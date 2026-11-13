@@ -7,7 +7,7 @@ Môi trường này không phải môi trường notebook Python 3.10–3.12 đ�
 |---|---|
 | CLI `--help`, mode và tham số không hợp lệ | Pass |
 | Parse AST của các file Python bàn giao | Pass |
-| 29 unittest offline | Pass; xem `runs/offline-checks.txt` |
+| 35 unittest offline | Pass; xem `runs/offline-checks.txt` |
 | Ghim checkout Git và từ chối commit sai | Pass trên repo fixture cục bộ |
 | Hai trạng thái, thứ tự ứng viên, fresh-process/object, budget/timeout | Pass trên fixture nhỏ có nhãn rõ |
 | Hai operator mutant và logic chỉ chấm test pass bản gốc | Pass trên fixture/mock, chưa chạy pytest thật |
@@ -129,3 +129,12 @@ Các test phân tích dùng fixture có nhãn, không công bố như kết qu�
 Workspace hiện không có completed experimental arm; báo cáo cục bộ nêu rõ 0 và
 không vẽ số chất lượng giả. Matplotlib không có tại workspace; phần tạo figures
 cần xác minh trên Kaggle sau khi có kết quả thật.
+
+## Luồng tự tạo dữ liệu và report
+
+`run_research.py` tạo input specification, gọi pipeline thật trước khi phân tích,
+cài dependency báo cáo bằng interpreter đã bootstrap và đóng gói measurements /
+generated pytest vào ZIP. Test orchestration dùng callback mô phỏng, có nhãn fixture;
+không tuyên bố đã chạy mới SLM tại workspace. Test xác nhận lỗi không có artifact
+không chạy tiếp analysis; có partial arm reports thì vẫn xuất report nhưng giữ
+trạng thái lỗi; archive giữ generated tests và bỏ checkout/cache có thể dựng lại.

@@ -16,6 +16,45 @@ Tất cả dùng cùng SLM, revision, mô tả tình huống, sinh pytest, repai
 Mặc định Qwen 1.5B; embedding BGE giữ backend upstream. Xem
 [đối chiếu paper/source và các giới hạn](docs/PIPELINE_REVIEW.md).
 
+## Chưa có dữ liệu kết quả? Chạy trọn gói để tự tạo dữ liệu thật
+
+Source PyCG ở commit ghim là dữ liệu đầu vào của pilot. Không cần chuẩn bị một CSV
+kết quả trước. [research/pilot-data.json](research/pilot-data.json) mô tả repository,
+target và hai tình huống; đó là input specification, không phải số đo đã có.
+
+Trên Kaggle bật Internet/GPU, dùng cell sau để tự bootstrap, tải source/model,
+validate, chạy bốn arm trên tối đa hai GPU, tạo report/figures rồi đóng gói ZIP:
+
+```python
+import os
+import subprocess
+project = '/kaggle/working/Test4Py-Setup-pilot-temp'
+subprocess.run(['git', '-C', project, 'pull', '--ff-only'], check=True)
+os.chdir(project)
+from pilot.notebook import run_research
+result = run_research(jobs=2, gpus='auto', rounds=1, refresh=10)
+print(result)
+```
+
+Không gọi `analyze.py` trước khi có artifact nếu muốn tạo dữ liệu mới. `run_research`
+chủ động chạy thí nghiệm thật, nên cần thời gian GPU; không dùng số mẫu giả thay
+cho inference. Dashboard vẫn là một bảng cập nhật tại chỗ. Dictionary trả về chỉ
+đường dẫn artifact, Markdown report, figures và `results.zip`. Giữ/download ZIP
+hoặc lưu Notebook Version để mang kết quả sang session khác.
+
+CLI tương đương (không cần venv hoặc output sẵn):
+
+```bash
+python run_research.py --jobs 2 --gpus auto --rounds 1 --output /kaggle/working/test4py-research
+```
+
+Các file tạo ra: `input-specification.json`, `research-run.json`, `experiment/`
+chứa artifact thật, `report/` chứa CSV/biểu đồ và `results.zip`. Nếu experiment có arm lỗi nhưng đã có artifact, báo cáo vẫn giữ đủ các arm và
+ghi `partial_failure`; không thay lỗi bằng điểm 0. Lỗi bootstrap/validation không
+có artifact sinh test sẽ dừng trước analysis. Bundle giữ bằng chứng lỗi của các bước đã chạy.
+ZIP loại model weights, thư viện CUDA và checkout có thể tải lại; giữ generated
+pytest, log model/probe, coverage, mutant verdicts, revision và báo cáo.
+
 ## Đánh giá khoa học và xuất bảng/biểu đồ
 
 Xem [research/REVIEW.md](research/REVIEW.md) cho đánh giá phê bình so với paper,

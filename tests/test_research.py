@@ -147,5 +147,87 @@ class ResearchTests(unittest.TestCase):
         self.assertFalse(destination.exists())
 
 
+    def test_full_research_entrypoint_creates_inputs_and_real_run_plan(self):
+        from unittest.mock import patch
+        import sys
+        import run_research
+        destination=self.root/'generated-research'
+        invoked=[]
+        def fake_command(args,**kwargs):
+            invoked.append(list(map(str,args)))
+            kwargs['log_path'].write_text('synthetic orchestration test; not measured results')
+            if 'analyze.py' in str(args[1]):
+                folder=destination/'report'; folder.mkdir()
+                (folder/'report.md').write_text('fixture, not research result')
+            return dict(returncode=0,timeout=False,stdout='',stderr='')
+        with patch.object(sys,'argv',['run_research.py','--output',str(destination)]), \
+             patch.object(run_research,'command',fake_command),contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(run_research.main(),0)
+        self.assertEqual(len(invoked),3)
+        self.assertIn('kaggle_run.py',invoked[0][2])
+        self.assertEqual(invoked[1][1:4],['-m','pip','install'])
+        self.assertEqual(Path(invoked[2][invoked[2].index('--input')+1]),destination/'experiment/comparison')
+        spec=json.loads((destination/'input-specification.json').read_text())
+        self.assertEqual(spec['kind'],'input_specification_not_experimental_results')
+        self.assertTrue((destination/'results.zip').exists())
+
+    def test_research_failure_stops_before_analysis_but_keeps_bundle(self):
+        from unittest.mock import patch
+        import sys
+        import run_research
+        destination=self.root/'failed-research'
+        calls=[]
+        def fail(args,**kwargs):
+            calls.append(args)
+            kwargs['log_path'].write_text('fixture failure')
+            return dict(returncode=1,timeout=False,stdout='',stderr='fixture failure')
+        with patch.object(sys,'argv',['run_research.py','--output',str(destination)]), \
+             patch.object(run_research,'command',fail),contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(run_research.main(),1)
+        self.assertEqual(len(calls),1)
+        self.assertEqual(json.loads((destination/'research-run.json').read_text())['status'],'failed')
+        self.assertTrue((destination/'results.zip').exists())
+        self.assertFalse((destination/'report/report.md').exists())
+
+    def test_bundle_retains_generated_tests_and_omits_rebuildable_caches(self):
+        import zipfile
+        from run_research import bundle_artifacts
+        generated=self.root/'experiment/comparison/baseline/PyCG/Test4DT_tests'
+        generated.mkdir(parents=True)
+        (generated/'test_generated.py').write_text('# fixture')
+        (generated.parent/'production.py').write_text('# rebuild from pinned commit')
+        upstream=self.root/'experiment/comparison/upstream'; upstream.mkdir(parents=True)
+        (upstream/'large.txt').write_text('not included')
+        archive=bundle_artifacts(self.root)
+        with zipfile.ZipFile(archive) as stream:
+            names=stream.namelist()
+            self.assertTrue(any(name.endswith('test_generated.py') for name in names))
+            self.assertFalse(any(name.endswith('production.py') or name.endswith('large.txt') for name in names))
+
+
+    def test_partial_experiment_is_reported_without_hiding_failures(self):
+        from unittest.mock import patch
+        import sys
+        import run_research
+        destination=self.root/'partial-research'
+        calls=[]
+        def fake(args,**kwargs):
+            calls.append(args)
+            kwargs['log_path'].write_text('fixture partial run')
+            if len(calls)==1:
+                write_json(destination/'experiment/comparison/baseline/report.json',dict(status='failed'))
+                return dict(returncode=1,timeout=False,stdout='',stderr='fixture')
+            if len(calls)==3:
+                folder=destination/'report'; folder.mkdir()
+                (folder/'report.md').write_text('fixture partial report')
+            return dict(returncode=0,timeout=False,stdout='',stderr='')
+        with patch.object(sys,'argv',['run_research.py','--output',str(destination)]), \
+             patch.object(run_research,'command',fake),contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(run_research.main(),1)
+        self.assertEqual(len(calls),3)
+        self.assertTrue((destination/'report/report.md').exists())
+        self.assertEqual(json.loads((destination/'research-run.json').read_text())['status'],'failed')
+
+
 if __name__=='__main__':
     unittest.main()

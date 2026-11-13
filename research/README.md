@@ -7,6 +7,12 @@
 Kết quả Kaggle chưa hoàn tất: không có số nào ở đây chứng minh verified vượt baseline.
 Các fixture trong `tests/test_research.py` chỉ kiểm tra logic thống kê/collector, không phải dữ liệu thực nghiệm.
 
+Nếu chưa có artifact, dùng `run_research.py` hoặc `pilot.notebook.run_research()`
+để tự chạy pipeline và tạo kết quả thật, sau đó tự gọi phân tích và tạo `results.zip`.
+Không cần `--input` có sẵn. File `pilot-data.json` mô tả input; không chứa số kết quả
+bịa/synthetic. Hướng dẫn cell đầy đủ ở README gốc. Các lệnh bên dưới dành cho trường
+hợp đã có artifact và chỉ muốn phân tích lại.
+
 Phân tích dùng Python hiện tại của notebook (`sys.executable`), không cần venv GPU
 trong `/tmp`. Venv tạm có thể mất giữa các session. Sau khi một lượt chạy hoàn tất,
 phân tích ngay trên Kaggle để không cần tải log lớn vào cell:

@@ -73,10 +73,13 @@ def snapshot(output):
     if not step and run.get('status') == 'running':
         completed = {row.get('name') for row in run.get('steps', [])}
         step = next((name for name in ('bootstrap', 'validation', 'comparison') if name not in completed), 'comparison')
-    return dict(output=str(output), status=run.get('status', 'starting'), step=step or 'starting',
+    outer = read_json(output.parent / 'research-run.json')
+    if outer and outer.get('current_step') != 'experiment':
+        step = outer.get('current_step', step)
+    return dict(output=str(output), status=outer.get('status', run.get('status', 'starting')), step=step or 'starting',
         completed=len(comparison.get('arms', {})), arms=arms,
-        stages_done=run.get('steps_completed', len(run.get('steps', []))),
-        stages_total=run.get('steps_total', 3), gpus=gpu.get('gpus', []),
+        stages_done=outer.get('steps_completed',run.get('steps_completed', len(run.get('steps', [])))),
+        stages_total=outer.get('steps_total',run.get('steps_total', 3)), gpus=gpu.get('gpus', []),
         gpu_updated=gpu.get('time', '—'), failed_step=run.get('failed_step'))
 
 
@@ -235,3 +238,28 @@ def render_charts(history):
             + chart('GPU utilization (%)', utilization, 100)
             + chart('GPU used memory (GiB)', memory)
             + chart('Cumulative model tokens', token_series))
+
+
+def run_research(output='/kaggle/working/test4py-research-dashboard', project=BASE,
+                 jobs=2, gpus='auto', rounds=1, refresh=10, runtime='modern'):
+    """Generate real data + scientific report + ZIP with one bounded notebook display."""
+    if refresh < 1:
+        raise ValueError('refresh must be at least one second')
+    root = reserve_output(output)
+    research = root / 'research'
+    cmd = [sys.executable, '-u', str(Path(project)/'run_research.py'), '--output', str(research),
+           '--runtime', runtime, '--jobs', str(jobs), '--gpus', gpus, '--rounds', str(rounds), '--console', 'quiet']
+    with (root/'launcher.log').open('w') as stream:
+        process = subprocess.Popen(cmd,cwd=project,stdout=stream,stderr=subprocess.STDOUT,start_new_session=True)
+        try:
+            watch_run(research/'experiment',refresh=refresh,process=process)
+        except BaseException:
+            stop_process_tree(process)
+            raise
+        code = process.wait()
+    if code and not (research/'report/report.md').exists():
+        raise RuntimeError(f'Research run stopped. Actual logs/bundle: {research}; launcher: {root/"launcher.log"}')
+    return dict(status='partial_failure' if code else 'complete', artifacts=str(research),
+                report=str(research/'report/report.md'),
+                figures=str(research/'report/figures') if (research/'report/figures').is_dir() else None,
+                bundle=str(research/'results.zip') if (research/'results.zip').is_file() else None)
