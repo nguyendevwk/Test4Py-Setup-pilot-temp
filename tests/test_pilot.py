@@ -247,5 +247,17 @@ class PilotTests(unittest.TestCase):
 
 
 
+    def test_modern_bootstrap_reuses_cuda_without_installing_torch(self):
+        from bootstrap_modern import plan
+        commands = plan('uv', self.root / 'modern', '/usr/bin/python3')
+        self.assertIn('--system-site-packages', commands[0])
+        self.assertFalse(any('torch==' in arg for cmd in commands for arg in cmd))
+        self.assertIn('--runtime', commands[-1])
+        result = command([sys.executable, BASE / 'bootstrap_modern.py', '--dry-run',
+                          '--venv', self.root / 'modern'])
+        self.assertEqual(result['returncode'], 0)
+        self.assertFalse((self.root / 'modern').exists())
+
+
 if __name__ == '__main__':
     unittest.main()

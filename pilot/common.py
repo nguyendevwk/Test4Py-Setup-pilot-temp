@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 import hashlib
+import importlib.metadata
 import json
 import os
 from pathlib import Path
@@ -85,3 +86,10 @@ def reserve_output(requested):
         except FileExistsError:
             continue
     raise RuntimeError('Could not allocate a fresh output directory')
+
+
+def package_versions():
+    # In system-site-packages venvs, metadata can contain both local and inherited
+    # distributions. Resolve each name through active sys.path, matching imports.
+    names = {dist.metadata['Name'] for dist in importlib.metadata.distributions()}
+    return {name: importlib.metadata.version(name) for name in sorted(names) if name}

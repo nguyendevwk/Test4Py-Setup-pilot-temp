@@ -16,6 +16,45 @@ Tất cả dùng cùng SLM, revision, mô tả tình huống, sinh pytest, repai
 Mặc định Qwen 1.5B; embedding BGE giữ backend upstream. Xem
 [đối chiếu paper/source và các giới hạn](docs/PIPELINE_REVIEW.md).
 
+## Tùy chọn thư viện mới trên Python 3.13
+
+Profile **modern** bổ sung Transformers 4.57.6, Chroma 1.3.5, NumPy 2.2.6 và
+LangChain Core 1.0.7. Đây là các phiên bản mới hơn được chọn để kiểm tra API;
+không tuyên bố là tất cả phiên bản mới nhất hoặc đã pass pipeline trên Kaggle.
+Bản legacy bên dưới vẫn giữ để đối chiếu. Không trộn hai file requirements.
+
+Modern tái dùng Python và Torch CUDA có sẵn của Kaggle, không tải lại Torch/CUDA.
+Một venv `--system-site-packages` nhận các thư viện modern cục bộ và đọc các package
+còn lại từ image Kaggle. Vì vậy phải giữ cả Docker image version, `environment.json`
+và freeze khi tái lập; đây không phải môi trường hoàn toàn độc lập image.
+
+```python
+%cd /kaggle/working/Test4Py-Setup-pilot-temp
+!python -m pip install uv==0.6.17
+!python bootstrap_modern.py --report-dir /kaggle/working/modern-environment
+!/tmp/test4py-modern/bin/python run.py --runtime modern --validate-only --output /kaggle/working/validate-modern
+```
+
+Sau khi validation báo complete:
+
+```python
+!/tmp/test4py-modern/bin/python run.py --runtime modern --mode compare --rounds 1 --output /kaggle/working/pilot-modern
+```
+
+Bootstrap bắt buộc smoke-check import và Chroma add/query. `pip-check.txt` ghi cả
+xung đột từ package kế thừa của image, nên cần xem log nếu có cảnh báo. Chưa có
+Internet/GPU tại workspace để chạy kiểm tra tích hợp. Chỉ diễn giải kết quả sau khi
+validation thật pass; kiểm tra này chưa thay cho một lượt sinh test thật.
+
+Cả bốn arm phải chạy trong cùng profile. Không dùng baseline legacy so với verified
+modern để quy tác động cho setup. Phần phân tích, suy luận kiểu, generation/repair
+của upstream vẫn giữ nguyên. API của Chroma mới và Python 3.13 phải được xác minh
+thêm qua validation và vòng sinh test thật.
+
+Nguồn phiên bản: [Transformers](https://pypi.org/project/transformers/4.57.6/),
+[Chroma](https://pypi.org/project/chromadb/1.3.5/),
+[NumPy](https://pypi.org/project/numpy/2.2.6/).
+
 ## Kaggle / Colab, kể cả notebook Python 3.13
 
 Log pip đã xác nhận hai vấn đề ở môi trường cũ: Transformers 4.48.3 đòi

@@ -7,7 +7,7 @@ Môi trường này không phải môi trường notebook Python 3.10–3.12 đ�
 |---|---|
 | CLI `--help`, mode và tham số không hợp lệ | Pass |
 | Parse AST của các file Python bàn giao | Pass |
-| 10 unittest offline | Pass; xem `runs/offline-checks.txt` |
+| 11 unittest offline | Pass; xem `runs/offline-checks.txt` |
 | Ghim checkout Git và từ chối commit sai | Pass trên repo fixture cục bộ |
 | Hai trạng thái, thứ tự ứng viên, fresh-process/object, budget/timeout | Pass trên fixture nhỏ có nhãn rõ |
 | Hai operator mutant và logic chỉ chấm test pass bản gốc | Pass trên fixture/mock, chưa chạy pytest thật |
@@ -68,3 +68,11 @@ Sau khi validation báo complete:
 
 Nếu đã có output, xem đường dẫn mới được in ở `Reports:`. `comparison.json` nằm
 trong đường dẫn đó. Không dùng Python 3.13 của notebook để chạy trực tiếp stack cũ.
+
+## Profile modern (chưa kiểm chứng tích hợp)
+
+Thêm `bootstrap_modern.py`, `requirements-modern.txt` và `--runtime modern` để
+thử Python 3.13 với thư viện mới. Kiểm tra offline xác nhận dry-run không tạo venv,
+không lên kế hoạch cài Torch và dùng interpreter hiện tại. Profile này tái dùng
+Torch/CUDA từ image Kaggle; cần ghi nhận image và môi trường thực tế. Chưa chạy
+pip resolver/import/model/upstream thực tế ở profile modern do giới hạn mạng.

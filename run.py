@@ -10,12 +10,14 @@ import sys
 import time
 import traceback
 
-from pilot.common import BASE, MODES, PYCG, UPSTREAM, checkout, command, digest, write_json, reserve_output
+from pilot.common import BASE, MODES, PYCG, UPSTREAM, checkout, command, digest, write_json, reserve_output, package_versions
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--mode', choices=(*MODES, 'compare'), default='compare')
+    parser.add_argument('--runtime', choices=('legacy', 'modern'), default='legacy',
+                        help='modern allows Python 3.13 and requires requirements-modern.txt')
     parser.add_argument('--rounds', type=int, default=1)
     parser.add_argument('--model', default='Qwen/Qwen2.5-Coder-1.5B-Instruct')
     parser.add_argument('--model-revision')
@@ -40,21 +42,23 @@ def main():
         print(f'Output already exists; preserving it. New run: {output}', flush=True)
     started = time.perf_counter()
     write_json(output / 'environment.json', dict(python=platform.python_version(), executable=sys.executable,
-        packages={dist.metadata['Name']: dist.version for dist in importlib.metadata.distributions()}))
-    settings = dict(config, requested_output=str(args.output.resolve()), actual_output=str(output), model=args.model, model_revision=args.model_revision,
+        packages=package_versions()))
+    settings = dict(config, requested_output=str(args.output.resolve()), actual_output=str(output), runtime=args.runtime, model=args.model, model_revision=args.model_revision,
                     embedding_revision=args.embedding_revision, upstream=UPSTREAM,
                     target_commit=PYCG, rounds=args.rounds, max_new_tokens=args.max_new_tokens,
                     generation=dict(do_sample=False, seed=config['seed']),
                     source_hashes={str(p.relative_to(BASE)): digest(p.read_text())
                         for p in [BASE / 'run.py', BASE / 'worker.py', BASE / 'bootstrap_kaggle.py',
                                   BASE / 'check_environment.py', BASE / 'requirements-notebook.txt',
+                                  BASE / 'bootstrap_modern.py', BASE / 'requirements-modern.txt',
                                   *sorted((BASE / 'pilot').glob('*.py'))]})
     manifest = output / 'experiment.json'
     write_json(manifest, settings)
     summary = dict(status='running', output=str(output), arms={}, validation_only=args.validate_only,
                    paper='https://arxiv.org/abs/2503.14000v2')
     try:
-        if not (3, 10) <= sys.version_info[:2] <= (3, 12):
+        lower, upper = ((3, 11), (3, 13)) if args.runtime == 'modern' else ((3, 10), (3, 12))
+        if not lower <= sys.version_info[:2] <= upper:
             raise RuntimeError('Pilot requires Python 3.10–3.12. Run python bootstrap_kaggle.py --venv /tmp/test4py-venv, then /tmp/test4py-venv/bin/python run.py with the same arguments.')
         upstream = output / 'upstream'
         stage = time.perf_counter()
@@ -92,7 +96,7 @@ def main():
                     stage = time.perf_counter()
                     checkout('https://github.com/vitsalis/PyCG.git', PYCG, root)
                     arm['checkout_seconds'] = time.perf_counter() - stage
-                    env = dict(os.environ, TRANSFORMER_PATH=embedding_path,
+                    env = dict(os.environ, USE_TF='0', USE_FLAX='0', TRANSFORMER_PATH=embedding_path,
                         USER_PYTHON_PATH=sys.executable,
                         PYTHONPATH=os.pathsep.join(map(str, (upstream, root, BASE))),
                         ANONYMIZED_TELEMETRY='False', PYTHONDONTWRITEBYTECODE='1',

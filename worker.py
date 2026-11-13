@@ -9,7 +9,7 @@ import sys
 import time
 import traceback
 
-from pilot.common import append_json, digest, write_json
+from pilot.common import append_json, digest, write_json, package_versions
 
 
 def main():
@@ -29,8 +29,7 @@ def main():
         backend = TransformersBackend(settings, work)
         report['stages']['model_load'] = time.perf_counter() - stage
         report['versions'] = dict(python=platform.python_version(), **backend.versions)
-        report['versions']['packages'] = {dist.metadata['Name']: dist.version
-                                          for dist in importlib.metadata.distributions()}
+        report['versions']['packages'] = package_versions()
         os.environ['OPENAI_API_KEY'] = 'local-inference'
         from test4dt import gptapi
         from pilot.setup import extract, select, production
