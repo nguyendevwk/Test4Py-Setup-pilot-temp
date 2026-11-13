@@ -16,6 +16,57 @@ Tất cả dùng cùng SLM, revision, mô tả tình huống, sinh pytest, repai
 Mặc định Qwen 1.5B; embedding BGE giữ backend upstream. Xem
 [đối chiếu paper/source và các giới hạn](docs/PIPELINE_REVIEW.md).
 
+## Tiến độ trực tiếp và hai GPU
+
+Bản mới hiển thị output subprocess ngay trong cell, đồng thời giữ log đầy đủ.
+Mỗi arm có `events.jsonl` và `progress.json`: model load, initialization, từng
+model call bắt đầu/kết thúc, vòng sinh test, scoring và trạng thái cuối. Log model
+call có input/output token, token/giây, VRAM allocated/reserved và peak allocated.
+Không in output thô của model vào tiến độ; vẫn lưu nó trong `model_calls.jsonl`.
+
+Khi không có dòng mới, heartbeat báo thời gian chờ sau khoảng 15 giây. Không đoán
+phần trăm initialization vì số lời gọi phụ thuộc pipeline upstream. Số arm hoàn tất
+`completed=... total=4` là số đo thực tế. Sau cùng in bảng pass, module branch coverage,
+mutation score, token và thời gian; báo cáo JSON vẫn chứa coverage chi tiết từng hàm.
+
+Hai GPU của Kaggle có thể chạy **hai arm độc lập song song**, mỗi GPU giữ một bản
+SLM và embedding. Dùng `--jobs 2 --gpus 0,1` cho cả `kaggle_run.py` hoặc `run.py`:
+
+```python
+import subprocess
+import sys
+project = '/kaggle/working/Test4Py-Setup-pilot-temp'
+subprocess.run(['git', '-C', project, 'pull', '--ff-only'], check=True)
+subprocess.run([sys.executable, 'kaggle_run.py', '--runtime', 'modern',
+                '--jobs', '2', '--gpus', '0,1', '--rounds', '1',
+                '--output', '/kaggle/working/pilot-two-gpu'], cwd=project, check=True)
+```
+
+Nếu venv modern đã sẵn sàng và validation đã pass, chạy riêng phần so sánh:
+
+```python
+!/tmp/test4py-modern/bin/python run.py --runtime modern --mode compare --jobs 2 --gpus 0,1 --rounds 1 --output /kaggle/working/compare-two-gpu
+```
+
+Lịch chạy cấp slot rảnh cho arm tiếp theo, không quá một arm trên cùng GPU. Mỗi
+arm có checkout/process/cache import riêng; chỉ dùng chung file model cache đã tải
+trước. GPU index là tương đối với các GPU notebook đang thấy, có xét biến
+`CUDA_VISIBLE_DEVICES` kế thừa. GPU trong mỗi worker được ánh xạ lại thành `cuda:0`,
+đúng với API upstream. Tham khảo [PyTorch CUDA visibility](https://docs.pytorch.org/docs/2.11/cuda_environment_variables.html).
+
+`--jobs 1` (mặc định) chạy tuần tự. `--jobs 2 --gpus auto` tự dùng tối đa hai GPU
+thấy được; nếu chỉ thấy một thì chạy một arm mỗi lượt. `--gpus 0,1` báo lỗi nếu
+không có đủ hai GPU. Không chia một model qua hai GPU và không cộng VRAM hai card.
+Mức 11.2/15 GiB trên GPU đầu là một dấu hiệu có thể thử một arm tương tự trên GPU
+thứ hai, chưa bảo đảm mọi prompt lớn đều vừa bộ nhớ.
+
+`gpu_usage.jsonl` ở thư mục comparison lấy utilization/VRAM vật lý từ nvidia-smi
+khoảng 15 giây/lần; thiếu nvidia-smi không làm thất bại thí nghiệm. Có tổng wall time
+và tổng thời gian từng arm riêng. Chạy song song có tranh chấp CPU/IO, nên không
+coi đó là số liệu tốc độ tuần tự hoặc bảo đảm nhanh gấp đôi. Model/revision, prompt,
+repair, rounds, seed và token cap giữ chung cho bốn arm. Mỗi arm mặc định một CPU
+thread để giảm tranh chấp; `run.py --cpu-threads` được ghi trong manifest.
+
 ## Chạy chuẩn trên Kaggle
 
 Trong **Settings**, bật Internet và GPU. [Tài liệu Notebook Kaggle](https://www.kaggle.com/docs/notebooks)

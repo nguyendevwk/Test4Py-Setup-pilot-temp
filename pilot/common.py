@@ -8,6 +8,8 @@ from pathlib import Path
 import signal
 import subprocess
 import time
+import threading
+from collections import deque
 
 UPSTREAM = '3c8b45410545183a9a579a784ffefae722a158a6'
 PYCG = '8d5dc40837803beef1d8d379fbf2cdad6cd94641'
@@ -32,8 +34,10 @@ def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
 
 
-def command(args, cwd=None, timeout=120, env=None, log_path=None):
+def command(args, cwd=None, timeout=120, env=None, log_path=None, stream=False, label=None, heartbeat=15):
     """Kill the process group on timeout; optionally persist output as it arrives."""
+    if stream:
+        return stream_command(args, cwd, timeout, env, log_path, label, heartbeat)
     started = time.perf_counter()
     with ExitStack() as stack:
         sink = stack.enter_context(Path(log_path).open('w')) if log_path else subprocess.PIPE
@@ -98,3 +102,44 @@ def package_versions():
     # distributions. Resolve each name through active sys.path, matching imports.
     names = {dist.metadata['Name'] for dist in importlib.metadata.distributions()}
     return {name: importlib.metadata.version(name) for name in sorted(names) if name}
+
+
+def stream_command(args, cwd, timeout, env, log_path, label, heartbeat):
+    """Tee subprocess output to notebook and durable log, including while waiting."""
+    started = time.perf_counter()
+    lines = deque(maxlen=250)
+    last_output = [started]
+    expired = False
+    with ExitStack() as stack:
+        sink = stack.enter_context(Path(log_path).open('w')) if log_path else None
+        proc = subprocess.Popen(list(map(str, args)), cwd=cwd, env=env,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors='replace',
+            bufsize=1, start_new_session=True)
+        def read():
+            for line in proc.stdout:
+                lines.append(line)
+                last_output[0] = time.perf_counter()
+                if sink:
+                    sink.write(line)
+                    sink.flush()
+                print(line, end='', flush=True)
+            proc.stdout.close()
+        reader = threading.Thread(target=read, daemon=True)
+        reader.start()
+        while True:
+            remaining = timeout - (time.perf_counter() - started)
+            if remaining <= 0:
+                expired = True
+                os.killpg(proc.pid, signal.SIGKILL)
+                proc.wait()
+                break
+            try:
+                proc.wait(timeout=min(heartbeat, remaining))
+                break
+            except subprocess.TimeoutExpired:
+                if time.perf_counter() - last_output[0] >= heartbeat:
+                    print(f'[{label or "process"}] running {time.perf_counter()-started:.0f}s; waiting for next event', flush=True)
+        reader.join()
+    return dict(command=list(map(str, args)), returncode=proc.returncode, timeout=expired,
+        stdout=''.join(lines)[-12000:], stderr='', seconds=time.perf_counter()-started,
+        log_path=str(log_path) if log_path else None)

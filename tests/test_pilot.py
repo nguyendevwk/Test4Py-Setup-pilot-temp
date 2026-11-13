@@ -185,6 +185,26 @@ class PilotTests(unittest.TestCase):
         self.assertEqual(comparison['status'], 'partial_failure')
         self.assertTrue((output / 'caller/process.json').exists())
 
+        import time
+        parallel_output = self.root / 'parallel-experiment'
+        assignments = []
+        def parallel_worker(args, **kwargs):
+            assignments.append((args[3], kwargs['env']['CUDA_VISIBLE_DEVICES'], str(args[2]), str(args[4])))
+            time.sleep(.02)
+            return fake_worker(args, **kwargs)
+        with patch.object(sys, 'argv', ['run.py', '--output', str(parallel_output), '--jobs', '2', '--gpus', '0,1']), \
+             patch.dict(sys.modules, {'huggingface_hub': fake_hub}), \
+             patch.object(sys, 'version_info', (3, 11, 11)), \
+             patch.object(run, 'checkout', fake_checkout), patch.object(run, 'command', parallel_worker), \
+             patch.object(run, 'gpu_slots', return_value=['0', '1']):
+            self.assertEqual(run.main(), 1)
+        self.assertEqual({row[1] for row in assignments}, {'0', '1'})
+        self.assertEqual(len({row[2] for row in assignments}), 4)
+        self.assertEqual(len({row[3] for row in assignments}), 1)
+        parallel_report = json.loads((parallel_output / 'comparison.json').read_text())
+        self.assertEqual(parallel_report['execution']['jobs'], 2)
+        self.assertEqual(len(parallel_report['arms']), 4)
+
     def test_score_only_passed_original_and_same_pool(self):
         from unittest.mock import patch
         from pilot.scoring import score
@@ -311,6 +331,74 @@ class PilotTests(unittest.TestCase):
         self.assertEqual(result['returncode'], 0)
         self.assertIn('persistent stdout', path.read_text())
         self.assertIn('persistent stderr', path.read_text())
+
+
+    def test_parallel_scheduler_exclusive_gpu_and_failure_isolation(self):
+        import threading
+        import time
+        from pilot.scheduling import execute_modes
+        barrier = threading.Barrier(2)
+        lock = threading.Lock()
+        active, peak = {}, [0]
+        def arm(mode, gpu):
+            with lock:
+                active[gpu] = active.get(gpu, 0) + 1
+                self.assertEqual(active[gpu], 1)
+                peak[0] = max(peak[0], sum(active.values()))
+            try:
+                barrier.wait(timeout=3)
+                time.sleep(.02)
+                if mode == 'caller':
+                    raise RuntimeError('intentional fixture failure')
+                return dict(status='complete', gpu=gpu)
+            finally:
+                with lock:
+                    active[gpu] -= 1
+        results = dict(execute_modes(['baseline', 'caller', 'extracted', 'verified'], ['0', '1'], arm))
+        self.assertEqual(len(results), 4)
+        self.assertEqual(peak[0], 2)
+        self.assertEqual(results['caller']['status'], 'failed')
+        self.assertTrue(all(results[m]['status'] == 'complete' for m in ('baseline','extracted','verified')))
+
+    def test_gpu_selection_respects_parent_visibility(self):
+        import os
+        from unittest.mock import patch
+        from pilot.scheduling import gpu_slots
+        with patch.dict(os.environ, {'CUDA_VISIBLE_DEVICES': 'GPU-A,GPU-B'}), \
+             patch('pilot.scheduling.checked', return_value='2'):
+            self.assertEqual(gpu_slots(2, '0,1'), ['GPU-A', 'GPU-B'])
+            self.assertEqual(gpu_slots(1, '1'), ['GPU-B'])
+            self.assertEqual(gpu_slots(4), ['GPU-A', 'GPU-B'])
+            with self.assertRaises(ValueError):
+                gpu_slots(2, '0,0')
+            with self.assertRaises(ValueError):
+                gpu_slots(2, '-1')
+
+    def test_streaming_prints_before_exit_and_kills_on_timeout(self):
+        import contextlib
+        import io
+        import time
+        class TimedOutput(io.StringIO):
+            first = None
+            def write(self, text):
+                if 'first-line' in text and self.first is None:
+                    self.first = time.perf_counter()
+                return super().write(text)
+        output = TimedOutput()
+        log = self.root / 'live.log'
+        with contextlib.redirect_stdout(output):
+            result = command([sys.executable, '-u', '-c',
+                'import time; print("first-line", flush=True); time.sleep(.3); print("last-line")'],
+                stream=True, log_path=log)
+        self.assertEqual(result['returncode'], 0)
+        self.assertLess(output.first, time.perf_counter() - .15)
+        self.assertIn('last-line', log.read_text())
+        with contextlib.redirect_stdout(io.StringIO()):
+            timed = command([sys.executable, '-u', '-c',
+                'import time; print("before-timeout", flush=True); time.sleep(5)'],
+                stream=True, timeout=.2, log_path=self.root / 'timeout.log')
+        self.assertTrue(timed['timeout'])
+        self.assertIn('before-timeout', (self.root / 'timeout.log').read_text())
 
 
 if __name__ == '__main__':

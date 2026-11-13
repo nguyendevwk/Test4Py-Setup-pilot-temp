@@ -9,6 +9,7 @@ import sys
 import time
 import traceback
 
+from pilot.progress import emit
 from pilot.common import append_json, digest, write_json, package_versions
 
 
@@ -24,13 +25,17 @@ def main():
     write_json(work / 'report.json', report)
     backend = None
     try:
+        emit(work, 'worker', 'start', visible_gpus=os.environ.get('CUDA_VISIBLE_DEVICES', 'inherited'))
         stage = time.perf_counter()
         from pilot.backend import TransformersBackend
         backend = TransformersBackend(settings, work)
         report['stages']['model_load'] = time.perf_counter() - stage
-        report['versions'] = dict(python=platform.python_version(), **backend.versions)
+        report['versions'] = dict(python=platform.python_version(),
+                                  cuda_visible_devices=os.environ.get('CUDA_VISIBLE_DEVICES', 'inherited'),
+                                  **backend.versions)
         report['versions']['packages'] = package_versions()
         os.environ['OPENAI_API_KEY'] = 'local-inference'
+        emit(work, 'upstream_import', 'start')
         from test4dt import gptapi
         from pilot.setup import extract, select, production
         # Install before importing modules holding references to the shared object.
@@ -75,6 +80,7 @@ def main():
         stage = time.perf_counter()
         # Only the treatment arms incur extraction cost. Validation independently
         # checks that extraction is deterministic across clean source checkouts.
+        emit(work, 'setup', 'start')
         context = ''
         if mode != 'baseline':
             extraction = extract(root)
@@ -91,7 +97,7 @@ def main():
         original_ask = backend.ask
         async def ask(system, user):
             import inspect
-            direct = inspect.stack()[1].function
+            direct = inspect.currentframe().f_back.f_code.co_name
             if direct in {'generate_test_case_normal', 'generate_test_case_easy',
                           'generate_test_case_evol', 'repair_syntax_error', 'repair_assert_error'}:
                 user += '\n\n' + settings['scenario_prompt']
@@ -100,6 +106,7 @@ def main():
             return await original_ask(system, user)
         gptapi.model.aask = ask
 
+        emit(work, 'initialization', 'start')
         backend.phase = 'initialization'
         stage = time.perf_counter()
         project = PilotProject(str(root), settings['source_path'])
@@ -109,15 +116,19 @@ def main():
                            for fn in file.functions if fn.func_name == settings['target_function'])
         report['stages']['initialization'] = time.perf_counter() - stage
         stage = time.perf_counter()
+        emit(work, 'initialization', 'finished', seconds=round(report['stages']['initialization'], 2))
         for index in range(settings['rounds']):
+            emit(work, 'generation', 'round_start', round=index + 1, total_rounds=settings['rounds'])
             backend.phase = f'generation_round_{index + 1}'
             project.generate_once()
             recoder.score.first_run = False
+            emit(work, 'generation', 'round_end', round=index + 1, retained_files=len(project.target.test_manager.testcases))
             write_json(work / f'round_{index + 1}.json', recoder.score.to_json())
         report['stages']['generation_repair_coverage'] = time.perf_counter() - stage
         report['retained_pytest_files'] = len(project.target.test_manager.testcases)
         report['generation_stats'] = recoder.score.to_json()
         report['upstream_coverage'] = str(root / project.dir_type / 'coverage.json')
+        emit(work, 'scoring', 'start')
         backend.phase = 'scoring'
         stage = time.perf_counter()
         report['score'] = score(root, work, settings)
@@ -149,8 +160,13 @@ def main():
             detail['input'] += row['input_tokens']
             detail['output'] += row.get('output_tokens', 0)
             detail['seconds'] += row['seconds']
+        if backend is not None:
+            report['gpu_peak_allocated_gib'] = backend.torch.cuda.max_memory_allocated()/1024**3
+            report['gpu_peak_reserved_gib'] = backend.torch.cuda.max_memory_reserved()/1024**3
         report['worker_seconds'] = time.perf_counter() - started
         write_json(work / 'report.json', report)
+        emit(work, 'worker', 'finished', status=report['status'], input_tokens=report['input_tokens'],
+             output_tokens=report['output_tokens'], seconds=round(report['worker_seconds'], 2))
     return 0 if report['status'] == 'complete' else 1
 
 

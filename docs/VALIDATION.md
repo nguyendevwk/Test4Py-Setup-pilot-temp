@@ -7,7 +7,7 @@ Môi trường này không phải môi trường notebook Python 3.10–3.12 đ�
 |---|---|
 | CLI `--help`, mode và tham số không hợp lệ | Pass |
 | Parse AST của các file Python bàn giao | Pass |
-| 14 unittest offline | Pass; xem `runs/offline-checks.txt` |
+| 17 unittest offline | Pass; xem `runs/offline-checks.txt` |
 | Ghim checkout Git và từ chối commit sai | Pass trên repo fixture cục bộ |
 | Hai trạng thái, thứ tự ứng viên, fresh-process/object, budget/timeout | Pass trên fixture nhỏ có nhãn rõ |
 | Hai operator mutant và logic chỉ chấm test pass bản gốc | Pass trên fixture/mock, chưa chạy pytest thật |
@@ -90,3 +90,14 @@ phải chạy lại trong session Save & Run All. `kaggle_run.py` điều phối
 dừng nếu bootstrap/validation thất bại và giữ log process. Test lỗi bootstrap và
 lỗi validation xác nhận comparison không bị chạy tiếp. Test log xác nhận stdout
 và stderr được lưu. Validation worker lỗi giờ in phần cuối traceback ra CLI.
+
+## Tiến độ và multi-GPU
+
+Thêm streaming stdout vào notebook + log file, heartbeat, event JSON, token/giây,
+VRAM allocated/reserved và telemetry nvidia-smi. Scheduler chạy các arm trong process
+riêng, tối đa một arm cho mỗi GPU slot. Test concurrency dùng barrier hai thread,
+chứng minh hai slot có thể hoạt động cùng lúc, một lỗi không chặn các arm khác và
+không có hai arm trùng slot. Test CUDA visibility dùng UUID kế thừa. Test streaming
+chứng minh dòng đầu xuất hiện trước khi process kết thúc, log giữ đủ và timeout
+kết thúc process. Chưa có hai GPU hoạt động tại workspace để đo tốc độ hay peak VRAM
+thực tế; không báo hệ số tăng tốc thực nghiệm.

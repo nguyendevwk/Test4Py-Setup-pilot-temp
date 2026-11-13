@@ -13,9 +13,11 @@ def main():
     parser.add_argument('--runtime', choices=('modern', 'legacy'), default='modern')
     parser.add_argument('--rounds', type=int, default=1)
     parser.add_argument('--model', default='Qwen/Qwen2.5-Coder-1.5B-Instruct')
+    parser.add_argument('--jobs', type=int, default=1, help='independent comparison arms at once')
+    parser.add_argument('--gpus', default='auto', help='parent-visible GPU indices, e.g. 0,1')
     parser.add_argument('--venv', type=Path)
     args = parser.parse_args()
-    if args.rounds < 1:
+    if min(args.rounds, args.jobs) < 1:
         parser.error('rounds must be positive')
     output = reserve_output(args.output)
     venv = args.venv or Path('/tmp/test4py-modern' if args.runtime == 'modern' else '/tmp/test4py-venv')
@@ -31,14 +33,14 @@ def main():
                         '--validate-only', '--output', output / 'validation'], 1800),
         ('comparison', [python, BASE / 'run.py', '--runtime', args.runtime,
                         '--mode', 'compare', '--rounds', str(args.rounds), '--model', args.model,
-                        '--output', output / 'comparison'], 60000),
+                        '--jobs', str(args.jobs), '--gpus', args.gpus, '--output', output / 'comparison'], 60000),
     ]
     report = dict(status='running', output=str(output), runtime=args.runtime, steps=[])
     write_json(output / 'notebook-run.json', report)
     for label, cmd, timeout in steps:
         print(f'Starting {label}; log: {output / (label + ".log")}', flush=True)
         try:
-            result = command(cmd, cwd=BASE, timeout=timeout, log_path=output / (label + '.log'))
+            result = command(cmd, cwd=BASE, timeout=timeout, log_path=output / (label + '.log'), stream=True, label=label)
         except OSError as exc:
             result = dict(returncode=-1, timeout=False, stdout='', stderr=str(exc))
         write_json(output / (label + '-process.json'), result)
