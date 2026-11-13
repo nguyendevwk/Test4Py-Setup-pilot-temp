@@ -6,8 +6,8 @@ Môi trường này không phải môi trường notebook Python 3.10–3.12 đ�
 | Hạng mục | Kết quả thực tế |
 |---|---|
 | CLI `--help`, mode và tham số không hợp lệ | Pass |
-| Parse AST của 11 file Python bàn giao | Pass |
-| 8 unittest offline | Pass; xem `runs/offline-checks.txt` |
+| Parse AST của các file Python bàn giao | Pass |
+| 10 unittest offline | Pass; xem `runs/offline-checks.txt` |
 | Ghim checkout Git và từ chối commit sai | Pass trên repo fixture cục bộ |
 | Hai trạng thái, thứ tự ứng viên, fresh-process/object, budget/timeout | Pass trên fixture nhỏ có nhãn rõ |
 | Hai operator mutant và logic chỉ chấm test pass bản gốc | Pass trên fixture/mock, chưa chạy pytest thật |
@@ -39,18 +39,32 @@ README chính thức và paper arXiv v2 để thiết kế adapter. Đọc trự
 với đã checkout/chạy toàn pipeline. Chưa có số coverage hoặc mutation score nghiên cứu;
 không dùng kết quả fixture thay cho kết quả target thật.
 
-## Lệnh chạy tiếp trên Kaggle/Colab
+## Bản sửa Kaggle Python 3.13
 
-Sau khi giải nén, đổi vào thư mục source, bật Internet/GPU, dùng Python 3.10–3.12:
+Theo log người dùng, notebook dùng Python 3.13 và pip báo xung đột tokenizers.
+Đã đổi Transformers 4.46.3 + tokenizers 0.20.3, thêm bootstrap Python 3.11.11/Torch
+2.5.1 cu121 tách khỏi kernel. Bootstrap có `pip check` và smoke check Chroma để
+kiểm chứng dependency thực tế trước khi chạy pipeline.
+
+Đã thêm kiểm tra offline cho output tồn tại: giữ log cũ, tạo sibling mới; kiểm tra
+bootstrap dry-run không tạo môi trường/không tải gì. Đã thử `uv pip compile` nhưng bị lỗi DNS khi truy cập PyPI (`pypi.org/simple/astor/`).
+Chưa khẳng định pip resolver,
+bootstrap CUDA hoặc pipeline PyCG thật đã pass khi mạng tại máy này còn bị chặn.
+
+## Lệnh chạy tiếp trên Kaggle
 
 ```python
-!python -m pip install -r requirements-notebook.txt
-!python run.py --validate-only --output runs/validate-real
-!python run.py --mode compare --rounds 1 --output runs/pilot-qwen-1b
+%cd /kaggle/working/Test4Py-Setup-pilot-temp
+!python -m pip install uv==0.6.17
+!python bootstrap_kaggle.py --venv /tmp/test4py-venv --report-dir /kaggle/working/pilot-environment
+!/tmp/test4py-venv/bin/python run.py --validate-only --output /kaggle/working/validate-real
 ```
 
-`validate-real` phải pass hai test oracle nội bộ và kill hai mutant trước khi diễn giải
-kết quả sinh test. Nếu validation không pass, xem `validation_process.json` và các JSON
-trong `validation/`; không sửa oracle/pool sau khi nhìn kết quả từng cấu hình.
-So sánh chính ở `runs/pilot-qwen-1b/comparison.json`, chi tiết từng mode ở `report.json`.
-Dừng ở một hàm này trước khi mở rộng.
+Sau khi validation báo complete:
+
+```python
+!/tmp/test4py-venv/bin/python run.py --mode compare --rounds 1 --output /kaggle/working/pilot-qwen-1b
+```
+
+Nếu đã có output, xem đường dẫn mới được in ở `Reports:`. `comparison.json` nằm
+trong đường dẫn đó. Không dùng Python 3.13 của notebook để chạy trực tiếp stack cũ.

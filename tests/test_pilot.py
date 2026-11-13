@@ -177,6 +177,7 @@ class PilotTests(unittest.TestCase):
             return dict(returncode=int(failed), timeout=False, stdout='', stderr='', seconds=0)
         with patch.object(sys, 'argv', ['run.py', '--output', str(output)]), \
              patch.dict(sys.modules, {'huggingface_hub': fake_hub}), \
+             patch.object(sys, 'version_info', (3, 11, 11)), \
              patch.object(run, 'checkout', fake_checkout), patch.object(run, 'command', fake_worker):
             self.assertEqual(run.main(), 1)
         self.assertEqual(invoked, ['baseline', 'caller', 'extracted', 'verified'])
@@ -213,6 +214,37 @@ class PilotTests(unittest.TestCase):
             self.assertEqual(nodes, [pass_id])
         self.assertEqual(len(result['mutants']), 2)
         self.assertTrue((work / 'mutant_pool.json').exists())
+
+
+    def test_output_rerun_preserves_old_artifacts(self):
+        from pilot.common import reserve_output
+        requested = self.root / 'run'
+        first = reserve_output(requested)
+        (first / 'comparison.json').write_text('retained failure log')
+        second = reserve_output(requested)
+        third = reserve_output(requested)
+        self.assertEqual(first, requested)
+        self.assertEqual(len({first, second, third}), 3)
+        self.assertEqual((first / 'comparison.json').read_text(), 'retained failure log')
+        self.assertTrue(second.name.startswith('run-rerun-'))
+        collision = self.root / 'file'
+        collision.write_text('keep')
+        with self.assertRaises(ValueError):
+            reserve_output(collision)
+        self.assertEqual(collision.read_text(), 'keep')
+
+    def test_kaggle_bootstrap_dry_run_from_newer_python(self):
+        from bootstrap_kaggle import plan
+        commands = plan('uv', self.root / 'venv')
+        self.assertIn('3.11.11', commands[0])
+        self.assertIn('torch==2.5.1', commands[1])
+        self.assertIn('https://download.pytorch.org/whl/cu121', commands[1])
+        self.assertIn('--only-binary', commands[2])
+        result = command([sys.executable, BASE / 'bootstrap_kaggle.py', '--dry-run',
+                          '--venv', self.root / 'not-created'])
+        self.assertEqual(result['returncode'], 0)
+        self.assertFalse((self.root / 'not-created').exists())
+
 
 
 if __name__ == '__main__':

@@ -2,13 +2,15 @@
 import argparse
 from datetime import datetime, timezone
 import json
+import importlib.metadata
+import platform
 import os
 from pathlib import Path
 import sys
 import time
 import traceback
 
-from pilot.common import BASE, MODES, PYCG, UPSTREAM, checkout, command, digest, write_json
+from pilot.common import BASE, MODES, PYCG, UPSTREAM, checkout, command, digest, write_json, reserve_output
 
 
 def main():
@@ -30,20 +32,30 @@ def main():
     config = json.loads(args.config.read_text())
     if min(config['probe_timeout'], config['score_timeout'], config['worker_timeout'], config['max_probes']) <= 0:
         parser.error('timeouts and max_probes must be positive')
-    output = args.output.resolve()
-    output.mkdir(parents=True, exist_ok=False)
+    try:
+        output = reserve_output(args.output)
+    except ValueError as exc:
+        parser.error(str(exc))
+    if output != args.output.resolve():
+        print(f'Output already exists; preserving it. New run: {output}', flush=True)
     started = time.perf_counter()
-    settings = dict(config, model=args.model, model_revision=args.model_revision,
+    write_json(output / 'environment.json', dict(python=platform.python_version(), executable=sys.executable,
+        packages={dist.metadata['Name']: dist.version for dist in importlib.metadata.distributions()}))
+    settings = dict(config, requested_output=str(args.output.resolve()), actual_output=str(output), model=args.model, model_revision=args.model_revision,
                     embedding_revision=args.embedding_revision, upstream=UPSTREAM,
                     target_commit=PYCG, rounds=args.rounds, max_new_tokens=args.max_new_tokens,
                     generation=dict(do_sample=False, seed=config['seed']),
                     source_hashes={str(p.relative_to(BASE)): digest(p.read_text())
-                        for p in [BASE / 'run.py', BASE / 'worker.py', *sorted((BASE / 'pilot').glob('*.py'))]})
+                        for p in [BASE / 'run.py', BASE / 'worker.py', BASE / 'bootstrap_kaggle.py',
+                                  BASE / 'check_environment.py', BASE / 'requirements-notebook.txt',
+                                  *sorted((BASE / 'pilot').glob('*.py'))]})
     manifest = output / 'experiment.json'
     write_json(manifest, settings)
-    summary = dict(status='running', arms={}, validation_only=args.validate_only,
+    summary = dict(status='running', output=str(output), arms={}, validation_only=args.validate_only,
                    paper='https://arxiv.org/abs/2503.14000v2')
     try:
+        if not (3, 10) <= sys.version_info[:2] <= (3, 12):
+            raise RuntimeError('Pilot requires Python 3.10–3.12. Run python bootstrap_kaggle.py --venv /tmp/test4py-venv, then /tmp/test4py-venv/bin/python run.py with the same arguments.')
         upstream = output / 'upstream'
         stage = time.perf_counter()
         checkout('https://github.com/Test4DT/Test4Py.git', UPSTREAM, upstream)

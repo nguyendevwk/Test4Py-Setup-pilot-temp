@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import hashlib
 import json
 import os
@@ -67,3 +68,20 @@ def checkout(url, revision, dst):
     if checked(['git', '-C', dst, 'status', '--porcelain']):
         raise RuntimeError('Checkout is not clean')
     return actual
+
+
+def reserve_output(requested):
+    """Fresh sibling for notebook reruns; never reuse/delete earlier artifacts."""
+    requested = Path(requested).resolve()
+    if requested.exists() and not requested.is_dir():
+        raise ValueError(f'Output exists and is not a directory: {requested}')
+    timestamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+    for attempt in range(100):
+        candidate = requested if attempt == 0 else requested.with_name(
+            requested.name + f'-rerun-{timestamp}-{attempt}')
+        try:
+            candidate.mkdir(parents=True, exist_ok=False)
+            return candidate
+        except FileExistsError:
+            continue
+    raise RuntimeError('Could not allocate a fresh output directory')
