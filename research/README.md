@@ -7,12 +7,15 @@
 Kết quả Kaggle chưa hoàn tất: không có số nào ở đây chứng minh verified vượt baseline.
 Các fixture trong `tests/test_research.py` chỉ kiểm tra logic thống kê/collector, không phải dữ liệu thực nghiệm.
 
-Sau khi một lượt chạy hoàn tất, phân tích ngay trên Kaggle để không cần tải log lớn vào cell:
+Phân tích dùng Python hiện tại của notebook (`sys.executable`), không cần venv GPU
+trong `/tmp`. Venv tạm có thể mất giữa các session. Sau khi một lượt chạy hoàn tất,
+phân tích ngay trên Kaggle để không cần tải log lớn vào cell:
 
 ```python
 import subprocess
+import sys
 subprocess.run([
-    '/tmp/test4py-modern/bin/python', 'analyze.py',
+    sys.executable, 'analyze.py',
     '--input', '/kaggle/working/pilot-two-gpu',
     '--output', '/kaggle/working/pilot-research-report', '--plots',
 ], cwd='/kaggle/working/Test4Py-Setup-pilot-temp', check=True)
