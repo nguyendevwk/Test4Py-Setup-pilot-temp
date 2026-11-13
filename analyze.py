@@ -3,6 +3,7 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -317,13 +318,66 @@ def provenance(experiments):
     return files
 
 
+def discover_runs(roots, max_depth=10, max_directories=10000):
+    """Bounded artifact search, pruning source checkouts and package/model caches."""
+    found, visited, truncated = {}, 0, False
+    prune={'.git','__pycache__','upstream','PyCG','mutants','node_modules','site-packages','.cache','research_reports'}
+    for root in map(Path,roots):
+        if not root.is_dir():
+            continue
+        for directory, names, files in os.walk(root, followlinks=False):
+            visited += 1
+            if visited > max_directories:
+                truncated = True
+                break
+            directory=Path(directory)
+            depth=len(directory.relative_to(root).parts)
+            names[:]=sorted(name for name in names if name not in prune and not name.startswith('.venv')) if depth<max_depth else []
+            if 'experiment.json' not in files:
+                continue
+            settings=read(directory/'experiment.json')
+            if settings.get('target_function')!='get_custom_loader':
+                continue
+            comparison=read(directory/'comparison.json')
+            arms=[read(directory/mode/'report.json') for mode in MODES]
+            recorded=sum(bool(arm) for arm in arms)
+            row=dict(path=str(directory.resolve()),status=comparison.get('status','running_or_unknown'),
+                recorded=recorded,completed=sum(arm.get('status')=='complete' for arm in arms),
+                validation_only=comparison.get('validation_only',False),
+                modified=(directory/'experiment.json').stat().st_mtime)
+            found[row['path']]=row
+        if truncated:
+            break
+    # Most recent experiment, NOT best quality or highest completion count.
+    return sorted(found.values(),key=lambda row:(row['modified'],row['path']),reverse=True),truncated
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--input',type=Path,required=True)
+    parser.add_argument('--input',type=Path,default=Path('auto'),help='artifact folder, or auto to find the latest run')
+    parser.add_argument('--list-runs',action='store_true',help='list discovered artifact folders without analyzing')
+    parser.add_argument('--search-root',type=Path,action='append',help='search roots (default: /kaggle/working and /kaggle/input)')
     parser.add_argument('--output',type=Path,default=Path('research_reports/pilot'))
     parser.add_argument('--plots',action='store_true')
     args=parser.parse_args()
-    if not args.input.exists(): parser.error('input directory does not exist')
+    if args.list_runs or str(args.input)=='auto':
+        candidates,truncated=discover_runs(args.search_root or [Path('/kaggle/working'),Path('/kaggle/input')])
+        for row in candidates[:20]:
+            kind='validation' if row['validation_only'] else 'experiment'
+            print(f"{row['path']} | {kind} | {row['status']} | completed={row['completed']} recorded={row['recorded']}")
+        if truncated:
+            print('Search limit reached; use --search-root to narrow the search.')
+        if args.list_runs:
+            if not candidates:
+                print('No pilot artifacts found. Restore saved Notebook outputs using Add Input, or run an experiment first.')
+            return 0
+        usable=[row for row in candidates if row['recorded'] and not row['validation_only']]
+        if not usable:
+            parser.error('No experimental arm artifacts found. Source alone is not results. Restore saved Notebook outputs via Add Input, use --search-root for their location, or run a new experiment if results were not saved.')
+        args.input=Path(usable[0]['path'])
+        print(f'Auto-selected most recent artifact run: {args.input}; use --input PATH to select another run.')
+    if not args.input.is_dir():
+        parser.error(f'Input directory does not exist: {args.input}. Use --input auto or --list-runs to locate saved artifacts.')
     output=reserve_output(args.output)
     rows,experiments,mutants,probes,stages,warnings=collect(args.input)
     pairs=paired_rows(rows)

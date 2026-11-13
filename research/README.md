@@ -16,10 +16,21 @@ import subprocess
 import sys
 subprocess.run([
     sys.executable, 'analyze.py',
-    '--input', '/kaggle/working/pilot-two-gpu',
+    '--input', 'auto',
     '--output', '/kaggle/working/pilot-research-report', '--plots',
 ], cwd='/kaggle/working/Test4Py-Setup-pilot-temp', check=True)
 ```
+
+`--input auto` tìm artifact mới nhất trong `/kaggle/working` và `/kaggle/input`,
+không chọn theo điểm chất lượng; loại validation-only khỏi auto-selection. Dùng
+`--list-runs` để xem các đường dẫn và `--input PATH` để chọn chính xác. Có thể chỉ định
+`--search-root PATH` khi output đã được gắn qua Add Input. Search có giới hạn độ sâu
+và số thư mục, bỏ qua checkout/cache để tránh quét dữ liệu rất lớn.
+
+Nếu không có artifact: source repo không chứa kết quả Kaggle của bạn. Thêm output
+Notebook đã lưu hoặc Dataset qua **Add Input** rồi tìm lại. Nếu kết quả trước đó
+chưa được lưu và đã mất khỏi session, không thể dựng lại số liệu từ source; cần
+chạy thí nghiệm mới. Không tạo thư mục input rỗng để bỏ qua lỗi.
 
 Nếu dùng `run_notebook`, thay `--input` bằng biến `reports` trả về từ helper.
 Đổi thư mục input theo run thực tế, kể cả hậu tố rerun. Matplotlib thường có trong

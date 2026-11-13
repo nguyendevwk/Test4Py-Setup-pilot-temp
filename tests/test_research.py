@@ -117,5 +117,35 @@ class ResearchTests(unittest.TestCase):
         self.assertIsNone(pair['delta_passed'])
 
 
+    def test_discovery_prunes_checkouts_and_distinguishes_validation(self):
+        self.arm('baseline',status='failed')
+        hidden=self.root/'upstream'
+        hidden.mkdir()
+        write_json(hidden/'experiment.json',self.settings)
+        validation=self.root/'saved-validation'
+        validation.mkdir()
+        write_json(validation/'experiment.json',self.settings)
+        write_json(validation/'comparison.json',dict(validation_only=True,status='complete'))
+        found,truncated=analyze.discover_runs([self.root])
+        self.assertFalse(truncated)
+        self.assertEqual(len(found),2)
+        actual=next(row for row in found if row['path']==str(self.root))
+        self.assertEqual(actual['recorded'],1)
+        self.assertEqual(actual['completed'],0)
+        self.assertTrue(next(row for row in found if row['path']==str(validation))['validation_only'])
+
+    def test_empty_auto_input_stops_without_creating_fake_report(self):
+        from unittest.mock import patch
+        import sys
+        empty=self.root/'empty'; empty.mkdir()
+        destination=self.root/'must-not-exist'
+        with patch.object(sys,'argv',['analyze.py','--input','auto','--search-root',str(empty),'--output',str(destination)]), \
+             contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as error:
+                analyze.main()
+        self.assertEqual(error.exception.code,2)
+        self.assertFalse(destination.exists())
+
+
 if __name__=='__main__':
     unittest.main()
