@@ -16,6 +16,36 @@ Tất cả dùng cùng SLM, revision, mô tả tình huống, sinh pytest, repai
 Mặc định Qwen 1.5B; embedding BGE giữ backend upstream. Xem
 [đối chiếu paper/source và các giới hạn](docs/PIPELINE_REVIEW.md).
 
+## Chạy chuẩn trên Kaggle
+
+Trong **Settings**, bật Internet và GPU. [Tài liệu Notebook Kaggle](https://www.kaggle.com/docs/notebooks)
+cho phép gọi shell bằng `!`, nhưng các lệnh `!` riêng biệt không tự dừng chuỗi cell
+khi một lệnh trả exit code khác 0. Dùng entrypoint tuần tự sau để không chạy
+validation trên một môi trường cài đặt lỗi:
+
+```python
+import subprocess
+import sys
+from pathlib import Path
+project = Path('/kaggle/working/Test4Py-Setup-pilot-temp')
+subprocess.run(['git', '-C', str(project), 'pull', '--ff-only'], check=True)
+subprocess.run([sys.executable, str(project / 'kaggle_run.py'), '--runtime', 'modern',
+                '--output', '/kaggle/working/test4py-pilot'], check=True, cwd=project)
+```
+
+Entry point chạy bootstrap, validation, rồi compare; chỉ chạy bước sau khi bước
+trước thành công. Không xóa venv dở hoặc log cũ. Nếu output tồn tại, tạo sibling mới.
+Xem đường dẫn in ra: `notebook-run.json`, `bootstrap.log`, `validation.log`,
+`comparison.log`; báo cáo nghiên cứu nằm trong `comparison/comparison.json`.
+Log được ghi trong khi subprocess chạy, nên có thể mở file từ giao diện Kaggle.
+Venv/cache vẫn nằm dưới `/tmp`, output nằm trong `/kaggle/working` để lưu Notebook Version.
+
+Lỗi `invalid value ... --only-binary` đã được sửa ở cả hai bootstrap: `uv` nhận
+một cờ cho từng package, ví dụ `--only-binary numpy --only-binary tokenizers`.
+Đây là [cú pháp uv](https://docs.astral.sh/uv/reference/cli/), không phải cấu hình Kaggle.
+Thêm regression test gọi uv thật với wheel fixture, offline và dry-run, để kiểm tra
+parser mà không tải dependencies hoặc thay đổi môi trường.
+
 ## Tùy chọn thư viện mới trên Python 3.13
 
 Profile **modern** bổ sung Transformers 4.57.6, Chroma 1.3.5, NumPy 2.2.6 và

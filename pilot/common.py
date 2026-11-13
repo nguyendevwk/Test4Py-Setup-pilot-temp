@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from datetime import datetime, timezone
 import hashlib
 import importlib.metadata
@@ -31,21 +32,25 @@ def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
 
 
-def command(args, cwd=None, timeout=120, env=None):
-    """Kill the process group on timeout, including any pytest subprocesses."""
+def command(args, cwd=None, timeout=120, env=None, log_path=None):
+    """Kill the process group on timeout; optionally persist output as it arrives."""
     started = time.perf_counter()
-    proc = subprocess.Popen(list(map(str, args)), cwd=cwd, env=env,
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                            text=True, start_new_session=True)
-    expired = False
-    try:
-        out, err = proc.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        expired = True
-        os.killpg(proc.pid, signal.SIGKILL)
-        out, err = proc.communicate()
+    with ExitStack() as stack:
+        sink = stack.enter_context(Path(log_path).open('w')) if log_path else subprocess.PIPE
+        proc = subprocess.Popen(list(map(str, args)), cwd=cwd, env=env,
+                                stdout=sink, stderr=subprocess.STDOUT if log_path else subprocess.PIPE,
+                                text=True, start_new_session=True)
+        expired = False
+        try:
+            out, err = proc.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            expired = True
+            os.killpg(proc.pid, signal.SIGKILL)
+            out, err = proc.communicate()
+    if log_path:
+        out, err = Path(log_path).read_text(errors='replace')[-12000:], ''
     return dict(command=list(map(str, args)), returncode=proc.returncode,
-                stdout=out, stderr=err, timeout=expired,
+                stdout=out, stderr=err, timeout=expired, log_path=str(log_path) if log_path else None,
                 seconds=time.perf_counter() - started)
 
 

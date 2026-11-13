@@ -74,6 +74,8 @@ def main():
                              cwd=root, env=env, timeout=config['worker_timeout'])
             write_json(output / 'validation_process.json', result)
             summary['status'] = 'complete' if result['returncode'] == 0 else 'validation_failed'
+            if result['returncode'] != 0 or result['timeout']:
+                print('Validation worker failed:\n' + (result['stdout'] + result['stderr'])[-6000:], flush=True)
         else:
             stage = time.perf_counter()
             from huggingface_hub import model_info, snapshot_download

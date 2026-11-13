@@ -259,5 +259,59 @@ class PilotTests(unittest.TestCase):
         self.assertFalse((self.root / 'modern').exists())
 
 
+    def test_real_uv_parses_both_bootstraps_offline(self):
+        import os
+        import shutil
+        import zipfile
+        from bootstrap_kaggle import plan as legacy_plan
+        from bootstrap_modern import plan as modern_plan
+        uv = os.environ.get('TEST4PY_TEST_UV') or shutil.which('uv')
+        if not uv:
+            self.skipTest('uv executable unavailable')
+        wheel = self.root / 'pilot_binary_smoke-0.0.0-py3-none-any.whl'
+        info = 'pilot_binary_smoke-0.0.0.dist-info'
+        with zipfile.ZipFile(wheel, 'w') as archive:
+            archive.writestr(info + '/METADATA', 'Metadata-Version: 2.1\nName: pilot-binary-smoke\nVersion: 0.0.0\n')
+            archive.writestr(info + '/WHEEL', 'Wheel-Version: 1.0\nGenerator: fixture\nRoot-Is-Purelib: true\nTag: py3-none-any\n')
+            archive.writestr(info + '/RECORD', '')
+        for install in [legacy_plan(uv, self.root / 'legacy')[2],
+                        modern_plan(uv, self.root / 'modern', sys.executable)[1]]:
+            flags = []
+            for i, arg in enumerate(install):
+                if arg == '--only-binary':
+                    flags += [arg, install[i + 1]]
+            proc = command([uv, 'pip', 'install', '--python', sys.executable, '--offline',
+                            '--dry-run', '--no-deps', '--cache-dir', self.root / 'uv-cache',
+                            *flags, wheel], env=dict(os.environ, UV_SYSTEM_PYTHON='false'))
+            self.assertEqual(proc['returncode'], 0, proc)
+
+    def test_notebook_runner_stops_at_failed_step(self):
+        from unittest.mock import patch
+        import kaggle_run
+        for failure, expected in [('bootstrap', 1), ('validation', 2)]:
+            output = self.root / failure
+            calls = []
+            def fake_command(args, **kwargs):
+                label = 'bootstrap' if 'bootstrap_' in str(args[1]) else ('validation' if '--validate-only' in args else 'comparison')
+                calls.append(label)
+                kwargs['log_path'].write_text('fixture ' + label)
+                return dict(returncode=int(label == failure), timeout=False, stdout='fixture', stderr='')
+            with patch.object(sys, 'argv', ['kaggle_run.py', '--output', str(output)]), \
+                 patch.object(kaggle_run.shutil, 'which', return_value='/usr/bin/uv'), \
+                 patch.object(kaggle_run, 'command', fake_command):
+                self.assertEqual(kaggle_run.main(), 1)
+            self.assertEqual(len(calls), expected)
+            self.assertNotIn('comparison', calls)
+            report = json.loads((output / 'notebook-run.json').read_text())
+            self.assertEqual(report['failed_step'], failure)
+
+    def test_command_persists_process_log(self):
+        path = self.root / 'process.log'
+        result = command([sys.executable, '-c', 'print("persistent stdout"); import sys; print("persistent stderr", file=sys.stderr)'], log_path=path)
+        self.assertEqual(result['returncode'], 0)
+        self.assertIn('persistent stdout', path.read_text())
+        self.assertIn('persistent stderr', path.read_text())
+
+
 if __name__ == '__main__':
     unittest.main()

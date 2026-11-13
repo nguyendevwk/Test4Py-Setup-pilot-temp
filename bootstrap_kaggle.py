@@ -18,7 +18,7 @@ def plan(uv, environment):
         [uv, 'venv', '--seed', '--python', PYTHON_VERSION, str(environment)],
         [uv, 'pip', 'install', '--python', str(python), f'torch=={TORCH_VERSION}',
          '--index-url', TORCH_INDEX],
-        [uv, 'pip', 'install', '--python', str(python), '--only-binary', 'numpy,tokenizers,chroma-hnswlib,onnxruntime',
+        [uv, 'pip', 'install', '--python', str(python), '--only-binary', 'numpy', '--only-binary', 'tokenizers', '--only-binary', 'chroma-hnswlib', '--only-binary', 'onnxruntime',
          '-r', str(BASE / 'requirements-notebook.txt')],
         [str(python), '-m', 'pip', 'check'],
         [str(python), str(BASE / 'check_environment.py')],

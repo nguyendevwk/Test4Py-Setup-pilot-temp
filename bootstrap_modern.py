@@ -14,7 +14,7 @@ def plan(uv, environment, interpreter):
     return [
         [uv, 'venv', '--seed', '--system-site-packages', '--python', interpreter, str(environment)],
         [uv, 'pip', 'install', '--python', str(python), '--upgrade',
-         '--only-binary', 'numpy,tokenizers,chromadb,onnxruntime',
+         '--only-binary', 'numpy', '--only-binary', 'tokenizers', '--only-binary', 'chromadb', '--only-binary', 'onnxruntime',
          '-r', str(BASE / 'requirements-modern.txt')],
         [str(python), str(BASE / 'check_environment.py'), '--runtime', 'modern'],
     ]

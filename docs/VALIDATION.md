@@ -7,7 +7,7 @@ Môi trường này không phải môi trường notebook Python 3.10–3.12 đ�
 |---|---|
 | CLI `--help`, mode và tham số không hợp lệ | Pass |
 | Parse AST của các file Python bàn giao | Pass |
-| 11 unittest offline | Pass; xem `runs/offline-checks.txt` |
+| 14 unittest offline | Pass; xem `runs/offline-checks.txt` |
 | Ghim checkout Git và từ chối commit sai | Pass trên repo fixture cục bộ |
 | Hai trạng thái, thứ tự ứng viên, fresh-process/object, budget/timeout | Pass trên fixture nhỏ có nhãn rõ |
 | Hai operator mutant và logic chỉ chấm test pass bản gốc | Pass trên fixture/mock, chưa chạy pytest thật |
@@ -76,3 +76,17 @@ thử Python 3.13 với thư viện mới. Kiểm tra offline xác nhận dry-ru
 không lên kế hoạch cài Torch và dùng interpreter hiện tại. Profile này tái dùng
 Torch/CUDA từ image Kaggle; cần ghi nhận image và môi trường thực tế. Chưa chạy
 pip resolver/import/model/upstream thực tế ở profile modern do giới hạn mạng.
+
+## Sửa cú pháp uv và thứ tự chạy Kaggle
+
+Người dùng đã tái hiện lỗi parser trên uv 0.6.17 vì giá trị `--only-binary` chứa
+nhiều tên cách nhau bằng dấu phẩy. Hai bootstrap giờ dùng cờ lặp cho từng package.
+Đối chiếu source parser tại tag 0.6.17 và tài liệu CLI uv. Regression test thực thi
+uv cục bộ (0.13.5), cài wheel fixture ở chế độ offline/dry-run, pass cả hai bootstrap.
+Chưa chạy được binary 0.6.17 tại workspace vì tải release bị lỗi DNS.
+
+Theo docs Kaggle, source và report ở `/kaggle/working`, venv/cache ở `/tmp`, bootstrap
+phải chạy lại trong session Save & Run All. `kaggle_run.py` điều phối từng bước,
+dừng nếu bootstrap/validation thất bại và giữ log process. Test lỗi bootstrap và
+lỗi validation xác nhận comparison không bị chạy tiếp. Test log xác nhận stdout
+và stderr được lưu. Validation worker lỗi giờ in phần cuối traceback ra CLI.
