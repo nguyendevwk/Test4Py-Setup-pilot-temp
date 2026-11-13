@@ -16,6 +16,26 @@ Tất cả dùng cùng SLM, revision, mô tả tình huống, sinh pytest, repai
 Mặc định Qwen 1.5B; embedding BGE giữ backend upstream. Xem
 [đối chiếu paper/source và các giới hạn](docs/PIPELINE_REVIEW.md).
 
+## Đánh giá khoa học và xuất bảng/biểu đồ
+
+Xem [research/REVIEW.md](research/REVIEW.md) cho đánh giá phê bình so với paper,
+đóng góp còn cần chứng minh, đối chứng, threats, kế hoạch thống kê và ứng dụng.
+[research/METRICS.csv](research/METRICS.csv) ghi định nghĩa, đơn vị, mẫu số và các chỉ
+số chưa đo được. [research/README.md](research/README.md) hướng dẫn dùng `analyze.py`
+để xuất CSV, paired differences và figures SVG/PDF/PNG từ kết quả thật trên Kaggle.
+Không có kết quả hoàn tất thì NA, không tự tạo biểu đồ hiệu quả hoặc CI/p-value.
+
+Dashboard nay có cả mẫu số: các bước launcher, arm / 4, các bước initialization
+được theo dõi, rounds hoàn tất / cấu hình, LLM calls kết thúc / đã bắt đầu,
+probes / budget và mutants đã chấm / tổng. Mẫu số probe là ngân sách tối đa, không
+phải số việc bắt buộc; số bước init không đồng nghĩa phần trăm thời gian. Tổng
+LLM calls của upstream chưa biết trước, nên không đưa ra phần trăm tổng giả.
+
+Bên dưới bảng có SVG charts GPU utilization, GPU memory và token cộng dồn. Chỉ giữ
+60 mẫu gần nhất trong dashboard, không thêm output mới mỗi lần refresh; raw telemetry
+vẫn lưu đầy đủ. Đây là biểu đồ vận hành; biểu đồ đánh giá khoa học tạo riêng bằng
+Matplotlib sau khi có artifact đo được.
+
 ## Bảng trạng thái gọn trên Kaggle — khuyến nghị
 
 Để tránh output dài làm chậm browser, dùng **hàm Python trong notebook** thay cho

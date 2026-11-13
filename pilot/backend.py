@@ -17,6 +17,8 @@ class TransformersBackend:
         self.settings, self.work = settings, work
         self.phase = 'initialization'
         self.call_count = 0
+        self.calls_finished = 0
+        self.calls_failed = 0
         self.input_tokens = 0
         self.output_tokens = 0
         torch.set_num_threads(settings.get('cpu_threads', 1))
@@ -54,7 +56,8 @@ class TransformersBackend:
                       input_tokens=int(inputs.input_ids.shape[1]))
         self.call_count += 1
         emit(self.work, self.phase, 'model_call_start', call=self.call_count, operation=role,
-             input_tokens=record['input_tokens'], max_new_tokens=self.settings['max_new_tokens'])
+             input_tokens=record['input_tokens'], max_new_tokens=self.settings['max_new_tokens'],
+             model_calls_started=self.call_count, model_calls_finished=self.calls_finished)
         try:
             with self.torch.inference_mode():
                 result = self.model.generate(**inputs, do_sample=False,
@@ -74,11 +77,14 @@ class TransformersBackend:
             record['allocated_gib'] = self.torch.cuda.memory_allocated()/1024**3
             record['reserved_gib'] = self.torch.cuda.memory_reserved()/1024**3
             record['peak_allocated_gib'] = self.torch.cuda.max_memory_allocated()/1024**3
+            self.calls_finished += 1
+            self.calls_failed += int('error' in record)
             self.input_tokens += record['input_tokens']
             self.output_tokens += record.get('output_tokens', 0)
             append_json(self.work / 'model_calls.jsonl', record)
             emit(self.work, self.phase, 'model_call_end', call=self.call_count,
-                 seconds=round(record['seconds'], 2), output_tokens=record.get('output_tokens', 0),
+                 model_calls_started=self.call_count, model_calls_finished=self.calls_finished,
+                 model_calls_failed=self.calls_failed, seconds=round(record['seconds'], 2), output_tokens=record.get('output_tokens', 0),
                  tokens_per_second=round(record['output_tokens_per_second'], 2),
                  total_input_tokens=self.input_tokens, total_output_tokens=self.output_tokens,
                  allocated_gib=round(record['allocated_gib'], 2), reserved_gib=round(record['reserved_gib'], 2),

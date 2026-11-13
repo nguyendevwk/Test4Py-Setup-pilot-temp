@@ -72,7 +72,7 @@ def main():
     started = time.perf_counter()
     write_json(output / 'environment.json', dict(python=platform.python_version(), executable=sys.executable,
         packages=package_versions()))
-    settings = dict(config, requested_output=str(args.output.resolve()), actual_output=str(output), runtime=args.runtime, model=args.model, model_revision=args.model_revision,
+    settings = dict(config, mode=args.mode, requested_output=str(args.output.resolve()), actual_output=str(output), runtime=args.runtime, model=args.model, model_revision=args.model_revision,
                     embedding_revision=args.embedding_revision, upstream=UPSTREAM,
                     target_commit=PYCG, rounds=args.rounds, max_new_tokens=args.max_new_tokens,
                     generation=dict(do_sample=False, seed=config['seed']), cpu_threads=args.cpu_threads,

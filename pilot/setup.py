@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 import time
 
+from pilot.progress import emit
 from pilot.common import BASE, append_json, command, digest, write_json
 
 SCENARIOS = ('new_target', 'existing_target')
@@ -91,6 +92,9 @@ def select(root, extraction, mode, work, config):
     started = time.perf_counter()
     work = Path(work)
     selected, probes = {}, []
+    emit(work, 'setup', 'selection_start', probes_used=0,
+         probe_budget=config['max_probes'] if mode == 'verified' else 0,
+         verified_scenarios=0, scenarios_total=2 if mode == 'verified' else 0)
     if mode == 'verified':
         # Budget counts actual fresh-process probes across both scenarios.
         for candidate in extraction['candidates']:
@@ -103,6 +107,8 @@ def select(root, extraction, mode, work, config):
             append_json(work / 'probes.jsonl', result)
             if result['accepted']:
                 selected[candidate['scenario']] = candidate
+            emit(work, 'setup', 'probe_end', probes_used=len(probes), probe_budget=config['max_probes'],
+                 verified_scenarios=len(selected), scenarios_total=2)
     elif mode == 'extracted':
         for candidate in extraction['candidates']:
             selected.setdefault(candidate['scenario'], candidate)

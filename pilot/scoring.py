@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 import sys
 
+from pilot.progress import emit
 from pilot.common import append_json, command, digest, write_json
 
 
@@ -121,9 +122,11 @@ def score(root, work, config):
     if root == work or root in work.parents:
         raise ValueError('Scoring output must be outside the source checkout')
     pool = mutate((root / 'pycg/machinery/imports.py').read_text())
+    emit(work, 'scoring', 'mutants_configured', mutants_completed=0, mutants_total=len(pool))
     write_json(work / 'mutant_pool.json', pool)
     tests_dir = root / 'Test4DT_tests'
     if not list(tests_dir.glob('test_*.py')):
+        emit(work, 'scoring', 'mutants_skipped', mutants_completed=0, mutants_total=len(pool), mutants_skipped=len(pool))
         result = dict(status='no_generated_tests', passed=0, mutation_score=None,
                       mutants=[dict(name=name, verdict='no_eligible_tests') for name in pool],
                       mutant_pool_hash=digest(pool), branch_coverage=None)
@@ -166,10 +169,13 @@ def score(root, work, config):
                                            verdict=mutant_verdict(proc, data, eligible),
                                            process=proc, tests=data.get('tests', [])))
             write_json(work / 'score.json', result)
+            emit(work, 'scoring', 'mutant_end', mutants_completed=len(result['mutants']),
+                 mutants_total=len(pool), mutant=name, verdict=result['mutants'][-1]['verdict'])
         # The fixed denominator is two; unresolved mutants do not silently vanish.
         if all(m['verdict'] in ('killed', 'survived') for m in result['mutants']):
             result['mutation_score'] = sum(m['verdict'] == 'killed' for m in result['mutants']) / 2
     if not eligible:
+        emit(work, 'scoring', 'mutants_skipped', mutants_completed=0, mutants_total=len(pool), mutants_skipped=len(pool))
         result['mutants'] = [dict(name=name, verdict='no_eligible_tests') for name in pool]
     write_json(work / 'score.json', result)
     return result

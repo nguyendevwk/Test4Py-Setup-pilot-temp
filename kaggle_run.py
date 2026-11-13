@@ -38,7 +38,8 @@ def main():
                         '--mode', 'compare', '--rounds', str(args.rounds), '--model', args.model,
                         '--jobs', str(args.jobs), '--gpus', args.gpus, '--console', 'full', '--output', output / 'comparison'], 60000),
     ]
-    report = dict(status='running', output=str(output), runtime=args.runtime, steps=[])
+    report = dict(status='running', output=str(output), runtime=args.runtime, steps=[],
+                  steps_completed=0, steps_total=len(steps), rounds=args.rounds)
     write_json(output / 'notebook-run.json', report)
     for label, cmd, timeout in steps:
         report['current_step'] = label
@@ -50,6 +51,7 @@ def main():
             result = dict(returncode=-1, timeout=False, stdout='', stderr=str(exc))
         write_json(output / (label + '-process.json'), result)
         report['steps'].append(dict(name=label, returncode=result['returncode'], timeout=result['timeout']))
+        report['steps_completed'] = len(report['steps'])
         if result['returncode'] != 0 or result['timeout']:
             report.update(status='failed', failed_step=label)
             write_json(output / 'notebook-run.json', report)

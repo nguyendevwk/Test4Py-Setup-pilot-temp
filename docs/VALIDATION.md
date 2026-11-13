@@ -7,7 +7,7 @@ Môi trường này không phải môi trường notebook Python 3.10–3.12 đ�
 |---|---|
 | CLI `--help`, mode và tham số không hợp lệ | Pass |
 | Parse AST của các file Python bàn giao | Pass |
-| 21 unittest offline | Pass; xem `runs/offline-checks.txt` |
+| 29 unittest offline | Pass; xem `runs/offline-checks.txt` |
 | Ghim checkout Git và từ chối commit sai | Pass trên repo fixture cục bộ |
 | Hai trạng thái, thứ tự ứng viên, fresh-process/object, budget/timeout | Pass trên fixture nhỏ có nhãn rõ |
 | Hai operator mutant và logic chỉ chấm test pass bản gốc | Pass trên fixture/mock, chưa chạy pytest thật |
@@ -116,3 +116,16 @@ ngưỡng cấu hình + một thông báo, raw log vẫn đủ 1000 dòng. Dashb
 DisplayHandle và update định kỳ, không tích lũy các bảng. Test fake display xác
 nhận tạo một handle, update nhiều lần; test tail đọc có giới hạn và HTML được escape.
 Chưa kiểm tra trực tiếp DOM của frontend Kaggle tại workspace này.
+
+## Bộ đếm và đánh giá khoa học
+
+Thêm bộ đếm các bước init instrument được (sync/async, không đổi return value),
+rounds, calls finished/started, probes/budget và mutant evaluations. Dashboard có
+rolling SVG charts giới hạn 60 mẫu; đây là telemetry, không phải chart hiệu quả.
+Thêm `analyze.py` và research review/protocol/metric dictionary. Collector loại
+oracle validation khỏi kết quả generated tests, để NA thay vì 0, kiểm tra matched
+cohort/candidate/mutant pool và tính target coverage bằng union arc/line cụ thể.
+Các test phân tích dùng fixture có nhãn, không công bố như kết quả nghiên cứu.
+Workspace hiện không có completed experimental arm; báo cáo cục bộ nêu rõ 0 và
+không vẽ số chất lượng giả. Matplotlib không có tại workspace; phần tạo figures
+cần xác minh trên Kaggle sau khi có kết quả thật.

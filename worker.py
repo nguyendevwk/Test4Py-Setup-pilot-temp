@@ -110,6 +110,9 @@ def main():
         backend.phase = 'initialization'
         stage = time.perf_counter()
         project = PilotProject(str(root), settings['source_path'])
+        from pilot.instrumentation import instrument_initialization
+        instrument_initialization(project, work)
+        emit(work, 'initialization', 'rounds_configured', rounds_completed=0, rounds_total=settings['rounds'])
         asyncio.run(project.init())
         project.target, = (fn for file in project.file_messages
                            if file.mod_name == settings['target_module']
@@ -122,7 +125,8 @@ def main():
             backend.phase = f'generation_round_{index + 1}'
             project.generate_once()
             recoder.score.first_run = False
-            emit(work, 'generation', 'round_end', round=index + 1, retained_files=len(project.target.test_manager.testcases))
+            emit(work, 'generation', 'round_end', round=index + 1, rounds_completed=index + 1,
+                 rounds_total=settings['rounds'], retained_files=len(project.target.test_manager.testcases))
             write_json(work / f'round_{index + 1}.json', recoder.score.to_json())
         report['stages']['generation_repair_coverage'] = time.perf_counter() - stage
         report['retained_pytest_files'] = len(project.target.test_manager.testcases)
