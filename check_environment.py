@@ -7,12 +7,13 @@ import os
 from pathlib import Path
 import platform
 import sys
-from pilot.common import package_versions
+from pilot.common import package_versions, write_json
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime', choices=('legacy', 'modern'), default='legacy')
+    parser.add_argument('--report', type=Path, help='write complete metadata here; console stays concise')
     args = parser.parse_args()
     lower, upper = ((3, 11), (3, 13)) if args.runtime == 'modern' else ((3, 10), (3, 12))
     if not lower <= sys.version_info[:2] <= upper:
@@ -43,7 +44,13 @@ def main():
     report = dict(runtime=args.runtime, python=platform.python_version(), executable=sys.executable,
                   cuda_available=torch.cuda.is_available(), torch_cuda=torch.version.cuda,
                   packages=package_versions())
-    print(json.dumps(report, indent=2))
+    if args.report:
+        write_json(args.report, report)
+    summary = {key: report[key] for key in ('runtime', 'python', 'executable', 'cuda_available', 'torch_cuda')}
+    summary['packages'] = {name: importlib.metadata.version(name) for name in
+                           ('torch', 'transformers', 'tokenizers', 'chromadb', 'numpy')}
+    summary['full_report'] = str(args.report) if args.report else None
+    print('Environment smoke check passed: ' + json.dumps(summary))
     return 0
 
 

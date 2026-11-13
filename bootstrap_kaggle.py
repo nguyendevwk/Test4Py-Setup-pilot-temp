@@ -21,7 +21,7 @@ def plan(uv, environment):
         [uv, 'pip', 'install', '--python', str(python), '--only-binary', 'numpy', '--only-binary', 'tokenizers', '--only-binary', 'chroma-hnswlib', '--only-binary', 'onnxruntime',
          '-r', str(BASE / 'requirements-notebook.txt')],
         [str(python), '-m', 'pip', 'check'],
-        [str(python), str(BASE / 'check_environment.py')],
+        [str(python), str(BASE / 'check_environment.py'), '--report', str(environment / 'environment.json')],
     ]
 
 
@@ -54,6 +54,8 @@ def main():
         if args.report_dir:
             args.report_dir.mkdir(parents=True, exist_ok=True)
             (args.report_dir / 'requirements-resolved.txt').write_text(freeze)
+            if (environment / 'environment.json').exists() and args.report_dir.resolve() != environment:
+                shutil.copy2(environment / 'environment.json', args.report_dir / 'environment.json')
         print(f'Environment ready: {python}\nResolved versions: {environment / "requirements-resolved.txt"}')
         print(f'{python} run.py --validate-only --output /kaggle/working/validate-real')
     return 0

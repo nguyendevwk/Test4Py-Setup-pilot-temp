@@ -401,5 +401,92 @@ class PilotTests(unittest.TestCase):
         self.assertIn('before-timeout', (self.root / 'timeout.log').read_text())
 
 
+    def test_compact_console_is_bounded_but_raw_log_complete(self):
+        import contextlib
+        import io
+        from pilot.console import Console
+        console = Console('compact', limit=3, interval=0)
+        display = io.StringIO()
+        path = self.root / 'bounded.log'
+        with contextlib.redirect_stdout(display):
+            result = command([sys.executable, '-u', '-c',
+                'for i in range(1000): print("[mode] event", i)'],
+                stream=True, log_path=path, console=console)
+        self.assertEqual(result['returncode'], 0)
+        self.assertEqual(len(path.read_text().splitlines()), 1000)
+        self.assertLessEqual(len(display.getvalue().splitlines()), 4)
+        self.assertIn('Display limit reached', display.getvalue())
+        self.assertIn('999', result['stdout'])
+
+    def test_notebook_updates_one_display_and_reads_bounded_tail(self):
+        from pilot.common import write_json
+        from pilot.notebook import snapshot, render, watch_run, tail_text
+        from unittest.mock import patch
+        output = self.root / 'dashboard'
+        output.mkdir()
+        write_json(output / 'notebook-run.json', dict(status='running', current_step='comparison'))
+        work = output / 'comparison/baseline'
+        work.mkdir(parents=True)
+        write_json(work / 'progress.json', dict(phase='initialization', event='model_call_end', call=7,
+            total_input_tokens=100, total_output_tokens=30, allocated_gib=3.2, tokens_per_second=12.5))
+        write_json(work / 'report.json', dict(status='running', versions=dict(packages={'HUGE-DUMP': 'x' * 10000})))
+        state = snapshot(output)
+        self.assertEqual(state['arms'][0]['call'], 7)
+        self.assertEqual(state['arms'][0]['input_tokens'], 100)
+        rendered = render(state)
+        self.assertNotIn('HUGE-DUMP', rendered)
+        self.assertLess(len(rendered), 10000)
+        displays = []
+        class Handle:
+            updates = 0
+            latest = ''
+            def update(self, value):
+                self.updates += 1
+                self.latest = value
+        handle = Handle()
+        def display(value, **kwargs):
+            displays.append(value)
+            return handle
+        class Process:
+            polls = 0
+            def poll(self):
+                self.polls += 1
+                return 0 if self.polls == 3 else None
+        with patch('pilot.notebook.time.sleep'):
+            watch_run(output, process=Process(), display_fn=display)
+        self.assertEqual(len(displays), 1)
+        self.assertEqual(handle.updates, 3)
+        large = self.root / 'large.log'
+        large.write_text('x' * 1_000_000 + 'LAST')
+        self.assertEqual(len(tail_text(large, 100)), 100)
+        self.assertTrue(tail_text(large, 100).endswith('LAST'))
+
+    def test_dashboard_escapes_model_and_path_content(self):
+        from pilot.notebook import snapshot, render
+        from pilot.common import write_json
+        output = self.root / 'html'
+        work = output / 'comparison/baseline'
+        work.mkdir(parents=True)
+        write_json(work / 'progress.json', dict(phase='<script>unsafe()</script>'))
+        rendered = render(snapshot(output))
+        self.assertNotIn('<script>', rendered)
+        self.assertIn('&lt;script&gt;', rendered)
+
+
+    def test_status_retains_counters_while_next_call_is_running(self):
+        import contextlib
+        import io
+        from pilot.progress import emit
+        with contextlib.redirect_stdout(io.StringIO()):
+            emit(self.root, 'initialization', 'model_call_end', total_input_tokens=400,
+                 total_output_tokens=50, allocated_gib=3.2)
+            emit(self.root, 'initialization', 'model_call_start', call=2, input_tokens=100)
+        state = json.loads((self.root / 'progress.json').read_text())
+        self.assertEqual(state['event'], 'model_call_start')
+        self.assertEqual(state['total_input_tokens'], 400)
+        self.assertEqual(state['total_output_tokens'], 50)
+        self.assertEqual(state['allocated_gib'], 3.2)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -16,6 +16,54 @@ Tất cả dùng cùng SLM, revision, mô tả tình huống, sinh pytest, repai
 Mặc định Qwen 1.5B; embedding BGE giữ backend upstream. Xem
 [đối chiếu paper/source và các giới hạn](docs/PIPELINE_REVIEW.md).
 
+## Bảng trạng thái gọn trên Kaggle — khuyến nghị
+
+Để tránh output dài làm chậm browser, dùng **hàm Python trong notebook** thay cho
+`!python ...` nếu muốn bảng cập nhật tại chỗ:
+
+```python
+import os
+import subprocess
+project = '/kaggle/working/Test4Py-Setup-pilot-temp'
+subprocess.run(['git', '-C', project, 'pull', '--ff-only'], check=True)
+os.chdir(project)
+from pilot.notebook import run_notebook
+reports = run_notebook(
+    output='/kaggle/working/pilot-dashboard',
+    jobs=2, gpus='0,1', rounds=1, refresh=10,
+)
+```
+
+Chỉ một bảng hiển thị được thay nội dung mỗi 10 giây qua
+[IPython DisplayHandle.update](https://ipython.readthedocs.io/en/stable/api/generated/IPython.display.html).
+Bảng có stage, tiến độ 0/4 arm, GPU utilization/VRAM, call counter, token, token/giây,
+pass và mutation score khi chấm xong. Không thêm một bảng mới cho mỗi event.
+Không hiển thị output thô của model, danh sách hàng nghìn package hay toàn bộ traceback.
+
+`reports` là thư mục thực tế: `<output>/run/` hoặc sibling mới nếu output đã tồn tại.
+`launcher.log` nằm ngay dưới `<output>/`; log từng bước và báo cáo nằm trong `run/`.
+Bảng chỉ đọc `progress.json`, `gpu_latest.json`, report JSON nhỏ; không quét
+`model_calls.jsonl` hay đọc lại toàn log mỗi lần refresh. Phần tail fallback cũng
+chỉ đọc tối đa vài KB. Metadata đầy đủ ở `run/environment/environment.json`.
+
+Muốn xem một run có sẵn mà không khởi chạy thí nghiệm khác:
+
+```python
+from pilot.notebook import watch_run
+watch_run('/kaggle/working/pilot-two-gpu', refresh=10)
+```
+
+Watch phải chạy trong kernel có quyền đọc thư mục đó; kernel notebook đang bận
+chạy một cell đồng bộ thì cell watch khác phải chờ. Bản dashboard launcher ở trên
+kết hợp việc khởi chạy và theo dõi trong cùng cell. Nếu ngắt cell, helper cố dừng
+cả cây process (Kaggle có psutil), giữ nguyên log.
+
+CLI mặc định dùng `--console compact`: dòng tổng hợp được giới hạn và model/GPU
+log được throttle, toàn bộ raw output vẫn ghi trước khi lọc. `--console quiet`
+giảm output hơn; `--console full` dành cho debug. `check_environment.py` chỉ in
+vài phiên bản quan trọng; danh sách package đầy đủ chuyển sang JSON. Các chế độ
+console không đổi prompt, model, token cap, pipeline hoặc bộ chấm.
+
 ## Tiến độ trực tiếp và hai GPU
 
 Bản mới hiển thị output subprocess ngay trong cell, đồng thời giữ log đầy đủ.

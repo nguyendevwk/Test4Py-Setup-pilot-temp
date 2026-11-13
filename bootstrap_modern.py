@@ -16,7 +16,7 @@ def plan(uv, environment, interpreter):
         [uv, 'pip', 'install', '--python', str(python), '--upgrade',
          '--only-binary', 'numpy', '--only-binary', 'tokenizers', '--only-binary', 'chromadb', '--only-binary', 'onnxruntime',
          '-r', str(BASE / 'requirements-modern.txt')],
-        [str(python), str(BASE / 'check_environment.py'), '--runtime', 'modern'],
+        [str(python), str(BASE / 'check_environment.py'), '--runtime', 'modern', '--report', str(environment / 'environment.json')],
     ]
 
 
@@ -53,6 +53,8 @@ def main():
     if not args.dry_run:
         target = args.report_dir or environment
         target.mkdir(parents=True, exist_ok=True)
+        if (environment / 'environment.json').exists() and target.resolve() != environment:
+            shutil.copy2(environment / 'environment.json', target / 'environment.json')
         freeze = subprocess.check_output([str(python), '-m', 'pip', 'freeze'], text=True, env=env)
         (target / 'requirements-resolved.txt').write_text(freeze)
         # Global Kaggle packages may already have unrelated inconsistencies.

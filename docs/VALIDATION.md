@@ -7,7 +7,7 @@ Môi trường này không phải môi trường notebook Python 3.10–3.12 đ�
 |---|---|
 | CLI `--help`, mode và tham số không hợp lệ | Pass |
 | Parse AST của các file Python bàn giao | Pass |
-| 17 unittest offline | Pass; xem `runs/offline-checks.txt` |
+| 21 unittest offline | Pass; xem `runs/offline-checks.txt` |
 | Ghim checkout Git và từ chối commit sai | Pass trên repo fixture cục bộ |
 | Hai trạng thái, thứ tự ứng viên, fresh-process/object, budget/timeout | Pass trên fixture nhỏ có nhãn rõ |
 | Hai operator mutant và logic chỉ chấm test pass bản gốc | Pass trên fixture/mock, chưa chạy pytest thật |
@@ -101,3 +101,18 @@ không có hai arm trùng slot. Test CUDA visibility dùng UUID kế thừa. Tes
 chứng minh dòng đầu xuất hiện trước khi process kết thúc, log giữ đủ và timeout
 kết thúc process. Chưa có hai GPU hoạt động tại workspace để đo tốc độ hay peak VRAM
 thực tế; không báo hệ số tăng tốc thực nghiệm.
+
+## Bằng chứng Kaggle và giảm tải output
+
+Theo log người dùng cung cấp ngày 2026-11-14: Python 3.13.16, Torch 2.11 cu130,
+Transformers 4.57.6, Chroma 1.3.5 đã qua smoke check; validation PyCG thật pass hai
+trạng thái và bộ chấm hai mutant oracle nội bộ. Hai worker trên GPU 0/1 đã nạp
+model (2.88 GiB mỗi worker trước embedding). Chưa nhận báo cáo generated-test
+coverage/mutation cuối cùng nên không kết luận chất lượng hay tăng tốc.
+
+Bỏ in toàn bộ package metadata ra console, chuyển sang file JSON. Thêm console
+compact/quiet và limiter; test với 1000 dòng xác nhận browser chỉ nhận tối đa
+ngưỡng cấu hình + một thông báo, raw log vẫn đủ 1000 dòng. Dashboard chỉ dùng một
+DisplayHandle và update định kỳ, không tích lũy các bảng. Test fake display xác
+nhận tạo một handle, update nhiều lần; test tail đọc có giới hạn và HTML được escape.
+Chưa kiểm tra trực tiếp DOM của frontend Kaggle tại workspace này.

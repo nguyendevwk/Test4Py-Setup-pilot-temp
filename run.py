@@ -10,6 +10,7 @@ import sys
 import time
 import traceback
 
+from pilot.console import Console
 from pilot.progress import emit
 from pilot.scheduling import execute_modes, gpu_slots
 from pilot.telemetry import GPUMonitor
@@ -41,6 +42,7 @@ def main():
     parser.add_argument('--mode', choices=(*MODES, 'compare'), default='compare')
     parser.add_argument('--runtime', choices=('legacy', 'modern'), default='legacy',
                         help='modern allows Python 3.13 and requires requirements-modern.txt')
+    parser.add_argument('--console', choices=('compact', 'quiet', 'full'), default='compact')
     parser.add_argument('--jobs', type=int, default=1, help='concurrent independent arms, one per GPU')
     parser.add_argument('--gpus', default='auto', help='indices relative to parent-visible GPUs, e.g. 0,1')
     parser.add_argument('--cpu-threads', type=int, default=1, help='CPU threads per arm, identical for all modes')
@@ -55,6 +57,7 @@ def main():
     parser.add_argument('--validate-only', action='store_true',
                         help='real pinned checkouts, two states, probes and internal scorer; no model/GPU')
     args = parser.parse_args()
+    console = Console(args.console)
     if min(args.rounds, args.max_new_tokens, args.jobs, args.cpu_threads) < 1:
         parser.error('rounds and max-new-tokens must be positive')
     config = json.loads(args.config.read_text())
@@ -100,7 +103,7 @@ def main():
             env = dict(os.environ, PYTHONPATH=str(BASE), PYTHONDONTWRITEBYTECODE='1')
             result = command([sys.executable, '-m', 'pilot.validate', root],
                              cwd=root, env=env, timeout=config['worker_timeout'], stream=True, label='validation',
-                             log_path=output / 'validation-worker.log')
+                             log_path=output / 'validation-worker.log', console=console)
             write_json(output / 'validation_process.json', result)
             summary['status'] = 'complete' if result['returncode'] == 0 else 'validation_failed'
             if result['returncode'] != 0 or result['timeout']:
@@ -150,7 +153,7 @@ def main():
                         env['CUDA_VISIBLE_DEVICES'] = str(gpu)
                     process = command([sys.executable, BASE / 'worker.py', root, mode, manifest],
                                       cwd=root, env=env, timeout=config['worker_timeout'], stream=True,
-                                      log_path=work / 'worker.log', label=mode)
+                                      log_path=work / 'worker.log', label=mode, console=console)
                     write_json(work / 'process.json', process)
                     path = work / 'report.json'
                     report = json.loads(path.read_text()) if path.exists() else {}
@@ -170,7 +173,7 @@ def main():
                      **arm.get('metrics', {}))
                 return arm
             parallel_started = time.perf_counter()
-            with GPUMonitor(output):
+            with GPUMonitor(output, console=console):
                 for mode, arm in execute_modes(modes, slots, run_arm):
                     summary['arms'][mode] = arm
                     write_json(output / 'comparison.json', summary)

@@ -34,10 +34,10 @@ def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
 
 
-def command(args, cwd=None, timeout=120, env=None, log_path=None, stream=False, label=None, heartbeat=15):
+def command(args, cwd=None, timeout=120, env=None, log_path=None, stream=False, label=None, heartbeat=15, console=None):
     """Kill the process group on timeout; optionally persist output as it arrives."""
     if stream:
-        return stream_command(args, cwd, timeout, env, log_path, label, heartbeat)
+        return stream_command(args, cwd, timeout, env, log_path, label, heartbeat, console)
     started = time.perf_counter()
     with ExitStack() as stack:
         sink = stack.enter_context(Path(log_path).open('w')) if log_path else subprocess.PIPE
@@ -104,8 +104,10 @@ def package_versions():
     return {name: importlib.metadata.version(name) for name in sorted(names) if name}
 
 
-def stream_command(args, cwd, timeout, env, log_path, label, heartbeat):
+def stream_command(args, cwd, timeout, env, log_path, label, heartbeat, console=None):
     """Tee subprocess output to notebook and durable log, including while waiting."""
+    from pilot.console import Console
+    console = console or Console('full')
     started = time.perf_counter()
     lines = deque(maxlen=250)
     last_output = [started]
@@ -122,7 +124,7 @@ def stream_command(args, cwd, timeout, env, log_path, label, heartbeat):
                 if sink:
                     sink.write(line)
                     sink.flush()
-                print(line, end='', flush=True)
+                console.write(line, label=label or 'process')
             proc.stdout.close()
         reader = threading.Thread(target=read, daemon=True)
         reader.start()
@@ -138,7 +140,7 @@ def stream_command(args, cwd, timeout, env, log_path, label, heartbeat):
                 break
             except subprocess.TimeoutExpired:
                 if time.perf_counter() - last_output[0] >= heartbeat:
-                    print(f'[{label or "process"}] running {time.perf_counter()-started:.0f}s; waiting for next event', flush=True)
+                    console.write(f'[{label or "process"}] running {time.perf_counter()-started:.0f}s; waiting for next event', label=label or 'process')
         reader.join()
     return dict(command=list(map(str, args)), returncode=proc.returncode, timeout=expired,
         stdout=''.join(lines)[-12000:], stderr='', seconds=time.perf_counter()-started,

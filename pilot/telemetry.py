@@ -4,7 +4,7 @@ import io
 import subprocess
 import threading
 from datetime import datetime, timezone
-from pilot.common import append_json
+from pilot.common import append_json, write_json
 
 
 def sample_gpus():
@@ -24,7 +24,9 @@ def sample_gpus():
 
 
 class GPUMonitor:
-    def __init__(self, output, interval=15):
+    def __init__(self, output, interval=15, console=None):
+        from pilot.console import Console
+        self.console = console or Console('full')
         self.output, self.interval = output, interval
         self.stop = threading.Event()
         self.thread = None
@@ -33,9 +35,11 @@ class GPUMonitor:
         def monitor():
             while not self.stop.is_set():
                 rows = sample_gpus()
-                append_json(self.output / 'gpu_usage.jsonl', dict(time=datetime.now(timezone.utc).isoformat(), gpus=rows))
+                snapshot = dict(time=datetime.now(timezone.utc).isoformat(), gpus=rows)
+                append_json(self.output / 'gpu_usage.jsonl', snapshot)
+                write_json(self.output / 'gpu_latest.json', snapshot)
                 if rows:
-                    print('[GPU] ' + ' | '.join(f"{r['index']}: {r['utilization_percent']:.0f}% {r['used_mib']/1024:.1f}/{r['total_mib']/1024:.1f} GiB" for r in rows), flush=True)
+                    self.console.write('[GPU] ' + ' | '.join(f"{r['index']}: {r['utilization_percent']:.0f}% {r['used_mib']/1024:.1f}/{r['total_mib']/1024:.1f} GiB" for r in rows), label='gpu')
                 self.stop.wait(self.interval)
         self.thread = threading.Thread(target=monitor, daemon=True)
         self.thread.start()

@@ -4,6 +4,7 @@ from pathlib import Path
 import shutil
 import sys
 
+from pilot.console import Console
 from pilot.common import BASE, command, reserve_output, write_json
 
 
@@ -13,12 +14,14 @@ def main():
     parser.add_argument('--runtime', choices=('modern', 'legacy'), default='modern')
     parser.add_argument('--rounds', type=int, default=1)
     parser.add_argument('--model', default='Qwen/Qwen2.5-Coder-1.5B-Instruct')
+    parser.add_argument('--console', choices=('compact', 'quiet', 'full'), default='compact')
     parser.add_argument('--jobs', type=int, default=1, help='independent comparison arms at once')
     parser.add_argument('--gpus', default='auto', help='parent-visible GPU indices, e.g. 0,1')
     parser.add_argument('--venv', type=Path)
     args = parser.parse_args()
     if min(args.rounds, args.jobs) < 1:
         parser.error('rounds must be positive')
+    console = Console(args.console)
     output = reserve_output(args.output)
     venv = args.venv or Path('/tmp/test4py-modern' if args.runtime == 'modern' else '/tmp/test4py-venv')
     python = venv / 'bin/python'
@@ -30,17 +33,19 @@ def main():
         ('bootstrap', [sys.executable, BASE / bootstrap, '--venv', venv,
                        '--report-dir', output / 'environment'], 3600),
         ('validation', [python, BASE / 'run.py', '--runtime', args.runtime,
-                        '--validate-only', '--output', output / 'validation'], 1800),
+                        '--validate-only', '--console', 'full', '--output', output / 'validation'], 1800),
         ('comparison', [python, BASE / 'run.py', '--runtime', args.runtime,
                         '--mode', 'compare', '--rounds', str(args.rounds), '--model', args.model,
-                        '--jobs', str(args.jobs), '--gpus', args.gpus, '--output', output / 'comparison'], 60000),
+                        '--jobs', str(args.jobs), '--gpus', args.gpus, '--console', 'full', '--output', output / 'comparison'], 60000),
     ]
     report = dict(status='running', output=str(output), runtime=args.runtime, steps=[])
     write_json(output / 'notebook-run.json', report)
     for label, cmd, timeout in steps:
+        report['current_step'] = label
+        write_json(output / 'notebook-run.json', report)
         print(f'Starting {label}; log: {output / (label + ".log")}', flush=True)
         try:
-            result = command(cmd, cwd=BASE, timeout=timeout, log_path=output / (label + '.log'), stream=True, label=label)
+            result = command(cmd, cwd=BASE, timeout=timeout, log_path=output / (label + '.log'), stream=True, label=label, console=console)
         except OSError as exc:
             result = dict(returncode=-1, timeout=False, stdout='', stderr=str(exc))
         write_json(output / (label + '-process.json'), result)
