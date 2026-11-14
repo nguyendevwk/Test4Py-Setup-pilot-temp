@@ -4,6 +4,8 @@ import os
 import time
 from pilot.common import append_json
 from pilot.progress import emit
+from pilot.model_profiles import profile
+from pilot.quality import final_answer
 
 
 class TransformersBackend:
@@ -24,8 +26,9 @@ class TransformersBackend:
         torch.set_num_threads(settings.get('cpu_threads', 1))
         emit(work, 'model_load', 'start', gpu=os.environ.get('CUDA_VISIBLE_DEVICES', 'inherited'))
         torch.manual_seed(settings['seed'])
+        self.profile = profile(settings['model'])
         opts = dict(revision=settings['model_revision'])
-        self.tokenizer = AutoTokenizer.from_pretrained(settings['model'], **opts)
+        self.tokenizer = AutoTokenizer.from_pretrained(settings['model'], use_fast=self.profile.get('use_fast',True), **opts)
         self.model = AutoModelForCausalLM.from_pretrained(
             settings['model'], torch_dtype=torch.float16, **opts).to('cuda:0').eval()
         self.versions = dict(torch=torch.__version__, transformers=transformers.__version__,
@@ -62,14 +65,19 @@ class TransformersBackend:
             with self.torch.inference_mode():
                 result = self.model.generate(**inputs, do_sample=False,
                     max_new_tokens=self.settings['max_new_tokens'],
-                    pad_token_id=self.tokenizer.eos_token_id)
+                    pad_token_id=self.tokenizer.eos_token_id,
+                    eos_token_id=self.profile.get('eos_token_id', self.tokenizer.eos_token_id))
             generated = result[0, inputs.input_ids.shape[1]:]
             output = self.tokenizer.decode(generated, skip_special_tokens=True)
-            record.update(output=output, output_tokens=len(generated),
+            answer, answer_status = final_answer(output)
+            record.update(output=output, final_answer=answer, answer_status=answer_status, output_tokens=len(generated),
                           truncated=len(generated) == self.settings['max_new_tokens'])
-            return output
+            if not answer:
+                raise ValueError('Model produced no complete final answer; inspect raw model log and token budget')
+            return answer
         except Exception as exc:
-            record.update(error=repr(exc), output_tokens=0)
+            record['error'] = repr(exc)
+            record.setdefault('output_tokens', 0)
             raise
         finally:
             record['seconds'] = time.perf_counter() - start

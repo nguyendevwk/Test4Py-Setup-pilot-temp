@@ -155,7 +155,9 @@ def collect(root):
             cohort = dict(upstream=effective.get('upstream'), model=effective.get('model'),
                 model_revision=effective.get('model_revision'), embedding=effective.get('embedding'),
                 embedding_revision=effective.get('embedding_revision'), runtime=effective.get('runtime'),
-                generation=effective.get('generation'), rounds=effective.get('rounds'),
+                generation=effective.get('generation'), max_new_tokens=effective.get('max_new_tokens'),
+                prompt_policy=effective.get('prompt_policy'), code_extraction=effective.get('code_extraction'),
+                model_profile=effective.get('model_profile'), rounds=effective.get('rounds'),
                 repair_policy=effective.get('repair_policy'), source_hashes=effective.get('source_hashes'),
                 scenario_prompt=effective.get('scenario_prompt'), source_path=effective.get('source_path'),
                 python=versions.get('python'), packages=versions.get('packages'), cpu_threads=effective.get('cpu_threads'))

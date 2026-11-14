@@ -10,6 +10,7 @@ import sys
 import time
 import traceback
 
+from pilot.model_profiles import DEFAULT_MODEL, profile
 from pilot.console import Console
 from pilot.progress import emit
 from pilot.scheduling import execute_modes, gpu_slots
@@ -40,23 +41,27 @@ def print_metrics(output, summary):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--mode', choices=(*MODES, 'compare'), default='compare')
-    parser.add_argument('--runtime', choices=('legacy', 'modern'), default='legacy',
+    parser.add_argument('--runtime', choices=('legacy', 'modern'), default='modern',
                         help='modern allows Python 3.13 and requires requirements-modern.txt')
     parser.add_argument('--console', choices=('compact', 'quiet', 'full'), default='compact')
     parser.add_argument('--jobs', type=int, default=1, help='concurrent independent arms, one per GPU')
     parser.add_argument('--gpus', default='auto', help='indices relative to parent-visible GPUs, e.g. 0,1')
     parser.add_argument('--cpu-threads', type=int, default=1, help='CPU threads per arm, identical for all modes')
     parser.add_argument('--rounds', type=int, default=1)
-    parser.add_argument('--model', default='Qwen/Qwen2.5-Coder-1.5B-Instruct')
+    parser.add_argument('--model', default=DEFAULT_MODEL)
     parser.add_argument('--model-revision')
     parser.add_argument('--embedding-revision')
-    parser.add_argument('--max-new-tokens', type=int, default=512)
+    parser.add_argument('--max-new-tokens', type=int, default=None)
     parser.add_argument('--config', type=Path, default=BASE / 'pilot.json')
     parser.add_argument('--output', type=Path, default=BASE / 'runs' /
                         datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
     parser.add_argument('--validate-only', action='store_true',
                         help='real pinned checkouts, two states, probes and internal scorer; no model/GPU')
+    parser.add_argument('--model-smoke', action='store_true', help='load model and generate one tiny Python answer; no upstream initialization')
+    parser.add_argument('--prompt-policy', choices=('source-grounded-v2','original'), default='source-grounded-v2')
     args = parser.parse_args()
+    selected_profile = profile(args.model)
+    args.max_new_tokens = args.max_new_tokens or selected_profile['max_new_tokens']
     console = Console(args.console)
     if min(args.rounds, args.max_new_tokens, args.jobs, args.cpu_threads) < 1:
         parser.error('rounds and max-new-tokens must be positive')
@@ -75,6 +80,7 @@ def main():
     settings = dict(config, mode=args.mode, requested_output=str(args.output.resolve()), actual_output=str(output), runtime=args.runtime, model=args.model, model_revision=args.model_revision,
                     embedding_revision=args.embedding_revision, upstream=UPSTREAM,
                     target_commit=PYCG, rounds=args.rounds, max_new_tokens=args.max_new_tokens,
+                    model_profile=selected_profile, prompt_policy=args.prompt_policy, code_extraction='single-complete-block-v2',
                     generation=dict(do_sample=False, seed=config['seed']), cpu_threads=args.cpu_threads,
                     requested_jobs=args.jobs, requested_gpus=args.gpus,
                     source_hashes={str(p.relative_to(BASE)): digest(p.read_text())
@@ -90,6 +96,23 @@ def main():
         lower, upper = ((3, 11), (3, 13)) if args.runtime == 'modern' else ((3, 10), (3, 12))
         if not lower <= sys.version_info[:2] <= upper:
             raise RuntimeError('Pilot requires Python 3.10–3.12. Run python bootstrap_kaggle.py --venv /tmp/test4py-venv, then /tmp/test4py-venv/bin/python run.py with the same arguments.')
+        if args.model_smoke:
+            from huggingface_hub import model_info
+            from pilot.backend import TransformersBackend
+            from pilot.quality import extract_code, code_quality
+            import asyncio
+            settings['model_revision'] = model_info(args.model, revision=args.model_revision).sha
+            write_json(manifest, settings)
+            backend = TransformersBackend(settings, output)
+            backend.phase = 'model_smoke'
+            answer = asyncio.run(backend.ask('Return only Python code.', 'Write a function add(a, b) returning their sum.'))
+            code = extract_code(answer)
+            (output/'smoke.py').write_text(code)
+            quality = code_quality(code)
+            write_json(output/'smoke.json', dict(quality=quality, settings=settings, versions=backend.versions,
+                limitation='Protocol smoke only; generated code was parsed, not executed. Not pilot effectiveness.'))
+            print(f'Model smoke: {quality}; artifacts: {output}', flush=True)
+            return 0 if quality['ast_parse'] else 1
         upstream = output / 'upstream'
         stage = time.perf_counter()
         emit(output, 'preflight', 'checkout_upstream')

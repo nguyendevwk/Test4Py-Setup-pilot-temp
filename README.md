@@ -403,3 +403,47 @@ Coverage not measured stays NA. One target and one round support descriptive pai
 comparisons only; do not compute significance from four treatment arms as replicates.
 Dual-GPU speedup requires a matched single-GPU execution; token/s alone cannot establish it.
 Use actual artifacts to diagnose zero-pass runs before repeating model generation.
+
+### Quality-first 2026 cohort: run smoke before the pilot
+
+Default generator is now `Nanbeige/Nanbeige4.1-3B`, with the February2026
+research report https://arxiv.org/abs/2602.13367 and official model card
+https://huggingface.co/Nanbeige/Nanbeige4.1-3B . This is a source-backed candidate,
+not a measured best-model claim. Its profile uses an8192 output-token cap,
+slow tokenizer, explicit chat EOS166101, and separates completed reasoning
+from the final answer. Raw reasoning/output and token costs are retained.
+An incomplete reasoning answer fails explicitly. This budget is experimental,
+not the vendor's full recommended budget or a guarantee of quality.
+
+```python
+import subprocess, sys
+project = "/kaggle/working/Test4Py-Setup-pilot-temp"
+subprocess.run(["git", "pull"], cwd=project, check=True)
+subprocess.run([sys.executable, "bootstrap_modern.py"], cwd=project, check=True)
+subprocess.run([
+    "/tmp/test4py-modern/bin/python", "run.py",
+    "--runtime", "modern", "--model-smoke",
+    "--model", "Nanbeige/Nanbeige4.1-3B",
+    "--output", "/kaggle/working/test4py-model-smoke",
+], cwd=project, check=True)
+```
+
+Smoke loads the pinned model revision and generates one tiny Python answer,
+parses it and writes `smoke.py`, `smoke.json`, `model_calls.jsonl`, `experiment.json`.
+It does not execute generated code, run Test4Py initialization, or establish
+pilot effectiveness. On failure preserve `comparison.json` and raw logs.
+Do not start the full comparison until the smoke result is reviewed.
+For a non-thinking control use `--model Qwen/Qwen3-4B-Instruct-2507`.
+Qwen3.5 is explicitly rejected pending a validated architecture/runtime adapter.
+
+The new shared `source-grounded-v2` prompt policy appends actual production
+imports, factory and receiver-method excerpts to generation/repair in every arm;
+these override conflicting generated usage summaries without exposing probe
+observations or oracle outputs. Single complete Python-block extraction is
+uniform across arms; ambiguous/incomplete fenced answers fail explicitly.
+Candidate AST quality and every static/runtime checker result are archived.
+These are new experimental conditions and must not be pooled with old runs;
+`analyze.py` includes prompt policy, extraction, token cap and model profile in
+comparability cohorts. `--prompt-policy original` omits source grounding but
+retains the new extraction policy, so it is not an exact historical replay.
+See `research/QUALITY_FIRST.md` for the scientific protocol.

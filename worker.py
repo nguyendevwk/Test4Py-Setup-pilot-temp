@@ -9,6 +9,7 @@ import sys
 import time
 import traceback
 
+from pilot.quality import extract_code, code_quality, source_context
 from pilot.progress import emit
 from pilot.common import append_json, digest, write_json, package_versions
 
@@ -45,7 +46,7 @@ def main():
         from test4dt.recorder import recoder
         # Uniform newline fix for upstream's module-comment concatenation.
         original_get_code = testcase.get_code
-        testcase.get_code = lambda text: '\n' + original_get_code(text)
+        testcase.get_code = extract_code
 
         original_set = testcase.Testcase.set_code
         def archive_code(self, code):
@@ -56,13 +57,15 @@ def main():
             path = archive / f'{index:04d}.py'
             path.write_text(code)
             append_json(work / 'test_attempts.jsonl', dict(file=str(path),
-                        upstream_test=self.test_path, stage=backend.phase, sha256=digest(code)))
+                        upstream_test=self.test_path, stage=backend.phase, sha256=digest(code), quality=code_quality(code)))
         testcase.Testcase.set_code = archive_code
         from pilot.scoring import classify, score
         for name in ('find_syntax_error', 'find_assert_error'):
             original = getattr(testcase.Testcase, name)
             def observe(self, original=original, name=name):
                 value = original(self)
+                append_json(work / 'quality_checks.jsonl', dict(check=name, test=self.test_path, failed=bool(value),
+                    phase=backend.phase, diagnostic=self.error_message if value else None))
                 if value:
                     append_json(work / 'errors.jsonl', dict(check=name, test=self.test_path,
                                 category=classify(self.error_message), message=self.error_message))
@@ -100,6 +103,8 @@ def main():
             direct = inspect.currentframe().f_back.f_code.co_name
             if direct in {'generate_test_case_normal', 'generate_test_case_easy',
                           'generate_test_case_evol', 'repair_syntax_error', 'repair_assert_error'}:
+                if settings.get('prompt_policy') == 'source-grounded-v2':
+                    user += '\n\n' + source_context(root)
                 user += '\n\n' + settings['scenario_prompt']
                 if context:
                     user += '\n\n' + context
@@ -140,6 +145,7 @@ def main():
         score_ok = report['score']['status'] in {'scored', 'no_generated_tests'}
         mutant_ok = all(m['verdict'] in {'killed', 'survived', 'no_eligible_tests'}
                         for m in report['score'].get('mutants', []))
+        report['test_outcome'] = 'valid_tests' if report['score'].get('passed',0) > 0 else 'no_valid_tests'
         report['status'] = 'complete' if score_ok and mutant_ok else 'failed'
         if report['status'] == 'failed':
             report['error'] = 'Scoring incomplete; inspect score.json and process artifacts'
