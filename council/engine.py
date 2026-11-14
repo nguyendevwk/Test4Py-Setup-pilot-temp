@@ -9,10 +9,11 @@ class CouncilEngine:
                  critic_model='Qwen/Qwen3-4B-Instruct-2507', coder_device=None,
                  critic_device=None, max_new_tokens=512, mock=False, load_in_4bit=False,
                  coder_revision='main', critic_revision='main', seed=42,
-                 enable_critic=True, work=None):
+                 enable_critic=True, work=None, temperature=0.0, top_p=0.95):
         self.mock, self.load_in_4bit = mock, load_in_4bit
         self.work = Path(work) if work else None
         self.enable_critic, self.max_new_tokens = enable_critic, max_new_tokens
+        self.temperature, self.top_p = float(temperature), float(top_p)
         self.telemetry = {f'{r}_{k}': 0 for r in ('coder', 'critic')
                           for k in ('calls', 'input_tokens', 'tokens', 'seconds')}
         self.versions = dict(mock=mock, seed=seed, models={})
@@ -81,8 +82,12 @@ class CouncilEngine:
                 record['input_tokens'] = length
                 self.telemetry[role+'_input_tokens'] += length
                 with torch.inference_mode():
-                    output = model.generate(**inputs, do_sample=False, max_new_tokens=self.max_new_tokens,
-                                            pad_token_id=tokenizer.eos_token_id)
+                    gen_opts = dict(max_new_tokens=self.max_new_tokens, pad_token_id=tokenizer.eos_token_id)
+                    if self.temperature > 0.0:
+                        gen_opts.update(do_sample=True, temperature=self.temperature, top_p=self.top_p)
+                    else:
+                        gen_opts.update(do_sample=False)
+                    output = model.generate(**inputs, **gen_opts)
                 ids = output[0, length:]
                 record.update(output=tokenizer.decode(ids, skip_special_tokens=True), output_tokens=len(ids),
                               truncated=len(ids) == self.max_new_tokens)

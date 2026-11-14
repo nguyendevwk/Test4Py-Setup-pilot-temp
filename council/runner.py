@@ -186,7 +186,9 @@ def run_council_pipeline(args):
     settings = json.loads((BASE/'pilot.json').read_text())
     policy = dict(protocol='council-case-study-v2', target_commit=PYCG, settings=settings,
         source_hashes=source_hashes(), max_new_tokens=args.max_new_tokens,
-        generation=dict(do_sample=False, seed=getattr(args, 'seed', 42)),
+        generation=dict(do_sample=getattr(args, 'temperature', 0.0) > 0.0,
+                        temperature=getattr(args, 'temperature', 0.0),
+                        seed=getattr(args, 'seed', 42)),
         load_in_4bit=bool(getattr(args, 'load_in_4bit', False)))
     summary = dict(schema_version=SCHEMA_VERSION, run_kind='mock' if args.mock else 'real', mock=args.mock,
         output=str(output), protocol=policy['protocol'], cohort=digest(policy), policy=policy,
@@ -218,13 +220,17 @@ def run_council_pipeline(args):
         engine = CouncilEngine(coder_model=args.coder_model, critic_model=args.critic_model,
             mock=args.mock, max_new_tokens=args.max_new_tokens, load_in_4bit=getattr(args, 'load_in_4bit', False),
             coder_revision=getattr(args, 'coder_revision', 'main'), critic_revision=getattr(args, 'critic_revision', 'main'),
-            seed=getattr(args, 'seed', 42), enable_critic=not args.no_repair and getattr(args, 'repair_with', 'critic') == 'critic', work=output)
+            seed=getattr(args, 'seed', 42), enable_critic=not args.no_repair and getattr(args, 'repair_with', 'critic') == 'critic',
+            work=output, temperature=getattr(args, 'temperature', 0.0))
         summary['model_load_seconds'] = time.perf_counter()-stage
         save()
         if not args.mock:
             product = output/'target_repo'
             checkout('https://github.com/vitsalis/PyCG.git', PYCG, product)
         for idx in range(args.samples):
+            if not args.mock and getattr(args, 'temperature', 0.0) > 0.0:
+                import torch
+                torch.manual_seed(args.seed + idx)
             directory = output/'samples'/f'sample_{idx+1:02d}'
             directory.mkdir(parents=True)
             print(f'[Council] {args.mode}: {idx+1}/{args.samples} -> {directory}', flush=True)
@@ -273,6 +279,7 @@ def main():
     parser.add_argument('--coder-revision', default='main', help='Resolved to an immutable SHA and recorded')
     parser.add_argument('--critic-revision', default='main')
     parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--temperature', type=float, default=0.0, help='Sampling temperature (0.0 for deterministic greedy)')
     parser.add_argument('--no-repair', action='store_true')
     parser.add_argument('--repair-with', choices=('critic', 'coder'), default='critic')
     parser.add_argument('--max-new-tokens', type=int, default=2048)
