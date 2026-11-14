@@ -29,8 +29,33 @@ class TransformersBackend:
         self.profile = profile(settings['model'])
         opts = dict(revision=settings['model_revision'])
         self.tokenizer = AutoTokenizer.from_pretrained(settings['model'], use_fast=self.profile.get('use_fast',True), **opts)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            settings['model'], torch_dtype=torch.float16, **opts).to('cuda:0').eval()
+        
+        # Check if 4-bit quantization is needed for 7B+ models on 15GB GPUs
+        model_str = settings['model'].lower()
+        is_large = any(s in model_str for s in ["7b", "8b", "14b", "32b"])
+        if is_large and torch.cuda.is_available():
+            try:
+                from transformers import BitsAndBytesConfig
+                bnb_config = BitsAndBytesConfig(
+                    load_in_4bit=True,
+                    bnb_4bit_compute_dtype=torch.float16,
+                    bnb_4bit_quant_type="nf4",
+                    bnb_4bit_use_double_quant=True,
+                )
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    settings['model'],
+                    quantization_config=bnb_config,
+                    device_map={"": "cuda:0"},
+                    **opts
+                ).eval()
+                print(f"[Backend] Auto 4-bit NF4 enabled for {settings['model']} to prevent CUDA OOM.")
+            except Exception as e:
+                print(f"[Backend] 4-bit fallback: {e}")
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    settings['model'], torch_dtype=torch.float16, **opts).to('cuda:0').eval()
+        else:
+            self.model = AutoModelForCausalLM.from_pretrained(
+                settings['model'], torch_dtype=torch.float16, **opts).to('cuda:0').eval()
         self.versions = dict(torch=torch.__version__, transformers=transformers.__version__,
                              gpu=torch.cuda.get_device_name(0),
                              loaded_model_revision=getattr(self.model.config, '_commit_hash', None))
