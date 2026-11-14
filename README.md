@@ -515,3 +515,38 @@ Historical commands specifying Nanbeige still select it; replace `--model`
 explicitly to try the new recommendation. Default output cap2048 for Qwen;
 truncation remains logged, not silently treated as valid code. Do not start a full
 pipeline until the single-sample target screen has been reviewed.
+
+### Run nineteen NA modules (baseline, three rounds)
+
+See [sampling/provenance and limitations](research/benchmark/README.md).
+This is19/183 by count, deliberately selected fromNA58 across9 projects, not a
+representative random10% of all183. No generic setup adapter is claimed.
+
+```python
+import subprocess, sys
+from pathlib import Path
+project = Path('/kaggle/working/Test4Py-Setup-pilot-temp')
+venv = Path('/kaggle/working/test4py-env')
+subprocess.run(['git','pull'],cwd=project,check=True)
+subprocess.run([sys.executable,'bootstrap_modern.py','--venv',str(venv)],cwd=project,check=True)
+python = str(venv/'bin/python')
+output = '/kaggle/working/test4py-na19'
+# Check repos/dependencies/imports first, without model inference.
+subprocess.run([python,'benchmark19.py','--action','prepare','--output',output],cwd=project,check=True)
+```
+
+Inspect `benchmark.json` before model execution. If preparation passes:
+
+```python
+subprocess.run([
+    python,'benchmark19.py','--action','run','--resume','--output',output,
+    '--jobs','2','--gpus','auto','--rounds','3',
+    '--model','Qwen/Qwen3-4B-Instruct-2507',
+],cwd=project,check=True)
+```
+
+Use a new output path for a different plan/config. Repeat the same prepare
+command with `--resume` to retry failures, preserving earlier attempts. Full
+project logs go to files; console is bounded. A failed project does not stop
+others. `report.md` and `modules.csv` show quality; `benchmark.json` reports
+scored/19 and all environment failures. No generic mutation score is claimed.
