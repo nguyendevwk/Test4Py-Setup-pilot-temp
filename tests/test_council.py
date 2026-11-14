@@ -55,7 +55,8 @@ def test_hollow():
 
 
 def test_council_engine_mock():
-    engine = CouncilEngine(mock=True)
+    engine = CouncilEngine(mock=True, load_in_4bit=True)
+    assert engine.load_in_4bit is True
     res_coder = engine.call_coder("sys", "user")
     assert "test_mock" in res_coder
     assert engine.telemetry["coder_calls"] == 1

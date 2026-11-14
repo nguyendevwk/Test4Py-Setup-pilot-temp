@@ -14,11 +14,13 @@ class CouncilEngine:
         critic_device: Optional[str] = None,
         max_new_tokens: int = 512,
         mock: bool = False,
+        load_in_4bit: bool = False,
     ):
         self.mock = mock
         self.coder_model_name = coder_model
         self.critic_model_name = critic_model
         self.max_new_tokens = max_new_tokens
+        self.load_in_4bit = load_in_4bit
         self.telemetry = {
             "coder_calls": 0,
             "critic_calls": 0,
@@ -55,25 +57,42 @@ class CouncilEngine:
         print(f"  - Coder Model  : {self.coder_model_name} on {self.coder_device}")
         print(f"  - Critic Model : {self.critic_model_name} on {self.critic_device}")
 
+        def _build_model_kwargs(model_name: str, device: str):
+            kwargs = {"device_map": {"": device}}
+            if self.load_in_4bit and "cuda" in device:
+                try:
+                    from transformers import BitsAndBytesConfig
+                    kwargs["quantization_config"] = BitsAndBytesConfig(
+                        load_in_4bit=True,
+                        bnb_4bit_compute_dtype=torch.float16,
+                        bnb_4bit_quant_type="nf4",
+                        bnb_4bit_use_double_quant=True,
+                    )
+                    print(f"  ⚡ 4-bit NF4 quantization enabled for {model_name}")
+                except Exception as e:
+                    print(f"  ⚠️ Could not enable 4-bit for {model_name} ({e}), falling back to FP16")
+                    kwargs["torch_dtype"] = torch.float16
+            else:
+                kwargs["torch_dtype"] = torch.float16 if "cuda" in device else torch.float32
+            return kwargs
+
         # 1. Load Coder (GPU 0)
         t0 = time.perf_counter()
         self.coder_tokenizer = AutoTokenizer.from_pretrained(self.coder_model_name, use_fast=True)
-        dtype_coder = torch.float16 if "cuda" in self.coder_device else torch.float32
+        coder_kwargs = _build_model_kwargs(self.coder_model_name, self.coder_device)
         self.coder_model = AutoModelForCausalLM.from_pretrained(
             self.coder_model_name,
-            torch_dtype=dtype_coder,
-            device_map={"": self.coder_device}
+            **coder_kwargs
         ).eval()
         print(f"  ✓ Coder loaded in {time.perf_counter() - t0:.2f}s")
 
         # 2. Load Critic (GPU 1 or fallback)
         t1 = time.perf_counter()
         self.critic_tokenizer = AutoTokenizer.from_pretrained(self.critic_model_name, use_fast=True)
-        dtype_critic = torch.float16 if "cuda" in self.critic_device else torch.float32
+        critic_kwargs = _build_model_kwargs(self.critic_model_name, self.critic_device)
         self.critic_model = AutoModelForCausalLM.from_pretrained(
             self.critic_model_name,
-            torch_dtype=dtype_critic,
-            device_map={"": self.critic_device}
+            **critic_kwargs
         ).eval()
         print(f"  ✓ Critic loaded in {time.perf_counter() - t1:.2f}s")
 

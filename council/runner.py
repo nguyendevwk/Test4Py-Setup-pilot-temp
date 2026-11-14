@@ -33,7 +33,7 @@ def run_council_pipeline(args) -> Dict[str, Any]:
     print("=" * 70, flush=True)
 
     # 1. Initialize Council Engine
-    # Ensure pytest-json-report is available in runtime
+    # Ensure dependencies are available in runtime
     try:
         import pytest_jsonreport
     except ImportError:
@@ -41,11 +41,20 @@ def run_council_pipeline(args) -> Dict[str, Any]:
         print("[Setup] Installing pytest-json-report in sandbox environment...", flush=True)
         subprocess.run([sys.executable, "-m", "pip", "install", "-q", "pytest-json-report"], check=False)
 
+    if getattr(args, 'load_in_4bit', False):
+        try:
+            import bitsandbytes
+        except ImportError:
+            import subprocess
+            print("[Setup] Installing bitsandbytes for 4-bit quantization on Kaggle T4...", flush=True)
+            subprocess.run([sys.executable, "-m", "pip", "install", "-q", "bitsandbytes"], check=False)
+
     engine = CouncilEngine(
         coder_model=args.coder_model,
         critic_model=args.critic_model,
         mock=args.mock,
         max_new_tokens=args.max_new_tokens,
+        load_in_4bit=getattr(args, 'load_in_4bit', False),
     )
 
     # 2. Checkout target repository (PyCG)
@@ -204,6 +213,8 @@ def main():
     parser.add_argument('--critic-model', default=None)
     parser.add_argument('--no-repair', action='store_true', help='Disable Critic repair loop')
     parser.add_argument('--max-new-tokens', type=int, default=512, help='Token limit (512 is fast and ample for pytest files)')
+    parser.add_argument('--load-in-4bit', dest='load_in_4bit', action='store_true', default=None, help='Force 4-bit NF4 quantization')
+    parser.add_argument('--no-4bit', dest='load_in_4bit', action='store_false', help='Disable 4-bit quantization and force FP16')
     parser.add_argument('--mock', action='store_true', help='Mock model generation for offline testing')
     parser.add_argument('--output', type=Path, default=BASE / 'runs' / 'council_run')
     args = parser.parse_args()
@@ -215,6 +226,13 @@ def main():
     else:
         args.coder_model = args.coder_model or "Qwen/Qwen2.5-Coder-7B-Instruct"
         args.critic_model = args.critic_model or "Qwen/Qwen3-4B-Instruct-2507"
+
+    # Auto-detect 4-bit quantization for 7B+ models on 16GB GPUs to prevent CUDA OOM
+    if args.load_in_4bit is None:
+        model_str = (args.coder_model or "").lower()
+        args.load_in_4bit = any(s in model_str for s in ["7b", "8b", "14b", "32b"])
+        if args.load_in_4bit:
+            print("[Council] Auto-detected 7B+ model: Enabling 4-bit NF4 quantization to fit within Kaggle T4 VRAM (15GB).")
 
     run_council_pipeline(args)
 
