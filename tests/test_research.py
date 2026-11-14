@@ -33,6 +33,16 @@ class ResearchTests(unittest.TestCase):
         write_json(self.root/mode/'selection.json',dict(selected={'new_target':'x'},candidate_hash='same-candidates'))
         return report
 
+    def test_zero_pass_efficiency_is_not_success_or_zero_cost(self):
+        self.arm('verified',score=dict(status='no_generated_tests',passed=0,mutation_score=None),input_tokens=100,output_tokens=50)
+        rows,*_=analyze.collect(self.root)
+        row=next(r for r in rows if r['mode']=='verified')
+        self.assertEqual(row['test_outcome'],'no_valid_tests')
+        self.assertEqual(row['passing_tests_per_million_tokens'],0)
+        self.assertIsNone(row['tokens_per_passing_test'])
+        self.assertIsNone(row['seconds_per_passing_test'])
+        self.assertIsNone(row['mutation_score'])
+
     def test_validation_oracle_is_excluded(self):
         self.arm('verified')
         write_json(self.root/'comparison.json',dict(validation_only=True,status='complete'))

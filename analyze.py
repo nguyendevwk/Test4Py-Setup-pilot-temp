@@ -95,6 +95,35 @@ def call_statistics(path):
     return result
 
 
+def effectiveness_metrics(row, work):
+    """Measured denominators only; event counts are not independent test outcomes."""
+    calls = list(records(work / 'model_calls.jsonl'))
+    probes = [p for p in records(work / 'probes.jsonl') if not p.get('_invalid_record')]
+    errors = [e for e in records(work / 'errors.jsonl') if not e.get('_invalid_record')]
+    tokens = None if row['input_tokens'] is None or row['output_tokens'] is None else row['input_tokens'] + row['output_tokens']
+    passed = row.get('passed')
+    row.update(total_tokens=tokens,
+        test_outcome=('valid_tests' if passed and passed > 0 else 'no_valid_tests' if passed == 0 else 'unknown'),
+        passing_tests_per_million_tokens=passed * 1e6 / tokens if tokens else None,
+        tokens_per_passing_test=tokens / passed if tokens is not None and passed else None,
+        seconds_per_passing_test=row['worker_seconds'] / passed if row.get('worker_seconds') is not None and passed else None,
+        truncated_call_pct=percentage(row['truncated_calls'], row['calls']),
+        probe_attempts=len(probes), probe_acceptances=sum(p.get('accepted') is True for p in probes),
+        probe_acceptance_pct=percentage(sum(p.get('accepted') is True for p in probes),len(probes)),
+        probe_seconds=sum(p.get('process',{}).get('seconds',0) or 0 for p in probes) if probes else None)
+    row['error_categories'] = {category:sum(e.get('category') == category for e in errors)
+        for category in ('generation','import','setup','assertion','other')}
+    operations = {}
+    for call in calls:
+        if call.get('_invalid_record'): continue
+        name = call.get('upstream_operation','unknown')
+        item = operations.setdefault(name,dict(calls=0,input_tokens=0,output_tokens=0,seconds=0.,truncated_calls=0))
+        item['calls'] += 1
+        for key in ('input_tokens','output_tokens','seconds'): item[key] += call.get(key,0) or 0
+        item['truncated_calls'] += int(bool(call.get('truncated')))
+    row['operations'] = operations
+
+
 def collect(root):
     rows, experiments, mutants, probes, stages, warnings = [], [], [], [], [], []
     manifests = sorted(Path(root).rglob('experiment.json'))
@@ -166,6 +195,7 @@ def collect(root):
             row['first_pass_rate'] = None
             row['setup_failure_rate'] = None
             row['model_phase_statistics'] = call['phases']
+            effectiveness_metrics(row, work)
             rows.append(row)
             if call['invalid_records']:
                 warnings.append(dict(experiment=str(experiment),mode=mode,issue='Incomplete/malformed model log records'))
@@ -388,7 +418,20 @@ def main():
         'mutation_score','input_tokens','output_tokens','calls','raw_generation_calls','code_versions_archived','model_seconds','worker_seconds','arm_seconds',
         'peak_allocated_gib','peak_reserved_gib','probes_used','setup_complete','selection','candidate_hash','mutant_pool_hash','initialization_trace_hash',
         'error_events','setup_error_events','truncated_calls','first_pass_rate','setup_failure_rate','target_scopes','comparability_complete','complete_artifact']
+    fields += ['test_outcome','total_tokens','passing_tests_per_million_tokens','tokens_per_passing_test',
+        'seconds_per_passing_test','truncated_call_pct','probe_attempts','probe_acceptances','probe_acceptance_pct','probe_seconds','error_categories']
     csv_table(output/'arms.csv',rows,fields)
+    operation_rows = [dict(experiment=r['experiment'],mode=r['mode'],operation=k,**v) for r in rows for k,v in r['operations'].items()]
+    csv_table(output/'model_operations.csv',operation_rows,['experiment','mode','operation','calls','input_tokens','output_tokens','seconds','truncated_calls'])
+    diagnostics=[]
+    for r in rows:
+        work=Path(r['experiment'])/r['mode']
+        diagnostics.append(dict(experiment=r['experiment'],mode=r['mode'],execution_status=r['status'],
+            test_outcome=r['test_outcome'],error_event_categories=r['error_categories'],
+            recent_errors=[dict(category=e.get('category'),check=e.get('check'),message=str(e.get('message',''))[:2000])
+                for e in list(records(work/'errors.jsonl'))[-3:]],
+            limitation='Heuristic error events may repeat per test; not first-pass or causal setup-failure rates.'))
+    write_json(output/'diagnostics.json',diagnostics)
     csv_table(output/'experiments.csv',experiments,['experiment','status','validation_only','wall_seconds','jobs','generation_wall_seconds'])
     csv_table(output/'mutants.csv',mutants,['experiment','mode','name','verdict','sha256','pool_hash'])
     csv_table(output/'probes.csv',probes,['experiment','mode','candidate','scenario','accepted','reason','seconds','timeout'])
@@ -421,6 +464,14 @@ def main():
         # Do not pool differing cohorts. One value per observed arm is explicit.
         def values(key): return ', '.join(str(round(row[key],3)) for row in complete if row.get(key) is not None) or 'NA'
         lines.append(f'| {mode} | {len(complete)} / {len(group)} | {values("passed")} | {values("target_branch_pct")} | {values("mutation_score")} |')
+    lines += ['', '## Effectiveness and cost', '',
+        '| Mode | Outcome | Total tokens | Pass / million tokens | Truncated calls % | Probe accepted / attempted |',
+        '|---|---|---:|---:|---:|---:|']
+    for r in rows:
+        def fmt(key): return str(round(r[key],3)) if isinstance(r.get(key),(int,float)) else 'NA'
+        lines.append(f"| {r['mode']} | {r['test_outcome']} | {fmt('total_tokens')} | {fmt('passing_tests_per_million_tokens')} | {fmt('truncated_call_pct')} | {r['probe_acceptances']} / {r['probe_attempts']} |")
+    if any(r['test_outcome']=='no_valid_tests' for r in rows):
+        lines += ['', 'Execution completion does not imply successful test generation. Zero-pass arms provide no eligible mutation evidence. Cost per passing test is undefined, not zero. Diagnose errors and generation/repair operations before another full run.']
     lines += ['', 'Each listed value is an arm observation, not a pooled mean. Use cohort IDs in arms.csv.',
         'No first-pass or true setup-failure rates are reconstructed from retained passing suites or heuristic error events.',
         'No target coverage is substituted with module coverage. No mutation pool mismatch is silently pooled.',

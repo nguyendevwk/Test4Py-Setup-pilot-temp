@@ -377,3 +377,29 @@ python run.py --help
 Các test offline dùng fixture nhỏ được ghi rõ là fixture, kiểm tra logic adapter,
 Git pin cục bộ, timeout, candidate order và scoring verdict. Không phải kết quả trên PyCG thật.
 Xem [báo cáo kiểm tra thực tế](docs/VALIDATION.md) cho trạng thái Internet/GPU và lệnh chạy tiếp.
+
+### Audit an existing completed run without generating again
+
+```python
+import subprocess, sys
+subprocess.run(["git", "pull"], cwd="/kaggle/working/Test4Py-Setup-pilot-temp", check=True)
+subprocess.run([sys.executable, "analyze.py", "--input", "/kaggle/working/pilot-dashboard/run",
+               "--output", "/kaggle/working/pilot-evaluation", "--plots"],
+              cwd="/kaggle/working/Test4Py-Setup-pilot-temp", check=True)
+```
+
+`arms.csv` includes execution status separately from test outcome, measured token cost,
+passing tests per million tokens, cost per passing test (undefined when zero pass),
+truncation and probe counts. `model_operations.csv` separates initialization and
+individual generation/repair operations; `model_phases.csv` and `stages.csv` provide
+phase costs. `diagnostics.json` retains three clipped recent error messages per arm;
+full raw logs remain in the original run. Error categories are heuristic event counts,
+not independently labeled test failure rates. Probe acceptance is conditioned on the
+ordered early-stopping search, not an unbiased candidate success probability.
+
+Completion means execution ended; it does not establish usefulness. With zero passing
+tests, mutation score stays NA and no positive generation benefit can be claimed.
+Coverage not measured stays NA. One target and one round support descriptive paired
+comparisons only; do not compute significance from four treatment arms as replicates.
+Dual-GPU speedup requires a matched single-GPU execution; token/s alone cannot establish it.
+Use actual artifacts to diagnose zero-pass runs before repeating model generation.
