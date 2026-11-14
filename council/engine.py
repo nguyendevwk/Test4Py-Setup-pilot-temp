@@ -87,17 +87,18 @@ class CouncilEngine:
         t0 = time.perf_counter()
         messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
         inputs = self.coder_tokenizer.apply_chat_template(
-            messages, tokenize=True, add_generation_prompt=True, return_tensors="pt"
+            messages, tokenize=True, add_generation_prompt=True, return_tensors="pt", return_dict=True
         ).to(self.coder_device)
 
-        with torch.no_grad():
+        with torch.inference_mode():
             outputs = self.coder_model.generate(
-                inputs,
+                **inputs,
                 max_new_tokens=self.max_new_tokens,
                 do_sample=False,
                 pad_token_id=self.coder_tokenizer.eos_token_id,
             )
-        generated_ids = outputs[0][inputs.shape[1]:]
+        input_len = inputs.input_ids.shape[1]
+        generated_ids = outputs[0, input_len:]
         text = self.coder_tokenizer.decode(generated_ids, skip_special_tokens=True)
         dt = time.perf_counter() - t0
 
@@ -116,17 +117,18 @@ class CouncilEngine:
         t0 = time.perf_counter()
         messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
         inputs = self.critic_tokenizer.apply_chat_template(
-            messages, tokenize=True, add_generation_prompt=True, return_tensors="pt"
+            messages, tokenize=True, add_generation_prompt=True, return_tensors="pt", return_dict=True
         ).to(self.critic_device)
 
-        with torch.no_grad():
+        with torch.inference_mode():
             outputs = self.critic_model.generate(
-                inputs,
+                **inputs,
                 max_new_tokens=self.max_new_tokens,
                 do_sample=False,
                 pad_token_id=self.critic_tokenizer.eos_token_id,
             )
-        generated_ids = outputs[0][inputs.shape[1]:]
+        input_len = inputs.input_ids.shape[1]
+        generated_ids = outputs[0, input_len:]
         text = self.critic_tokenizer.decode(generated_ids, skip_special_tokens=True)
         dt = time.perf_counter() - t0
 
