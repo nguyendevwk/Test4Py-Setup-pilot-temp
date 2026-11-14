@@ -12,7 +12,7 @@ class CouncilEngine:
         critic_model: str = "Qwen/Qwen3-4B-Instruct-2507",
         coder_device: Optional[str] = None,
         critic_device: Optional[str] = None,
-        max_new_tokens: int = 1536,
+        max_new_tokens: int = 512,
         mock: bool = False,
     ):
         self.mock = mock

@@ -33,6 +33,14 @@ def run_council_pipeline(args) -> Dict[str, Any]:
     print("=" * 70, flush=True)
 
     # 1. Initialize Council Engine
+    # Ensure pytest-json-report is available in runtime
+    try:
+        import pytest_jsonreport
+    except ImportError:
+        import subprocess
+        print("[Setup] Installing pytest-json-report in sandbox environment...", flush=True)
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", "pytest-json-report"], check=False)
+
     engine = CouncilEngine(
         coder_model=args.coder_model,
         critic_model=args.critic_model,
@@ -195,7 +203,7 @@ def main():
     parser.add_argument('--coder-model', default=None)
     parser.add_argument('--critic-model', default=None)
     parser.add_argument('--no-repair', action='store_true', help='Disable Critic repair loop')
-    parser.add_argument('--max-new-tokens', type=int, default=1536)
+    parser.add_argument('--max-new-tokens', type=int, default=512, help='Token limit (512 is fast and ample for pytest files)')
     parser.add_argument('--mock', action='store_true', help='Mock model generation for offline testing')
     parser.add_argument('--output', type=Path, default=BASE / 'runs' / 'council_run')
     args = parser.parse_args()
