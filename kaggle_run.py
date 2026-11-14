@@ -13,7 +13,7 @@ def main():
     parser.add_argument('--output', type=Path, default=Path('/kaggle/working/test4py-pilot'))
     parser.add_argument('--runtime', choices=('modern', 'legacy'), default='modern')
     parser.add_argument('--rounds', type=int, default=1)
-    parser.add_argument('--model', default='Nanbeige/Nanbeige4.1-3B')
+    parser.add_argument('--model', default='Qwen/Qwen3-4B-Instruct-2507')
     parser.add_argument('--console', choices=('compact', 'quiet', 'full'), default='compact')
     parser.add_argument('--jobs', type=int, default=1, help='independent comparison arms at once')
     parser.add_argument('--gpus', default='auto', help='parent-visible GPU indices, e.g. 0,1')

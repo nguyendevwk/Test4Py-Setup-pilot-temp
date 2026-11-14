@@ -12,5 +12,7 @@ class QualityTests(unittest.TestCase):
         for raw in ('```python\nx=1','```python\nx=1\n```\n```python\ny=2\n```'):
             with self.assertRaises(ValueError): extract_code(raw)
     def test_profiles_and_unvalidated_architecture(self):
-        self.assertEqual(profile(DEFAULT_MODEL)['eos_token_id'],166101)
+        self.assertEqual(profile('Nanbeige/Nanbeige4.1-3B')['eos_token_id'],166101)
+        self.assertFalse(profile(DEFAULT_MODEL)['reasoning'])
+        self.assertEqual(profile('Qwen/Qwen2.5-Coder-3B-Instruct')['license'],'qwen-research')
         with self.assertRaises(ValueError):profile('Qwen/Qwen3.5-4B')

@@ -56,3 +56,15 @@ records original publisher, model kind (base/instruct/reasoning), license and
 paper. Default Nanbeige is a post-trained reasoning model, not a base model.
 Base models need a distinct validated completion prompt adapter; silently applying
 the chat adapter to arbitrary base checkpoints is not supported evidence.
+
+### Latency-driven candidate update
+
+Following observed Nanbeige905-token output for a trivial add function, prefer
+Qwen3-4B-Instruct-2507 for the next bounded screen: non-thinking by model design,
+2048 output cap, official checkpoint and Apache2.0. This is a2025 checkpoint
+selected for2026 research, not claimed to be released2026 or globally best.
+Keep Nanbeige as an explicitly selected2026 reasoning comparator. Add the
+Qwen2.5-Coder-3B-Instruct code specialist (qwen-research license) as an alternative.
+Compare original-pass/target reach/mutation/replay first, then measured latency;
+no expected speedup is reported as observed. Do not transfer the old long-run
+quality results to these untested configurations.

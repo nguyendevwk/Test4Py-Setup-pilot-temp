@@ -500,3 +500,18 @@ selection/probe, generation and scoring costs are retained in run/per-sample log
 Model-code collection errors count as unsuccessful candidates; infrastructure
 and generation/extraction failures remain logged and the other samples proceed.
 A screen finishing does not mean quality passes. Never auto-launch the full run.
+
+### Recommended low-latency screen (supersedes the earlier default)
+
+Default is now `Qwen/Qwen3-4B-Instruct-2507`: official Qwen non-thinking checkpoint,
+Apache2.0, family report https://arxiv.org/abs/2505.09388 and exact checkpoint
+https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507 . Released2025 and usable in2026;
+it must not be described as a2026 release. This choice avoids long reasoning
+outputs; speed/pytest quality still require measurement on our target.
+`Qwen/Qwen2.5-Coder-3B-Instruct` is a smaller code-specialist comparison with
+report https://arxiv.org/abs/2409.12186 and **qwen-research**, not Apache2.0,
+license. Nanbeige remains available as an explicit reasoning2026 candidate.
+Historical commands specifying Nanbeige still select it; replace `--model`
+explicitly to try the new recommendation. Default output cap2048 for Qwen;
+truncation remains logged, not silently treated as valid code. Do not start a full
+pipeline until the single-sample target screen has been reviewed.

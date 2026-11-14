@@ -35,7 +35,7 @@ def main():
     parser.add_argument('--jobs', type=int, default=2)
     parser.add_argument('--gpus', default='auto')
     parser.add_argument('--rounds', type=int, default=1)
-    parser.add_argument('--model', default='Nanbeige/Nanbeige4.1-3B')
+    parser.add_argument('--model', default='Qwen/Qwen3-4B-Instruct-2507')
     parser.add_argument('--venv', type=Path)
     parser.add_argument('--console', choices=('compact','quiet','full'), default='compact')
     args = parser.parse_args()
