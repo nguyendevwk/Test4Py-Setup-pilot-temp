@@ -86,9 +86,13 @@ def repair_with_critic(
 Your goal is to fix the failing pytest test cases based on the provided runtime traceback.
 
 Rules:
-1. PRESERVE ASSERTIONS: Never remove or comment out failing assertions. Fix the root cause instead.
-2. USE THE SETUP CONTEXT: Ensure the state of the object is properly initialized as specified in Setup Context.
-3. OUTPUT FORMAT: Return ONLY the complete, corrected Python pytest file inside a single ```python code block. No explanations."""
+1. PRESERVE INTENT: Do not delete valid test assertions. Fix the root cause (parameters, setup, or expected format).
+2. DIAGNOSE RUNTIME TRACEBACK:
+   - If AssertionError shows absolute path vs relative path mismatch (e.g. `'/abs/.../new.py' == 'new.py'`), wrap the expected string with `os.path.abspath(...)` or check `.endswith(...)`.
+   - If AttributeError shows missing method on manager (e.g. `'ImportManager' has no attribute 'get_custom_loader'`), call the standalone closure function `get_custom_loader(manager)(...)` instead.
+   - If node already exists, CustomLoader does not overwrite its filepath.
+3. USE THE SETUP CONTEXT: Ensure the state of the object is properly initialized as specified in Setup Context.
+4. OUTPUT FORMAT: Return ONLY the complete, corrected Python pytest file inside a single ```python code block. No explanations."""
 
     user_prompt = f"""### Target Source Code:
 ```python

@@ -14,10 +14,15 @@ def generate_test_with_coder(
 You will write high-coverage unit tests for the specified Python function.
 
 Requirements:
-1. CORRECT IMPORTS: Import the required classes and functions correctly using real package modules.
+1. CORRECT IMPORTS & SIGNATURES: Import the required classes and functions correctly using real package modules.
+   - `get_custom_loader(ig_obj)` is a standalone closure function in `pycg.machinery.imports`, NOT a method of `ImportManager`.
 2. STATE INITIALIZATION: Use the provided Verified Setup Context to construct and initialize objects before calling the target function.
-3. MEANINGFUL ASSERTIONS: Validate return values, attribute updates, and state transitions. Do not write empty tests.
-4. OUTPUT FORMAT: Output ONLY the complete test code inside a single ```python code block. No explanations."""
+3. DOMAIN KNOWLEDGE & PATH HANDLING:
+   - Filepaths stored in `ImportManager` nodes are converted to absolute paths using `os.path.abspath()`.
+   - When asserting on stored filepaths, compare with `os.path.abspath(...)` or check `.endswith(...)`.
+   - `CustomLoader(fullname, path)` creates an edge from `current_mod` to `fullname`. It registers a new node and sets filepath ONLY if the destination node does not already exist.
+4. MEANINGFUL ASSERTIONS: Validate return values, attribute updates, and state transitions. Do not write empty tests.
+5. OUTPUT FORMAT: Output ONLY the complete test code inside a single ```python code block. No explanations."""
 
     user_prompt = f"""### Module Under Test: `{module_name}`
 ### Target Function: `{target_function}`
