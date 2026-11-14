@@ -1,3 +1,7 @@
+> Council sau kiểm định 2026-11-15 dùng protocol `council-case-study-v2`.
+> Xem [hướng dẫn chạy lại](docs/COUNCIL_V2.md). Baseline Council không phải upstream Test4Py;
+> mock không có điểm efficacy và bảng cũ không được ghép với schema v2.
+
 # Test4Py: pilot tìm và kiểm chứng setup
 
 Mở rộng tách khỏi upstream, dừng ở `pycg.machinery.imports.get_custom_loader`.

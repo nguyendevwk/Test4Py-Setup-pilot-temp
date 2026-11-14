@@ -10,19 +10,11 @@ def generate_test_with_coder(
     scenario_desc: str = ""
 ) -> str:
     """Coder model (GPU 0) writes a complete pytest suite incorporating Verified Setup."""
-    sys_prompt = """You are an expert Python QA Engineer specializing in writing robust pytest test suites.
-You will write high-coverage unit tests for the specified Python function.
-
-Requirements:
-1. CORRECT IMPORTS & SIGNATURES: Import the required classes and functions correctly using real package modules.
-   - `get_custom_loader(ig_obj)` is a standalone closure function in `pycg.machinery.imports`, NOT a method of `ImportManager`.
-2. STATE INITIALIZATION: Use the provided Verified Setup Context to construct and initialize objects before calling the target function.
-3. DOMAIN KNOWLEDGE & PATH HANDLING:
-   - Filepaths stored in `ImportManager` nodes are converted to absolute paths using `os.path.abspath()`.
-   - When asserting on stored filepaths, compare with `os.path.abspath(...)` or check `.endswith(...)`.
-   - `CustomLoader(fullname, path)` creates an edge from `current_mod` to `fullname`. It registers a new node and sets filepath ONLY if the destination node does not already exist.
-4. MEANINGFUL ASSERTIONS: Validate return values, attribute updates, and state transitions. Do not write empty tests.
-5. OUTPUT FORMAT: Output ONLY the complete test code inside a single ```python code block. No explanations."""
+    sys_prompt = """Write pytest tests from the supplied production source.
+Use real imports and signatures; derive expected behavior from the source.
+Setup examples guide input construction, not assertion oracles. Exercise the requested
+scenarios and assert observable behavior. Do not use tautologies, skip tests, suppress
+failures, or modify product code. Return one complete Python code block only."""
 
     user_prompt = f"""### Module Under Test: `{module_name}`
 ### Target Function: `{target_function}`
@@ -32,7 +24,7 @@ Requirements:
 {target_source}
 ```
 
-### Verified Object Setup Context:
+### Setup Context (may be empty or unverified):
 ```python
 {setup_context}
 ```

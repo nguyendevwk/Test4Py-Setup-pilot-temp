@@ -159,6 +159,8 @@ def score(root, work, config):
             record = cov.get('files', {}).get('pycg/machinery/imports.py', {})
             result['branch_coverage'] = dict(module=record.get('summary'),
                                              functions=record.get('functions'))
+            if not record.get('summary'):
+                result['status'] = 'coverage_environment_error'
         else:
             result['status'] = 'coverage_environment_error'
         for name, mutant in pool.items():

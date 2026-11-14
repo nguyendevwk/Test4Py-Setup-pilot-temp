@@ -42,7 +42,7 @@ def extract(root):
             while owner in parents and not isinstance(owner, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 owner = parents[owner]
             evidence.append(dict(operation=node.func.attr, file=str(relative), line=node.lineno,
-                                 end_line=node.end_lineno, call=ast.get_source_segment(source, node),
+                                 end_line=node.end_lineno, owner_line=getattr(owner, 'lineno', node.lineno), call=ast.get_source_segment(source, node),
                                  snippet=ast.get_source_segment(source, owner)))
     operations = {
         'set_current_mod': 'manager.set_current_mod("pkg.main", "main.py")',
@@ -109,23 +109,28 @@ def select(root, extraction, mode, work, config):
                 selected[candidate['scenario']] = candidate
             emit(work, 'setup', 'probe_end', probes_used=len(probes), probe_budget=config['max_probes'],
                  verified_scenarios=len(selected), scenarios_total=2)
-    elif mode == 'extracted':
-        for candidate in extraction['candidates']:
+    elif mode in {'extracted', 'ranked'}:
+        candidates = extraction['candidates']
+        if mode == 'ranked':
+            # Static control: maximize distinct extracted operations, original order breaks ties.
+            # No probes or observations; this heuristic is not semantic verification.
+            candidates = sorted(candidates, key=lambda c: -len(set(c['operations'])))
+        for candidate in candidates:
             selected.setdefault(candidate['scenario'], candidate)
     context = ''
     if mode == 'caller':
         # Original product snippets only, no test source and no probe evidence.
-        snippets = sorted({f"{e['file']}:{e['line']}\n{e['snippet']}"
+        snippets = sorted({f"{e['file']}:{e.get('owner_line', e['line'])}\n{e['snippet']}"
                            for e in extraction['evidence']
                            if e['operation'] in {'set_current_mod', 'create_node'}})
         context = 'Production caller context (PyCG):\n' + '\n\n'.join(snippets)
-    elif mode in {'extracted', 'verified'}:
+    elif mode in {'extracted', 'ranked', 'verified'}:
         context = 'Candidate setup examples (derive assertions from production code):\n' + '\n\n'.join(
             f"{name}:\n```python\n{value['code']}\n```" for name, value in selected.items())
     selection = dict(mode=mode, selected={k: v['id'] for k, v in selected.items()},
                      candidate_hash=extraction['candidate_hash'], probes=len(probes),
                      seconds=time.perf_counter() - started,
-                     complete=len(selected) == 2 if mode in {'extracted', 'verified'} else True,
+                     complete=len(selected) == 2 if mode in {'extracted', 'ranked', 'verified'} else True,
                      prompt_context=context)
     write_json(work / 'selection.json', selection)
     return context, selection

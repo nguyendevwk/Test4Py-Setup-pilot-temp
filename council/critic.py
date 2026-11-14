@@ -1,58 +1,27 @@
 """Critic and Quality Assurance for Council Architecture."""
 import ast
-import re
-from typing import Dict, Any, Tuple
+from typing import Dict, Any
 
 def clean_code_block(raw: str) -> str:
-    """Extract strictly valid Python code from raw LLM output, stripping markdown and <think> tags."""
-    # 1. Remove reasoning / think tags if present
-    text = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL)
-    text = text.strip()
-
-    # 2. Extract from markdown code fence
-    match = re.search(r'```(?:python)?\s*\n(.*?)\n```', text, re.DOTALL | re.IGNORECASE)
-    if match:
-        code = match.group(1).strip()
-    else:
-        # If no code fence, strip any leading/trailing explanatory text
-        lines = []
-        for line in text.splitlines():
-            if line.startswith('```'):
-                continue
-            lines.append(line)
-        code = '\n'.join(lines).strip()
-
-    # 3. Quick AST sanity check
-    try:
-        ast.parse(code)
-        return code
-    except SyntaxError:
-        # Fallback to searching first line starting with import or def
-        all_lines = text.splitlines()
-        code_lines = []
-        in_code = False
-        for l in all_lines:
-            if l.startswith(('import ', 'from ', 'def test_', 'class Test', '@pytest.')):
-                in_code = True
-            if in_code:
-                if l.startswith('```'):
-                    break
-                code_lines.append(l)
-        candidate = '\n'.join(code_lines).strip()
-        try:
-            ast.parse(candidate)
-            return candidate
-        except Exception:
-            return code
+    """Common deterministic extraction; never salvage/truncate ambiguous completions."""
+    from pilot.quality import extract_code, final_answer
+    answer, status = final_answer(raw)
+    if not answer:
+        raise ValueError('No complete final answer: '+status)
+    return extract_code(answer).strip()
 
 
 def audit_test_quality(code: str) -> Dict[str, Any]:
-    """Audit syntactic validity and semantic assertion presence."""
+    """Syntactic screening only; this does not establish semantic correctness."""
     result = {
         "valid_ast": False,
         "test_functions": 0,
         "assertion_count": 0,
+        "assertion_like_calls": 0,
         "is_hollow": False,
+        "semantic_assertion_accuracy": None,
+        "review_required": True,
+        "tautological_assertions": 0,
         "error": None
     }
     try:
@@ -63,12 +32,18 @@ def audit_test_quality(code: str) -> Dict[str, Any]:
         return result
 
     for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith("test_"):
             result["test_functions"] += 1
         elif isinstance(node, ast.Assert):
             result["assertion_count"] += 1
+            if isinstance(node.test, ast.Constant) and bool(node.test.value):
+                result["tautological_assertions"] += 1
 
-    if result["test_functions"] > 0 and result["assertion_count"] == 0:
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and (
+            node.func.attr.startswith('assert') or node.func.attr in {'raises', 'warns'}):
+            result['assertion_like_calls'] += 1
+
+    if result["test_functions"] > 0 and result['assertion_like_calls'] == 0 and result["assertion_count"] == result["tautological_assertions"]:
         result["is_hollow"] = True
 
     return result
@@ -82,24 +57,18 @@ def repair_with_critic(
     setup_context: str
 ) -> str:
     """Critic model (GPU 1) analyzes runtime failure and produces a targeted fix."""
-    sys_prompt = """You are a Principal Software Quality Engineer and Test Repair Specialist.
-Your goal is to fix the failing pytest test cases based on the provided runtime traceback.
-
-Rules:
-1. PRESERVE INTENT: Do not delete valid test assertions. Fix the root cause (parameters, setup, or expected format).
-2. DIAGNOSE RUNTIME TRACEBACK:
-   - If AssertionError shows absolute path vs relative path mismatch (e.g. `'/abs/.../new.py' == 'new.py'`), wrap the expected string with `os.path.abspath(...)` or check `.endswith(...)`.
-   - If AttributeError shows missing method on manager (e.g. `'ImportManager' has no attribute 'get_custom_loader'`), call the standalone closure function `get_custom_loader(manager)(...)` instead.
-   - If node already exists, CustomLoader does not overwrite its filepath.
-3. USE THE SETUP CONTEXT: Ensure the state of the object is properly initialized as specified in Setup Context.
-4. OUTPUT FORMAT: Return ONLY the complete, corrected Python pytest file inside a single ```python code block. No explanations."""
+    sys_prompt = """Repair the pytest suite using production source and runtime diagnostics.
+Preserve tested scenarios and meaningful assertions. Fix the root cause rather than
+deleting tests, weakening checks, skipping tests, suppressing exceptions, or modifying
+product code. Derive expectations from source, not from a desire to pass.
+Return exactly one complete Python code block without explanation."""
 
     user_prompt = f"""### Target Source Code:
 ```python
 {target_source}
 ```
 
-### Verified Setup Context:
+### Setup Context (may be empty or unverified):
 ```python
 {setup_context}
 ```
