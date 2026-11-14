@@ -12,6 +12,7 @@ def generate_test_with_coder(
     """Coder model (GPU 0) writes a complete pytest suite incorporating Verified Setup."""
     sys_prompt = """Write pytest tests from the supplied production source.
 Use real imports and signatures; derive expected behavior from the source.
+Explicitly import all referenced modules (e.g. `import os` if using os.path) and exception classes (e.g. `from pycg.machinery.imports import ImportManagerError`).
 Setup examples guide input construction, not assertion oracles. Exercise the requested
 scenarios and assert observable behavior. Do not use tautologies, skip tests, suppress
 failures, or modify product code. Return one complete Python code block only."""
