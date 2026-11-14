@@ -62,8 +62,12 @@ class TransformersBackend:
              input_tokens=record['input_tokens'], max_new_tokens=self.settings['max_new_tokens'],
              model_calls_started=self.call_count, model_calls_finished=self.calls_finished)
         try:
+            generation = self.settings.get('generation', {})
+            sampling = dict(do_sample=bool(generation.get('do_sample',False)))
+            if sampling['do_sample']:
+                sampling.update(temperature=generation.get('temperature',.6), top_p=generation.get('top_p',.95))
             with self.torch.inference_mode():
-                result = self.model.generate(**inputs, do_sample=False,
+                result = self.model.generate(**inputs, **sampling,
                     max_new_tokens=self.settings['max_new_tokens'],
                     pad_token_id=self.tokenizer.eos_token_id,
                     eos_token_id=self.profile.get('eos_token_id', self.tokenizer.eos_token_id))

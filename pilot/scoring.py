@@ -73,7 +73,8 @@ def pytest_run(root, work, label, nodes, timeout, coverage=False):
     artifact.mkdir(parents=True, exist_ok=False)
     report = artifact / 'pytest.json'
     env = dict(os.environ, PYTHONPATH=str(root), PYTHONDONTWRITEBYTECODE='1',
-               PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', COVERAGE_FILE=str(artifact / '.coverage'))
+               PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', COVERAGE_FILE=str(artifact / '.coverage'),
+               PILOT_TRACE_FILE=str(artifact/'receiver_trace.json'))
     args = [sys.executable, '-m']
     if coverage:
         args += ['coverage', 'run', '--branch', '--source=pycg.machinery', '-m']

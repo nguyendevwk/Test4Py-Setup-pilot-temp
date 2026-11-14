@@ -447,3 +447,56 @@ These are new experimental conditions and must not be pooled with old runs;
 comparability cohorts. `--prompt-policy original` omits source grounding but
 retains the new extraction policy, so it is not an exact historical replay.
 See `research/QUALITY_FIRST.md` for the scientific protocol.
+
+### Small PyCG integration batch: 1 first, then 10% of 100
+
+After the model protocol smoke passes, run the following in Kaggle. This runner
+avoids the532 initialization calls and does not invoke upstream Test4Py repair.
+It is a **development integration screen**, not a replacement for the four-arm
+Test4Py experiment or a paper reproduction. One sample means one stochastic
+pytest-generation attempt on the same function, not a new target. The default
+mode is verified; change mode only in a separate clearly labeled output.
+
+```python
+import subprocess
+project = "/kaggle/working/Test4Py-Setup-pilot-temp"
+subprocess.run(["git", "pull"], cwd=project, check=True)
+subprocess.run([
+    "/tmp/test4py-modern/bin/python", "smoke_pilot.py",
+    "--population", "100", "--samples", "1",
+    "--mode", "verified", "--model", "Nanbeige/Nanbeige4.1-3B",
+    "--output", "/kaggle/working/pycg-screen-1",
+], cwd=project, check=True)
+```
+
+Review that first result, then run the10% screen separately:
+
+```python
+subprocess.run([
+    "/tmp/test4py-modern/bin/python", "smoke_pilot.py",
+    "--population", "100", "--fraction", "0.1",
+    "--mode", "verified", "--model", "Nanbeige/Nanbeige4.1-3B",
+    "--output", "/kaggle/working/pycg-screen-10",
+], cwd=project, check=True)
+```
+
+For all100 attempts use `--population 100 --samples 100` only after review.
+The sampler fixes attempt IDs with seed42; each attempt uses seed42+ID,
+temperature0.6/top_p0.95. The screen is stochastic and distinct from the greedy
+full-pipeline cohort. Do not combine them. Percentage selection refers to the
+planned attempt queue, not10% of paper benchmarks or project tests.
+
+Outputs: `screen.json` (settings, source hashes, pinned model/PyCG revision,
+packages, status and total wall time), `summary.json`, `samples.csv`, `report.md`,
+`samples.jsonl`, and per-sample folders containing prompt, raw model log,
+generated pytest, fresh-source checkout, score, coverage and mutant logs.
+`original/receiver_trace.json` records passive loader-constructor calls and
+receiver prerequisites; only original-passing nodeids count as passing reach.
+Observations never enter prompts. Mutants use only original-passing tests;
+no eligible tests leaves mutation NA. Three additional subprocess replays
+check stability. AST assertions are counts, not semantic correctness judgments.
+Assertion accuracy remains NA pending independent review. Full bootstrap/load,
+selection/probe, generation and scoring costs are retained in run/per-sample logs.
+Model-code collection errors count as unsuccessful candidates; infrastructure
+and generation/extraction failures remain logged and the other samples proceed.
+A screen finishing does not mean quality passes. Never auto-launch the full run.

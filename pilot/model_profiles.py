@@ -1,13 +1,16 @@
 """Source-backed candidates; profiles are hypotheses, not measured model rankings."""
 DEFAULT_MODEL = 'Nanbeige/Nanbeige4.1-3B'
 PROFILES = {
-    DEFAULT_MODEL: dict(name='nanbeige-2026-3b', max_new_tokens=8192, use_fast=False,
+    DEFAULT_MODEL: dict(name='nanbeige-2026-3b', publisher='Nanbeige LLM Lab', license='apache-2.0',
+        model_kind='post-trained-reasoning', publication_date='2026-02-13', max_new_tokens=8192, use_fast=False,
         eos_token_id=166101, paper='https://arxiv.org/abs/2602.13367',
         card='https://huggingface.co/Nanbeige/Nanbeige4.1-3B', reasoning=True),
-    'Qwen/Qwen3-4B-Instruct-2507': dict(name='qwen3-nonthinking-control', max_new_tokens=2048,
+    'Qwen/Qwen3-4B-Instruct-2507': dict(name='qwen3-nonthinking-control', publisher='Qwen', license='apache-2.0',
+        model_kind='instruct-nonthinking', max_new_tokens=2048,
         use_fast=True, paper='https://arxiv.org/abs/2505.09388',
         card='https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507', reasoning=False),
-    'Qwen/Qwen2.5-Coder-1.5B-Instruct': dict(name='historical-1.5b', max_new_tokens=2048,
+    'Qwen/Qwen2.5-Coder-1.5B-Instruct': dict(name='historical-1.5b', publisher='Qwen', license='apache-2.0',
+        model_kind='code-instruct', max_new_tokens=2048,
         use_fast=True, paper='https://arxiv.org/abs/2409.12186',
         card='https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct', reasoning=False),
 }

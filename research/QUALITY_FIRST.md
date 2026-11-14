@@ -44,3 +44,15 @@ Use documented non-thinking mode when supported; reasoning models need explicit 
 For fair quality ranking, predeclare quality metrics and allowance (repair attempts, maximum context/output, timeout); explicitly disclose model-specific templates, tokenizer tokenization and reasoning budgets. Equal token limits across tokenizers are not equal compute. Rank useful-scenario success and meaningful fault detection first, coverage second; use cost for configurations meeting quality gate. Do not optimize cached summaries until equivalence is demonstrated; separately charge cold/warm costs.
 
 No new GPU/model run was executed in this evaluation. Local artifacts under research_reports/quality-first are deterministic audits of supplied out_v2, not results from any shortlisted model.
+
+## Implemented integration pre-screen
+
+`smoke_pilot.py` provides an explicitly separate small stochastic sample queue:
+1attempt first, then10% of100 (10 attempts), optionally100 after review.
+It preserves raw logs, fresh source directories/processes, common scoring,
+passive constructor traces and replay outcomes. It does not execute upstream
+initialization/repair and cannot be reported as Test4Py efficacy. Profile metadata
+records original publisher, model kind (base/instruct/reasoning), license and
+paper. Default Nanbeige is a post-trained reasoning model, not a base model.
+Base models need a distinct validated completion prompt adapter; silently applying
+the chat adapter to arbitrary base checkpoints is not supported evidence.
