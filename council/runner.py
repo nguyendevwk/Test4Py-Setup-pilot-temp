@@ -166,6 +166,9 @@ def run_council_pipeline(args) -> Dict[str, Any]:
     total_time = time.perf_counter() - started
     summary = {
         "mode": args.mode,
+        "coder_model": args.coder_model,
+        "critic_model": args.critic_model,
+        "no_repair": getattr(args, 'no_repair', False),
         "samples": len(results),
         "passed_samples": sum(1 for r in results if r['passed_tests'] > 0),
         "critic_repairs": sum(1 for r in results if r['repaired_by_critic']),
