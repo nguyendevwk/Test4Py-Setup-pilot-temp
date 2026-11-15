@@ -213,8 +213,14 @@ def run_council_pipeline(args):
     try:
         if not args.mock:
             # Install dependencies before the run, never mutate an experimental environment.
-            import pytest_jsonreport  # noqa: F401
-            import coverage  # noqa: F401
+            try:
+                import pytest_jsonreport  # noqa: F401
+                import coverage  # noqa: F401
+            except ImportError:
+                import subprocess
+                subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', 'pytest-json-report', 'coverage'])
+                import pytest_jsonreport  # noqa: F401
+                import coverage  # noqa: F401
             summary['environment'] = dict(python=platform.python_version(), packages=package_versions())
         stage = time.perf_counter()
         engine = CouncilEngine(coder_model=args.coder_model, critic_model=args.critic_model,
@@ -266,6 +272,8 @@ def run_council_pipeline(args):
             lines += ['', 'Run failure: '+summary['error']]
         (output/'report.md').write_text('\n'.join(lines)+'\n')
     print(f"[Council] {summary['status']}; report: {output/'report.md'}", flush=True)
+    if summary.get('error'):
+        print(f"\n❌ [Council ERROR] {summary['error']}\n{summary.get('traceback', '')}", flush=True)
     return summary
 
 

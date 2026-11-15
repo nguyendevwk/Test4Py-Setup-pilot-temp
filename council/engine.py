@@ -33,13 +33,19 @@ class CouncilEngine:
             if role == 'critic' and not enable_critic:
                 continue
             device = getattr(self, role+'_device')
-            revision = HfApi().model_info(name, revision=requested).sha
+            try:
+                revision = HfApi().model_info(name, revision=requested).sha
+            except Exception as e:
+                print(f"[Council WARNING] Could not resolve SHA for {name} via HF API: {e}; falling back to {requested}", flush=True)
+                revision = requested
             record = dict(name=name, requested_revision=requested, revision=revision, device=device,
                           quantization='nf4' if load_in_4bit and 'cuda' in device else None)
             self.versions['models'][role] = record
             if self.work:
                 write_json(self.work/'engine.json', self.versions)
-            opts = dict(device_map={'': device}, revision=revision)
+            opts = dict(device_map={'': device})
+            if revision != 'main':
+                opts['revision'] = revision
             if record['quantization']:
                 from transformers import BitsAndBytesConfig
                 opts['quantization_config'] = BitsAndBytesConfig(load_in_4bit=True,
