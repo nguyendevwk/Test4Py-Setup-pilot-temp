@@ -23,6 +23,7 @@ class TransformersBackend:
         self.calls_failed = 0
         self.input_tokens = 0
         self.output_tokens = 0
+        self.fresh_input_tokens = self.fresh_output_tokens = 0
         torch.set_num_threads(settings.get('cpu_threads', 1))
         emit(work, 'model_load', 'start', gpu=os.environ.get('CUDA_VISIBLE_DEVICES', 'inherited'))
         torch.manual_seed(settings['seed'])
@@ -30,33 +31,10 @@ class TransformersBackend:
         opts = dict(revision=settings['model_revision'])
         self.tokenizer = AutoTokenizer.from_pretrained(settings['model'], use_fast=self.profile.get('use_fast',True), **opts)
         
-        # Check if 4-bit quantization is needed for 7B+ models on 15GB GPUs
-        model_str = settings['model'].lower()
-        is_large = any(s in model_str for s in ["7b", "8b", "14b", "32b"])
-        if is_large and torch.cuda.is_available():
-            try:
-                from transformers import BitsAndBytesConfig
-                bnb_config = BitsAndBytesConfig(
-                    load_in_4bit=True,
-                    bnb_4bit_compute_dtype=torch.float16,
-                    bnb_4bit_quant_type="nf4",
-                    bnb_4bit_use_double_quant=True,
-                )
-                self.model = AutoModelForCausalLM.from_pretrained(
-                    settings['model'],
-                    quantization_config=bnb_config,
-                    device_map={"": "cuda:0"},
-                    **opts
-                ).eval()
-                print(f"[Backend] Auto 4-bit NF4 enabled for {settings['model']} to prevent CUDA OOM.")
-            except Exception as e:
-                print(f"[Backend] 4-bit fallback: {e}")
-                self.model = AutoModelForCausalLM.from_pretrained(
-                    settings['model'], torch_dtype=torch.float16, **opts).to('cuda:0').eval()
-        else:
-            self.model = AutoModelForCausalLM.from_pretrained(
-                settings['model'], torch_dtype=torch.float16, **opts).to('cuda:0').eval()
-        self.versions = dict(torch=torch.__version__, transformers=transformers.__version__,
+        from pilot.runtime_limits import load_causal_model
+        from transformers import BitsAndBytesConfig
+        self.model, quantization = load_causal_model(settings, torch, AutoModelForCausalLM, BitsAndBytesConfig)
+        self.versions = dict(quantization=quantization, torch=torch.__version__, transformers=transformers.__version__,
                              gpu=torch.cuda.get_device_name(0),
                              loaded_model_revision=getattr(self.model.config, '_commit_hash', None))
         emit(work, 'model_load', 'ready', allocated_gib=round(torch.cuda.memory_allocated()/1024**3, 2))
@@ -70,15 +48,18 @@ class TransformersBackend:
         callers = []
         upstream_role = None
         frame = inspect.currentframe().f_back
-        while frame is not None:
-            callers.append(frame.f_code.co_name)
-            if upstream_role is None and frame.f_globals.get('__name__', '').startswith('test4dt'):
-                upstream_role = frame.f_code.co_name
-            frame = frame.f_back
+        try:
+            while frame is not None:
+                callers.append(frame.f_code.co_name)
+                if upstream_role is None and frame.f_globals.get('__name__', '').startswith('test4dt'):
+                    upstream_role = frame.f_code.co_name
+                frame = frame.f_back
+        finally:
+            del frame
         role = upstream_role or next((name for name in callers if name.startswith(('repair_', 'generate_test_case'))), None)
         messages = [dict(role='system', content=system), dict(role='user', content=user)]
         inputs = self.tokenizer.apply_chat_template(messages, tokenize=True,
-                    add_generation_prompt=True, return_tensors='pt', return_dict=True).to(self.model.device)
+                    add_generation_prompt=True, return_tensors='pt', return_dict=True)
         start = time.perf_counter()
         record = dict(phase=self.phase, upstream_operation=role, messages=messages,
                       input_tokens=int(inputs.input_ids.shape[1]))
@@ -86,38 +67,66 @@ class TransformersBackend:
         emit(self.work, self.phase, 'model_call_start', call=self.call_count, operation=role,
              input_tokens=record['input_tokens'], max_new_tokens=self.settings['max_new_tokens'],
              model_calls_started=self.call_count, model_calls_finished=self.calls_finished)
+        result, generated = None, None
         try:
-            generation = self.settings.get('generation', {})
-            sampling = dict(do_sample=bool(generation.get('do_sample',False)))
-            if sampling['do_sample']:
-                sampling.update(temperature=generation.get('temperature',.6), top_p=generation.get('top_p',.95))
-            with self.torch.inference_mode():
-                result = self.model.generate(**inputs, **sampling,
-                    max_new_tokens=self.settings['max_new_tokens'],
-                    pad_token_id=self.tokenizer.eos_token_id,
-                    eos_token_id=self.profile.get('eos_token_id', self.tokenizer.eos_token_id))
-            generated = result[0, inputs.input_ids.shape[1]:]
-            output = self.tokenizer.decode(generated, skip_special_tokens=True)
-            answer, answer_status = final_answer(output)
-            record.update(output=output, final_answer=answer, answer_status=answer_status, output_tokens=len(generated),
-                          truncated=len(generated) == self.settings['max_new_tokens'])
-            if not answer:
-                raise ValueError('Model produced no complete final answer; inspect raw model log and token budget')
-            return answer
+            from pilot.runtime_limits import check_token_budget
+            check_token_budget(record['input_tokens'], self.settings)
+            from contextlib import nullcontext
+            from pilot.initialization_cache import entry, cache_key
+            use_cache = self.phase == 'initialization' and self.settings.get('initialization_cache')
+            if use_cache and not self.settings.get('initialization_greedy', False):
+                raise ValueError('Initialization cache requires declared greedy initialization')
+            key = cache_key(self.settings, self.versions, messages) if use_cache else None
+            context = entry(self.settings['initialization_cache'], key) if use_cache else nullcontext((None, lambda payload: None))
+            record.update(cache_hit=False, cache_key=key)
+            with context as (cached, save):
+                if cached is not None:
+                    record.update(output=cached['output'],output_tokens=cached['output_tokens'],truncated=cached['truncated'],cache_hit=True)
+                else:
+                    inputs = inputs.to(self.model.device)
+                    generation = self.settings.get('generation', {})
+                    # Deterministic shared upstream initialization; stochastic seeds
+                    # apply to generation/repair, not independent summary replications.
+                    sampling = dict(do_sample=bool(generation.get('do_sample',False)) and not
+                                    (self.phase == 'initialization' and self.settings.get('initialization_greedy', False)))
+                    if sampling['do_sample']:
+                        sampling.update(temperature=generation.get('temperature',.6), top_p=generation.get('top_p',.95))
+                    record['inference_started'] = True
+                    with self.torch.inference_mode():
+                        result = self.model.generate(**inputs, **sampling,
+                            max_new_tokens=self.settings['max_new_tokens'],
+                            pad_token_id=self.tokenizer.eos_token_id,
+                            eos_token_id=self.profile.get('eos_token_id', self.tokenizer.eos_token_id))
+                    generated = result[0, inputs.input_ids.shape[1]:]
+                    output = self.tokenizer.decode(generated, skip_special_tokens=True)
+                    record.update(output=output,output_tokens=len(generated),truncated=len(generated)==self.settings['max_new_tokens'])
+                    if use_cache:
+                        save({k:record[k] for k in ('output','output_tokens','truncated')})
+                answer, answer_status = final_answer(record['output'])
+                record.update(final_answer=answer, answer_status=answer_status)
+                if not answer:
+                    raise ValueError('Model produced no complete final answer; inspect raw model log and token budget')
+                return answer
         except Exception as exc:
             record['error'] = repr(exc)
             record.setdefault('output_tokens', 0)
             raise
         finally:
             record['seconds'] = time.perf_counter() - start
-            record['output_tokens_per_second'] = record.get('output_tokens', 0) / max(record['seconds'], 1e-9)
+            record['output_tokens_per_second'] = 0 if record.get('cache_hit') else record.get('output_tokens', 0) / max(record['seconds'], 1e-9)
             record['allocated_gib'] = self.torch.cuda.memory_allocated()/1024**3
             record['reserved_gib'] = self.torch.cuda.memory_reserved()/1024**3
             record['peak_allocated_gib'] = self.torch.cuda.max_memory_allocated()/1024**3
             self.calls_finished += 1
             self.calls_failed += int('error' in record)
+            if record.get('inference_started'):
+                self.fresh_input_tokens = getattr(self, 'fresh_input_tokens', 0)+record['input_tokens']
+                self.fresh_output_tokens = getattr(self, 'fresh_output_tokens', 0)+record.get('output_tokens', 0)
             self.input_tokens += record['input_tokens']
             self.output_tokens += record.get('output_tokens', 0)
+            # Drop live references before clearing cache; empty_cache cannot free
+            # tensors still referenced by this frame or an inspect-frame cycle.
+            del inputs, result, generated
             if self.torch.cuda.is_available():
                 self.torch.cuda.empty_cache()
             import gc

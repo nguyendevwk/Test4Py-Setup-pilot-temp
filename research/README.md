@@ -1,3 +1,7 @@
+> **Công việc hiện hành:** [upstream paired pilot 14B NF4](../docs/UPSTREAM_NF4_PILOT.md); xem quyết định R5 trong nhật ký. Kết quả Council v4 không thay cho đối chứng upstream.
+
+> **Nhật ký hiện hành:** [NHAT_KY_NGHIEN_CUU.md](NHAT_KY_NGHIEN_CUU.md). Kaggle v3 có 0/6 suite all-pass; v4 có 3/8 final all-pass (first-pass 1/8). Xem R4 để đánh giá hallucination, test quality và giới hạn suy luận. Các giới hạn và đính chính ở [sổ tay](SO_TAY_HIEN_HANH.md).
+
 # Bộ đánh giá nghiên cứu
 
 - `REVIEW.md`: đánh giá đóng góp, đối chiếu paper, audit thiết kế, RQ, thống kê và ứng dụng.

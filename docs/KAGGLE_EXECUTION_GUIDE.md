@@ -1,3 +1,9 @@
+> **Current development protocol v4:** [MULTITARGET_V4.md](MULTITARGET_V4.md). Four-arm SLM grounding screen; v3 results remain historical evidence.
+
+> **Hướng dẫn hiện hành cho batch thử:** [MULTITARGET_SMOKE.md](MULTITARGET_SMOKE.md).
+> Notebook `kaggle_council_reproducible.ipynb` đã chuyển sang screen v3: 2 target × 3 arm × 1 attempt.
+> Phần bên dưới là hướng dẫn lịch sử, không dùng để tự động chạy full hoặc kết luận hiệu quả.
+
 # 🚀 Hướng Dẫn Thực Thi Chuẩn Hóa Trên Kaggle Dual-GPU (2x Tesla T4)
 
 Tài liệu này hướng dẫn chi tiết quy trình triển khai và tái lập thực nghiệm **Dual-GPU Council Architecture (MoA)** kết hợp **State-Aware Test Generation** trên môi trường điện toán đám mây Kaggle với chi phí $0.

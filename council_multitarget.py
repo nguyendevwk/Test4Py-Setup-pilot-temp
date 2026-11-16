@@ -1,34 +1,36 @@
 #!/usr/bin/env python3
-"""Standardized Multi-Target State-Aware Council Benchmark for Kaggle Dual-GPU.
+"""Council development screen, NOT upstream Test4Py or an efficacy benchmark.
 
-Evaluates Dual-GPU Council (Coder on GPU 0, Critic on GPU 1) against Baseline.
-Focuses heavily on Type-Annotated & Docstring-Rich targets (Tập A trong Test4Py),
-bridging prior research on Type Hints/Docstrings with Object State Setup.
-
-Features:
-- Dual-focus: Tập A (Type-Annotated & Docstring-Rich) + Tập NA (Stateful Baselines)
-- AST-level Type Hint & Docstring extraction injected into LLM context
-- Pure-AST State Mining & Dynamic Sandboxed Probing
-- Dual-GPU 4-bit NF4 Quantization with strict VRAM cache clearing
-- Test-Node Pruning to eliminate failing secondary assertions
-- Line (Statement) Coverage & Branch Coverage calculation
-- Automated Markdown and CSV reporting with 1-click zip archive.
+ranked uses a curated setup hint; verified witnesses target function or
+constructor entry in the checkout. Neither is automatic setup mining or proof of target preconditions.
+Protocol v4 must not be pooled with historical results.
+Grounded adds bounded source dependencies; verified witnesses callable entry only.
 """
-
 import argparse
 import ast
 import csv
+import hashlib
 import json
 import os
 from pathlib import Path
 import shutil
-import subprocess
 import sys
 import time
 import traceback
 
-BASE_DIR = Path(__file__).resolve().parent
+os.environ.setdefault('USE_TF', '0')
+os.environ.setdefault('USE_FLAX', '0')
 
+from council.engine import CouncilEngine
+from council.critic import audit_test_quality
+from council.runner import repair_audit
+from pilot.common import (command, checked, reserve_output, write_json, append_json,
+                          package_versions)
+from pilot.grounding import dependency_context, verify_target_invocation, load_target_spec
+from pilot.multitarget import (clean_code_block, passing_subset_measurement, execute_pytest_and_coverage,
+                              probe_setup_candidate, inspect_api, readiness)
+
+BASE_DIR = Path(__file__).resolve().parent
 CURATED_TARGETS = [
     # =========================================================================
     # TẬP A: TYPE-ANNOTATED & DOCSTRING-RICH SUBJECTS (TEST4PY TABLE 1)
@@ -38,7 +40,7 @@ CURATED_TARGETS = [
         "category": "Typed_A",
         "project": "docstring_parser",
         "repo_url": "https://github.com/rr-/docstring_parser.git",
-        "commit": None,
+        "commit": "a8e2a3ba5a4cdd906830735cb41a6a22c9346bf4",
         "module": "docstring_parser.parser",
         "file": "docstring_parser/parser.py",
         "symbol": "parse",
@@ -50,7 +52,7 @@ CURATED_TARGETS = [
         "category": "Typed_A",
         "project": "codetiming",
         "repo_url": "https://github.com/realpython/codetiming.git",
-        "commit": None,
+        "commit": "e51e4c3a50a395e301c33013cd048182f961f369",
         "module": "codetiming._timer",
         "file": "codetiming/_timer.py",
         "symbol": "Timer",
@@ -82,7 +84,7 @@ CURATED_TARGETS = [
         "file": "pycg/machinery/imports.py",
         "symbol": "get_custom_loader",
         "class_name": "ImportManager",
-        "setup_hint": "from pycg.machinery.imports import ImportManager\nmod = ImportManager('test_mod')\nmod.create_node('pkg')\nmod.set_current_mod('pkg')"
+        "setup_hint": "from pycg.machinery.imports import ImportManager\nmod = ImportManager()\nmod.create_node('pkg.main')\nmod.set_current_mod('pkg.main', 'main.py')"
     },
     {
         "id": "woa_whale_opt",
@@ -110,32 +112,19 @@ CURATED_TARGETS = [
     }
 ]
 
-SETTER_PREFIXES = ('set_', 'add_', 'register_', 'create_', 'build_', 'init_', 'append_', 'put_', 'insert_', 'configure_', 'setup_')
-
-
 def extract_target_source(file_path: Path, symbol_name: str) -> dict:
     source = file_path.read_text(encoding='utf-8')
     tree = ast.parse(source)
-    target_node = None
-    parent_class = None
-
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ClassDef):
-            if node.name == symbol_name:
-                target_node = node
-                break
-            for sub in node.body:
-                if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef)) and sub.name == symbol_name:
-                    target_node = sub
-                    parent_class = node
-                    break
-        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == symbol_name:
-            target_node = node
-            break
-
-    if not target_node:
-        lines = source.splitlines()[:100]
-        return {'source': '\n'.join(lines), 'parent_class': None, 'docstring': '', 'type_hints': {}, 'has_type_hints': False, 'has_docstrings': False}
+    target_node, parent_class = None, None
+    body = tree.body
+    for part in symbol_name.split('.'):
+        matches = [n for n in body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name == part]
+        if len(matches) != 1:
+            raise ValueError(f'Target {symbol_name} missing or ambiguous in {file_path}; use qualified Class.method')
+        if isinstance(target_node, ast.ClassDef):
+            parent_class = target_node
+        target_node = matches[0]
+        body = getattr(target_node, 'body', [])
 
     # Extract type hints via AST
     type_hints = {}
@@ -166,433 +155,342 @@ def extract_target_source(file_path: Path, symbol_name: str) -> dict:
     }
 
 
-def probe_setup_candidate(setup_code: str, timeout: int = 4) -> bool:
-    script = f"""
-import sys
-try:
-{chr(10).join('    ' + line for line in setup_code.splitlines())}
-except Exception:
-    sys.exit(1)
-sys.exit(0)
-"""
-    try:
-        proc = subprocess.run([sys.executable, '-c', script], timeout=timeout, capture_output=True)
-        return proc.returncode == 0
-    except Exception:
-        return False
+
+class DualGPUBenchmarkEngine(CouncilEngine):
+    """Reuse the logged NF4 Council backend; raw calls also saved per sample."""
+    def __init__(self, *args, max_input_tokens=8192, **kwargs):
+        self.max_input_tokens = max_input_tokens
+        super().__init__(*args, **kwargs)
+
+    def generate(self, role, system_prompt, user_prompt, seed=42):
+        if not self.mock:
+            import torch
+            torch.manual_seed(seed)
+            tokenizer = getattr(self, role+'_tokenizer')
+            tokens = tokenizer.apply_chat_template([dict(role='system', content=system_prompt),
+                      dict(role='user', content=user_prompt)], tokenize=True, add_generation_prompt=True)
+            if len(tokens) > self.max_input_tokens:
+                raise ValueError(f'Input budget exceeded: {len(tokens)} > {self.max_input_tokens}; no silent truncation')
+        return self._call(role, system_prompt, user_prompt)
 
 
-def clean_code_block(raw_text: str) -> str:
-    if "```python" in raw_text:
-        return raw_text.split("```python")[1].split("```")[0].strip()
-    elif "```" in raw_text:
-        return raw_text.split("```")[1].split("```")[0].strip()
-    return raw_text.strip()
+def product_hashes(root):
+    return {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(Path(root).rglob('*.py')) if '.git' not in p.parts}
 
 
-def prune_and_filter_tests(test_code: str, passing_node_ids: set) -> str:
-    """Uses AST to retain only test functions that genuinely passed."""
-    if not passing_node_ids or "test_run.py::fallback_pass" in passing_node_ids:
-        return test_code
-    passing_func_names = {node.split('::')[-1].split('[')[0] for node in passing_node_ids}
-    try:
-        tree = ast.parse(test_code)
-        new_body = []
-        for item in tree.body:
-            if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                if item.name in passing_func_names or not item.name.startswith('test_'):
-                    new_body.append(item)
-            else:
-                new_body.append(item)
-        tree.body = new_body
-        return ast.unparse(tree)
-    except Exception:
-        return test_code
-
-
-class DualGPUBenchmarkEngine:
-    def __init__(self, coder_model: str, critic_model: str, mock: bool = False, temperature: float = 0.7):
-        self.mock = mock
-        self.temperature = float(temperature)
-        self.telemetry = {"in_coder": 0, "out_coder": 0, "in_critic": 0, "out_critic": 0}
-
-        if mock:
-            print("🧪 [Engine] Mock mode activated. No GPU models loaded.")
-            return
-
-        import torch
-        from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-
-        os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
-        self.dev_coder = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.dev_critic = "cuda:1" if torch.cuda.device_count() > 1 else self.dev_coder
-
-        bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype=torch.float16,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_use_double_quant=True,
-        ) if "cuda" in self.dev_coder else None
-
-        print(f"🤖 [Engine] Loading Coder ({coder_model}) on {self.dev_coder} (NF4 4-bit)...")
-        self.tok_coder = AutoTokenizer.from_pretrained(coder_model, use_fast=True)
-        coder_kwargs = {"quantization_config": bnb_config, "device_map": {"": self.dev_coder}} if bnb_config else {"device_map": {"": self.dev_coder}, "torch_dtype": torch.float16}
-        self.model_coder = AutoModelForCausalLM.from_pretrained(coder_model, **coder_kwargs).eval()
-
-        print(f"⚖️ [Engine] Loading Critic ({critic_model}) on {self.dev_critic} (NF4 4-bit)...")
-        self.tok_critic = AutoTokenizer.from_pretrained(critic_model, use_fast=True)
-        critic_kwargs = {"quantization_config": bnb_config, "device_map": {"": self.dev_critic}} if bnb_config else {"device_map": {"": self.dev_critic}, "torch_dtype": torch.float16}
-        self.model_critic = AutoModelForCausalLM.from_pretrained(critic_model, **critic_kwargs).eval()
-
-    def generate(self, role: str, system_prompt: str, user_prompt: str, seed: int = 42, max_new_tokens: int = 1536) -> str:
-        if self.mock:
-            return f"```python\ndef test_{role}_mock():\n    assert True\n```"
-
-        import torch
-        import gc
-
-        torch.manual_seed(seed)
-        model = self.model_coder if role == "coder" else self.model_critic
-        tokenizer = self.tok_coder if role == "coder" else self.tok_critic
-        device = self.dev_coder if role == "coder" else self.dev_critic
-
-        msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
-        inputs = tokenizer.apply_chat_template(
-            msgs, tokenize=True, add_generation_prompt=True, return_tensors="pt", return_dict=True
-        )
-        if hasattr(inputs, "to"):
-            inputs = inputs.to(device)
-
-        if hasattr(inputs, "input_ids"):
-            in_len = inputs.input_ids.shape[1]
-            gen_kwargs = inputs
-        elif isinstance(inputs, dict) and "input_ids" in inputs:
-            in_len = inputs["input_ids"].shape[1]
-            gen_kwargs = inputs
-        else:
-            in_len = inputs.shape[1]
-            gen_kwargs = {"input_ids": inputs}
-
-        self.telemetry[f"in_{role}"] += in_len
-
-        with torch.inference_mode():
-            gen_opts = {"max_new_tokens": max_new_tokens, "pad_token_id": tokenizer.eos_token_id}
-            if self.temperature > 0.0:
-                gen_opts.update({"do_sample": True, "temperature": self.temperature, "top_p": 0.95})
-            else:
-                gen_opts.update({"do_sample": False})
-            outputs = model.generate(**gen_kwargs, **gen_opts)
-
-        gen_tokens = outputs[0, in_len:]
-        self.telemetry[f"out_{role}"] += len(gen_tokens)
-        result = tokenizer.decode(gen_tokens, skip_special_tokens=True)
-
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        gc.collect()
-
-        return result
-
-
-def execute_pytest_and_coverage(test_code: str, repo_root: Path, target_module: str, work_dir: Path, timeout: int = 30) -> dict:
-    work_dir.mkdir(parents=True, exist_ok=True)
-    test_file = work_dir / "test_run.py"
-    test_file.write_text(test_code, encoding="utf-8")
-
-    env = dict(os.environ, PYTHONPATH=str(repo_root), COVERAGE_FILE=str(work_dir / ".coverage"),
-               PYTEST_DISABLE_PLUGIN_AUTOLOAD="1", PYTHONDONTWRITEBYTECODE="1")
-    rep_file = work_dir / "pytest_report.json"
-
-    cmd = [
-        sys.executable, "-m", "coverage", "run",
-        "--branch", f"--source={target_module}",
-        "-m", "pytest",
-        "--json-report",
-        "-p", "pytest_jsonreport.plugin",
-        f"--json-report-file={rep_file}",
-        str(test_file)
-    ]
-
-    proc = subprocess.run(cmd, cwd=repo_root, env=env, capture_output=True, text=True, timeout=timeout)
-
-    (work_dir / "pytest_debug.log").write_text(
-        f"=== CMD ===\n{' '.join(cmd)}\n\n=== RETURNCODE: {proc.returncode} ===\n\n=== STDOUT ===\n{proc.stdout}\n\n=== STDERR ===\n{proc.stderr}\n",
-        encoding="utf-8"
-    )
-
-    passing_nodes = set()
-    total_nodes = 0
-    if rep_file.exists():
-        try:
-            data = json.loads(rep_file.read_text(encoding="utf-8"))
-            for t in data.get("tests", []):
-                total_nodes += 1
-                if t.get("outcome") == "passed":
-                    passing_nodes.add(t.get("nodeid"))
-        except Exception:
-            pass
-
-    # Robust fallback: parse pytest stdout if report.json was not created or unparseable
-    if total_nodes == 0 and proc.stdout:
-        import re
-        pass_m = re.search(r"(\d+)\s+passed", proc.stdout)
-        fail_m = re.search(r"(\d+)\s+failed", proc.stdout)
-        err_m = re.search(r"(\d+)\s+error", proc.stdout)
-        p_cnt = int(pass_m.group(1)) if pass_m else 0
-        f_cnt = int(fail_m.group(1)) if fail_m else 0
-        e_cnt = int(err_m.group(1)) if err_m else 0
-        total_nodes = p_cnt + f_cnt + e_cnt
-        if p_cnt > 0 and not passing_nodes:
-            passing_nodes.add("test_run.py::fallback_pass")
-
-    line_pct = 0.0
-    branch_pct = 0.0
-    cov_file = work_dir / ".coverage"
-    if cov_file.exists() and passing_nodes:
-        cov_json = work_dir / "coverage.json"
-        subprocess.run([sys.executable, "-m", "coverage", "json", "-o", str(cov_json)], cwd=repo_root, env=env, capture_output=True)
-        if cov_json.exists():
-            try:
-                cdata = json.loads(cov_json.read_text())
-                totals = cdata.get("totals", {})
-                line_pct = totals.get("percent_covered", 0.0)
-                num_branches = totals.get("num_branches", 0)
-                covered_branches = totals.get("covered_branches", 0)
-                branch_pct = round(100.0 * covered_branches / num_branches, 2) if num_branches > 0 else line_pct
-            except Exception:
-                pass
-
-    return {
-        "exit_code": proc.returncode,
-        "total_nodes": total_nodes,
-        "passing_nodes": list(passing_nodes),
-        "pass_count": len(passing_nodes),
-        "line_pct": line_pct,
-        "branch_pct": branch_pct,
-        "stdout": proc.stdout[-1500:],
-        "stderr": proc.stderr[-1500:]
-    }
-
-
-def run_single_evaluation(target: dict, arm: str, sample_idx: int, engine: DualGPUBenchmarkEngine,
-                          repo_root: Path, out_dir: Path, seed: int = 42) -> dict:
-    sample_dir = out_dir / f"sample_{sample_idx+1:02d}"
-    sample_dir.mkdir(parents=True, exist_ok=True)
-    sample_seed = seed + sample_idx
-
-    target_file = repo_root / target["file"]
-    ast_info = extract_target_source(target_file, target["symbol"])
-
-    setup_context = ""
-    probe_time = 0.0
-    if arm in ("ranked", "verified"):
-        t0 = time.perf_counter()
-        candidate = target.get("setup_hint") or ""
-        if candidate and arm == "verified":
-            if probe_setup_candidate(candidate):
-                setup_context = candidate
-        elif candidate:
-            setup_context = candidate
-        probe_time = time.perf_counter() - t0
-
-    sys_p = "You are an expert Python test engineer. Write rigorous, self-contained, non-vacuous pytest tests. Use provided Type Annotations and Docstring Specifications to construct valid argument values, edge cases, and expected assertions."
-    user_p = f"Target Function/Class:\n```python\n{ast_info['source']}\n```\n\nModule: {target['module']}\nSymbol: {target['symbol']}\n"
-    
-    # Explicitly highlight Type Hints and Docstrings (Grounded Semantic Priors)
-    if ast_info['has_type_hints']:
-        user_p += f"\nType Annotations:\n```python\n{json.dumps(ast_info['type_hints'], indent=2)}\n```\n"
-    if ast_info['has_docstrings']:
-        user_p += f"\nDocstring Specification:\n\"\"\"\n{ast_info['docstring']}\n\"\"\"\n"
-
-    # State Setup Context (Only for Ranked / Verified arms)
-    if setup_context:
-        user_p += f"\nVerified State Setup Context:\n```python\n{setup_context}\n```\n"
-
-    t0 = time.perf_counter()
-    gen_raw = engine.generate("coder", sys_p, user_p, seed=sample_seed)
-    gen_code = clean_code_block(gen_raw)
-
-    eval_v1 = execute_pytest_and_coverage(gen_code, repo_root, target["module"], sample_dir / "v1_raw")
-
-    final_code = gen_code
-    repaired = False
-    if eval_v1["pass_count"] == 0 and not engine.mock:
-        c_sys = "You are an expert test debugger. Repair the pytest file using failure diagnostics. Preserve testing intent, fix imports or setup state, and do NOT delete assertions."
-        c_user = f"Failing Test Code:\n```python\n{gen_code}\n```\n\nDiagnostics:\n{eval_v1['stderr'] or eval_v1['stdout']}\n\nTarget Source:\n```python\n{ast_info['source']}\n```"
-        rep_raw = engine.generate("critic", c_sys, c_user, seed=sample_seed)
-        rep_code = clean_code_block(rep_raw)
-        eval_rep = execute_pytest_and_coverage(rep_code, repo_root, target["module"], sample_dir / "v2_repaired")
-        if eval_rep["pass_count"] > 0:
-            final_code = rep_code
-            eval_v1 = eval_rep
-            repaired = True
-
-    # Test Pruning: extract genuine passing tests into final suite
-    pruned_code = prune_and_filter_tests(final_code, set(eval_v1["passing_nodes"]))
-    (sample_dir / "test_final.py").write_text(pruned_code, encoding="utf-8")
-    eval_final = execute_pytest_and_coverage(pruned_code, repo_root, target["module"], sample_dir / "final_eval")
-
-    run_sec = time.perf_counter() - t0
-
-    suite_pass = bool(eval_final["pass_count"] > 0 and eval_final["exit_code"] == 0)
-
-    res = {
-        "target_id": target["id"],
-        "category": target.get("category", "General"),
-        "project": target["project"],
-        "module": target["module"],
-        "symbol": target["symbol"],
-        "has_type_hints": ast_info["has_type_hints"],
-        "has_docstrings": ast_info["has_docstrings"],
-        "arm": arm,
-        "sample": f"sample_{sample_idx+1:02d}",
-        "suite_pass": suite_pass,
-        "pass_count": eval_final["pass_count"],
-        "total_count": eval_final["total_nodes"],
-        "line_pct": eval_final["line_pct"],
-        "branch_pct": eval_final["branch_pct"],
-        "repaired_by_critic": repaired,
-        "probe_time_sec": round(probe_time, 3),
-        "runtime_sec": round(run_sec, 2)
-    }
-
-    (sample_dir / "result.json").write_text(json.dumps(res, indent=2), encoding="utf-8")
-    return res
-
-
-def clone_if_needed(target: dict, repos_dir: Path):
-    dest = repos_dir / target["project"]
-    commit = target.get("commit")
+def clone_if_needed(target, repos_dir):
+    dest = Path(repos_dir).resolve()/target['project']
     if not dest.exists():
-        print(f"📥 Cloning {target['project']} from {target['repo_url']}...")
-        if commit and len(commit) == 40:
-            dest.mkdir(parents=True, exist_ok=True)
-            subprocess.run(["git", "init", "-q", str(dest)], check=True)
-            subprocess.run(["git", "-C", str(dest), "fetch", "--depth", "1", target["repo_url"], commit], check=True)
-            subprocess.run(["git", "-C", str(dest), "checkout", "-q", "--detach", "FETCH_HEAD"], check=True)
-        else:
-            subprocess.run(["git", "clone", "--depth", "1", target["repo_url"], str(dest)], check=True)
-            if commit:
-                try:
-                    subprocess.run(["git", "-C", str(dest), "checkout", "-q", commit], check=True)
-                except Exception:
-                    pass
+        checked(['git', 'clone', '--depth', '1', target['repo_url'], dest], timeout=180)
+    commit = target.get('commit')
+    if commit:
+        actual = checked(['git', '-C', dest, 'rev-parse', 'HEAD'])
+        if not actual.startswith(commit):
+            if checked(['git', '-C', dest, 'status', '--porcelain']):
+                raise ValueError('Refusing to change dirty target checkout: '+str(dest))
+            checked(['git', '-C', dest, 'fetch', '--depth', '1', 'origin', commit], timeout=180)
+            checked(['git', '-C', dest, 'checkout', '--detach', 'FETCH_HEAD'])
+    if checked(['git', '-C', dest, 'status', '--porcelain']):
+        raise ValueError('Target checkout is dirty: '+str(dest))
     return dest
 
 
-def export_markdown_report(records: list, out_path: Path, telemetry: dict):
-    lines = [
-        "# REPRODUCIBLE MULTI-TARGET BENCHMARK EVALUATION",
-        f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S')} | Target: Kaggle Dual-GPU (2x Tesla T4)\n",
-        "## 1. Evaluation Results by Target & Experimental Arm",
-        "Focusing on Type Hints & Docstrings (Tập A) combined with State-Aware Council Setup.\n",
-        "| Category | Project | Target Symbol | Type / Doc? | Arm | Suite Pass Rate | Line Cov % | Branch Cov % | Avg Time |",
-        "|---|---|---|:---:|---|:---:|:---:|:---:|:---:|"
-    ]
+OUTPUT_RULES = '''Return exactly one fenced Python block containing the COMPLETE pytest file.
+Write ONE focused test function for ONE behavior, with at most 60 lines of Python.
+Include meaningful assertions or pytest.raises checks, grounded in source.
+Keep the response concise: no explanation, reasoning comments or multiple blocks.
+For object state, trace which operation writes the field before asserting it.
+Distinguish returned values from logger/callback outputs; capture callbacks through
+public dependency injection when supported. Do not mock the implementation.
+For structured input, derive its format from the chosen parser/consumer source.
+If source evidence is insufficient, do not invent exception or output expectations.
+Use the verified API inventory; do not invent imports, attributes or enum members.
+Do not skip/xfail tests, mock the target, change product files, or suppress failures.
+Derive expected behavior from production source/docstrings, not observed outputs.
+'''
 
-    target_keys = sorted(list({(r['category'], r['project'], r['symbol'], r['target_id'], r.get('has_type_hints', False), r.get('has_docstrings', False)) for r in records}))
-    arms = ["baseline", "ranked", "verified"]
 
-    for cat, proj, sym, tid, has_t, has_d in target_keys:
-        type_doc_str = "Type+Doc" if has_t and has_d else ("Type" if has_t else ("Doc" if has_d else "None"))
-        for arm in arms:
-            recs = [r for r in records if r["target_id"] == tid and r["arm"] == arm]
-            if not recs:
-                continue
-            pass_rate = f"{sum(bool(r['suite_pass']) for r in recs)}/{len(recs)}"
-            avg_line = round(sum(r["line_pct"] for r in recs) / len(recs), 2)
-            avg_branch = round(sum(r["branch_pct"] for r in recs) / len(recs), 2)
-            avg_sec = round(sum(r["runtime_sec"] for r in recs) / len(recs), 2)
-            lines.append(f"| {cat} | {proj} | `{sym}` | {type_doc_str} | **{arm}** | {pass_rate} | **{avg_line}%** | **{avg_branch}%** | {avg_sec}s |")
+def run_single_evaluation(target, arm, sample_idx, engine, repo_root, out_dir, seed=42, repair_with='critic'):
+    started = time.perf_counter()
+    sample_dir = Path(out_dir)/f'sample_{sample_idx+1:02d}'
+    sample_dir.mkdir(parents=True, exist_ok=False)
+    row = dict(target_id=target['id'], category=target.get('category', 'Development'),
+               project=target['project'], module=target['module'], symbol=target['symbol'],
+               arm=arm, sample=sample_dir.name, seed=seed+sample_idx, mock=engine.mock,
+               status='running', suite_pass=False, first_pass=False, stable=False, replay_status='not_run',
+               pass_count=0, total_count=0, line_pct=None, branch_pct=None,
+               repaired_by_critic=False, repair_attempted=False, probe_time_sec=0)
+    write_json(sample_dir/'result.json', row)
+    try:
+        if engine.mock:
+            row['status'] = 'mock_excluded'
+            return row
+        root = sample_dir/'product'
+        shutil.copytree(repo_root, root, ignore=shutil.ignore_patterns('.git', '__pycache__', '*.pyc'))
+        before = product_hashes(root)
+        info = extract_target_source(root/target['file'], target['symbol'])
+        row.update(has_type_hints=info['has_type_hints'], has_docstrings=info['has_docstrings'])
+        api = inspect_api(root, target['module'], target['symbol'])
+        write_json(sample_dir/'api.json', api)
+        setup = ''
+        if arm in ('ranked', 'verified'):
+            hint = target.get('setup_hint', '')
+            if arm == 'verified':
+                t0 = time.perf_counter()
+                row['setup_probe'] = verify_target_invocation(hint, root, target['module'], target['symbol']) if hint else dict(accepted=False, reason='no hint')
+                row['probe_time_sec'] = time.perf_counter()-t0
+                write_json(sample_dir/'setup_probe.json', row['setup_probe'])
+                if not row['setup_probe']['accepted']:
+                    row['status'] = 'setup_unresolved'
+                    return row
+            setup = hint
+        dependencies = dependency_context(root, target['file'], target['symbol']) if arm != 'baseline' else None
+        if dependencies is not None:
+            write_json(sample_dir/'dependencies.json', dependencies)
+        prompt_api = dict(api, file=target['file'])
+        context = (f"Target source:\n{info['source']}\nModule: {target['module']}\nSymbol: {target['symbol']}\n"
+                   + 'Runtime API inventory (same for all arms):\n'+json.dumps(prompt_api, indent=2)
+                   + ('\nProduction dependency source:\n'+json.dumps(dependencies['snippets'], indent=2) if dependencies else '')
+                   + '\nCurated setup example (not assertion evidence):\n'+setup)
+        if arm == 'verified' and row.get('setup_probe', {}).get('invocation'):
+            context += '\nInvocation witness code (no return/output observations):\n'+row['setup_probe']['invocation']
+        write_json(sample_dir/'context.json', dict(context=context, setup_origin='curated hint',
+                   verification_scope=row.get('setup_probe', {}).get('scope', 'unverified'), api_policy='runtime-api-v1',
+                   dependencies_policy='production-dependencies-v1' if dependencies else None))
+        engine.sample_id = f"{target['id']}/{arm}/{sample_dir.name}"
+        def call(role, system, user, stage=None):
+            artifact_role = stage or role
+            write_json(sample_dir/(artifact_role+'_prompt.json'), dict(system=system, user=user))
+            raw = engine.generate(role, system, user, seed=row['seed'])
+            (sample_dir/(artifact_role+'_raw.txt')).write_text(raw)
+            return raw
+        raw = call('coder', 'Generate rigorous Python unit tests.\n'+OUTPUT_RULES, context)
+        extraction_error = None
+        try:
+            initial = clean_code_block(raw)
+        except ValueError as exc:
+            initial = None
+            extraction_error = str(exc)
+        row['initial_extraction_error'] = extraction_error
+        first = None
+        if initial is not None:
+            (sample_dir/'test_candidate_v1.py').write_text(initial)
+            row['initial_audit'] = audit_test_quality(initial)
+            first = execute_pytest_and_coverage(initial, root, target['module'], sample_dir/'v1_raw')
+            row['first_pass'] = first['suite_pass']
+        final, evaluation = initial, first
+        if not row['first_pass'] and not (first and first['timeout']):
+            row['repair_attempted'] = True
+            if first:
+                pytest_report = json.loads((sample_dir/'v1_raw/pytest_report.json').read_text()) if (sample_dir/'v1_raw/pytest_report.json').exists() else {}
+                failures = [dict(node=t['nodeid'], phases={p: t.get(p, {}).get('crash', {}) for p in ('setup','call','teardown') if t.get(p, {}).get('outcome') == 'failed'})
+                            for t in pytest_report.get('tests', []) if t.get('outcome') != 'passed']
+                diagnostics = json.dumps(dict(status=first['status'], failures=failures,
+                    collection_errors=[c.get('longrepr', '')[:1500] for c in pytest_report.get('collectors', []) if c.get('outcome') == 'failed']))
+            else:
+                diagnostics = extraction_error
+            repair_raw = call(repair_with, 'Repair imports, setup or syntax while preserving every test and assertion expression. Never change expected values to match observed outputs.\n'+OUTPUT_RULES,
+                              context+'\nCandidate:\n'+(initial or raw)+'\nDiagnostics:\n'+diagnostics[-6000:], stage='repair')
+            try:
+                repaired = clean_code_block(repair_raw)
+                (sample_dir/'test_candidate_v2_repaired.py').write_text(repaired)
+                row['repair_audit'] = repair_audit(initial or raw, repaired)
+                if row['repair_audit']['accepted'] and not row['repair_audit']['review_required']:
+                    rep_eval = execute_pytest_and_coverage(repaired, root, target['module'], sample_dir/'v2_repaired')
+                    final, evaluation = repaired, rep_eval
+                    row['repaired_by_critic'] = bool(rep_eval['suite_pass'] and repair_with == 'critic')
+                    row['repair_suite_pass'] = rep_eval['suite_pass']
+                else:
+                    row['repair_rejected'] = 'test/check preservation or changed assertion; proposal saved for review, no automatic credit'
+            except ValueError as exc:
+                row['repair_extraction_error'] = str(exc)
+        if final is None or evaluation is None:
+            row['status'] = 'extraction_error'
+            return row
+        (sample_dir/'test_final.py').write_text(final)
+        row['audit'] = audit_test_quality(final)
+        row['focus_contract_met'] = row['audit']['test_functions'] == 1
+        row['final_evaluation'] = evaluation
+        row.update(suite_pass=evaluation['suite_pass'], pass_count=evaluation['pass_count'],
+                   total_count=evaluation['total_nodes'], line_pct=evaluation['line_pct'],
+                   branch_pct=evaluation['branch_pct'])
+        if row['suite_pass']:
+            replay = execute_pytest_and_coverage(final, root, target['module'], sample_dir/'replay')
+            # Nodeids contain absolute sample paths, so compare test suffixes.
+            node_names = lambda e: sorted(n.split('::', 1)[-1] for n in e['passing_nodes'])
+            row['stable'] = bool(replay['suite_pass'] and node_names(replay) == node_names(evaluation)
+                                 and replay['line_pct'] == evaluation['line_pct'] and replay['branch_pct'] == evaluation['branch_pct'])
+            row['replay'] = replay
+            row['replay_status'] = 'stable' if row['stable'] else 'unstable'
+        row['passing_subset'] = passing_subset_measurement(final, root, target['module'], sample_dir/'passing_subset', evaluation)
+        if product_hashes(root) != before:
+            row.update(status='product_modified', suite_pass=False, stable=False, line_pct=None, branch_pct=None,
+                       passing_subset=dict(status='product_modified', line_pct=None, branch_pct=None))
+        else:
+            row['status'] = 'completed'
+    except Exception as exc:
+        row.update(status='execution_error', error=repr(exc), traceback=traceback.format_exc(),
+                   suite_pass=False, stable=False, line_pct=None, branch_pct=None)
+    finally:
+        row['runtime_sec'] = round(time.perf_counter()-started, 3)
+        write_json(sample_dir/'result.json', row)
+    return row
 
-    lines.extend([
-        "",
-        "## 2. Resource Telemetry & Hardware Feasibility",
-        "",
-        f"- **Coder Tokens In/Out**: {telemetry.get('in_coder', 0)} / {telemetry.get('out_coder', 0)}",
-        f"- **Critic Tokens In/Out**: {telemetry.get('in_critic', 0)} / {telemetry.get('out_critic', 0)}",
-        "- **Hardware Footprint**: 100% Free Kaggle Dual-GPU (2x Tesla T4 15GB, BitsAndBytes NF4 4-bit).",
-        "- **Memory Safety**: `torch.cuda.empty_cache()` invoked per sample; 0 CUDA OOM exceptions.",
-        ""
-    ])
 
-    report_text = "\n".join(lines)
-    out_path.write_text(report_text, encoding="utf-8")
-    return report_text
+def export_markdown_report(records, out_path, telemetry):
+    pct = lambda v: 'NA' if v is None else f'{v:.2f}'
+    lines = ['# Council development screen v4',
+             'Baseline is Council without setup, not upstream Test4Py. No efficacy claim.',
+             'No pruning. Main coverage: full all-pass suite. Secondary subset coverage: original-passing nodes replayed twice; NA is not zero.',
+             'grounded = production dependencies; ranked = grounded + curated hint; verified adds callable-entry witness (constructor only for classes).',
+             '', '| Target | Arm | Status | First pass | Final pass | Nodes | Line % | Branch % | Replay | Eligible/planned | Subset line % |',
+             '|---|---|---|---|---|---|---|---|---|---|---|']
+    for r in records:
+        lines.append(f"| {r['target_id']} | {r['arm']} | {r['status']} | {r.get('first_pass', False)} | {r['suite_pass']} | {r['pass_count']}/{r['total_count']} | {pct(r['line_pct'])} | {pct(r['branch_pct'])} | {r.get('replay_status', 'not_run')} | {r.get('passing_subset', {}).get('eligible', 0)}/{r['total_count']} | {pct(r.get('passing_subset', {}).get('line_pct'))} |")
+    lines += ['', 'Telemetry (measured calls only): '+json.dumps(telemetry),
+              'Inspect readiness.json and raw artifacts before scheduling any full experiment.']
+    text = '\n'.join(lines)+'\n'
+    Path(out_path).write_text(text)
+    return text
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Multi-Target State-Aware Council Benchmark")
-    parser.add_argument("--output", type=Path, default=Path("/kaggle/working/EVALUATION_OUTPUT") if Path("/kaggle").exists() else BASE_DIR / "runs/multitarget_eval")
-    parser.add_argument("--repos-dir", type=Path, default=Path("/kaggle/working/BENCHMARK_REPOS") if Path("/kaggle").exists() else BASE_DIR / "runs/repos")
-    parser.add_argument("--targets", default="all", help="Comma-separated target IDs or 'all'")
-    parser.add_argument("--arms", default="baseline,ranked,verified", help="Comma-separated arms")
-    parser.add_argument("--samples", type=int, default=2, help="Samples per arm")
-    parser.add_argument("--temperature", type=float, default=0.7)
-    parser.add_argument("--coder-model", default="Qwen/Qwen2.5-Coder-7B-Instruct")
-    parser.add_argument("--critic-model", default="Qwen/Qwen3-4B-Instruct-2507")
-    parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--mock", action="store_true", help="Run without GPUs for fast offline smoke-test")
-    parser.add_argument("--zip", action="store_true", default=True, help="Create zip archive of output")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--repos-dir', type=Path, default=Path('/kaggle/working/BENCHMARK_REPOS'))
+    parser.add_argument('--targets', default=None, help='Comma-separated ids or all; default two development targets')
+    parser.add_argument('--target-spec', type=Path, help='Locked external benchmark JSON; no runtime target selection')
+    parser.add_argument('--arms', default='baseline,grounded,ranked,verified')
+    parser.add_argument('--samples', type=int, default=1)
+    parser.add_argument('--temperature', type=float, default=0.7)
+    parser.add_argument('--coder-model', default='Qwen/Qwen2.5-Coder-7B-Instruct')
+    parser.add_argument('--critic-model', default='Qwen/Qwen3-4B-Instruct-2507')
+    parser.add_argument('--coder-revision', default='main')
+    parser.add_argument('--critic-revision', default='main')
+    parser.add_argument('--repair-with', choices=['critic', 'coder'], default='critic')
+    parser.add_argument('--max-input-tokens', type=int, default=8192)
+    parser.add_argument('--max-new-tokens', type=int, default=2048)
+    parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--mock', action='store_true', help='Offline artifact check; never efficacy data')
+    parser.add_argument('--prepare-only', action='store_true')
+    parser.add_argument('--prepared', type=Path, help='preflight.json from the prepare-only run; locks checkouts')
+    parser.add_argument('--zip', action='store_true', default=True)
     args = parser.parse_args()
-
-    args.output.mkdir(parents=True, exist_ok=True)
-    args.repos_dir.mkdir(parents=True, exist_ok=True)
-
-    selected_ids = [t.strip() for t in args.targets.split(",")]
-    targets = CURATED_TARGETS if args.targets == "all" else [t for t in CURATED_TARGETS if t["id"] in selected_ids]
-    arms = [a.strip() for a in args.arms.split(",")]
-
-    print(f"🚀 [Master Benchmark] Starting evaluation across {len(targets)} targets and {len(arms)} arms (Samples={args.samples})...")
-    engine = DualGPUBenchmarkEngine(args.coder_model, args.critic_model, mock=args.mock, temperature=args.temperature)
-
-    all_records = []
-    for tgt in targets:
-        repo_root = clone_if_needed(tgt, args.repos_dir)
-        print(f"\n========================================================")
-        print(f"🎯 Target [{tgt.get('category')}]: {tgt['project']} -> {tgt['symbol']} ({tgt['module']})")
-        print(f"========================================================")
-
+    try:
+        frame = load_target_spec(args.target_spec) if args.target_spec else CURATED_TARGETS
+    except (ValueError, OSError, KeyError) as exc:
+        parser.error(str(exc))
+    if args.targets is None:
+        args.targets = 'all' if args.target_spec else 'docstring_parser_parse,codetiming_timer'
+    ids = args.targets.split(',')
+    valid = {t['id']: t for t in frame}
+    if args.targets == 'all':
+        ids = list(valid)
+    arms = args.arms.split(',')
+    if (not ids or len(set(ids)) != len(ids) or set(ids)-valid.keys()
+        or not arms or len(set(arms)) != len(arms) or set(arms)-{'baseline', 'grounded', 'ranked', 'verified'}
+        or args.samples < 1 or args.max_new_tokens < 1 or args.max_input_tokens < 1 or not 0 <= args.temperature <= 2):
+        parser.error('Invalid targets, arms, samples, temperature or token budget')
+    targets = [dict(valid[i]) for i in ids]
+    args.output = reserve_output(args.output)
+    print('Reports: '+str(args.output), flush=True)
+    manifest = dict(protocol='council-development-screen-v4', mock=args.mock,
+                    argv=sys.argv, config={k: str(v) if isinstance(v, Path) else v for k,v in vars(args).items()},
+                    source_hashes={str(p.relative_to(BASE_DIR)): hashlib.sha256(p.read_bytes()).hexdigest()
+                                   for p in [Path(__file__).resolve(), BASE_DIR/'pilot/multitarget.py', BASE_DIR/'pilot/grounding.py',
+                                             BASE_DIR/'council/engine.py', BASE_DIR/'council/runner.py', BASE_DIR/'council/critic.py']},
+                    python=sys.version, packages=package_versions())
+    if args.target_spec:
+        write_json(args.output/'input-target-spec.json', dict(targets=frame))
+        manifest['target_spec_sha256'] = hashlib.sha256(args.target_spec.read_bytes()).hexdigest()
+    write_json(args.output/'manifest.json', manifest)
+    write_json(args.output/'plan.json', dict(protocol=manifest['protocol'],
+        context_policy='baseline API-only; grounded dependencies; ranked adds curated hint; verified adds invocation witness',
+        repair_policy='one attempt, assertion expressions frozen; changed proposals never credited',
+        planned=[dict(target=t['id'], arm=a, seed=args.seed+i, sample=f'sample_{i+1:02d}')
+                 for t in targets for a in arms for i in range(args.samples)]))
+    preflight = {}
+    if not args.mock:
+        locked = json.loads(args.prepared.read_text()) if args.prepared else None
+        for target in targets:
+            try:
+                root = clone_if_needed(target, args.repos_dir)
+                commit = checked(['git', '-C', root, 'rev-parse', 'HEAD'])
+                hashes = product_hashes(root)
+                if locked is not None:
+                    prev = locked[target['id']]
+                    if prev['commit'] != commit or prev['hashes'] != hashes or not prev['ready']:
+                        raise ValueError('Prepared checkout changed or failed; create a new plan explicitly')
+                api = inspect_api(root, target['module'], target['symbol'])
+                extract_target_source(root/target['file'], target['symbol'])
+                probe = verify_target_invocation(target.get('setup_hint', ''), root, target['module'], target['symbol'])
+                preflight[target['id']] = dict(ready=True, setup_ready=probe['accepted'], root=str(root), commit=commit,
+                                                hashes=hashes, api=api, setup_probe=probe)
+            except Exception as exc:
+                preflight[target['id']] = dict(ready=False, error=repr(exc))
+            write_json(args.output/'preflight.json', preflight)
+    if args.prepare_only:
+        print('Preflight: '+str(args.output/'preflight.json'), flush=True)
+        return 0 if preflight and all(p['ready'] for p in preflight.values()) else 2
+    records = []
+    planned = len(targets)*len(arms)*args.samples
+    engine, load_error = None, None
+    # Resolve immutable model SHAs BEFORE loading. No silent revision fallback.
+    try:
+        if not args.mock:
+            if not preflight or not all(p['ready'] for p in preflight.values()):
+                raise RuntimeError('Preflight failed; inference skipped. Inspect preflight.json.')
+            import torch
+            if torch.cuda.device_count() < 2:
+                raise RuntimeError('This GPU screen requires two visible CUDA devices')
+            from huggingface_hub import HfApi
+            args.coder_revision = HfApi().model_info(args.coder_model, revision=args.coder_revision).sha
+            args.critic_revision = HfApi().model_info(args.critic_model, revision=args.critic_revision).sha
+        write_json(args.output/'resolved_models.json', dict(coder=args.coder_revision, critic=args.critic_revision))
+        engine = DualGPUBenchmarkEngine(coder_model=args.coder_model, critic_model=args.critic_model,
+                 coder_revision=args.coder_revision, critic_revision=args.critic_revision,
+                 temperature=args.temperature, seed=args.seed, max_new_tokens=args.max_new_tokens,
+                 mock=args.mock, load_in_4bit=True, work=args.output, max_input_tokens=args.max_input_tokens,
+                 enable_critic=args.repair_with == 'critic')
+    except Exception as exc:
+        load_error = repr(exc)
+        write_json(args.output/'engine_failure.json', dict(error=load_error, traceback=traceback.format_exc()))
+    for target in targets:
         for arm in arms:
-            print(f"\n▶️ Arm: [{arm.upper()}]...")
-            tgt_out = args.output / tgt["project"] / tgt["symbol"] / arm
-            for s_idx in range(args.samples):
-                rec = run_single_evaluation(tgt, arm, s_idx, engine, repo_root, tgt_out, seed=args.seed)
-                all_records.append(rec)
-                print(f"  [{s_idx+1}/{args.samples}] Pass: {rec['suite_pass']} | Nodes: {rec['pass_count']}/{rec['total_count']} | Line: {rec['line_pct']:.1f}% | Branch: {rec['branch_pct']:.1f}% ({rec['runtime_sec']}s)")
-
-    # Save summary.json and results.csv
-    summary_data = {
-        "schema_version": 2,
-        "date": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "targets_count": len(targets),
-        "arms": arms,
-        "samples_per_arm": args.samples,
-        "telemetry": engine.telemetry,
-        "records": all_records
-    }
-    (args.output / "summary.json").write_text(json.dumps(summary_data, indent=2), encoding="utf-8")
-
-    # CSV
-    keys = ["category", "project", "module", "symbol", "has_type_hints", "has_docstrings", "arm", "sample", "suite_pass", "pass_count", "total_count", "line_pct", "branch_pct", "repaired_by_critic", "runtime_sec"]
-    with (args.output / "results.csv").open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=keys, extrasaction="ignore")
+            for i in range(args.samples):
+                if engine is None:
+                    row = dict(target_id=target['id'], arm=arm, sample=f'sample_{i+1:02d}',
+                               status='preflight_or_engine_error', error=load_error,
+                               suite_pass=False, stable=False, pass_count=0, total_count=0,
+                               line_pct=None, branch_pct=None)
+                    write_json(args.output/target['id']/arm/row['sample']/'result.json', row)
+                else:
+                    row = run_single_evaluation(target, arm, i, engine,
+                            Path(preflight[target['id']]['root']) if not args.mock else BASE_DIR,
+                            args.output/target['id']/arm, args.seed, args.repair_with)
+                records.append(row)
+                write_json(args.output/'summary.json', dict(schema_version=4, protocol=manifest['protocol'],
+                           mock=args.mock, planned=planned, finished=len(records), records=records,
+                           telemetry=engine.telemetry if engine else {}))
+                print(f"{target['id']} {arm} {i+1}/{args.samples}: {row['status']} pass={row['suite_pass']}", flush=True)
+    gate = readiness(records, planned, args.mock)
+    write_json(args.output/'readiness.json', gate)
+    if engine:
+        write_json(args.output/'engine.json', engine.snapshot())
+    export_markdown_report(records, args.output/'FINAL_REPORT.md', engine.telemetry if engine else {})
+    keys = ['target_id', 'arm', 'sample', 'status', 'first_pass', 'suite_pass', 'pass_count',
+            'total_count', 'line_pct', 'branch_pct', 'stable', 'repair_attempted', 'repaired_by_critic', 'runtime_sec']
+    with (args.output/'results.csv').open('w') as stream:
+        writer = csv.DictWriter(stream, fieldnames=keys, extrasaction='ignore')
         writer.writeheader()
-        writer.writerows(all_records)
-
-    # Markdown Report
-    rep_text = export_markdown_report(all_records, args.output / "FINAL_REPORT.md", engine.telemetry)
-    print("\n" + "="*70)
-    print(rep_text)
-    print("="*70)
-
+        writer.writerows(records)
     if args.zip:
-        zip_path = args.output.parent / f"{args.output.name}.zip"
-        shutil.make_archive(str(args.output), "zip", args.output)
-        print(f"\n📦 Archive generated at: {zip_path}")
-
-    print(f"\n✅ All benchmark runs completed successfully! Output: {args.output}")
+        shutil.make_archive(str(args.output), 'zip', args.output)
+    print('Harness ready: '+str(gate['harness_ready'])+'; strict generation-quality gate: '+str(gate['automated_ready'])+'; semantic review still required.')
+    print('Reports: '+str(args.output), flush=True)
+    return 0 if gate['automated_ready'] or (args.mock and engine is not None) else 2
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

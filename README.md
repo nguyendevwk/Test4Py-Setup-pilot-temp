@@ -1,3 +1,11 @@
+> **Current upstream paired pilot:** [14B NF4 protocol](docs/UPSTREAM_NF4_PILOT.md), [Kaggle notebook](notebooks/kaggle_upstream_nf4_paired.ipynb). Actual Test4Py upstream in both arms; source checks → VRAM stress → small A/B before the larger pilot. GPU evidence is pending.
+
+> **Current development protocol v4:** [docs/MULTITARGET_V4.md](docs/MULTITARGET_V4.md). Four-arm SLM grounding screen; v3 results remain historical evidence.
+
+> **Development screen v3 (2026-11-16):** xem [batch kiểm tra source trên Kaggle](docs/MULTITARGET_SMOKE.md).
+> Sửa extraction, collection counts và line coverage; không pruning để tăng pass rate.
+> Council multi-target là engineering screen, không phải Test4Py upstream hoặc bằng chứng vượt paper.
+
 > Council sau kiểm định 2026-11-15 dùng protocol `council-case-study-v2`.
 > Xem [hướng dẫn chạy lại](docs/COUNCIL_V2.md). Baseline Council không phải upstream Test4Py;
 > mock không có điểm efficacy và bảng cũ không được ghép với schema v2.
