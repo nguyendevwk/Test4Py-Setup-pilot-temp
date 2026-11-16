@@ -197,7 +197,8 @@ def clone_if_needed(target, repos_dir):
 
 
 OUTPUT_RULES = '''Return exactly one fenced Python block containing the COMPLETE pytest file.
-Write ONE focused test function for ONE behavior, with at most 60 lines of Python.
+CRITICAL: Write EXACTLY ONE focused test function for ONE behavior, with at most 50 lines of Python.
+Do NOT write multiple test functions in the file, because any single failing test causes the entire suite to fail.
 Include meaningful assertions or pytest.raises checks, grounded in source.
 Keep the response concise: no explanation, reasoning comments or multiple blocks.
 For object state, trace which operation writes the field before asserting it.
