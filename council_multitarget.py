@@ -257,8 +257,22 @@ class DualGPUBenchmarkEngine:
         device = self.dev_coder if role == "coder" else self.dev_critic
 
         msgs = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
-        inputs = tokenizer.apply_chat_template(msgs, tokenize=True, add_generation_prompt=True, return_tensors="pt").to(device)
-        in_len = inputs.shape[1]
+        inputs = tokenizer.apply_chat_template(
+            msgs, tokenize=True, add_generation_prompt=True, return_tensors="pt", return_dict=True
+        )
+        if hasattr(inputs, "to"):
+            inputs = inputs.to(device)
+
+        if hasattr(inputs, "input_ids"):
+            in_len = inputs.input_ids.shape[1]
+            gen_kwargs = inputs
+        elif isinstance(inputs, dict) and "input_ids" in inputs:
+            in_len = inputs["input_ids"].shape[1]
+            gen_kwargs = inputs
+        else:
+            in_len = inputs.shape[1]
+            gen_kwargs = {"input_ids": inputs}
+
         self.telemetry[f"in_{role}"] += in_len
 
         with torch.inference_mode():
@@ -267,7 +281,7 @@ class DualGPUBenchmarkEngine:
                 gen_opts.update({"do_sample": True, "temperature": self.temperature, "top_p": 0.95})
             else:
                 gen_opts.update({"do_sample": False})
-            outputs = model.generate(inputs, **gen_opts)
+            outputs = model.generate(**gen_kwargs, **gen_opts)
 
         gen_tokens = outputs[0, in_len:]
         self.telemetry[f"out_{role}"] += len(gen_tokens)
