@@ -83,7 +83,13 @@ def main():
         gptapi.model.aask=ask
         class SelectedProject(ProjectMessage):
             def _get_files(self):
-                return [p for p in sorted(super()._get_files()) if production(Path(p).relative_to(root))]
+                all_files = [p for p in sorted(super()._get_files()) if production(Path(p).relative_to(root))]
+                selected_files = []
+                for p in all_files:
+                    rel = str(Path(p).relative_to(root)).removesuffix('.py').replace('/', '.')
+                    if any(rel.endswith(sel.split('.')[-1]) or sel.endswith(rel.split('.')[-1]) or sel in rel for sel in selected):
+                        selected_files.append(p)
+                return selected_files if selected_files else all_files
             async def generate_test_case(self):
                 # Keep upstream generation/repair for every function in selected modules.
                 for file in self.file_messages:

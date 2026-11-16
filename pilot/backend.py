@@ -118,6 +118,10 @@ class TransformersBackend:
             self.calls_failed += int('error' in record)
             self.input_tokens += record['input_tokens']
             self.output_tokens += record.get('output_tokens', 0)
+            if self.torch.cuda.is_available():
+                self.torch.cuda.empty_cache()
+            import gc
+            gc.collect()
             append_json(self.work / 'model_calls.jsonl', record)
             emit(self.work, self.phase, 'model_call_end', call=self.call_count,
                  model_calls_started=self.call_count, model_calls_finished=self.calls_finished,

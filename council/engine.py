@@ -107,6 +107,14 @@ class CouncilEngine:
             self.telemetry[role+'_seconds'] += record['seconds']
             if self.work:
                 append_json(self.work/'model_calls.jsonl', record)
+            if not self.mock:
+                try:
+                    import torch, gc
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                    gc.collect()
+                except Exception:
+                    pass
 
     def call_coder(self, system_prompt, user_prompt):
         return self._call('coder', system_prompt, user_prompt)
