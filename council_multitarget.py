@@ -480,8 +480,13 @@ def main():
     if engine:
         write_json(args.output/'engine.json', engine.snapshot())
     export_markdown_report(records, args.output/'FINAL_REPORT.md', engine.telemetry if engine else {})
-    keys = ['target_id', 'arm', 'sample', 'status', 'first_pass', 'suite_pass', 'pass_count',
-            'total_count', 'line_pct', 'branch_pct', 'stable', 'repair_attempted', 'repaired_by_critic', 'runtime_sec']
+    for r in records:
+        if isinstance(r.get('passing_subset'), dict):
+            r['subset_line_pct'] = r['passing_subset'].get('line_pct')
+            r['subset_branch_pct'] = r['passing_subset'].get('branch_pct')
+    keys = ['target_id', 'category', 'arm', 'sample', 'seed', 'status', 'first_pass', 'suite_pass',
+            'pass_count', 'total_count', 'line_pct', 'branch_pct', 'subset_line_pct', 'subset_branch_pct',
+            'stable', 'replay_status', 'repair_attempted', 'repaired_by_critic', 'runtime_sec']
     with (args.output/'results.csv').open('w') as stream:
         writer = csv.DictWriter(stream, fieldnames=keys, extrasaction='ignore')
         writer.writeheader()
