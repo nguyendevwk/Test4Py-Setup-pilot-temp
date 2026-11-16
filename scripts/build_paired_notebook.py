@@ -7,7 +7,8 @@ from pathlib import Path
 import zipfile
 
 BASE=Path(__file__).resolve().parents[1]
-BASE_COMMIT='e86fab21d11494277d5029ff9d1c673e5c9927b0'
+import subprocess
+BASE_COMMIT=subprocess.check_output(['git','rev-parse','HEAD'],cwd=BASE,text=True).strip()
 patterns=['*.py','pilot/*.py','council/*.py','tests/test*.py','requirements*.txt','pytest.ini','pilot.json',
           'research/benchmark/*.json','notebooks/kaggle_multitarget_smoke_v4.ipynb','scripts/check_upstream_fixture.py','scripts/check_upstream_initialization.py']
 files=sorted({p for pattern in patterns for p in BASE.glob(pattern) if p.is_file()})
