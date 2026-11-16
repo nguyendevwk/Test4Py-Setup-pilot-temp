@@ -73,6 +73,7 @@ python3 council_multitarget.py \
 2. **Cơ chế Tỉa Test (Test-Node Pruning)**:
    * Sau khi LLM sinh mã kiểm thử (gồm 3–5 test functions), hệ thống tự động lọc giữ lại các test case chạy pass thực sự.
    * Các assert phụ bị lệch ở nhiệt độ $0.7$ được lược bỏ để đảm bảo file test cuối cùng đạt **100% Suite Pass Rate** mà vẫn bảo toàn độ phủ nhánh cao.
-3. **Môi trường thuần Python (Pure-Python Zero-C)**:
-   * Tuyển chọn 6 targets thuần Python từ 4 repositories tiêu biểu trong Bảng 1 của Test4Py (`PyCG`, `woa`, `superstring.py`, `genty`).
+3. **Môi trường thuần Python kết hợp Type Hints & Docstrings (Tập A & NA)**:
+   * Tập trung mạnh vào các repository có Type Hints và Docstrings đầy đủ (`docstring_parser`, `codetiming`, `typesystem`) từ Bảng 1 của Test4Py, kết hợp các case study đối chứng trạng thái (`PyCG`, `woa`, `superstring`).
+   * Tự động trích xuất Type Annotations và Docstrings qua AST đưa vào ngữ cảnh sinh test của Coder.
    * Không phụ thuộc vào các thư viện C/Cython lỗi thời, tương thích 100% với môi trường Linux/Python 3.10 trên Kaggle.

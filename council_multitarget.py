@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """Standardized Multi-Target State-Aware Council Benchmark for Kaggle Dual-GPU.
 
-Evaluates Dual-GPU Council (Coder on GPU 0, Critic on GPU 1) against Baseline
-across curated, pure-Python targets from Test4Py Table 1 (NA Projects).
+Evaluates Dual-GPU Council (Coder on GPU 0, Critic on GPU 1) against Baseline.
+Focuses heavily on Type-Annotated & Docstring-Rich targets (Tập A trong Test4Py),
+bridging prior research on Type Hints/Docstrings with Object State Setup.
 
-Includes:
+Features:
+- Dual-focus: Tập A (Type-Annotated & Docstring-Rich) + Tập NA (Stateful Baselines)
+- AST-level Type Hint & Docstring extraction injected into LLM context
 - Pure-AST State Mining & Dynamic Sandboxed Probing
 - Dual-GPU 4-bit NF4 Quantization with strict VRAM cache clearing
 - Test-Node Pruning to eliminate failing secondary assertions
-- Branch Coverage & Mutation Scoring
+- Line (Statement) Coverage & Branch Coverage calculation
 - Automated Markdown and CSV reporting with 1-click zip archive.
 """
 
@@ -27,8 +30,51 @@ import traceback
 BASE_DIR = Path(__file__).resolve().parent
 
 CURATED_TARGETS = [
+    # =========================================================================
+    # TẬP A: TYPE-ANNOTATED & DOCSTRING-RICH SUBJECTS (TEST4PY TABLE 1)
+    # =========================================================================
+    {
+        "id": "docstring_parser_parse",
+        "category": "Typed_A",
+        "project": "docstring_parser",
+        "repo_url": "https://github.com/rr-/docstring_parser.git",
+        "commit": None,
+        "module": "docstring_parser.parser",
+        "file": "docstring_parser/parser.py",
+        "symbol": "parse",
+        "class_name": None,
+        "setup_hint": "sample_doc = \"\"\"Summary line.\n\n:param name: parameter description\n:type name: str\n:returns: return description\n\"\"\""
+    },
+    {
+        "id": "codetiming_timer",
+        "category": "Typed_A",
+        "project": "codetiming",
+        "repo_url": "https://github.com/realpython/codetiming.git",
+        "commit": None,
+        "module": "codetiming._timer",
+        "file": "codetiming/_timer.py",
+        "symbol": "Timer",
+        "class_name": "Timer",
+        "setup_hint": "from codetiming import Timer\nt = Timer(name='perf_timer', text='Elapsed: {:0.4f}s')\nt.start()"
+    },
+    {
+        "id": "typesystem_schema",
+        "category": "Typed_A",
+        "project": "typesystem",
+        "repo_url": "https://github.com/encode/typesystem.git",
+        "commit": None,
+        "module": "typesystem.schemas",
+        "file": "typesystem/schemas.py",
+        "symbol": "Schema",
+        "class_name": "Schema",
+        "setup_hint": "from typesystem import Schema, String, Integer\nclass UserSchema(Schema):\n    username = String(max_length=50)\n    age = Integer()\nuser = UserSchema(username='alice', age=30)"
+    },
+    # =========================================================================
+    # TẬP NA: STATEFUL OBJECT GRAPH BASELINES (TEST4PY TABLE 1)
+    # =========================================================================
     {
         "id": "pycg_imports",
+        "category": "NA_Baseline",
         "project": "PyCG",
         "repo_url": "https://github.com/vitsalis/PyCG.git",
         "commit": "8d5dc40837803beef1d8d379fbf2cdad6cd94641",
@@ -39,18 +85,8 @@ CURATED_TARGETS = [
         "setup_hint": "from pycg.machinery.imports import ImportManager\nmod = ImportManager('test_mod')\nmod.create_node('pkg')\nmod.set_current_mod('pkg')"
     },
     {
-        "id": "pycg_as_graph",
-        "project": "PyCG",
-        "repo_url": "https://github.com/vitsalis/PyCG.git",
-        "commit": "8d5dc40837803beef1d8d379fbf2cdad6cd94641",
-        "module": "pycg.formats.as_graph",
-        "file": "pycg/formats/as_graph.py",
-        "symbol": "as_graph",
-        "class_name": None,
-        "setup_hint": "cg = {'main': ['func1', 'func2'], 'func1': ['func2'], 'func2': []}"
-    },
-    {
         "id": "woa_whale_opt",
+        "category": "NA_Baseline",
         "project": "woa",
         "repo_url": "https://github.com/docwza/woa.git",
         "commit": "4747379",
@@ -61,18 +97,8 @@ CURATED_TARGETS = [
         "setup_hint": "from src.whale_optimization import WhaleOptimization\nwoa = WhaleOptimization(opt_func=lambda x: sum(i**2 for i in x), constraints=[(-5, 5), (-5, 5)], nsols=5, b=1, a=2, a_step=0.1)"
     },
     {
-        "id": "woa_animate",
-        "project": "woa",
-        "repo_url": "https://github.com/docwza/woa.git",
-        "commit": "4747379",
-        "module": "src.animate_scatter",
-        "file": "src/animate_scatter.py",
-        "symbol": "animate_scatter",
-        "class_name": None,
-        "setup_hint": "import numpy as np\nx = np.random.rand(5, 2)"
-    },
-    {
         "id": "superstring",
+        "category": "NA_Baseline",
         "project": "superstring.py",
         "repo_url": "https://github.com/btwael/superstring.py.git",
         "commit": "f47ef78",
@@ -81,17 +107,6 @@ CURATED_TARGETS = [
         "symbol": "SuperString",
         "class_name": "SuperString",
         "setup_hint": "from superstring.superstring import SuperString\ns = SuperString('Test String For Python Testing')"
-    },
-    {
-        "id": "genty_args",
-        "project": "genty",
-        "repo_url": "https://github.com/box/genty.git",
-        "commit": "85f7c96",
-        "module": "genty.genty_args",
-        "file": "genty/genty_args.py",
-        "symbol": "genty_args",
-        "class_name": "genty_args",
-        "setup_hint": "from genty.genty_args import genty_args\nga = genty_args(1, 2, kw=3)"
     }
 ]
 
@@ -103,6 +118,7 @@ def extract_target_source(file_path: Path, symbol_name: str) -> dict:
     tree = ast.parse(source)
     target_node = None
     parent_class = None
+
     for node in ast.walk(tree):
         if isinstance(node, ast.ClassDef):
             if node.name == symbol_name:
@@ -119,12 +135,34 @@ def extract_target_source(file_path: Path, symbol_name: str) -> dict:
 
     if not target_node:
         lines = source.splitlines()[:100]
-        return {'source': '\n'.join(lines), 'parent_class': None, 'docstring': ''}
+        return {'source': '\n'.join(lines), 'parent_class': None, 'docstring': '', 'type_hints': {}, 'has_type_hints': False, 'has_docstrings': False}
+
+    # Extract type hints via AST
+    type_hints = {}
+    if isinstance(target_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        for arg in target_node.args.args:
+            if arg.annotation:
+                type_hints[arg.arg] = ast.unparse(arg.annotation)
+        if target_node.returns:
+            type_hints['return'] = ast.unparse(target_node.returns)
+    elif isinstance(target_node, ast.ClassDef):
+        for item in target_node.body:
+            if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
+                type_hints[item.target.id] = ast.unparse(item.annotation)
+            elif isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) and item.name == '__init__':
+                for arg in item.args.args:
+                    if arg.annotation and arg.arg != 'self':
+                        type_hints[arg.arg] = ast.unparse(arg.annotation)
+
+    docstring = ast.get_docstring(target_node) or ''
 
     return {
         'source': ast.get_source_segment(source, target_node) or '',
         'parent_class': parent_class.name if parent_class else None,
-        'docstring': ast.get_docstring(target_node) or ''
+        'docstring': docstring,
+        'has_docstrings': bool(docstring.strip()),
+        'type_hints': type_hints,
+        'has_type_hints': bool(type_hints)
     }
 
 
@@ -274,6 +312,7 @@ def execute_pytest_and_coverage(test_code: str, repo_root: Path, target_module: 
         except Exception:
             pass
 
+    line_pct = 0.0
     branch_pct = 0.0
     cov_file = work_dir / ".coverage"
     if cov_file.exists() and passing_nodes:
@@ -282,7 +321,11 @@ def execute_pytest_and_coverage(test_code: str, repo_root: Path, target_module: 
         if cov_json.exists():
             try:
                 cdata = json.loads(cov_json.read_text())
-                branch_pct = cdata.get("totals", {}).get("percent_covered", 0.0)
+                totals = cdata.get("totals", {})
+                line_pct = totals.get("percent_covered", 0.0)
+                num_branches = totals.get("num_branches", 0)
+                covered_branches = totals.get("covered_branches", 0)
+                branch_pct = round(100.0 * covered_branches / num_branches, 2) if num_branches > 0 else line_pct
             except Exception:
                 pass
 
@@ -291,6 +334,7 @@ def execute_pytest_and_coverage(test_code: str, repo_root: Path, target_module: 
         "total_nodes": total_nodes,
         "passing_nodes": list(passing_nodes),
         "pass_count": len(passing_nodes),
+        "line_pct": line_pct,
         "branch_pct": branch_pct,
         "stdout": proc.stdout[-1500:],
         "stderr": proc.stderr[-1500:]
@@ -318,8 +362,16 @@ def run_single_evaluation(target: dict, arm: str, sample_idx: int, engine: DualG
             setup_context = candidate
         probe_time = time.perf_counter() - t0
 
-    sys_p = "You are an expert Python test engineer. Write rigorous, self-contained, non-vacuous pytest tests for the target code. Avoid empty assertions like assert True."
+    sys_p = "You are an expert Python test engineer. Write rigorous, self-contained, non-vacuous pytest tests. Use provided Type Annotations and Docstring Specifications to construct valid argument values, edge cases, and expected assertions."
     user_p = f"Target Function/Class:\n```python\n{ast_info['source']}\n```\n\nModule: {target['module']}\nSymbol: {target['symbol']}\n"
+    
+    # Explicitly highlight Type Hints and Docstrings (Grounded Semantic Priors)
+    if ast_info['has_type_hints']:
+        user_p += f"\nType Annotations:\n```python\n{json.dumps(ast_info['type_hints'], indent=2)}\n```\n"
+    if ast_info['has_docstrings']:
+        user_p += f"\nDocstring Specification:\n\"\"\"\n{ast_info['docstring']}\n\"\"\"\n"
+
+    # State Setup Context (Only for Ranked / Verified arms)
     if setup_context:
         user_p += f"\nVerified State Setup Context:\n```python\n{setup_context}\n```\n"
 
@@ -353,14 +405,18 @@ def run_single_evaluation(target: dict, arm: str, sample_idx: int, engine: DualG
 
     res = {
         "target_id": target["id"],
+        "category": target.get("category", "General"),
         "project": target["project"],
         "module": target["module"],
         "symbol": target["symbol"],
+        "has_type_hints": ast_info["has_type_hints"],
+        "has_docstrings": ast_info["has_docstrings"],
         "arm": arm,
         "sample": f"sample_{sample_idx+1:02d}",
         "suite_pass": suite_pass,
         "pass_count": eval_final["pass_count"],
         "total_count": eval_final["total_nodes"],
+        "line_pct": eval_final["line_pct"],
         "branch_pct": eval_final["branch_pct"],
         "repaired_by_critic": repaired,
         "probe_time_sec": round(probe_time, 3),
@@ -395,25 +451,26 @@ def export_markdown_report(records: list, out_path: Path, telemetry: dict):
     lines = [
         "# REPRODUCIBLE MULTI-TARGET BENCHMARK EVALUATION",
         f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S')} | Target: Kaggle Dual-GPU (2x Tesla T4)\n",
-        "## 1. Aggregate Results by Target & Experimental Arm",
-        "",
-        "| Project | Target Symbol | Arm | Suite Pass Rate | Avg Passing Tests | Mean Branch Cov % | Avg Runtime (s) |",
-        "|---|---|:---:|:---:|:---:|:---:|:---:|"
+        "## 1. Evaluation Results by Target & Experimental Arm",
+        "Focusing on Type Hints & Docstrings (Tập A) combined with State-Aware Council Setup.\n",
+        "| Category | Project | Target Symbol | Type / Doc? | Arm | Suite Pass Rate | Line Cov % | Branch Cov % | Avg Time |",
+        "|---|---|---|:---:|---|:---:|:---:|:---:|:---:|"
     ]
 
-    target_keys = sorted(list({(r['project'], r['symbol'], r['target_id']) for r in records}))
+    target_keys = sorted(list({(r['category'], r['project'], r['symbol'], r['target_id'], r.get('has_type_hints', False), r.get('has_docstrings', False)) for r in records}))
     arms = ["baseline", "ranked", "verified"]
 
-    for proj, sym, tid in target_keys:
+    for cat, proj, sym, tid, has_t, has_d in target_keys:
+        type_doc_str = "Type+Doc" if has_t and has_d else ("Type" if has_t else ("Doc" if has_d else "None"))
         for arm in arms:
             recs = [r for r in records if r["target_id"] == tid and r["arm"] == arm]
             if not recs:
                 continue
             pass_rate = f"{sum(bool(r['suite_pass']) for r in recs)}/{len(recs)}"
-            avg_nodes = round(sum(r["pass_count"] for r in recs) / len(recs), 2)
-            avg_cov = round(sum(r["branch_pct"] for r in recs) / len(recs), 2)
+            avg_line = round(sum(r["line_pct"] for r in recs) / len(recs), 2)
+            avg_branch = round(sum(r["branch_pct"] for r in recs) / len(recs), 2)
             avg_sec = round(sum(r["runtime_sec"] for r in recs) / len(recs), 2)
-            lines.append(f"| {proj} | `{sym}` | **{arm}** | {pass_rate} | {avg_nodes} | **{avg_cov}%** | {avg_sec}s |")
+            lines.append(f"| {cat} | {proj} | `{sym}` | {type_doc_str} | **{arm}** | {pass_rate} | **{avg_line}%** | **{avg_branch}%** | {avg_sec}s |")
 
     lines.extend([
         "",
@@ -460,7 +517,7 @@ def main():
     for tgt in targets:
         repo_root = clone_if_needed(tgt, args.repos_dir)
         print(f"\n========================================================")
-        print(f"🎯 Target: {tgt['project']} -> {tgt['symbol']} ({tgt['module']})")
+        print(f"🎯 Target [{tgt.get('category')}]: {tgt['project']} -> {tgt['symbol']} ({tgt['module']})")
         print(f"========================================================")
 
         for arm in arms:
@@ -469,9 +526,9 @@ def main():
             for s_idx in range(args.samples):
                 rec = run_single_evaluation(tgt, arm, s_idx, engine, repo_root, tgt_out, seed=args.seed)
                 all_records.append(rec)
-                print(f"  [{s_idx+1}/{args.samples}] Pass: {rec['suite_pass']} | Nodes: {rec['pass_count']}/{rec['total_count']} | Branch Cov: {rec['branch_pct']:.1f}% ({rec['runtime_sec']}s)")
+                print(f"  [{s_idx+1}/{args.samples}] Pass: {rec['suite_pass']} | Nodes: {rec['pass_count']}/{rec['total_count']} | Line: {rec['line_pct']:.1f}% | Branch: {rec['branch_pct']:.1f}% ({rec['runtime_sec']}s)")
 
-    # Save summary.json and modules.csv
+    # Save summary.json and results.csv
     summary_data = {
         "schema_version": 2,
         "date": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -484,7 +541,7 @@ def main():
     (args.output / "summary.json").write_text(json.dumps(summary_data, indent=2), encoding="utf-8")
 
     # CSV
-    keys = ["project", "module", "symbol", "arm", "sample", "suite_pass", "pass_count", "total_count", "branch_pct", "repaired_by_critic", "runtime_sec"]
+    keys = ["category", "project", "module", "symbol", "has_type_hints", "has_docstrings", "arm", "sample", "suite_pass", "pass_count", "total_count", "line_pct", "branch_pct", "repaired_by_critic", "runtime_sec"]
     with (args.output / "results.csv").open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=keys, extrasaction="ignore")
         writer.writeheader()
