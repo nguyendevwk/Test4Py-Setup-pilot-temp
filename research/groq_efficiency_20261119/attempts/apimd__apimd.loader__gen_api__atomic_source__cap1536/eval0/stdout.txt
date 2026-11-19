@@ -1,0 +1,83 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_gen_api_creates_markdown _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-114/test_gen_api_creates_markdown0')
+
+    def test_gen_api_creates_markdown(tmp_path):
+        """Normal case: a valid module is loaded and a markdown file is written."""
+        # Create a simple module with a function
+        mod_name = "sample_module"
+        _create_module(tmp_path, mod_name, "def hello():\n    return 'hi'\n")
+    
+        # Ensure the module can be imported
+        sys.path.insert(0, str(tmp_path))
+        try:
+            importlib.invalidate_caches()
+            importlib.import_module(mod_name)
+        finally:
+            sys.path.pop(0)
+    
+        # Run gen_api
+        docs = gen_api({"Sample": mod_name}, pwd=str(tmp_path), prefix=str(tmp_path / "docs"), dry=False)
+    
+        # Verify that one document was returned
+>       assert len(docs) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+../../../../../../../groq_efficiency_20261119/attempts/apimd__apimd.loader__gen_api__atomic_source__cap1536/eval0/test_generated.py:37: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-114/test_gen_api_creates_markdown0/docs[0m
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-114/test_gen_api_creates_markdown0/docs[0m
+[32mLoad root: sample_module (Sample)[0m
+[32mLoad root: sample_module (Sample)[0m
+[33m'sample_module' can not be found[0m
+[33m'sample_module' can not be found[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:127 Create directory: /tmp/pytest-of-heurix/pytest-114/test_gen_api_creates_markdown0/docs
+INFO     root:loader.py:131 Load root: sample_module (Sample)
+WARNING  root:loader.py:134 'sample_module' can not be found
+______________________ test_gen_api_prefix_already_exists ______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-114/test_gen_api_prefix_already_ex0')
+
+    def test_gen_api_prefix_already_exists(tmp_path):
+        """Boundary case: the prefix directory already exists; gen_api should not fail."""
+        # Create the prefix directory beforehand
+        prefix_dir = tmp_path / "existing_docs"
+        prefix_dir.mkdir()
+    
+        # Create a simple module
+        mod_name = "another_module"
+        _create_module(tmp_path, mod_name, "def add(a, b):\n    return a + b\n")
+    
+        # Ensure the module can be imported
+        sys.path.insert(0, str(tmp_path))
+        try:
+            importlib.invalidate_caches()
+            importlib.import_module(mod_name)
+        finally:
+            sys.path.pop(0)
+    
+        # Run gen_api
+        docs = gen_api({"Another": mod_name}, prefix=str(prefix_dir), dry=False)
+    
+        # Verify that one document was returned
+>       assert len(docs) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+../../../../../../../groq_efficiency_20261119/attempts/apimd__apimd.loader__gen_api__atomic_source__cap1536/eval0/test_generated.py:85: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[32mLoad root: another_module (Another)[0m
+[32mLoad root: another_module (Another)[0m
+[33m'another_module' can not be found[0m
+[33m'another_module' can not be found[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:131 Load root: another_module (Another)
+WARNING  root:loader.py:134 'another_module' can not be found
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_efficiency_20261119/attempts/apimd__apimd.loader__gen_api__atomic_source__cap1536/eval0/test_generated.py::test_gen_api_creates_markdown
+FAILED ../../../../../../../groq_efficiency_20261119/attempts/apimd__apimd.loader__gen_api__atomic_source__cap1536/eval0/test_generated.py::test_gen_api_prefix_already_exists
+2 failed, 1 passed in 0.20s

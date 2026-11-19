@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-58b18e61-71a8-4e19-b52e-3ed2bf65cd47",
+  "object": "chat.completion",
+  "created": 1795079652,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport io\nimport time\nimport threading\nimport types\nimport importlib\nimport pytest\n\n# Import the target module\nfrom httpie.uploads import observe_stdin_for_data_thread, Environment\n\n# Helper to create a dummy Environment with stderr capturing\nclass DummyEnv:\n    def __init__(self):\n        self.stderr = io.StringIO()\n\n# Test 1: On non‑Windows, with READ_THRESHOLD > 0, a warning is emitted after the timeout\ndef test_observe_stdin_warning_emitted(tmp_path):\n    mod = importlib.reload(importlib.import_module(\"httpie.uploads\"))\n    # Ensure we are not on Windows\n    mod.is_windows = False\n    # Set a short threshold\n    mod.READ_THRESHOLD = 0.1\n    env = DummyEnv()\n    read_event = threading.Event()\n    # Use a dummy file object\n    dummy_file = io.BytesIO(b\"\")\n    observe_stdin_for_data_thread(env, dummy_file, read_event)\n    # Wait longer than the threshold to allow the thread to run\n    time.sleep(0.2)\n    output = env.stderr.getvalue()\n    assert \"> warning: no stdin data read in 0.1s\" in output\n\n# Test 2: When READ_THRESHOLD is 0, no warning is emitted and no thread is started\ndef test_observe_stdin_no_threshold(tmp_path):\n    mod = importlib.reload(importlib.import_module(\"httpie.uploads\"))\n    mod.is_windows = False\n    mod.READ_THRESHOLD = 0\n    env = DummyEnv()\n    read_event = threading.Event()\n    dummy_file = io.BytesIO(b\"\")\n    observe_stdin_for_data_thread(env, dummy_file, read_event)\n    # Wait to ensure no thread would have run\n    time.sleep(0.1)\n    output = env.stderr.getvalue()\n    assert output == \"\"\n\n# Test 3: On Windows, the function returns immediately and does not start a thread\ndef test_observe_stdin_windows(monkeypatch):\n    mod = importlib.reload(importlib.import_module(\"httpie.uploads\"))\n    # Simulate Windows environment\n    monkeypatch.setattr(mod, \"is_windows\", True)\n    env = DummyEnv()\n    read_event = threading.Event()\n    dummy_file = io.BytesIO(b\"\")\n    result = observe_stdin_for_data_thread(env, dummy_file, read_event)\n    assert result is None\n    # No warning should be written\n    assert env.stderr.getvalue() == \"\"\n```",
+        "reasoning": "We need tests for observe_stdin_for_data_thread. Need to simulate non-windows, READ_THRESHOLD variable? It's not defined in snippet; assume imported from somewhere. We can't modify product code. We need to import module and set environment. We can patch is_windows to False. Also need READ_THRESHOLD; maybe defined elsewhere. We can monkeypatch module attributes. Use tmp_path for file? file param unused. We test that thread starts and writes warning after timeout. Use threading.Event that never set. Capture stderr via StringIO. Use time.sleep slightly > threshold. Need threshold small. We'll monkeypatch READ_THRESHOLD to 0.1. Then test that warning appears. Also test that if READ_THRESHOLD=0 no warning. Third test maybe that on windows returns None immediately. Use monkeypatch is_windows True. Ensure no thread started. Use mock to track thread? We can patch threading.Thread to capture args. But simpler: set is_windows True and ensure function returns None and no warning. Use StringIO. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005232039,
+    "prompt_tokens": 552,
+    "prompt_time": 0.029086725,
+    "completion_tokens": 738,
+    "completion_time": 0.76105561,
+    "total_tokens": 1290,
+    "total_time": 0.790142335,
+    "completion_tokens_details": {
+      "reasoning_tokens": 208
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7shbgh8enatea1qxqg4b3c8",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport io\nimport time\nimport threading\nimport types\nimport importlib\nimport pytest\n\n# Import the target module\nfrom httpie.uploads import observe_stdin_for_data_thread, Environment\n\n# Helper to create a dummy Environment with stderr capturing\nclass DummyEnv:\n    def __init__(self):\n        self.stderr = io.StringIO()\n\n# Test 1: On non‑Windows, with READ_THRESHOLD > 0, a warning is emitted after the timeout\ndef test_observe_stdin_warning_emitted(tmp_path):\n    mod = importlib.reload(importlib.import_module(\"httpie.uploads\"))\n    # Ensure we are not on Windows\n    mod.is_windows = False\n    # Set a short threshold\n    mod.READ_THRESHOLD = 0.1\n    env = DummyEnv()\n    read_event = threading.Event()\n    # Use a dummy file object\n    dummy_file = io.BytesIO(b\"\")\n    observe_stdin_for_data_thread(env, dummy_file, read_event)\n    # Wait longer than the threshold to allow the thread to run\n    time.sleep(0.2)\n    output = env.stderr.getvalue()\n    assert \"> warning: no stdin data read in 0.1s\" in output\n\n# Test 2: When READ_THRESHOLD is 0, no warning is emitted and no thread is started\ndef test_observe_stdin_no_threshold(tmp_path):\n    mod = importlib.reload(importlib.import_module(\"httpie.uploads\"))\n    mod.is_windows = False\n    mod.READ_THRESHOLD = 0\n    env = DummyEnv()\n    read_event = threading.Event()\n    dummy_file = io.BytesIO(b\"\")\n    observe_stdin_for_data_thread(env, dummy_file, read_event)\n    # Wait to ensure no thread would have run\n    time.sleep(0.1)\n    output = env.stderr.getvalue()\n    assert output == \"\"\n\n# Test 3: On Windows, the function returns immediately and does not start a thread\ndef test_observe_stdin_windows(monkeypatch):\n    mod = importlib.reload(importlib.import_module(\"httpie.uploads\"))\n    # Simulate Windows environment\n    monkeypatch.setattr(mod, \"is_windows\", True)\n    env = DummyEnv()\n    read_event = threading.Event()\n    dummy_file = io.BytesIO(b\"\")\n    result = observe_stdin_for_data_thread(env, dummy_file, read_event)\n    assert result is None\n    # No warning should be written\n    assert env.stderr.getvalue() == \"\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "ab2a0a209b6547ea843ecc8a9d03a807",
+  "_api_plus_pacing_seconds": 1.433674739964772
+}

@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-53c1ec4f-ff3f-4c0d-a7b5-73530643da4e",
+  "object": "chat.completion",
+  "created": 1795079661,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport requests\nimport pytest\nfrom httpie.cli.dicts import HTTPHeadersDict\nfrom httpie.client import apply_missing_repeated_headers\n\n\ndef test_apply_missing_repeated_headers_restores_all_original_values(tmp_path):\n    # Original headers contain the same header name twice with different values\n    original = HTTPHeadersDict([(\"X-Test\", \"value1\"), (\"X-Test\", \"value2\")])\n    # Prepare a request that will override one of the values\n    req = requests.Request(\"GET\", \"http://example.com\")\n    prepped = requests.Session().prepare_request(req)\n    # Simulate that the request library has overridden the header to a single value\n    prepped.headers[\"X-Test\"] = \"value1\"\n    # Apply the function\n    apply_missing_repeated_headers(original, prepped)\n    # After merging, both original values should be present\n    assert prepped.headers.get_all(\"X-Test\") == [\"value1\", \"value2\"]\n\n\ndef test_apply_missing_repeated_headers_preserves_overridden_value(tmp_path):\n    # Original headers contain two values\n    original = HTTPHeadersDict([(\"X-Override\", \"original1\"), (\"X-Override\", \"original2\")])\n    # Prepare a request that overrides the header to a new value\n    req = requests.Request(\"GET\", \"http://example.com\")\n    prepped = requests.Session().prepare_request(req)\n    prepped.headers[\"X-Override\"] = \"newvalue\"\n    # Apply the function\n    apply_missing_repeated_headers(original, prepped)\n    # The overridden value should remain, and original values should not be added\n    assert prepped.headers.get_all(\"X-Override\") == [\"newvalue\"]\n\n\ndef test_apply_missing_repeated_headers_no_change_when_header_absent(tmp_path):\n    # Original headers contain a header not present in the prepared request\n    original = HTTPHeadersDict([(\"X-Only\", \"onlyvalue\")])\n    req = requests.Request(\"GET\", \"http://example.com\")\n    prepped = requests.Session().prepare_request(req)\n    # Apply the function\n    apply_missing_repeated_headers(original, prepped)\n    # Since the header was not in the prepared request, nothing should change\n    assert \"X-Only\" not in prepped.headers\n```",
+        "reasoning": "Need tests for apply_missing_repeated_headers. Use HTTPHeadersDict from httpie.cli.dicts. Let's inspect its behavior? Assume behaves like dict preserving case? We'll create original_headers with repeated header names. Use requests.PreparedRequest. We'll test that after function, headers contain all original values. Also test that overridden value preserved. Also boundary: header not present. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004753231,
+    "prompt_tokens": 650,
+    "prompt_time": 0.01699681,
+    "completion_tokens": 560,
+    "completion_time": 0.586860389,
+    "total_tokens": 1210,
+    "total_time": 0.603857199,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 77
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7shbs7we8d8jjvce670v74t",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport requests\nimport pytest\nfrom httpie.cli.dicts import HTTPHeadersDict\nfrom httpie.client import apply_missing_repeated_headers\n\n\ndef test_apply_missing_repeated_headers_restores_all_original_values(tmp_path):\n    # Original headers contain the same header name twice with different values\n    original = HTTPHeadersDict([(\"X-Test\", \"value1\"), (\"X-Test\", \"value2\")])\n    # Prepare a request that will override one of the values\n    req = requests.Request(\"GET\", \"http://example.com\")\n    prepped = requests.Session().prepare_request(req)\n    # Simulate that the request library has overridden the header to a single value\n    prepped.headers[\"X-Test\"] = \"value1\"\n    # Apply the function\n    apply_missing_repeated_headers(original, prepped)\n    # After merging, both original values should be present\n    assert prepped.headers.get_all(\"X-Test\") == [\"value1\", \"value2\"]\n\n\ndef test_apply_missing_repeated_headers_preserves_overridden_value(tmp_path):\n    # Original headers contain two values\n    original = HTTPHeadersDict([(\"X-Override\", \"original1\"), (\"X-Override\", \"original2\")])\n    # Prepare a request that overrides the header to a new value\n    req = requests.Request(\"GET\", \"http://example.com\")\n    prepped = requests.Session().prepare_request(req)\n    prepped.headers[\"X-Override\"] = \"newvalue\"\n    # Apply the function\n    apply_missing_repeated_headers(original, prepped)\n    # The overridden value should remain, and original values should not be added\n    assert prepped.headers.get_all(\"X-Override\") == [\"newvalue\"]\n\n\ndef test_apply_missing_repeated_headers_no_change_when_header_absent(tmp_path):\n    # Original headers contain a header not present in the prepared request\n    original = HTTPHeadersDict([(\"X-Only\", \"onlyvalue\")])\n    req = requests.Request(\"GET\", \"http://example.com\")\n    prepped = requests.Session().prepare_request(req)\n    # Apply the function\n    apply_missing_repeated_headers(original, prepped)\n    # Since the header was not in the prepared request, nothing should change\n    assert \"X-Only\" not in prepped.headers\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "c3087c70a65f498cb33031e3dbdbbb51",
+  "_api_plus_pacing_seconds": 1.9549732570303604
+}

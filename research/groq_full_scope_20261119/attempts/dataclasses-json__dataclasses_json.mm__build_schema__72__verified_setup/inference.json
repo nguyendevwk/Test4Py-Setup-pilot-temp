@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-0feca3c8-d665-4389-b22f-c64ceb0ebac5",
+  "object": "chat.completion",
+  "created": 1795076749,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport pytest\nfrom dataclasses import dataclass, field\nfrom typing import Optional, List\nfrom uuid import UUID\nfrom dataclasses_json.mm import build_schema\nfrom marshmallow import ValidationError\n\n# Helper dataclass used in tests\n@dataclass\nclass Person:\n    name: str\n    age: int\n    tags: List[str] = field(default_factory=list)\n    dataclass_json_config: Optional[str] = None  # should be excluded from schema fields\n\n# Test 1: Normal serialization and deserialization\ndef test_build_schema_basic_serialization(tmp_path):\n    # Build schema for Person\n    PersonSchema = build_schema(Person, mixin=None, infer_missing=False, partial=False)\n    schema = PersonSchema()\n\n    # Create an instance\n    person = Person(name=\"Alice\", age=30, tags=[\"engineer\", \"python\"])\n\n    # Dump to JSON string\n    json_str = schema.dumps(person)\n    data = json.loads(json_str)\n\n    # Verify that all fields except dataclass_json_config are present\n    assert set(data.keys()) == {\"name\", \"age\", \"tags\"}\n    assert data[\"name\"] == \"Alice\"\n    assert data[\"age\"] == 30\n    assert data[\"tags\"] == [\"engineer\", \"python\"]\n\n    # Load back to object\n    loaded = schema.loads(json_str)\n    assert isinstance(loaded, Person)\n    assert loaded.name == \"Alice\"\n    assert loaded.age == 30\n    assert loaded.tags == [\"engineer\", \"python\"]\n    # dataclass_json_config should be None by default\n    assert loaded.dataclass_json_config is None\n\n# Test 2: Schema Meta fields exclude dataclass_json_config and catch‑all placeholder\ndef test_build_schema_meta_excludes_special_fields():\n    PersonSchema = build_schema(Person, mixin=None, infer_missing=False, partial=False)\n    meta_fields = PersonSchema.Meta.fields\n    # dataclass_json_config should not be in the fields tuple\n    assert \"dataclass_json_config\" not in meta_fields\n    # All other dataclass fields should be present\n    expected = (\"name\", \"age\", \"tags\")\n    assert meta_fields == expected\n\n# Test 3: Passing a non‑dataclass raises an error\ndef test_build_schema_non_dataclass_raises():\n    class NotADataclass:\n        pass\n\n    with pytest.raises(TypeError):\n        build_schema(NotADataclass, mixin=None, infer_missing=False, partial=False)\n```",
+        "reasoning": "We need to test build_schema. We need a dataclass to pass. Write three tests: normal serialization/deserialization, boundary with optional catchall? maybe test that fields excluded. Use tmp_path for any file? Not needed. Just test behavior. Use simple dataclass. Ensure that dumps uses ExtendedEncoder. Also test that dump updates undefined parameters. Use a dataclass with extra attribute? Actually catchall var? Hard. Maybe test that Meta fields excludes dataclass_json_config. Use dataclass with that field. Ensure schema fields list excludes it. Use build_schema and check schema.Meta.fields. Third test error: passing non-dataclass raises? build_schema expects dataclass. Let's test that passing non-dataclass raises TypeError? Actually code uses dc_fields which will error. So test that."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.101426099,
+    "prompt_tokens": 815,
+    "prompt_time": 0.051726316,
+    "completion_tokens": 688,
+    "completion_time": 0.821367969,
+    "total_tokens": 1503,
+    "total_time": 0.873094285,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 162
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sejwzme39trnxgcnndtwyp",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport pytest\nfrom dataclasses import dataclass, field\nfrom typing import Optional, List\nfrom uuid import UUID\nfrom dataclasses_json.mm import build_schema\nfrom marshmallow import ValidationError\n\n# Helper dataclass used in tests\n@dataclass\nclass Person:\n    name: str\n    age: int\n    tags: List[str] = field(default_factory=list)\n    dataclass_json_config: Optional[str] = None  # should be excluded from schema fields\n\n# Test 1: Normal serialization and deserialization\ndef test_build_schema_basic_serialization(tmp_path):\n    # Build schema for Person\n    PersonSchema = build_schema(Person, mixin=None, infer_missing=False, partial=False)\n    schema = PersonSchema()\n\n    # Create an instance\n    person = Person(name=\"Alice\", age=30, tags=[\"engineer\", \"python\"])\n\n    # Dump to JSON string\n    json_str = schema.dumps(person)\n    data = json.loads(json_str)\n\n    # Verify that all fields except dataclass_json_config are present\n    assert set(data.keys()) == {\"name\", \"age\", \"tags\"}\n    assert data[\"name\"] == \"Alice\"\n    assert data[\"age\"] == 30\n    assert data[\"tags\"] == [\"engineer\", \"python\"]\n\n    # Load back to object\n    loaded = schema.loads(json_str)\n    assert isinstance(loaded, Person)\n    assert loaded.name == \"Alice\"\n    assert loaded.age == 30\n    assert loaded.tags == [\"engineer\", \"python\"]\n    # dataclass_json_config should be None by default\n    assert loaded.dataclass_json_config is None\n\n# Test 2: Schema Meta fields exclude dataclass_json_config and catch‑all placeholder\ndef test_build_schema_meta_excludes_special_fields():\n    PersonSchema = build_schema(Person, mixin=None, infer_missing=False, partial=False)\n    meta_fields = PersonSchema.Meta.fields\n    # dataclass_json_config should not be in the fields tuple\n    assert \"dataclass_json_config\" not in meta_fields\n    # All other dataclass fields should be present\n    expected = (\"name\", \"age\", \"tags\")\n    assert meta_fields == expected\n\n# Test 3: Passing a non‑dataclass raises an error\ndef test_build_schema_non_dataclass_raises():\n    class NotADataclass:\n        pass\n\n    with pytest.raises(TypeError):\n        build_schema(NotADataclass, mixin=None, infer_missing=False, partial=False)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4101509409956634
+}

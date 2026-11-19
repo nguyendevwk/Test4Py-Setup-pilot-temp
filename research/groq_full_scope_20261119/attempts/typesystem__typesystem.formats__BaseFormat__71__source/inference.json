@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-2eaf4ec0-69b8-4fdf-8823-7fa78c8ff52a",
+  "object": "chat.completion",
+  "created": 1795077034,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.formats import BaseFormat\nfrom typesystem.base import ValidationError\n\nclass IntFormat(BaseFormat):\n    errors = {\"not_int\": \"Expected an int, got {value}\"}\n\n    def is_native_type(self, value):\n        return isinstance(value, int)\n\n    def validate(self, value):\n        if self.is_native_type(value):\n            return value\n        return self.validation_error(\"not_int\")\n\n    def serialize(self, obj):\n        return str(obj) if obj is not None else None\n\ndef test_validation_error_message():\n    fmt = IntFormat()\n    err = fmt.validation_error(\"not_int\")\n    assert isinstance(err, ValidationError)\n    assert err.code == \"not_int\"\n    assert err.text == \"Expected an int, got {value}\"\n    # The message should include the current state of the format instance\n    fmt.value = 42\n    err_with_value = fmt.validation_error(\"not_int\")\n    assert err_with_value.text == \"Expected an int, got 42\"\n\ndef test_validate_success():\n    fmt = IntFormat()\n    result = fmt.validate(10)\n    assert result == 10\n    assert fmt.is_native_type(result) is True\n    serialized = fmt.serialize(result)\n    assert serialized == \"10\"\n\ndef test_validate_error():\n    fmt = IntFormat()\n    result = fmt.validate(\"not an int\")\n    assert isinstance(result, ValidationError)\n    assert result.code == \"not_int\"\n    assert result.text == \"Expected an int, got {value}\"\n```",
+        "reasoning": "We need to test BaseFormat. But it's abstract. We can create a concrete subclass for testing. Use simple implementation. Test validation_error, is_native_type, validate, serialize. But abstract methods raise NotImplemented. So we need subclass that implements them. We'll test that validation_error uses errors dict. Also test that validate returns value or ValidationError. We'll create subclass SimpleFormat that accepts int. Implement is_native_type checking isinstance int. validate returns value if int else ValidationError. serialize returns str(value). Write three tests: test_validation_error_message, test_validate_success, test_validate_error. Use pytest.raises? For error, validate returns ValidationError, not raise. So assert isinstance. Use tmp_path? Not needed. Provide code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051517667,
+    "prompt_tokens": 384,
+    "prompt_time": 0.029644931,
+    "completion_tokens": 473,
+    "completion_time": 0.523354742,
+    "total_tokens": 857,
+    "total_time": 0.552999673,
+    "completion_tokens_details": {
+      "reasoning_tokens": 148
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sevm00e1dtd75mawkpcry1",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.formats import BaseFormat\nfrom typesystem.base import ValidationError\n\nclass IntFormat(BaseFormat):\n    errors = {\"not_int\": \"Expected an int, got {value}\"}\n\n    def is_native_type(self, value):\n        return isinstance(value, int)\n\n    def validate(self, value):\n        if self.is_native_type(value):\n            return value\n        return self.validation_error(\"not_int\")\n\n    def serialize(self, obj):\n        return str(obj) if obj is not None else None\n\ndef test_validation_error_message():\n    fmt = IntFormat()\n    err = fmt.validation_error(\"not_int\")\n    assert isinstance(err, ValidationError)\n    assert err.code == \"not_int\"\n    assert err.text == \"Expected an int, got {value}\"\n    # The message should include the current state of the format instance\n    fmt.value = 42\n    err_with_value = fmt.validation_error(\"not_int\")\n    assert err_with_value.text == \"Expected an int, got 42\"\n\ndef test_validate_success():\n    fmt = IntFormat()\n    result = fmt.validate(10)\n    assert result == 10\n    assert fmt.is_native_type(result) is True\n    serialized = fmt.serialize(result)\n    assert serialized == \"10\"\n\ndef test_validate_error():\n    fmt = IntFormat()\n    result = fmt.validate(\"not an int\")\n    assert isinstance(result, ValidationError)\n    assert result.code == \"not_int\"\n    assert result.text == \"Expected an int, got {value}\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.921039336011745
+}

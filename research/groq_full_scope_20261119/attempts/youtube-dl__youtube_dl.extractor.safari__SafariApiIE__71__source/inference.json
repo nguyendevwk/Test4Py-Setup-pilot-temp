@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-ede0fae8-05fd-4354-9a55-2e8ca7b04724",
+  "object": "chat.completion",
+  "created": 1795077906,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport re\nimport pytest\nfrom youtube_dl.extractor.safari import SafariApiIE\n\n# Helper to create a dummy extractor instance with a patched _download_json\ndef make_extractor(json_response):\n    extractor = SafariApiIE()\n    def fake_download_json(url, name, note):\n        # The real method would fetch from the network; we return the provided JSON.\n        return json_response\n    extractor._download_json = fake_download_json\n    return extractor\n\ndef test_safari_api_ie_normal_extraction():\n    # Given a valid URL and a JSON containing a web_url field\n    url = \"https://www.safaribooksonline.com/api/v1/book/123456789/chapter/part01.html\"\n    json_response = {\"web_url\": \"https://example.com/content/part01\"}\n    extractor = make_extractor(json_response)\n\n    result = extractor._real_extract(url)\n\n    # The result should be a URL result pointing to the web_url\n    assert result._url == json_response[\"web_url\"]\n    assert result._ie_key == \"safari\"\n\ndef test_safari_api_ie_missing_web_url_raises():\n    # When the JSON lacks the required 'web_url' key, an ExtractorError should be raised\n    url = \"https://www.safaribooksonline.com/api/v1/book/987654321/chapter/part02.html\"\n    json_response = {\"not_web_url\": \"https://example.com/invalid\"}\n    extractor = make_extractor(json_response)\n\n    with pytest.raises(Exception) as excinfo:\n        extractor._real_extract(url)\n    assert \"web_url\" in str(excinfo.value)\n\ndef test_safari_api_ie_invalid_url_pattern():\n    # URLs that do not match the pattern should result in a regex match failure\n    url = \"https://www.safaribooksonline.com/api/v1/book/123/chapter/part01/extra.html\"\n    extractor = SafariApiIE()\n    # _real_extract will call re.match; we expect it to return None and raise\n    with pytest.raises(Exception) as excinfo:\n        extractor._real_extract(url)\n    assert \"Downloading part JSON\" not in str(excinfo.value)\n```",
+        "reasoning": "Need tests for SafariApiIE. We can instantiate extractor and call _real_extract with a mock URL but need to mock _download_json to return dict. Can't use mocks. Instead we can monkeypatch by subclassing? But cannot modify product code. We can use monkeypatch fixture to replace method on instance. That's allowed. Use pytest. Provide three tests: normal extraction, boundary with missing part? error when JSON missing web_url? Use raises. Use tmp_path? Not needed. Provide tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05343042,
+    "prompt_tokens": 522,
+    "prompt_time": 0.03128307,
+    "completion_tokens": 570,
+    "completion_time": 0.669457701,
+    "total_tokens": 1092,
+    "total_time": 0.700740771,
+    "completion_tokens_details": {
+      "reasoning_tokens": 101
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfp72tet6abe5bfyy974ya",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport re\nimport pytest\nfrom youtube_dl.extractor.safari import SafariApiIE\n\n# Helper to create a dummy extractor instance with a patched _download_json\ndef make_extractor(json_response):\n    extractor = SafariApiIE()\n    def fake_download_json(url, name, note):\n        # The real method would fetch from the network; we return the provided JSON.\n        return json_response\n    extractor._download_json = fake_download_json\n    return extractor\n\ndef test_safari_api_ie_normal_extraction():\n    # Given a valid URL and a JSON containing a web_url field\n    url = \"https://www.safaribooksonline.com/api/v1/book/123456789/chapter/part01.html\"\n    json_response = {\"web_url\": \"https://example.com/content/part01\"}\n    extractor = make_extractor(json_response)\n\n    result = extractor._real_extract(url)\n\n    # The result should be a URL result pointing to the web_url\n    assert result._url == json_response[\"web_url\"]\n    assert result._ie_key == \"safari\"\n\ndef test_safari_api_ie_missing_web_url_raises():\n    # When the JSON lacks the required 'web_url' key, an ExtractorError should be raised\n    url = \"https://www.safaribooksonline.com/api/v1/book/987654321/chapter/part02.html\"\n    json_response = {\"not_web_url\": \"https://example.com/invalid\"}\n    extractor = make_extractor(json_response)\n\n    with pytest.raises(Exception) as excinfo:\n        extractor._real_extract(url)\n    assert \"web_url\" in str(excinfo.value)\n\ndef test_safari_api_ie_invalid_url_pattern():\n    # URLs that do not match the pattern should result in a regex match failure\n    url = \"https://www.safaribooksonline.com/api/v1/book/123/chapter/part01/extra.html\"\n    extractor = SafariApiIE()\n    # _real_extract will call re.match; we expect it to return None and raise\n    with pytest.raises(Exception) as excinfo:\n        extractor._real_extract(url)\n    assert \"Downloading part JSON\" not in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1183681159745902
+}

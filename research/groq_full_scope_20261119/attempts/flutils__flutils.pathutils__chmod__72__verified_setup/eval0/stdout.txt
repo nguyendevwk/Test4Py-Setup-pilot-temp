@@ -1,0 +1,30 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_chmod_glob_and_include_parent ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chmod__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_chmod_glob_and_include_pa0')
+
+    def test_chmod_glob_and_include_parent(tmp_path):
+        # Setup nested structure
+        (tmp_path / "sub1").mkdir()
+        (tmp_path / "sub1" / "file1.txt").write_text("a")
+        (tmp_path / "sub2").mkdir()
+        (tmp_path / "sub2" / "file2.txt").write_text("b")
+    
+        # Glob pattern to change all files and dirs inside tmp_path
+        glob_pattern = normalize_path(tmp_path / "**")
+        chmod(glob_pattern, mode_file=0o600, mode_dir=0o700, include_parent=True)
+    
+        # Check each file and directory mode
+        for path in [tmp_path / "sub1", tmp_path / "sub1" / "file1.txt",
+                     tmp_path / "sub2", tmp_path / "sub2" / "file2.txt"]:
+            mode = stat.S_IMODE(os.lstat(path).st_mode)
+            expected = 0o700 if path.is_dir() else 0o600
+>           assert mode == expected, f"{path} mode {oct(mode)} != {oct(expected)}"
+E           AssertionError: /home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chmod__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_chmod_glob_and_include_pa0/sub1 mode 0o755 != 0o700
+E           assert 493 == 448
+
+test_generated.py:41: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_chmod_glob_and_include_parent - AssertionError...
+1 failed, 2 passed in 0.11s

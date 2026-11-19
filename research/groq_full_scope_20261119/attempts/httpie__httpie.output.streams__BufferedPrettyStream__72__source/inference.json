@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-0f6b2569-decd-4647-a459-af12900a46af",
+  "object": "chat.completion",
+  "created": 1795079667,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.streams import BufferedPrettyStream, BinarySuppressedError\n\n# Dummy classes to simulate required interfaces\nclass DummyMsg:\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def iter_body(self, chunk_size):\n        for chunk in self._chunks:\n            yield chunk\n\nclass DummyConverter:\n    def __init__(self, new_mime, new_body):\n        self.new_mime = new_mime\n        self.new_body = new_body\n\n    def convert(self, body):\n        return self.new_mime, self.new_body\n\nclass DummyConversion:\n    def __init__(self, converter_map):\n        self.converter_map = converter_map\n\n    def get_converter(self, mime):\n        return self.converter_map.get(mime)\n\n# Test normal text body without null bytes and no converter\ndef test_iter_body_normal_text():\n    msg = DummyMsg([b'hello ', b'world'])\n    conversion = DummyConversion({})\n    stream = BufferedPrettyStream.__new__(BufferedPrettyStream)\n    stream.msg = msg\n    stream.conversion = conversion\n    stream.mime = 'text/plain'\n    stream.process_body = lambda b: b.upper()\n    result = list(stream.iter_body())\n    assert result == [b'HELLO WORLD']\n\n# Test binary body that should raise BinarySuppressedError\ndef test_iter_body_binary_suppressed():\n    msg = DummyMsg([b'abc\\x00def'])\n    conversion = DummyConversion({})\n    stream = BufferedPrettyStream.__new__(BufferedPrettyStream)\n    stream.msg = msg\n    stream.conversion = conversion\n    stream.mime = 'application/octet-stream'\n    stream.process_body = lambda b: b\n    with pytest.raises(BinarySuppressedError):\n        list(stream.iter_body())\n\n# Test body that triggers a converter and changes mime\ndef test_iter_body_with_converter():\n    msg = DummyMsg([b'{\"key\":\"value\"}'])\n    converter = DummyConverter('application/json', b'{\"key\":\"converted\"}')\n    conversion = DummyConversion({'application/json': converter})\n    stream = BufferedPrettyStream.__new__(BufferedPrettyStream)\n    stream.msg = msg\n    stream.conversion = conversion\n    stream.mime = 'application/json'\n    stream.process_body = lambda b: b[::-1]  # reverse bytes\n    result = list(stream.iter_body())\n    # After conversion, mime should be updated and body reversed\n    assert stream.mime == 'application/json'\n    assert result == [b'}detcernoc\":\"yek\"{']\n```",
+        "reasoning": "We need to test BufferedPrettyStream. Need to import it. We need to create a dummy HTTPMessage with iter_body. Also need conversion and environment? Probably need to instantiate with minimal. Let's inspect PrettyStream? Not provided. Might be in same module. But we can create a minimal subclass? Actually BufferedPrettyStream inherits PrettyStream; we need to import it. But we don't know its constructor. Might require msg, conversion, etc. We can mock minimal attributes? But cannot mock target. But we can create a dummy class that inherits BufferedPrettyStream and override needed? But tests should use real target. We can instantiate BufferedPrettyStream with dummy args if constructor accepts them. Let's assume constructor signature: BufferedPrettyStream(msg, conversion, mime, process_body). Hard to know. Might be tough.\n\nMaybe we can test iter_body logic by creating a subclass that sets attributes manually. We can instantiate BufferedPrettyStream without calling __init__ by using object.__new__ and set attributes. Then call iter_body. That uses self.msg, self.conversion, self.mime, self.process_body. We can set those. So test normal: body without null bytes, no converter. Should yield processed body. We can set process_body to identity. For binary: chunk contains null, conversion returns None, should raise BinarySuppressedError. Need to import that exception. Let's import from module. Use tmp_path for any file? Not needed.\n\nImplement three tests: normal text, binary suppressed, converter conversion. Use minimal dummy msg with iter_body yielding chunks. Use dummy conversion with get_converter returning converter object with convert method. For binary suppressed, get_converter returns None. For converter conversion, get_converter returns converter that changes mime and body.\n\nLet's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005743178,
+    "prompt_tokens": 460,
+    "prompt_time": 0.011002774,
+    "completion_tokens": 884,
+    "completion_time": 1.231768907,
+    "total_tokens": 1344,
+    "total_time": 1.242771681,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 352
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7shbz1ne2vr4qvpyf5mxsez",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.streams import BufferedPrettyStream, BinarySuppressedError\n\n# Dummy classes to simulate required interfaces\nclass DummyMsg:\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def iter_body(self, chunk_size):\n        for chunk in self._chunks:\n            yield chunk\n\nclass DummyConverter:\n    def __init__(self, new_mime, new_body):\n        self.new_mime = new_mime\n        self.new_body = new_body\n\n    def convert(self, body):\n        return self.new_mime, self.new_body\n\nclass DummyConversion:\n    def __init__(self, converter_map):\n        self.converter_map = converter_map\n\n    def get_converter(self, mime):\n        return self.converter_map.get(mime)\n\n# Test normal text body without null bytes and no converter\ndef test_iter_body_normal_text():\n    msg = DummyMsg([b'hello ', b'world'])\n    conversion = DummyConversion({})\n    stream = BufferedPrettyStream.__new__(BufferedPrettyStream)\n    stream.msg = msg\n    stream.conversion = conversion\n    stream.mime = 'text/plain'\n    stream.process_body = lambda b: b.upper()\n    result = list(stream.iter_body())\n    assert result == [b'HELLO WORLD']\n\n# Test binary body that should raise BinarySuppressedError\ndef test_iter_body_binary_suppressed():\n    msg = DummyMsg([b'abc\\x00def'])\n    conversion = DummyConversion({})\n    stream = BufferedPrettyStream.__new__(BufferedPrettyStream)\n    stream.msg = msg\n    stream.conversion = conversion\n    stream.mime = 'application/octet-stream'\n    stream.process_body = lambda b: b\n    with pytest.raises(BinarySuppressedError):\n        list(stream.iter_body())\n\n# Test body that triggers a converter and changes mime\ndef test_iter_body_with_converter():\n    msg = DummyMsg([b'{\"key\":\"value\"}'])\n    converter = DummyConverter('application/json', b'{\"key\":\"converted\"}')\n    conversion = DummyConversion({'application/json': converter})\n    stream = BufferedPrettyStream.__new__(BufferedPrettyStream)\n    stream.msg = msg\n    stream.conversion = conversion\n    stream.mime = 'application/json'\n    stream.process_body = lambda b: b[::-1]  # reverse bytes\n    result = list(stream.iter_body())\n    # After conversion, mime should be updated and body reversed\n    assert stream.mime == 'application/json'\n    assert result == [b'}detcernoc\":\"yek\"{']\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "005f7658e99b4e34bc0813de575f8b0f",
+  "_api_plus_pacing_seconds": 1.8360211290419102
+}

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-600ff188-6226-41e0-b323-e87d07533a85",
+  "object": "chat.completion",
+  "created": 1795078672,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import run_on_executor, Future, chain_future\n\n\nclass Dummy:\n    def __init__(self):\n        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n    @run_on_executor\n    def add(self, a, b):\n        return a + b\n\n    @run_on_executor(executor=\"executor\")\n    def fail(self):\n        raise ValueError(\"boom\")\n\n    @run_on_executor\n    def slow(self, delay):\n        import time\n        time.sleep(delay)\n        return \"done\"\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_success():\n    d = Dummy()\n    fut = d.add(2, 3)\n    assert isinstance(fut, Future)\n    result = await fut\n    assert result == 5\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_exception():\n    d = Dummy()\n    fut = d.fail()\n    assert isinstance(fut, Future)\n    with pytest.raises(ValueError, match=\"boom\"):\n        await fut\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_chain_and_timeout():\n    d = Dummy()\n    fut = d.slow(0.1)\n    assert isinstance(fut, Future)\n    # Ensure the future completes within a reasonable time\n    result = await asyncio.wait_for(fut, timeout=1.0)\n    assert result == \"done\"\n```",
+        "reasoning": "Need tests for run_on_executor decorator. Use a class with executor ThreadPoolExecutor. Test normal execution returns Future result. Boundary: executor missing attribute raises AttributeError? Actually getattr will raise. Test error: method raises exception propagates. Use tmp_path? not needed. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054141535,
+    "prompt_tokens": 1466,
+    "prompt_time": 0.053896954,
+    "completion_tokens": 361,
+    "completion_time": 0.415898346,
+    "total_tokens": 1827,
+    "total_time": 0.4697953,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 59
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgdkq2e2tvzkb26cz77gs6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import run_on_executor, Future, chain_future\n\n\nclass Dummy:\n    def __init__(self):\n        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n    @run_on_executor\n    def add(self, a, b):\n        return a + b\n\n    @run_on_executor(executor=\"executor\")\n    def fail(self):\n        raise ValueError(\"boom\")\n\n    @run_on_executor\n    def slow(self, delay):\n        import time\n        time.sleep(delay)\n        return \"done\"\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_success():\n    d = Dummy()\n    fut = d.add(2, 3)\n    assert isinstance(fut, Future)\n    result = await fut\n    assert result == 5\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_exception():\n    d = Dummy()\n    fut = d.fail()\n    assert isinstance(fut, Future)\n    with pytest.raises(ValueError, match=\"boom\"):\n        await fut\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_chain_and_timeout():\n    d = Dummy()\n    fut = d.slow(0.1)\n    assert isinstance(fut, Future)\n    # Ensure the future completes within a reasonable time\n    result = await asyncio.wait_for(fut, timeout=1.0)\n    assert result == \"done\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8790833749808371
+}

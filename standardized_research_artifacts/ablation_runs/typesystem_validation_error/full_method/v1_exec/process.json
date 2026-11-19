@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/home/heurix/.cache/uv/builds-v0/.tmp5oedH2/bin/python3",
+    "-m",
+    "coverage",
+    "run",
+    "--branch",
+    "--source=typesystem.base",
+    "-m",
+    "pytest",
+    "-q",
+    "-o",
+    "addopts=",
+    "--confcutdir=/home/heurix/Documents/Test4Py_Setup/standardized_research_artifacts/ablation_runs/typesystem_validation_error/full_method/v1_exec",
+    "-p",
+    "pytest_jsonreport.plugin",
+    "--json-report",
+    "--json-report-file=/home/heurix/Documents/Test4Py_Setup/standardized_research_artifacts/ablation_runs/typesystem_validation_error/full_method/v1_exec/pytest_report.json",
+    "/home/heurix/Documents/Test4Py_Setup/standardized_research_artifacts/ablation_runs/typesystem_validation_error/full_method/v1_exec/test_run.py"
+  ],
+  "returncode": 1,
+  "stdout": "F                                                                        [100%]\n=================================== FAILURES ===================================\n__________________ test_validation_error_messages_and_prefix ___________________\n\n    def test_validation_error_messages_and_prefix():\n        # Create two messages with nested indices\n        msg_a = Message(text=\"Field is required\", code=\"required\", index=[\"field_a\"])\n        msg_b = Message(text=\"Invalid value\", code=\"invalid\", index=[\"field_b\", \"subfield\"])\n    \n        # Instantiate ValidationError with a list of messages\n        error = ValidationError(messages=[msg_a, msg_b])\n    \n        # The internal message list should match the input\n        assert error._messages == [msg_a, msg_b]\n    \n        # The internal dict should map indices to texts, nesting as needed\n        expected_dict = {\n            \"field_a\": \"Field is required\",\n            \"field_b\": {\"subfield\": \"Invalid value\"},\n        }\n        assert error._message_dict == expected_dict\n    \n        # messages() should return a copy of the original list\n        assert error.messages() == [msg_a, msg_b]\n    \n        # messages(add_prefix) should prepend the prefix to each message's index\n        prefixed = error.messages(add_prefix=\"parent\")\n        assert len(prefixed) == 2\n        assert prefixed[0].index == [\"parent\", \"field_a\"]\n        assert prefixed[0].text == \"Field is required\"\n        assert prefixed[1].index == [\"parent\", \"field_b\", \"subfield\"]\n        assert prefixed[1].text == \"Invalid value\"\n    \n        # Instantiating with a single message via keyword arguments\n        single_error = ValidationError(text=\"Single error\", code=\"single\", key=\"k\")\n        single_msg = single_error.messages()[0]\n        assert single_msg.text == \"Single error\"\n        assert single_msg.code == \"single\"\n        # The index should default to an empty list when not provided\n>       assert single_msg.index == []\nE       AssertionError: assert ['k'] == []\nE         \nE         Left contains one more item: 'k'\nE         Use -v to get more diff\n\n../../standardized_research_artifacts/ablation_runs/typesystem_validation_error/full_method/v1_exec/test_run.py:40: AssertionError\n=========================== short test summary info ============================\nFAILED ../../standardized_research_artifacts/ablation_runs/typesystem_validation_error/full_method/v1_exec/test_run.py::test_validation_error_messages_and_prefix\n1 failed in 0.22s\n",
+  "stderr": "/home/heurix/.cache/uv/archive-v0/Mqfl7i_nhzmUVumj/lib/python3.12/site-packages/coverage/inorout.py:560: CoverageWarning: Module tests was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.17.3/messages.html#warning-module-not-imported\n  self.warn(f\"Module {pkg} was never imported.\", slug=\"module-not-imported\")\n",
+  "timeout": false,
+  "log_path": null,
+  "seconds": 2.260045759991044
+}

@@ -1,0 +1,46 @@
+{
+  "policy": "production-dependencies-v1",
+  "max_chars": 10000,
+  "max_nodes": 10,
+  "chars": 5599,
+  "snippets": [
+    {
+      "file": "superstring/superstring.py",
+      "line": 4,
+      "symbol": "SuperStringBase",
+      "source": "class SuperStringBase(object):\n    def length(self):\n        pass\n\n    def lower(self):\n        if self.length() < SUPERSTRING_MINIMAL_LENGTH:\n            return SuperString(self.to_printable().lower())\n        return SuperStringLower(self)\n\n    def upper(self):\n        if self.length() < SUPERSTRING_MINIMAL_LENGTH:\n            return SuperString(self.to_printable().upper())\n        return SuperStringUpper(self)\n\n    def character_at(self, index):\n        pass\n\n    def split(self, separator=\" \"):\n        result = []\n        previous = 0\n        for i in range(self.length()):\n            for j in range(len(separator)):\n                if self.character_at(i + j) != separator[j]:\n                    break\n            else:\n                result.append(self.substring(previous, i))\n                previous = i + len(separator)\n        result.append(self.substring(previous))\n        return result\n\n    def substring(self, start_index, end_index=None):\n        start_index = start_index if start_index is not None else 0\n        end_index = end_index if end_index is not None else self.length()\n        # TODO: assert that start_index < end_index\n        # TODO: what if start_index == end_index\n        if start_index == 0 and end_index == self.length():\n            return self\n        if end_index - start_index < SUPERSTRING_MINIMAL_LENGTH:\n            return SuperString(self.to_printable(start_index, end_index=end_index))\n        return SuperStringSubstring(self, start_index, end_index)\n\n    def strip(self):\n        for start_index in range(self.length()):\n            if self.character_at(start_index) != ' ':\n                break\n        for end_index in range(self.length() - 1, start_index, -1):\n            if self.character_at(end_index) != ' ':\n                break\n        return self.substring(start_index, end_index + 1)\n\n    def to_printable(self, start_index=None, end_index=None):\n        pass\n\n    def __len__(self):\n        return self.length()\n\n    def __add__(self, right):\n        if not issubclass(type(right), SuperStringBase):\n            right = SuperString(str(right))\n        return SuperStringConcatenation(self, right)\n\n    def __str__(self):\n        return self.to_printable()\n\n    def __getitem__(self, key):\n        if isinstance(key, slice):\n            start = key.start if key.start >= 0 else self.length() + key.start\n            stop = key.stop if key.stop >= 0 else self.length() + key.stop\n            return self.substring(start, end_index=stop)\n        return self.character_at(key)"
+    },
+    {
+      "file": "superstring/superstring.py",
+      "line": 1,
+      "symbol": "SUPERSTRING_MINIMAL_LENGTH",
+      "source": "SUPERSTRING_MINIMAL_LENGTH = 48"
+    },
+    {
+      "file": "superstring/superstring.py",
+      "line": 145,
+      "symbol": "SuperStringLower",
+      "source": "class SuperStringLower(SuperStringBase):\n    def __init__(self, base):\n        self._base = base\n\n    def lower(self):\n        return self\n\n    def upper(self):\n        return self._base.upper()\n\n    def length(self):\n        return self._base.length()\n\n    def character_at(self, index):\n        return self._base.character_at(index).lower()\n\n    def to_printable(self, start_index=None, end_index=None):\n        return self._base.to_printable(start_index, end_index).lower()"
+    },
+    {
+      "file": "superstring/superstring.py",
+      "line": 165,
+      "symbol": "SuperStringUpper",
+      "source": "class SuperStringUpper(SuperStringBase):\n    def __init__(self, base):\n        self._base = base\n\n    def lower(self):\n        return self._base.lower()\n\n    def upper(self):\n        return self\n\n    def length(self):\n        return self._base.length()\n\n    def character_at(self, index):\n        return self._base.character_at(index).upper()\n\n    def to_printable(self, start_index=None, end_index=None):\n        return self._base.to_printable(start_index, end_index).upper()"
+    },
+    {
+      "file": "superstring/superstring.py",
+      "line": 120,
+      "symbol": "SuperStringSubstring",
+      "source": "class SuperStringSubstring(SuperStringBase):\n    def __init__(self, base, start_index, end_index):\n        self._base = base\n        self._start_index = start_index\n        self._end_index = end_index\n\n    def length(self):\n        return self._end_index - self._start_index\n\n    def character_at(self, index):\n        return self._base.character_at(self._start_index + index)\n\n    def substring(self, start_index, end_index=None):\n        start_index = start_index if start_index is not None else 0\n        end_index = end_index if end_index is not None else self.length()\n        return self._base[self._start_index + start_index:self._start_index + end_index]\n\n    def to_printable(self, start_index=None, end_index=None):\n        start_index = start_index if start_index is not None else 0\n        end_index = end_index if end_index is not None else self.length()\n        start_index += self._start_index\n        end_index += self._start_index\n        return self._base.to_printable(start_index, end_index=end_index)"
+    },
+    {
+      "file": "superstring/superstring.py",
+      "line": 94,
+      "symbol": "SuperStringConcatenation",
+      "source": "class SuperStringConcatenation(SuperStringBase):\n    def __init__(self, left, right):\n        self._left = left\n        self._right = right\n\n    def length(self):\n        return self._left.length() + self._right.length()\n\n    def character_at(self, index):\n        left_len = self._left.length()\n        if index < left_len:\n            return self._left[index]\n        return self._right[index - left_len]\n\n    def to_printable(self, start_index=None, end_index=None):\n        start_index = start_index if start_index is not None else 0\n        end_index = end_index if end_index is not None else self.length()\n        left_len = self._left.length()\n        if end_index < left_len:\n            return self._left.to_printable(start_index=start_index, end_index=end_index)\n        elif start_index > left_len:\n            return self._right.to_printable(start_index=start_index - left_len, end_index=end_index - left_len)\n        return self._left.to_printable(start_index=start_index) + self._right.to_printable(\n            end_index=end_index - left_len)"
+    }
+  ],
+  "omitted": [],
+  "scope": "static source excerpts only; no inferred expected values"
+}

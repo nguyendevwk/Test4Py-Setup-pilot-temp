@@ -1,0 +1,43 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________________ test_validation_error_behavior ________________________
+
+    def test_validation_error_behavior():
+        # Canonical single-message construction
+        msg = Message(text="Field is required", code="required", index=["field_a"])
+        err = ValidationError(messages=[msg])
+        assert len(err.messages()) == 1
+        m = err.messages()[0]
+        assert isinstance(m, Message)
+        assert m.text == "Field is required"
+        assert m.code == "required"
+        assert m.index == ["field_a"]
+    
+        # Dict-like iteration yields top-level keys
+        assert list(err) == ["field_a"]
+    
+        # add_prefix prepends to each message index
+        prefixed = err.messages(add_prefix="parent")
+        assert len(prefixed) == 1
+        assert prefixed[0].index == ["parent", "field_a"]
+        assert prefixed[0].text == "Field is required"
+    
+        # Single-message initialization via keyword arguments
+        err2 = ValidationError(text="Missing", code="missing", key="username")
+        assert len(err2.messages()) == 1
+        m2 = err2.messages()[0]
+        assert m2.text == "Missing"
+        assert m2.code == "missing"
+>       assert m2.index == []
+E       AssertionError: assert ['username'] == []
+E         
+E         Left contains one more item: 'username'
+E         Use -v to get more diff
+
+../../phase2_results/typesystem_validation_error/council_enhanced/seed_43/v1_exec/test_run.py:31: AssertionError
+=========================== short test summary info ============================
+FAILED ../../phase2_results/typesystem_validation_error/council_enhanced/seed_43/v1_exec/test_run.py::test_validation_error_behavior
+1 failed in 0.22s
+
+/home/heurix/.cache/uv/archive-v0/ZMxlGZafGJre2eGL/lib/python3.12/site-packages/coverage/inorout.py:560: CoverageWarning: Module tests was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.17.3/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")

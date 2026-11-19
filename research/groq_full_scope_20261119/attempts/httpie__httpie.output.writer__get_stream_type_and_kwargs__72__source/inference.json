@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-5158bcb0-b3c3-4d3f-a2ff-8b90e207a795",
+  "object": "chat.completion",
+  "created": 1795079619,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.writer import get_stream_type_and_kwargs\nfrom httpie.output.streams import RawStream, EncodedStream, PrettyStream, BufferedPrettyStream\nfrom httpie.models import HTTPResponse\nfrom httpie.output.processing import Conversion, Formatting\nfrom httpie.output.processing import ProcessingOptions\nfrom httpie.context import Environment\nfrom httpie.cli.dicts import HTTPHeadersDict\n\n\nclass DummyEnv(Environment):\n    def __init__(self, stdout_isatty: bool):\n        self.stdout_isatty = stdout_isatty\n\n\ndef test_raw_stream_non_tty_no_prettify():\n    env = DummyEnv(stdout_isatty=False)\n    proc_opts = ProcessingOptions(stream=False, style=None, json=False, format_options=None,\n                                  response_mime=None, response_charset=None)\n    headers = HTTPHeadersDict()\n    stream_cls, kwargs = get_stream_type_and_kwargs(env, proc_opts, HTTPResponse, headers)\n    assert stream_cls is RawStream\n    assert kwargs[\"chunk_size\"] == RawStream.CHUNK_SIZE\n\n\ndef test_pretty_stream_tty_with_prettify():\n    env = DummyEnv(stdout_isatty=True)\n    proc_opts = ProcessingOptions(stream=False, style=\"monokai\", json=True,\n                                  format_options={\"indent\": 2},\n                                  response_mime=\"application/json\",\n                                  response_charset=\"utf-8\")\n    headers = HTTPHeadersDict()\n    stream_cls, kwargs = get_stream_type_and_kwargs(env, proc_opts, HTTPResponse, headers)\n    assert stream_cls is BufferedPrettyStream\n    assert isinstance(kwargs[\"conversion\"], Conversion)\n    assert isinstance(kwargs[\"formatting\"], Formatting)\n    assert kwargs[\"formatting\"].color_scheme == \"monokai\"\n    assert kwargs[\"formatting\"].explicit_json is True\n    assert kwargs[\"formatting\"].format_options == {\"indent\": 2}\n    assert kwargs[\"mime_overwrite\"] == \"application/json\"\n    assert kwargs[\"encoding_overwrite\"] == \"utf-8\"\n\n\ndef test_auto_streaming_event_stream_header():\n    env = DummyEnv(stdout_isatty=False)\n    proc_opts = ProcessingOptions(stream=False, style=None, json=False, format_options=None,\n                                  response_mime=None, response_charset=None)\n    headers = HTTPHeadersDict({\"Content-Type\": \"text/event-stream; charset=utf-8\"})\n    stream_cls, kwargs = get_stream_type_and_kwargs(env, proc_opts, HTTPResponse, headers)\n    assert stream_cls is RawStream\n    assert kwargs[\"chunk_size\"] == RawStream.CHUNK_SIZE_BY_LINE\n```",
+        "reasoning": "We need three tests covering normal, boundary, error. Use tmp_path? Not needed. Use dummy Environment with stdout_isatty property. We can create minimal mock Environment class. Use ProcessingOptions from .processing? import. We'll create simple objects. Test when not stream, not tty, no prettify -> RawStream with chunk_size. Test when tty and prettify groups -> PrettyStream with conversion etc. Test auto-streaming when Content-Type event-stream. Use HTTPResponse type. Use HTTPHeadersDict simple dict. Ensure returned class and kwargs."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005014633,
+    "prompt_tokens": 720,
+    "prompt_time": 0.037312379,
+    "completion_tokens": 644,
+    "completion_time": 0.678741796,
+    "total_tokens": 1364,
+    "total_time": 0.716054175,
+    "completion_tokens_details": {
+      "reasoning_tokens": 111
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7shag7ket4bbsjdp3w44d9e",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.writer import get_stream_type_and_kwargs\nfrom httpie.output.streams import RawStream, EncodedStream, PrettyStream, BufferedPrettyStream\nfrom httpie.models import HTTPResponse\nfrom httpie.output.processing import Conversion, Formatting\nfrom httpie.output.processing import ProcessingOptions\nfrom httpie.context import Environment\nfrom httpie.cli.dicts import HTTPHeadersDict\n\n\nclass DummyEnv(Environment):\n    def __init__(self, stdout_isatty: bool):\n        self.stdout_isatty = stdout_isatty\n\n\ndef test_raw_stream_non_tty_no_prettify():\n    env = DummyEnv(stdout_isatty=False)\n    proc_opts = ProcessingOptions(stream=False, style=None, json=False, format_options=None,\n                                  response_mime=None, response_charset=None)\n    headers = HTTPHeadersDict()\n    stream_cls, kwargs = get_stream_type_and_kwargs(env, proc_opts, HTTPResponse, headers)\n    assert stream_cls is RawStream\n    assert kwargs[\"chunk_size\"] == RawStream.CHUNK_SIZE\n\n\ndef test_pretty_stream_tty_with_prettify():\n    env = DummyEnv(stdout_isatty=True)\n    proc_opts = ProcessingOptions(stream=False, style=\"monokai\", json=True,\n                                  format_options={\"indent\": 2},\n                                  response_mime=\"application/json\",\n                                  response_charset=\"utf-8\")\n    headers = HTTPHeadersDict()\n    stream_cls, kwargs = get_stream_type_and_kwargs(env, proc_opts, HTTPResponse, headers)\n    assert stream_cls is BufferedPrettyStream\n    assert isinstance(kwargs[\"conversion\"], Conversion)\n    assert isinstance(kwargs[\"formatting\"], Formatting)\n    assert kwargs[\"formatting\"].color_scheme == \"monokai\"\n    assert kwargs[\"formatting\"].explicit_json is True\n    assert kwargs[\"formatting\"].format_options == {\"indent\": 2}\n    assert kwargs[\"mime_overwrite\"] == \"application/json\"\n    assert kwargs[\"encoding_overwrite\"] == \"utf-8\"\n\n\ndef test_auto_streaming_event_stream_header():\n    env = DummyEnv(stdout_isatty=False)\n    proc_opts = ProcessingOptions(stream=False, style=None, json=False, format_options=None,\n                                  response_mime=None, response_charset=None)\n    headers = HTTPHeadersDict({\"Content-Type\": \"text/event-stream; charset=utf-8\"})\n    stream_cls, kwargs = get_stream_type_and_kwargs(env, proc_opts, HTTPResponse, headers)\n    assert stream_cls is RawStream\n    assert kwargs[\"chunk_size\"] == RawStream.CHUNK_SIZE_BY_LINE\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "6a2afaebf9ea484ea659389bfb32da47",
+  "_api_plus_pacing_seconds": 1.7836029439931735
+}

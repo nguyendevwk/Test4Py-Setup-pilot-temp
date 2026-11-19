@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-8dbae329-a3c8-41b1-98b3-13b7ede61dab",
+  "object": "chat.completion",
+  "created": 1795079544,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado import options\nfrom tornado.options import add_parse_callback, parse_command_line, clear_options, define, options as opts\n\n\ndef test_callback_invoked_after_parsing(tmp_path):\n    \"\"\"The callback registered via add_parse_callback should be called after parsing.\"\"\"\n    # Ensure a clean state\n    clear_options()\n    # Define a dummy option\n    define(\"dummy\", default=42, type=int, help=\"dummy option\")\n    # Flag to verify callback execution\n    executed = {\"called\": False}\n\n    def callback():\n        executed[\"called\"] = True\n\n    add_parse_callback(callback)\n    # Parse an empty command line (no args)\n    parse_command_line([])\n    assert executed[\"called\"] is True, \"Callback was not invoked after parsing\"\n\n\ndef test_multiple_callbacks_order(tmp_path):\n    \"\"\"Multiple callbacks should be invoked in the order they were added.\"\"\"\n    clear_options()\n    order = []\n\n    def first():\n        order.append(\"first\")\n\n    def second():\n        order.append(\"second\")\n\n    add_parse_callback(first)\n    add_parse_callback(second)\n    parse_command_line([])\n    assert order == [\"first\", \"second\"], f\"Callbacks executed in wrong order: {order}\"\n\n\ndef test_invalid_callback_type_raises():\n    \"\"\"add_parse_callback should raise TypeError when given a non-callable.\"\"\"\n    clear_options()\n    with pytest.raises(TypeError):\n        add_parse_callback(123)  # non-callable argument\n```",
+        "reasoning": "We need to write tests for add_parse_callback. It calls options.add_parse_callback. We need to import tornado.options. Let's inspect options module. But we can test that callback is called after parsing. In tornado.options, there is OptionParser. We can create a parser, add option, parse, then check callback called. Use tmp_path for config file? But we can just parse args. Use add_parse_callback to register a function that sets a flag. Then parse args. Ensure callback executed. Also test that multiple callbacks called in order. Third test error: passing non-callable raises TypeError? Let's check signature: expects Callable[[], None]. If pass int, should raise TypeError. We'll test that. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004545821,
+    "prompt_tokens": 403,
+    "prompt_time": 0.027338775,
+    "completion_tokens": 457,
+    "completion_time": 0.58290415,
+    "total_tokens": 860,
+    "total_time": 0.610242925,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 149
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh875tep2bbd0x5mfnr9jf",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado import options\nfrom tornado.options import add_parse_callback, parse_command_line, clear_options, define, options as opts\n\n\ndef test_callback_invoked_after_parsing(tmp_path):\n    \"\"\"The callback registered via add_parse_callback should be called after parsing.\"\"\"\n    # Ensure a clean state\n    clear_options()\n    # Define a dummy option\n    define(\"dummy\", default=42, type=int, help=\"dummy option\")\n    # Flag to verify callback execution\n    executed = {\"called\": False}\n\n    def callback():\n        executed[\"called\"] = True\n\n    add_parse_callback(callback)\n    # Parse an empty command line (no args)\n    parse_command_line([])\n    assert executed[\"called\"] is True, \"Callback was not invoked after parsing\"\n\n\ndef test_multiple_callbacks_order(tmp_path):\n    \"\"\"Multiple callbacks should be invoked in the order they were added.\"\"\"\n    clear_options()\n    order = []\n\n    def first():\n        order.append(\"first\")\n\n    def second():\n        order.append(\"second\")\n\n    add_parse_callback(first)\n    add_parse_callback(second)\n    parse_command_line([])\n    assert order == [\"first\", \"second\"], f\"Callbacks executed in wrong order: {order}\"\n\n\ndef test_invalid_callback_type_raises():\n    \"\"\"add_parse_callback should raise TypeError when given a non-callable.\"\"\"\n    clear_options()\n    with pytest.raises(TypeError):\n        add_parse_callback(123)  # non-callable argument\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "baf65c4ade164e388cfe75ca5ae86987",
+  "_api_plus_pacing_seconds": 1.6971904940437526
+}

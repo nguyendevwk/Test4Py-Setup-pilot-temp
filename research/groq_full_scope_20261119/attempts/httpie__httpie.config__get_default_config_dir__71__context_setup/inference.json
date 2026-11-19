@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-78d7bc6b-ec4f-47af-be82-803c210abb02",
+  "object": "chat.completion",
+  "created": 1795078465,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport shutil\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\n# Import the target function after setting up the environment\nfrom httpie.config import get_default_config_dir, DEFAULT_CONFIG_DIRNAME, DEFAULT_RELATIVE_LEGACY_CONFIG_DIR, DEFAULT_RELATIVE_XDG_CONFIG_HOME, ENV_HTTPIE_CONFIG_DIR, ENV_XDG_CONFIG_HOME\n\n\ndef test_env_override_config_dir(tmp_path, monkeypatch):\n    \"\"\"When HTTPIE_CONFIG_DIR is set, it overrides all other logic.\"\"\"\n    override_dir = tmp_path / \"override\"\n    override_dir.mkdir()\n    monkeypatch.setenv(ENV_HTTPIE_CONFIG_DIR, str(override_dir))\n    # Ensure other env vars are unset\n    monkeypatch.delenv(ENV_XDG_CONFIG_HOME, raising=False)\n    # Ensure home is not used\n    monkeypatch.setenv(\"HOME\", str(tmp_path / \"home\"))\n    result = get_default_config_dir()\n    assert result == override_dir\n    assert result.is_absolute()\n\n\ndef test_legacy_config_dir_exists(tmp_path, monkeypatch):\n    \"\"\"If a legacy ~/.httpie directory exists, it is returned.\"\"\"\n    # Set HOME to tmp_path\n    monkeypatch.setenv(\"HOME\", str(tmp_path))\n    # Ensure HTTPIE_CONFIG_DIR is not set\n    monkeypatch.delenv(ENV_HTTPIE_CONFIG_DIR, raising=False)\n    # Create legacy directory\n    legacy_dir = tmp_path / DEFAULT_RELATIVE_LEGACY_CONFIG_DIR\n    legacy_dir.mkdir()\n    result = get_default_config_dir()\n    assert result == legacy_dir\n    assert result.is_absolute()\n\n\ndef test_xdg_default_config_dir(tmp_path, monkeypatch):\n    \"\"\"When no legacy dir and no env override, XDG config dir is used.\"\"\"\n    # Set HOME to tmp_path\n    monkeypatch.setenv(\"HOME\", str(tmp_path))\n    # Ensure HTTPIE_CONFIG_DIR is not set\n    monkeypatch.delenv(ENV_HTTPIE_CONFIG_DIR, raising=False)\n    # Ensure legacy dir does not exist\n    legacy_dir = tmp_path / DEFAULT_RELATIVE_LEGACY_CONFIG_DIR\n    if legacy_dir.exists():\n        shutil.rmtree(legacy_dir)\n    # Set XDG_CONFIG_HOME to a custom path\n    xdg_home = tmp_path / \"xdg\"\n    xdg_home.mkdir()\n    monkeypatch.setenv(ENV_XDG_CONFIG_HOME, str(xdg_home))\n    result = get_default_config_dir()\n    expected = xdg_home / DEFAULT_CONFIG_DIRNAME\n    assert result == expected\n    assert result.is_absolute()\n```",
+        "reasoning": "We need three tests. Test env override, legacy exists, XDG default. Use tmp_path. Ensure not modify product. Use os.environ. Use Path.exists by creating file. Use tmp_path for home? We can monkeypatch Path.home via monkeypatch? But cannot modify code. We can set environment variable HOME to tmp_path. For legacy test, create .httpie dir inside home. For XDG default, set XDG_CONFIG_HOME to tmp_path. Ensure no env override. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053292323,
+    "prompt_tokens": 674,
+    "prompt_time": 0.040955316,
+    "completion_tokens": 649,
+    "completion_time": 0.71067089,
+    "total_tokens": 1323,
+    "total_time": 0.751626206,
+    "completion_tokens_details": {
+      "reasoning_tokens": 102
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg78r7eq19xbdatg56fn79",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport shutil\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\n# Import the target function after setting up the environment\nfrom httpie.config import get_default_config_dir, DEFAULT_CONFIG_DIRNAME, DEFAULT_RELATIVE_LEGACY_CONFIG_DIR, DEFAULT_RELATIVE_XDG_CONFIG_HOME, ENV_HTTPIE_CONFIG_DIR, ENV_XDG_CONFIG_HOME\n\n\ndef test_env_override_config_dir(tmp_path, monkeypatch):\n    \"\"\"When HTTPIE_CONFIG_DIR is set, it overrides all other logic.\"\"\"\n    override_dir = tmp_path / \"override\"\n    override_dir.mkdir()\n    monkeypatch.setenv(ENV_HTTPIE_CONFIG_DIR, str(override_dir))\n    # Ensure other env vars are unset\n    monkeypatch.delenv(ENV_XDG_CONFIG_HOME, raising=False)\n    # Ensure home is not used\n    monkeypatch.setenv(\"HOME\", str(tmp_path / \"home\"))\n    result = get_default_config_dir()\n    assert result == override_dir\n    assert result.is_absolute()\n\n\ndef test_legacy_config_dir_exists(tmp_path, monkeypatch):\n    \"\"\"If a legacy ~/.httpie directory exists, it is returned.\"\"\"\n    # Set HOME to tmp_path\n    monkeypatch.setenv(\"HOME\", str(tmp_path))\n    # Ensure HTTPIE_CONFIG_DIR is not set\n    monkeypatch.delenv(ENV_HTTPIE_CONFIG_DIR, raising=False)\n    # Create legacy directory\n    legacy_dir = tmp_path / DEFAULT_RELATIVE_LEGACY_CONFIG_DIR\n    legacy_dir.mkdir()\n    result = get_default_config_dir()\n    assert result == legacy_dir\n    assert result.is_absolute()\n\n\ndef test_xdg_default_config_dir(tmp_path, monkeypatch):\n    \"\"\"When no legacy dir and no env override, XDG config dir is used.\"\"\"\n    # Set HOME to tmp_path\n    monkeypatch.setenv(\"HOME\", str(tmp_path))\n    # Ensure HTTPIE_CONFIG_DIR is not set\n    monkeypatch.delenv(ENV_HTTPIE_CONFIG_DIR, raising=False)\n    # Ensure legacy dir does not exist\n    legacy_dir = tmp_path / DEFAULT_RELATIVE_LEGACY_CONFIG_DIR\n    if legacy_dir.exists():\n        shutil.rmtree(legacy_dir)\n    # Set XDG_CONFIG_HOME to a custom path\n    xdg_home = tmp_path / \"xdg\"\n    xdg_home.mkdir()\n    monkeypatch.setenv(ENV_XDG_CONFIG_HOME, str(xdg_home))\n    result = get_default_config_dir()\n    expected = xdg_home / DEFAULT_CONFIG_DIRNAME\n    assert result == expected\n    assert result.is_absolute()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1966147229541093
+}

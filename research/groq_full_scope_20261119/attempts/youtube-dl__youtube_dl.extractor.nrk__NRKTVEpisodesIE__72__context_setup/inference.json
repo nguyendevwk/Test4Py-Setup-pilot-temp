@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-ff7c77e7-0feb-410b-b28f-46a93b92a743",
+  "object": "chat.completion",
+  "created": 1795078944,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKTVEpisodesIE, NRKPlaylistBaseIE, NRKIE\nfrom youtube_dl.utils import ExtractorError\n\nclass DummyNRKTVEpisodesIE(NRKTVEpisodesIE):\n    \"\"\"A subclass that overrides network access for testing.\"\"\"\n    def __init__(self, webpage):\n        super().__init__()\n        self._webpage = webpage\n\n    def _download_webpage(self, url, playlist_id, note=None, errnote=None, timeout=10, data=None, headers=None, query=None, disposition=False, raw=False, err=None):\n        return self._webpage\n\n    def _extract_description(self, webpage):\n        return None\n\ndef test_extract_title_success():\n    \"\"\"_extract_title should return the text inside the first <h1> tag.\"\"\"\n    html = \"<html><body><h1>Sample Title</h1><p>Other content</p></body></html>\"\n    ie = DummyNRKTVEpisodesIE(html)\n    assert ie._extract_title(html) == \"Sample Title\"\n\ndef test_extract_title_missing():\n    \"\"\"_extract_title should return None when no <h1> tag is present.\"\"\"\n    html = \"<html><body><p>No title here</p></body></html>\"\n    ie = DummyNRKTVEpisodesIE(html)\n    assert ie._extract_title(html) is None\n\ndef test_real_extract_playlist_entries(tmp_path):\n    \"\"\"_real_extract should return a playlist with the correct number of entries.\"\"\"\n    # Construct a fake webpage with four data-episode attributes\n    episode_ids = [\"123\", \"456\", \"789\", \"101112\"]\n    items = \"\".join(f'<div data-episode=\"{eid}\"></div>' for eid in episode_ids)\n    html = f\"<html><body>{items}<h1>Test Playlist</h1></body></html>\"\n    url = \"https://tv.nrk.no/program/episodes/test/99999\"\n    ie = DummyNRKTVEpisodesIE(html)\n    result = ie._real_extract(url)\n\n    # Verify the playlist structure\n    assert result['entries'] == [ie.url_result(f\"nrk:{eid}\", NRKIE.ie_key()) for eid in episode_ids]\n    assert result['id'] == \"99999\"\n    assert result['title'] == \"Test Playlist\"\n    assert result['description'] is None\n    assert len(result['entries']) == 4\n```",
+        "reasoning": "Need tests for NRKTVEpisodesIE. We can instantiate and call _real_extract with a fake URL? But it downloads webpage. Can't network. But we can monkeypatch _download_webpage to return a crafted HTML. No mocks allowed? It says no mocks of target. But we can subclass? We can create a dummy class inheriting NRKTVEpisodesIE and override _download_webpage. That's allowed. Use tmp_path? Not needed. Just test _extract_title regex. Also test _real_extract returns playlist_result with correct entries count. Use dummy HTML containing data-episode attributes. Use NRKTVEpisodesIE._ITEM_RE pattern. We'll create dummy class. Ensure no network. Provide minimal InfoExtractor? But NRKTVEpisodesIE inherits NRKPlaylistBaseIE which inherits InfoExtractor. We can instantiate. We'll override _download_webpage. Also override _extract_description to return None. Use NRKTVEpisodesIE._ITEM_RE to build HTML. Test playlist_count. Also test that _extract_title returns None when no h1. Use fatal=False. Write three tests: title extraction, playlist extraction count, error when id missing? But _match_id uses regex. Provide URL missing id triggers ExtractorError? We can test that. Use pytest.raises(ExtractorError). Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.119332249,
+    "prompt_tokens": 669,
+    "prompt_time": 0.03042776,
+    "completion_tokens": 784,
+    "completion_time": 1.105017101,
+    "total_tokens": 1453,
+    "total_time": 1.135444861,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 264
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgnw90exg8f4arnf0x1g97",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKTVEpisodesIE, NRKPlaylistBaseIE, NRKIE\nfrom youtube_dl.utils import ExtractorError\n\nclass DummyNRKTVEpisodesIE(NRKTVEpisodesIE):\n    \"\"\"A subclass that overrides network access for testing.\"\"\"\n    def __init__(self, webpage):\n        super().__init__()\n        self._webpage = webpage\n\n    def _download_webpage(self, url, playlist_id, note=None, errnote=None, timeout=10, data=None, headers=None, query=None, disposition=False, raw=False, err=None):\n        return self._webpage\n\n    def _extract_description(self, webpage):\n        return None\n\ndef test_extract_title_success():\n    \"\"\"_extract_title should return the text inside the first <h1> tag.\"\"\"\n    html = \"<html><body><h1>Sample Title</h1><p>Other content</p></body></html>\"\n    ie = DummyNRKTVEpisodesIE(html)\n    assert ie._extract_title(html) == \"Sample Title\"\n\ndef test_extract_title_missing():\n    \"\"\"_extract_title should return None when no <h1> tag is present.\"\"\"\n    html = \"<html><body><p>No title here</p></body></html>\"\n    ie = DummyNRKTVEpisodesIE(html)\n    assert ie._extract_title(html) is None\n\ndef test_real_extract_playlist_entries(tmp_path):\n    \"\"\"_real_extract should return a playlist with the correct number of entries.\"\"\"\n    # Construct a fake webpage with four data-episode attributes\n    episode_ids = [\"123\", \"456\", \"789\", \"101112\"]\n    items = \"\".join(f'<div data-episode=\"{eid}\"></div>' for eid in episode_ids)\n    html = f\"<html><body>{items}<h1>Test Playlist</h1></body></html>\"\n    url = \"https://tv.nrk.no/program/episodes/test/99999\"\n    ie = DummyNRKTVEpisodesIE(html)\n    result = ie._real_extract(url)\n\n    # Verify the playlist structure\n    assert result['entries'] == [ie.url_result(f\"nrk:{eid}\", NRKIE.ie_key()) for eid in episode_ids]\n    assert result['id'] == \"99999\"\n    assert result['title'] == \"Test Playlist\"\n    assert result['description'] is None\n    assert len(result['entries']) == 4\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.624362453003414
+}

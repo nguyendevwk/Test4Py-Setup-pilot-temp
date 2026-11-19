@@ -1,0 +1,49 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_parse_class_attribute_docstrings _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-177/test_parse_class_attribute_doc0')
+
+    def test_parse_class_attribute_docstrings(tmp_path):
+        """Boundary case: parse a class with attribute docstrings defined in source."""
+        module_code = '''
+    class MyClass:
+        """Class docstring."""
+        attr1 = 1
+        """Attribute 1 docstring."""
+        attr2 = "two"
+        """Attribute 2 docstring."""
+    '''
+        module_file = tmp_path / "mymodule.py"
+        module_file.write_text(module_code)
+        spec = importlib.util.spec_from_file_location("mymodule", module_file)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules["mymodule"] = module
+        spec.loader.exec_module(module)
+    
+        cls = module.MyClass
+        doc = parse_from_object(cls, style=DocstringStyle.AUTO)
+        assert isinstance(doc, Docstring)
+        # Class docstring
+        assert doc.short_description == "Class docstring."
+        # Attribute docstrings should be added
+>       attr_docs = {ad.name: ad.description for ad in doc.attribute_docs}
+E       AttributeError: 'Docstring' object has no attribute 'attribute_docs'
+
+../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__42__atomic_source/eval0/test_generated.py:48: AttributeError
+_____________________ test_parse_invalid_docstring_raises ______________________
+
+    def test_parse_invalid_docstring_raises():
+        """Error case: passing an object with an unparsable docstring raises ParseError."""
+        class BadDoc:
+            """This is a bad docstring that will cause a ParseError because it contains
+            an unmatched bracket [.
+            """
+>       with pytest.raises(ParseError):
+E       Failed: DID NOT RAISE ParseError
+
+../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__42__atomic_source/eval0/test_generated.py:58: Failed
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__42__atomic_source/eval0/test_generated.py::test_parse_class_attribute_docstrings
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__42__atomic_source/eval0/test_generated.py::test_parse_invalid_docstring_raises
+2 failed, 1 passed in 0.17s

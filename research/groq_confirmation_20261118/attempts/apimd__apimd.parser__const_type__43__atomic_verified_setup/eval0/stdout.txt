@@ -1,0 +1,38 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_sequence_and_dict_type_inference _____________________
+
+    def test_sequence_and_dict_type_inference():
+        # List of integers
+        node = ast.parse("[1, 2, 3]", mode="eval").body
+        assert const_type(node) == "list[int]"
+    
+        # Tuple of mixed types
+        node = ast.parse("(1, 'a', 3.14)", mode="eval").body
+>       assert const_type(node) == "tuple[int, str, float]"
+E       AssertionError: assert 'tuple[Any]' == 'tuple[int, str, float]'
+E         
+E         - tuple[int, str, float]
+E         + tuple[Any]
+
+../../../../../../attempts/apimd__apimd.parser__const_type__43__atomic_verified_setup/eval0/test_generated.py:25: AssertionError
+________________________ test_call_and_default_behavior ________________________
+
+    def test_call_and_default_behavior():
+        # Call to built-in type constructor
+        node = ast.parse("int(5)", mode="eval").body
+        assert const_type(node) == "int"
+    
+        # Call to unknown function
+        node = ast.parse("foo(1)", mode="eval").body
+        assert const_type(node) == ANY
+    
+        # Non-ast.expr input should return ANY
+>       with pytest.raises(AttributeError):
+E       Failed: DID NOT RAISE AttributeError
+
+../../../../../../attempts/apimd__apimd.parser__const_type__43__atomic_verified_setup/eval0/test_generated.py:45: Failed
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/apimd__apimd.parser__const_type__43__atomic_verified_setup/eval0/test_generated.py::test_sequence_and_dict_type_inference
+FAILED ../../../../../../attempts/apimd__apimd.parser__const_type__43__atomic_verified_setup/eval0/test_generated.py::test_call_and_default_behavior
+2 failed, 1 passed in 0.13s

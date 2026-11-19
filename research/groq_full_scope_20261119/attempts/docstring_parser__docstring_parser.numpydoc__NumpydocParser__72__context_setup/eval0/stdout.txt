@@ -1,0 +1,70 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_parse_basic_description_and_parameters __________________
+
+    def test_parse_basic_description_and_parameters():
+        doc = """
+        Short description.
+    
+        Long description that spans
+        multiple lines.
+    
+        Parameters
+        ----------
+        x : int
+            The first parameter.
+        y : str, optional
+            The second parameter, default is 'foo'.
+        """
+        parser = NumpydocParser()
+        parsed = parser.parse(doc)
+        assert parsed.style == DocstringStyle.NUMPYDOC
+        assert parsed.short_description == "Short description."
+        assert parsed.long_description == "Long description that spans\nmultiple lines."
+        assert parsed.blank_after_short_description is True
+>       assert parsed.blank_after_long_description is False
+E       assert True is False
+E        +  where True = <docstring_parser.common.Docstring object at 0x7f1af6fe7bb0>.blank_after_long_description
+
+test_generated.py:26: AssertionError
+_____________________ test_parse_examples_and_deprecation ______________________
+
+    def test_parse_examples_and_deprecation():
+        doc = """
+        Example usage.
+    
+        Examples
+        --------
+        >>> import math
+        >>> math.sqrt(4)
+        2.0
+        This should return 2.0.
+    
+        Deprecated
+        ----------
+        1.2
+        This function is deprecated.
+        """
+        parser = NumpydocParser()
+        parsed = parser.parse(doc)
+        examples = [m for m in parsed.meta if isinstance(m, DocstringExample)]
+        assert len(examples) == 1
+        example = examples[0]
+        assert example.snippet == ">>> import math\n>>> math.sqrt(4)"
+>       assert example.description == "This should return 2.0."
+E       AssertionError: assert '2.0\nThis sh...s deprecated.' == 'This should return 2.0.'
+E         
+E         + 2.0
+E         - This should return 2.0.
+E         + This should return 2.0.
+E         ?                        +
+E         + 
+E         + Deprecated...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+test_generated.py:60: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_basic_description_and_parameters - asser...
+FAILED test_generated.py::test_parse_examples_and_deprecation - AssertionErro...
+2 failed, 1 passed in 0.15s

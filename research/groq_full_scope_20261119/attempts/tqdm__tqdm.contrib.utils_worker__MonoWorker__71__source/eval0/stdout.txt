@@ -1,0 +1,44 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_waiting_task_replaced_by_new_submission _________________
+
+    def test_waiting_task_replaced_by_new_submission():
+        worker = MonoWorker()
+        lock = threading.Lock()
+        order = []
+    
+        def long_task():
+            with lock:
+                order.append("long_start")
+            time.sleep(0.1)
+            with lock:
+                order.append("long_end")
+    
+        def short_task():
+            with lock:
+                order.append("short_start")
+            time.sleep(0.01)
+            with lock:
+                order.append("short_end")
+    
+        # Submit long task first
+        long_future = worker.submit(long_task)
+        # Immediately submit short task, which should replace the waiting slot
+        short_future = worker.submit(short_task)
+    
+        # Wait for both to finish
+        long_future.result()
+        short_future.result()
+    
+        # The long task should run to completion, short task should also run
+        # but the order should reflect that short started after long started
+>       assert order == ["long_start", "short_start", "long_end", "short_end"]
+E       AssertionError: assert ['long_start'..., 'short_end'] == ['long_start'..., 'short_end']
+E         
+E         At index 1 diff: 'long_end' != 'short_start'
+E         Use -v to get more diff
+
+test_generated.py:52: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_waiting_task_replaced_by_new_submission - Asse...
+1 failed, 2 passed in 0.62s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-c045ba0e-19ba-4861-a553-60defba2ea47",
+  "object": "chat.completion",
+  "created": 1795076270,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport socket\nimport pytest\nfrom tornado.netutil import ExecutorResolver\nfrom tornado.concurrent import run_on_executor\n\n# Helper to run the resolver in the current event loop\nasync def run_resolver(resolver, host, port, family=socket.AF_UNSPEC):\n    return await resolver.resolve(host, port, family)\n\n@pytest.mark.asyncio\nasync def test_resolver_returns_valid_addresses(tmp_path):\n    \"\"\"ExecutorResolver should return a non‑empty list of address tuples for a valid host.\"\"\"\n    resolver = ExecutorResolver()\n    resolver.initialize(concurrent.futures.ThreadPoolExecutor(max_workers=1))\n    # Resolve localhost on an arbitrary port\n    result = await run_resolver(resolver, \"localhost\", 80)\n    # Each tuple should contain an address family and an address\n    assert isinstance(result, list) and len(result) > 0\n    for fam, addr in result:\n        assert fam in (socket.AF_INET, socket.AF_INET6)\n        assert isinstance(addr, tuple)\n    resolver.close()\n    # After close, executor should be None\n    assert resolver.executor is None\n\n@pytest.mark.asyncio\nasync def test_resolver_with_close_executor_false(tmp_path):\n    \"\"\"When close_executor is False, the executor should not be shut down on close.\"\"\"\n    executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n    resolver = ExecutorResolver()\n    resolver.initialize(executor=executor, close_executor=False)\n    # Resolve a valid host\n    result = await run_resolver(resolver, \"localhost\", 80)\n    assert result  # non-empty\n    # Close resolver but keep executor alive\n    resolver.close()\n    assert resolver.executor is None\n    # Executor should still be running; we can submit a task\n    future = executor.submit(lambda: 42)\n    assert future.result() == 42\n    executor.shutdown()\n\n@pytest.mark.asyncio\nasync def test_resolver_invalid_host_raises(tmp_path):\n    \"\"\"Resolving an invalid hostname should raise a socket.gaierror.\"\"\"\n    resolver = ExecutorResolver()\n    resolver.initialize(concurrent.futures.ThreadPoolExecutor(max_workers=1))\n    with pytest.raises(socket.gaierror):\n        await run_resolver(resolver, \"nonexistent.host.example\", 80)\n    resolver.close()\n```",
+        "reasoning": "We need to write tests for ExecutorResolver.resolve. But we don't have full context of Resolver base class. Likely resolve uses run_on_executor decorator to run in executor. We can test that it returns correct addresses for known host. Use localhost. Also test that close shuts down executor. Use ThreadPoolExecutor. Third test error: passing invalid host raises exception. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04676566,
+    "prompt_tokens": 641,
+    "prompt_time": 0.03345119,
+    "completion_tokens": 560,
+    "completion_time": 0.626753258,
+    "total_tokens": 1201,
+    "total_time": 0.660204448,
+    "completion_tokens_details": {
+      "reasoning_tokens": 78
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7se49raezrajh37vf2fzgrj",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport socket\nimport pytest\nfrom tornado.netutil import ExecutorResolver\nfrom tornado.concurrent import run_on_executor\n\n# Helper to run the resolver in the current event loop\nasync def run_resolver(resolver, host, port, family=socket.AF_UNSPEC):\n    return await resolver.resolve(host, port, family)\n\n@pytest.mark.asyncio\nasync def test_resolver_returns_valid_addresses(tmp_path):\n    \"\"\"ExecutorResolver should return a non‑empty list of address tuples for a valid host.\"\"\"\n    resolver = ExecutorResolver()\n    resolver.initialize(concurrent.futures.ThreadPoolExecutor(max_workers=1))\n    # Resolve localhost on an arbitrary port\n    result = await run_resolver(resolver, \"localhost\", 80)\n    # Each tuple should contain an address family and an address\n    assert isinstance(result, list) and len(result) > 0\n    for fam, addr in result:\n        assert fam in (socket.AF_INET, socket.AF_INET6)\n        assert isinstance(addr, tuple)\n    resolver.close()\n    # After close, executor should be None\n    assert resolver.executor is None\n\n@pytest.mark.asyncio\nasync def test_resolver_with_close_executor_false(tmp_path):\n    \"\"\"When close_executor is False, the executor should not be shut down on close.\"\"\"\n    executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n    resolver = ExecutorResolver()\n    resolver.initialize(executor=executor, close_executor=False)\n    # Resolve a valid host\n    result = await run_resolver(resolver, \"localhost\", 80)\n    assert result  # non-empty\n    # Close resolver but keep executor alive\n    resolver.close()\n    assert resolver.executor is None\n    # Executor should still be running; we can submit a task\n    future = executor.submit(lambda: 42)\n    assert future.result() == 42\n    executor.shutdown()\n\n@pytest.mark.asyncio\nasync def test_resolver_invalid_host_raises(tmp_path):\n    \"\"\"Resolving an invalid hostname should raise a socket.gaierror.\"\"\"\n    resolver = ExecutorResolver()\n    resolver.initialize(concurrent.futures.ThreadPoolExecutor(max_workers=1))\n    with pytest.raises(socket.gaierror):\n        await run_resolver(resolver, \"nonexistent.host.example\", 80)\n    resolver.close()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.001484056992922
+}

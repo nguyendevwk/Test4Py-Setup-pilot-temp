@@ -1,0 +1,185 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_logging_redirect_to_tqdm_write ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.logging__logging_redirect_tqdm__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_logging_redirect_to_tqdm_0')
+
+    def test_logging_redirect_to_tqdm_write(tmp_path):
+        # Setup a logger with a console handler
+        logger = logging.getLogger("test_logger")
+        logger.setLevel(logging.INFO)
+        console_handler = logging.StreamHandler(sys.stdout)
+        logger.handlers = [console_handler]
+    
+        # Capture stdout to verify that tqdm.write writes to it
+        stdout_capture = io.StringIO()
+        with contextlib.redirect_stdout(stdout_capture):
+            with logging_redirect_tqdm([logger]):
+                logger.info("Test message")
+        # After context, the message should have been written via tqdm.write
+        output = stdout_capture.getvalue()
+>       assert "Test message" in output
+E       AssertionError: assert 'Test message' in ''
+
+test_generated.py:32: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Test message
+----------------------------- Captured stderr call -----------------------------
+Test message
+------------------------------ Captured log call -------------------------------
+INFO     test_logger:test_generated.py:29 Test message
+___________________ test_logging_redirect_with_file_handler ____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.logging__logging_redirect_tqdm__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_logging_redirect_with_fil0')
+
+    def test_logging_redirect_with_file_handler(tmp_path):
+        # Logger with both console and file handlers
+        logger = logging.getLogger("file_logger")
+        logger.setLevel(logging.INFO)
+        file_handler = logging.FileHandler(tmp_path / "log.txt")
+        console_handler = logging.StreamHandler(sys.stdout)
+        logger.handlers = [file_handler, console_handler]
+    
+        # Capture stdout
+        stdout_capture = io.StringIO()
+        with contextlib.redirect_stdout(stdout_capture):
+            with logging_redirect_tqdm([logger]):
+                logger.info("File and console message")
+        # Message should appear in stdout via tqdm.write
+>       assert "File and console message" in stdout_capture.getvalue()
+E       AssertionError: assert 'File and console message' in ''
+E        +  where '' = <built-in method getvalue of _io.StringIO object at 0x7f5bc9d38b80>()
+E        +    where <built-in method getvalue of _io.StringIO object at 0x7f5bc9d38b80> = <_io.StringIO object at 0x7f5bc9d38b80>.getvalue
+
+test_generated.py:55: AssertionError
+----------------------------- Captured stdout call -----------------------------
+File and console message
+----------------------------- Captured stderr call -----------------------------
+File and console message
+------------------------------ Captured log call -------------------------------
+INFO     file_logger:test_generated.py:53 File and console message
+_________________ test_logging_redirect_with_custom_tqdm_class _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.logging__logging_redirect_tqdm__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_logging_redirect_with_cus0')
+
+    def test_logging_redirect_with_custom_tqdm_class(tmp_path):
+        # Logger with console handler
+        logger = logging.getLogger("custom_logger")
+        logger.setLevel(logging.INFO)
+        console_handler = logging.StreamHandler(sys.stdout)
+        logger.handlers = [console_handler]
+    
+        # Use a custom tqdm class that records writes
+        capture = CaptureTqdm()
+        with logging_redirect_tqdm([logger], tqdm_class=lambda *a, **k: capture):
+            logger.info("Custom tqdm message")
+        # The custom tqdm instance should have captured the message
+>       assert "Custom tqdm message" in capture.captured
+E       AssertionError: assert 'Custom tqdm message' in []
+E        +  where [] = <test_generated.CaptureTqdm object at 0x7f5bc9eb3430>.captured
+
+test_generated.py:73: AssertionError
+----------------------------- Captured stderr call -----------------------------
+0it [00:00, ?it/s]--- Logging error ---
+Traceback (most recent call last):
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/tqdm/contrib/logging.py", line 27, in emit
+    self.tqdm_class.write(msg, file=self.stream)
+AttributeError: 'function' object has no attribute 'write'
+Call stack:
+  File "/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/coverage/__main__.py", line 12, in <module>
+    sys.exit(main())
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/coverage/cmdline.py", line 1174, in main
+    status = CoverageScript().command_line(argv)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/coverage/cmdline.py", line 863, in command_line
+    return self.do_run(options, args)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/coverage/cmdline.py", line 1053, in do_run
+    runner.run()
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/coverage/execfile.py", line 222, in run
+    exec(code, main_mod.__dict__)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pytest/__main__.py", line 9, in <module>
+    raise SystemExit(_console_main())
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/config/__init__.py", line 286, in _console_main
+    code = _main(prog=_get_prog_name(sys.argv))
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/config/__init__.py", line 262, in _main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_caller.py", line 197, in __call__
+    return self._hookexec(
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_manager.py", line 183, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_execution.py", line 147, in _multicall
+    res = hook_impl.function(*args)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/main.py", line 380, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/main.py", line 333, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/main.py", line 387, in _main
+    config.hook.pytest_runtestloop(session=session)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_caller.py", line 197, in __call__
+    return self._hookexec(
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_manager.py", line 183, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_execution.py", line 147, in _multicall
+    res = hook_impl.function(*args)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/main.py", line 411, in pytest_runtestloop
+    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_caller.py", line 197, in __call__
+    return self._hookexec(
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_manager.py", line 183, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_execution.py", line 147, in _multicall
+    res = hook_impl.function(*args)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/runner.py", line 118, in pytest_runtest_protocol
+    runtestprotocol(item, nextitem=nextitem)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/runner.py", line 139, in runtestprotocol
+    reports.append(call_and_report(item, "call", log))
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/runner.py", line 249, in call_and_report
+    call = CallInfo.from_call(
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/runner.py", line 361, in from_call
+    result: TResult | None = func()
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/runner.py", line 250, in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_caller.py", line 197, in __call__
+    return self._hookexec(
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_manager.py", line 183, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_execution.py", line 147, in _multicall
+    res = hook_impl.function(*args)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/runner.py", line 184, in pytest_runtest_call
+    item.runtest()
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/python.py", line 1798, in runtest
+    self.ihook.pytest_pyfunc_call(pyfuncitem=self)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_caller.py", line 197, in __call__
+    return self._hookexec(
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_manager.py", line 183, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/pluggy/_execution.py", line 147, in _multicall
+    res = hook_impl.function(*args)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/_pytest/python.py", line 187, in pytest_pyfunc_call
+    result = testfunction(**testargs)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.logging__logging_redirect_tqdm__72__source/eval0/test_generated.py", line 71, in test_logging_redirect_with_custom_tqdm_class
+    logger.info("Custom tqdm message")
+  File "/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/logging/__init__.py", line 1477, in info
+    self._log(INFO, msg, args, **kwargs)
+  File "/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/logging/__init__.py", line 1624, in _log
+    self.handle(record)
+  File "/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/logging/__init__.py", line 1634, in handle
+    self.callHandlers(record)
+  File "/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/logging/__init__.py", line 1696, in callHandlers
+    hdlr.handle(record)
+  File "/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/logging/__init__.py", line 968, in handle
+    self.emit(record)
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/tqdm/contrib/logging.py", line 32, in emit
+    self.handleError(record)
+Message: 'Custom tqdm message'
+Arguments: ()
+------------------------------ Captured log call -------------------------------
+INFO     custom_logger:test_generated.py:71 Custom tqdm message
+=========================== short test summary info ============================
+FAILED test_generated.py::test_logging_redirect_to_tqdm_write - AssertionErro...
+FAILED test_generated.py::test_logging_redirect_with_file_handler - Assertion...
+FAILED test_generated.py::test_logging_redirect_with_custom_tqdm_class - Asse...
+3 failed in 0.22s

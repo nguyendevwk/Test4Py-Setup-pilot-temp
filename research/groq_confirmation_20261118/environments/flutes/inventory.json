@@ -1,0 +1,166 @@
+{
+  "candidates": [
+    {
+      "module": "flutes.iterator",
+      "symbol": "chunk",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "source_sha256": "ce52005942e2abddd15e6e736baa524a6873f0dae37cc1b7a9d0307d6c01f6e2",
+      "source": "import weakref\nfrom typing import Callable, Generic, Iterable, Iterator, List, Optional, Sequence, TypeVar, overload\n\ndef chunk(n: int, iterable: Iterable[T]) -> Iterator[List[T]]:\n    r\"\"\"Split the iterable into chunks, with each chunk containing no more than ``n`` elements.\n\n    .. code:: python\n\n        >>> list(chunk(3, range(10)))\n        [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]\n\n    :param n: The maximum number of elements in one chunk.\n    :param iterable: The iterable.\n    :return: An iterator over chunks.\n    \"\"\"\n    if n <= 0:\n        raise ValueError(\"`n` should be positive\")\n    group = []\n    for x in iterable:\n        group.append(x)\n        if len(group) == n:\n            yield group\n            group = []\n    if len(group) > 0:\n        yield group",
+      "source_lines": 22
+    },
+    {
+      "module": "flutes.iterator",
+      "symbol": "take",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "source_sha256": "ce52005942e2abddd15e6e736baa524a6873f0dae37cc1b7a9d0307d6c01f6e2",
+      "source": "import weakref\nfrom typing import Callable, Generic, Iterable, Iterator, List, Optional, Sequence, TypeVar, overload\n\ndef take(n: int, iterable: Iterable[T]) -> Iterator[T]:\n    r\"\"\"Take the first :attr:`n` elements from an iterable.\n\n    .. code:: python\n\n        >>> list(take(5, range(1000000)))\n        [0, 1, 2, 3, 4]\n\n    :param n: The number of elements to take.\n    :param iterable: The iterable.\n    :return: An iterator returning the first :attr:`n` elements from the iterable.\n    \"\"\"\n    if n < 0:\n        raise ValueError(\"`n` should be non-negative\")\n    try:\n        it = iter(iterable)\n        for _ in range(n):\n            yield next(it)\n    except StopIteration:\n        pass",
+      "source_lines": 20
+    },
+    {
+      "module": "flutes.iterator",
+      "symbol": "drop",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "source_sha256": "ce52005942e2abddd15e6e736baa524a6873f0dae37cc1b7a9d0307d6c01f6e2",
+      "source": "import weakref\nfrom typing import Callable, Generic, Iterable, Iterator, List, Optional, Sequence, TypeVar, overload\n\ndef drop(n: int, iterable: Iterable[T]) -> Iterator[T]:\n    r\"\"\"Drop the first :attr:`n` elements from an iterable, and return the rest as an iterator.\n\n    .. code:: python\n\n        >>> next(drop(5, range(1000000)))\n        5\n\n    :param n: The number of elements to drop.\n    :param iterable: The iterable.\n    :return: An iterator returning the remaining part of the iterable after the first :attr:`n` elements.\n    \"\"\"\n    if n < 0:\n        raise ValueError(\"`n` should be non-negative\")\n    try:\n        it = iter(iterable)\n        for _ in range(n):\n            next(it)\n        yield from it\n    except StopIteration:\n        pass",
+      "source_lines": 21
+    },
+    {
+      "module": "flutes.iterator",
+      "symbol": "drop_until",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "source_sha256": "ce52005942e2abddd15e6e736baa524a6873f0dae37cc1b7a9d0307d6c01f6e2",
+      "source": "import weakref\nfrom typing import Callable, Generic, Iterable, Iterator, List, Optional, Sequence, TypeVar, overload\n\ndef drop_until(pred_fn: Callable[[T], bool], iterable: Iterable[T]) -> Iterator[T]:\n    r\"\"\"Drop elements from the iterable until an element that satisfies the predicate is encountered. Similar to the\n    built-in :py:func:`filter` function, but only applied to a prefix of the iterable.\n\n    .. code:: python\n\n        >>> list(drop_until(lambda x: x > 5, range(10)))\n        [6, 7, 8, 9]\n\n    :param pred_fn: The predicate that returned elements should satisfy.\n    :param iterable: The iterable.\n    :return: The iterator after dropping elements.\n    \"\"\"\n    iterator = iter(iterable)\n    for item in iterator:\n        if not pred_fn(item):\n            continue\n        yield item\n        break\n    yield from iterator",
+      "source_lines": 20
+    },
+    {
+      "module": "flutes.iterator",
+      "symbol": "split_by",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "source_sha256": "ce52005942e2abddd15e6e736baa524a6873f0dae37cc1b7a9d0307d6c01f6e2",
+      "source": "import weakref\nfrom typing import Callable, Generic, Iterable, Iterator, List, Optional, Sequence, TypeVar, overload\n\ndef split_by(iterable: Iterable[A], empty_segments: bool = False, *, criterion=None, separator=None) \\\n        -> Iterator[List[A]]:\n    r\"\"\"Split a list into sub-lists by dropping certain elements. Exactly one of ``criterion`` and ``separator`` must be\n    specified. For example:\n\n    .. code:: python\n\n        >>> list(split_by(range(10), criterion=lambda x: x % 3 == 0))\n        [[1, 2], [4, 5], [7, 8]]\n\n        >>> list(split_by(\" Split by: \", empty_segments=True, separator='.'))\n        [[], ['S', 'p', 'l', 'i', 't'], ['b', 'y', ':'], []]\n\n    :param iterable: The list to split.\n    :param empty_segments: If ``True``, include an empty list in cases where two adjacent elements satisfy\n        the criterion.\n    :param criterion: The criterion to decide whether to drop an element.\n    :param separator: The separator for sub-lists. An element is dropped if it is equal to ``parameter``.\n    :return: List of sub-lists.\n    \"\"\"\n    if not ((criterion is None) ^ (separator is None)):\n        raise ValueError(\"Exactly one of `criterion` and `separator` should be specified\")\n    if criterion is None:\n        criterion = lambda x: x == separator\n    group = []\n    for x in iterable:\n        if not criterion(x):\n            group.append(x)\n        else:\n            if len(group) > 0 or empty_segments:\n                yield group\n            group = []\n    if len(group) > 0 or empty_segments:\n        yield group",
+      "source_lines": 34
+    },
+    {
+      "module": "flutes.iterator",
+      "symbol": "scanl",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "source_sha256": "ce52005942e2abddd15e6e736baa524a6873f0dae37cc1b7a9d0307d6c01f6e2",
+      "source": "import weakref\nfrom typing import Callable, Generic, Iterable, Iterator, List, Optional, Sequence, TypeVar, overload\n\ndef scanl(func, iterable, *args):\n    r\"\"\"Computes the intermediate results of :py:func:`~functools.reduce`. Equivalent to Haskell's ``scanl``. For\n    example:\n\n    .. code:: python\n\n        >>> list(scanl(operator.add, [1, 2, 3, 4], 0))\n        [0, 1, 3, 6, 10]\n        >>> list(scanl(lambda s, x: x + s, ['a', 'b', 'c', 'd']))\n        ['a', 'ba', 'cba', 'dcba']\n\n    Learn more at `Learn You a Haskell: Higher Order Functions <http://learnyouahaskell.com/higher-order-functions>`_.\n\n    :param func: The function to apply. This should be a binary function where the arguments are: the accumulator,\n        and the current element.\n    :param iterable: The list of elements to iteratively apply the function to.\n    :param initial: The initial value for the accumulator. If not supplied, the first element in the list is used.\n    :return: The intermediate results at each step.\n    \"\"\"\n    iterable = iter(iterable)\n    if len(args) == 1:\n        acc = args[0]\n    elif len(args) == 0:\n        acc = next(iterable)\n    else:\n        raise ValueError(\"Too many arguments\")\n    yield acc\n    for x in iterable:\n        acc = func(acc, x)\n        yield acc",
+      "source_lines": 30
+    },
+    {
+      "module": "flutes.iterator",
+      "symbol": "scanr",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "source_sha256": "ce52005942e2abddd15e6e736baa524a6873f0dae37cc1b7a9d0307d6c01f6e2",
+      "source": "import weakref\nfrom typing import Callable, Generic, Iterable, Iterator, List, Optional, Sequence, TypeVar, overload\n\ndef scanr(func, iterable, *args):\n    r\"\"\"Computes the intermediate results of :py:func:`~functools.reduce` applied in reverse. Equivalent to Haskell's\n    ``scanr``. For example:\n\n    .. code:: python\n\n        >>> scanr(operator.add, [1, 2, 3, 4], 0)\n        [10, 9, 7, 4, 0]\n        >>> scanr(lambda s, x: x + s, ['a', 'b', 'c', 'd'])\n        ['abcd', 'bcd', 'cd', 'd']\n\n    Learn more at `Learn You a Haskell: Higher Order Functions <http://learnyouahaskell.com/higher-order-functions>`_.\n\n    :param func: The function to apply. This should be a binary function where the arguments are: the accumulator,\n        and the current element.\n    :param iterable: The list of elements to iteratively apply the function to.\n    :param initial: The initial value for the accumulator. If not supplied, the first element in the list is used.\n    :return: The intermediate results at each step, starting from the end.\n    \"\"\"\n    return list(scanl(func, reversed(iterable), *args))[::-1]",
+      "source_lines": 20
+    },
+    {
+      "module": "flutes.iterator",
+      "symbol": "LazyList",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "source_sha256": "ce52005942e2abddd15e6e736baa524a6873f0dae37cc1b7a9d0307d6c01f6e2",
+      "source": "import weakref\nfrom typing import Callable, Generic, Iterable, Iterator, List, Optional, Sequence, TypeVar, overload\n\nclass LazyList(Generic[T], Sequence[T]):\n    r\"\"\"A wrapper over an iterable to allow lazily converting it into a list. The iterable is only iterated up to the\n    accessed indices.\n\n    :param iterable: The iterable to wrap.\n    \"\"\"\n\n    class LazyListIterator:\n        def __init__(self, lst: 'LazyList[T]'):\n            self.list = weakref.ref(lst)\n            self.index = 0\n\n        def __iter__(self):\n            return self\n\n        def __next__(self):\n            try:\n                obj = self.list()[self.index]\n            except IndexError:\n                raise StopIteration\n            self.index += 1\n            return obj\n\n    def __init__(self, iterable: Iterable[T]):\n        self.iter = iter(iterable)\n        self.exhausted = False\n        self.list: List[T] = []\n\n    def __iter__(self):\n        if self.exhausted:\n            return iter(self.list)\n        return self.LazyListIterator(self)\n\n    def _fetch_until(self, idx: Optional[int]) -> None:\n        if self.exhausted:\n            return\n        try:\n            if idx is not None and idx < 0:\n                idx = None  # otherwise we won't know when the sequence ends\n            while idx is None or len(self.list) <= idx:\n                self.list.append(next(self.iter))\n        except StopIteration:\n            self.exhausted = True\n            del self.iter\n\n    @overload\n    def __getitem__(self, idx: int) -> T: ...\n\n    @overload\n    def __getitem__(self, idx: slice) -> List[T]: ...\n\n    def __getitem__(self, idx):\n        if isinstance(idx, slice):\n            self._fetch_until(idx.stop)\n        else:\n            self._fetch_until(idx)\n        return self.list[idx]\n\n    def __len__(self):\n        if self.exhausted:\n            return len(self.list)\n        else:\n            raise TypeError(\"__len__ is not available before the iterable is depleted\")",
+      "source_lines": 63
+    },
+    {
+      "module": "flutes.iterator",
+      "symbol": "Range",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "source_sha256": "ce52005942e2abddd15e6e736baa524a6873f0dae37cc1b7a9d0307d6c01f6e2",
+      "source": "import weakref\nfrom typing import Callable, Generic, Iterable, Iterator, List, Optional, Sequence, TypeVar, overload\n\nclass Range(Sequence[int]):\n    r\"\"\"A replacement for built-in :py:class:`range` with support for indexing operators. For example:\n\n    .. code:: python\n\n        >>> r = Range(10)         # (end)\n        >>> r = Range(1, 10 + 1)  # (start, end)\n        >>> r = Range(1, 11, 2)   # (start, end, step)\n        >>> print(r[0], r[2], r[4])\n        1 5 9\n    \"\"\"\n\n    @overload\n    def __init__(self, stop: int): ...\n\n    @overload\n    def __init__(self, start: int, stop: int): ...\n\n    @overload\n    def __init__(self, start: int, stop: int, step: int): ...\n\n    def __init__(self, *args):\n        if len(args) == 0 or len(args) > 3:\n            raise ValueError(\"Range should be called the same way as the builtin `range`\")\n        if len(args) == 1:\n            self.l = 0\n            self.r = args[0]\n            self.step = 1\n        else:\n            self.l = args[0]\n            self.r = args[1]\n            self.step = 1 if len(args) == 2 else args[2]\n        self.val = self.l\n        self.length = (self.r - self.l) // self.step\n\n    def __iter__(self) -> Iterator[int]:\n        return Range(self.l, self.r, self.step)\n\n    def __next__(self) -> int:\n        if self.val >= self.r:\n            raise StopIteration\n        result = self.val\n        self.val += self.step\n        return result\n\n    def __len__(self) -> int:\n        return self.length\n\n    def _get_idx(self, idx: int) -> int:\n        return self.l + self.step * idx\n\n    @overload\n    def __getitem__(self, idx: int) -> int: ...\n\n    @overload\n    def __getitem__(self, idx: slice) -> List[int]: ...\n\n    def __getitem__(self, item):\n        if isinstance(item, slice):\n            return [self._get_idx(idx) for idx in range(*item.indices(self.length))]\n        if item < 0:\n            item = self.length + item\n        return self._get_idx(item)",
+      "source_lines": 63
+    },
+    {
+      "module": "flutes.iterator",
+      "symbol": "MapList",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "source_sha256": "ce52005942e2abddd15e6e736baa524a6873f0dae37cc1b7a9d0307d6c01f6e2",
+      "source": "import weakref\nfrom typing import Callable, Generic, Iterable, Iterator, List, Optional, Sequence, TypeVar, overload\n\nclass MapList(Generic[R], Sequence[R]):\n    r\"\"\"A wrapper over a list that allows lazily performing transformations on the list elements. It's basically the\n    built-in :py:func:`map` function, with support for indexing operators. An example use case:\n\n    .. code:: python\n\n        >>> import bisect\n\n        >>> # Find index of the first element in `a` whose square is >= 10.\n        ... a = [1, 2, 3, 4, 5]\n        ... pos = bisect.bisect_left(MapList(lambda x: x * x, a), 10)\n        3\n\n        >>> # Find the first index `i` such that `a[i] * b[i]` is >= 10.\n        ... b = [2, 3, 4, 5, 6]\n        ... pos = bisect.bisect_left(MapList(lambda i: a[i] * b[i], Range(len(a))), 10)\n        2\n\n    :param func: The transformation to perform on list elements.\n    :param lst: The list to wrap.\n    \"\"\"\n\n    def __init__(self, func: Callable[[T], R], lst: Sequence[T]):\n        self.func = func\n        self.list = lst\n\n    @overload\n    def __getitem__(self, idx: int) -> R: ...\n\n    @overload\n    def __getitem__(self, idx: slice) -> List[R]: ...\n\n    def __getitem__(self, item):\n        if isinstance(item, int):\n            return self.func(self.list[item])\n        return [self.func(x) for x in self.list[item]]\n\n    def __iter__(self) -> Iterator[R]:\n        return map(self.func, self.list)\n\n    def __len__(self) -> int:\n        return len(self.list)",
+      "source_lines": 42
+    },
+    {
+      "module": "flutes.structure",
+      "symbol": "reverse_map",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/structure.py",
+      "source_sha256": "72cdf395789909e3c9f2cd35b9fe2eed4f2b6eb871bd44c285013d4dc51478f3",
+      "source": "from functools import lru_cache\nfrom typing import Callable, Collection, Dict, List, Sequence, Set, Type, TypeVar, no_type_check\n\ndef reverse_map(d: Dict[T, int]) -> List[T]:\n    r\"\"\"Given a dict containing pairs of ``(item, id)``, return a list where the ``id``-th element is ``item``.\n\n    .. note::\n        It is assumed that the ``id``\\ s form a permutation.\n\n    .. code:: python\n\n        >>> words = ['a', 'aardvark', 'abandon', ...]\n        >>> word_to_id = {word: idx for idx, word in enumerate(words)}\n        >>> id_to_word = reverse_map(word_to_id)\n        >>> (words == id_to_word)\n        True\n\n    :param d: The dictionary mapping ``item`` to ``id``.\n    \"\"\"\n    return [k for k, _ in sorted(d.items(), key=lambda xs: xs[1])]",
+      "source_lines": 17
+    },
+    {
+      "module": "flutes.structure",
+      "symbol": "register_no_map_class",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/structure.py",
+      "source_sha256": "72cdf395789909e3c9f2cd35b9fe2eed4f2b6eb871bd44c285013d4dc51478f3",
+      "source": "from functools import lru_cache\nfrom typing import Callable, Collection, Dict, List, Sequence, Set, Type, TypeVar, no_type_check\n\ndef register_no_map_class(container_type: Type[T]) -> None:\n    r\"\"\"Register a container type as `non-mappable`, i.e., instances of the class will be treated as singleton objects in\n    :func:`map_structure` and :func:`map_structure_zip`, their contents will not be traversed. This would be useful for\n    certain types that subclass built-in container types, such as ``torch.Size``.\n\n    :param container_type: The type of the container, e.g. :py:class:`list`, :py:class:`dict`.\n    \"\"\"\n    return _NO_MAP_TYPES.add(container_type)",
+      "source_lines": 8
+    },
+    {
+      "module": "flutes.structure",
+      "symbol": "no_map_instance",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/structure.py",
+      "source_sha256": "72cdf395789909e3c9f2cd35b9fe2eed4f2b6eb871bd44c285013d4dc51478f3",
+      "source": "from functools import lru_cache\nfrom typing import Callable, Collection, Dict, List, Sequence, Set, Type, TypeVar, no_type_check\n\ndef no_map_instance(instance: T) -> T:\n    r\"\"\"Register a container instance as `non-mappable`, i.e., it will be treated as a singleton object in\n    :func:`map_structure` and :func:`map_structure_zip`, its contents will not be traversed.\n\n    :param instance: The container instance.\n    \"\"\"\n    try:\n        setattr(instance, _NO_MAP_INSTANCE_ATTR, True)\n        return instance\n    except AttributeError:\n        return _no_map_type(type(instance))(instance)",
+      "source_lines": 11
+    },
+    {
+      "module": "flutes.structure",
+      "symbol": "map_structure",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/structure.py",
+      "source_sha256": "72cdf395789909e3c9f2cd35b9fe2eed4f2b6eb871bd44c285013d4dc51478f3",
+      "source": "from functools import lru_cache\nfrom typing import Callable, Collection, Dict, List, Sequence, Set, Type, TypeVar, no_type_check\n\ndef map_structure(fn: Callable[[T], R], obj: Collection[T]) -> Collection[R]:\n    r\"\"\"Map a function over all elements in a (possibly nested) collection.\n\n    :param fn: The function to call on elements.\n    :param obj: The collection to map function over.\n    :return: The collection in the same structure, with elements mapped.\n    \"\"\"\n    if obj.__class__ in _NO_MAP_TYPES or hasattr(obj, _NO_MAP_INSTANCE_ATTR):\n        return fn(obj)\n    if isinstance(obj, list):\n        return [map_structure(fn, x) for x in obj]\n    if isinstance(obj, tuple):\n        if hasattr(obj, '_fields'):  # namedtuple\n            return type(obj)(*[map_structure(fn, x) for x in obj])\n        else:\n            return tuple(map_structure(fn, x) for x in obj)\n    if isinstance(obj, dict):\n        # could be `OrderedDict`\n        return type(obj)((k, map_structure(fn, v)) for k, v in obj.items())\n    if isinstance(obj, set):\n        return {map_structure(fn, x) for x in obj}\n    return fn(obj)",
+      "source_lines": 22
+    },
+    {
+      "module": "flutes.structure",
+      "symbol": "map_structure_zip",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/structure.py",
+      "source_sha256": "72cdf395789909e3c9f2cd35b9fe2eed4f2b6eb871bd44c285013d4dc51478f3",
+      "source": "from functools import lru_cache\nfrom typing import Callable, Collection, Dict, List, Sequence, Set, Type, TypeVar, no_type_check\n\ndef map_structure_zip(fn: Callable[..., R], objs: Sequence[Collection[T]]) -> Collection[R]:\n    r\"\"\"Map a function over tuples formed by taking one elements from each (possibly nested) collection. Each collection\n    must have identical structures.\n\n    .. note::\n        Although identical structures are required, it is not enforced by assertions. The structure of the first\n        collection is assumed to be the structure for all collections.\n\n    :param fn: The function to call on elements.\n    :param objs: The list of collections to map function over.\n    :return: A collection with the same structure, with elements mapped.\n    \"\"\"\n    obj = objs[0]\n    if obj.__class__ in _NO_MAP_TYPES or hasattr(obj, _NO_MAP_INSTANCE_ATTR):\n        return fn(*objs)\n    if isinstance(obj, list):\n        return [map_structure_zip(fn, xs) for xs in zip(*objs)]\n    if isinstance(obj, tuple):\n        if hasattr(obj, '_fields'):  # namedtuple\n            return type(obj)(*[map_structure_zip(fn, xs) for xs in zip(*objs)])\n        else:\n            return tuple(map_structure_zip(fn, xs) for xs in zip(*objs))\n    if isinstance(obj, dict):\n        # could be `OrderedDict`\n        return type(obj)((k, map_structure_zip(fn, [o[k] for o in objs])) for k in obj.keys())\n    if isinstance(obj, set):\n        raise ValueError(\"Structures cannot contain `set` because it's unordered\")\n    return fn(*objs)",
+      "source_lines": 28
+    },
+    {
+      "module": "flutes.timing",
+      "symbol": "work_in_progress",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/timing.py",
+      "source_sha256": "d5e8b51e7d65da8e554fc9386ba6b1f4efe2ddcabfa6e82e1ecebdc2aac4b3e7",
+      "source": "import contextlib\nimport time\n\ndef work_in_progress(desc: str = \"Work in progress\"):\n    r\"\"\"Time the execution time of a code block or function.\n\n    .. code:: python\n\n        >>> @work_in_progress(\"Loading file\")\n        ... def load_file(path):\n        ...     with open(path, \"rb\") as f:\n        ...         return pickle.load(f)\n        ...\n        ... obj = load_file(\"/path/to/some/file\")\n        Loading file... done. (3.52s)\n\n        >>> with work_in_progress(\"Saving file\"):\n        ...     with open(path, \"wb\") as f:\n        ...         pickle.dump(obj, f)\n        Saving file... done. (3.78s)\n\n    :param desc: Description of the task performed.\n    \"\"\"\n    print(desc + \"... \", end='', flush=True)\n    begin_time = time.time()\n    yield\n    time_consumed = time.time() - begin_time\n    print(f\"done. ({time_consumed:.2f}s)\")",
+      "source_lines": 25
+    }
+  ],
+  "errors": [],
+  "site": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages",
+  "version": "0.3.0",
+  "packages": {
+    "ptyprocess": "0.7.0",
+    "pure_eval": "0.2.4",
+    "stack-data": "0.6.3",
+    "asttokens": "3.0.2",
+    "psutil": "7.2.2",
+    "decorator": "5.3.1",
+    "pexpect": "4.9.0",
+    "termcolor": "3.3.0",
+    "executing": "2.3.0",
+    "exceptiongroup": "1.3.1",
+    "tomli": "2.5.0",
+    "matplotlib-inline": "0.2.2",
+    "parso": "0.8.7",
+    "traitlets": "5.16.1",
+    "tqdm": "4.70.1",
+    "pluggy": "1.7.0",
+    "pytest-metadata": "3.1.1",
+    "packaging": "26.3",
+    "typing_extensions": "4.16.0",
+    "iniconfig": "2.3.1",
+    "pytest-json-report": "1.5.0",
+    "flutes": "0.3.0",
+    "wcwidth": "0.9.4",
+    "coverage": "7.16.2",
+    "pytest": "9.2.0",
+    "prompt_toolkit": "3.0.53",
+    "Pygments": "2.21.0",
+    "ipython": "8.39.0",
+    "jedi": "0.20.1"
+  }
+}

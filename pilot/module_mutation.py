@@ -25,13 +25,13 @@ def pool(source, limit=4):
         for child in ast.iter_child_nodes(node):
             walk(child, owners, in_function)
     walk(tree)
+    positions = {id(node): index for index,node in enumerate(ast.walk(tree))}
     results = []
     for index, (target, op_index, replacement, owner, old) in enumerate(candidates[:limit]):
         mutant = copy.deepcopy(tree)
-        # Match the exact AST position/type; deterministic independently of generated tests.
-        found = [n for n in ast.walk(mutant) if type(n) is type(target) and
-                 getattr(n, 'lineno', None) == target.lineno and getattr(n, 'col_offset', None) == target.col_offset]
-        node, = found
+        # Nested left-associative expressions can share start coordinates.
+        # Deepcopy preserves traversal order, so select the exact original node.
+        node = list(ast.walk(mutant))[positions[id(target)]]
         if isinstance(node, ast.Compare):
             node.ops[op_index] = replacement()
         else:

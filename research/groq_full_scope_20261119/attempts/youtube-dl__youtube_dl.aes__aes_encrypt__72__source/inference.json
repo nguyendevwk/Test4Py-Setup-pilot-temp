@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-0300cdf5-3bdd-43c0-a635-8d85cfb560ca",
+  "object": "chat.completion",
+  "created": 1795078525,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.aes import aes_encrypt, key_expansion\nfrom youtube_dl.utils import bytes_to_intlist, intlist_to_bytes\n\n# Test vector from NIST SP 800-38A\nPLAINTEXT = bytes.fromhex(\"00112233445566778899aabbccddeeff\")\nKEY_128 = bytes.fromhex(\"000102030405060708090a0b0c0d0e0f\")\nEXPECTED_CIPHERTEXT = bytes.fromhex(\"69c4e0d86a7b0430d8cdb78070b4c55a\")\n\ndef test_aes_encrypt_known_vector():\n    \"\"\"Encrypt a single block with a known key and compare to the expected ciphertext.\"\"\"\n    expanded_key = key_expansion(KEY_128)\n    data_ints = bytes_to_intlist(PLAINTEXT)\n    cipher_ints = aes_encrypt(data_ints, expanded_key)\n    cipher_bytes = intlist_to_bytes(cipher_ints)\n    assert cipher_bytes == EXPECTED_CIPHERTEXT\n\ndef test_aes_encrypt_idempotent_with_same_input():\n    \"\"\"Encrypting the same block twice with the same key yields the same ciphertext.\"\"\"\n    expanded_key = key_expansion(KEY_128)\n    data_ints = bytes_to_intlist(PLAINTEXT)\n    first = aes_encrypt(data_ints, expanded_key)\n    second = aes_encrypt(data_ints, expanded_key)\n    assert first == second\n\ndef test_aes_encrypt_invalid_key_length_raises():\n    \"\"\"Providing an expanded key whose length is not a multiple of 16 should raise an error.\"\"\"\n    expanded_key = key_expansion(KEY_128)[:-1]  # truncate to invalid length\n    data_ints = bytes_to_intlist(PLAINTEXT)\n    with pytest.raises(ValueError):\n        aes_encrypt(data_ints, expanded_key)\n```",
+        "reasoning": "Need to test aes_encrypt. Need to import from youtube_dl.aes. We need known key and data to produce expected output. Use known AES example: key 128-bit, plaintext block. Use standard AES test vector: plaintext 00112233445566778899aabbccddeeff, key 000102030405060708090a0b0c0d0e0f, ciphertext 69c4e0d86a7b0430d8cdb78070b4c55a. Need expanded key. We can use youtube_dl.utils to generate? There's key expansion function? Search. But easier: use pycryptodome? Not allowed. We can compute expanded key using youtube_dl's key expansion? There's function in youtube_dl.aes? Let's inspect. Probably has key_expansion. But not given. We can import youtube_dl.aes and use its key_expansion? Let's assume function exists: youtube_dl.aes.key_expansion. We'll use that. Write tests: test_encrypt_known_vector. test_boundary: data length 16 bytes. test_error: passing wrong key length raises? aes_encrypt expects expanded_key length multiple of 16. Provide wrong length and expect ValueError? Not sure. Maybe it will compute rounds incorrectly. We can test that passing data not 16 bytes raises? It doesn't check. So maybe test that passing data longer raises? Not. Instead test that encryption is reversible with decrypt? Not available. We'll test that encryption of zero block with zero key gives known result? Not known. Maybe test that encryption with same expanded key twice yields same result. Use same data. We'll assert equality. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053275314,
+    "prompt_tokens": 415,
+    "prompt_time": 0.014957525,
+    "completion_tokens": 733,
+    "completion_time": 0.828461232,
+    "total_tokens": 1148,
+    "total_time": 0.843418757,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 339
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg93x1eed9ey0gng3h9zsf",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.aes import aes_encrypt, key_expansion\nfrom youtube_dl.utils import bytes_to_intlist, intlist_to_bytes\n\n# Test vector from NIST SP 800-38A\nPLAINTEXT = bytes.fromhex(\"00112233445566778899aabbccddeeff\")\nKEY_128 = bytes.fromhex(\"000102030405060708090a0b0c0d0e0f\")\nEXPECTED_CIPHERTEXT = bytes.fromhex(\"69c4e0d86a7b0430d8cdb78070b4c55a\")\n\ndef test_aes_encrypt_known_vector():\n    \"\"\"Encrypt a single block with a known key and compare to the expected ciphertext.\"\"\"\n    expanded_key = key_expansion(KEY_128)\n    data_ints = bytes_to_intlist(PLAINTEXT)\n    cipher_ints = aes_encrypt(data_ints, expanded_key)\n    cipher_bytes = intlist_to_bytes(cipher_ints)\n    assert cipher_bytes == EXPECTED_CIPHERTEXT\n\ndef test_aes_encrypt_idempotent_with_same_input():\n    \"\"\"Encrypting the same block twice with the same key yields the same ciphertext.\"\"\"\n    expanded_key = key_expansion(KEY_128)\n    data_ints = bytes_to_intlist(PLAINTEXT)\n    first = aes_encrypt(data_ints, expanded_key)\n    second = aes_encrypt(data_ints, expanded_key)\n    assert first == second\n\ndef test_aes_encrypt_invalid_key_length_raises():\n    \"\"\"Providing an expanded key whose length is not a multiple of 16 should raise an error.\"\"\"\n    expanded_key = key_expansion(KEY_128)[:-1]  # truncate to invalid length\n    data_ints = bytes_to_intlist(PLAINTEXT)\n    with pytest.raises(ValueError):\n        aes_encrypt(data_ints, expanded_key)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.264537950977683
+}

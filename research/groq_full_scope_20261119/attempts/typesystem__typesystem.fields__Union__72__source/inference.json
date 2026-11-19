@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-7c267494-5ee4-4c3c-a6e1-2cfd4fa6b321",
+  "object": "chat.completion",
+  "created": 1795078245,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport decimal\nimport re\nimport typing\nimport pytest\nfrom typesystem import fields, ValidationError\n\n# Test 1: Successful validation with a matching child type\ndef test_union_validates_first_matching_child():\n    union_field = fields.Union(any_of=[fields.Integer(), fields.String()])\n    # Integer matches first child\n    result = union_field.validate(42)\n    assert result == 42\n    # String matches second child\n    result = union_field.validate(\"hello\")\n    assert result == \"hello\"\n\n# Test 2: Null handling when allow_null is set via a child\ndef test_union_allows_null_when_child_allows():\n    union_field = fields.Union(any_of=[fields.Integer(allow_null=True), fields.String()])\n    # Null should be accepted\n    result = union_field.validate(None)\n    assert result is None\n    # Non-null still validates against children\n    assert union_field.validate(10) == 10\n    assert union_field.validate(\"test\") == \"test\"\n\n# Test 3: ValidationError raised when no child matches and candidate errors exist\ndef test_union_raises_union_error_with_candidate_errors():\n    # Child that accepts Decimal but raises a type error for int\n    class DecimalField(fields.Decimal):\n        def validate_or_error(self, value):\n            try:\n                return super().validate_or_error(value)\n            except ValidationError as e:\n                # Re-raise to propagate\n                raise e\n\n    union_field = fields.Union(any_of=[DecimalField(), fields.String()])\n    # int does not match any child; DecimalField will produce a type error\n    with pytest.raises(ValidationError) as excinfo:\n        union_field.validate(5)\n    # The raised error should be the union error, not the child type error\n    assert excinfo.value.code == \"union\"\n    assert \"Did not match any valid type.\" in excinfo.value.message\n```",
+        "reasoning": "We need tests for Union field. Need to import typesystem.fields.Union. Use tmp_path? Not needed. We'll create simple fields: IntegerField, StringField etc. Use typesystem library. Write three tests: normal success, boundary null allowed, error with candidate errors. Use assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054434548,
+    "prompt_tokens": 543,
+    "prompt_time": 0.004520081,
+    "completion_tokens": 463,
+    "completion_time": 0.782456742,
+    "total_tokens": 1006,
+    "total_time": 0.786976823,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 60
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg0ja2ezgvcn11s24gs48x",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport decimal\nimport re\nimport typing\nimport pytest\nfrom typesystem import fields, ValidationError\n\n# Test 1: Successful validation with a matching child type\ndef test_union_validates_first_matching_child():\n    union_field = fields.Union(any_of=[fields.Integer(), fields.String()])\n    # Integer matches first child\n    result = union_field.validate(42)\n    assert result == 42\n    # String matches second child\n    result = union_field.validate(\"hello\")\n    assert result == \"hello\"\n\n# Test 2: Null handling when allow_null is set via a child\ndef test_union_allows_null_when_child_allows():\n    union_field = fields.Union(any_of=[fields.Integer(allow_null=True), fields.String()])\n    # Null should be accepted\n    result = union_field.validate(None)\n    assert result is None\n    # Non-null still validates against children\n    assert union_field.validate(10) == 10\n    assert union_field.validate(\"test\") == \"test\"\n\n# Test 3: ValidationError raised when no child matches and candidate errors exist\ndef test_union_raises_union_error_with_candidate_errors():\n    # Child that accepts Decimal but raises a type error for int\n    class DecimalField(fields.Decimal):\n        def validate_or_error(self, value):\n            try:\n                return super().validate_or_error(value)\n            except ValidationError as e:\n                # Re-raise to propagate\n                raise e\n\n    union_field = fields.Union(any_of=[DecimalField(), fields.String()])\n    # int does not match any child; DecimalField will produce a type error\n    with pytest.raises(ValidationError) as excinfo:\n        union_field.validate(5)\n    # The raised error should be the union error, not the child type error\n    assert excinfo.value.code == \"union\"\n    assert \"Did not match any valid type.\" in excinfo.value.message\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1688424780149944
+}

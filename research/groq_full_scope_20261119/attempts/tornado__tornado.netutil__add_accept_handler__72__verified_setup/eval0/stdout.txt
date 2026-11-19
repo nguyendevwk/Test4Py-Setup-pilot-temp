@@ -1,0 +1,43 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_add_accept_handler_accepts_connection __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__add_accept_handler__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_add_accept_handler_accept0')
+
+    def test_add_accept_handler_accepts_connection(tmp_path):
+        """The callback is invoked with a new connection and its address."""
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setblocking(False)
+        server.bind(("127.0.0.1", 0))
+        server.listen(1)
+    
+        received = []
+    
+        def callback(conn, addr):
+            received.append((conn, addr))
+            conn.close()
+    
+        remove = add_accept_handler(server, callback)
+    
+        loop = IOLoop.current()
+        thread = threading.Thread(target=_run_loop, args=(loop, 0.5))
+        thread.start()
+    
+        # Connect a client to trigger the accept handler
+        client = socket.create_connection(server.getsockname())
+        client.close()
+    
+        thread.join()
+        remove()
+        server.close()
+    
+        assert len(received) == 1
+        conn, addr = received[0]
+        assert isinstance(conn, socket.socket)
+>       assert addr == server.getsockname()
+E       OSError: [Errno 9] Bad file descriptor
+
+test_generated.py:48: OSError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_add_accept_handler_accepts_connection - OSErro...
+1 failed, 2 passed in 1.71s

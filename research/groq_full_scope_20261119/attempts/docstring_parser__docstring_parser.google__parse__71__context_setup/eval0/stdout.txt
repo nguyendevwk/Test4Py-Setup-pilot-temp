@@ -1,0 +1,76 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_parse_basic_google_style _________________________
+
+    def test_parse_basic_google_style():
+        """Verify that a simple Google‑style docstring is parsed correctly."""
+        doc = """
+        Short summary.
+    
+        Longer description that spans multiple lines.
+    
+        Args:
+            x (int): The first argument.
+            y (str): The second argument.
+    
+        Returns:
+            bool: True if successful, False otherwise.
+    
+        Raises:
+            ValueError: If an error occurs.
+    
+        Examples:
+            >>> result = func(1, 'a')
+            >>> assert result is True
+        """
+        parsed = parse(doc)
+        assert isinstance(parsed, Docstring)
+        # Summary and description
+        assert parsed.short_description == "Short summary."
+        assert parsed.long_description.strip().startswith("Longer description")
+        # Parameters
+        assert len(parsed.params) == 2
+        param_names = {p.arg_name for p in parsed.params}
+        assert param_names == {"x", "y"}
+        # Return
+        assert parsed.returns is not None
+        assert parsed.returns.type_name == "bool"
+        # Raises
+        assert len(parsed.raises) == 1
+        assert parsed.raises[0].type_name == "ValueError"
+        # Examples
+        assert len(parsed.examples) == 1
+>       assert parsed.examples[0].example_text.strip().startswith(">>> result = func")
+E       AttributeError: 'DocstringExample' object has no attribute 'example_text'
+
+test_generated.py:43: AttributeError
+__________________________ test_parse_empty_and_none ___________________________
+
+    def test_parse_empty_and_none():
+        """Parsing an empty string or None should yield an empty Docstring."""
+        empty = parse("")
+        assert isinstance(empty, Docstring)
+>       assert empty.short_description == ""
+E       AssertionError: assert None == ''
+E        +  where None = <docstring_parser.common.Docstring object at 0x7f3ed16ebd30>.short_description
+
+test_generated.py:49: AssertionError
+____________________ test_parse_invalid_format_raises_error ____________________
+
+    def test_parse_invalid_format_raises_error():
+        """A malformed Google‑style docstring should raise ParseError."""
+        bad_doc = """
+        Summary line
+    
+        Args
+            x (int): missing colon after section header
+        """
+>       with pytest.raises(ParseError):
+E       Failed: DID NOT RAISE ParseError
+
+test_generated.py:73: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_basic_google_style - AttributeError: 'Do...
+FAILED test_generated.py::test_parse_empty_and_none - AssertionError: assert ...
+FAILED test_generated.py::test_parse_invalid_format_raises_error - Failed: DI...
+3 failed in 0.17s

@@ -1,0 +1,80 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________________ test_string_validate_behavior _________________________
+
+    def test_string_validate_behavior():
+        field = String(
+            allow_blank=True,
+            trim_whitespace=True,
+            min_length=3,
+            max_length=5,
+            pattern=r'\d+',
+        )
+        # None coerces to empty string when allow_blank is True
+        assert field.validate(None) == ""
+        # Valid string with whitespace trimmed
+        assert field.validate("  123  ") == "123"
+        # Too short string triggers min_length error
+        with pytest.raises(Exception):
+            field.validate("12")
+        # Too long string triggers max_length error
+        with pytest.raises(Exception):
+            field.validate("123456")
+        # Pattern mismatch triggers pattern error
+        with pytest.raises(Exception):
+            field.validate("abc")
+        # Null character is removed before validation
+>       assert field.validate("a\0bc") == "abc"
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+../../expanded_120_results/typesystem_string/baseline/seed_46/v1_exec/test_run.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.fields.String object at 0x7fa32b045700>, value = 'abc'
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        if value is None and self.allow_null:
+            return None
+        elif value is None and self.allow_blank and self.coerce_types:
+            # Leniently cast nulls to empty strings if allow_blank.
+            return ""
+        elif value is None:
+            raise self.validation_error("null")
+        elif self.format in FORMATS and FORMATS[self.format].is_native_type(value):
+            return value
+        elif not isinstance(value, str):
+            raise self.validation_error("type")
+    
+        # The null character is always invalid.
+        value = value.replace("\0", "")
+    
+        # Strip leading/trailing whitespace by default.
+        if self.trim_whitespace:
+            value = value.strip()
+    
+        if not self.allow_blank and not value:
+            if self.allow_null and self.coerce_types:
+                # Leniently cast empty strings (after trimming) to null if allow_null.
+                return None
+            raise self.validation_error("blank")
+    
+        if self.min_length is not None:
+            if len(value) < self.min_length:
+                raise self.validation_error("min_length")
+    
+        if self.max_length is not None:
+            if len(value) > self.max_length:
+                raise self.validation_error("max_length")
+    
+        if self.pattern_regex is not None:
+            if not self.pattern_regex.search(value):
+>               raise self.validation_error("pattern")
+E               typesystem.base.ValidationError: Must match the pattern /\d+/.
+
+typesystem/fields.py:178: ValidationError
+=========================== short test summary info ============================
+FAILED ../../expanded_120_results/typesystem_string/baseline/seed_46/v1_exec/test_run.py::test_string_validate_behavior
+1 failed in 0.25s
+
+/home/heurix/.cache/uv/archive-v0/ZMxlGZafGJre2eGL/lib/python3.12/site-packages/coverage/inorout.py:560: CoverageWarning: Module tests was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.17.3/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")

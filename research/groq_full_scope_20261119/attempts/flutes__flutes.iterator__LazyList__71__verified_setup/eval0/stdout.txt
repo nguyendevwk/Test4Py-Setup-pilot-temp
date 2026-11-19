@@ -1,0 +1,36 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_lazy_list_basic_access_and_iteration ___________________
+
+    def test_lazy_list_basic_access_and_iteration():
+        # Create a LazyList from a finite iterable
+        source = (x for x in range(5))
+        lazy = LazyList(source)
+    
+        # Access elements by index; should trigger lazy fetching
+        assert lazy[0] == 0
+        assert lazy[4] == 4
+    
+        # After accessing the last element, the iterable is exhausted
+        with pytest.raises(TypeError):
+            len(lazy)  # __len__ should raise before exhaustion
+    
+        # Now the list is fully populated; len should work
+>       assert len(lazy) == 5
+
+test_generated.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <flutes.iterator.LazyList object at 0x7fe90dc03b20>
+
+    def __len__(self):
+        if self.exhausted:
+            return len(self.list)
+        else:
+>           raise TypeError("__len__ is not available before the iterable is depleted")
+E           TypeError: __len__ is not available before the iterable is depleted
+
+../../../../groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py:292: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_lazy_list_basic_access_and_iteration - TypeErr...
+1 failed, 2 passed in 0.14s

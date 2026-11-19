@@ -1,0 +1,35 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_threaded_resolver_initializes_pool ____________________
+
+    def test_threaded_resolver_initializes_pool():
+        resolver = ThreadedResolver()
+        resolver.initialize(num_threads=5)
+        # The executor should be a ThreadPoolExecutor with 5 workers
+        assert isinstance(resolver.executor, concurrent.futures.ThreadPoolExecutor)
+>       assert resolver.executor._max_workers == 5
+E       assert 10 == 5
+E        +  where 10 = <concurrent.futures.thread.ThreadPoolExecutor object at 0x7f09ca1642b0>._max_workers
+E        +    where <concurrent.futures.thread.ThreadPoolExecutor object at 0x7f09ca1642b0> = <tornado.netutil.ThreadedResolver object at 0x7f09ca48ab60>.executor
+
+test_generated.py:13: AssertionError
+______________________ test_threaded_resolver_shared_pool ______________________
+
+    def test_threaded_resolver_shared_pool():
+        resolver1 = ThreadedResolver()
+        resolver1.initialize(num_threads=3)
+        resolver2 = ThreadedResolver()
+        resolver2.initialize(num_threads=7)  # size argument ignored after first pool
+        # Both resolvers should reference the same executor instance
+        assert resolver1.executor is resolver2.executor
+        # The pool should still have the original size (3 workers)
+>       assert resolver1.executor._max_workers == 3
+E       assert 10 == 3
+E        +  where 10 = <concurrent.futures.thread.ThreadPoolExecutor object at 0x7f09ca1642b0>._max_workers
+E        +    where <concurrent.futures.thread.ThreadPoolExecutor object at 0x7f09ca1642b0> = <tornado.netutil.ThreadedResolver object at 0x7f09c995f0d0>.executor
+
+test_generated.py:24: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_threaded_resolver_initializes_pool - assert 10...
+FAILED test_generated.py::test_threaded_resolver_shared_pool - assert 10 == 3
+2 failed, 1 passed in 0.20s

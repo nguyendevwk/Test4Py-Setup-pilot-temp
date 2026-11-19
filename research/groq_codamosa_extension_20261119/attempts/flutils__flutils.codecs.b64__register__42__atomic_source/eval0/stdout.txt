@@ -1,0 +1,272 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_register_adds_decoder_and_encoder ____________________
+
+text = b'hello world', errors = 'strict'
+
+    def encode(
+            text: _STR,
+            errors: _STR = 'strict'
+    ) -> Tuple[bytes, int]:
+        """Convert the given ``text`` of base64 characters into the base64
+        decoded bytes.
+    
+        Args:
+            text (str): The string input.  The given string input can span
+                across many lines and be indented any number of spaces.
+            errors (str): Not used.  This argument exists to meet the
+                interface requirements.  Any value given to this argument
+                is ignored.
+    
+        Returns:
+            bytes: The given ``text`` converted into base64 bytes.
+            int: The length of the returned bytes.
+        """
+        # Convert the given 'text', that are of type UserString into a str.
+        text_input = str(text)
+    
+        # Cleanup whitespace.
+        text_str = text_input.strip()
+        text_str = '\n'.join(
+            filter(
+                lambda x: len(x) > 0,
+                map(lambda x: x.strip(), text_str.strip().splitlines())
+            )
+        )
+    
+        # Convert the cleaned text into utf8 bytes
+        text_bytes = text_str.encode('utf-8')
+        try:
+>           out = base64.decodebytes(text_bytes)
+
+flutils/codecs/b64.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = b"b'hello world'"
+
+    def decodebytes(s):
+        """Decode a bytestring of base-64 data into a bytes object."""
+        _input_type_check(s)
+>       return binascii.a2b_base64(s)
+E       binascii.Error: Incorrect padding
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/base64.py:562: Error
+
+During handling of the above exception, another exception occurred:
+
+    def test_register_adds_decoder_and_encoder():
+        """After calling register, the codec name is available and works."""
+        # Ensure the codec is not registered yet
+        with pytest.raises(LookupError):
+            codecs.getdecoder(NAME)
+        # Register the codec
+        register()
+        # Now the decoder and encoder should be available
+        decoder = codecs.getdecoder(NAME)
+        encoder = codecs.getencoder(NAME)
+        assert decoder is not None
+        assert encoder is not None
+        # Test that encoding and decoding round‑trip correctly
+        original = b"hello world"
+>       encoded, _ = encoder(original)
+
+../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_source/eval0/test_generated.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = b'hello world', errors = 'strict'
+
+    def encode(
+            text: _STR,
+            errors: _STR = 'strict'
+    ) -> Tuple[bytes, int]:
+        """Convert the given ``text`` of base64 characters into the base64
+        decoded bytes.
+    
+        Args:
+            text (str): The string input.  The given string input can span
+                across many lines and be indented any number of spaces.
+            errors (str): Not used.  This argument exists to meet the
+                interface requirements.  Any value given to this argument
+                is ignored.
+    
+        Returns:
+            bytes: The given ``text`` converted into base64 bytes.
+            int: The length of the returned bytes.
+        """
+        # Convert the given 'text', that are of type UserString into a str.
+        text_input = str(text)
+    
+        # Cleanup whitespace.
+        text_str = text_input.strip()
+        text_str = '\n'.join(
+            filter(
+                lambda x: len(x) > 0,
+                map(lambda x: x.strip(), text_str.strip().splitlines())
+            )
+        )
+    
+        # Convert the cleaned text into utf8 bytes
+        text_bytes = text_str.encode('utf-8')
+        try:
+            out = base64.decodebytes(text_bytes)
+        except Error as e:
+>           raise UnicodeEncodeError(
+                'b64',
+                text_input,
+                0,
+                len(text),
+                (
+                    f'{text_str!r} is not a proper bas64 character string: '
+                    f'{e}'
+                )
+            )
+E           UnicodeEncodeError: 'b64' codec can't encode characters in position 0-10: "b'hello world'" is not a proper bas64 character string: Incorrect padding
+
+flutils/codecs/b64.py:52: UnicodeEncodeError
+_________________________ test_register_is_idempotent __________________________
+
+    def test_register_is_idempotent():
+        """Calling register multiple times should not raise an exception."""
+        register()
+        # Register again; should not raise
+        register()
+        # Verify still works
+        decoder = codecs.getdecoder(NAME)
+        encoded, _ = decoder(b"test")
+>       assert encoded == base64.b64decode(b"test")
+E       AssertionError: assert 'dGVzdA==' == b'\xb5\xeb-'
+E        +  where b'\xb5\xeb-' = <function b64decode at 0x7f1baffb6b00>(b'test')
+E        +    where <function b64decode at 0x7f1baffb6b00> = base64.b64decode
+
+../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_source/eval0/test_generated.py:37: AssertionError
+________________ test_register_does_not_override_existing_codec ________________
+
+text = b'anything', errors = 'strict'
+
+    def encode(
+            text: _STR,
+            errors: _STR = 'strict'
+    ) -> Tuple[bytes, int]:
+        """Convert the given ``text`` of base64 characters into the base64
+        decoded bytes.
+    
+        Args:
+            text (str): The string input.  The given string input can span
+                across many lines and be indented any number of spaces.
+            errors (str): Not used.  This argument exists to meet the
+                interface requirements.  Any value given to this argument
+                is ignored.
+    
+        Returns:
+            bytes: The given ``text`` converted into base64 bytes.
+            int: The length of the returned bytes.
+        """
+        # Convert the given 'text', that are of type UserString into a str.
+        text_input = str(text)
+    
+        # Cleanup whitespace.
+        text_str = text_input.strip()
+        text_str = '\n'.join(
+            filter(
+                lambda x: len(x) > 0,
+                map(lambda x: x.strip(), text_str.strip().splitlines())
+            )
+        )
+    
+        # Convert the cleaned text into utf8 bytes
+        text_bytes = text_str.encode('utf-8')
+        try:
+>           out = base64.decodebytes(text_bytes)
+
+flutils/codecs/b64.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = b"b'anything'"
+
+    def decodebytes(s):
+        """Decode a bytestring of base-64 data into a bytes object."""
+        _input_type_check(s)
+>       return binascii.a2b_base64(s)
+E       binascii.Error: Invalid base64-encoded string: number of data characters (9) cannot be 1 more than a multiple of 4
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/base64.py:562: Error
+
+During handling of the above exception, another exception occurred:
+
+    def test_register_does_not_override_existing_codec():
+        """If a codec with the same name already exists, register should not replace it."""
+        # Create a dummy codec with the same name
+        def dummy_getreginfo():
+            return {
+                'name': NAME,
+                'encode': lambda obj, errors='strict': (b'dummy', 0),
+                'decode': lambda obj, errors='strict': (b'dummy', 0),
+            }
+        # Register dummy codec
+        codecs.register(lambda name: dummy_getreginfo() if name == NAME else None)
+        # Capture the original encode/decode
+        original_encoder = codecs.getencoder(NAME)
+        original_decoder = codecs.getdecoder(NAME)
+        # Now register the real codec
+        register()
+        # The original dummy codec should still be in effect
+>       enc, _ = original_encoder(b"anything")
+
+../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_source/eval0/test_generated.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = b'anything', errors = 'strict'
+
+    def encode(
+            text: _STR,
+            errors: _STR = 'strict'
+    ) -> Tuple[bytes, int]:
+        """Convert the given ``text`` of base64 characters into the base64
+        decoded bytes.
+    
+        Args:
+            text (str): The string input.  The given string input can span
+                across many lines and be indented any number of spaces.
+            errors (str): Not used.  This argument exists to meet the
+                interface requirements.  Any value given to this argument
+                is ignored.
+    
+        Returns:
+            bytes: The given ``text`` converted into base64 bytes.
+            int: The length of the returned bytes.
+        """
+        # Convert the given 'text', that are of type UserString into a str.
+        text_input = str(text)
+    
+        # Cleanup whitespace.
+        text_str = text_input.strip()
+        text_str = '\n'.join(
+            filter(
+                lambda x: len(x) > 0,
+                map(lambda x: x.strip(), text_str.strip().splitlines())
+            )
+        )
+    
+        # Convert the cleaned text into utf8 bytes
+        text_bytes = text_str.encode('utf-8')
+        try:
+            out = base64.decodebytes(text_bytes)
+        except Error as e:
+>           raise UnicodeEncodeError(
+                'b64',
+                text_input,
+                0,
+                len(text),
+                (
+                    f'{text_str!r} is not a proper bas64 character string: '
+                    f'{e}'
+                )
+            )
+E           UnicodeEncodeError: 'b64' codec can't encode characters in position 0-7: "b'anything'" is not a proper bas64 character string: Invalid base64-encoded string: number of data characters (9) cannot be 1 more than a multiple of 4
+
+flutils/codecs/b64.py:52: UnicodeEncodeError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_source/eval0/test_generated.py::test_register_adds_decoder_and_encoder
+FAILED ../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_source/eval0/test_generated.py::test_register_is_idempotent
+FAILED ../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_source/eval0/test_generated.py::test_register_does_not_override_existing_codec
+3 failed in 0.19s

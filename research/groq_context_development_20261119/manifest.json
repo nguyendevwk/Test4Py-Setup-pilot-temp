@@ -1,0 +1,899 @@
+{
+  "status": "post_extension_development_context_closure_screen_not_independent_confirmation",
+  "design": "All34 previously observed targets; matched new generation two arms; two-level same-module AST declarations max8000chars/4000per declaration plus verified setup. No model outcome selection or expected-output hints.",
+  "model": "openai/gpt-oss-20b",
+  "seed_values": [
+    46
+  ],
+  "arms": [
+    "atomic_source",
+    "atomic_verified_setup"
+  ],
+  "rules": "Write a complete pytest module testing the real imported target.\nUse production source as evidence. Test normal, boundary and error behavior.\nUse precise assertions, pytest.raises or unittest assertions; no tautologies,\nskips, xfail, suppression of unexpected exceptions or mocks of the target.\nDo not modify product code, install packages, access network or real user files.\nTemporary files must use tmp_path. Keep suites independent and deterministic.\nReturn exactly one complete Python code block. Do not output explanations.\nWrite exactly THREE independent test functions. Each tests one scenario with concrete observable assertions. Prefer small representative tests over sprawling suites. Do not use private APIs unless the target itself is private.",
+  "repair_rounds": 0,
+  "max_completion_tokens": 2048,
+  "temperature": 0.2,
+  "budget_shared_usd": 3,
+  "targets": [
+    {
+      "module": "pysnooper.tracer",
+      "symbol": "get_local_reprs",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/tracer.py",
+      "source_sha256": "a2d1dd118022304ecf9daa42540ae5927d6864bede083625c6fb65c7a2d62d50",
+      "source": "import functools\nimport inspect\nimport opcode\nimport os\nimport sys\nimport re\nimport collections\nimport datetime as datetime_module\nimport itertools\nimport threading\nimport traceback\nfrom .variables import CommonVariable, Exploding, BaseVariable\nfrom . import utils, pycompat\n\ndef get_local_reprs(frame, watch=(), custom_repr=(), max_length=None, normalize=False):\n    code = frame.f_code\n    vars_order = (code.co_varnames + code.co_cellvars + code.co_freevars +\n                  tuple(frame.f_locals.keys()))\n\n    result_items = [(key, utils.get_shortish_repr(value, custom_repr,\n                                                  max_length, normalize))\n                    for key, value in frame.f_locals.items()]\n    result_items.sort(key=lambda key_value: vars_order.index(key_value[0]))\n    result = collections.OrderedDict(result_items)\n\n    for variable in watch:\n        result.update(sorted(variable.items(frame, normalize)))\n    return result",
+      "source_lines": 14,
+      "project": "PySnooper",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages",
+      "id": "PySnooper__pysnooper.tracer__get_local_reprs",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/tracer.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/tracer.py\", line 33, in get_local_reprs\n    code = frame.f_code\nAttributeError: 'int' object has no attribute 'f_code'\n",
+        "returncode": 1
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "pysnooper.variables",
+      "symbol": "Indices",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/variables.py",
+      "source_sha256": "cb1f7476d0c6c0d32dc0576dfe24869a5b87c2f9152d6e43c3f0d8a0ffcb273d",
+      "source": "import itertools\nimport abc\nfrom copy import deepcopy\nfrom . import utils\nfrom . import pycompat\n\nclass Indices(Keys):\n    _slice = slice(None)\n\n    def _keys(self, main_value):\n        return range(len(main_value))[self._slice]\n\n    def __getitem__(self, item):\n        assert isinstance(item, slice)\n        result = deepcopy(self)\n        result._slice = item\n        return result",
+      "source_lines": 11,
+      "project": "PySnooper",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages",
+      "id": "PySnooper__pysnooper.variables__Indices",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/variables.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/variables.py\", line 24, in __init__\n    self.code = compile(source, '<variable>', 'eval')\nTypeError: compile() arg 1 must be a string, bytes or AST object\n",
+        "returncode": 1
+      },
+      "context_closure": "class Keys(CommonVariable):\n    def _keys(self, main_value):\n        return main_value.keys()\n\n    def _format_key(self, key):\n        return '[{}]'.format(utils.get_shortish_repr(key))\n\n    def _get_value(self, main_value, key):\n        return main_value[key]\n\nclass CommonVariable(BaseVariable):\n    def _items(self, main_value, normalize=False):\n        result = [(self.source, utils.get_shortish_repr(main_value, normalize=normalize))]\n        for key in self._safe_keys(main_value):\n            try:\n                if key in self.exclude:\n                    continue\n                value = self._get_value(main_value, key)\n            except Exception:\n                continue\n            result.append((\n                '{}{}'.format(self.unambiguous_source, self._format_key(key)),\n                utils.get_shortish_repr(value)\n            ))\n        return result\n\n    def _safe_keys(self, main_value):\n        try:\n            for key in self._keys(main_value):\n                yield key\n        except Exception:\n            pass\n\n    def _keys(self, main_value):\n        return ()\n\n    def _format_key(self, key):\n        raise NotImplementedError\n\n    def _get_value(self, main_value, key):\n        raise NotImplementedError",
+      "context_closure_names": [
+        "CommonVariable",
+        "Keys"
+      ],
+      "context_closure_characters": 1239
+    },
+    {
+      "module": "pysnooper.utils",
+      "symbol": "get_shortish_repr",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/utils.py",
+      "source_sha256": "da054266ab14393c2c7864de4373d3b81dab3d6c257d78da12f78e07978e05bc",
+      "source": "import abc\nimport re\nimport sys\nfrom .pycompat import ABC, string_types, collections_abc\n\ndef get_shortish_repr(item, custom_repr=(), max_length=None, normalize=False):\n    repr_function = get_repr_function(item, custom_repr)\n    try:\n        r = repr_function(item)\n    except Exception:\n        r = 'REPR FAILED'\n    r = r.replace('\\r', '').replace('\\n', '')\n    if normalize:\n        r = normalize_repr(r)\n    if max_length:\n        r = truncate(r, max_length)\n    return r",
+      "source_lines": 12,
+      "project": "PySnooper",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages",
+      "id": "PySnooper__pysnooper.utils__get_shortish_repr",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/utils.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(item, custom_repr=(), max_length=None, normalize=False)\", \"arguments\": {\"item\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "def get_repr_function(item, custom_repr):\n    for condition, action in custom_repr:\n        if isinstance(condition, type):\n            condition = lambda x, y=condition: isinstance(x, y)\n        if condition(item):\n            return action\n    return repr\n\ndef normalize_repr(item_repr):\n    \"\"\"Remove memory address (0x...) from a default python repr\"\"\"\n    return DEFAULT_REPR_RE.sub('', item_repr)\n\ndef truncate(string, max_length):\n    if (max_length is None) or (len(string) <= max_length):\n        return string\n    else:\n        left = (max_length - 3) // 2\n        right = max_length - 3 - left\n        return u'{}...{}'.format(string[:left], string[-right:])\n\nDEFAULT_REPR_RE = re.compile(r' at 0x[a-f0-9A-F]{4,}')",
+      "context_closure_names": [
+        "DEFAULT_REPR_RE",
+        "get_repr_function",
+        "normalize_repr",
+        "truncate"
+      ],
+      "context_closure_characters": 719
+    },
+    {
+      "module": "codetiming._timers",
+      "symbol": "Timers",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/codetiming/venv/lib/python3.10/site-packages/codetiming/_timers.py",
+      "source_sha256": "3741d7bae53ac2c9588365665780c4c397e9405038249b2db5dd6f3e68f88e20",
+      "source": "import collections\nimport math\nimport statistics\nfrom typing import TYPE_CHECKING, Any, Callable, Dict, List\n\nclass Timers(UserDict):\n    \"\"\"Custom dictionary that stores information about timers.\"\"\"\n\n    def __init__(self, *args: Any, **kwargs: Any) -> None:\n        \"\"\"Add a private dictionary keeping track of all timings\"\"\"\n        super().__init__(*args, **kwargs)\n        self._timings: Dict[str, List[float]] = collections.defaultdict(list)\n\n    def add(self, name: str, value: float) -> None:\n        \"\"\"Add a timing value to the given timer.\"\"\"\n        self._timings[name].append(value)\n        self.data.setdefault(name, 0)\n        self.data[name] += value\n\n    def clear(self) -> None:\n        \"\"\"Clear timers.\"\"\"\n        self.data.clear()\n        self._timings.clear()\n\n    def __setitem__(self, name: str, value: float) -> None:\n        \"\"\"Disallow setting of timer values.\"\"\"\n        raise TypeError(\n            f\"{self.__class__.__name__!r} does not support item assignment. \"\n            \"Use '.add()' to update values.\"\n        )\n\n    def apply(self, func: Callable[[List[float]], float], name: str) -> float:\n        \"\"\"Apply a function to the results of one named timer.\"\"\"\n        if name in self._timings:\n            return func(self._timings[name])\n        raise KeyError(name)\n\n    def count(self, name: str) -> float:\n        \"\"\"Number of timings.\"\"\"\n        return self.apply(len, name=name)\n\n    def total(self, name: str) -> float:\n        \"\"\"Total time for timers.\"\"\"\n        return self.apply(sum, name=name)\n\n    def min(self, name: str) -> float:\n        \"\"\"Minimal value of timings.\"\"\"\n        return self.apply(lambda values: min(values or [0]), name=name)\n\n    def max(self, name: str) -> float:\n        \"\"\"Maximal value of timings.\"\"\"\n        return self.apply(lambda values: max(values or [0]), name=name)\n\n    def mean(self, name: str) -> float:\n        \"\"\"Mean value of timings.\"\"\"\n        return self.apply(lambda values: statistics.mean(values or [0]), name=name)\n\n    def median(self, name: str) -> float:\n        \"\"\"Median value of timings.\"\"\"\n        return self.apply(lambda values: statistics.median(values or [0]), name=name)\n\n    def stdev(self, name: str) -> float:\n        \"\"\"Standard deviation of timings.\"\"\"\n        if name in self._timings:\n            value = self._timings[name]\n            return statistics.stdev(value) if len(value) >= 2 else math.nan\n        raise KeyError(name)",
+      "source_lines": 62,
+      "project": "codetiming",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/codetiming/venv/lib/python3.10/site-packages",
+      "id": "codetiming__codetiming._timers__Timers",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/codetiming/venv/lib/python3.10/site-packages/codetiming/_timers.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(*args: Any, **kwargs: Any) -> None\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "cookiecutter.prompt",
+      "symbol": "JsonPrompt",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/cookiecutter/prompt.py",
+      "source_sha256": "ab77946a6b260796e9d25de39c7f0415989c4d55d2075d755e873d4d02240db3",
+      "source": "from __future__ import annotations\nimport json\nimport os\nimport re\nimport sys\nfrom collections import OrderedDict\nfrom collections.abc import Iterator\nfrom itertools import starmap\nfrom pathlib import Path\nfrom typing import TYPE_CHECKING, Any, TypeAlias\nfrom jinja2.exceptions import UndefinedError\nfrom rich.prompt import Confirm, InvalidResponse, Prompt, PromptBase\nfrom cookiecutter.exceptions import UndefinedVariableInTemplate\nfrom cookiecutter.utils import create_env_with_context, rmtree\n\nclass JsonPrompt(PromptBase[dict]):\n    \"\"\"A prompt that returns a dict from JSON string.\"\"\"\n\n    default = None\n    response_type = dict\n    validate_error_message = \"[prompt.invalid]  Please enter a valid JSON string\"\n\n    @staticmethod\n    def process_response(value: str) -> dict[str, Any]:\n        \"\"\"Convert choices to a dict.\"\"\"\n        return process_json(value)",
+      "source_lines": 11,
+      "project": "cookiecutter",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages",
+      "id": "cookiecutter__cookiecutter.prompt__JsonPrompt",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/cookiecutter/prompt.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(prompt: Union[str, ForwardRef('Text')] = '', *, console: Optional[rich.console.Console] = None, password: bool = False, choices: Optional[List[str]] = None, case_sensitive: bool = True, show_default: bool = True, show_choices: bool = True) -> None\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "def process_json(user_value: str):\n    \"\"\"Load user-supplied value as a JSON dict.\n\n    :param user_value: User-supplied value to load as a JSON dict\n    \"\"\"\n    try:\n        user_dict = json.loads(user_value, object_pairs_hook=OrderedDict)\n    except Exception as error:\n        # Leave it up to click to ask the user again\n        msg = 'Unable to decode to JSON.'\n        raise InvalidResponse(msg) from error\n\n    if not isinstance(user_dict, dict):\n        # Leave it up to click to ask the user again\n        msg = 'Requires JSON dict.'\n        raise InvalidResponse(msg)\n\n    return user_dict",
+      "context_closure_names": [
+        "process_json"
+      ],
+      "context_closure_characters": 599
+    },
+    {
+      "module": "cookiecutter.repository",
+      "symbol": "repository_has_cookiecutter_json",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/cookiecutter/repository.py",
+      "source_sha256": "fc8d261453ddf9a6dec38eecab1f2468177b6ee1de6195271264feab60c46dca",
+      "source": "from __future__ import annotations\nimport os\nimport re\nfrom typing import TYPE_CHECKING\nfrom cookiecutter.exceptions import RepositoryNotFound\nfrom cookiecutter.vcs import clone\nfrom cookiecutter.zipfile import unzip\n\ndef repository_has_cookiecutter_json(repo_directory: str) -> bool:\n    \"\"\"Determine if `repo_directory` contains a `cookiecutter.json` file.\n\n    :param repo_directory: The candidate repository directory.\n    :return: True if the `repo_directory` is valid, else False.\n    \"\"\"\n    repo_directory_exists = os.path.isdir(repo_directory)\n\n    repo_config_exists = os.path.isfile(\n        os.path.join(repo_directory, 'cookiecutter.json')\n    )\n    return repo_directory_exists and repo_config_exists",
+      "source_lines": 12,
+      "project": "cookiecutter",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages",
+      "id": "cookiecutter__cookiecutter.repository__repository_has_cookiecutter_json",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/cookiecutter/repository.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/cookiecutter/repository.py\", line 65, in repository_has_cookiecutter_json\n    os.path.join(repo_directory, 'cookiecutter.json')\n  File \"/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/posixpath.py\", line 76, in join\n    a = os.fspath(a)\nTypeError: expected str, bytes or os.PathLike object, not int\n",
+        "returncode": 1
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "cookiecutter.zipfile",
+      "symbol": "unzip",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/cookiecutter/zipfile.py",
+      "source_sha256": "87a5477b31baeb999c35688bb59972f707db9370aa89b9a1087a4d77aae66752",
+      "source": "from __future__ import annotations\nimport os\nimport tempfile\nfrom pathlib import Path\nfrom zipfile import BadZipFile, ZipFile\nimport requests\nfrom cookiecutter.exceptions import InvalidZipRepository\nfrom cookiecutter.prompt import prompt_and_delete, read_repo_password\nfrom cookiecutter.utils import make_sure_path_exists\n\ndef unzip(\n    zip_uri: str,\n    is_url: bool,\n    clone_to_dir: Path | str = \".\",\n    no_input: bool = False,\n    password: str | None = None,\n) -> str:\n    \"\"\"Download and unpack a zipfile at a given URI.\n\n    This will download the zipfile to the cookiecutter repository,\n    and unpack into a temporary directory.\n\n    :param zip_uri: The URI for the zipfile.\n    :param is_url: Is the zip URI a URL or a file?\n    :param clone_to_dir: The cookiecutter repository directory\n        to put the archive into.\n    :param no_input: Do not prompt for user input and eventually force a refresh of\n        cached resources.\n    :param password: The password to use when unpacking the repository.\n    \"\"\"\n    # Ensure that clone_to_dir exists\n    clone_to_dir = Path(clone_to_dir).expanduser()\n    make_sure_path_exists(clone_to_dir)\n\n    if is_url:\n        # Build the name of the cached zipfile,\n        # and prompt to delete if it already exists.\n        identifier = zip_uri.rsplit('/', 1)[1]\n        zip_path = os.path.join(clone_to_dir, identifier)\n\n        if os.path.exists(zip_path):\n            download = prompt_and_delete(zip_path, no_input=no_input)\n        else:\n            download = True\n\n        if download:\n            # (Re) download the zipfile\n            r = requests.get(zip_uri, stream=True, timeout=100)\n            with open(zip_path, 'wb') as f:\n                for chunk in r.iter_content(chunk_size=1024):\n                    if chunk:  # filter out keep-alive new chunks\n                        f.write(chunk)\n    else:\n        # Just use the local zipfile as-is.\n        zip_path = os.path.abspath(zip_uri)\n\n    # Now unpack the repository. The zipfile will be unpacked\n    # into a temporary directory\n    try:\n        # Use context manager so the file descriptor is always released, even if\n        # an exception occurs while processing the archive. This prevents file\n        # handle leaks on operating systems that keep the underlying ZIP file\n        # locked until it is explicitly closed.\n        with ZipFile(zip_path) as zip_file:\n            if len(zip_file.namelist()) == 0:\n                msg = f'Zip repository {zip_uri} is empty'\n                raise InvalidZipRepository(msg)\n\n            # The first record in the zipfile should be the directory entry for\n            # the archive. If it isn't a directory, there's a problem.\n            first_filename = zip_file.namelist()[0]\n            if not first_filename.endswith('/'):\n                msg = f\"Zip repository {zip_uri} does not include a top-level directory\"\n                raise InvalidZipRepository(msg)\n\n            # Construct the final target directory\n            project_name = first_filename[:-1]\n            unzip_base = tempfile.mkdtemp()\n            unzip_path = os.path.join(unzip_base, project_name)\n\n            # Extract the zip file into the temporary directory\n            try:\n                zip_file.extractall(path=unzip_base)\n            except RuntimeError as runtime_err:\n                # File is password protected; try to get a password from the\n                # environment; if that doesn't work, ask the user.\n                if password is not None:\n                    try:\n                        zip_file.extractall(\n                            path=unzip_base, pwd=password.encode('utf-8')\n                        )\n                    except RuntimeError as e:\n                        msg = 'Invalid password provided for protected repository'\n                        raise InvalidZipRepository(msg) from e\n                elif no_input:\n                    msg = 'Unable to unlock password protected repository'\n                    raise InvalidZipRepository(msg) from runtime_err\n                else:\n                    retry: int | None = 0\n                    while retry is not None:\n                        try:\n                            password = read_repo_password('Repo password')\n                            zip_file.extractall(\n                                path=unzip_base, pwd=password.encode('utf-8')\n                            )\n                            retry = None\n                        except RuntimeError as e:  # noqa: PERF203\n                            retry += 1  # type: ignore[operator]\n                            if retry == 3:\n                                msg = (\n                                    'Invalid password provided for protected repository'\n                                )\n                                raise InvalidZipRepository(msg) from e\n\n    except BadZipFile as e:\n        msg = f'Zip repository {zip_uri} is not a valid zip archive:'\n        raise InvalidZipRepository(msg) from e\n\n    return unzip_path",
+      "source_lines": 109,
+      "project": "cookiecutter",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages",
+      "id": "cookiecutter__cookiecutter.zipfile__unzip",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/cookiecutter/zipfile.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/cookiecutter/zipfile.py\", line 61, in unzip\n    zip_path = os.path.abspath(zip_uri)\n  File \"/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/posixpath.py\", line 376, in abspath\n    path = os.fspath(path)\nTypeError: expected str, bytes or os.PathLike object, not int\n",
+        "returncode": 1
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "docstring_parser.parser",
+      "symbol": "parse_from_object",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/parser.py",
+      "source_sha256": "7bac541bdb7c43ea3fabf38e911c70eefb374c6e86c5c20724017afee750c179",
+      "source": "import inspect\nimport typing as T\nfrom docstring_parser import epydoc, google, numpydoc, rest\nfrom docstring_parser.attrdoc import add_attribute_docstrings\nfrom docstring_parser.common import (\n    Docstring,\n    DocstringStyle,\n    ParseError,\n    RenderingStyle,\n)\n\ndef parse_from_object(\n    obj: T.Any,\n    style: DocstringStyle = DocstringStyle.AUTO,\n) -> Docstring:\n    \"\"\"Parse the object's docstring(s) into its components.\n\n    The object can be anything that has a ``__doc__`` attribute. In contrast to\n    the ``parse`` function, ``parse_from_object`` is able to parse attribute\n    docstrings which are defined in the source code instead of ``__doc__``.\n\n    Currently only attribute docstrings defined at class and module levels are\n    supported. Attribute docstrings defined in ``__init__`` methods are not\n    supported.\n\n    When given a class, only the attribute docstrings of that class are parsed,\n    not its inherited classes. This is a design decision. Separate calls to\n    this function should be performed to get attribute docstrings of parent\n    classes.\n\n    :param obj: object from which to parse the docstring(s)\n    :param style: docstring style\n    :returns: parsed docstring representation\n    \"\"\"\n    docstring = parse(obj.__doc__, style=style)\n\n    if inspect.isclass(obj) or inspect.ismodule(obj):\n        add_attribute_docstrings(obj, docstring)\n\n    return docstring",
+      "source_lines": 29,
+      "project": "docstring_parser",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages",
+      "id": "docstring_parser__docstring_parser.parser__parse_from_object",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/parser.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(obj: Any, style: docstring_parser.common.DocstringStyle = <DocstringStyle.AUTO: 255>) -> docstring_parser.common.Docstring\", \"arguments\": {\"obj\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "def parse(\n    text: T.Optional[str], style: DocstringStyle = DocstringStyle.AUTO\n) -> Docstring:\n    \"\"\"Parse the docstring into its components.\n\n    :param text: docstring text to parse\n    :param style: docstring style\n    :returns: parsed docstring representation\n    \"\"\"\n    if style != DocstringStyle.AUTO:\n        return _STYLE_MAP[style].parse(text)\n\n    exc: T.Optional[Exception] = None\n    rets = []\n    for module in _STYLE_MAP.values():\n        try:\n            ret = module.parse(text)\n        except ParseError as ex:\n            exc = ex\n        else:\n            rets.append(ret)\n\n    if not rets:\n        raise exc\n\n    return sorted(rets, key=lambda d: len(d.meta), reverse=True)[0]\n\n_STYLE_MAP = {\n    DocstringStyle.REST: rest,\n    DocstringStyle.GOOGLE: google,\n    DocstringStyle.NUMPYDOC: numpydoc,\n    DocstringStyle.EPYDOC: epydoc,\n}",
+      "context_closure_names": [
+        "_STYLE_MAP",
+        "parse"
+      ],
+      "context_closure_characters": 857
+    },
+    {
+      "module": "docstring_parser.common",
+      "symbol": "DocstringReturns",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/common.py",
+      "source_sha256": "5ae6b5e94a6f64bf27aa6ad1330a61d8f3cd0f1efbe1a2b75859d29e3bd53cfc",
+      "source": "import enum\nimport typing as T\n\nclass DocstringReturns(DocstringMeta):\n    \"\"\"DocstringMeta symbolizing :returns or :yields metadata.\"\"\"\n\n    def __init__(\n        self,\n        args: T.List[str],\n        description: T.Optional[str],\n        type_name: T.Optional[str],\n        is_generator: bool,\n        return_name: T.Optional[str] = None,\n    ) -> None:\n        \"\"\"Initialize self.\"\"\"\n        super().__init__(args, description)\n        self.type_name = type_name\n        self.is_generator = is_generator\n        self.return_name = return_name",
+      "source_lines": 16,
+      "project": "docstring_parser",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages",
+      "id": "docstring_parser__docstring_parser.common__DocstringReturns",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/common.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(args: List[str], description: Optional[str], type_name: Optional[str], is_generator: bool, return_name: Optional[str] = None) -> None\", \"arguments\": {\"args\": \"1\", \"description\": \"1\", \"type_name\": \"1\", \"is_generator\": \"False\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "class DocstringMeta:\n    \"\"\"Docstring meta information.\n\n    Symbolizes lines in form of\n\n        :param arg: description\n        :raises ValueError: if something happens\n    \"\"\"\n\n    def __init__(\n        self, args: T.List[str], description: T.Optional[str]\n    ) -> None:\n        \"\"\"Initialize self.\n\n        :param args: list of arguments. The exact content of this variable is\n            dependent on the kind of docstring; it's used to distinguish\n            between custom docstring meta information items.\n        :param description: associated docstring description.\n        \"\"\"\n        self.args = args\n        self.description = description",
+      "context_closure_names": [
+        "DocstringMeta"
+      ],
+      "context_closure_characters": 653
+    },
+    {
+      "module": "docstring_parser.google",
+      "symbol": "parse",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/google.py",
+      "source_sha256": "06ee42cb57f29696d02d09dc86faa7a2c77b68564b0109a18d5a35e09519ca8c",
+      "source": "import inspect\nimport re\nimport typing as T\nfrom collections import OrderedDict, namedtuple\nfrom enum import IntEnum\nfrom .common import (\n    EXAMPLES_KEYWORDS,\n    PARAM_KEYWORDS,\n    RAISES_KEYWORDS,\n    RETURNS_KEYWORDS,\n    YIELDS_KEYWORDS,\n    Docstring,\n    DocstringExample,\n    DocstringMeta,\n    DocstringParam,\n    DocstringRaises,\n    DocstringReturns,\n    DocstringStyle,\n    ParseError,\n    RenderingStyle,\n)\n\ndef parse(text: T.Optional[str]) -> Docstring:\n    \"\"\"Parse the Google-style docstring into its components.\n\n    :returns: parsed docstring\n    \"\"\"\n    return GoogleParser().parse(text)",
+      "source_lines": 6,
+      "project": "docstring_parser",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages",
+      "id": "docstring_parser__docstring_parser.google__parse",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/google.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/google.py\", line 301, in parse\n    return GoogleParser().parse(text)\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/google.py\", line 215, in parse\n    text = inspect.cleandoc(text)\n  File \"/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py\", line 750, in cleandoc\n    lines = doc.expandtabs().split('\\n')\nAttributeError: 'int' object has no attribute 'expandtabs'\n",
+        "returncode": 1
+      },
+      "context_closure": "",
+      "context_closure_names": [
+        "GoogleParser"
+      ],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "flutils.codecs.b64",
+      "symbol": "register",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/b64.py",
+      "source_sha256": "d697337114f1e14442c82329357345f28f68b94fc90d5e1b7d11272f15aa3adf",
+      "source": "import base64\nimport codecs\nfrom binascii import Error\nfrom collections import UserString\nfrom typing import ByteString as _ByteString\nfrom typing import (\n    Optional,\n    Tuple,\n    Union,\n)\n\ndef register() -> None:\n    \"\"\"Register the ``b64`` codec with Python.\"\"\"\n    try:\n        codecs.getdecoder(NAME)\n    except LookupError:\n        codecs.register(_get_codec_info)",
+      "source_lines": 6,
+      "project": "flutils",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages",
+      "id": "flutils__flutils.codecs.b64__register",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/b64.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"() -> None\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "NAME = __name__.split('.')[-1]\n\ndef _get_codec_info(name: str) -> Optional[codecs.CodecInfo]:\n    if name == NAME:\n        obj = codecs.CodecInfo(  # type: ignore\n            name=NAME,\n            decode=decode,  # type: ignore[arg-type]\n            encode=encode,  # type: ignore[arg-type]\n        )\n        return obj\n    return None\n\ndef decode(\n        data: _ByteString,\n        errors: _STR = 'strict'\n) -> Tuple[str, int]:\n    \"\"\"Convert the given ``data`` into base64 Characters.\n\n    Args:\n        data (bytes or bytearray or memoryview): Bytes to be converted\n            to a string of base64 characters.\n        errors (str or :obj:`~UserString`): Not used.  This argument exists\n            to meet the interface requirements.  Any value given to this\n            argument is ignored.\n\n    Returns:\n        str: of base64 Characters\n        int: the number of the given ``data`` bytes consumed.\n    \"\"\"\n    # Convert memoryview and bytearray objects to bytes.\n    data_bytes = bytes(data)\n\n    # Encode the 'data_bytes' into base64 bytes.\n    encoded_bytes = base64.b64encode(data_bytes)\n\n    # Decode the 'base64_bytes' as utf8 into a string.\n    encoded_str = encoded_bytes.decode('utf-8')\n\n    return encoded_str, len(data)\n\ndef encode(\n        text: _STR,\n        errors: _STR = 'strict'\n) -> Tuple[bytes, int]:\n    \"\"\"Convert the given ``text`` of base64 characters into the base64\n    decoded bytes.\n\n    Args:\n        text (str): The string input.  The given string input can span\n            across many lines and be indented any number of spaces.\n        errors (str): Not used.  This argument exists to meet the\n            interface requirements.  Any value given to this argument\n            is ignored.\n\n    Returns:\n        bytes: The given ``text`` converted into base64 bytes.\n        int: The length of the returned bytes.\n    \"\"\"\n    # Convert the given 'text', that are of type UserString into a str.\n    text_input = str(text)\n\n    # Cleanup whitespace.\n    text_str = text_input.strip()\n    text_str = '\\n'.join(\n        filter(\n            lambda x: len(x) > 0,\n            map(lambda x: x.strip(), text_str.strip().splitlines())\n        )\n    )\n\n    # Convert the cleaned text into utf8 bytes\n    text_bytes = text_str.encode('utf-8')\n    try:\n        out = base64.decodebytes(text_bytes)\n    except Error as e:\n        raise UnicodeEncodeError(\n            'b64',\n            text_input,\n            0,\n            len(text),\n            (\n                f'{text_str!r} is not a proper bas64 character string: '\n                f'{e}'\n            )\n        )\n    return out, len(text)",
+      "context_closure_names": [
+        "NAME",
+        "_get_codec_info",
+        "decode",
+        "encode"
+      ],
+      "context_closure_characters": 2617
+    },
+    {
+      "module": "flutils.pathutils",
+      "symbol": "find_paths",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/pathutils.py",
+      "source_sha256": "776dcb0cbff8bfa78a836dd205c87127bed4f26276c9aadf7efd0d492b4a4c27",
+      "source": "import functools\nimport getpass\nimport grp\nimport os\nimport pwd\nimport sys\nfrom collections import deque\nfrom os import PathLike\nfrom pathlib import (\n    Path,\n    PosixPath,\n    WindowsPath,\n)\nfrom typing import (\n    Deque,\n    Generator,\n    Optional,\n    Union,\n    cast,\n)\n\ndef find_paths(\n        pattern: _PATH\n) -> Generator[Path, None, None]:\n    \"\"\"Find all paths that match the given :term:`glob pattern`.\n\n    This function pre-processes the given ``pattern`` with\n    :obj:`~flutils.normalize_path`.\n\n    Args:\n        pattern (:obj:`str`, :obj:`bytes` or :obj:`Path <pathlib.Path>`):\n            The path to find; which may contain a :term:`glob pattern`.\n\n    :rtype:\n        :obj:`Generator <typing.Generator>`\n\n    Yields:\n        :obj:`pathlib.PosixPath` or :obj:`pathlib.WindowsPath`\n\n    Example:\n        >>> from flutils.pathutils import find_paths\n        >>> list(find_paths('~/tmp/*'))\n        [PosixPath('/home/test_user/tmp/file_one'),\n        PosixPath('/home/test_user/tmp/dir_one')]\n\n    \"\"\"\n    pattern = normalize_path(pattern)\n    search = pattern.as_posix()[len(pattern.anchor):]\n    yield from Path(pattern.anchor).glob(search)",
+      "source_lines": 28,
+      "project": "flutils",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages",
+      "id": "flutils__flutils.pathutils__find_paths",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/pathutils.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(pattern: Union[os.PathLike, pathlib.PosixPath, pathlib.WindowsPath, bytes, str]) -> Generator[pathlib.Path, NoneType, NoneType]\", \"arguments\": {\"pattern\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "_PATH = Union[\n    PathLike,\n    PosixPath,\n    WindowsPath,\n    bytes,\n    str,\n]\n\ndef normalize_path(path: _PATH) -> Path:\n    \"\"\"Normalize a given path.\n\n    The given ``path`` will be normalized in the following process.\n\n    #. :obj:`bytes` will be converted to a :obj:`str` using the encoding\n       given by :obj:`getfilesystemencoding() <sys.getfilesystemencoding>`.\n    #. :obj:`PosixPath <pathlib.PosixPath>` and\n       :obj:`WindowsPath <pathlib.WindowsPath>` will be converted\n       to a :obj:`str` using the :obj:`as_posix() <pathlib.PurePath.as_posix>`\n       method.\n    #. An initial component of ``~`` will be replaced by that user\u2019s\n       home directory.\n    #. Any environment variables will be expanded.\n    #. Non absolute paths will have the current working directory from\n       :obj:`os.getcwd() <os.cwd>`prepended.  If needed, use\n       :obj:`os.chdir() <os.chdir>` to change the current working directory\n       before calling this function.\n    #. Redundant separators and up-level references will be normalized, so\n       that ``A//B``, ``A/B/``, ``A/./B`` and ``A/foo/../B`` all become\n       ``A/B``.\n\n    Args:\n        path (:obj:`str`, :obj:`bytes` or :obj:`Path <pathlib.Path>`):\n            The path to be normalized.\n\n    :rtype:\n        :obj:`Path <pathlib.Path>`\n\n        * :obj:`PosixPath <pathlib.PosixPath>` or\n          :obj:`WindowsPath <pathlib.WindowsPath>` depending on the system.\n\n        .. Note:: :obj:`Path <pathlib.Path>` objects are immutable. Therefore,\n           any given ``path`` of type :obj:`Path <pathlib.Path>` will not be\n           the same object returned.\n\n    Example:\n\n        >>> from flutils.pathutils import normalize_path\n        >>> normalize_path('~/tmp/foo/../bar')\n        PosixPath('/home/test_user/tmp/bar')\n\n    \"\"\"\n    path = cast(PathLike, path)\n    path = os.path.expanduser(path)\n    path = cast(PathLike, path)\n    path = os.path.expandvars(path)\n    path = cast(PathLike, path)\n    if os.path.isabs(path) is False:\n        path = os.path.join(os.getcwd(), path)\n    path = cast(PathLike, path)\n    path = os.path.normpath(path)\n    path = cast(PathLike, path)\n    path = os.path.normcase(path)\n    path = cast(PathLike, path)\n    return Path(path)",
+      "context_closure_names": [
+        "_PATH",
+        "normalize_path"
+      ],
+      "context_closure_characters": 2232
+    },
+    {
+      "module": "flutils.objutils",
+      "symbol": "is_list_like",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/objutils.py",
+      "source_sha256": "e264f4d8e01e1b7736fddd40f091518d64479cfeeda69a1646aa178d9c7c6d37",
+      "source": "from collections import (\n    UserList,\n    deque,\n)\nfrom collections.abc import (\n    Iterator,\n    KeysView,\n    ValuesView,\n)\nfrom typing import Any as _Any\n\ndef is_list_like(\n        obj: _Any\n) -> bool:\n    \"\"\"Check that given ``obj`` acts like a list and is iterable.\n\n    List-like objects are instances of:\n\n    - :obj:`UserList <collections.UserList>`\n    - :obj:`Iterator <collections.abc.Iterator>`\n    - :obj:`KeysView <collections.abc.KeysView>`\n    - :obj:`ValuesView <collections.abc.ValuesView>`\n    - :obj:`deque <collections.deque>`\n    - :obj:`frozenset`\n    - :obj:`list`\n    - :obj:`set`\n    - :obj:`tuple`\n\n    List-like objects are **NOT** instances of:\n\n    - :obj:`None`\n    - :obj:`bool`\n    - :obj:`bytes`\n    - :obj:`ChainMap <collections.ChainMap>`\n    - :obj:`Counter <collections.Counter>`\n    - :obj:`OrderedDict <collections.OrderedDict>`\n    - :obj:`UserDict <collections.UserDict>`\n    - :obj:`UserString <collections.UserString>`\n    - :obj:`defaultdict <collections.defaultdict>`\n    - :obj:`Decimal <decimal.Decimal>`\n    - :obj:`dict`\n    - :obj:`float`\n    - :obj:`int`\n    - :obj:`str`\n    - etc...\n\n    Args:\n        obj (:obj:`Any <typing.Any>`): The object to check.\n\n    :rtype:\n        :obj:`bool`\n\n        * :obj:`True` if the given ``obj`` is list-like; :\n        * :obj:`False` otherwise.\n\n    Examples:\n        >>> from flutils.objutils import is_list_like\n        >>> is_list_like([1, 2, 3])\n        True\n        >>> is_list_like(reversed([1, 2, 4]))\n        True\n        >>> is_list_like('hello')\n        False\n        >>> is_list_like(sorted('hello'))\n        True\n    \"\"\"\n    if is_subclass_of_any(obj, *_LIST_LIKE):\n        return True\n    return False",
+      "source_lines": 58,
+      "project": "flutils",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages",
+      "id": "flutils__flutils.objutils__is_list_like",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/objutils.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(obj: Any) -> bool\", \"arguments\": {\"obj\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "_LIST_LIKE = (\n    list,\n    set,\n    frozenset,\n    tuple,\n    deque,\n    Iterator,\n    ValuesView,\n    KeysView,\n    UserList\n)\n\ndef is_subclass_of_any(obj: _Any, *classes: _Any) -> bool:\n    \"\"\"Check if the given ``obj`` is a subclass of any of the given\n    ``*classes``.\n\n    Args:\n        obj (:obj:`Any <typing.Any>`): The object to check.\n        *classes (:obj:`Any <typing.Any>`): The classes to check against.\n\n    :rtype:\n        :obj:`bool`\n\n        * :obj:`True` if the given ``obj`` is an instance of ANY given\n          ``*classes``;\n        * :obj:`False` otherwise.\n\n    Example:\n        >>> from flutils.objutils import is_subclass_of_any\n        >>> from collections import ValuesView, KeysView, UserList\n        >>> obj = dict(a=1, b=2)\n        >>> is_subclass_of_any(obj.keys(),ValuesView,KeysView,UserList)\n        True\n    \"\"\"\n    for cls in classes:\n        if issubclass(obj.__class__, cls):\n            return True\n    return False",
+      "context_closure_names": [
+        "_LIST_LIKE",
+        "is_subclass_of_any"
+      ],
+      "context_closure_characters": 956
+    },
+    {
+      "module": "string_utils.validation",
+      "symbol": "is_ip_v6",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/python-string-utils/venv/lib/python3.10/site-packages/string_utils/validation.py",
+      "source_sha256": "d625c7caffd81143c0c4fd866ee604b519f646d365993835b6bb24203df368bc",
+      "source": "import json\nimport string\nfrom typing import Any, Optional, List\nfrom ._regex import *\nfrom .errors import InvalidInputError\n\ndef is_ip_v6(input_string: Any) -> bool:\n    \"\"\"\n    Checks if a string is a valid ip v6.\n\n    *Examples:*\n\n    >>> is_ip_v6('2001:db8:85a3:0000:0000:8a2e:370:7334') # returns true\n    >>> is_ip_v6('2001:db8:85a3:0000:0000:8a2e:370:?') # returns false (invalid \"?\")\n\n    :param input_string: String to check.\n    :type input_string: str\n    :return: True if a v6 ip, false otherwise.\n    \"\"\"\n    return is_full_string(input_string) and IP_V6_RE.match(input_string) is not None",
+      "source_lines": 14,
+      "project": "python-string-utils",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/python-string-utils/venv/lib/python3.10/site-packages",
+      "id": "python-string-utils__string_utils.validation__is_ip_v6",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/python-string-utils/venv/lib/python3.10/site-packages/string_utils/validation.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(input_string: Any) -> bool\", \"arguments\": {\"input_string\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "def is_full_string(input_string: Any) -> bool:\n    \"\"\"\n    Check if a string is not empty (it must contains at least one non space character).\n\n    *Examples:*\n\n    >>> is_full_string(None) # returns false\n    >>> is_full_string('') # returns false\n    >>> is_full_string(' ') # returns false\n    >>> is_full_string('hello') # returns true\n\n    :param input_string: String to check.\n    :type input_string: str\n    :return: True if not empty, false otherwise.\n    \"\"\"\n    return is_string(input_string) and input_string.strip() != ''\n\ndef is_string(obj: Any) -> bool:\n    \"\"\"\n    Checks if an object is a string.\n\n    *Example:*\n\n    >>> is_string('foo') # returns true\n    >>> is_string(b'foo') # returns false\n\n    :param obj: Object to test.\n    :return: True if string, false otherwise.\n    \"\"\"\n    return isinstance(obj, str)",
+      "context_closure_names": [
+        "is_full_string",
+        "is_string"
+      ],
+      "context_closure_characters": 828
+    },
+    {
+      "module": "string_utils.manipulation",
+      "symbol": "reverse",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/python-string-utils/venv/lib/python3.10/site-packages/string_utils/manipulation.py",
+      "source_sha256": "193ffd97bbf69717fc51a5723a0ca30cf6eba9e9c4022057e669c13d7c6aed9d",
+      "source": "import base64\nimport random\nimport unicodedata\nimport zlib\nfrom typing import Union\nfrom uuid import uuid4\nfrom ._regex import *\nfrom .errors import InvalidInputError\nfrom .validation import is_snake_case, is_full_string, is_camel_case, is_integer, is_string\n\ndef reverse(input_string: str) -> str:\n    \"\"\"\n    Returns the string with its chars reversed.\n\n    *Example:*\n\n    >>> reverse('hello') # returns 'olleh'\n\n    :param input_string: String to revert.\n    :type input_string: str\n    :return: Reversed string.\n    \"\"\"\n    if not is_string(input_string):\n        raise InvalidInputError(input_string)\n\n    return input_string[::-1]",
+      "source_lines": 16,
+      "project": "python-string-utils",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/python-string-utils/venv/lib/python3.10/site-packages",
+      "id": "python-string-utils__string_utils.manipulation__reverse",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/python-string-utils/venv/lib/python3.10/site-packages/string_utils/manipulation.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/python-string-utils/venv/lib/python3.10/site-packages/string_utils/manipulation.py\", line 295, in reverse\n    raise InvalidInputError(input_string)\nstring_utils.errors.InvalidInputError: Expected \"str\", received \"int\"\n",
+        "returncode": 1
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "string_utils.generation",
+      "symbol": "random_string",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/python-string-utils/venv/lib/python3.10/site-packages/string_utils/generation.py",
+      "source_sha256": "262a1375ab5027626b97e64cbb41ffd5c4416866ff0ebb8a1c1505245957af18",
+      "source": "import binascii\nimport os\nimport random\nimport string\nfrom typing import Generator\nfrom uuid import uuid4\nfrom .manipulation import roman_encode\n\ndef random_string(size: int) -> str:\n    \"\"\"\n    Returns a string of the specified size containing random characters (uppercase/lowercase ascii letters and digits).\n\n    *Example:*\n\n    >>> random_string(9) # possible output: \"cx3QQbzYg\"\n\n    :param size: Desired string size\n    :type size: int\n    :return: Random string\n    \"\"\"\n    if not isinstance(size, int) or size < 1:\n        raise ValueError('size must be >= 1')\n\n    chars = string.ascii_letters + string.digits\n    buffer = [random.choice(chars) for _ in range(size)]\n    out = ''.join(buffer)\n\n    return out",
+      "source_lines": 20,
+      "project": "python-string-utils",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/python-string-utils/venv/lib/python3.10/site-packages",
+      "id": "python-string-utils__string_utils.generation__random_string",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/python-string-utils/venv/lib/python3.10/site-packages/string_utils/generation.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(size: int) -> str\", \"arguments\": {\"size\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "sanic.headers",
+      "symbol": "parse_forwarded",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages/sanic/headers.py",
+      "source_sha256": "f1a5821943f93251ec11e14d6d25bf61e53966fa51c65ee477f27b777ff50e4b",
+      "source": "from __future__ import annotations\nimport re\nfrom collections.abc import Iterable\nfrom typing import Any\nfrom urllib.parse import unquote\nfrom sanic.exceptions import InvalidHeader\nfrom sanic.helpers import STATUS_CODES\n\ndef parse_forwarded(headers, config) -> Options | None:\n    \"\"\"Parse RFC 7239 Forwarded headers.\n    The value of `by` or `secret` must match `config.FORWARDED_SECRET`\n    :return: dict with keys and values, or None if nothing matched\n    \"\"\"\n    header = headers.getall(\"forwarded\", None)\n    secret = config.FORWARDED_SECRET\n    if header is None or not secret:\n        return None\n    header = \",\".join(header)  # Join multiple header lines\n    if secret not in header:\n        return None\n    # Loop over <separator><key>=<value> elements from right to left\n    sep = pos = None\n    options_list: list[tuple[str, str]] = []\n    found = False\n    for m in _rparam.finditer(header[::-1]):\n        # Start of new element? (on parser skips and non-semicolon right sep)\n        if m.start() != pos or sep != \";\":\n            # Was the previous element (from right) what we wanted?\n            if found:\n                break\n            # Clear values and parse as new element\n            del options_list[:]\n        pos = m.end()\n        val_token, val_quoted, key, sep = m.groups()\n        key = key.lower()[::-1]\n        val = (val_token or val_quoted.replace('\"\\\\', '\"'))[::-1]\n        options_list.append((key, val))\n        if key in (\"secret\", \"by\") and val == secret:\n            found = True\n        # Check if we would return on next round, to avoid useless parse\n        if found and sep != \";\":\n            break\n    # If secret was found, return the matching options in left-to-right order\n    return fwd_normalize(reversed(options_list)) if found else None",
+      "source_lines": 36,
+      "project": "sanic",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages",
+      "id": "sanic__sanic.headers__parse_forwarded",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages/sanic/headers.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages/sanic/headers.py\", line 373, in parse_forwarded\n    header = headers.getall(\"forwarded\", None)\nAttributeError: 'int' object has no attribute 'getall'\n",
+        "returncode": 1
+      },
+      "context_closure": "Options = dict[str, int | str]\n\n_rparam = re.compile(f\"(?:{_token}|{_quoted})={_token}\\\\s*($|[;,])\", re.ASCII)\n\ndef fwd_normalize(fwd: OptionsIterable) -> Options:\n    \"\"\"Normalize and convert values extracted from forwarded headers.\n\n    Args:\n        fwd (OptionsIterable): An iterable of key-value pairs.\n\n    Returns:\n        Options: A dict of normalized key-value pairs.\n    \"\"\"\n    ret: dict[str, int | str] = {}\n    for key, val in fwd:\n        if val is not None:\n            try:\n                if key in (\"by\", \"for\"):\n                    ret[key] = fwd_normalize_address(val)\n                elif key in (\"host\", \"proto\"):\n                    ret[key] = val.lower()\n                elif key == \"port\":\n                    ret[key] = int(val)\n                elif key == \"path\":\n                    ret[key] = unquote(val)\n                else:\n                    ret[key] = val\n            except ValueError:\n                pass\n    return ret\n\nOptionsIterable = Iterable[tuple[str, str]]\n\n_token, _quoted = r\"([\\w!#$%&'*+\\-.^_`|~]+)\", r'\"([^\"]*)\"'\n\n_token, _quoted = r\"([\\w!#$%&'*+\\-.^_`|~]+)\", r'\"([^\"]*)\"'\n\ndef fwd_normalize_address(addr: str) -> str:\n    \"\"\"Normalize address fields of proxy headers.\n\n    Args:\n        addr (str): An address string.\n\n    Returns:\n        str: A normalized address string.\n    \"\"\"\n    if addr == \"unknown\":\n        raise ValueError()  # omit unknown value identifiers\n    if addr.startswith(\"_\"):\n        return addr  # do not lower-case obfuscated strings\n    if _ipv6_re.fullmatch(addr):\n        addr = f\"[{addr}]\"  # bracket IPv6\n    return addr.lower()",
+      "context_closure_names": [
+        "Options",
+        "OptionsIterable",
+        "_quoted",
+        "_rparam",
+        "_token",
+        "fwd_normalize",
+        "fwd_normalize_address"
+      ],
+      "context_closure_characters": 1597
+    },
+    {
+      "module": "sanic.exceptions",
+      "symbol": "SanicException",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages/sanic/exceptions.py",
+      "source_sha256": "1bc3de4ab222117b0bea28ea8a60c39a3f5a3e6a16486ec2380ea58d27d27131",
+      "source": "from asyncio import CancelledError\nfrom collections.abc import Sequence\nfrom os import PathLike\nfrom typing import Any\nfrom sanic.helpers import STATUS_CODES\nfrom sanic.models.protocol_types import Range\n\nclass SanicException(Exception):\n    \"\"\"Generic exception that will generate an HTTP response when raised in the context of a request lifecycle.\n\n    Usually, it is best practice to use one of the more specific exceptions\n    than this generic one. Even when trying to raise a 500, it is generally\n    preferable to use `ServerError`.\n\n    Args:\n        message (Optional[Union[str, bytes]], optional): The message to be sent to the client. If `None`,\n            then the appropriate HTTP response status message will be used instead. Defaults to `None`.\n        status_code (Optional[int], optional): The HTTP response code to send, if applicable. If `None`,\n            then it will be 500. Defaults to `None`.\n        quiet (Optional[bool], optional): When `True`, the error traceback will be suppressed from the logs.\n            Defaults to `None`.\n        context (Optional[Dict[str, Any]], optional): Additional mapping of key/value data that will be\n            sent to the client upon exception. Defaults to `None`.\n        extra (Optional[Dict[str, Any]], optional): Additional mapping of key/value data that will NOT be\n            sent to the client when in PRODUCTION mode. Defaults to `None`.\n        headers (Optional[Dict[str, Any]], optional): Additional headers that should be sent with the HTTP\n            response. Defaults to `None`.\n\n    Examples:\n        ```python\n        raise SanicException(\n            \"Something went wrong\",\n            status_code=999,\n            context={\n                \"info\": \"Some additional details to send to the client\",\n            },\n            headers={\n                \"X-Foo\": \"bar\"\n            }\n        )\n        ```\n    \"\"\"  # noqa: E501\n\n    status_code: int = 500\n    quiet: bool | None = False\n    headers: dict[str, str] = {}\n    message: str = \"\"\n\n    def __init__(\n        self,\n        message: str | bytes | None = None,\n        status_code: int | None = None,\n        *,\n        quiet: bool | None = None,\n        context: dict[str, Any] | None = None,\n        extra: dict[str, Any] | None = None,\n        headers: dict[str, str] | None = None,\n    ) -> None:\n        self.context = context\n        self.extra = extra\n        status_code = status_code or getattr(\n            self.__class__, \"status_code\", None\n        )\n        quiet = (\n            quiet\n            if quiet is not None\n            else getattr(self.__class__, \"quiet\", None)\n        )\n        headers = headers or getattr(self.__class__, \"headers\", {})\n        if message is None:\n            message = self.message\n            if not message and status_code:\n                msg = STATUS_CODES.get(status_code, b\"\")\n                message = msg.decode()\n        elif isinstance(message, bytes):\n            message = message.decode()\n\n        super().__init__(message)\n\n        self.status_code = status_code or self.status_code\n        self.quiet = quiet\n        self.headers = headers\n        try:\n            self.message = message\n        except AttributeError:\n            ...",
+      "source_lines": 79,
+      "project": "sanic",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages",
+      "id": "sanic__sanic.exceptions__SanicException",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages/sanic/exceptions.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(message: str | bytes | None = None, status_code: int | None = None, *, quiet: bool | None = None, context: dict[str, typing.Any] | None = None, extra: dict[str, typing.Any] | None = None, headers: dict[str, str] | None = None) -> None\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "sanic.helpers",
+      "symbol": "Default",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages/sanic/helpers.py",
+      "source_sha256": "7e00456c7058b5d609854e88ea9bf680c763153cf9c4da8a115b6beaca620a5c",
+      "source": "import sys\nfrom functools import partial\nfrom importlib import import_module\nfrom inspect import ismodule\n\nclass Default:\n    \"\"\"\n    It is used to replace `None` or `object()` as a sentinel\n    that represents a default value. Sometimes we want to set\n    a value to `None` so we cannot use `None` to represent the\n    default value, and `object()` is hard to be typed.\n    \"\"\"\n\n    def __repr__(self):\n        return \"<Default>\"\n\n    def __str__(self) -> str:\n        return self.__repr__()",
+      "source_lines": 13,
+      "project": "sanic",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages",
+      "id": "sanic__sanic.helpers__Default",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages/sanic/helpers.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"()\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "thefuck.rules.brew_install",
+      "symbol": "get_new_command",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/brew_install.py",
+      "source_sha256": "b296f339c16be7bbdb2d853d2e8919914e13bcd21d3beb60fdc6f0274f6aea4f",
+      "source": "import os\nimport re\nfrom thefuck.utils import get_closest, replace_argument\nfrom thefuck.specific.brew import get_brew_path_prefix, brew_available\n\ndef get_new_command(command):\n    not_exist_formula = re.findall(r'Error: No available formula for ([a-z]+)',\n                                   command.output)[0]\n    exist_formula = _get_similar_formula(not_exist_formula)\n\n    return replace_argument(command.script, not_exist_formula, exist_formula)",
+      "source_lines": 6,
+      "project": "thefuck",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages",
+      "id": "thefuck__thefuck.rules.brew_install__get_new_command",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/brew_install.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/brew_install.py\", line 39, in get_new_command\n    command.output)[0]\nAttributeError: 'int' object has no attribute 'output'\n",
+        "returncode": 1
+      },
+      "context_closure": "def _get_similar_formula(formula_name):\n    return get_closest(formula_name, _get_formulas(), cutoff=0.85)\n\ndef _get_formulas():\n    # Formulas are based on each local system's status\n    try:\n        brew_path_prefix = get_brew_path_prefix()\n        brew_formula_path = brew_path_prefix + '/Library/Formula'\n\n        for file_name in os.listdir(brew_formula_path):\n            if file_name.endswith('.rb'):\n                yield file_name[:-3]\n    except Exception:\n        pass",
+      "context_closure_names": [
+        "_get_formulas",
+        "_get_similar_formula"
+      ],
+      "context_closure_characters": 477
+    },
+    {
+      "module": "thefuck.rules.lein_not_task",
+      "symbol": "get_new_command",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/lein_not_task.py",
+      "source_sha256": "40f462c9e5c72c3bdbbdecbe8f5b4524cb9970707203850c8b06afc4cd399e08",
+      "source": "import re\nfrom thefuck.utils import replace_command, get_all_matched_commands, for_app\nfrom thefuck.specific.sudo import sudo_support\n\ndef get_new_command(command):\n    broken_cmd = re.findall(r\"'([^']*)' is not a task\",\n                            command.output)[0]\n    new_cmds = get_all_matched_commands(command.output, 'Did you mean this?')\n    return replace_command(command, broken_cmd, new_cmds)",
+      "source_lines": 5,
+      "project": "thefuck",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages",
+      "id": "thefuck__thefuck.rules.lein_not_task__get_new_command",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/lein_not_task.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/decorator/__init__.py\", line 247, in fun\n    return caller(func, *(extras + args), **kw)\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/specific/sudo.py\", line 8, in sudo_support\n    if not command.script.startswith('sudo '):\nAttributeError: 'int' object has no attribute 'script'\n",
+        "returncode": 1
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "thefuck.rules.choco_install",
+      "symbol": "get_new_command",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/choco_install.py",
+      "source_sha256": "c57d9321ed18d14495b54c464b92d8fd508db5584e34148876195be52318628a",
+      "source": "from thefuck.utils import for_app, which\n\ndef get_new_command(command):\n    # Find the argument that is the package name\n    for script_part in command.script_parts:\n        if (\n            script_part not in [\"choco\", \"cinst\", \"install\"]\n            # Need exact match (bc chocolatey is a package)\n            and not script_part.startswith('-')\n            # Leading hyphens are parameters; some packages contain them though\n            and '=' not in script_part and '/' not in script_part\n            # These are certainly parameters\n        ):\n            return command.script.replace(script_part, script_part + \".install\")\n    return []",
+      "source_lines": 13,
+      "project": "thefuck",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages",
+      "id": "thefuck__thefuck.rules.choco_install__get_new_command",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/choco_install.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/choco_install.py\", line 12, in get_new_command\n    for script_part in command.script_parts:\nAttributeError: 'int' object has no attribute 'script_parts'\n",
+        "returncode": 1
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "tornado.concurrent",
+      "symbol": "future_set_result_unless_cancelled",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/concurrent.py",
+      "source_sha256": "9f468edcb2c46d8ac1e275d4be63507317a786511f2ec1bb237f76d4974cfd68",
+      "source": "import asyncio\nfrom concurrent import futures\nimport functools\nimport sys\nimport types\nfrom tornado.log import app_log\nimport typing\nfrom typing import Any, Callable, Optional, Tuple, Union\n\ndef future_set_result_unless_cancelled(\n    future: \"Union[futures.Future[_T], Future[_T]]\", value: _T\n) -> None:\n    \"\"\"Set the given ``value`` as the `Future`'s result, if not cancelled.\n\n    Avoids ``asyncio.InvalidStateError`` when calling ``set_result()`` on\n    a cancelled `asyncio.Future`.\n\n    .. versionadded:: 5.0\n    \"\"\"\n    if not future.cancelled():\n        future.set_result(value)",
+      "source_lines": 12,
+      "project": "tornado",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages",
+      "id": "tornado__tornado.concurrent__future_set_result_unless_cancelled",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/concurrent.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/concurrent.py\", line 195, in future_set_result_unless_cancelled\n    if not future.cancelled():\nAttributeError: 'int' object has no attribute 'cancelled'\n",
+        "returncode": 1
+      },
+      "context_closure": "_T = typing.TypeVar(\"_T\")",
+      "context_closure_names": [
+        "_T"
+      ],
+      "context_closure_characters": 25
+    },
+    {
+      "module": "tornado.auth",
+      "symbol": "OAuth2Mixin",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/auth.py",
+      "source_sha256": "ae26a38b4dac9ae4c26f4d21ae9546b16a1351b0d28ddbd4ccd17114ef47c120",
+      "source": "import base64\nimport binascii\nimport hashlib\nimport hmac\nimport re\nimport time\nimport urllib.parse\nimport uuid\nimport warnings\nfrom tornado import httpclient\nfrom tornado import escape\nfrom tornado.httputil import url_concat\nfrom tornado.util import unicode_type\nfrom tornado.web import RequestHandler\nfrom typing import List, Any, Dict, cast, Iterable, Union, Optional\n\nclass OAuth2Mixin:\n    \"\"\"Abstract implementation of OAuth 2.0.\n\n    See `FacebookGraphMixin` or `GoogleOAuth2Mixin` below for example\n    implementations.\n\n    Class attributes:\n\n    * ``_OAUTH_AUTHORIZE_URL``: The service's authorization url.\n    * ``_OAUTH_ACCESS_TOKEN_URL``:  The service's access token url.\n    \"\"\"\n\n    def authorize_redirect(\n        self,\n        redirect_uri: Optional[str] = None,\n        client_id: Optional[str] = None,\n        client_secret: Optional[str] = None,\n        extra_params: Optional[Dict[str, Any]] = None,\n        scope: Optional[List[str]] = None,\n        response_type: str = \"code\",\n    ) -> None:\n        \"\"\"Redirects the user to obtain OAuth authorization for this service.\n\n        Some providers require that you register a redirect URL with\n        your application instead of passing one via this method. You\n        should call this method to log the user in, and then call\n        ``get_authenticated_user`` in the handler for your\n        redirect URL to complete the authorization process.\n\n        .. versionchanged:: 6.0\n\n           The ``callback`` argument and returned awaitable were removed;\n           this is now an ordinary synchronous function.\n\n        .. deprecated:: 6.4\n           The ``client_secret`` argument (which has never had any effect)\n           is deprecated and will be removed in Tornado 7.0.\n        \"\"\"\n        if client_secret is not None:\n            warnings.warn(\"client_secret argument is deprecated\", DeprecationWarning)\n        handler = cast(RequestHandler, self)\n        args = {\"response_type\": response_type}\n        if redirect_uri is not None:\n            args[\"redirect_uri\"] = redirect_uri\n        if client_id is not None:\n            args[\"client_id\"] = client_id\n        if extra_params:\n            args.update(extra_params)\n        if scope:\n            args[\"scope\"] = \" \".join(scope)\n        url = self._OAUTH_AUTHORIZE_URL  # type: ignore\n        handler.redirect(url_concat(url, args))\n\n    def _oauth_request_token_url(\n        self,\n        redirect_uri: Optional[str] = None,\n        client_id: Optional[str] = None,\n        client_secret: Optional[str] = None,\n        code: Optional[str] = None,\n        extra_params: Optional[Dict[str, Any]] = None,\n    ) -> str:\n        url = self._OAUTH_ACCESS_TOKEN_URL  # type: ignore\n        args = {}  # type: Dict[str, str]\n        if redirect_uri is not None:\n            args[\"redirect_uri\"] = redirect_uri\n        if code is not None:\n            args[\"code\"] = code\n        if client_id is not None:\n            args[\"client_id\"] = client_id\n        if client_secret is not None:\n            args[\"client_secret\"] = client_secret\n        if extra_params:\n            args.update(extra_params)\n        return url_concat(url, args)\n\n    async def oauth2_request(\n        self,\n        url: str,\n        access_token: Optional[str] = None,\n        post_args: Optional[Dict[str, Any]] = None,\n        **args: Any,\n    ) -> Any:\n        \"\"\"Fetches the given URL auth an OAuth2 access token.\n\n        If the request is a POST, ``post_args`` should be provided. Query\n        string arguments should be given as keyword arguments.\n\n        Example usage:\n\n        ..testcode::\n\n            class MainHandler(tornado.web.RequestHandler,\n                              tornado.auth.FacebookGraphMixin):\n                @tornado.web.authenticated\n                async def get(self):\n                    new_entry = await self.oauth2_request(\n                        \"https://graph.facebook.com/me/feed\",\n                        post_args={\"message\": \"I am posting from my Tornado application!\"},\n                        access_token=self.current_user[\"access_token\"])\n\n                    if not new_entry:\n                        # Call failed; perhaps missing permission?\n                        self.authorize_redirect()\n                        return\n                    self.finish(\"Posted a message!\")\n\n        .. versionadded:: 4.3\n\n        .. versionchanged::: 6.0\n\n           The ``callback`` argument was removed. Use the returned awaitable object instead.\n        \"\"\"\n        all_args = {}\n        if access_token:\n            all_args[\"access_token\"] = access_token\n            all_args.update(args)\n\n        if all_args:\n            url += \"?\" + urllib.parse.urlencode(all_args)\n        http = self.get_auth_http_client()\n        if post_args is not None:\n            response = await http.fetch(\n                url, method=\"POST\", body=urllib.parse.urlencode(post_args)\n            )\n        else:\n            response = await http.fetch(url)\n        return escape.json_decode(response.body)\n\n    def get_auth_http_client(self) -> httpclient.AsyncHTTPClient:\n        \"\"\"Returns the `.AsyncHTTPClient` instance to be used for auth requests.\n\n        May be overridden by subclasses to use an HTTP client other than\n        the default.\n\n        .. versionadded:: 4.3\n        \"\"\"\n        return httpclient.AsyncHTTPClient()",
+      "source_lines": 137,
+      "project": "tornado",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages",
+      "id": "tornado__tornado.auth__OAuth2Mixin",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/auth.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"()\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "tornado.locks",
+      "symbol": "BoundedSemaphore",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/locks.py",
+      "source_sha256": "3bff7b17678f84864c252e48ecdb5d4176f3657535a0facb2196c4507aeead14",
+      "source": "import collections\nimport datetime\nimport types\nfrom tornado import gen, ioloop\nfrom tornado.concurrent import Future, future_set_result_unless_cancelled\nfrom typing import Union, Optional, Type, Any, Awaitable\nimport typing\n\nclass BoundedSemaphore(Semaphore):\n    \"\"\"A semaphore that prevents release() being called too many times.\n\n    If `.release` would increment the semaphore's value past the initial\n    value, it raises `ValueError`. Semaphores are mostly used to guard\n    resources with limited capacity, so a semaphore released too many times\n    is a sign of a bug.\n    \"\"\"\n\n    def __init__(self, value: int = 1) -> None:\n        super().__init__(value=value)\n        self._initial_value = value\n\n    def release(self) -> None:\n        \"\"\"Increment the counter and wake one waiter.\"\"\"\n        if self._value >= self._initial_value:\n            raise ValueError(\"Semaphore released too many times\")\n        super().release()",
+      "source_lines": 18,
+      "project": "tornado",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages",
+      "id": "tornado__tornado.locks__BoundedSemaphore",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/locks.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(value: int = 1) -> None\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "",
+      "context_closure_names": [
+        "Semaphore"
+      ],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "tqdm.contrib.utils_worker",
+      "symbol": "MonoWorker",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/tqdm/contrib/utils_worker.py",
+      "source_sha256": "bdac722726a06303824172d431df3a6c26c8e2c3ea672b2e3066c34869af116a",
+      "source": "from collections import deque\nfrom concurrent.futures import ThreadPoolExecutor\nfrom ..auto import tqdm as tqdm_auto\n\nclass MonoWorker:\n    \"\"\"\n    Supports one running task and one waiting task.\n    The waiting task is the most recent submitted (others are discarded).\n    \"\"\"\n    def __init__(self):\n        self.pool = ThreadPoolExecutor(max_workers=1)\n        self.futures = deque([], 2)\n\n    def submit(self, func, *args, **kwargs):\n        \"\"\"`func(*args, **kwargs)` may replace currently waiting task.\"\"\"\n        futures = self.futures\n        if len(futures) == futures.maxlen:\n            running = futures.popleft()\n            if not running.done():\n                if len(futures):  # clear waiting\n                    waiting = futures.pop()\n                    waiting.cancel()\n                futures.appendleft(running)  # re-insert running\n        try:\n            waiting = self.pool.submit(func, *args, **kwargs)\n        except Exception as e:\n            tqdm_auto.write(str(e))\n        else:\n            futures.append(waiting)\n            return waiting",
+      "source_lines": 26,
+      "project": "tqdm",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages",
+      "id": "tqdm__tqdm.contrib.utils_worker__MonoWorker",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/tqdm/contrib/utils_worker.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"()\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "tqdm.rich",
+      "symbol": "tqdm_rich",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/tqdm/rich.py",
+      "source_sha256": "274e32abacb652bf74d76cc2ecf91ccc0d6dedc0e37adf3c866064ac0bfeb36b",
+      "source": "from warnings import warn\nfrom rich.progress import (\n    BarColumn, Progress, ProgressColumn, Text, TimeElapsedColumn, TimeRemainingColumn, filesize)\nfrom .std import TqdmExperimentalWarning\nfrom .std import tqdm as std_tqdm\n\nclass tqdm_rich(std_tqdm):  # pragma: no cover\n    \"\"\"Experimental rich.progress GUI version of tqdm!\"\"\"\n    # TODO: @classmethod: write()?\n    def __init__(self, *args, **kwargs):\n        \"\"\"\n        This class accepts the following parameters *in addition* to\n        the parameters accepted by `tqdm`.\n\n        Parameters\n        ----------\n        progress  : tuple, optional\n            arguments for `rich.progress.Progress()`.\n        options  : dict, optional\n            keyword arguments for `rich.progress.Progress()`.\n        \"\"\"\n        kwargs = kwargs.copy()\n        kwargs['gui'] = True\n        # convert disable = None to False\n        kwargs['disable'] = bool(kwargs.get('disable', False))\n        progress = kwargs.pop('progress', None)\n        options = kwargs.pop('options', {}).copy()\n        super().__init__(*args, **kwargs)\n\n        if self.disable:\n            return\n\n        warn(\"rich is experimental/alpha\", TqdmExperimentalWarning, stacklevel=2)\n        d = self.format_dict\n        if progress is None:\n            progress = (\n                \"[progress.description]{task.description}\"\n                \"[progress.percentage]{task.percentage:>4.0f}%\",\n                BarColumn(bar_width=None),\n                FractionColumn(\n                    unit_scale=d['unit_scale'], unit_divisor=d['unit_divisor']),\n                \"[\", TimeElapsedColumn(), \"<\", TimeRemainingColumn(),\n                \",\", RateColumn(unit=d['unit'], unit_scale=d['unit_scale'],\n                                unit_divisor=d['unit_divisor']), \"]\"\n            )\n        options.setdefault('transient', not self.leave)\n        self._prog = Progress(*progress, **options)\n        self._prog.__enter__()\n        self._task_id = self._prog.add_task(self.desc or \"\", **d)\n\n    def close(self):\n        if self.disable:\n            return\n        self.display()  # print 100%, vis #1306\n        super().close()\n        self._prog.__exit__(None, None, None)\n\n    def clear(self, *_, **__):\n        pass\n\n    def display(self, *_, **__):\n        if not hasattr(self, '_task_id'):\n            return\n        self._prog.update(self._task_id, completed=self.n, description=self.desc)\n\n    def reset(self, total=None):\n        \"\"\"\n        Resets to 0 iterations for repeated use.\n\n        Parameters\n        ----------\n        total  : int or float, optional. Total to use for the new bar.\n        \"\"\"\n        if hasattr(self, '_prog'):\n            self._prog.reset(total=total)\n        super().reset(total=total)",
+      "source_lines": 70,
+      "project": "tqdm",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages",
+      "id": "tqdm__tqdm.rich__tqdm_rich",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/tqdm/rich.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n  File \"/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/importlib/__init__.py\", line 126, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n  File \"<frozen importlib._bootstrap>\", line 1050, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1027, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1006, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 688, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 883, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 241, in _call_with_frames_removed\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/tqdm/rich.py\", line 11, in <module>\n    from rich.progress import (\nModuleNotFoundError: No module named 'rich'\n",
+        "returncode": 1
+      },
+      "context_closure": "class FractionColumn(ProgressColumn):\n    \"\"\"Renders completed/total, e.g. '0.5/2.3 G'.\"\"\"\n    def __init__(self, unit_scale=False, unit_divisor=1000):\n        self.unit_scale = unit_scale\n        self.unit_divisor = unit_divisor\n        super().__init__()\n\n    def render(self, task):\n        \"\"\"Calculate common unit for completed and total.\"\"\"\n        completed = int(task.completed)\n        # total is None when the iterable has no length (e.g. a generator)\n        total = int(task.total) if task.total is not None else None\n        base = total if total is not None else completed\n        if self.unit_scale:\n            unit, suffix = filesize.pick_unit_and_suffix(\n                base,\n                [\"\", \"K\", \"M\", \"G\", \"T\", \"P\", \"E\", \"Z\", \"Y\"],\n                self.unit_divisor,\n            )\n        else:\n            unit, suffix = filesize.pick_unit_and_suffix(base, [\"\"], 1)\n        precision = 0 if unit == 1 else 1\n        total_str = f\"{total/unit:,.{precision}f}\" if total is not None else \"?\"\n        return Text(\n            f\"{completed/unit:,.{precision}f}/{total_str} {suffix}\",\n            style=\"progress.download\")\n\nclass RateColumn(ProgressColumn):\n    \"\"\"Renders human readable transfer speed.\"\"\"\n    def __init__(self, unit=\"\", unit_scale=False, unit_divisor=1000):\n        self.unit = unit\n        self.unit_scale = unit_scale\n        self.unit_divisor = unit_divisor\n        super().__init__()\n\n    def render(self, task):\n        \"\"\"Show data transfer speed.\"\"\"\n        speed = task.speed\n        if speed is None:\n            return Text(f\"? {self.unit}/s\", style=\"progress.data.speed\")\n        if self.unit_scale:\n            unit, suffix = filesize.pick_unit_and_suffix(\n                speed,\n                [\"\", \"K\", \"M\", \"G\", \"T\", \"P\", \"E\", \"Z\", \"Y\"],\n                self.unit_divisor,\n            )\n        else:\n            unit, suffix = filesize.pick_unit_and_suffix(speed, [\"\"], 1)\n        precision = 0 if unit == 1 else 1\n        return Text(f\"{speed/unit:,.{precision}f} {suffix}{self.unit}/s\",\n                    style=\"progress.data.speed\")",
+      "context_closure_names": [
+        "FractionColumn",
+        "RateColumn"
+      ],
+      "context_closure_characters": 2092
+    },
+    {
+      "module": "tqdm.contrib.itertools",
+      "symbol": "combinations_with_replacement",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/tqdm/contrib/itertools.py",
+      "source_sha256": "300f7e26f6f74e8b1ea69227bdebf6885e1ba2437b190cb84382e08d4c98740e",
+      "source": "import itertools\nimport math\nfrom ..auto import tqdm as tqdm_auto\n\ndef combinations_with_replacement(iterable, r, total=None, tqdm_class=tqdm_auto, **kwargs):\n    \"\"\"Equivalent of `itertools.combinations_with_replacement`.\"\"\"\n    if total is None:\n        try:\n            n = len(iterable)\n        except (TypeError, AttributeError):\n            pass\n        else:\n            total = 1\n            for i in range(n+r-1, n-1, -1):\n                total *= i\n            for i in range(1, r+1):\n                total //= i\n    return tqdm_class(itertools.combinations_with_replacement(iterable, r), total=total, **kwargs)",
+      "source_lines": 14,
+      "project": "tqdm",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages",
+      "id": "tqdm__tqdm.contrib.itertools__combinations_with_replacement",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/tqdm/contrib/itertools.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tqdm/venv/lib/python3.10/site-packages/tqdm/contrib/itertools.py\", line 80, in combinations_with_replacement\n    return tqdm_class(itertools.combinations_with_replacement(iterable, r), total=total, **kwargs)\nTypeError: 'int' object is not iterable\n",
+        "returncode": 1
+      },
+      "context_closure": "",
+      "context_closure_names": [],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "typesystem.schemas",
+      "symbol": "Reference",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/schemas.py",
+      "source_sha256": "9524e49282dc95f7c353d5bbb336aaea309174630bd7f489bd1a95256f2acfb8",
+      "source": "import typing\nfrom collections.abc import MutableMapping\nfrom typesystem.base import ValidationError\nfrom typesystem.fields import Field, Message\n\nclass Reference(Field):\n    errors = {\"null\": \"May not be null.\"}\n\n    def __init__(\n        self,\n        to: str,\n        definitions: Definitions,\n        **kwargs: typing.Any,\n    ) -> None:\n        super().__init__(**kwargs)\n        self.to = to\n        self.definitions = definitions\n\n    @property\n    def target(self) -> typing.Any:\n        return self.definitions[self.to]\n\n    def validate(self, value: typing.Any) -> typing.Any:\n        if value is None and self.allow_null:\n            return None\n        elif value is None:\n            raise self.validation_error(\"null\")\n\n        return self.target.validate(value)\n\n    def serialize(self, obj: typing.Any) -> typing.Any:\n        if obj is None:\n            return None\n        return dict(obj)",
+      "source_lines": 29,
+      "project": "typesystem",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages",
+      "id": "typesystem__typesystem.schemas__Reference",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/schemas.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(to: str, definitions: typesystem.schemas.Definitions, **kwargs: Any) -> None\", \"arguments\": {\"to\": \"1\", \"definitions\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "class Definitions(MutableMapping):\n    def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:\n        self._definitions = dict(*args, **kwargs)  # type: dict\n\n    def __getitem__(self, key: typing.Any) -> typing.Any:\n        return self._definitions[key]\n\n    def __iter__(self) -> typing.Iterator[typing.Any]:\n        return iter(self._definitions)\n\n    def __len__(self) -> int:\n        return len(self._definitions)\n\n    def __setitem__(self, key: typing.Any, value: typing.Any) -> None:\n        assert (\n            key not in self._definitions\n        ), r\"Definition for {key!r} has already been set.\"\n        self._definitions[key] = value\n\n    def __delitem__(self, key: typing.Any) -> None:\n        del self._definitions[key]",
+      "context_closure_names": [
+        "Definitions"
+      ],
+      "context_closure_characters": 748
+    },
+    {
+      "module": "typesystem.formats",
+      "symbol": "DateTimeFormat",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/formats.py",
+      "source_sha256": "2695868fc82d7ff07140266d0f2cf6aedcd5565a09581cd9d17b2432ccbc0220",
+      "source": "import datetime\nimport ipaddress\nimport re\nimport typing\nimport uuid\nfrom urllib.parse import urlparse\nfrom typesystem.base import ValidationError\n\nclass DateTimeFormat(BaseFormat):\n    errors = {\n        \"format\": \"Must be a valid datetime format.\",\n        \"invalid\": \"Must be a real datetime.\",\n    }\n\n    def is_native_type(self, value: typing.Any) -> bool:\n        return isinstance(value, datetime.datetime)\n\n    def validate(self, value: typing.Any) -> datetime.datetime:\n        match = DATETIME_REGEX.match(value)\n        if not match:\n            raise self.validation_error(\"format\")\n\n        groups = match.groupdict()\n        if groups[\"microsecond\"] is not None:\n            groups[\"microsecond\"] = groups[\"microsecond\"].ljust(6, \"0\")\n\n        tzinfo_str = groups.pop(\"tzinfo\")\n        if tzinfo_str == \"Z\":\n            tzinfo = datetime.timezone.utc\n        elif tzinfo_str is not None:\n            offset_mins = int(tzinfo_str[-2:]) if len(tzinfo_str) > 3 else 0\n            offset_hours = int(tzinfo_str[1:3])\n            delta = datetime.timedelta(hours=offset_hours, minutes=offset_mins)\n            if tzinfo_str[0] == \"-\":\n                delta = -delta\n            tzinfo = datetime.timezone(delta)\n        else:\n            tzinfo = None\n\n        kwargs = {k: int(v) for k, v in groups.items() if v is not None}\n        try:\n            return datetime.datetime(**kwargs, tzinfo=tzinfo)  # type: ignore\n        except ValueError:\n            raise self.validation_error(\"invalid\")\n\n    def serialize(\n        self, obj: typing.Optional[datetime.datetime]\n    ) -> typing.Optional[str]:\n        if obj is None:\n            return None\n\n        assert isinstance(obj, datetime.datetime)\n\n        value = obj.isoformat()\n\n        if value.endswith(\"+00:00\"):\n            value = value[:-6] + \"Z\"\n\n        return value",
+      "source_lines": 51,
+      "project": "typesystem",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages",
+      "id": "typesystem__typesystem.formats__DateTimeFormat",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/formats.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"()\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "class BaseFormat:\n    errors: typing.Dict[str, str] = {}\n\n    def validation_error(self, code: str) -> ValidationError:\n        text = self.errors[code].format(**self.__dict__)\n        return ValidationError(text=text, code=code)\n\n    def is_native_type(self, value: typing.Any) -> bool:\n        raise NotImplementedError()  # pragma: no cover\n\n    def validate(self, value: typing.Any) -> typing.Union[typing.Any, ValidationError]:\n        raise NotImplementedError()  # pragma: no cover\n\n    def serialize(self, obj: typing.Any) -> typing.Optional[str]:\n        raise NotImplementedError()\n\nDATETIME_REGEX = re.compile(\n    r\"(?P<year>\\d{4})-(?P<month>\\d{1,2})-(?P<day>\\d{1,2})\"\n    r\"[T ](?P<hour>\\d{1,2}):(?P<minute>\\d{1,2})\"\n    r\"(?::(?P<second>\\d{1,2})(?:\\.(?P<microsecond>\\d{1,6})\\d{0,6})?)?\"\n    r\"(?P<tzinfo>Z|[+-]\\d{2}(?::?\\d{2})?)?$\"\n)",
+      "context_closure_names": [
+        "BaseFormat",
+        "DATETIME_REGEX"
+      ],
+      "context_closure_characters": 845
+    },
+    {
+      "module": "typesystem.fields",
+      "symbol": "Decimal",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py",
+      "source_sha256": "69d565d3e83572e05d6d81dd7f2d0de55e365c26c8477c8126620c4368cc5ca0",
+      "source": "import decimal\nimport re\nimport typing\nfrom math import isfinite\nfrom typesystem import formats\nfrom typesystem.base import Message, ValidationError, ValidationResult\nfrom typesystem.unique import Uniqueness\n\nclass Decimal(Number):\n    numeric_type = decimal.Decimal\n\n    def serialize(self, obj: typing.Any) -> typing.Any:\n        return None if obj is None else float(obj)",
+      "source_lines": 5,
+      "project": "typesystem",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages",
+      "id": "typesystem__typesystem.fields__Decimal",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(*, minimum: Union[int, float, decimal.Decimal] = None, maximum: Union[int, float, decimal.Decimal] = None, exclusive_minimum: Union[int, float, decimal.Decimal] = None, exclusive_maximum: Union[int, float, decimal.Decimal] = None, precision: str = None, multiple_of: Union[int, float, decimal.Decimal] = None, coerce_types: bool = True, **kwargs: Any)\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "",
+      "context_closure_names": [
+        "Number"
+      ],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "youtube_dl.aes",
+      "symbol": "aes_decrypt_text",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/aes.py",
+      "source_sha256": "329a210eaeafa8b0758e02a1f7386a70823712623f4543ac492acf86eda97589",
+      "source": "from __future__ import unicode_literals\nfrom math import ceil\nfrom .compat import compat_b64decode\nfrom .utils import bytes_to_intlist, intlist_to_bytes\n\ndef aes_decrypt_text(data, password, key_size_bytes):\n    \"\"\"\n    Decrypt text\n    - The first 8 Bytes of decoded 'data' are the 8 high Bytes of the counter\n    - The cipher key is retrieved by encrypting the first 16 Byte of 'password'\n      with the first 'key_size_bytes' Bytes from 'password' (if necessary filled with 0's)\n    - Mode of operation is 'counter'\n\n    @param {str} data                    Base64 encoded string\n    @param {str,unicode} password        Password (will be encoded with utf-8)\n    @param {int} key_size_bytes          Possible values: 16 for 128-Bit, 24 for 192-Bit or 32 for 256-Bit\n    @returns {str}                       Decrypted data\n    \"\"\"\n    NONCE_LENGTH_BYTES = 8\n\n    data = bytes_to_intlist(compat_b64decode(data))\n    password = bytes_to_intlist(password.encode('utf-8'))\n\n    key = password[:key_size_bytes] + [0] * (key_size_bytes - len(password))\n    key = aes_encrypt(key[:BLOCK_SIZE_BYTES], key_expansion(key)) * (key_size_bytes // BLOCK_SIZE_BYTES)\n\n    nonce = data[:NONCE_LENGTH_BYTES]\n    cipher = data[NONCE_LENGTH_BYTES:]\n\n    class Counter(object):\n        __value = nonce + [0] * (BLOCK_SIZE_BYTES - NONCE_LENGTH_BYTES)\n\n        def next_value(self):\n            temp = self.__value\n            self.__value = inc(self.__value)\n            return temp\n\n    decrypted_data = aes_ctr_decrypt(cipher, key, Counter())\n    plaintext = intlist_to_bytes(decrypted_data)\n\n    return plaintext",
+      "source_lines": 36,
+      "project": "youtube-dl",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages",
+      "id": "youtube-dl__youtube_dl.aes__aes_decrypt_text",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/aes.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/aes.py\", line 183, in aes_decrypt_text\n    data = bytes_to_intlist(compat_b64decode(data))\n  File \"/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/base64.py\", line 80, in b64decode\n    s = _bytes_from_decode_data(s)\n  File \"/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/base64.py\", line 45, in _bytes_from_decode_data\n    raise TypeError(\"argument should be a bytes-like object or ASCII \"\nTypeError: argument should be a bytes-like object or ASCII string, not 'int'\n",
+        "returncode": 1
+      },
+      "context_closure": "BLOCK_SIZE_BYTES = 16\n\ndef aes_ctr_decrypt(data, key, counter):\n    \"\"\"\n    Decrypt with aes in counter mode\n\n    @param {int[]} data        cipher\n    @param {int[]} key         16/24/32-Byte cipher key\n    @param {instance} counter  Instance whose next_value function (@returns {int[]}  16-Byte block)\n                               returns the next counter block\n    @returns {int[]}           decrypted data\n    \"\"\"\n    expanded_key = key_expansion(key)\n    block_count = int(ceil(float(len(data)) / BLOCK_SIZE_BYTES))\n\n    decrypted_data = []\n    for i in range(block_count):\n        counter_block = counter.next_value()\n        block = data[i * BLOCK_SIZE_BYTES: (i + 1) * BLOCK_SIZE_BYTES]\n        block += [0] * (BLOCK_SIZE_BYTES - len(block))\n\n        cipher_counter_block = aes_encrypt(counter_block, expanded_key)\n        decrypted_data += xor(block, cipher_counter_block)\n    decrypted_data = decrypted_data[:len(data)]\n\n    return decrypted_data\n\ndef aes_encrypt(data, expanded_key):\n    \"\"\"\n    Encrypt one block with aes\n\n    @param {int[]} data          16-Byte state\n    @param {int[]} expanded_key  176/208/240-Byte expanded key\n    @returns {int[]}             16-Byte cipher\n    \"\"\"\n    rounds = len(expanded_key) // BLOCK_SIZE_BYTES - 1\n\n    data = xor(data, expanded_key[:BLOCK_SIZE_BYTES])\n    for i in range(1, rounds + 1):\n        data = sub_bytes(data)\n        data = shift_rows(data)\n        if i != rounds:\n            data = mix_columns(data)\n        data = xor(data, expanded_key[i * BLOCK_SIZE_BYTES: (i + 1) * BLOCK_SIZE_BYTES])\n\n    return data\n\ndef inc(data):\n    data = data[:]  # copy\n    for i in range(len(data) - 1, -1, -1):\n        if data[i] == 255:\n            data[i] = 0\n        else:\n            data[i] = data[i] + 1\n            break\n    return data\n\ndef key_expansion(data):\n    \"\"\"\n    Generate key schedule\n\n    @param {int[]} data  16/24/32-Byte cipher key\n    @returns {int[]}     176/208/240-Byte expanded key\n    \"\"\"\n    data = data[:]  # copy\n    rcon_iteration = 1\n    key_size_bytes = len(data)\n    expanded_key_size_bytes = (key_size_bytes // 4 + 7) * BLOCK_SIZE_BYTES\n\n    while len(data) < expanded_key_size_bytes:\n        temp = data[-4:]\n        temp = key_schedule_core(temp, rcon_iteration)\n        rcon_iteration += 1\n        data += xor(temp, data[-key_size_bytes: 4 - key_size_bytes])\n\n        for _ in range(3):\n            temp = data[-4:]\n            data += xor(temp, data[-key_size_bytes: 4 - key_size_bytes])\n\n        if key_size_bytes == 32:\n            temp = data[-4:]\n            temp = sub_bytes(temp)\n            data += xor(temp, data[-key_size_bytes: 4 - key_size_bytes])\n\n        for _ in range(3 if key_size_bytes == 32 else 2 if key_size_bytes == 24 else 0):\n            temp = data[-4:]\n            data += xor(temp, data[-key_size_bytes: 4 - key_size_bytes])\n    data = data[:expanded_key_size_bytes]\n\n    return data\n\ndef key_schedule_core(data, rcon_iteration):\n    data = rotate(data)\n    data = sub_bytes(data)\n    data[0] = data[0] ^ RCON[rcon_iteration]\n\n    return data\n\ndef mix_columns(data, matrix=MIX_COLUMN_MATRIX):\n    data_mixed = []\n    for i in range(4):\n        column = data[i * 4: (i + 1) * 4]\n        data_mixed += mix_column(column, matrix)\n    return data_mixed\n\ndef shift_rows(data):\n    data_shifted = []\n    for column in range(4):\n        for row in range(4):\n            data_shifted.append(data[((column + row) & 0b11) * 4 + row])\n    return data_shifted\n\ndef sub_bytes(data):\n    return [SBOX[x] for x in data]\n\ndef xor(data1, data2):\n    return [x ^ y for x, y in zip(data1, data2)]",
+      "context_closure_names": [
+        "BLOCK_SIZE_BYTES",
+        "aes_ctr_decrypt",
+        "aes_encrypt",
+        "inc",
+        "key_expansion",
+        "key_schedule_core",
+        "mix_columns",
+        "shift_rows",
+        "sub_bytes",
+        "xor"
+      ],
+      "context_closure_characters": 3579
+    },
+    {
+      "module": "youtube_dl.extractor.zdf",
+      "symbol": "ZDFBaseIE",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/zdf.py",
+      "source_sha256": "4688e395426ba0c6a14c9faea71c06d220a789adf70f315822a985ebb20d58f6",
+      "source": "from __future__ import unicode_literals\nimport re\nfrom .common import InfoExtractor\nfrom ..compat import compat_str\nfrom ..utils import (\n    determine_ext,\n    float_or_none,\n    int_or_none,\n    merge_dicts,\n    NO_DEFAULT,\n    orderedSet,\n    parse_codecs,\n    qualities,\n    try_get,\n    unified_timestamp,\n    update_url_query,\n    url_or_none,\n    urljoin,\n)\n\nclass ZDFBaseIE(InfoExtractor):\n    _GEO_COUNTRIES = ['DE']\n    _QUALITIES = ('auto', 'low', 'med', 'high', 'veryhigh', 'hd')\n\n    def _call_api(self, url, video_id, item, api_token=None, referrer=None):\n        headers = {}\n        if api_token:\n            headers['Api-Auth'] = 'Bearer %s' % api_token\n        if referrer:\n            headers['Referer'] = referrer\n        return self._download_json(\n            url, video_id, 'Downloading JSON %s' % item, headers=headers)\n\n    @staticmethod\n    def _extract_subtitles(src):\n        subtitles = {}\n        for caption in try_get(src, lambda x: x['captions'], list) or []:\n            subtitle_url = url_or_none(caption.get('uri'))\n            if subtitle_url:\n                lang = caption.get('language', 'deu')\n                subtitles.setdefault(lang, []).append({\n                    'url': subtitle_url,\n                })\n        return subtitles\n\n    def _extract_format(self, video_id, formats, format_urls, meta):\n        format_url = url_or_none(meta.get('url'))\n        if not format_url:\n            return\n        if format_url in format_urls:\n            return\n        format_urls.add(format_url)\n        mime_type = meta.get('mimeType')\n        ext = determine_ext(format_url)\n        if mime_type == 'application/x-mpegURL' or ext == 'm3u8':\n            formats.extend(self._extract_m3u8_formats(\n                format_url, video_id, 'mp4', m3u8_id='hls',\n                entry_protocol='m3u8_native', fatal=False))\n        elif mime_type == 'application/f4m+xml' or ext == 'f4m':\n            formats.extend(self._extract_f4m_formats(\n                update_url_query(format_url, {'hdcore': '3.7.0'}), video_id, f4m_id='hds', fatal=False))\n        else:\n            f = parse_codecs(meta.get('mimeCodec'))\n            format_id = ['http']\n            for p in (meta.get('type'), meta.get('quality')):\n                if p and isinstance(p, compat_str):\n                    format_id.append(p)\n            f.update({\n                'url': format_url,\n                'format_id': '-'.join(format_id),\n                'format_note': meta.get('quality'),\n                'language': meta.get('language'),\n                'quality': qualities(self._QUALITIES)(meta.get('quality')),\n                'preference': -10,\n            })\n            formats.append(f)\n\n    def _extract_ptmd(self, ptmd_url, video_id, api_token, referrer):\n        ptmd = self._call_api(\n            ptmd_url, video_id, 'metadata', api_token, referrer)\n\n        content_id = ptmd.get('basename') or ptmd_url.split('/')[-1]\n\n        formats = []\n        track_uris = set()\n        for p in ptmd['priorityList']:\n            formitaeten = p.get('formitaeten')\n            if not isinstance(formitaeten, list):\n                continue\n            for f in formitaeten:\n                f_qualities = f.get('qualities')\n                if not isinstance(f_qualities, list):\n                    continue\n                for quality in f_qualities:\n                    tracks = try_get(quality, lambda x: x['audio']['tracks'], list)\n                    if not tracks:\n                        continue\n                    for track in tracks:\n                        self._extract_format(\n                            content_id, formats, track_uris, {\n                                'url': track.get('uri'),\n                                'type': f.get('type'),\n                                'mimeType': f.get('mimeType'),\n                                'quality': quality.get('quality'),\n                                'language': track.get('language'),\n                            })\n        self._sort_formats(formats)\n\n        duration = float_or_none(try_get(\n            ptmd, lambda x: x['attributes']['duration']['value']), scale=1000)\n\n        return {\n            'extractor_key': ZDFIE.ie_key(),\n            'id': content_id,\n            'duration': duration,\n            'formats': formats,\n            'subtitles': self._extract_subtitles(ptmd),\n        }\n\n    def _extract_player(self, webpage, video_id, fatal=True):\n        return self._parse_json(\n            self._search_regex(\n                r'(?s)data-zdfplayer-jsb=([\"\\'])(?P<json>{.+?})\\1', webpage,\n                'player JSON', default='{}' if not fatal else NO_DEFAULT,\n                group='json'),\n            video_id)",
+      "source_lines": 106,
+      "project": "youtube-dl",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages",
+      "id": "youtube-dl__youtube_dl.extractor.zdf__ZDFBaseIE",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/zdf.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(downloader=None)\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "",
+      "context_closure_names": [
+        "ZDFIE"
+      ],
+      "context_closure_characters": 0
+    },
+    {
+      "module": "youtube_dl.socks",
+      "symbol": "Socks4Error",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/socks.py",
+      "source_sha256": "d06cad48867eee2c792a5e8c3b50e6511f52b6724153b3ba77cabe9930730ce7",
+      "source": "from __future__ import unicode_literals\nimport collections\nimport socket\nfrom .compat import (\n    compat_ord,\n    compat_struct_pack,\n    compat_struct_unpack,\n)\n\nclass Socks4Error(ProxyError):\n    ERR_SUCCESS = 90\n\n    CODES = {\n        91: 'request rejected or failed',\n        92: 'request rejected because SOCKS server cannot connect to identd on the client',\n        93: 'request rejected because the client program and identd report different user-ids'\n    }",
+      "source_lines": 8,
+      "project": "youtube-dl",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages",
+      "id": "youtube-dl__youtube_dl.socks__Socks4Error",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/socks.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(code=None, msg=None)\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "context_closure": "class ProxyError(socket.error):\n    ERR_SUCCESS = 0x00\n\n    def __init__(self, code=None, msg=None):\n        if code is not None and msg is None:\n            msg = self.CODES.get(code) or 'unknown error'\n        super(ProxyError, self).__init__(code, msg)",
+      "context_closure_names": [
+        "ProxyError"
+      ],
+      "context_closure_characters": 255
+    }
+  ],
+  "projects": [
+    {
+      "project": "PySnooper",
+      "package": "PySnooper",
+      "install_returncode": 0,
+      "version": "1.2.3",
+      "candidate_count": 17
+    },
+    {
+      "project": "codetiming",
+      "package": "codetiming",
+      "install_returncode": 0,
+      "version": "1.4.0",
+      "candidate_count": 1
+    },
+    {
+      "project": "cookiecutter",
+      "package": "cookiecutter",
+      "install_returncode": 0,
+      "version": "2.7.1",
+      "candidate_count": 22
+    },
+    {
+      "project": "docstring_parser",
+      "package": "docstring-parser",
+      "install_returncode": 0,
+      "version": "0.18.0",
+      "candidate_count": 25
+    },
+    {
+      "project": "flutils",
+      "package": "flutils",
+      "install_returncode": 0,
+      "version": "0.7",
+      "candidate_count": 25
+    },
+    {
+      "project": "python-string-utils",
+      "package": "python-string-utils",
+      "install_returncode": 0,
+      "version": "1.0.0",
+      "candidate_count": 42
+    },
+    {
+      "project": "sanic",
+      "package": "sanic",
+      "install_returncode": 0,
+      "version": "25.12.1",
+      "candidate_count": 39
+    },
+    {
+      "project": "thefuck",
+      "package": "thefuck",
+      "install_returncode": 0,
+      "version": "3.32",
+      "candidate_count": 46
+    },
+    {
+      "project": "tornado",
+      "package": "tornado",
+      "install_returncode": 0,
+      "version": "6.5.10",
+      "candidate_count": 69
+    },
+    {
+      "project": "tqdm",
+      "package": "tqdm",
+      "install_returncode": 0,
+      "version": "4.70.1",
+      "candidate_count": 18
+    },
+    {
+      "project": "typesystem",
+      "package": "typesystem",
+      "install_returncode": 0,
+      "version": "0.4.1",
+      "candidate_count": 45
+    },
+    {
+      "project": "youtube-dl",
+      "package": "youtube-dl",
+      "install_returncode": 0,
+      "version": "2021.12.17",
+      "candidate_count": 70
+    }
+  ],
+  "planned": 68,
+  "expected_target_slots": 36,
+  "missing_target_slots": 2,
+  "primary": "all-pass + positive module coverage + replay + quality gate",
+  "source_versions": "Resolved PyPI releases pinned; published CodaMOSA module frame; not original Docker commits",
+  "preparation_time": 1795049250.5913467,
+  "source_manifest_sha256": "3ba5f37ffccfd449175ff56b7609b85175790ce827a4822f9766f391afea2871",
+  "preparer_sha256": "566c2b4200faa2a41ec753d27e3f49a55df3dd7284dd847c1422f54435a4cd9b",
+  "rationale": "Respond to limited setup-only transfer with bounded genuine helper/global production context; a development engineering comparison, not held-out proof."
+}

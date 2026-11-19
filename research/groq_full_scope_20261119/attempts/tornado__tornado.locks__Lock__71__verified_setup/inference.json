@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-97cc2ad8-cf01-4db1-971e-072bba7d1299",
+  "object": "chat.completion",
+  "created": 1795079452,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport datetime\nimport pytest\nfrom tornado import ioloop, gen\nfrom tornado.locks import Lock\n\n# Helper to run async coroutines in Tornado's IOLoop\ndef run_async(coro):\n    return ioloop.IOLoop.current().run_sync(lambda: gen.convert_yielded(coro))\n\n@pytest.mark.asyncio\nasync def test_lock_basic_acquire_release():\n    lock = Lock()\n    # Initially unlocked: acquire should succeed immediately\n    await lock.acquire()\n    # After acquiring, lock is held; attempting to acquire again should block\n    # We'll start a coroutine that tries to acquire and set a flag after acquiring\n    flag = {\"acquired\": False}\n    async def waiter():\n        await lock.acquire()\n        flag[\"acquired\"] = True\n        lock.release()\n    # Schedule waiter; it should block until we release\n    ioloop.IOLoop.current().add_callback(waiter)\n    # Give the loop a moment to schedule waiter\n    await asyncio.sleep(0.01)\n    assert not flag[\"acquired\"], \"waiter acquired lock prematurely\"\n    # Release the lock; waiter should now acquire\n    lock.release()\n    # Wait a bit for waiter to run\n    await asyncio.sleep(0.01)\n    assert flag[\"acquired\"], \"waiter did not acquire lock after release\"\n\n@pytest.mark.asyncio\nasync def test_lock_async_context_manager():\n    lock = Lock()\n    # Use async with to acquire and release automatically\n    async with lock:\n        # Inside context, lock should be held; attempting to acquire again should block\n        flag = {\"acquired\": False}\n        async def waiter():\n            await lock.acquire()\n            flag[\"acquired\"] = True\n            lock.release()\n        ioloop.IOLoop.current().add_callback(waiter)\n        await asyncio.sleep(0.01)\n        assert not flag[\"acquired\"], \"waiter acquired lock inside context prematurely\"\n    # After exiting context, lock should be released; waiter should acquire\n    await asyncio.sleep(0.01)\n    assert flag[\"acquired\"], \"waiter did not acquire lock after context exit\"\n\ndef test_release_unlocked_raises_runtime_error():\n    lock = Lock()\n    # Releasing an unlocked lock should raise RuntimeError\n    with pytest.raises(RuntimeError, match=\"release unlocked lock\"):\n        lock.release()\n```",
+        "reasoning": "We need tests for Lock. Use tornado.locks.Lock. Need to import. Use asyncio event loop? tornado uses its own ioloop. But we can use tornado.gen.coroutine? Use async/await. We'll test acquire/release, context manager, error on release unlocked. Use tmp_path not needed. Write three tests: test_lock_basic, test_lock_context_manager, test_release_unlocked_error. Use tornado.ioloop.IOLoop.current().run_sync? We'll use tornado.gen.coroutine to run. Simpler: use tornado.ioloop.IOLoop.current().run_sync with a function. Let's write async functions and run via IOLoop.current().run_sync(lambda: tornado.gen.convert_yielded(async_func()))? Actually run_sync expects a function returning a Future. We can use tornado.gen.convert_yielded to wrap async. Use tornado.gen.convert_yielded(async_func). Then run_sync. Let's code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004859898,
+    "prompt_tokens": 865,
+    "prompt_time": 0.046415481,
+    "completion_tokens": 691,
+    "completion_time": 0.73122411,
+    "total_tokens": 1556,
+    "total_time": 0.777639591,
+    "completion_tokens_details": {
+      "reasoning_tokens": 190
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh5czqeeyrd55g52xyefhz",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport datetime\nimport pytest\nfrom tornado import ioloop, gen\nfrom tornado.locks import Lock\n\n# Helper to run async coroutines in Tornado's IOLoop\ndef run_async(coro):\n    return ioloop.IOLoop.current().run_sync(lambda: gen.convert_yielded(coro))\n\n@pytest.mark.asyncio\nasync def test_lock_basic_acquire_release():\n    lock = Lock()\n    # Initially unlocked: acquire should succeed immediately\n    await lock.acquire()\n    # After acquiring, lock is held; attempting to acquire again should block\n    # We'll start a coroutine that tries to acquire and set a flag after acquiring\n    flag = {\"acquired\": False}\n    async def waiter():\n        await lock.acquire()\n        flag[\"acquired\"] = True\n        lock.release()\n    # Schedule waiter; it should block until we release\n    ioloop.IOLoop.current().add_callback(waiter)\n    # Give the loop a moment to schedule waiter\n    await asyncio.sleep(0.01)\n    assert not flag[\"acquired\"], \"waiter acquired lock prematurely\"\n    # Release the lock; waiter should now acquire\n    lock.release()\n    # Wait a bit for waiter to run\n    await asyncio.sleep(0.01)\n    assert flag[\"acquired\"], \"waiter did not acquire lock after release\"\n\n@pytest.mark.asyncio\nasync def test_lock_async_context_manager():\n    lock = Lock()\n    # Use async with to acquire and release automatically\n    async with lock:\n        # Inside context, lock should be held; attempting to acquire again should block\n        flag = {\"acquired\": False}\n        async def waiter():\n            await lock.acquire()\n            flag[\"acquired\"] = True\n            lock.release()\n        ioloop.IOLoop.current().add_callback(waiter)\n        await asyncio.sleep(0.01)\n        assert not flag[\"acquired\"], \"waiter acquired lock inside context prematurely\"\n    # After exiting context, lock should be released; waiter should acquire\n    await asyncio.sleep(0.01)\n    assert flag[\"acquired\"], \"waiter did not acquire lock after context exit\"\n\ndef test_release_unlocked_raises_runtime_error():\n    lock = Lock()\n    # Releasing an unlocked lock should raise RuntimeError\n    with pytest.raises(RuntimeError, match=\"release unlocked lock\"):\n        lock.release()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "ccbfcebe9ea244e585a611a9770cf82d",
+  "_api_plus_pacing_seconds": 1.3283652669633739
+}

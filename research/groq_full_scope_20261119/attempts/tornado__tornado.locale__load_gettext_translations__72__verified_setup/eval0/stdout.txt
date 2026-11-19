@@ -1,0 +1,50 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_load_gettext_translations_success ____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_gettext_translations__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_gettext_translations0')
+
+    def test_load_gettext_translations_success(tmp_path: Path):
+        domain = "testdomain"
+        # Create two language directories with valid .mo files
+        create_mo_file(tmp_path, "en", domain, {"Hello": "Hello"})
+        create_mo_file(tmp_path, "es", domain, {"Hello": "Hola"})
+        # Load translations
+        locale_module.load_gettext_translations(str(tmp_path), domain)
+        # Verify internal state
+        assert hasattr(locale_module, "_translations")
+>       assert "en" in locale_module._translations
+E       AssertionError: assert 'en' in {}
+E        +  where {} = locale_module._translations
+
+test_generated.py:52: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    tornado.general:locale.py:212 Cannot load translation for 'en': [Errno 0] File is corrupt: '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_gettext_translations__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_gettext_translations0/en/LC_MESSAGES/testdomain.mo'
+ERROR    tornado.general:locale.py:212 Cannot load translation for 'es': [Errno 0] File is corrupt: '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_gettext_translations__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_gettext_translations0/es/LC_MESSAGES/testdomain.mo'
+_________________ test_load_gettext_translations_invalid_file __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_gettext_translations__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_gettext_translations1')
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7f84dac933a0>
+
+    def test_load_gettext_translations_invalid_file(tmp_path: Path, caplog):
+        domain = "testdomain"
+        # Create a valid .mo file
+        create_mo_file(tmp_path, "fr", domain, {"Hello": "Bonjour"})
+        # Create an invalid .mo file (empty file)
+        (tmp_path / "de" / "LC_MESSAGES").mkdir(parents=True, exist_ok=True)
+        (tmp_path / "de" / "LC_MESSAGES" / f"{domain}.mo").write_bytes(b"")
+        # Load translations
+        locale_module.load_gettext_translations(str(tmp_path), domain)
+        # The invalid file should be skipped; only 'fr' should be loaded
+>       assert "fr" in locale_module._translations
+E       AssertionError: assert 'fr' in {}
+E        +  where {} = locale_module._translations
+
+test_generated.py:75: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    tornado.general:locale.py:212 Cannot load translation for 'fr': [Errno 0] File is corrupt: '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_gettext_translations__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_gettext_translations1/fr/LC_MESSAGES/testdomain.mo'
+ERROR    tornado.general:locale.py:212 Cannot load translation for 'de': unpack requires a buffer of 4 bytes
+=========================== short test summary info ============================
+FAILED test_generated.py::test_load_gettext_translations_success - AssertionE...
+FAILED test_generated.py::test_load_gettext_translations_invalid_file - Asser...
+2 failed, 1 passed in 0.17s

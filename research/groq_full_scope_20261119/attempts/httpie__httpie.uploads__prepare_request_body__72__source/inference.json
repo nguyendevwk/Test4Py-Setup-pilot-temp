@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-c0aa1bcc-c86c-42af-a9e5-2babf7ad7660",
+  "object": "chat.completion",
+  "created": 1795079407,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport pytest\nfrom httpie.uploads import prepare_request_body, ChunkedUploadStream, ChunkedStream\nfrom httpie.context import Environment\nfrom httpie.cli.dicts import RequestDataDict\n\n# Helper environment with minimal attributes used by _prepare_file_for_upload\nclass DummyEnv(Environment):\n    def __init__(self):\n        super().__init__()\n        self.upload_chunk_size = 1024  # arbitrary chunk size\n\ndef test_prepare_request_body_with_bytes():\n    env = DummyEnv()\n    data = b\"hello world\"\n    result = prepare_request_body(\n        env=env,\n        raw_body=data,\n        body_read_callback=lambda x: None,\n        offline=False,\n        chunked=False,\n    )\n    assert isinstance(result, bytes)\n    assert result == data\n\ndef test_prepare_request_body_with_file_like_offline():\n    env = DummyEnv()\n    file_content = b\"file content\"\n    file_obj = io.BytesIO(file_content)\n    result = prepare_request_body(\n        env=env,\n        raw_body=file_obj,\n        body_read_callback=lambda x: None,\n        offline=True,\n        chunked=False,\n    )\n    assert isinstance(result, bytes)\n    assert result == file_content\n\ndef test_prepare_request_body_with_file_like_chunked(tmp_path):\n    env = DummyEnv()\n    file_content = b\"chunked data for upload\"\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_bytes(file_content)\n    file_obj = open(file_path, \"rb\")\n    result = prepare_request_body(\n        env=env,\n        raw_body=file_obj,\n        body_read_callback=lambda x: None,\n        offline=False,\n        chunked=False,\n    )\n    assert isinstance(result, ChunkedStream)\n    # Read all data from the returned stream\n    read_data = b\"\".join(chunk for chunk in result)\n    assert read_data == file_content\n    file_obj.close()\n```",
+        "reasoning": "We need three tests for prepare_request_body. Use tmp_path for file. Test normal bytes, file-like, chunked. Use simple env mock? Environment needed but only used in _prepare_file_for_upload. We can skip offline false. For file-like, we need env with maybe .upload_chunk_size? but we can pass dummy env with attribute upload_chunk_size. Use simple class. Test that file-like returns ChunkedStream? Actually _prepare_file_for_upload returns ChunkedStream. We can test that returned is instance of ChunkedStream and reading yields original bytes. Need import. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.0459711,
+    "prompt_tokens": 548,
+    "prompt_time": 0.004172249,
+    "completion_tokens": 533,
+    "completion_time": 0.783008924,
+    "total_tokens": 1081,
+    "total_time": 0.787181173,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 123
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh415ve9g9xyvs1ws1pp06",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport pytest\nfrom httpie.uploads import prepare_request_body, ChunkedUploadStream, ChunkedStream\nfrom httpie.context import Environment\nfrom httpie.cli.dicts import RequestDataDict\n\n# Helper environment with minimal attributes used by _prepare_file_for_upload\nclass DummyEnv(Environment):\n    def __init__(self):\n        super().__init__()\n        self.upload_chunk_size = 1024  # arbitrary chunk size\n\ndef test_prepare_request_body_with_bytes():\n    env = DummyEnv()\n    data = b\"hello world\"\n    result = prepare_request_body(\n        env=env,\n        raw_body=data,\n        body_read_callback=lambda x: None,\n        offline=False,\n        chunked=False,\n    )\n    assert isinstance(result, bytes)\n    assert result == data\n\ndef test_prepare_request_body_with_file_like_offline():\n    env = DummyEnv()\n    file_content = b\"file content\"\n    file_obj = io.BytesIO(file_content)\n    result = prepare_request_body(\n        env=env,\n        raw_body=file_obj,\n        body_read_callback=lambda x: None,\n        offline=True,\n        chunked=False,\n    )\n    assert isinstance(result, bytes)\n    assert result == file_content\n\ndef test_prepare_request_body_with_file_like_chunked(tmp_path):\n    env = DummyEnv()\n    file_content = b\"chunked data for upload\"\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_bytes(file_content)\n    file_obj = open(file_path, \"rb\")\n    result = prepare_request_body(\n        env=env,\n        raw_body=file_obj,\n        body_read_callback=lambda x: None,\n        offline=False,\n        chunked=False,\n    )\n    assert isinstance(result, ChunkedStream)\n    # Read all data from the returned stream\n    read_data = b\"\".join(chunk for chunk in result)\n    assert read_data == file_content\n    file_obj.close()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "d574a616bc3a4265966ebe2b8daeb3d4",
+  "_api_plus_pacing_seconds": 1.5421246269834228
+}

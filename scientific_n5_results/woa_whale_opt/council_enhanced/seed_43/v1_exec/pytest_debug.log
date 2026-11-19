@@ -1,0 +1,39 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_whale_optimization_optimize_updates_state_and_constraints ________
+
+    def test_whale_optimization_optimize_updates_state_and_constraints():
+        np.random.seed(0)
+        opt_func = lambda x, y: x**2 + y**2
+        constraints = [(-5, 5), (-5, 5)]
+        woa = WhaleOptimization(opt_func, constraints, nsols=5, b=1, a=2, a_step=0.1)
+    
+        # initial state
+        assert woa._sols.shape == (5, 2)
+        assert woa._a == 2
+    
+        # run first optimization
+        woa.optimize()
+        assert woa._a == 1.9
+        assert len(woa._best_solutions) == 1
+    
+        # fitness consistency
+        fitness = opt_func(woa._sols[:, 0], woa._sols[:, 1])
+        best_fitness, _ = woa._best_solutions[0]
+        assert best_fitness == pytest.approx(fitness.min())
+    
+        # solutions within constraints
+        for sol in woa._sols:
+            assert all(c[0] <= val <= c[1] for val, c in zip(sol, constraints))
+    
+        # run second optimization
+        woa.optimize()
+>       assert woa._a == 1.8
+E       assert 1.7999999999999998 == 1.8
+E        +  where 1.7999999999999998 = <src.whale_optimization.WhaleOptimization object at 0x7f6e60ca1eb0>._a
+
+../../scientific_n5_results/woa_whale_opt/council_enhanced/seed_43/v1_exec/test_run.py:31: AssertionError
+=========================== short test summary info ============================
+FAILED ../../scientific_n5_results/woa_whale_opt/council_enhanced/seed_43/v1_exec/test_run.py::test_whale_optimization_optimize_updates_state_and_constraints
+1 failed in 0.80s
+

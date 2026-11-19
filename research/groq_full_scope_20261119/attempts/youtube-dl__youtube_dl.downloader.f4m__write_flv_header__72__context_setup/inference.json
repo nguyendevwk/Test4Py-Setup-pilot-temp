@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-0dd89d85-be98-43b3-b70d-edfd1ae463d9",
+  "object": "chat.completion",
+  "created": 1795077689,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport pytest\nfrom youtube_dl.downloader.f4m import write_flv_header\n\ndef test_write_flv_header_writes_correct_bytes_and_position(tmp_path):\n    stream = io.BytesIO()\n    write_flv_header(stream)\n    # The header should be exactly 13 bytes long\n    assert stream.getvalue() == b'FLV\\x01\\x05\\x00\\x00\\x00\\x09\\x00\\x00\\x00\\x00'\n    # After writing, the stream position should be at the end of the header\n    assert stream.tell() == 13\n\ndef test_write_flv_header_appends_to_existing_content(tmp_path):\n    stream = io.BytesIO(b'PRE')\n    write_flv_header(stream)\n    # The header should be appended after the existing bytes\n    assert stream.getvalue() == b'PREFLV\\x01\\x05\\x00\\x00\\x00\\x09\\x00\\x00\\x00\\x00'\n    # Position should be at the end of the new content\n    assert stream.tell() == 3 + 13\n\ndef test_write_flv_header_raises_on_closed_stream(tmp_path):\n    stream = io.BytesIO()\n    stream.close()\n    with pytest.raises(ValueError):\n        write_flv_header(stream)\n```",
+        "reasoning": "We need to test write_flv_header. It writes bytes. We'll test that after calling, stream contains expected bytes. Use BytesIO. Also test that it doesn't modify stream position? It writes at current position. We'll test that after writing, position is at 13? Let's compute: 'FLV\\x01' 4 bytes, '\\x05' 1, '\\x00\\x00\\x00\\x09' 4, '\\x00\\x00\\x00\\x00' 4 total 13. So test that. Also test that calling multiple times appends. Third test maybe error: passing non-writable stream raises? But function expects stream with write. We can pass a BytesIO that is closed to raise ValueError. Test that."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.098222823,
+    "prompt_tokens": 381,
+    "prompt_time": 0.118543246,
+    "completion_tokens": 426,
+    "completion_time": 0.557446375,
+    "total_tokens": 807,
+    "total_time": 0.675989621,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 154
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sffk6pejn8jcqtr8z9fjpf",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport pytest\nfrom youtube_dl.downloader.f4m import write_flv_header\n\ndef test_write_flv_header_writes_correct_bytes_and_position(tmp_path):\n    stream = io.BytesIO()\n    write_flv_header(stream)\n    # The header should be exactly 13 bytes long\n    assert stream.getvalue() == b'FLV\\x01\\x05\\x00\\x00\\x00\\x09\\x00\\x00\\x00\\x00'\n    # After writing, the stream position should be at the end of the header\n    assert stream.tell() == 13\n\ndef test_write_flv_header_appends_to_existing_content(tmp_path):\n    stream = io.BytesIO(b'PRE')\n    write_flv_header(stream)\n    # The header should be appended after the existing bytes\n    assert stream.getvalue() == b'PREFLV\\x01\\x05\\x00\\x00\\x00\\x09\\x00\\x00\\x00\\x00'\n    # Position should be at the end of the new content\n    assert stream.tell() == 3 + 13\n\ndef test_write_flv_header_raises_on_closed_stream(tmp_path):\n    stream = io.BytesIO()\n    stream.close()\n    with pytest.raises(ValueError):\n        write_flv_header(stream)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1173744840198196
+}

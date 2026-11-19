@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-6d62dcbb-5abf-44df-83c3-25fb77efabe9",
+  "object": "chat.completion",
+  "created": 1795078793,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport json\nimport tempfile\nimport pytest\nfrom httpie.cli.requestitems import RequestItems\nfrom httpie.cli.argtypes import KeyValueArg\nfrom httpie.cli.constants import (\n    SEPARATOR_HEADER,\n    SEPARATOR_HEADER_EMPTY,\n    SEPARATOR_DATA_STRING,\n    SEPARATOR_DATA_RAW_JSON,\n    SEPARATOR_FILE_UPLOAD,\n    RequestType,\n)\nfrom httpie.cli.dicts import HTTPHeadersDict, RequestDataDict, RequestFilesDict\n\n\ndef test_header_and_empty_header_parsing(tmp_path):\n    \"\"\"Headers should be parsed correctly, including empty values.\"\"\"\n    # Create a temporary file for the file upload test\n    header_file = tmp_path / \"header.txt\"\n    header_file.write_text(\"value\")\n\n    args = [\n        KeyValueArg(key=\"X-Custom\", sep=SEPARATOR_HEADER, value=\"123\"),\n        KeyValueArg(key=\"X-Empty\", sep=SEPARATOR_HEADER_EMPTY, value=\"\"),\n        KeyValueArg(key=\"X-File\", sep=SEPARATOR_HEADER, value=str(header_file)),\n    ]\n\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n\n    # Headers are stored in an HTTPHeadersDict\n    assert isinstance(items.headers, HTTPHeadersDict)\n    assert items.headers[\"X-Custom\"] == [\"123\"]\n    assert items.headers[\"X-Empty\"] == [\"\"]\n    # Header file content is read and stored as a string\n    assert items.headers[\"X-File\"] == [header_file.read_text()]\n\n\ndef test_data_string_and_raw_json_parsing(tmp_path):\n    \"\"\"Data string and raw JSON should be parsed into the data dict.\"\"\"\n    # Create a temporary JSON file for raw JSON embedding\n    json_file = tmp_path / \"data.json\"\n    json_file.write_text(json.dumps({\"foo\": \"bar\"}))\n\n    args = [\n        KeyValueArg(key=\"name\", sep=SEPARATOR_DATA_STRING, value=\"Alice\"),\n        KeyValueArg(key=\"config\", sep=SEPARATOR_DATA_RAW_JSON, value=json_file),\n    ]\n\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n\n    # Data is stored in a RequestJSONDataDict\n    assert isinstance(items.data, RequestDataDict)\n    assert items.data[\"name\"] == [\"Alice\"]\n    # Raw JSON file is parsed and stored as a dict\n    assert items.data[\"config\"] == [{\"foo\": \"bar\"}]\n\n\ndef test_file_upload_and_multipart_parsing(tmp_path):\n    \"\"\"File upload arguments should populate files and multipart_data correctly.\"\"\"\n    # Create a temporary file to upload\n    upload_file = tmp_path / \"upload.txt\"\n    upload_file.write_text(\"content\")\n\n    args = [\n        KeyValueArg(key=\"file1\", sep=SEPARATOR_FILE_UPLOAD, value=str(upload_file)),\n        KeyValueArg(key=\"field1\", sep=SEPARATOR_DATA_STRING, value=\"value1\"),\n    ]\n\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n\n    # Files dict should contain the file path\n    assert isinstance(items.files, RequestFilesDict)\n    assert items.files[\"file1\"] == [str(upload_file)]\n\n    # Multipart data should contain the same key for file uploads\n    assert isinstance(items.multipart_data, RequestDataDict)\n    assert items.multipart_data[\"file1\"] == [str(upload_file)]\n\n    # Non-file data should be in the normal data dict\n    assert items.data[\"field1\"] == [\"value1\"]\n```",
+        "reasoning": "We need to write tests for RequestItems.from_args. We need to import RequestItems and related constants. We'll craft KeyValueArg objects. Need to import KeyValueArg. We'll test header, query, data string, file upload. Use tmp_path for file. Ensure correct dicts. Let's write three tests: 1) header and empty header. 2) data string and raw json. 3) file upload with multipart. Use assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053700264,
+    "prompt_tokens": 1131,
+    "prompt_time": 0.027201223,
+    "completion_tokens": 812,
+    "completion_time": 0.995912109,
+    "total_tokens": 1943,
+    "total_time": 1.023113332,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 92
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgh9edex79tjvdnmw7hkfx",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport json\nimport tempfile\nimport pytest\nfrom httpie.cli.requestitems import RequestItems\nfrom httpie.cli.argtypes import KeyValueArg\nfrom httpie.cli.constants import (\n    SEPARATOR_HEADER,\n    SEPARATOR_HEADER_EMPTY,\n    SEPARATOR_DATA_STRING,\n    SEPARATOR_DATA_RAW_JSON,\n    SEPARATOR_FILE_UPLOAD,\n    RequestType,\n)\nfrom httpie.cli.dicts import HTTPHeadersDict, RequestDataDict, RequestFilesDict\n\n\ndef test_header_and_empty_header_parsing(tmp_path):\n    \"\"\"Headers should be parsed correctly, including empty values.\"\"\"\n    # Create a temporary file for the file upload test\n    header_file = tmp_path / \"header.txt\"\n    header_file.write_text(\"value\")\n\n    args = [\n        KeyValueArg(key=\"X-Custom\", sep=SEPARATOR_HEADER, value=\"123\"),\n        KeyValueArg(key=\"X-Empty\", sep=SEPARATOR_HEADER_EMPTY, value=\"\"),\n        KeyValueArg(key=\"X-File\", sep=SEPARATOR_HEADER, value=str(header_file)),\n    ]\n\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n\n    # Headers are stored in an HTTPHeadersDict\n    assert isinstance(items.headers, HTTPHeadersDict)\n    assert items.headers[\"X-Custom\"] == [\"123\"]\n    assert items.headers[\"X-Empty\"] == [\"\"]\n    # Header file content is read and stored as a string\n    assert items.headers[\"X-File\"] == [header_file.read_text()]\n\n\ndef test_data_string_and_raw_json_parsing(tmp_path):\n    \"\"\"Data string and raw JSON should be parsed into the data dict.\"\"\"\n    # Create a temporary JSON file for raw JSON embedding\n    json_file = tmp_path / \"data.json\"\n    json_file.write_text(json.dumps({\"foo\": \"bar\"}))\n\n    args = [\n        KeyValueArg(key=\"name\", sep=SEPARATOR_DATA_STRING, value=\"Alice\"),\n        KeyValueArg(key=\"config\", sep=SEPARATOR_DATA_RAW_JSON, value=json_file),\n    ]\n\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n\n    # Data is stored in a RequestJSONDataDict\n    assert isinstance(items.data, RequestDataDict)\n    assert items.data[\"name\"] == [\"Alice\"]\n    # Raw JSON file is parsed and stored as a dict\n    assert items.data[\"config\"] == [{\"foo\": \"bar\"}]\n\n\ndef test_file_upload_and_multipart_parsing(tmp_path):\n    \"\"\"File upload arguments should populate files and multipart_data correctly.\"\"\"\n    # Create a temporary file to upload\n    upload_file = tmp_path / \"upload.txt\"\n    upload_file.write_text(\"content\")\n\n    args = [\n        KeyValueArg(key=\"file1\", sep=SEPARATOR_FILE_UPLOAD, value=str(upload_file)),\n        KeyValueArg(key=\"field1\", sep=SEPARATOR_DATA_STRING, value=\"value1\"),\n    ]\n\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n\n    # Files dict should contain the file path\n    assert isinstance(items.files, RequestFilesDict)\n    assert items.files[\"file1\"] == [str(upload_file)]\n\n    # Multipart data should contain the same key for file uploads\n    assert isinstance(items.multipart_data, RequestDataDict)\n    assert items.multipart_data[\"file1\"] == [str(upload_file)]\n\n    # Non-file data should be in the normal data dict\n    assert items.data[\"field1\"] == [\"value1\"]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5103077340172604
+}

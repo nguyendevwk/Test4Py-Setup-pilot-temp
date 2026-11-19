@@ -1,0 +1,57 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_logging_redirected_to_pbar_output ____________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7f438888ec20>
+
+    def test_logging_redirected_to_pbar_output(capsys):
+        """When a log message is emitted inside the context, it appears in the tqdm bar output."""
+        LOG = logging.getLogger("tqdm_test")
+        LOG.setLevel(logging.INFO)
+    
+        # Capture stdout to inspect tqdm output
+        with tqdm_logging_redirect(trange(3), total=3, leave=False) as pbar:
+            LOG.info("Test message")
+            # Advance the bar to force output
+            for _ in range(3):
+                pbar.update(1)
+    
+        # Capture the printed output
+        captured = capsys.readouterr()
+        # The log message should be present in the output (tqdm.write writes to stdout)
+>       assert "Test message" in captured.out
+E       AssertionError: assert 'Test message' in ''
+E        +  where '' = CaptureResult(out='', err='\r  0%|          | 0/3 [00:00<?, ?it/s]\n\r  0%|          | 0/3 [00:00<?, ?it/s]\x1b[A\r   ... | 0/3 [00:00<?, ?it/s]\n\r  0%|          | 0/3 [00:00<?, ?it/s]\x1b[A\n\r                                     \x1b[A').out
+
+test_generated.py:23: AssertionError
+------------------------------ Captured log call -------------------------------
+INFO     tqdm_test:test_generated.py:15 Test message
+________________________ test_default_loggers_use_root _________________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7f4388452140>
+
+    def test_default_loggers_use_root(capsys):
+        """When no loggers are specified, the root logger is used for redirection."""
+        LOG = logging.getLogger("tqdm_test_root")
+        LOG.setLevel(logging.INFO)
+    
+        # Ensure root logger has a console handler
+        root_handler = logging.StreamHandler(sys.stdout)
+        logging.root.handlers = [root_handler]
+    
+        with tqdm_logging_redirect(trange(1), total=1, leave=False) as pbar:
+            LOG.info("Root logger message")
+            pbar.update(1)
+    
+        captured = capsys.readouterr()
+        assert "Root logger message" in captured.out
+>       assert "100%" in captured.out or "1/1" in captured.out
+E       AssertionError: assert ('100%' in 'Root logger message\n' or '1/1' in 'Root logger message\n')
+E        +  where 'Root logger message\n' = CaptureResult(out='Root logger message\n', err='\n\r  0%|          | 0/1 [00:00<?, ?it/s]\x1b[A\n\n\r  0%|          | ...]\x1b[A\n\n\r  0%|          | 0/1 [00:00<?, ?it/s]\x1b[A\x1b[A\n\n\r                                     \x1b[A\x1b[A').out
+E        +  and   'Root logger message\n' = CaptureResult(out='Root logger message\n', err='\n\r  0%|          | 0/1 [00:00<?, ?it/s]\x1b[A\n\n\r  0%|          | ...]\x1b[A\n\n\r  0%|          | 0/1 [00:00<?, ?it/s]\x1b[A\x1b[A\n\n\r                                     \x1b[A\x1b[A').out
+
+test_generated.py:55: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_logging_redirected_to_pbar_output - AssertionE...
+FAILED test_generated.py::test_default_loggers_use_root - AssertionError: ass...
+2 failed, 1 passed in 0.15s

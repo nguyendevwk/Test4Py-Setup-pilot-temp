@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-bd20960d-c969-4c45-bd8b-f37ae8dc4e3a",
+  "object": "chat.completion",
+  "created": 1795077946,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport getpass\nimport os\nimport pwd\nimport pytest\nfrom flutils.pathutils import get_os_user\n\n\ndef test_get_os_user_current_user_returns_struct_passwd(tmp_path):\n    \"\"\"Calling get_os_user with no argument should return the current user.\"\"\"\n    current_user = getpass.getuser()\n    expected = pwd.getpwnam(current_user)\n    result = get_os_user()\n    assert isinstance(result, pwd.struct_passwd)\n    assert result.pw_name == expected.pw_name\n    assert result.pw_uid == expected.pw_uid\n    assert result.pw_gid == expected.pw_gid\n    assert result.pw_dir == expected.pw_dir\n    assert result.pw_shell == expected.pw_shell\n\n\ndef test_get_os_user_with_valid_uid_returns_struct_passwd(tmp_path):\n    \"\"\"Providing a valid UID should return the corresponding user struct.\"\"\"\n    # Use the current user's UID for a guaranteed valid test\n    uid = os.getuid()\n    expected = pwd.getpwuid(uid)\n    result = get_os_user(uid)\n    assert isinstance(result, pwd.struct_passwd)\n    assert result.pw_name == expected.pw_name\n    assert result.pw_uid == expected.pw_uid\n    assert result.pw_gid == expected.pw_gid\n    assert result.pw_dir == expected.pw_dir\n    assert result.pw_shell == expected.pw_shell\n\n\ndef test_get_os_user_invalid_name_or_uid_raises_os_error(tmp_path):\n    \"\"\"Providing an invalid name or UID should raise OSError.\"\"\"\n    # Invalid name\n    with pytest.raises(OSError) as exc_name:\n        get_os_user(\"this_user_does_not_exist_12345\")\n    assert \"not a valid \\\"login name\\\"\" in str(exc_name.value)\n\n    # Invalid UID (negative number unlikely to exist)\n    with pytest.raises(OSError) as exc_uid:\n        get_os_user(-1)\n    assert \"not a valid uid\" in str(exc_uid.value)\n```",
+        "reasoning": "Need tests for get_os_user. Use tmp_path? Not needed. Test normal: current user exists. boundary: invalid uid int. error: invalid name string. Use pytest.raises. Use getpass.getuser to get current. Use pwd.getpwnam to get expected. Ensure returned struct_passwd. Test that uid int works. Also test that passing None returns current. Ensure type."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.056857626,
+    "prompt_tokens": 630,
+    "prompt_time": 0.252580264,
+    "completion_tokens": 496,
+    "completion_time": 0.755118002,
+    "total_tokens": 1126,
+    "total_time": 1.007698266,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 80
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfqdv7e8armrz9ta5f2n4t",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport getpass\nimport os\nimport pwd\nimport pytest\nfrom flutils.pathutils import get_os_user\n\n\ndef test_get_os_user_current_user_returns_struct_passwd(tmp_path):\n    \"\"\"Calling get_os_user with no argument should return the current user.\"\"\"\n    current_user = getpass.getuser()\n    expected = pwd.getpwnam(current_user)\n    result = get_os_user()\n    assert isinstance(result, pwd.struct_passwd)\n    assert result.pw_name == expected.pw_name\n    assert result.pw_uid == expected.pw_uid\n    assert result.pw_gid == expected.pw_gid\n    assert result.pw_dir == expected.pw_dir\n    assert result.pw_shell == expected.pw_shell\n\n\ndef test_get_os_user_with_valid_uid_returns_struct_passwd(tmp_path):\n    \"\"\"Providing a valid UID should return the corresponding user struct.\"\"\"\n    # Use the current user's UID for a guaranteed valid test\n    uid = os.getuid()\n    expected = pwd.getpwuid(uid)\n    result = get_os_user(uid)\n    assert isinstance(result, pwd.struct_passwd)\n    assert result.pw_name == expected.pw_name\n    assert result.pw_uid == expected.pw_uid\n    assert result.pw_gid == expected.pw_gid\n    assert result.pw_dir == expected.pw_dir\n    assert result.pw_shell == expected.pw_shell\n\n\ndef test_get_os_user_invalid_name_or_uid_raises_os_error(tmp_path):\n    \"\"\"Providing an invalid name or UID should raise OSError.\"\"\"\n    # Invalid name\n    with pytest.raises(OSError) as exc_name:\n        get_os_user(\"this_user_does_not_exist_12345\")\n    assert \"not a valid \\\"login name\\\"\" in str(exc_name.value)\n\n    # Invalid UID (negative number unlikely to exist)\n    with pytest.raises(OSError) as exc_uid:\n        get_os_user(-1)\n    assert \"not a valid uid\" in str(exc_uid.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3672213929821737
+}

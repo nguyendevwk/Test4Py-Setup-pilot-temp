@@ -66,7 +66,8 @@ was not locked: inspection found an empty pyrthon.console and 37 functions in
 superstring. The actual chosen frame is **3 modules in 2 projects**, not five modules
 in three projects. Do not silently claim the original proposed size was executed.
 
-Small stage: genty.genty_repeat, seed 42, 1 round, 2 arms (2 module trials).
+Small stage: genty.genty_repeat + genty.genty_args, seed 42, 1 round, 2 arms
+(4 module trials, 2 project workers). Same model and budgets as the larger stage.
 Larger pilot: all 3 modules, seeds 42/43, 3 rounds, 2 arms (12 module trials).
 The small module/project are development data. This frame is not held-out evidence
 of generalization; use other locked projects for a later confirmatory study.
@@ -91,8 +92,10 @@ Run All stops after small. Steps:
 4. Real upstream CPU initialization on both actual projects with SCRIPTED summary/
    embedding fixtures; then real upstream generation/scoring on a temporary toy
    project with SCRIPTED outputs. Their artifacts are engineering evidence ONLY.
-5. `stress`: on each GPU, synthetic source token inputs of 2K/4K/6K with FORCED
-   1024-token decoding and a repeat of the largest input. Require at least 1.5 GiB
+5. `stress`: on each GPU in parallel, synthetic source token inputs up to the
+   frozen cap with FORCED full-budget decoding and a repeat of the largest input.
+   The current notebook freezes 4096 input + 512 output for both stages/arms.
+   Require at least 1.5 GiB
    conservative headroom. Weights-only fit is insufficient. Input and output budgets
    and immutable model revision are bound to the evidence. No efficacy metrics.
 6. `small`: actual Qwen 14B inference through upstream for both arms, isolated
@@ -101,6 +104,16 @@ Run All stops after small. Steps:
 7. Review source/test evidence and measured runtime, then explicitly enable
    `RUN_LARGER` in the last cell. Main refuses missing/mismatched stress/small evidence.
    A baseline producing no valid tests is an outcome, not a reason to fabricate pass.
+
+The GPU screen has one 3600-second wall-clock budget spanning stress model
+download/load, bounded embedding download and the small workers. CPU environment
+installation, preparation and scripted engineering fixtures are separate overhead.
+Each probe is capped at 1800 seconds; both GPU probes run concurrently. Worker
+timeouts use the remaining shared budget. A budget timeout preserves planned
+rows/raw artifacts and blocks larger readiness; it is not a successful screen.
+At least one real model-generated retained-test coverage path must be measured
+in small before larger can start. This is a development engineering criterion,
+not proof of generalization or a requirement that baseline be all-pass.
 
 No automatic favorable-seed retries or replacement project. Worker limit is one
 hour per project/arm/seed; unfinished work remains in the planned denominator.

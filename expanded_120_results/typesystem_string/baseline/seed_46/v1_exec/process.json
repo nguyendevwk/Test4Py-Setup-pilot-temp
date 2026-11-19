@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/home/heurix/.cache/uv/builds-v0/.tmpKsOndk/bin/python3",
+    "-m",
+    "coverage",
+    "run",
+    "--branch",
+    "--source=typesystem.fields",
+    "-m",
+    "pytest",
+    "-q",
+    "-o",
+    "addopts=",
+    "--confcutdir=/home/heurix/Documents/Test4Py_Setup/expanded_120_results/typesystem_string/baseline/seed_46/v1_exec",
+    "-p",
+    "pytest_jsonreport.plugin",
+    "--json-report",
+    "--json-report-file=/home/heurix/Documents/Test4Py_Setup/expanded_120_results/typesystem_string/baseline/seed_46/v1_exec/pytest_report.json",
+    "/home/heurix/Documents/Test4Py_Setup/expanded_120_results/typesystem_string/baseline/seed_46/v1_exec/test_run.py"
+  ],
+  "returncode": 1,
+  "stdout": "F                                                                        [100%]\n=================================== FAILURES ===================================\n________________________ test_string_validate_behavior _________________________\n\n    def test_string_validate_behavior():\n        field = String(\n            allow_blank=True,\n            trim_whitespace=True,\n            min_length=3,\n            max_length=5,\n            pattern=r'\\d+',\n        )\n        # None coerces to empty string when allow_blank is True\n        assert field.validate(None) == \"\"\n        # Valid string with whitespace trimmed\n        assert field.validate(\"  123  \") == \"123\"\n        # Too short string triggers min_length error\n        with pytest.raises(Exception):\n            field.validate(\"12\")\n        # Too long string triggers max_length error\n        with pytest.raises(Exception):\n            field.validate(\"123456\")\n        # Pattern mismatch triggers pattern error\n        with pytest.raises(Exception):\n            field.validate(\"abc\")\n        # Null character is removed before validation\n>       assert field.validate(\"a\\0bc\") == \"abc\"\n               ^^^^^^^^^^^^^^^^^^^^^^^\n\n../../expanded_120_results/typesystem_string/baseline/seed_46/v1_exec/test_run.py:26: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <typesystem.fields.String object at 0x7fa32b045700>, value = 'abc'\n\n    def validate(self, value: typing.Any) -> typing.Any:\n        if value is None and self.allow_null:\n            return None\n        elif value is None and self.allow_blank and self.coerce_types:\n            # Leniently cast nulls to empty strings if allow_blank.\n            return \"\"\n        elif value is None:\n            raise self.validation_error(\"null\")\n        elif self.format in FORMATS and FORMATS[self.format].is_native_type(value):\n            return value\n        elif not isinstance(value, str):\n            raise self.validation_error(\"type\")\n    \n        # The null character is always invalid.\n        value = value.replace(\"\\0\", \"\")\n    \n        # Strip leading/trailing whitespace by default.\n        if self.trim_whitespace:\n            value = value.strip()\n    \n        if not self.allow_blank and not value:\n            if self.allow_null and self.coerce_types:\n                # Leniently cast empty strings (after trimming) to null if allow_null.\n                return None\n            raise self.validation_error(\"blank\")\n    \n        if self.min_length is not None:\n            if len(value) < self.min_length:\n                raise self.validation_error(\"min_length\")\n    \n        if self.max_length is not None:\n            if len(value) > self.max_length:\n                raise self.validation_error(\"max_length\")\n    \n        if self.pattern_regex is not None:\n            if not self.pattern_regex.search(value):\n>               raise self.validation_error(\"pattern\")\nE               typesystem.base.ValidationError: Must match the pattern /\\d+/.\n\ntypesystem/fields.py:178: ValidationError\n=========================== short test summary info ============================\nFAILED ../../expanded_120_results/typesystem_string/baseline/seed_46/v1_exec/test_run.py::test_string_validate_behavior\n1 failed in 0.25s\n",
+  "stderr": "/home/heurix/.cache/uv/archive-v0/ZMxlGZafGJre2eGL/lib/python3.12/site-packages/coverage/inorout.py:560: CoverageWarning: Module tests was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.17.3/messages.html#warning-module-not-imported\n  self.warn(f\"Module {pkg} was never imported.\", slug=\"module-not-imported\")\n",
+  "timeout": false,
+  "log_path": null,
+  "seconds": 2.177052390994504
+}

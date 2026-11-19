@@ -1,0 +1,99 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________________ test_register_and_decode ___________________________
+
+    def test_register_and_decode():
+        """
+        Test that the register function registers the 'b64' codec and that
+        the decoder correctly decodes a base64 string.
+        """
+        # Ensure the codec is not registered yet
+        with pytest.raises(LookupError):
+            codecs.getdecoder("b64")
+    
+        # Register the codec
+        b64_module.register()
+    
+        # After registration, the decoder should be available
+        decoder = codecs.getdecoder("b64")
+        assert decoder is not None
+    
+        # Decode a known base64 string
+        original = b"hello world"
+        encoded = base64.b64encode(original).decode("ascii")
+>       decoded_bytes, _ = decoder(encoded)
+
+test_generated.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = 'aGVsbG8gd29ybGQ=', errors = 'strict'
+
+    def decode(
+            data: _ByteString,
+            errors: _STR = 'strict'
+    ) -> Tuple[str, int]:
+        """Convert the given ``data`` into base64 Characters.
+    
+        Args:
+            data (bytes or bytearray or memoryview): Bytes to be converted
+                to a string of base64 characters.
+            errors (str or :obj:`~UserString`): Not used.  This argument exists
+                to meet the interface requirements.  Any value given to this
+                argument is ignored.
+    
+        Returns:
+            str: of base64 Characters
+            int: the number of the given ``data`` bytes consumed.
+        """
+        # Convert memoryview and bytearray objects to bytes.
+>       data_bytes = bytes(data)
+E       TypeError: string argument without an encoding
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/b64.py:84: TypeError
+___________________________ test_register_idempotent ___________________________
+
+    def test_register_idempotent():
+        """
+        Test that calling register multiple times does not raise an exception
+        and the codec remains available.
+        """
+        # First registration
+        b64_module.register()
+        # Second registration should be harmless
+        b64_module.register()
+    
+        # The decoder should still work
+        decoder = codecs.getdecoder("b64")
+>       decoded_bytes, _ = decoder(base64.b64encode(b"test").decode("ascii"))
+
+test_generated.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = 'dGVzdA==', errors = 'strict'
+
+    def decode(
+            data: _ByteString,
+            errors: _STR = 'strict'
+    ) -> Tuple[str, int]:
+        """Convert the given ``data`` into base64 Characters.
+    
+        Args:
+            data (bytes or bytearray or memoryview): Bytes to be converted
+                to a string of base64 characters.
+            errors (str or :obj:`~UserString`): Not used.  This argument exists
+                to meet the interface requirements.  Any value given to this
+                argument is ignored.
+    
+        Returns:
+            str: of base64 Characters
+            int: the number of the given ``data`` bytes consumed.
+        """
+        # Convert memoryview and bytearray objects to bytes.
+>       data_bytes = bytes(data)
+E       TypeError: string argument without an encoding
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/b64.py:84: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_register_and_decode - TypeError: string argume...
+FAILED test_generated.py::test_register_idempotent - TypeError: string argume...
+2 failed, 1 passed in 0.12s

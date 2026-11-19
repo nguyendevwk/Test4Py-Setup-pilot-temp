@@ -1,0 +1,85 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_gen_api_creates_markdown _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-56/test_gen_api_creates_markdown0')
+
+    def test_gen_api_creates_markdown(tmp_path):
+        """Normal case: a valid module is processed and a markdown file is created."""
+        # Create a simple module with a docstring
+        mod_name = "sample_module"
+        create_module(tmp_path, mod_name, '"""Sample module docstring."""\n\ndef foo():\n    pass')
+        # Run gen_api
+        docs = gen_api({"Sample": mod_name}, prefix=str(tmp_path), link=False, level=2, toc=False, dry=False)
+        # Verify that one document is returned
+>       assert len(docs) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+../../../../../../attempts/apimd__apimd.loader__gen_api__43__atomic_verified_setup/eval0/test_generated.py:25: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[32mLoad root: sample_module (Sample)[0m
+[32mLoad root: sample_module (Sample)[0m
+[33m'sample_module' can not be found[0m
+[33m'sample_module' can not be found[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:131 Load root: sample_module (Sample)
+WARNING  root:loader.py:134 'sample_module' can not be found
+____________________________ test_gen_api_with_pwd _____________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-56/test_gen_api_with_pwd0')
+
+    def test_gen_api_with_pwd(tmp_path):
+        """Error/edge case: providing a pwd that contains a package allows import."""
+        # Create a package with an __init__.py and a module
+        pkg_dir = tmp_path / "mypkg"
+        pkg_dir.mkdir()
+        (pkg_dir / "__init__.py").write_text("")
+        create_module(pkg_dir, "inner", '"""Inner module."""')
+        # Ensure the package is importable via pwd
+>       docs = gen_api({"Inner": "mypkg.inner"}, pwd=str(pkg_dir), prefix=str(tmp_path), dry=False)
+
+../../../../../../attempts/apimd__apimd.loader__gen_api__43__atomic_verified_setup/eval0/test_generated.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+apimd/loader.py:132: in gen_api
+    doc = loader(name, _site_path(name), link, level, toc)
+apimd/loader.py:38: in _site_path
+    s = find_spec(name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'mypkg.inner', package = None
+
+    def find_spec(name, package=None):
+        """Return the spec for the specified module.
+    
+        First, sys.modules is checked to see if the module was already imported. If
+        so, then sys.modules[name].__spec__ is returned. If that happens to be
+        set to None, then ValueError is raised. If the module is not in
+        sys.modules, then sys.meta_path is searched for a suitable spec with the
+        value of 'path' given to the finders. None is returned if no spec could
+        be found.
+    
+        If the name is for submodule (contains a dot), the parent module is
+        automatically imported.
+    
+        The name and package arguments work the same as importlib.import_module().
+        In other words, relative module names (with leading dots) work.
+    
+        """
+        fullname = resolve_name(name, package) if name.startswith('.') else name
+        if fullname not in sys.modules:
+            parent_name = fullname.rpartition('.')[0]
+            if parent_name:
+>               parent = __import__(parent_name, fromlist=['__path__'])
+E               ModuleNotFoundError: No module named 'mypkg'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/importlib/util.py:94: ModuleNotFoundError
+----------------------------- Captured stderr call -----------------------------
+[32mLoad root: mypkg.inner (Inner)[0m
+[32mLoad root: mypkg.inner (Inner)[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:131 Load root: mypkg.inner (Inner)
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/apimd__apimd.loader__gen_api__43__atomic_verified_setup/eval0/test_generated.py::test_gen_api_creates_markdown
+FAILED ../../../../../../attempts/apimd__apimd.loader__gen_api__43__atomic_verified_setup/eval0/test_generated.py::test_gen_api_with_pwd
+2 failed, 1 passed in 0.32s

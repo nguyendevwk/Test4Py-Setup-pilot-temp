@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-52c92e64-6f83-4186-a169-98d8a2a2695d",
+  "object": "chat.completion",
+  "created": 1795077422,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport io\nimport pytest\nfrom thefuck.logs import confirm_text\nfrom thefuck import const\n\n# Helper to capture stderr output\n@pytest.fixture\ndef captured_stderr():\n    original_stderr = sys.stderr\n    buffer = io.StringIO()\n    sys.stderr = buffer\n    try:\n        yield buffer\n    finally:\n        sys.stderr = original_stderr\n\ndef test_confirm_text_basic(captured_stderr):\n    class Cmd:\n        script = \"ls -la\"\n        side_effect = False\n    confirm_text(Cmd())\n    output = captured_stderr.getvalue()\n    # Should contain the user command mark and the script\n    assert const.USER_COMMAND_MARK in output\n    assert \"ls -la\" in output\n    # Should not contain side effect marker\n    assert \"(+side effect)\" not in output\n    # Should contain the prompt symbols\n    assert \"[enter/↑/↓/ctrl+c]\" in output\n\ndef test_confirm_text_with_side_effect(captured_stderr):\n    class Cmd:\n        script = \"git commit\"\n        side_effect = True\n    confirm_text(Cmd())\n    output = captured_stderr.getvalue()\n    # Should contain the side effect marker\n    assert \"(+side effect)\" in output\n    # Should still contain the script\n    assert \"git commit\" in output\n\ndef test_confirm_text_empty_script(captured_stderr):\n    class Cmd:\n        script = \"\"\n        side_effect = False\n    confirm_text(Cmd())\n    output = captured_stderr.getvalue()\n    # Should still write something to stderr\n    assert output != \"\"\n    # Should not raise errors even with empty script\n    assert const.USER_COMMAND_MARK in output\n```",
+        "reasoning": "We need to test confirm_text. It writes to sys.stderr. We can capture stderr. Use tmp_path? not needed. Three tests: normal command, side_effect True, and maybe empty script? But script likely string. We'll test that output contains expected markers. Use contextmanager to capture stderr. Use colorama init? color function? color defined? In code, color is used but not defined in snippet. Probably imported earlier. But we can call confirm_text and capture. We'll test that output contains script and side effect string. Also test that it writes to stderr. Third test maybe confirm that no exception when script empty. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.212826671,
+    "prompt_tokens": 400,
+    "prompt_time": 0.473750712,
+    "completion_tokens": 491,
+    "completion_time": 0.5937112,
+    "total_tokens": 891,
+    "total_time": 1.067461912,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 130
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sf7e56ekpsy6m68sq8ksgc",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport io\nimport pytest\nfrom thefuck.logs import confirm_text\nfrom thefuck import const\n\n# Helper to capture stderr output\n@pytest.fixture\ndef captured_stderr():\n    original_stderr = sys.stderr\n    buffer = io.StringIO()\n    sys.stderr = buffer\n    try:\n        yield buffer\n    finally:\n        sys.stderr = original_stderr\n\ndef test_confirm_text_basic(captured_stderr):\n    class Cmd:\n        script = \"ls -la\"\n        side_effect = False\n    confirm_text(Cmd())\n    output = captured_stderr.getvalue()\n    # Should contain the user command mark and the script\n    assert const.USER_COMMAND_MARK in output\n    assert \"ls -la\" in output\n    # Should not contain side effect marker\n    assert \"(+side effect)\" not in output\n    # Should contain the prompt symbols\n    assert \"[enter/↑/↓/ctrl+c]\" in output\n\ndef test_confirm_text_with_side_effect(captured_stderr):\n    class Cmd:\n        script = \"git commit\"\n        side_effect = True\n    confirm_text(Cmd())\n    output = captured_stderr.getvalue()\n    # Should contain the side effect marker\n    assert \"(+side effect)\" in output\n    # Should still contain the script\n    assert \"git commit\" in output\n\ndef test_confirm_text_empty_script(captured_stderr):\n    class Cmd:\n        script = \"\"\n        side_effect = False\n    confirm_text(Cmd())\n    output = captured_stderr.getvalue()\n    # Should still write something to stderr\n    assert output != \"\"\n    # Should not raise errors even with empty script\n    assert const.USER_COMMAND_MARK in output\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.598892247013282
+}

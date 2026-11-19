@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-684d7f1b-6d82-4c94-8003-93b7f699ac16",
+  "object": "chat.completion",
+  "created": 1795079609,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport time\nimport pytest\nfrom httpie.utils import get_expired_cookies\n\ndef test_get_expired_cookies_returns_expired():\n    # Cookie with expires 1 second in the past\n    past = time.time() - 1\n    cookie_str = f\"sessionid=abc123; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(past))}; Path=/; HttpOnly\"\n    expired = get_expired_cookies(cookie_str, now=time.time())\n    assert len(expired) == 1\n    assert expired[0][\"name\"] == \"sessionid\"\n    assert expired[0][\"path\"] == \"/\"\n\ndef test_get_expired_cookies_boundary_expires_now():\n    # Cookie with expires exactly now should be considered expired\n    now = time.time()\n    cookie_str = f\"token=xyz; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(now))}; Path=/\"\n    expired = get_expired_cookies(cookie_str, now=now)\n    assert len(expired) == 1\n    assert expired[0][\"name\"] == \"token\"\n    assert expired[0][\"path\"] == \"/\"\n\ndef test_get_expired_cookies_invalid_cookie_returns_empty():\n    # Malformed cookie string should result in no expired cookies\n    invalid_str = \"this is not a valid cookie header\"\n    expired = get_expired_cookies(invalid_str, now=time.time())\n    assert expired == []\n```",
+        "reasoning": "We need 3 tests. Use tmp_path? Not needed. Test normal: cookie with expires past. boundary: expires exactly now. error: invalid cookie string? parse_ns_headers may raise? Let's test that invalid cookie string returns empty list. Use time."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005273011,
+    "prompt_tokens": 500,
+    "prompt_time": 0.026260358,
+    "completion_tokens": 390,
+    "completion_time": 0.425329932,
+    "total_tokens": 890,
+    "total_time": 0.45159029,
+    "completion_tokens_details": {
+      "reasoning_tokens": 53
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sha6hre6eskqmtfq7npxks",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport time\nimport pytest\nfrom httpie.utils import get_expired_cookies\n\ndef test_get_expired_cookies_returns_expired():\n    # Cookie with expires 1 second in the past\n    past = time.time() - 1\n    cookie_str = f\"sessionid=abc123; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(past))}; Path=/; HttpOnly\"\n    expired = get_expired_cookies(cookie_str, now=time.time())\n    assert len(expired) == 1\n    assert expired[0][\"name\"] == \"sessionid\"\n    assert expired[0][\"path\"] == \"/\"\n\ndef test_get_expired_cookies_boundary_expires_now():\n    # Cookie with expires exactly now should be considered expired\n    now = time.time()\n    cookie_str = f\"token=xyz; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(now))}; Path=/\"\n    expired = get_expired_cookies(cookie_str, now=now)\n    assert len(expired) == 1\n    assert expired[0][\"name\"] == \"token\"\n    assert expired[0][\"path\"] == \"/\"\n\ndef test_get_expired_cookies_invalid_cookie_returns_empty():\n    # Malformed cookie string should result in no expired cookies\n    invalid_str = \"this is not a valid cookie header\"\n    expired = get_expired_cookies(invalid_str, now=time.time())\n    assert expired == []\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "8b2f78300366422fb21d71cf25898e14",
+  "_api_plus_pacing_seconds": 1.6107919439673424
+}

@@ -1,0 +1,31 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_union_null_handling_and_error_message __________________
+
+    def test_union_null_handling_and_error_message():
+        """Union should allow null if any child allows it, otherwise raise error."""
+        int_field = IntField(allow_null=True)
+        str_field = StrField()
+        union = Union(any_of=[int_field, str_field])
+        # Null is allowed because int_field allows null
+        assert union.validate_or_error(None).value is None
+    
+        # Create a union without any allow_null child
+        union_no_null = Union(any_of=[IntField(), StrField()])
+>       with pytest.raises(ValidationError) as excinfo:
+E       Failed: DID NOT RAISE ValidationError
+
+test_generated.py:40: Failed
+______________________ test_union_fallback_to_union_error ______________________
+
+    def test_union_fallback_to_union_error():
+        """When no child validates, Union should raise its own error."""
+        union = Union(any_of=[IntField(), StrField()])
+>       with pytest.raises(ValidationError) as excinfo:
+E       Failed: DID NOT RAISE ValidationError
+
+test_generated.py:47: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_union_null_handling_and_error_message - Failed...
+FAILED test_generated.py::test_union_fallback_to_union_error - Failed: DID NO...
+2 failed, 1 passed in 0.20s

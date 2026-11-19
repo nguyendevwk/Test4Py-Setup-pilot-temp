@@ -1,0 +1,109 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_encode_basic_ascii_and_escape ______________________
+
+    def test_encode_basic_ascii_and_escape():
+        # Input contains normal ASCII and an escaped hex sequence \x41 (A)
+        input_text = "Hello\\x41World"
+        # Expected: bytes of escaped UTF‑8 hex for "HelloAWorld"
+        expected_bytes = b"\\x48\\x65\\x6c\\x6c\\x6f\\x41\\x57\\x6f\\x72\\x6c\\x64"
+        out_bytes, consumed = encode(input_text)
+>       assert out_bytes == expected_bytes
+E       AssertionError: assert b'HelloAWorld' == b'\\x48\\x65\...x72\\x6c\\x64'
+E         
+E         At index 0 diff: b'H' != b'\\'
+E         Use -v to get more diff
+
+test_generated.py:11: AssertionError
+___________________________ test_encode_empty_string ___________________________
+
+    def test_encode_empty_string():
+        # Empty input should return empty bytes and zero consumed characters
+>       out_bytes, consumed = encode("")
+
+test_generated.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = '', errors = 'strict'
+
+    def encode(
+            text: _Str,
+            errors: _Str = 'strict'
+    ) -> Tuple[bytes, int]:
+        """Convert a :obj:`str`, that may contain escaped utf8 hexadecimal, to
+        bytes of escaped utf8 hexadecimal.
+    
+        Args:
+            text (str or :obj:`~UserString`): The string input.
+            errors (str or :obj:`~UserString`): The error checking level.
+    
+        Returns:
+            bytes: The given ``text`` converted into escaped utf8 bytes.
+            int: The number of given ``text`` characters consumed
+    
+        Raises:
+             UnicodeEncodeError: if the given ``text`` contains escaped
+                utf8 hexadecimal that references invalid utf8 bytes.
+        """
+    
+        # Convert the given 'text', that are of type UserString into a str.
+        # if isinstance(text, UserString):
+        #     text_input = str(text)
+        # else:
+    
+        text_input = str(text)
+    
+        # Convert the given 'errors', that are of type UserString into a str.
+        errors_input = str(errors)
+    
+        # Convert the string into utf-8 bytes
+        text_bytes_utf8 = text_input.encode('utf-8')
+        text_bytes_utf8 = cast(bytes, text_bytes_utf8)
+    
+        # Convert the utf8 bytes into a string of latin-1 characters.
+        # This basically maps the exact utf8 bytes to the string. Also,
+        # this converts any escaped hexadecimal sequences \\xHH into
+        # \xHH bytes.
+        text_str_latin1 = text_bytes_utf8.decode('unicode_escape')
+    
+        # Convert the string of latin-1 characters (which are actually
+        # utf8 characters) into bytes.
+        text_bytes_utf8 = text_str_latin1.encode('latin1')
+    
+        # Convert the utf8 bytes into a string.
+        try:
+            text_str = text_bytes_utf8.decode('utf-8', errors=errors_input)
+        except UnicodeDecodeError as e:
+            raise UnicodeEncodeError(
+                'eutf8h',
+                str(text_input),
+                e.start,
+                e.end,
+                e.reason,
+            )
+    
+        # Convert each character into a string of escaped utf8 hexadecimal.
+>       out_str: str = reduce(lambda a, b: f'{a}{b}', _each_utf8_hex(text_str))
+E       TypeError: reduce() of empty iterable with no initial value
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/raw_utf8_escape.py:84: TypeError
+____________________ test_encode_invalid_utf8_escape_raises ____________________
+
+    def test_encode_invalid_utf8_escape_raises():
+        # \xFF is not a valid UTF‑8 byte sequence; should raise UnicodeEncodeError
+        with pytest.raises(UnicodeEncodeError) as excinfo:
+            encode("\\xFF")
+        # The exception should mention the original text and the error reason
+>       assert str(excinfo.value).startswith("eutf8h")
+E       assert False
+E        +  where False = <built-in method startswith of str object at 0x7f4040b3a730>('eutf8h')
+E        +    where <built-in method startswith of str object at 0x7f4040b3a730> = "'eutf8h' codec can't encode character '\\x5c' in position 0: invalid start byte".startswith
+E        +      where "'eutf8h' codec can't encode character '\\x5c' in position 0: invalid start byte" = str(UnicodeEncodeError('eutf8h', '\\xFF', 0, 1, 'invalid start byte'))
+E        +        where UnicodeEncodeError('eutf8h', '\\xFF', 0, 1, 'invalid start byte') = <ExceptionInfo UnicodeEncodeError('eutf8h', '\\xFF', 0, 1, 'invalid start byte') tblen=2>.value
+
+test_generated.py:27: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_encode_basic_ascii_and_escape - AssertionError...
+FAILED test_generated.py::test_encode_empty_string - TypeError: reduce() of e...
+FAILED test_generated.py::test_encode_invalid_utf8_escape_raises - assert False
+3 failed in 0.12s

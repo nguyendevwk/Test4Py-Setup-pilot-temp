@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-fc587a47-4246-4b23-ab88-180548e45415",
+  "object": "chat.completion",
+  "created": 1795079405,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport pytest\nfrom youtube_dl.extractor.tudou import TudouPlaylistIE\n\n\nclass DummyDownloader:\n    \"\"\"A minimal downloader that returns predefined JSON data.\"\"\"\n    def __init__(self, data):\n        self.data = data\n\n    def _download_json(self, url, video_id, note=None, errnote=None, headers=None, data=None, timeout=None, check_status=True):\n        # Return the predefined data regardless of the URL\n        return self.data\n\n\ndef test_playlist_minimum_entries(tmp_path):\n    \"\"\"Verify that the playlist contains at least the expected number of entries.\"\"\"\n    # Prepare dummy playlist data with 209 items\n    dummy_items = [{'icode': f'id{i}', 'kw': f'kw{i}'} for i in range(209)]\n    dummy_json = {'items': dummy_items}\n    downloader = DummyDownloader(dummy_json)\n\n    ie = TudouPlaylistIE()\n    ie.downloader = downloader\n\n    result = ie.extract('http://www.tudou.com/listplay/zzdE77v6Mmo.html')\n    assert result['entries'] is not None\n    assert len(result['entries']) == 209\n    assert all(entry['url'] == f'http://www.tudou.com/programs/view/{item[\"icode\"]}' for entry, item in zip(result['entries'], dummy_items))\n\n\ndef test_invalid_url_raises():\n    \"\"\"Ensure that an invalid URL raises a ValueError.\"\"\"\n    ie = TudouPlaylistIE()\n    with pytest.raises(ValueError):\n        ie.extract('http://www.tudou.com/invalid/zzdE77v6Mmo.html')\n\n\ndef test_entry_fields_correct(tmp_path):\n    \"\"\"Check that each entry contains the expected keys and values.\"\"\"\n    dummy_items = [\n        {'icode': 'abc123', 'kw': 'keyword1'},\n        {'icode': 'def456', 'kw': 'keyword2'},\n    ]\n    dummy_json = {'items': dummy_items}\n    downloader = DummyDownloader(dummy_json)\n\n    ie = TudouPlaylistIE()\n    ie.downloader = downloader\n\n    result = ie.extract('http://www.tudou.com/listplay/zzdE77v6Mmo.html')\n    entries = result['entries']\n    assert len(entries) == 2\n    for entry, item in zip(entries, dummy_items):\n        assert entry['url'] == f'http://www.tudou.com/programs/view/{item[\"icode\"]}'\n        assert entry['ie_key'] == 'Tudou'\n        assert entry['id'] == item['icode']\n        assert entry['title'] == item['kw']\n```",
+        "reasoning": "We need to write tests for TudouPlaylistIE. We cannot access network. But we can simulate by monkeypatching _download_json to return dummy data. But cannot mock target? Instruction: no mocks of the target. But we can monkeypatch method on instance? That's still mocking. But maybe allowed? It says no mocks of the target. But monkeypatching is mocking. So we need to test real behavior but cannot hit network. Maybe we can use a local file? But _download_json uses downloader. We can create a subclass that overrides _download_json to return test data. But that's mocking. However it's not mocking the target class itself, just subclass. Might be acceptable. We'll create a dummy downloader that returns JSON. Use InfoExtractor base? Might be complex. Maybe easier: use youtube_dl's InfoExtractor? But we cannot import youtube_dl? It's available. We'll instantiate TudouPlaylistIE with a dummy downloader that has _download_json method. Actually InfoExtractor expects a downloader attribute. We can set it manually. Provide a dummy downloader with _download_json returning our data. That is mocking but not of target. I'll proceed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05394157,
+    "prompt_tokens": 513,
+    "prompt_time": 0.02810686,
+    "completion_tokens": 787,
+    "completion_time": 0.86780217,
+    "total_tokens": 1300,
+    "total_time": 0.89590903,
+    "completion_tokens_details": {
+      "reasoning_tokens": 232
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh3z8he8crwm8f7fb4rrsk",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport pytest\nfrom youtube_dl.extractor.tudou import TudouPlaylistIE\n\n\nclass DummyDownloader:\n    \"\"\"A minimal downloader that returns predefined JSON data.\"\"\"\n    def __init__(self, data):\n        self.data = data\n\n    def _download_json(self, url, video_id, note=None, errnote=None, headers=None, data=None, timeout=None, check_status=True):\n        # Return the predefined data regardless of the URL\n        return self.data\n\n\ndef test_playlist_minimum_entries(tmp_path):\n    \"\"\"Verify that the playlist contains at least the expected number of entries.\"\"\"\n    # Prepare dummy playlist data with 209 items\n    dummy_items = [{'icode': f'id{i}', 'kw': f'kw{i}'} for i in range(209)]\n    dummy_json = {'items': dummy_items}\n    downloader = DummyDownloader(dummy_json)\n\n    ie = TudouPlaylistIE()\n    ie.downloader = downloader\n\n    result = ie.extract('http://www.tudou.com/listplay/zzdE77v6Mmo.html')\n    assert result['entries'] is not None\n    assert len(result['entries']) == 209\n    assert all(entry['url'] == f'http://www.tudou.com/programs/view/{item[\"icode\"]}' for entry, item in zip(result['entries'], dummy_items))\n\n\ndef test_invalid_url_raises():\n    \"\"\"Ensure that an invalid URL raises a ValueError.\"\"\"\n    ie = TudouPlaylistIE()\n    with pytest.raises(ValueError):\n        ie.extract('http://www.tudou.com/invalid/zzdE77v6Mmo.html')\n\n\ndef test_entry_fields_correct(tmp_path):\n    \"\"\"Check that each entry contains the expected keys and values.\"\"\"\n    dummy_items = [\n        {'icode': 'abc123', 'kw': 'keyword1'},\n        {'icode': 'def456', 'kw': 'keyword2'},\n    ]\n    dummy_json = {'items': dummy_items}\n    downloader = DummyDownloader(dummy_json)\n\n    ie = TudouPlaylistIE()\n    ie.downloader = downloader\n\n    result = ie.extract('http://www.tudou.com/listplay/zzdE77v6Mmo.html')\n    entries = result['entries']\n    assert len(entries) == 2\n    for entry, item in zip(entries, dummy_items):\n        assert entry['url'] == f'http://www.tudou.com/programs/view/{item[\"icode\"]}'\n        assert entry['ie_key'] == 'Tudou'\n        assert entry['id'] == item['icode']\n        assert entry['title'] == item['kw']\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "0abb9e676c654fbabad25f982bd0567a",
+  "_api_plus_pacing_seconds": 1.4845857500331476
+}

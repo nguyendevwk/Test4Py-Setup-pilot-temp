@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-14631dbb-7c52-4ad0-83ab-784717fb6b81",
+  "object": "chat.completion",
+  "created": 1795079373,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nfrom decimal import Decimal\n\nimport pytest\n\nfrom pypara.dcc import dcfc_30_e_plus_360\n\n\ndef test_normal_day_count_fraction():\n    \"\"\"Test a typical case where no date adjustments are required.\"\"\"\n    start = datetime.date(2007, 12, 28)\n    asof = datetime.date(2008, 2, 28)\n    end = asof\n    result = dcfc_30_e_plus_360(start, asof, end)\n    # Expected fraction from the docstring example\n    assert result == Decimal('0.1666666666666666666666666667')\n\n\ndef test_boundary_day_adjustments():\n    \"\"\"Test the special handling of 31st days for start and asof dates.\"\"\"\n    # Start on 31st -> should be treated as 30th\n    start = datetime.date(2007, 12, 31)\n    # Asof on 31st -> should be incremented by one day\n    asof = datetime.date(2008, 2, 28)  # 28th is not 31st, so no increment\n    end = asof\n    # Manually compute expected nod: (28-30)+30*(2-12)+360*(2008-2007) = -2+30*(-10)+360 = -2-300+360 = 58\n    expected_fraction = Decimal(58) / Decimal(360)\n    assert dcfc_30_e_plus_360(start, asof, end) == expected_fraction\n\n    # Asof on 31st: increment by one day\n    asof_31 = datetime.date(2008, 2, 31)\n    # Since 2008 is leap year, Feb 31 is invalid; use March 1 instead to simulate increment\n    asof_31 = datetime.date(2008, 3, 1)\n    # Start remains 31st of December\n    result = dcfc_30_e_plus_360(start, asof_31, asof_31)\n    # Expected nod: (1-30)+30*(3-12)+360*(2008-2007) = -29+30*(-9)+360 = -29-270+360 = 61\n    assert result == Decimal(61) / Decimal(360)\n\n\ndef test_negative_day_count_fraction():\n    \"\"\"Test that the function can produce a negative fraction when asof precedes start.\"\"\"\n    start = datetime.date(2008, 3, 1)\n    asof = datetime.date(2008, 2, 28)\n    end = asof\n    # nod = (28-1)+30*(2-3)+360*(2008-2008) = 27+30*(-1)+0 = -3\n    expected_fraction = Decimal(-3) / Decimal(360)\n    assert dcfc_30_e_plus_360(start, asof, end) == expected_fraction\n```",
+        "reasoning": "We need three tests for dcfc_30_e_plus_360. Use tmp_path not needed. Just test normal, boundary, error. Edge: start day 31 adjustment, asof day 31 adjustment. Also test invalid date order returns 0? Actually function itself doesn't check; DCC does. So test function directly. Use datetime.date. Test normal: example. Boundary: start 31, asof 31. Error: asof before start? function will compute negative nod. But we can test that. Use precise assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04771731,
+    "prompt_tokens": 1835,
+    "prompt_time": 0.110543675,
+    "completion_tokens": 742,
+    "completion_time": 1.068145346,
+    "total_tokens": 2577,
+    "total_time": 1.178689021,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 111
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh2zd4ekg8df96q0skv0w2",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nfrom decimal import Decimal\n\nimport pytest\n\nfrom pypara.dcc import dcfc_30_e_plus_360\n\n\ndef test_normal_day_count_fraction():\n    \"\"\"Test a typical case where no date adjustments are required.\"\"\"\n    start = datetime.date(2007, 12, 28)\n    asof = datetime.date(2008, 2, 28)\n    end = asof\n    result = dcfc_30_e_plus_360(start, asof, end)\n    # Expected fraction from the docstring example\n    assert result == Decimal('0.1666666666666666666666666667')\n\n\ndef test_boundary_day_adjustments():\n    \"\"\"Test the special handling of 31st days for start and asof dates.\"\"\"\n    # Start on 31st -> should be treated as 30th\n    start = datetime.date(2007, 12, 31)\n    # Asof on 31st -> should be incremented by one day\n    asof = datetime.date(2008, 2, 28)  # 28th is not 31st, so no increment\n    end = asof\n    # Manually compute expected nod: (28-30)+30*(2-12)+360*(2008-2007) = -2+30*(-10)+360 = -2-300+360 = 58\n    expected_fraction = Decimal(58) / Decimal(360)\n    assert dcfc_30_e_plus_360(start, asof, end) == expected_fraction\n\n    # Asof on 31st: increment by one day\n    asof_31 = datetime.date(2008, 2, 31)\n    # Since 2008 is leap year, Feb 31 is invalid; use March 1 instead to simulate increment\n    asof_31 = datetime.date(2008, 3, 1)\n    # Start remains 31st of December\n    result = dcfc_30_e_plus_360(start, asof_31, asof_31)\n    # Expected nod: (1-30)+30*(3-12)+360*(2008-2007) = -29+30*(-9)+360 = -29-270+360 = 61\n    assert result == Decimal(61) / Decimal(360)\n\n\ndef test_negative_day_count_fraction():\n    \"\"\"Test that the function can produce a negative fraction when asof precedes start.\"\"\"\n    start = datetime.date(2008, 3, 1)\n    asof = datetime.date(2008, 2, 28)\n    end = asof\n    # nod = (28-1)+30*(2-3)+360*(2008-2008) = 27+30*(-1)+0 = -3\n    expected_fraction = Decimal(-3) / Decimal(360)\n    assert dcfc_30_e_plus_360(start, asof, end) == expected_fraction\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "5a1d8675ae9349d5bc1be2f27d8a3198",
+  "_api_plus_pacing_seconds": 1.999039123998955
+}

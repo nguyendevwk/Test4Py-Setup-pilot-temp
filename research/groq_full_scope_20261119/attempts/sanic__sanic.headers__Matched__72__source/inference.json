@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-17ad3353-2ec0-4aa2-8fa8-4856888fc7ae",
+  "object": "chat.completion",
+  "created": 1795079374,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import Matched\n\ndef test_parse_and_basic_properties(tmp_path):\n    \"\"\"Test that parsing a MIME string creates a Matched with expected attributes.\"\"\"\n    m = Matched.parse(\"text/plain\")\n    # The raw MIME string should be preserved\n    assert str(m) == \"text/plain\"\n    # The header should be a MediaType instance (truthy)\n    assert m.header is not None\n    # Boolean context should be True when header is present\n    assert bool(m) is True\n    # Representation should include the matched header\n    rep = repr(m)\n    assert \"<text/plain matched\" in rep\n    assert \">\" in rep\n\ndef test_equality_and_comparison(tmp_path):\n    \"\"\"Test equality between Matched objects and between Matched and raw MIME strings.\"\"\"\n    m1 = Matched.parse(\"application/json\")\n    m2 = Matched.parse(\"application/json\")\n    # Two Matched objects with the same MIME should be equal\n    assert m1 == m2\n    # Equality with a raw string should also succeed\n    assert m1 == \"application/json\"\n    # Equality with a different MIME should fail\n    assert m1 != \"text/html\"\n    # Equality with an unrelated type should return False\n    assert m1 != 42\n\ndef test_match_with_missing_header(tmp_path):\n    \"\"\"Test that match returns None when either side has no header.\"\"\"\n    # Create a Matched with no header by manually passing None\n    m_no_header = Matched(\"image/png\", None)\n    # Matching against any string should return None\n    assert m_no_header.match(\"image/png\") is None\n    # Matching against another Matched with no header should also return None\n    other_no_header = Matched(\"image/png\", None)\n    assert m_no_header.match(other_no_header) is None\n```",
+        "reasoning": "We need to test Matched. Need MediaType class? Not provided. But Matched.parse uses MediaType._parse. We can't import MediaType? It's in sanic.headers? Likely defined elsewhere. But we can test behavior of Matched without needing MediaType? We can test __eq__ with strings, bool, etc. But match requires header. Might be None. We can test that match returns None when header missing. Also test __repr__.\n\nWe need to import Matched from sanic.headers. We'll write tests. Use tmp_path? Not needed. Just create Matched instances. Use parse on simple string? It will call MediaType._parse which may fail if MediaType not defined. But maybe MediaType is defined in same module. We assume parse works. We'll test parse returns Matched with header not None. Use equality with string. Also test __bool__.\n\nTest 1: parse simple \"text/plain\" and check mime, header truthy, bool True, str correct.\n\nTest 2: equality between two Matched with same mime and header. Also equality with string same mime.\n\nTest 3: match returns None when header missing. Create Matched with header None by passing None? parse always gives header. But we can manually instantiate with header None. Then match returns None.\n\nLet's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.0462338,
+    "prompt_tokens": 796,
+    "prompt_time": 0.005945699,
+    "completion_tokens": 667,
+    "completion_time": 0.939748857,
+    "total_tokens": 1463,
+    "total_time": 0.945694556,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 271
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh311yefnt342qm38ghnh4",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import Matched\n\ndef test_parse_and_basic_properties(tmp_path):\n    \"\"\"Test that parsing a MIME string creates a Matched with expected attributes.\"\"\"\n    m = Matched.parse(\"text/plain\")\n    # The raw MIME string should be preserved\n    assert str(m) == \"text/plain\"\n    # The header should be a MediaType instance (truthy)\n    assert m.header is not None\n    # Boolean context should be True when header is present\n    assert bool(m) is True\n    # Representation should include the matched header\n    rep = repr(m)\n    assert \"<text/plain matched\" in rep\n    assert \">\" in rep\n\ndef test_equality_and_comparison(tmp_path):\n    \"\"\"Test equality between Matched objects and between Matched and raw MIME strings.\"\"\"\n    m1 = Matched.parse(\"application/json\")\n    m2 = Matched.parse(\"application/json\")\n    # Two Matched objects with the same MIME should be equal\n    assert m1 == m2\n    # Equality with a raw string should also succeed\n    assert m1 == \"application/json\"\n    # Equality with a different MIME should fail\n    assert m1 != \"text/html\"\n    # Equality with an unrelated type should return False\n    assert m1 != 42\n\ndef test_match_with_missing_header(tmp_path):\n    \"\"\"Test that match returns None when either side has no header.\"\"\"\n    # Create a Matched with no header by manually passing None\n    m_no_header = Matched(\"image/png\", None)\n    # Matching against any string should return None\n    assert m_no_header.match(\"image/png\") is None\n    # Matching against another Matched with no header should also return None\n    other_no_header = Matched(\"image/png\", None)\n    assert m_no_header.match(other_no_header) is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "bf3af8cfc1ec43ec9088723f0d768f6d",
+  "_api_plus_pacing_seconds": 1.5892573629971594
+}

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-2a64412a-aea9-4081-b999-48a02048cf4c",
+  "object": "chat.completion",
+  "created": 1795077308,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem import Array, String, Integer, ValidationError\n\ndef test_array_with_exact_items_and_unique():\n    # Array expects exactly 3 items, all strings, and they must be unique\n    field = Array(items=String(), exact_items=3, unique_items=True)\n    # Valid input\n    valid = [\"a\", \"b\", \"c\"]\n    assert field.validate(valid) == [\"a\", \"b\", \"c\"]\n\n    # Duplicate items should raise ValidationError\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate([\"x\", \"x\", \"y\"])\n    messages = excinfo.value.messages\n    assert any(msg.code == \"unique_items\" for msg in messages)\n    # The error should point to the duplicate position\n    assert any(msg.key == 1 for msg in messages)\n\ndef test_array_with_additional_items_and_min_max():\n    # Array expects at least 2 items, at most 4, first two must be integers, rest strings\n    int_field = Integer()\n    str_field = String()\n    field = Array(items=[int_field, int_field], additional_items=str_field, min_items=2, max_items=4)\n    # Valid input with 3 items\n    valid = [1, 2, \"three\"]\n    assert field.validate(valid) == [1, 2, \"three\"]\n\n    # Too few items\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate([1])\n    assert excinfo.value.messages[0].code == \"min_items\"\n\n    # Too many items\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate([1, 2, \"three\", \"four\", \"five\"])\n    assert excinfo.value.messages[0].code == \"max_items\"\n\n    # Additional item not matching type\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate([1, 2, 3])  # third item should be string\n    assert excinfo.value.messages[0].code == \"type\"\n\ndef test_array_serialization_and_null_handling():\n    # Array that allows null values\n    field = Array(items=Integer(), allow_null=True)\n    # Null should be returned as None\n    assert field.validate(None) is None\n    # Non-null list should be validated and serialized\n    input_list = [1, 2, 3]\n    validated = field.validate(input_list)\n    assert validated == [1, 2, 3]\n    # Serialization should preserve the list\n    assert field.serialize(validated) == [1, 2, 3]\n    # Serialization of None should return None\n    assert field.serialize(None) is None\n```",
+        "reasoning": "We need three test functions for Array field. Use tmp_path? Not needed. Just test validation and serialization. Use typesystem Array. Let's import. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.055921009,
+    "prompt_tokens": 1143,
+    "prompt_time": 0.121178106,
+    "completion_tokens": 610,
+    "completion_time": 1.77919731,
+    "total_tokens": 1753,
+    "total_time": 1.9003754160000002,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 34
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sf3ycae8g94n0phd5ygps6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem import Array, String, Integer, ValidationError\n\ndef test_array_with_exact_items_and_unique():\n    # Array expects exactly 3 items, all strings, and they must be unique\n    field = Array(items=String(), exact_items=3, unique_items=True)\n    # Valid input\n    valid = [\"a\", \"b\", \"c\"]\n    assert field.validate(valid) == [\"a\", \"b\", \"c\"]\n\n    # Duplicate items should raise ValidationError\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate([\"x\", \"x\", \"y\"])\n    messages = excinfo.value.messages\n    assert any(msg.code == \"unique_items\" for msg in messages)\n    # The error should point to the duplicate position\n    assert any(msg.key == 1 for msg in messages)\n\ndef test_array_with_additional_items_and_min_max():\n    # Array expects at least 2 items, at most 4, first two must be integers, rest strings\n    int_field = Integer()\n    str_field = String()\n    field = Array(items=[int_field, int_field], additional_items=str_field, min_items=2, max_items=4)\n    # Valid input with 3 items\n    valid = [1, 2, \"three\"]\n    assert field.validate(valid) == [1, 2, \"three\"]\n\n    # Too few items\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate([1])\n    assert excinfo.value.messages[0].code == \"min_items\"\n\n    # Too many items\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate([1, 2, \"three\", \"four\", \"five\"])\n    assert excinfo.value.messages[0].code == \"max_items\"\n\n    # Additional item not matching type\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate([1, 2, 3])  # third item should be string\n    assert excinfo.value.messages[0].code == \"type\"\n\ndef test_array_serialization_and_null_handling():\n    # Array that allows null values\n    field = Array(items=Integer(), allow_null=True)\n    # Null should be returned as None\n    assert field.validate(None) is None\n    # Non-null list should be validated and serialized\n    input_list = [1, 2, 3]\n    validated = field.validate(input_list)\n    assert validated == [1, 2, 3]\n    # Serialization should preserve the list\n    assert field.serialize(validated) == [1, 2, 3]\n    # Serialization of None should return None\n    assert field.serialize(None) is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 2.273511996027082
+}

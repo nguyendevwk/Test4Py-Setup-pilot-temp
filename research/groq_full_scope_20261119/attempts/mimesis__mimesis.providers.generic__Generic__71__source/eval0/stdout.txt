@@ -1,0 +1,22 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_generic_reseed_propagates_to_providers __________________
+
+    def test_generic_reseed_propagates_to_providers():
+        """Reseeding Generic should reseed all contained providers."""
+        g = Generic(seed=123)
+        # Pick a provider that has a reseed method
+        provider_name = next(
+            (name for name in g.__dir__() if hasattr(g, name) and hasattr(getattr(g, name), "reseed")),
+            None,
+        )
+        assert provider_name is not None, "No provider with reseed method found"
+        provider = getattr(g, provider_name)
+        # Capture the provider's internal state before reseeding
+>       before_state = provider._random.randint(0, 1000)
+E       AttributeError: 'Address' object has no attribute '_random'. Did you mean: 'random'?
+
+test_generated.py:34: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_generic_reseed_propagates_to_providers - Attri...
+1 failed, 2 passed in 0.18s

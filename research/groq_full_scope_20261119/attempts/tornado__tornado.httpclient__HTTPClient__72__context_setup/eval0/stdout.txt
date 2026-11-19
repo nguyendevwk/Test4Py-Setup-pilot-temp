@@ -1,0 +1,91 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_httpclient_fetch_delegates_to_async_client ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.httpclient__HTTPClient__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_httpclient_fetch_delegate0')
+
+    def test_httpclient_fetch_delegates_to_async_client(tmp_path: Any) -> None:
+        """HTTPClient.fetch should delegate to the async client and return its response."""
+        client = HTTPClient(async_client_class=DummyAsyncClient)
+>       response = client.fetch("http://example.com")
+
+test_generated.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/httpclient.py:134: in fetch
+    response = self._io_loop.run_sync(
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/ioloop.py:547: in run_sync
+    return future_cell["future"].result()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyAsyncClient object at 0x7f38be976620>
+request = 'http://example.com', kwargs = {}
+
+    async def fetch(self, request: Any, **kwargs: Any) -> HTTPResponse:
+        self.fetch_calls.append((request, kwargs))
+        # Return a simple HTTPResponse with status 200 and body "ok"
+>       return HTTPResponse(
+            request=request,
+            code=200,
+            reason="OK",
+            headers={},
+            buffer=bytes("ok", "utf-8"),
+            request_time=0.0,
+            connection_time=0.0,
+            time_info={},
+        )
+E       TypeError: HTTPResponse.__init__() got an unexpected keyword argument 'connection_time'
+
+test_generated.py:18: TypeError
+______________ test_httpclient_fetch_raises_http_error_on_non_200 ______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.httpclient__HTTPClient__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_httpclient_fetch_raises_h0')
+
+    def test_httpclient_fetch_raises_http_error_on_non_200(tmp_path: Any) -> None:
+        """If the async client returns a non-200 response, HTTPClient.fetch should raise HTTPError."""
+        class Non200AsyncClient:
+            async def fetch(self, request: Any, **kwargs: Any) -> HTTPResponse:
+                return HTTPResponse(
+                    request=request,
+                    code=404,
+                    reason="Not Found",
+                    headers={},
+                    buffer=bytes("not found", "utf-8"),
+                    request_time=0.0,
+                    connection_time=0.0,
+                    time_info={},
+                )
+            def close(self) -> None: ...
+    
+        client = HTTPClient(async_client_class=Non200AsyncClient)
+        with pytest.raises(HTTPError) as excinfo:
+>           client.fetch("http://example.com")
+
+test_generated.py:78: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/httpclient.py:134: in fetch
+    response = self._io_loop.run_sync(
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/ioloop.py:547: in run_sync
+    return future_cell["future"].result()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.test_httpclient_fetch_raises_http_error_on_non_200.<locals>.Non200AsyncClient object at 0x7f38be981420>
+request = 'http://example.com', kwargs = {}
+
+    async def fetch(self, request: Any, **kwargs: Any) -> HTTPResponse:
+>       return HTTPResponse(
+            request=request,
+            code=404,
+            reason="Not Found",
+            headers={},
+            buffer=bytes("not found", "utf-8"),
+            request_time=0.0,
+            connection_time=0.0,
+            time_info={},
+        )
+E       TypeError: HTTPResponse.__init__() got an unexpected keyword argument 'connection_time'
+
+test_generated.py:64: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_httpclient_fetch_delegates_to_async_client - T...
+FAILED test_generated.py::test_httpclient_fetch_raises_http_error_on_non_200
+2 failed, 1 passed in 0.26s

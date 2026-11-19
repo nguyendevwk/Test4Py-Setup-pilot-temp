@@ -1,0 +1,63 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_enum_lookup_by_value_and_name ______________________
+
+    def test_enum_lookup_by_value_and_name():
+        """Test that enum can be accessed by both value and name."""
+        # Lookup by value
+        rest = DocstringStyle(1)
+        google = DocstringStyle(2)
+        # Lookup by name
+        assert DocstringStyle["REST"] is rest
+        assert DocstringStyle["GOOGLE"] is google
+        # Ensure that the same instance is returned for repeated lookups
+        assert DocstringStyle(1) is DocstringStyle.REST
+>       assert DocstringStyle("NUMPYDOC") is DocstringStyle.NUMPYDOC
+
+test_generated.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/enum.py:385: in __call__
+    return cls.__new__(cls, value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <enum 'DocstringStyle'>, value = 'NUMPYDOC'
+
+    def __new__(cls, value):
+        # all enum instances are actually created during class construction
+        # without calling this method; this method is called by the metaclass'
+        # __call__ (i.e. Color(3) ), and by pickle
+        if type(value) is cls:
+            # For lookups like Color(Color.RED)
+            return value
+        # by-value search for a matching enum member
+        # see if it's in the reverse mapping (for hashable values)
+        try:
+            return cls._value2member_map_[value]
+        except KeyError:
+            # Not found, no need to do long O(n) search
+            pass
+        except TypeError:
+            # not there, now do long search -- O(n) behavior
+            for member in cls._member_map_.values():
+                if member._value_ == value:
+                    return member
+        # still not found -- try _missing_ hook
+        try:
+            exc = None
+            result = cls._missing_(value)
+        except Exception as e:
+            exc = e
+            result = None
+        try:
+            if isinstance(result, cls):
+                return result
+            else:
+                ve_exc = ValueError("%r is not a valid %s" % (value, cls.__qualname__))
+                if result is None and exc is None:
+>                   raise ve_exc
+E                   ValueError: 'NUMPYDOC' is not a valid DocstringStyle
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/enum.py:710: ValueError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_enum_lookup_by_value_and_name - ValueError: 'N...
+1 failed, 2 passed in 0.15s

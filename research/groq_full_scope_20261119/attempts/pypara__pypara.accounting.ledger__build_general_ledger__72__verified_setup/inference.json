@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-4bbb7e50-d94f-44a3-8832-ed31022c2866",
+  "object": "chat.completion",
+  "created": 1795078809,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\n\nfrom pypara.accounting.ledger import build_general_ledger\nfrom pypara.accounting.accounts import Account\nfrom pypara.accounting.journaling import JournalEntry, Posting\nfrom pypara.accounting.generic import Balance\nfrom pypara.accounting.generic import Ledger, GeneralLedger\nfrom pypara.commons.zeitgeist import DateRange\nfrom pypara.commons.numbers import Quantity\n\n\ndef test_build_general_ledger_with_initial_and_postings(tmp_path):\n    \"\"\"Normal case: initial balances and postings within period are recorded.\"\"\"\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc_cash = Account(\"Cash\")\n    acc_sales = Account(\"Sales\")\n\n    initial = {acc_cash: Balance(period.since, Quantity(Decimal(\"1000.00\")))}\n\n    entry = JournalEntry(\n        date=datetime.date(2023, 6, 15),\n        postings=[\n            Posting(acc_cash, Quantity(Decimal(\"-200.00\"))),\n            Posting(acc_sales, Quantity(Decimal(\"200.00\"))),\n        ],\n    )\n\n    ledger = build_general_ledger(period, [entry], initial)\n\n    # Verify that the ledger contains both accounts\n    assert acc_cash in ledger.ledgers\n    assert acc_sales in ledger.ledgers\n\n    # Verify balances after posting\n    cash_balance = ledger.ledgers[acc_cash].balance\n    sales_balance = ledger.ledgers[acc_sales].balance\n    assert cash_balance.amount == Decimal(\"800.00\")\n    assert sales_balance.amount == Decimal(\"200.00\")\n\n\ndef test_build_general_ledger_boundary_dates(tmp_path):\n    \"\"\"Boundary case: postings exactly on the period boundaries are included.\"\"\"\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc = Account(\"Revenue\")\n\n    initial = {}\n\n    entry_start = JournalEntry(\n        date=period.since,\n        postings=[Posting(acc, Quantity(Decimal(\"500.00\")))],\n    )\n    entry_end = JournalEntry(\n        date=period.until,\n        postings=[Posting(acc, Quantity(Decimal(\"300.00\")))],\n    )\n\n    ledger = build_general_ledger(period, [entry_start, entry_end], initial)\n\n    # Verify that both postings are included\n    balance = ledger.ledgers[acc].balance\n    assert balance.amount == Decimal(\"800.00\")\n\n\ndef test_build_general_ledger_excludes_out_of_range(tmp_path):\n    \"\"\"Error case: postings outside the period are ignored.\"\"\"\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc = Account(\"Expense\")\n\n    initial = {}\n\n    entry_before = JournalEntry(\n        date=datetime.date(2022, 12, 31),\n        postings=[Posting(acc, Quantity(Decimal(\"100.00\")))],\n    )\n    entry_after = JournalEntry(\n        date=datetime.date(2024, 1, 1),\n        postings=[Posting(acc, Quantity(Decimal(\"200.00\")))],\n    )\n    entry_inside = JournalEntry(\n        date=datetime.date(2023, 6, 1),\n        postings=[Posting(acc, Quantity(Decimal(\"300.00\")))],\n    )\n\n    ledger = build_general_ledger(period, [entry_before, entry_inside, entry_after], initial)\n\n    # Only the inside entry should be present\n    assert acc in ledger.ledgers\n    assert ledger.ledgers[acc].balance.amount == Decimal(\"300.00\")\n    # No other accounts should exist\n    assert len(ledger.ledgers) == 1\n```",
+        "reasoning": "Need tests for build_general_ledger. Need minimal classes: DateRange, Account, JournalEntry, Posting, Balance, Ledger, GeneralLedger. But these are in package. We can import. Write tests using tmp_path? Not needed. Just create objects. Use Decimal. Test normal: one posting within period, initial balances. Boundary: posting exactly at since or until. Error: posting outside period should be ignored. Use assertions. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.160989631,
+    "prompt_tokens": 556,
+    "prompt_time": 0.263514296,
+    "completion_tokens": 880,
+    "completion_time": 1.039742284,
+    "total_tokens": 1436,
+    "total_time": 1.30325658,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 91
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sghr9bedh9q8yv4d05xx18",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\n\nfrom pypara.accounting.ledger import build_general_ledger\nfrom pypara.accounting.accounts import Account\nfrom pypara.accounting.journaling import JournalEntry, Posting\nfrom pypara.accounting.generic import Balance\nfrom pypara.accounting.generic import Ledger, GeneralLedger\nfrom pypara.commons.zeitgeist import DateRange\nfrom pypara.commons.numbers import Quantity\n\n\ndef test_build_general_ledger_with_initial_and_postings(tmp_path):\n    \"\"\"Normal case: initial balances and postings within period are recorded.\"\"\"\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc_cash = Account(\"Cash\")\n    acc_sales = Account(\"Sales\")\n\n    initial = {acc_cash: Balance(period.since, Quantity(Decimal(\"1000.00\")))}\n\n    entry = JournalEntry(\n        date=datetime.date(2023, 6, 15),\n        postings=[\n            Posting(acc_cash, Quantity(Decimal(\"-200.00\"))),\n            Posting(acc_sales, Quantity(Decimal(\"200.00\"))),\n        ],\n    )\n\n    ledger = build_general_ledger(period, [entry], initial)\n\n    # Verify that the ledger contains both accounts\n    assert acc_cash in ledger.ledgers\n    assert acc_sales in ledger.ledgers\n\n    # Verify balances after posting\n    cash_balance = ledger.ledgers[acc_cash].balance\n    sales_balance = ledger.ledgers[acc_sales].balance\n    assert cash_balance.amount == Decimal(\"800.00\")\n    assert sales_balance.amount == Decimal(\"200.00\")\n\n\ndef test_build_general_ledger_boundary_dates(tmp_path):\n    \"\"\"Boundary case: postings exactly on the period boundaries are included.\"\"\"\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc = Account(\"Revenue\")\n\n    initial = {}\n\n    entry_start = JournalEntry(\n        date=period.since,\n        postings=[Posting(acc, Quantity(Decimal(\"500.00\")))],\n    )\n    entry_end = JournalEntry(\n        date=period.until,\n        postings=[Posting(acc, Quantity(Decimal(\"300.00\")))],\n    )\n\n    ledger = build_general_ledger(period, [entry_start, entry_end], initial)\n\n    # Verify that both postings are included\n    balance = ledger.ledgers[acc].balance\n    assert balance.amount == Decimal(\"800.00\")\n\n\ndef test_build_general_ledger_excludes_out_of_range(tmp_path):\n    \"\"\"Error case: postings outside the period are ignored.\"\"\"\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc = Account(\"Expense\")\n\n    initial = {}\n\n    entry_before = JournalEntry(\n        date=datetime.date(2022, 12, 31),\n        postings=[Posting(acc, Quantity(Decimal(\"100.00\")))],\n    )\n    entry_after = JournalEntry(\n        date=datetime.date(2024, 1, 1),\n        postings=[Posting(acc, Quantity(Decimal(\"200.00\")))],\n    )\n    entry_inside = JournalEntry(\n        date=datetime.date(2023, 6, 1),\n        postings=[Posting(acc, Quantity(Decimal(\"300.00\")))],\n    )\n\n    ledger = build_general_ledger(period, [entry_before, entry_inside, entry_after], initial)\n\n    # Only the inside entry should be present\n    assert acc in ledger.ledgers\n    assert ledger.ledgers[acc].balance.amount == Decimal(\"300.00\")\n    # No other accounts should exist\n    assert len(ledger.ledgers) == 1\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.847086360969115
+}

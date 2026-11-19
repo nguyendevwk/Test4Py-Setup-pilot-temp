@@ -1,0 +1,54 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_login_fails_with_missing_credentials ___________________
+
+    def test_login_fails_with_missing_credentials():
+        """If the login response contains credentials but no logged_in flag, an error is raised."""
+        ie = SafariBaseIE()
+        ie._get_login_info = lambda: ("user@example.com", "wrongpass")
+    
+        # First webpage download: not logged in
+        ie._download_webpage_handle = lambda *_, **__: (None, DummyURLH("https://learning.oreilly.com/accounts/login-check/"))
+    
+        # JSON download returns auth dict with credentials but not logged in
+        ie._download_json_handle = lambda *_, **__: {
+            "logged_in": False,
+            "redirect_uri": None,
+            "credentials": "Invalid credentials",
+        }
+    
+        with pytest.raises(ExtractorError, match="Unable to login: Invalid credentials"):
+>           ie._login()
+
+test_generated.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.safari.SafariBaseIE object at 0x7ff869b0fb50>
+
+    def _login(self):
+        username, password = self._get_login_info()
+        if username is None:
+            return
+    
+        _, urlh = self._download_webpage_handle(
+            'https://learning.oreilly.com/accounts/login-check/', None,
+            'Downloading login page')
+    
+        def is_logged(urlh):
+            return 'learning.oreilly.com/home/' in urlh.geturl()
+    
+        if is_logged(urlh):
+            self.LOGGED_IN = True
+            return
+    
+        redirect_url = urlh.geturl()
+        parsed_url = compat_urlparse.urlparse(redirect_url)
+        qs = compat_parse_qs(parsed_url.query)
+        next_uri = compat_urlparse.urljoin(
+>           'https://api.oreilly.com', qs['next'][0])
+E       KeyError: 'next'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/safari.py:51: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_login_fails_with_missing_credentials - KeyErro...
+1 failed, 2 passed in 0.68s

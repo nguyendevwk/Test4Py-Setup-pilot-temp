@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-aaba0252-658c-413f-aef0-52f53f705f13",
+  "object": "chat.completion",
+  "created": 1795079399,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.trutv import TruTVIE\n\n@pytest.fixture\ndef ie():\n    return TruTVIE()\n\ndef test_episode_extract(monkeypatch, ie, tmp_path):\n    # Prepare mock data for an episode\n    mock_json = {\n        'episode': {\n            'mediaId': '12345',\n            'title': '  Episode Title  ',\n            'description': 'Desc',\n            'images': [\n                {'srcUrl': 'http://img1.jpg', 'width': '640', 'height': '360'},\n                {'srcUrl': None, 'width': '320', 'height': '180'},\n            ],\n            'publicationDate': '2023-01-01T12:00:00Z',\n            'showTitle': 'Show',\n            'seasonNum': '2',\n            'episodeNum': '5',\n        }\n    }\n    # Mock _download_json to return mock_json\n    def mock_download_json(url, display_id):\n        assert url == 'https://api.trutv.com/v2/web/episode/the-carbonaro-effect/12345'\n        assert display_id == '12345'\n        return mock_json\n    monkeypatch.setattr(ie, \"_download_json\", mock_download_json)\n\n    # Mock _extract_ngtv_info to return a base dict\n    def mock_extract_ngtv_info(media_id, _, meta):\n        assert media_id == '12345'\n        assert meta['url'] == 'https://www.trutv.com/shows/the-carbonaro-effect/videos/sunlight-activated-flower.html'\n        assert meta['site_name'] == 'truTV'\n        return {'dummy': 'value'}\n\n    monkeypatch.setattr(ie, \"_extract_ngtv_info\", mock_extract_ngtv_info)\n\n    url = 'https://www.trutv.com/shows/the-carbonaro-effect/videos/sunlight-activated-flower.html'\n    info = ie._real_extract(url)\n\n    assert info['id'] == '12345'\n    assert info['display_id'] == '12345'\n    assert info['title'] == 'Episode Title'\n    assert info['description'] == 'Desc'\n    assert info['series'] == 'Show'\n    assert info['season_number'] == 2\n    assert info['episode_number'] == 5\n    assert info['thumbnails'] == [{'url': 'http://img1.jpg', 'width': 640, 'height': 360}]\n    assert info['timestamp'] == 1672574400  # 2023-01-01T12:00:00Z in epoch\n\ndef test_series_clip_extract(monkeypatch, ie):\n    # Prepare mock data for a series clip\n    mock_json = {\n        'info': {\n            'mediaId': 'clip123',\n            'title': 'Clip Title',\n            'description': None,\n            'images': [],\n            'publicationDate': None,\n            'showTitle': None,\n            'seasonNum': None,\n            'episodeNum': None,\n        }\n    }\n    def mock_download_json(url, display_id):\n        assert url == 'https://api.trutv.com/v2/web/series/clip/the-carbonaro-effect/sunlight-activated-flower'\n        assert display_id == 'sunlight-activated-flower'\n        return mock_json\n    monkeypatch.setattr(ie, \"_download_json\", mock_download_json)\n\n    def mock_extract_ngtv_info(media_id, _, meta):\n        assert media_id == 'clip123'\n        return {'dummy': 'value'}\n\n    monkeypatch.setattr(ie, \"_extract_ngtv_info\", mock_extract_ngtv_info)\n\n    url = 'https://www.trutv.com/shows/the-carbonaro-effect/videos/sunlight-activated-flower'\n    info = ie._real_extract(url)\n\n    assert info['id'] == 'clip123'\n    assert info['display_id'] == 'sunlight-activated-flower'\n    assert info['title'] == 'Clip Title'\n    assert info['description'] is None\n    assert info['thumbnails'] == []\n    assert info['timestamp'] is None\n    assert info['series'] is None\n    assert info['season_number'] is None\n    assert info['episode_number'] is None\n\ndef test_invalid_url_raises(monkeypatch, ie):\n    # Ensure that an invalid URL raises a regex match error\n    url = 'https://www.trutv.com/invalid/url'\n    with pytest.raises(AttributeError):\n        ie._real_extract(url)\n```",
+        "reasoning": "We need to test TruTVIE._real_extract. We cannot hit network. But we can monkeypatch _download_json and _extract_ngtv_info to return controlled data. Use pytest. Three tests: normal episode, series clip, error when missing groups? But cannot modify code. We can test that for given URL, it calls download_json with correct URL. Use monkeypatch. Also test thumbnails filtering. Third test boundary: missing images. Use custom data. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048434633,
+    "prompt_tokens": 834,
+    "prompt_time": 0.024042226,
+    "completion_tokens": 1052,
+    "completion_time": 1.502618938,
+    "total_tokens": 1886,
+    "total_time": 1.526661164,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 97
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh3r6kexs8szs89p84qp2c",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.trutv import TruTVIE\n\n@pytest.fixture\ndef ie():\n    return TruTVIE()\n\ndef test_episode_extract(monkeypatch, ie, tmp_path):\n    # Prepare mock data for an episode\n    mock_json = {\n        'episode': {\n            'mediaId': '12345',\n            'title': '  Episode Title  ',\n            'description': 'Desc',\n            'images': [\n                {'srcUrl': 'http://img1.jpg', 'width': '640', 'height': '360'},\n                {'srcUrl': None, 'width': '320', 'height': '180'},\n            ],\n            'publicationDate': '2023-01-01T12:00:00Z',\n            'showTitle': 'Show',\n            'seasonNum': '2',\n            'episodeNum': '5',\n        }\n    }\n    # Mock _download_json to return mock_json\n    def mock_download_json(url, display_id):\n        assert url == 'https://api.trutv.com/v2/web/episode/the-carbonaro-effect/12345'\n        assert display_id == '12345'\n        return mock_json\n    monkeypatch.setattr(ie, \"_download_json\", mock_download_json)\n\n    # Mock _extract_ngtv_info to return a base dict\n    def mock_extract_ngtv_info(media_id, _, meta):\n        assert media_id == '12345'\n        assert meta['url'] == 'https://www.trutv.com/shows/the-carbonaro-effect/videos/sunlight-activated-flower.html'\n        assert meta['site_name'] == 'truTV'\n        return {'dummy': 'value'}\n\n    monkeypatch.setattr(ie, \"_extract_ngtv_info\", mock_extract_ngtv_info)\n\n    url = 'https://www.trutv.com/shows/the-carbonaro-effect/videos/sunlight-activated-flower.html'\n    info = ie._real_extract(url)\n\n    assert info['id'] == '12345'\n    assert info['display_id'] == '12345'\n    assert info['title'] == 'Episode Title'\n    assert info['description'] == 'Desc'\n    assert info['series'] == 'Show'\n    assert info['season_number'] == 2\n    assert info['episode_number'] == 5\n    assert info['thumbnails'] == [{'url': 'http://img1.jpg', 'width': 640, 'height': 360}]\n    assert info['timestamp'] == 1672574400  # 2023-01-01T12:00:00Z in epoch\n\ndef test_series_clip_extract(monkeypatch, ie):\n    # Prepare mock data for a series clip\n    mock_json = {\n        'info': {\n            'mediaId': 'clip123',\n            'title': 'Clip Title',\n            'description': None,\n            'images': [],\n            'publicationDate': None,\n            'showTitle': None,\n            'seasonNum': None,\n            'episodeNum': None,\n        }\n    }\n    def mock_download_json(url, display_id):\n        assert url == 'https://api.trutv.com/v2/web/series/clip/the-carbonaro-effect/sunlight-activated-flower'\n        assert display_id == 'sunlight-activated-flower'\n        return mock_json\n    monkeypatch.setattr(ie, \"_download_json\", mock_download_json)\n\n    def mock_extract_ngtv_info(media_id, _, meta):\n        assert media_id == 'clip123'\n        return {'dummy': 'value'}\n\n    monkeypatch.setattr(ie, \"_extract_ngtv_info\", mock_extract_ngtv_info)\n\n    url = 'https://www.trutv.com/shows/the-carbonaro-effect/videos/sunlight-activated-flower'\n    info = ie._real_extract(url)\n\n    assert info['id'] == 'clip123'\n    assert info['display_id'] == 'sunlight-activated-flower'\n    assert info['title'] == 'Clip Title'\n    assert info['description'] is None\n    assert info['thumbnails'] == []\n    assert info['timestamp'] is None\n    assert info['series'] is None\n    assert info['season_number'] is None\n    assert info['episode_number'] is None\n\ndef test_invalid_url_raises(monkeypatch, ie):\n    # Ensure that an invalid URL raises a regex match error\n    url = 'https://www.trutv.com/invalid/url'\n    with pytest.raises(AttributeError):\n        ie._real_extract(url)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "6b67ef49f57844f4a00363395e4c1fe1",
+  "_api_plus_pacing_seconds": 2.080366987036541
+}

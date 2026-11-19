@@ -1,0 +1,144 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_safari_course_ie_suitable ________________________
+
+    def test_safari_course_ie_suitable():
+        # URL that matches the pattern but is not handled by SafariIE or SafariApiIE
+        url = "https://www.safaribooksonline.com/library/view/hadoop-fundamentals-livelessons/9780133392838/"
+        assert SafariCourseIE.suitable(url) is True
+    
+        # URL that is handled by SafariIE (e.g., a book page)
+        url_book = "https://www.safaribooksonline.com/api/v1/book/9781449396459/?override_format=json"
+>       assert SafariCourseIE.suitable(url_book) is False
+E       AssertionError: assert True is False
+E        +  where True = suitable('https://www.safaribooksonline.com/api/v1/book/9781449396459/?override_format=json')
+E        +    where suitable = SafariCourseIE.suitable
+
+test_generated.py:13: AssertionError
+____________________ test_safari_course_ie_extract_success _____________________
+
+    def test_safari_course_ie_extract_success():
+        # Create an instance of the extractor
+        ie = SafariCourseIE()
+        # Monkeypatch the downloader to return a controlled JSON response
+        def fake_download_json(url, video_id, note):
+            # The URL is not used in this test; we just return a minimal valid structure
+            return {
+                "title": "Test Course Title",
+                "chapters": [
+                    "https://www.safaribooksonline.com/api/v1/chapter/1",
+                    "https://www.safaribooksonline.com/api/v1/chapter/2",
+                ],
+            }
+        ie._download_json = fake_download_json
+    
+        # Use a URL that matches the extractor's pattern
+        url = "https://www.safaribooksonline.com/library/view/test-course/1234567890/"
+>       result = ie.extract(url)
+
+test_generated.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:533: in extract
+    self.initialize()
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:432: in initialize
+    self._initialize_geo_bypass({
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.safari.SafariCourseIE object at 0x7f3f68023be0>
+geo_bypass_context = {'countries': None, 'ip_blocks': None}
+
+    def _initialize_geo_bypass(self, geo_bypass_context):
+        """
+        Initialize geo restriction bypass mechanism.
+    
+        This method is used to initialize geo bypass mechanism based on faking
+        X-Forwarded-For HTTP header. A random country from provided country list
+        is selected and a random IP belonging to this country is generated. This
+        IP will be passed as X-Forwarded-For HTTP header in all subsequent
+        HTTP requests.
+    
+        This method will be used for initial geo bypass mechanism initialization
+        during the instance initialization with _GEO_COUNTRIES and
+        _GEO_IP_BLOCKS.
+    
+        You may also manually call it from extractor's code if geo bypass
+        information is not available beforehand (e.g. obtained during
+        extraction) or due to some other reason. In this case you should pass
+        this information in geo bypass context passed as first argument. It may
+        contain following fields:
+    
+        countries:  List of geo unrestricted countries (similar
+                    to _GEO_COUNTRIES)
+        ip_blocks:  List of geo unrestricted IP blocks in CIDR notation
+                    (similar to _GEO_IP_BLOCKS)
+    
+        """
+        if not self._x_forwarded_for_ip:
+    
+            # Geo bypass mechanism is explicitly disabled by user
+>           if not self._downloader.params.get('geo_bypass', True):
+E           AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:469: AttributeError
+__________________ test_safari_course_ie_extract_no_chapters ___________________
+
+    def test_safari_course_ie_extract_no_chapters():
+        ie = SafariCourseIE()
+        def fake_download_json(url, video_id, note):
+            # Return JSON without 'chapters' key to trigger the error
+            return {"title": "Incomplete Course"}
+        ie._download_json = fake_download_json
+    
+        url = "https://www.safaribooksonline.com/library/view/incomplete-course/9876543210/"
+        with pytest.raises(ExtractorError) as excinfo:
+>           ie.extract(url)
+
+test_generated.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:533: in extract
+    self.initialize()
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:432: in initialize
+    self._initialize_geo_bypass({
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.safari.SafariCourseIE object at 0x7f3f68022590>
+geo_bypass_context = {'countries': None, 'ip_blocks': None}
+
+    def _initialize_geo_bypass(self, geo_bypass_context):
+        """
+        Initialize geo restriction bypass mechanism.
+    
+        This method is used to initialize geo bypass mechanism based on faking
+        X-Forwarded-For HTTP header. A random country from provided country list
+        is selected and a random IP belonging to this country is generated. This
+        IP will be passed as X-Forwarded-For HTTP header in all subsequent
+        HTTP requests.
+    
+        This method will be used for initial geo bypass mechanism initialization
+        during the instance initialization with _GEO_COUNTRIES and
+        _GEO_IP_BLOCKS.
+    
+        You may also manually call it from extractor's code if geo bypass
+        information is not available beforehand (e.g. obtained during
+        extraction) or due to some other reason. In this case you should pass
+        this information in geo bypass context passed as first argument. It may
+        contain following fields:
+    
+        countries:  List of geo unrestricted countries (similar
+                    to _GEO_COUNTRIES)
+        ip_blocks:  List of geo unrestricted IP blocks in CIDR notation
+                    (similar to _GEO_IP_BLOCKS)
+    
+        """
+        if not self._x_forwarded_for_ip:
+    
+            # Geo bypass mechanism is explicitly disabled by user
+>           if not self._downloader.params.get('geo_bypass', True):
+E           AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:469: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_safari_course_ie_suitable - AssertionError: as...
+FAILED test_generated.py::test_safari_course_ie_extract_success - AttributeEr...
+FAILED test_generated.py::test_safari_course_ie_extract_no_chapters - Attribu...
+3 failed in 1.71s

@@ -1,0 +1,57 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_super_inside_method_replaces_args ____________________
+
+    def test_super_inside_method_replaces_args():
+        src = """
+    class A:
+        def foo(self):
+            return super()
+    """
+>       tree = _parse_and_transform(src)
+
+test_generated.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+source = '\nclass A:\n    def foo(self):\n        return super()\n'
+
+    def _parse_and_transform(source: str) -> ast3.Module:
+        """Parse source with typed_ast and apply the transformer."""
+        tree = ast3.parse(source)
+>       transformer = SuperWithoutArgumentsTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:11: TypeError
+______________________ test_super_outside_function_warns _______________________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7fe6c8ceff10>
+
+    def test_super_outside_function_warns(caplog):
+        src = """
+    class A:
+        return super()
+    """
+        tree = ast3.parse(src)
+>       transformer = SuperWithoutArgumentsTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:41: TypeError
+________________________ test_super_outside_class_warns ________________________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7fe6c8d97b80>
+
+    def test_super_outside_class_warns(caplog):
+        src = """
+    def foo():
+        return super()
+    """
+        tree = ast3.parse(src)
+>       transformer = SuperWithoutArgumentsTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:54: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_super_inside_method_replaces_args - TypeError:...
+FAILED test_generated.py::test_super_outside_function_warns - TypeError: Base...
+FAILED test_generated.py::test_super_outside_class_warns - TypeError: BaseNod...
+3 failed in 0.33s

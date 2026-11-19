@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-74ee5f20-0225-4bf1-86fb-d7e34c13844e",
+  "object": "chat.completion",
+  "created": 1795079450,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.mixins.exceptions import ExceptionMixin, FutureException\n\n\nclass DummyMixin(ExceptionMixin):\n    \"\"\"Concrete implementation of ExceptionMixin for testing.\"\"\"\n\n    def __init__(self):\n        super().__init__()\n        self.applied_exceptions = []\n\n    def _apply_exception_handler(self, handler: FutureException):\n        # Record the applied handler for later inspection\n        self.applied_exceptions.append(handler)\n\n\ndef test_exception_decorator_with_apply_and_list():\n    \"\"\"Decorator should register FutureException and apply it when apply=True.\"\"\"\n    mixin = DummyMixin()\n\n    @mixin.exception([ValueError, KeyError], apply=True)\n    def handler(request, exc):\n        return \"handled\"\n\n    # The decorator returns the original handler\n    assert handler.__name__ == \"handler\"\n\n    # One FutureException should be stored\n    assert len(mixin._future_exceptions) == 1\n    future_exc = next(iter(mixin._future_exceptions))\n    assert isinstance(future_exc, FutureException)\n    # The exception types should be stored correctly\n    assert set(future_exc.exceptions) == {ValueError, KeyError}\n\n    # The handler should have been applied\n    assert mixin.applied_exceptions == [future_exc]\n\n\ndef test_exception_decorator_without_apply_and_single_exception():\n    \"\"\"Decorator should register FutureException but not apply it when apply=False.\"\"\"\n    mixin = DummyMixin()\n\n    @mixin.exception(ValueError, apply=False)\n    def handler(request, exc):\n        return \"handled\"\n\n    # No FutureException should be applied\n    assert mixin.applied_exceptions == []\n\n    # The FutureException should still be stored\n    assert len(mixin._future_exceptions) == 1\n    future_exc = next(iter(mixin._future_exceptions))\n    assert set(future_exc.exceptions) == {ValueError}\n\n\ndef test_all_exceptions_decorator_equivalence():\n    \"\"\"all_exceptions should behave like exception(Exception).\"\"\"\n    mixin = DummyMixin()\n\n    @mixin.all_exceptions\n    def handler(request, exc):\n        return \"handled\"\n\n    # The handler should be registered for the generic Exception\n    assert len(mixin._future_exceptions) == 1\n    future_exc = next(iter(mixin._future_exceptions))\n    assert set(future_exc.exceptions) == {Exception}\n\n    # The handler should have been applied\n    assert mixin.applied_exceptions == [future_exc]\n```",
+        "reasoning": "We need to test ExceptionMixin. We can create a dummy subclass that implements _apply_exception_handler to record calls. Test decorator adding to set, apply flag, handling list input, all_exceptions. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004338747,
+    "prompt_tokens": 979,
+    "prompt_time": 0.021925899,
+    "completion_tokens": 560,
+    "completion_time": 0.589154422,
+    "total_tokens": 1539,
+    "total_time": 0.611080321,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 45
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh5bajeq0rewhjemnqft1g",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.mixins.exceptions import ExceptionMixin, FutureException\n\n\nclass DummyMixin(ExceptionMixin):\n    \"\"\"Concrete implementation of ExceptionMixin for testing.\"\"\"\n\n    def __init__(self):\n        super().__init__()\n        self.applied_exceptions = []\n\n    def _apply_exception_handler(self, handler: FutureException):\n        # Record the applied handler for later inspection\n        self.applied_exceptions.append(handler)\n\n\ndef test_exception_decorator_with_apply_and_list():\n    \"\"\"Decorator should register FutureException and apply it when apply=True.\"\"\"\n    mixin = DummyMixin()\n\n    @mixin.exception([ValueError, KeyError], apply=True)\n    def handler(request, exc):\n        return \"handled\"\n\n    # The decorator returns the original handler\n    assert handler.__name__ == \"handler\"\n\n    # One FutureException should be stored\n    assert len(mixin._future_exceptions) == 1\n    future_exc = next(iter(mixin._future_exceptions))\n    assert isinstance(future_exc, FutureException)\n    # The exception types should be stored correctly\n    assert set(future_exc.exceptions) == {ValueError, KeyError}\n\n    # The handler should have been applied\n    assert mixin.applied_exceptions == [future_exc]\n\n\ndef test_exception_decorator_without_apply_and_single_exception():\n    \"\"\"Decorator should register FutureException but not apply it when apply=False.\"\"\"\n    mixin = DummyMixin()\n\n    @mixin.exception(ValueError, apply=False)\n    def handler(request, exc):\n        return \"handled\"\n\n    # No FutureException should be applied\n    assert mixin.applied_exceptions == []\n\n    # The FutureException should still be stored\n    assert len(mixin._future_exceptions) == 1\n    future_exc = next(iter(mixin._future_exceptions))\n    assert set(future_exc.exceptions) == {ValueError}\n\n\ndef test_all_exceptions_decorator_equivalence():\n    \"\"\"all_exceptions should behave like exception(Exception).\"\"\"\n    mixin = DummyMixin()\n\n    @mixin.all_exceptions\n    def handler(request, exc):\n        return \"handled\"\n\n    # The handler should be registered for the generic Exception\n    assert len(mixin._future_exceptions) == 1\n    future_exc = next(iter(mixin._future_exceptions))\n    assert set(future_exc.exceptions) == {Exception}\n\n    # The handler should have been applied\n    assert mixin.applied_exceptions == [future_exc]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "fb6774e81c8b4ffc97cab35cff6b580d",
+  "_api_plus_pacing_seconds": 1.3007115430082195
+}

@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________ test_schema_validate_required_and_readonly __________________
+
+    def test_schema_validate_required_and_readonly():
+        # Field 'a' has a default, so it is not required.
+        # Field 'b' is read-only, so it is ignored during validation.
+        # Field 'c' has no default and is not read-only, so it is required.
+        schema = Schema(
+            fields={
+                "a": DummyField(default=1),
+                "b": DummyField(read_only=True),
+                "c": DummyField(),
+            }
+        )
+    
+        # Validate with only 'a' provided: should raise a ValidationError for missing 'c'.
+        with pytest.raises(ValidationError) as excinfo:
+            schema.validate({"a": 42})
+        error = excinfo.value
+        # There should be exactly one error message with code 'required' and index ['c'].
+>       assert len(error.messages) == 1
+E       TypeError: object of type 'method' has no len()
+
+../first_run/test_run.py:30: TypeError
+=========================== short test summary info ============================
+FAILED ../first_run/test_run.py::test_schema_validate_required_and_readonly
+1 failed in 0.15s
+
+/home/heurix/Documents/Test4Py_Setup/.venv/lib/python3.10/site-packages/coverage/inorout.py:558: CoverageWarning: Module tests was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.16.2/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")

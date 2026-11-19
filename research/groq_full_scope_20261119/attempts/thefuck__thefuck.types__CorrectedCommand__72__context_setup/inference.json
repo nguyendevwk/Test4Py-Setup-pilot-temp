@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a7865b7b-ecaa-48b1-bd06-0f9855139b2e",
+  "object": "chat.completion",
+  "created": 1795077881,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport os\nimport builtins\nimport types\nimport pytest\n\nfrom thefuck.types import CorrectedCommand\nfrom thefuck import settings\nfrom thefuck import shell\n\n\ndef _reset_settings():\n    \"\"\"Restore settings to defaults after a test.\"\"\"\n    settings.repeat = False\n    settings.debug = False\n    settings.alter_history = False\n\n\ndef test_eq_and_hash_and_repr():\n    \"\"\"CorrectedCommand equality ignores priority and hash is consistent.\"\"\"\n    cmd1 = CorrectedCommand(\"ls\", None, 10)\n    cmd2 = CorrectedCommand(\"ls\", None, 20)\n    cmd3 = CorrectedCommand(\"cat\", None, 10)\n\n    # Equality ignores priority\n    assert cmd1 == cmd2\n    assert cmd1 != cmd3\n\n    # Hash is based on script and side_effect\n    assert hash(cmd1) == hash(cmd2)\n    assert hash(cmd1) != hash(cmd3)\n\n    # Representation includes all fields\n    rep = repr(cmd1)\n    assert \"CorrectedCommand\" in rep\n    assert \"ls\" in rep\n    assert \"10\" in rep\n\n\ndef test_get_script_repeat_behavior(tmp_path):\n    \"\"\"_get_script returns original script or repeats based on settings.\"\"\"\n    # Ensure repeat is False\n    settings.repeat = False\n    cmd = CorrectedCommand(\"echo hi\", None, 0)\n    assert cmd._get_script() == \"echo hi\"\n\n    # Enable repeat and debug\n    settings.repeat = True\n    settings.debug = True\n    # Use a simple script that contains spaces\n    script = \"echo 'hello world'\"\n    cmd = CorrectedCommand(script, None, 0)\n    result = cmd._get_script()\n    # Should contain the original script and the repeat wrapper\n    assert script in result\n    # The repeat wrapper should include the alias and --debug flag\n    alias = shell.get_alias()\n    assert alias in result\n    assert \"--debug\" in result\n    # The repeat wrapper should be quoted correctly\n    quoted = shell.quote(script)\n    assert quoted in result\n    # Clean up\n    _reset_settings()\n\n\ndef test_run_writes_to_stdout_and_side_effect(monkeypatch, capsys):\n    \"\"\"run writes the script to stdout and calls side_effect.\"\"\"\n    # Prepare a side_effect that records its arguments\n    recorded = {}\n    def side_effect(old_cmd, new_script):\n        recorded['old'] = old_cmd\n        recorded['new'] = new_script\n\n    # Use a dummy old_cmd object\n    class DummyCmd:\n        pass\n    old_cmd = DummyCmd()\n\n    # Ensure history alteration is disabled to avoid file writes\n    settings.alter_history = False\n    cmd = CorrectedCommand(\"pwd\", side_effect, 0)\n\n    # Run the command\n    cmd.run(old_cmd)\n\n    # Capture stdout\n    out, err = capsys.readouterr()\n    assert out.strip() == \"pwd\"\n\n    # Side effect should have been called with correct arguments\n    assert recorded['old'] is old_cmd\n    assert recorded['new'] == \"pwd\"\n\n    # Clean up\n    _reset_settings()\n```",
+        "reasoning": "Need tests for CorrectedCommand. Use tmp_path for history? shell.put_to_history writes to history file? We can monkeypatch shell.put_to_history to capture. But no mocks allowed. But we can patch by temporarily setting settings.alter_history False to avoid writing. We can test __eq__, __hash__, __repr__, _get_script with settings.repeat True/False. Use settings from module. We'll import settings and modify attributes. Ensure revert. Use context manager. Write three tests: test_eq_and_hash, test_get_script_repeat, test_run_writes_stdout. For run, capture stdout via capsys. Ensure side_effect called. Use a simple side_effect that records. No mocks. Use real shell? shell.quote etc. Might need to import shell. Use settings.repeat False. Ensure _get_script returns script. For repeat True, check contains or_ pattern. Use shell.or_? We'll just check that returned string contains original script. Use capsys."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054305202,
+    "prompt_tokens": 766,
+    "prompt_time": 0.038895297,
+    "completion_tokens": 861,
+    "completion_time": 0.975555096,
+    "total_tokens": 1627,
+    "total_time": 1.014450393,
+    "completion_tokens_details": {
+      "reasoning_tokens": 196
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfnenrey0sgk872w320cyk",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport os\nimport builtins\nimport types\nimport pytest\n\nfrom thefuck.types import CorrectedCommand\nfrom thefuck import settings\nfrom thefuck import shell\n\n\ndef _reset_settings():\n    \"\"\"Restore settings to defaults after a test.\"\"\"\n    settings.repeat = False\n    settings.debug = False\n    settings.alter_history = False\n\n\ndef test_eq_and_hash_and_repr():\n    \"\"\"CorrectedCommand equality ignores priority and hash is consistent.\"\"\"\n    cmd1 = CorrectedCommand(\"ls\", None, 10)\n    cmd2 = CorrectedCommand(\"ls\", None, 20)\n    cmd3 = CorrectedCommand(\"cat\", None, 10)\n\n    # Equality ignores priority\n    assert cmd1 == cmd2\n    assert cmd1 != cmd3\n\n    # Hash is based on script and side_effect\n    assert hash(cmd1) == hash(cmd2)\n    assert hash(cmd1) != hash(cmd3)\n\n    # Representation includes all fields\n    rep = repr(cmd1)\n    assert \"CorrectedCommand\" in rep\n    assert \"ls\" in rep\n    assert \"10\" in rep\n\n\ndef test_get_script_repeat_behavior(tmp_path):\n    \"\"\"_get_script returns original script or repeats based on settings.\"\"\"\n    # Ensure repeat is False\n    settings.repeat = False\n    cmd = CorrectedCommand(\"echo hi\", None, 0)\n    assert cmd._get_script() == \"echo hi\"\n\n    # Enable repeat and debug\n    settings.repeat = True\n    settings.debug = True\n    # Use a simple script that contains spaces\n    script = \"echo 'hello world'\"\n    cmd = CorrectedCommand(script, None, 0)\n    result = cmd._get_script()\n    # Should contain the original script and the repeat wrapper\n    assert script in result\n    # The repeat wrapper should include the alias and --debug flag\n    alias = shell.get_alias()\n    assert alias in result\n    assert \"--debug\" in result\n    # The repeat wrapper should be quoted correctly\n    quoted = shell.quote(script)\n    assert quoted in result\n    # Clean up\n    _reset_settings()\n\n\ndef test_run_writes_to_stdout_and_side_effect(monkeypatch, capsys):\n    \"\"\"run writes the script to stdout and calls side_effect.\"\"\"\n    # Prepare a side_effect that records its arguments\n    recorded = {}\n    def side_effect(old_cmd, new_script):\n        recorded['old'] = old_cmd\n        recorded['new'] = new_script\n\n    # Use a dummy old_cmd object\n    class DummyCmd:\n        pass\n    old_cmd = DummyCmd()\n\n    # Ensure history alteration is disabled to avoid file writes\n    settings.alter_history = False\n    cmd = CorrectedCommand(\"pwd\", side_effect, 0)\n\n    # Run the command\n    cmd.run(old_cmd)\n\n    # Capture stdout\n    out, err = capsys.readouterr()\n    assert out.strip() == \"pwd\"\n\n    # Side effect should have been called with correct arguments\n    assert recorded['old'] is old_cmd\n    assert recorded['new'] == \"pwd\"\n\n    # Clean up\n    _reset_settings()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3897123099886812
+}

@@ -1,0 +1,38 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_aes_ctr_decrypt_roundtrip ________________________
+
+    def test_aes_ctr_decrypt_roundtrip():
+        key = [i for i in range(16)]  # 16‑byte key
+        plaintext = [i % 256 for i in range(30)]  # 30 bytes, not a multiple of block size
+        counter = SimpleCounter()
+    
+        # Encrypt plaintext using the same counter
+        expanded_key = key
+        # We need to use the same counter state as decryption, so reset counter
+        counter_enc = SimpleCounter()
+        cipher = []
+        block_count = (len(plaintext) + BLOCK_SIZE_BYTES - 1) // BLOCK_SIZE_BYTES
+        for i in range(block_count):
+            counter_block = counter_enc.next_value()
+            block = plaintext[i * BLOCK_SIZE_BYTES:(i + 1) * BLOCK_SIZE_BYTES]
+            block += [0] * (BLOCK_SIZE_BYTES - len(block))
+            cipher_block = aes_encrypt(counter_block, key)
+            cipher += [b ^ c for b, c in zip(block, cipher_block)]
+        cipher = cipher[:len(plaintext)]
+    
+        # Decrypt
+        counter_dec = SimpleCounter()
+        decrypted = aes_ctr_decrypt(cipher, key, counter_dec)
+    
+>       assert decrypted == plaintext, "Decrypted data should match original plaintext"
+E       AssertionError: Decrypted data should match original plaintext
+E       assert [198, 161, 59...135, 143, ...] == [0, 1, 2, 3, 4, 5, ...]
+E         
+E         At index 0 diff: 198 != 0
+E         Use -v to get more diff
+
+test_generated.py:39: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_aes_ctr_decrypt_roundtrip - AssertionError: De...
+1 failed, 2 passed in 0.98s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-4decd35a-dc01-49b8-828b-8e8a9960c831",
+  "object": "chat.completion",
+  "created": 1795078805,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\n\nfrom pypara.accounting.ledger import build_general_ledger\nfrom pypara.accounting.accounts import Account\nfrom pypara.accounting.generic import Balance\nfrom pypara.accounting.journaling import JournalEntry, Posting\nfrom pypara.accounting.commons.zeitgeist import DateRange\nfrom pypara.accounting.commons.numbers import Quantity\n\n\ndef test_build_general_ledger_normal():\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc = Account(\"Cash\")\n    posting = Posting(acc, Quantity(Decimal(\"100.00\")))\n    entry = JournalEntry(datetime.date(2023, 6, 15), [posting])\n    initial = {}\n    ledger = build_general_ledger(period, [entry], initial)\n\n    # The ledger should contain one account with the correct balance\n    assert acc in ledger.ledgers\n    ledger_balance = ledger.ledgers[acc].balance\n    assert ledger_balance.amount == Decimal(\"100.00\")\n    assert ledger_balance.date == datetime.date(2023, 1, 1)\n\n\ndef test_build_general_ledger_boundary_dates():\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc = Account(\"Revenue\")\n    # Posting exactly on the start date\n    posting_start = Posting(acc, Quantity(Decimal(\"50.00\")))\n    entry_start = JournalEntry(datetime.date(2023, 1, 1), [posting_start])\n    # Posting exactly on the end date\n    posting_end = Posting(acc, Quantity(Decimal(\"75.00\")))\n    entry_end = JournalEntry(datetime.date(2023, 12, 31), [posting_end])\n\n    initial = {}\n    ledger = build_general_ledger(period, [entry_start, entry_end], initial)\n\n    # Both postings should be included\n    ledger_balance = ledger.ledgers[acc].balance\n    assert ledger_balance.amount == Decimal(\"125.00\")\n    assert ledger_balance.date == datetime.date(2023, 1, 1)\n\n\ndef test_build_general_ledger_excludes_out_of_range():\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc = Account(\"Expense\")\n    # Posting outside the period\n    posting = Posting(acc, Quantity(Decimal(\"200.00\")))\n    entry = JournalEntry(datetime.date(2024, 1, 1), [posting])\n\n    initial = {}\n    ledger = build_general_ledger(period, [entry], initial)\n\n    # No ledger should be created for the account\n    assert acc not in ledger.ledgers\n```",
+        "reasoning": "We need tests for build_general_ledger. Need minimal classes: DateRange, JournalEntry, Posting, Account, Balance, Ledger, GeneralLedger, InitialBalances. Likely exist in package. We'll import. Use tmp_path? Not needed. Just create simple objects. Use Decimal. Test normal: one posting within period. Boundary: posting exactly at since or until. Error: posting outside period should be ignored. Use assertions. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.12261157,
+    "prompt_tokens": 556,
+    "prompt_time": 0.053882449,
+    "completion_tokens": 683,
+    "completion_time": 0.764991293,
+    "total_tokens": 1239,
+    "total_time": 0.818873742,
+    "completion_tokens_details": {
+      "reasoning_tokens": 91
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sghn1nef9vvbegpbcwdbpx",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\n\nfrom pypara.accounting.ledger import build_general_ledger\nfrom pypara.accounting.accounts import Account\nfrom pypara.accounting.generic import Balance\nfrom pypara.accounting.journaling import JournalEntry, Posting\nfrom pypara.accounting.commons.zeitgeist import DateRange\nfrom pypara.accounting.commons.numbers import Quantity\n\n\ndef test_build_general_ledger_normal():\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc = Account(\"Cash\")\n    posting = Posting(acc, Quantity(Decimal(\"100.00\")))\n    entry = JournalEntry(datetime.date(2023, 6, 15), [posting])\n    initial = {}\n    ledger = build_general_ledger(period, [entry], initial)\n\n    # The ledger should contain one account with the correct balance\n    assert acc in ledger.ledgers\n    ledger_balance = ledger.ledgers[acc].balance\n    assert ledger_balance.amount == Decimal(\"100.00\")\n    assert ledger_balance.date == datetime.date(2023, 1, 1)\n\n\ndef test_build_general_ledger_boundary_dates():\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc = Account(\"Revenue\")\n    # Posting exactly on the start date\n    posting_start = Posting(acc, Quantity(Decimal(\"50.00\")))\n    entry_start = JournalEntry(datetime.date(2023, 1, 1), [posting_start])\n    # Posting exactly on the end date\n    posting_end = Posting(acc, Quantity(Decimal(\"75.00\")))\n    entry_end = JournalEntry(datetime.date(2023, 12, 31), [posting_end])\n\n    initial = {}\n    ledger = build_general_ledger(period, [entry_start, entry_end], initial)\n\n    # Both postings should be included\n    ledger_balance = ledger.ledgers[acc].balance\n    assert ledger_balance.amount == Decimal(\"125.00\")\n    assert ledger_balance.date == datetime.date(2023, 1, 1)\n\n\ndef test_build_general_ledger_excludes_out_of_range():\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acc = Account(\"Expense\")\n    # Posting outside the period\n    posting = Posting(acc, Quantity(Decimal(\"200.00\")))\n    entry = JournalEntry(datetime.date(2024, 1, 1), [posting])\n\n    initial = {}\n    ledger = build_general_ledger(period, [entry], initial)\n\n    # No ledger should be created for the account\n    assert acc not in ledger.ledgers\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3215035009779967
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a16d17fe-d77b-42ae-b348-67610481a22e",
+  "object": "chat.completion",
+  "created": 1795078391,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom pypara.accounting.journaling import JournalEntry, Direction\nfrom pypara.accounting.accounts import Account, AccountType\nfrom pypara.commons.numbers import Quantity, Amount\n\n\nclass DummySource:\n    \"\"\"Simple source object for testing.\"\"\"\n    def __repr__(self):\n        return \"<DummySource>\"\n\n\ndef test_post_and_properties(tmp_path):\n    \"\"\"Posting a positive and a negative quantity should create\n    increment and decrement postings respectively, and the\n    corresponding properties should expose them.\"\"\"\n    entry = JournalEntry(\n        date=datetime.date(2024, 1, 1),\n        description=\"Test entry\",\n        source=DummySource()\n    )\n    cash = Account(\"Cash\", AccountType.ASSET)\n    revenue = Account(\"Revenue\", AccountType.REVENUE)\n\n    # Post a positive quantity (increment)\n    entry.post(datetime.date(2024, 1, 1), cash, Quantity(100))\n    # Post a negative quantity (decrement)\n    entry.post(datetime.date(2024, 1, 1), revenue, Quantity(-50))\n\n    # There should be two postings\n    assert len(entry.postings) == 2\n\n    # Check direction of each posting\n    inc_postings = list(entry.increments)\n    dec_postings = list(entry.decrements)\n    assert len(inc_postings) == 1\n    assert len(dec_postings) == 1\n    assert inc_postings[0].account is cash\n    assert dec_postings[0].account is revenue\n\n    # Check debit/credit classification\n    debits = list(entry.debits)\n    credits = list(entry.credits)\n    # In this simple example, both postings are debits because\n    # the amount is positive for both (the sign is handled by Direction)\n    assert all(p.is_debit for p in debits)\n    assert all(p.is_credit for p in credits)\n\n\ndef test_zero_quantity_no_post(tmp_path):\n    \"\"\"Posting a quantity of zero should not create any postings.\"\"\"\n    entry = JournalEntry(\n        date=datetime.date(2024, 1, 2),\n        description=\"Zero quantity test\",\n        source=DummySource()\n    )\n    bank = Account(\"Bank\", AccountType.ASSET)\n\n    entry.post(datetime.date(2024, 1, 2), bank, Quantity(0))\n    assert len(entry.postings) == 0\n\n\ndef test_validate_raises_on_imbalance(tmp_path):\n    \"\"\"validate() should raise an AssertionError when debits and credits\n    do not match.\"\"\"\n    entry = JournalEntry(\n        date=datetime.date(2024, 1, 3),\n        description=\"Imbalance test\",\n        source=DummySource()\n    )\n    asset = Account(\"Asset\", AccountType.ASSET)\n    liability = Account(\"Liability\", AccountType.LIABILITY)\n\n    # Post an imbalance: debit 200, credit 100\n    entry.post(datetime.date(2024, 1, 3), asset, Quantity(200))\n    entry.post(datetime.date(2024, 1, 3), liability, Quantity(-100))\n\n    with pytest.raises(AssertionError) as excinfo:\n        entry.validate()\n    assert \"Total Debits and Credits are not equal\" in str(excinfo.value)\n```",
+        "reasoning": "We need to write tests for JournalEntry. Need to import. Use tmp_path? Not needed. We'll create dummy source. Use simple object. Need Account class? import. We'll create minimal accounts. Use real classes. Let's inspect accounts.We don't have code. Assume Account has attributes. We'll just create a simple mock? But cannot mock target. We need real Account. Let's inspect.We can't. We'll assume Account is simple dataclass with name. Use from pypara.accounting.accounts import Account. We'll create Account('Cash', AccountType.ASSET). Need AccountType. Use import. We'll test post increments/decrements, validate passes. Also test that zero quantity does nothing. And test that validate raises when imbalance. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047002487,
+    "prompt_tokens": 909,
+    "prompt_time": 0.058242342,
+    "completion_tokens": 862,
+    "completion_time": 0.985803158,
+    "total_tokens": 1771,
+    "total_time": 1.0440455,
+    "completion_tokens_details": {
+      "reasoning_tokens": 153
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg505zed78gydes1mvnhjc",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom pypara.accounting.journaling import JournalEntry, Direction\nfrom pypara.accounting.accounts import Account, AccountType\nfrom pypara.commons.numbers import Quantity, Amount\n\n\nclass DummySource:\n    \"\"\"Simple source object for testing.\"\"\"\n    def __repr__(self):\n        return \"<DummySource>\"\n\n\ndef test_post_and_properties(tmp_path):\n    \"\"\"Posting a positive and a negative quantity should create\n    increment and decrement postings respectively, and the\n    corresponding properties should expose them.\"\"\"\n    entry = JournalEntry(\n        date=datetime.date(2024, 1, 1),\n        description=\"Test entry\",\n        source=DummySource()\n    )\n    cash = Account(\"Cash\", AccountType.ASSET)\n    revenue = Account(\"Revenue\", AccountType.REVENUE)\n\n    # Post a positive quantity (increment)\n    entry.post(datetime.date(2024, 1, 1), cash, Quantity(100))\n    # Post a negative quantity (decrement)\n    entry.post(datetime.date(2024, 1, 1), revenue, Quantity(-50))\n\n    # There should be two postings\n    assert len(entry.postings) == 2\n\n    # Check direction of each posting\n    inc_postings = list(entry.increments)\n    dec_postings = list(entry.decrements)\n    assert len(inc_postings) == 1\n    assert len(dec_postings) == 1\n    assert inc_postings[0].account is cash\n    assert dec_postings[0].account is revenue\n\n    # Check debit/credit classification\n    debits = list(entry.debits)\n    credits = list(entry.credits)\n    # In this simple example, both postings are debits because\n    # the amount is positive for both (the sign is handled by Direction)\n    assert all(p.is_debit for p in debits)\n    assert all(p.is_credit for p in credits)\n\n\ndef test_zero_quantity_no_post(tmp_path):\n    \"\"\"Posting a quantity of zero should not create any postings.\"\"\"\n    entry = JournalEntry(\n        date=datetime.date(2024, 1, 2),\n        description=\"Zero quantity test\",\n        source=DummySource()\n    )\n    bank = Account(\"Bank\", AccountType.ASSET)\n\n    entry.post(datetime.date(2024, 1, 2), bank, Quantity(0))\n    assert len(entry.postings) == 0\n\n\ndef test_validate_raises_on_imbalance(tmp_path):\n    \"\"\"validate() should raise an AssertionError when debits and credits\n    do not match.\"\"\"\n    entry = JournalEntry(\n        date=datetime.date(2024, 1, 3),\n        description=\"Imbalance test\",\n        source=DummySource()\n    )\n    asset = Account(\"Asset\", AccountType.ASSET)\n    liability = Account(\"Liability\", AccountType.LIABILITY)\n\n    # Post an imbalance: debit 200, credit 100\n    entry.post(datetime.date(2024, 1, 3), asset, Quantity(200))\n    entry.post(datetime.date(2024, 1, 3), liability, Quantity(-100))\n\n    with pytest.raises(AssertionError) as excinfo:\n        entry.validate()\n    assert \"Total Debits and Credits are not equal\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4502955680363812
+}

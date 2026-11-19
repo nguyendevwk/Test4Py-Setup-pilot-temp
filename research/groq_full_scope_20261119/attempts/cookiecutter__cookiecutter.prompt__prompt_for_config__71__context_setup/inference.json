@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-985ffd01-4f3d-4ee1-be53-a6a64b1c1871",
+  "object": "chat.completion",
+  "created": 1795077197,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport pytest\nfrom collections import OrderedDict\n\nfrom cookiecutter.prompt import (\n    prompt_for_config,\n    prompt_choice_for_config,\n    UndefinedVariableInTemplate,\n)\n\n\ndef test_prompt_for_config_simple_and_dict(monkeypatch):\n    \"\"\"\n    Verify that prompt_for_config correctly renders simple values and\n    dictionary values when no_input=True.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"My Project\",\n            \"repo_name\": \"{{ cookiecutter.project_name.replace(' ', '_') }}\",\n            \"config\": {\"key1\": \"value1\", \"key2\": \"{{ cookiecutter.project_name }}\"},\n            \"__prompts__\": {},\n        }\n    }\n\n    result = prompt_for_config(context, no_input=True)\n\n    assert isinstance(result, OrderedDict)\n    # Simple string rendered correctly\n    assert result[\"project_name\"] == \"My Project\"\n    # Jinja2 expression rendered\n    assert result[\"repo_name\"] == \"My_Project\"\n    # Dictionary rendered recursively\n    assert result[\"config\"] == {\"key1\": \"value1\", \"key2\": \"My Project\"}\n\n\ndef test_prompt_choice_for_config_returns_first_when_no_input():\n    \"\"\"\n    When no_input=True, prompt_choice_for_config should return the first\n    rendered option without prompting the user.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"Test\",\n            \"__prompts__\": {},\n        }\n    }\n    env = context[\"cookiecutter\"][\"__prompts__\"]  # dummy env for rendering\n    # Use a simple list of raw values\n    options = [\"option1\", \"{{ cookiecutter.project_name }}\"]\n    # Render options manually\n    rendered = [prompt_choice_for_config.__globals__[\"render_variable\"](\n        prompt_choice_for_config.__globals__[\"create_env_with_context\"](context),\n        opt,\n        {}\n    ) for opt in options]\n    # The first option should be returned\n    assert prompt_choice_for_config({}, None, \"choice\", options, True) == rendered[0]\n\n\ndef test_prompt_choice_for_config_raises_on_empty_list():\n    \"\"\"\n    prompt_choice_for_config should raise ValueError when the options list\n    is empty and no_input is True.\n    \"\"\"\n    with pytest.raises(ValueError, match=\"empty\"):\n        prompt_choice_for_config({}, None, \"choice\", [], True)\n```",
+        "reasoning": "Need tests for prompt_for_config with no_input True to avoid prompts. Test simple variable, choice, dict. Also test error when choice empty. Use tmp_path? not needed. We'll craft context. Use pytest.raises for ValueError. Three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051312624,
+    "prompt_tokens": 2615,
+    "prompt_time": 0.198918385,
+    "completion_tokens": 556,
+    "completion_time": 0.616452366,
+    "total_tokens": 3171,
+    "total_time": 0.815370751,
+    "completion_tokens_details": {
+      "reasoning_tokens": 51
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sf0jr2es0stkhr4wm9kcz6",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport pytest\nfrom collections import OrderedDict\n\nfrom cookiecutter.prompt import (\n    prompt_for_config,\n    prompt_choice_for_config,\n    UndefinedVariableInTemplate,\n)\n\n\ndef test_prompt_for_config_simple_and_dict(monkeypatch):\n    \"\"\"\n    Verify that prompt_for_config correctly renders simple values and\n    dictionary values when no_input=True.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"My Project\",\n            \"repo_name\": \"{{ cookiecutter.project_name.replace(' ', '_') }}\",\n            \"config\": {\"key1\": \"value1\", \"key2\": \"{{ cookiecutter.project_name }}\"},\n            \"__prompts__\": {},\n        }\n    }\n\n    result = prompt_for_config(context, no_input=True)\n\n    assert isinstance(result, OrderedDict)\n    # Simple string rendered correctly\n    assert result[\"project_name\"] == \"My Project\"\n    # Jinja2 expression rendered\n    assert result[\"repo_name\"] == \"My_Project\"\n    # Dictionary rendered recursively\n    assert result[\"config\"] == {\"key1\": \"value1\", \"key2\": \"My Project\"}\n\n\ndef test_prompt_choice_for_config_returns_first_when_no_input():\n    \"\"\"\n    When no_input=True, prompt_choice_for_config should return the first\n    rendered option without prompting the user.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"Test\",\n            \"__prompts__\": {},\n        }\n    }\n    env = context[\"cookiecutter\"][\"__prompts__\"]  # dummy env for rendering\n    # Use a simple list of raw values\n    options = [\"option1\", \"{{ cookiecutter.project_name }}\"]\n    # Render options manually\n    rendered = [prompt_choice_for_config.__globals__[\"render_variable\"](\n        prompt_choice_for_config.__globals__[\"create_env_with_context\"](context),\n        opt,\n        {}\n    ) for opt in options]\n    # The first option should be returned\n    assert prompt_choice_for_config({}, None, \"choice\", options, True) == rendered[0]\n\n\ndef test_prompt_choice_for_config_raises_on_empty_list():\n    \"\"\"\n    prompt_choice_for_config should raise ValueError when the options list\n    is empty and no_input is True.\n    \"\"\"\n    with pytest.raises(ValueError, match=\"empty\"):\n        prompt_choice_for_config({}, None, \"choice\", [], True)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2127519000205211
+}

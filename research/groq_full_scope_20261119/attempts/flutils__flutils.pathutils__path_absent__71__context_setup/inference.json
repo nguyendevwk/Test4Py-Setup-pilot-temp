@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-cdc8079f-c976-4abc-9506-d502f97ee757",
+  "object": "chat.completion",
+  "created": 1795076618,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport pathlib\nimport pytest\nfrom flutils.pathutils import path_absent, normalize_path\n\n\ndef test_path_absent_removes_file(tmp_path: pathlib.Path) -> None:\n    \"\"\"path_absent should delete an existing file.\"\"\"\n    file_path = tmp_path / \"test_file.txt\"\n    file_path.write_text(\"content\")\n    assert file_path.exists()\n    path_absent(file_path)\n    assert not file_path.exists()\n\n\ndef test_path_absent_removes_directory_recursively(tmp_path: pathlib.Path) -> None:\n    \"\"\"path_absent should recursively delete a directory and its contents.\"\"\"\n    dir_path = tmp_path / \"test_dir\"\n    dir_path.mkdir()\n    (dir_path / \"subdir\").mkdir()\n    (dir_path / \"subdir\" / \"file.txt\").write_text(\"data\")\n    assert dir_path.exists()\n    assert (dir_path / \"subdir\" / \"file.txt\").exists()\n    path_absent(dir_path)\n    assert not dir_path.exists()\n\n\ndef test_path_absent_handles_symlink_and_relative_path(tmp_path: pathlib.Path) -> None:\n    \"\"\"path_absent should remove symlinks and work with relative paths.\"\"\"\n    target_file = tmp_path / \"target.txt\"\n    target_file.write_text(\"target\")\n    symlink_path = tmp_path / \"link.txt\"\n    symlink_path.symlink_to(target_file)\n    assert symlink_path.is_symlink()\n    # Use a relative path string\n    relative_path = os.path.relpath(symlink_path, start=os.getcwd())\n    path_absent(relative_path)\n    assert not symlink_path.exists()\n    # Ensure the target file still exists\n    assert target_file.exists()\n```",
+        "reasoning": "Need tests for path_absent. Use tmp_path. Three tests: normal file deletion, directory recursive, error when path doesn't exist? path_absent does nothing. Test that after calling, path absent. Also test symlink removal. Use tmp_path to create file, dir, symlink. Ensure no exceptions. Use pytest.raises for non-existent? Actually path_absent should not raise. So test that no exception. Third test boundary: path is relative? normalize handles. Test that relative path works. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.488649201,
+    "prompt_tokens": 1214,
+    "prompt_time": 0.071182821,
+    "completion_tokens": 465,
+    "completion_time": 0.527081708,
+    "total_tokens": 1679,
+    "total_time": 0.598264529,
+    "completion_tokens_details": {
+      "reasoning_tokens": 105
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7seexkaegbvb4y0vmv46nnh",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport pathlib\nimport pytest\nfrom flutils.pathutils import path_absent, normalize_path\n\n\ndef test_path_absent_removes_file(tmp_path: pathlib.Path) -> None:\n    \"\"\"path_absent should delete an existing file.\"\"\"\n    file_path = tmp_path / \"test_file.txt\"\n    file_path.write_text(\"content\")\n    assert file_path.exists()\n    path_absent(file_path)\n    assert not file_path.exists()\n\n\ndef test_path_absent_removes_directory_recursively(tmp_path: pathlib.Path) -> None:\n    \"\"\"path_absent should recursively delete a directory and its contents.\"\"\"\n    dir_path = tmp_path / \"test_dir\"\n    dir_path.mkdir()\n    (dir_path / \"subdir\").mkdir()\n    (dir_path / \"subdir\" / \"file.txt\").write_text(\"data\")\n    assert dir_path.exists()\n    assert (dir_path / \"subdir\" / \"file.txt\").exists()\n    path_absent(dir_path)\n    assert not dir_path.exists()\n\n\ndef test_path_absent_handles_symlink_and_relative_path(tmp_path: pathlib.Path) -> None:\n    \"\"\"path_absent should remove symlinks and work with relative paths.\"\"\"\n    target_file = tmp_path / \"target.txt\"\n    target_file.write_text(\"target\")\n    symlink_path = tmp_path / \"link.txt\"\n    symlink_path.symlink_to(target_file)\n    assert symlink_path.is_symlink()\n    # Use a relative path string\n    relative_path = os.path.relpath(symlink_path, start=os.getcwd())\n    path_absent(relative_path)\n    assert not symlink_path.exists()\n    # Ensure the target file still exists\n    assert target_file.exists()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4140847509843297
+}

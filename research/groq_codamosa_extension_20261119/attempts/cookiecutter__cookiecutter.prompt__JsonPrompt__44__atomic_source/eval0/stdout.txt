@@ -1,0 +1,75 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_process_response_invalid_json ______________________
+
+user_value = '{name: Alice, age: 30}'
+
+    def process_json(user_value: str):
+        """Load user-supplied value as a JSON dict.
+    
+        :param user_value: User-supplied value to load as a JSON dict
+        """
+        try:
+>           user_dict = json.loads(user_value, object_pairs_hook=OrderedDict)
+
+cookiecutter/prompt.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/json/__init__.py:359: in loads
+    return cls(**kw).decode(s)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/json/decoder.py:337: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f1d5cc81090>
+s = '{name: Alice, age: 30}', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+>           obj, end = self.scan_once(s, idx)
+E           json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/json/decoder.py:353: JSONDecodeError
+
+The above exception was the direct cause of the following exception:
+
+    def test_process_response_invalid_json():
+        # Arrange: an invalid JSON string
+        invalid_json = "{name: Alice, age: 30}"  # missing quotes around keys
+    
+        # Act & Assert: processing should raise a JSONDecodeError
+        with pytest.raises(json.JSONDecodeError):
+>           JsonPrompt.process_response(invalid_json)
+
+../../../../../../attempts/cookiecutter__cookiecutter.prompt__JsonPrompt__44__atomic_source/eval0/test_generated.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+cookiecutter/prompt.py:171: in process_response
+    return process_json(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+user_value = '{name: Alice, age: 30}'
+
+    def process_json(user_value: str):
+        """Load user-supplied value as a JSON dict.
+    
+        :param user_value: User-supplied value to load as a JSON dict
+        """
+        try:
+            user_dict = json.loads(user_value, object_pairs_hook=OrderedDict)
+        except Exception as error:
+            # Leave it up to click to ask the user again
+            msg = 'Unable to decode to JSON.'
+>           raise InvalidResponse(msg) from error
+E           rich.prompt.InvalidResponse: Unable to decode to JSON.
+
+cookiecutter/prompt.py:151: InvalidResponse
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/cookiecutter__cookiecutter.prompt__JsonPrompt__44__atomic_source/eval0/test_generated.py::test_process_response_invalid_json
+1 failed, 2 passed in 0.30s

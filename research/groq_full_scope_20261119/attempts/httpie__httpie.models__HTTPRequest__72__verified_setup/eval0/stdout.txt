@@ -1,0 +1,38 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_headers_includes_host_and_skips_header __________________
+
+    def test_headers_includes_host_and_skips_header():
+        # Prepare a request without a Host header and with a skip header
+        req = requests.Request(
+            method="GET",
+            url="http://example.com/api?x=1",
+            headers={
+                "User-Agent": "test-agent",
+                "X-Custom": "value",
+                "X-Skip": SKIP_HEADER,  # header that should be skipped
+            },
+            data=None,
+        )
+        prepared = req.prepare()
+        http_req = HTTPRequest(prepared)
+    
+        headers_str = http_req.headers
+        # The request line should be first
+        assert headers_str.startswith("GET /api?x=1 HTTP/1.1")
+        # Host header should be added automatically
+        assert "Host: example.com" in headers_str
+        # Skippable header should not appear
+>       assert "X-Skip:" not in headers_str
+E       AssertionError: assert 'X-Skip:' not in 'GET /api?x=... example.com'
+E         
+E         'X-Skip:' is contained here:
+E           m: value
+E           X-Skip: @@@SKIP_HEADER@@@
+E         ? +++++++
+E           Host: example.com
+
+test_generated.py:27: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_headers_includes_host_and_skips_header - Asser...
+1 failed, 2 passed in 0.36s

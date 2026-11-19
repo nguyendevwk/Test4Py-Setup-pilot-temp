@@ -1,0 +1,45 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_find_case_insensitive_and_stripped ____________________
+
+    def test_find_case_insensitive_and_stripped():
+        """DCCRegistry.find should locate conventions regardless of case and surrounding whitespace."""
+        # Register a convention with mixed case and spaces
+        @dcc("  Mixed/Case  ")
+        def mixed_calc(start, asof, end, freq=None):
+            return Decimal(1)
+    
+        # Direct lookup with exact name
+        assert DCCRegistry.find("  Mixed/Case  ") is not None
+    
+        # Lookup with different case
+>       assert DCCRegistry.find("mixed/case") is not None
+E       AssertionError: assert None is not None
+E        +  where None = find('mixed/case')
+E        +    where find = <pypara.dcc.DCCRegistryMachinery object at 0x7fe44b33d840>.find
+
+test_generated.py:39: AssertionError
+__________________ test_last_payment_date_boundary_conditions __________________
+
+    def test_last_payment_date_boundary_conditions():
+        """_last_payment_date should correctly handle edge cases such as year boundaries and end-of-month."""
+        # Case: asof before start month, should return previous year same month
+        start = datetime.date(2020, 5, 15)
+        asof = datetime.date(2021, 3, 10)  # earlier month than start
+        result = _last_payment_date(start, asof, frequency=1)
+        assert result == datetime.date(2020, 5, 15)
+    
+        # Case: asof exactly on a payment month but before eom, should return same month
+        start = datetime.date(2020, 1, 31)
+        asof = datetime.date(2020, 1, 30)
+        result = _last_payment_date(start, asof, frequency=1)
+>       assert result == datetime.date(2020, 1, 31)
+E       AssertionError: assert datetime.date(2019, 1, 31) == datetime.date(2020, 1, 31)
+E        +  where datetime.date(2020, 1, 31) = <class 'datetime.date'>(2020, 1, 31)
+E        +    where <class 'datetime.date'> = datetime.date
+
+test_generated.py:63: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_find_case_insensitive_and_stripped - Assertion...
+FAILED test_generated.py::test_last_payment_date_boundary_conditions - Assert...
+2 failed, 1 passed in 0.15s

@@ -1,0 +1,65 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_parse_basic_docstring __________________________
+
+    def test_parse_basic_docstring():
+        """Verify that a simple numpydoc docstring is parsed correctly."""
+        parser = NumpydocParser()
+        doc = """
+        Short description.
+    
+        Long description that spans
+        multiple lines.
+    
+        Parameters
+        ----------
+        x : int
+            The first parameter.
+        y : str, optional
+            The second parameter.
+        """
+        result = parser.parse(doc)
+        assert result.style == DocstringStyle.NUMPYDOC
+        assert result.short_description == "Short description."
+        assert result.long_description == "Long description that spans\nmultiple lines."
+        assert result.blank_after_short_description is True
+>       assert result.blank_after_long_description is False
+E       assert True is False
+E        +  where True = <docstring_parser.common.Docstring object at 0x7f0cebadbca0>.blank_after_long_description
+
+test_generated.py:25: AssertionError
+__________________________ test_parse_empty_docstring __________________________
+
+    def test_parse_empty_docstring():
+        """An empty or None docstring should return an empty Docstring object."""
+        parser = NumpydocParser()
+>       assert parser.parse("") == parser.parse(None)
+E       AssertionError: assert <docstring_parser.common.Docstring object at 0x7f0ceba8b190> == <docstring_parser.common.Docstring object at 0x7f0ceba8b1c0>
+E        +  where <docstring_parser.common.Docstring object at 0x7f0ceba8b190> = parse('')
+E        +    where parse = <docstring_parser.numpydoc.NumpydocParser object at 0x7f0ceba8a260>.parse
+E        +  and   <docstring_parser.common.Docstring object at 0x7f0ceba8b1c0> = parse(None)
+E        +    where parse = <docstring_parser.numpydoc.NumpydocParser object at 0x7f0ceba8a260>.parse
+
+test_generated.py:35: AssertionError
+______________________ test_parse_unknown_section_raises _______________________
+
+    def test_parse_unknown_section_raises():
+        """If the docstring contains a section title not in the parser's registry,
+        a KeyError should be raised."""
+        parser = NumpydocParser()
+        bad_doc = """
+        Short description.
+    
+        Unknown
+        -------
+        Some content that should trigger an error.
+        """
+>       with pytest.raises(KeyError):
+E       Failed: DID NOT RAISE KeyError
+
+test_generated.py:52: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_basic_docstring - assert True is False
+FAILED test_generated.py::test_parse_empty_docstring - AssertionError: assert...
+FAILED test_generated.py::test_parse_unknown_section_raises - Failed: DID NOT...
+3 failed in 0.13s

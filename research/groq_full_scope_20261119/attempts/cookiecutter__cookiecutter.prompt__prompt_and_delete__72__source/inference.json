@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b772e24a-4650-4b33-acb3-587ed72dd94a",
+  "object": "chat.completion",
+  "created": 1795076310,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom cookiecutter.prompt import prompt_and_delete\n\n\ndef test_prompt_and_delete_removes_existing_file(tmp_path):\n    # Create a temporary file\n    file_path = tmp_path / \"testfile.txt\"\n    file_path.write_text(\"content\")\n    assert file_path.exists()\n\n    # Call the function with no_input=True to force deletion\n    result = prompt_and_delete(file_path, no_input=True)\n\n    # The function should return True and the file should be removed\n    assert result is True\n    assert not file_path.exists()\n\n\ndef test_prompt_and_delete_removes_existing_directory(tmp_path):\n    # Create a temporary directory with a file inside\n    dir_path = tmp_path / \"testdir\"\n    dir_path.mkdir()\n    (dir_path / \"inner.txt\").write_text(\"inner\")\n    assert dir_path.exists()\n    assert (dir_path / \"inner.txt\").exists()\n\n    # Call the function with no_input=True to force deletion\n    result = prompt_and_delete(dir_path, no_input=True)\n\n    # The function should return True and the directory should be removed\n    assert result is True\n    assert not dir_path.exists()\n\n\ndef test_prompt_and_delete_raises_when_path_missing(tmp_path):\n    # Define a path that does not exist\n    missing_path = tmp_path / \"nonexistent.txt\"\n    assert not missing_path.exists()\n\n    # Calling with no_input=True should attempt to delete and raise FileNotFoundError\n    with pytest.raises(FileNotFoundError):\n        prompt_and_delete(missing_path, no_input=True)\n```",
+        "reasoning": "We need tests for prompt_and_delete. It uses read_user_yes_no which is not defined here; likely imported from cookiecutter.prompt? Actually not imported. So code will error. But maybe read_user_yes_no is defined elsewhere in module. We can't import. But we can test behavior by mocking? Can't mock target. But we can test that when no_input True deletes file. We can create temp file and dir. Use tmp_path. For no_input True, it should delete. For no_input False, it will call read_user_yes_no which will raise NameError. So we can't test that path. So only test no_input True. Also test that if path is dir, rmtree called. We can patch rmtree? Can't mock. But we can check file removed. For dir, rmtree will delete. So test that after call, path doesn't exist. Also test that function returns True. Third test maybe test that if path is file, os.remove called. Use tmp_path to create file. Ensure removed. Also test that function returns True. That's two tests. Need third independent scenario: maybe test that when no_input True and path doesn't exist, it doesn't error? It will try os.remove which will raise FileNotFoundError. But we can create nonexistent path and expect FileNotFoundError? But function doesn't catch. So test that it raises FileNotFoundError. That's third. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051568962,
+    "prompt_tokens": 569,
+    "prompt_time": 0.033734925,
+    "completion_tokens": 627,
+    "completion_time": 0.698813895,
+    "total_tokens": 1196,
+    "total_time": 0.73254882,
+    "completion_tokens_details": {
+      "reasoning_tokens": 287
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7se5gs0e3rstvd1ee601sye",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom cookiecutter.prompt import prompt_and_delete\n\n\ndef test_prompt_and_delete_removes_existing_file(tmp_path):\n    # Create a temporary file\n    file_path = tmp_path / \"testfile.txt\"\n    file_path.write_text(\"content\")\n    assert file_path.exists()\n\n    # Call the function with no_input=True to force deletion\n    result = prompt_and_delete(file_path, no_input=True)\n\n    # The function should return True and the file should be removed\n    assert result is True\n    assert not file_path.exists()\n\n\ndef test_prompt_and_delete_removes_existing_directory(tmp_path):\n    # Create a temporary directory with a file inside\n    dir_path = tmp_path / \"testdir\"\n    dir_path.mkdir()\n    (dir_path / \"inner.txt\").write_text(\"inner\")\n    assert dir_path.exists()\n    assert (dir_path / \"inner.txt\").exists()\n\n    # Call the function with no_input=True to force deletion\n    result = prompt_and_delete(dir_path, no_input=True)\n\n    # The function should return True and the directory should be removed\n    assert result is True\n    assert not dir_path.exists()\n\n\ndef test_prompt_and_delete_raises_when_path_missing(tmp_path):\n    # Define a path that does not exist\n    missing_path = tmp_path / \"nonexistent.txt\"\n    assert not missing_path.exists()\n\n    # Calling with no_input=True should attempt to delete and raise FileNotFoundError\n    with pytest.raises(FileNotFoundError):\n        prompt_and_delete(missing_path, no_input=True)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0727860659826547
+}

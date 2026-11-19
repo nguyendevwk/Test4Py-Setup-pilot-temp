@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-34e6574e-18af-41ee-bde0-2c66c39f74e1",
+  "object": "chat.completion",
+  "created": 1795077012,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport sys\nimport io\nimport pytest\nfrom tqdm.contrib.logging import tqdm_logging_redirect\nfrom tqdm import tqdm as std_tqdm\n\ndef test_logging_redirect_to_tqdm_output(capsys):\n    \"\"\"Messages logged inside the context are written to the tqdm bar.\"\"\"\n    logger = logging.getLogger(\"tqdm_test\")\n    logger.setLevel(logging.INFO)\n    # Ensure no handlers interfere\n    logger.handlers = []\n\n    with tqdm_logging_redirect(total=3, desc=\"test\") as pbar:\n        logger.info(\"Hello from tqdm\")\n        pbar.update(1)\n        logger.info(\"Another message\")\n        pbar.update(1)\n        logger.info(\"Final message\")\n        pbar.update(1)\n\n    # Capture stdout and check that the logged messages appear\n    captured = capsys.readouterr()\n    # The messages should be present in the output, each on a new line\n    assert \"Hello from tqdm\" in captured.out\n    assert \"Another message\" in captured.out\n    assert \"Final message\" in captured.out\n\ndef test_logging_redirect_with_custom_logger_and_stream(capsys):\n    \"\"\"Custom logger with a stream handler receives messages via tqdm.\"\"\"\n    stream = io.StringIO()\n    handler = logging.StreamHandler(stream)\n    logger = logging.getLogger(\"custom_logger\")\n    logger.setLevel(logging.DEBUG)\n    logger.handlers = [handler]\n\n    with tqdm_logging_redirect(total=2, desc=\"custom\", loggers=[logger]) as pbar:\n        logger.debug(\"Debug message\")\n        pbar.update(1)\n        logger.warning(\"Warning message\")\n        pbar.update(1)\n\n    # The stream should contain the messages, not the stdout\n    stream_contents = stream.getvalue()\n    assert \"Debug message\" in stream_contents\n    assert \"Warning message\" in stream_contents\n    # The stdout should not contain the messages (only the tqdm bar)\n    captured = capsys.readouterr()\n    assert \"Debug message\" not in captured.out\n    assert \"Warning message\" not in captured.out\n\ndef test_invalid_tqdm_class_raises_type_error():\n    \"\"\"Passing a non-callable as tqdm_class should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        with tqdm_logging_redirect(total=1, tqdm_class=\"not_a_class\") as pbar:\n            # The context manager should fail before yielding\n            pass\n```",
+        "reasoning": "We need to write tests for tqdm_logging_redirect. It yields a pbar. We can test that logs are redirected to tqdm. Use logging. Use tmp_path? Not needed. Use context manager. We'll test that logging messages appear in tqdm bar. Use a simple tqdm with total=5. Use logging.getLogger. Capture output? We can check that the bar's write method called? Hard. Instead, we can test that the context manager yields pbar and that after exit, logging is restored. Use a logger that writes to a StringIO. Use logging.StreamHandler to capture. Then inside context, log a message and check that the handler's stream contains the message. But tqdm redirects logs to tqdm.write, which writes to stdout. We can capture stdout. Use capsys. So test that message appears in stdout. Also test boundary: total=0? error? Maybe test that passing invalid tqdm_class raises TypeError? But function expects tqdm_class to be callable. We can pass a non-callable and expect TypeError. Third test: test that loggers list works: pass custom logger and ensure its messages are redirected. We'll use capsys. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.479798624,
+    "prompt_tokens": 524,
+    "prompt_time": 0.06176722,
+    "completion_tokens": 740,
+    "completion_time": 0.840507271,
+    "total_tokens": 1264,
+    "total_time": 0.902274491,
+    "completion_tokens_details": {
+      "reasoning_tokens": 239
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7setxe9e2hb45w8b2ehyyx0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport sys\nimport io\nimport pytest\nfrom tqdm.contrib.logging import tqdm_logging_redirect\nfrom tqdm import tqdm as std_tqdm\n\ndef test_logging_redirect_to_tqdm_output(capsys):\n    \"\"\"Messages logged inside the context are written to the tqdm bar.\"\"\"\n    logger = logging.getLogger(\"tqdm_test\")\n    logger.setLevel(logging.INFO)\n    # Ensure no handlers interfere\n    logger.handlers = []\n\n    with tqdm_logging_redirect(total=3, desc=\"test\") as pbar:\n        logger.info(\"Hello from tqdm\")\n        pbar.update(1)\n        logger.info(\"Another message\")\n        pbar.update(1)\n        logger.info(\"Final message\")\n        pbar.update(1)\n\n    # Capture stdout and check that the logged messages appear\n    captured = capsys.readouterr()\n    # The messages should be present in the output, each on a new line\n    assert \"Hello from tqdm\" in captured.out\n    assert \"Another message\" in captured.out\n    assert \"Final message\" in captured.out\n\ndef test_logging_redirect_with_custom_logger_and_stream(capsys):\n    \"\"\"Custom logger with a stream handler receives messages via tqdm.\"\"\"\n    stream = io.StringIO()\n    handler = logging.StreamHandler(stream)\n    logger = logging.getLogger(\"custom_logger\")\n    logger.setLevel(logging.DEBUG)\n    logger.handlers = [handler]\n\n    with tqdm_logging_redirect(total=2, desc=\"custom\", loggers=[logger]) as pbar:\n        logger.debug(\"Debug message\")\n        pbar.update(1)\n        logger.warning(\"Warning message\")\n        pbar.update(1)\n\n    # The stream should contain the messages, not the stdout\n    stream_contents = stream.getvalue()\n    assert \"Debug message\" in stream_contents\n    assert \"Warning message\" in stream_contents\n    # The stdout should not contain the messages (only the tqdm bar)\n    captured = capsys.readouterr()\n    assert \"Debug message\" not in captured.out\n    assert \"Warning message\" not in captured.out\n\ndef test_invalid_tqdm_class_raises_type_error():\n    \"\"\"Passing a non-callable as tqdm_class should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        with tqdm_logging_redirect(total=1, tqdm_class=\"not_a_class\") as pbar:\n            # The context manager should fail before yielding\n            pass\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.7068496830179356
+}

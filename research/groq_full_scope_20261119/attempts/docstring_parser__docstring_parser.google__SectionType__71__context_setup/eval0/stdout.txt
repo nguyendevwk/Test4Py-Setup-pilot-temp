@@ -1,0 +1,77 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_section_type_int_enum_behavior ______________________
+
+    def test_section_type_int_enum_behavior():
+        """SectionType should behave like an IntEnum: support integer comparison and arithmetic."""
+        assert SectionType.SINGULAR == 0
+        assert SectionType.MULTIPLE == 1
+        assert SectionType.SINGULAR_OR_MULTIPLE == 2
+        # Arithmetic operations should produce integers, not SectionType
+        assert isinstance(SectionType.SINGULAR + 1, int)
+        assert SectionType.SINGULAR + 1 == 1
+        # Comparisons with other enums should raise TypeError
+>       with pytest.raises(TypeError):
+E       Failed: DID NOT RAISE TypeError
+
+test_generated.py:28: Failed
+____________________ test_section_type_invalid_value_raises ____________________
+
+    def test_section_type_invalid_value_raises():
+        """Creating a SectionType with an invalid value should raise ValueError."""
+        with pytest.raises(ValueError):
+            SectionType(3)
+        with pytest.raises(ValueError):
+            SectionType(-1)
+        # Ensure that passing a non-integer raises TypeError
+        with pytest.raises(TypeError):
+>           SectionType("0")
+
+test_generated.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/enum.py:385: in __call__
+    return cls.__new__(cls, value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <enum 'SectionType'>, value = '0'
+
+    def __new__(cls, value):
+        # all enum instances are actually created during class construction
+        # without calling this method; this method is called by the metaclass'
+        # __call__ (i.e. Color(3) ), and by pickle
+        if type(value) is cls:
+            # For lookups like Color(Color.RED)
+            return value
+        # by-value search for a matching enum member
+        # see if it's in the reverse mapping (for hashable values)
+        try:
+            return cls._value2member_map_[value]
+        except KeyError:
+            # Not found, no need to do long O(n) search
+            pass
+        except TypeError:
+            # not there, now do long search -- O(n) behavior
+            for member in cls._member_map_.values():
+                if member._value_ == value:
+                    return member
+        # still not found -- try _missing_ hook
+        try:
+            exc = None
+            result = cls._missing_(value)
+        except Exception as e:
+            exc = e
+            result = None
+        try:
+            if isinstance(result, cls):
+                return result
+            else:
+                ve_exc = ValueError("%r is not a valid %s" % (value, cls.__qualname__))
+                if result is None and exc is None:
+>                   raise ve_exc
+E                   ValueError: '0' is not a valid SectionType
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/enum.py:710: ValueError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_section_type_int_enum_behavior - Failed: DID N...
+FAILED test_generated.py::test_section_type_invalid_value_raises - ValueError...
+2 failed, 1 passed in 0.17s

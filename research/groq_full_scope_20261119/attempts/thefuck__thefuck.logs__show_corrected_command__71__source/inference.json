@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-9974975d-4cc8-4450-b512-0e36bc53e5b5",
+  "object": "chat.completion",
+  "created": 1795078503,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport io\nimport pytest\nfrom thefuck.logs import show_corrected_command\nfrom thefuck import const\n\n# Helper to capture stderr output\n@pytest.fixture\ndef captured_stderr():\n    old_stderr = sys.stderr\n    sys.stderr = io.StringIO()\n    try:\n        yield sys.stderr\n    finally:\n        sys.stderr = old_stderr\n\ndef test_show_corrected_command_with_side_effect(captured_stderr):\n    class Cmd:\n        script = \"git commit -m 'msg'\"\n        side_effect = True\n    show_corrected_command(Cmd)\n    output = captured_stderr.getvalue()\n    assert const.USER_COMMAND_MARK in output\n    assert \"git commit -m 'msg'\" in output\n    assert \"(+side effect)\" in output\n    # Ensure formatting includes color codes\n    assert \"\\x1b[\" in output\n\ndef test_show_corrected_command_without_side_effect(captured_stderr):\n    class Cmd:\n        script = \"ls -la\"\n        side_effect = False\n    show_corrected_command(Cmd)\n    output = captured_stderr.getvalue()\n    assert const.USER_COMMAND_MARK in output\n    assert \"ls -la\" in output\n    assert \"(+side effect)\" not in output\n    assert \"\\x1b[\" in output\n\ndef test_show_corrected_command_empty_script(captured_stderr):\n    class Cmd:\n        script = \"\"\n        side_effect = False\n    show_corrected_command(Cmd)\n    output = captured_stderr.getvalue()\n    assert const.USER_COMMAND_MARK in output\n    assert output.endswith(\"\\n\")\n    # Even with empty script, side effect string should be absent\n    assert \"(+side effect)\" not in output\n```",
+        "reasoning": "We need to test show_corrected_command. It writes to stderr. We can capture stderr. Use tmp_path? Not needed. Just capture. Use pytest. Provide a simple object with attributes script and side_effect. Test both side_effect True and False. Three test functions: one normal, one boundary? maybe empty script? error behavior? maybe script None? But function expects string. Could test that it writes correct formatting. Use colorama for color codes. We'll just check that output contains script and side effect string. Use contextmanager to capture stderr. Write three tests: normal with side_effect True, normal with side_effect False, and boundary: script empty string. Ensure no exceptions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 1.10513513,
+    "prompt_tokens": 336,
+    "prompt_time": 0.019861889,
+    "completion_tokens": 503,
+    "completion_time": 0.555675794,
+    "total_tokens": 839,
+    "total_time": 0.575537683,
+    "completion_tokens_details": {
+      "reasoning_tokens": 139
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg8dv5e5s88pg0nn8663qn",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport io\nimport pytest\nfrom thefuck.logs import show_corrected_command\nfrom thefuck import const\n\n# Helper to capture stderr output\n@pytest.fixture\ndef captured_stderr():\n    old_stderr = sys.stderr\n    sys.stderr = io.StringIO()\n    try:\n        yield sys.stderr\n    finally:\n        sys.stderr = old_stderr\n\ndef test_show_corrected_command_with_side_effect(captured_stderr):\n    class Cmd:\n        script = \"git commit -m 'msg'\"\n        side_effect = True\n    show_corrected_command(Cmd)\n    output = captured_stderr.getvalue()\n    assert const.USER_COMMAND_MARK in output\n    assert \"git commit -m 'msg'\" in output\n    assert \"(+side effect)\" in output\n    # Ensure formatting includes color codes\n    assert \"\\x1b[\" in output\n\ndef test_show_corrected_command_without_side_effect(captured_stderr):\n    class Cmd:\n        script = \"ls -la\"\n        side_effect = False\n    show_corrected_command(Cmd)\n    output = captured_stderr.getvalue()\n    assert const.USER_COMMAND_MARK in output\n    assert \"ls -la\" in output\n    assert \"(+side effect)\" not in output\n    assert \"\\x1b[\" in output\n\ndef test_show_corrected_command_empty_script(captured_stderr):\n    class Cmd:\n        script = \"\"\n        side_effect = False\n    show_corrected_command(Cmd)\n    output = captured_stderr.getvalue()\n    assert const.USER_COMMAND_MARK in output\n    assert output.endswith(\"\\n\")\n    # Even with empty script, side effect string should be absent\n    assert \"(+side effect)\" not in output\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 2.044878958025947
+}

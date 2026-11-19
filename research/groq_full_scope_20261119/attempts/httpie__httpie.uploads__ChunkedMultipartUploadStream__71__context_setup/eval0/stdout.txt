@@ -1,0 +1,42 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_iteration_yields_chunks _________________________
+
+    def test_iteration_yields_chunks():
+        data = b'abcdefghijklmnopqrstuvwxyz'
+        encoder = DummyEncoder(data, chunk_size=5)
+        stream = ChunkedMultipartUploadStream(encoder)
+        chunks = list(stream)
+        # The encoder should split the data into 5-byte chunks
+>       assert chunks == [b'abcde', b'fghij', b'klmno', b'pqrst', b'uvwxy', b'z']
+E       AssertionError: assert [b'abcdefghij...opqrstuvwxyz'] == [b'abcde', b'...'uvwxy', b'z']
+E         
+E         At index 0 diff: b'abcdefghijklmnopqrstuvwxyz' != b'abcde'
+E         Right contains 5 more items, first extra item: b'fghij'
+E         Use -v to get more diff
+
+test_generated.py:25: AssertionError
+_________________________ test_event_set_on_each_chunk _________________________
+
+    def test_event_set_on_each_chunk():
+        data = b'1234567890'
+        encoder = DummyEncoder(data, chunk_size=3)
+        event = threading.Event()
+        stream = ChunkedMultipartUploadStream(encoder, event=event)
+        # Initially the event should not be set
+        assert not event.is_set()
+        # Consume the first chunk
+        first_chunk = next(iter(stream))
+        # After reading a chunk the event should be set
+        assert event.is_set()
+        # Reset the event for the next chunk
+        event.clear()
+        # Consume the second chunk
+>       second_chunk = next(iter(stream))
+E       StopIteration
+
+test_generated.py:41: StopIteration
+=========================== short test summary info ============================
+FAILED test_generated.py::test_iteration_yields_chunks - AssertionError: asse...
+FAILED test_generated.py::test_event_set_on_each_chunk - StopIteration
+2 failed, 1 passed in 0.52s

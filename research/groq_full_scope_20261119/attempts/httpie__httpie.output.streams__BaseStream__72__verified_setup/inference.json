@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-79a39582-393e-436c-8d01-892e3306706a",
+  "object": "chat.completion",
+  "created": 1795079530,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.streams import BaseStream\nfrom httpie.models import HTTPMessage, OutputOptions\n\n# Minimal concrete implementation of BaseStream for testing\nclass DummyStream(BaseStream):\n    def iter_body(self):\n        # Return body as a single chunk\n        return [b\"Hello, world!\"]\n\n# Helper to create a simple HTTPMessage\nclass SimpleMessage(HTTPMessage):\n    def __init__(self, headers: str, metadata: str, body: str):\n        self._headers = headers\n        self._metadata = metadata\n        self._body = body\n\n    def headers(self):\n        return self._headers\n\n    def metadata(self):\n        return self._metadata\n\n    def body(self):\n        return self._body\n\n    def encode(self):\n        return self._body.encode()\n\n    def headers_encode(self):\n        return self._headers.encode()\n\n    def metadata_encode(self):\n        return self._metadata.encode()\n\n    # Provide attributes expected by BaseStream\n    @property\n    def headers(self):\n        return self._headers\n\n    @property\n    def metadata(self):\n        return self._metadata\n\n    @property\n    def body(self):\n        return self._body\n\n@pytest.fixture\ndef message():\n    return SimpleMessage(\n        headers=\"HTTP/1.1 200 OK\\r\\nContent-Type: text/plain\",\n        metadata=\"Request: GET /\",\n        body=\"Hello, world!\"\n    )\n\ndef test_headers_only(message):\n    opts = OutputOptions(headers=True, body=False, meta=False)\n    stream = DummyStream(message, opts)\n    result = b\"\".join(stream)\n    assert result == b\"HTTP/1.1 200 OK\\r\\nContent-Type: text/plain\\r\\n\\r\\n\"\n\ndef test_body_only(message):\n    opts = OutputOptions(headers=False, body=True, meta=False)\n    stream = DummyStream(message, opts)\n    result = b\"\".join(stream)\n    assert result == b\"Hello, world!\"\n\ndef test_headers_body_meta(message):\n    opts = OutputOptions(headers=True, body=True, meta=True)\n    stream = DummyStream(message, opts)\n    result = b\"\".join(stream)\n    expected = (\n        b\"HTTP/1.1 200 OK\\r\\nContent-Type: text/plain\\r\\n\\r\\n\"\n        b\"Hello, world!\\n\\n\"\n        b\"Request: GET /\\n\\n\"\n    )\n    assert result == expected\n```",
+        "reasoning": "Need tests for BaseStream. But BaseStream abstract. We can create a concrete subclass for testing. Use simple HTTPMessage mock. Let's create minimal HTTPMessage with headers, metadata, body. Use OutputOptions with flags. Test iteration yields correct bytes. Also test DataSuppressedError handling. But DataSuppressedError not defined in snippet; assume imported? Not present. We can skip that. Just test normal behavior. Three tests: headers only, body only, headers+body+meta. Use simple subclass."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005006246,
+    "prompt_tokens": 655,
+    "prompt_time": 0.009416314,
+    "completion_tokens": 616,
+    "completion_time": 0.690148703,
+    "total_tokens": 1271,
+    "total_time": 0.699565017,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 104
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh7scre8sv464tt22jvmxa",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.streams import BaseStream\nfrom httpie.models import HTTPMessage, OutputOptions\n\n# Minimal concrete implementation of BaseStream for testing\nclass DummyStream(BaseStream):\n    def iter_body(self):\n        # Return body as a single chunk\n        return [b\"Hello, world!\"]\n\n# Helper to create a simple HTTPMessage\nclass SimpleMessage(HTTPMessage):\n    def __init__(self, headers: str, metadata: str, body: str):\n        self._headers = headers\n        self._metadata = metadata\n        self._body = body\n\n    def headers(self):\n        return self._headers\n\n    def metadata(self):\n        return self._metadata\n\n    def body(self):\n        return self._body\n\n    def encode(self):\n        return self._body.encode()\n\n    def headers_encode(self):\n        return self._headers.encode()\n\n    def metadata_encode(self):\n        return self._metadata.encode()\n\n    # Provide attributes expected by BaseStream\n    @property\n    def headers(self):\n        return self._headers\n\n    @property\n    def metadata(self):\n        return self._metadata\n\n    @property\n    def body(self):\n        return self._body\n\n@pytest.fixture\ndef message():\n    return SimpleMessage(\n        headers=\"HTTP/1.1 200 OK\\r\\nContent-Type: text/plain\",\n        metadata=\"Request: GET /\",\n        body=\"Hello, world!\"\n    )\n\ndef test_headers_only(message):\n    opts = OutputOptions(headers=True, body=False, meta=False)\n    stream = DummyStream(message, opts)\n    result = b\"\".join(stream)\n    assert result == b\"HTTP/1.1 200 OK\\r\\nContent-Type: text/plain\\r\\n\\r\\n\"\n\ndef test_body_only(message):\n    opts = OutputOptions(headers=False, body=True, meta=False)\n    stream = DummyStream(message, opts)\n    result = b\"\".join(stream)\n    assert result == b\"Hello, world!\"\n\ndef test_headers_body_meta(message):\n    opts = OutputOptions(headers=True, body=True, meta=True)\n    stream = DummyStream(message, opts)\n    result = b\"\".join(stream)\n    expected = (\n        b\"HTTP/1.1 200 OK\\r\\nContent-Type: text/plain\\r\\n\\r\\n\"\n        b\"Hello, world!\\n\\n\"\n        b\"Request: GET /\\n\\n\"\n    )\n    assert result == expected\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "9060985f97d84e619f8ad765bfc8a86e",
+  "_api_plus_pacing_seconds": 1.6657256719772704
+}

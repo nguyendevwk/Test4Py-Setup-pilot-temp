@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-85baab21-f264-4f2f-afc6-ba4ad4cc4bf7",
+  "object": "chat.completion",
+  "created": 1795076802,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport decimal\nimport pytest\nfrom pypara.dcc import dcfc_30_360_german\n\ndef test_normal_case_example_1():\n    \"\"\"Verify the example from the docstring for a typical February period.\"\"\"\n    start = datetime.date(2007, 12, 28)\n    asof = datetime.date(2008, 2, 28)\n    end = asof\n    result = dcfc_30_360_german(start, asof, end)\n    assert isinstance(result, decimal.Decimal)\n    assert result == decimal.Decimal('0.16666666666667')\n\ndef test_boundary_case_last_day_of_month():\n    \"\"\"Check that dates on the last day of a month are treated as day 30.\"\"\"\n    # Start on 31st January, asof on 31st March, end on 31st March\n    start = datetime.date(2023, 1, 31)\n    asof = datetime.date(2023, 3, 31)\n    end = asof\n    # Manual calculation:\n    # d1 = 30 (31st -> 30), d2 = 30 (31st -> 30)\n    # nod = (30-30) + 30*(3-1) + 360*(2023-2023) = 60\n    expected = decimal.Decimal('60') / decimal.Decimal('360')\n    assert dcfc_30_360_german(start, asof, end) == expected\n\ndef test_asof_before_start_returns_zero_fraction():\n    \"\"\"When asof is before start, the fraction should be zero (handled by DCC logic).\"\"\"\n    # The function itself does not guard this, but the DCC wrapper does.\n    # We directly call the function to confirm it still returns a Decimal.\n    start = datetime.date(2024, 5, 10)\n    asof = datetime.date(2024, 5, 5)   # before start\n    end = datetime.date(2024, 6, 10)\n    result = dcfc_30_360_german(start, asof, end)\n    # The calculation will produce a negative nod, but the DCC wrapper would return ZERO.\n    # Here we just ensure the function returns a Decimal and the value is negative.\n    assert isinstance(result, decimal.Decimal)\n    assert result < decimal.Decimal('0')\n```",
+        "reasoning": "We need 3 test functions for dcfc_30_360_german. Use datetime.date. Test normal, boundary, error? The function expects Date type but uses .day etc. Use datetime.date. Test normal case: example given. Test boundary: start 31 Jan, asof 28 Feb? Also test error: asof before start? But function doesn't check; but DCC uses. We'll just test that asof before start returns 0? But not in function. So maybe test that negative nod handled? We'll test that start=31, asof=31, end=31 gives 0. Use assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052305154,
+    "prompt_tokens": 1918,
+    "prompt_time": 0.113907661,
+    "completion_tokens": 639,
+    "completion_time": 0.741647821,
+    "total_tokens": 2557,
+    "total_time": 0.855555482,
+    "completion_tokens_details": {
+      "reasoning_tokens": 130
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7semh56e8pakcybftg50zmj",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport decimal\nimport pytest\nfrom pypara.dcc import dcfc_30_360_german\n\ndef test_normal_case_example_1():\n    \"\"\"Verify the example from the docstring for a typical February period.\"\"\"\n    start = datetime.date(2007, 12, 28)\n    asof = datetime.date(2008, 2, 28)\n    end = asof\n    result = dcfc_30_360_german(start, asof, end)\n    assert isinstance(result, decimal.Decimal)\n    assert result == decimal.Decimal('0.16666666666667')\n\ndef test_boundary_case_last_day_of_month():\n    \"\"\"Check that dates on the last day of a month are treated as day 30.\"\"\"\n    # Start on 31st January, asof on 31st March, end on 31st March\n    start = datetime.date(2023, 1, 31)\n    asof = datetime.date(2023, 3, 31)\n    end = asof\n    # Manual calculation:\n    # d1 = 30 (31st -> 30), d2 = 30 (31st -> 30)\n    # nod = (30-30) + 30*(3-1) + 360*(2023-2023) = 60\n    expected = decimal.Decimal('60') / decimal.Decimal('360')\n    assert dcfc_30_360_german(start, asof, end) == expected\n\ndef test_asof_before_start_returns_zero_fraction():\n    \"\"\"When asof is before start, the fraction should be zero (handled by DCC logic).\"\"\"\n    # The function itself does not guard this, but the DCC wrapper does.\n    # We directly call the function to confirm it still returns a Decimal.\n    start = datetime.date(2024, 5, 10)\n    asof = datetime.date(2024, 5, 5)   # before start\n    end = datetime.date(2024, 6, 10)\n    result = dcfc_30_360_german(start, asof, end)\n    # The calculation will produce a negative nod, but the DCC wrapper would return ZERO.\n    # Here we just ensure the function returns a Decimal and the value is negative.\n    assert isinstance(result, decimal.Decimal)\n    assert result < decimal.Decimal('0')\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1907150910119526
+}

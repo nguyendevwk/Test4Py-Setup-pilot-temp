@@ -1,0 +1,94 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+__________________ test_lazyperclassproperty_caches_per_class __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-30/test_lazyperclassproperty_cach0')
+
+    def test_lazyperclassproperty_caches_per_class(tmp_path):
+        """The property should compute once per class and cache the result."""
+        counter = {"count": 0}
+    
+        @lazyperclassproperty
+        def value(cls):
+            counter["count"] += 1
+            return f"{cls.__name__}_value"
+    
+        class Base:
+            pass
+    
+        class Child(Base):
+            pass
+    
+        # First access on Base triggers computation
+>       assert Base.value == "Base_value"
+E       AttributeError: type object 'Base' has no attribute 'value'
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyperclassproperty__43__ast_dependencies/eval0/test_generated.py:21: AttributeError
+________________ test_lazyperclassproperty_access_via_instance _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-30/test_lazyperclassproperty_acce0')
+
+    def test_lazyperclassproperty_access_via_instance(tmp_path):
+        """Accessing the property through an instance should return the same cached value."""
+        counter = {"count": 0}
+    
+        @lazyperclassproperty
+        def value(cls):
+            counter["count"] += 1
+            return f"{cls.__name__}_value"
+    
+        class MyClass:
+            pass
+    
+        instance = MyClass()
+        # First access via class triggers computation
+>       assert MyClass.value == "MyClass_value"
+E       AttributeError: type object 'MyClass' has no attribute 'value'
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyperclassproperty__43__ast_dependencies/eval0/test_generated.py:55: AttributeError
+_____________ test_lazyperclassproperty_inheritance_and_overriding _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-30/test_lazyperclassproperty_inhe0')
+
+    def test_lazyperclassproperty_inheritance_and_overriding(tmp_path):
+        """Subclass can override the property and maintain its own cache."""
+        counter = {"Base": 0, "Sub": 0}
+    
+        @lazyperclassproperty
+        def value(cls):
+            counter[cls.__name__] += 1
+            return f"{cls.__name__}_value"
+    
+        class Base:
+            pass
+    
+        class Sub(Base):
+            pass
+    
+        # Base and Sub each compute once
+>       assert Base.value == "Base_value"
+E       AttributeError: type object 'Base' has no attribute 'value'
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyperclassproperty__43__ast_dependencies/eval0/test_generated.py:79: AttributeError
+_________________ test_lazyperclassproperty_error_propagation __________________
+
+    def test_lazyperclassproperty_error_propagation():
+        """If the underlying function raises, the exception propagates and is not cached."""
+        @lazyperclassproperty
+        def value(cls):
+            raise ValueError("boom")
+    
+        class ErrorClass:
+            pass
+    
+        with pytest.raises(ValueError, match="boom"):
+>           _ = ErrorClass.value
+E           AttributeError: type object 'ErrorClass' has no attribute 'value'
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyperclassproperty__43__ast_dependencies/eval0/test_generated.py:112: AttributeError
+=========================== short test summary info ============================
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyperclassproperty__43__ast_dependencies/eval0/test_generated.py::test_lazyperclassproperty_caches_per_class
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyperclassproperty__43__ast_dependencies/eval0/test_generated.py::test_lazyperclassproperty_access_via_instance
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyperclassproperty__43__ast_dependencies/eval0/test_generated.py::test_lazyperclassproperty_inheritance_and_overriding
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyperclassproperty__43__ast_dependencies/eval0/test_generated.py::test_lazyperclassproperty_error_propagation
+4 failed in 0.13s

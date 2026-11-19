@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-faad2df1-f2c9-4a7d-868d-65bc36c558e0",
+  "object": "chat.completion",
+  "created": 1795078456,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom docstring_parser.parser import parse, DocstringStyle, ParseError\nfrom docstring_parser.common import Docstring\n\n\ndef test_parse_google_style_returns_docstring():\n    \"\"\"Parsing a Google‑style docstring should return a Docstring instance.\"\"\"\n    google_doc = \"\"\"\n    Short description.\n\n    Args:\n        x (int): The first number.\n        y (int): The second number.\n\n    Returns:\n        int: The sum of x and y.\n    \"\"\"\n    result = parse(google_doc, style=DocstringStyle.GOOGLE)\n    assert isinstance(result, Docstring)\n    assert result.short_description == \"Short description.\"\n    assert len(result.params) == 2\n    assert result.params[0].arg_name == \"x\"\n    assert result.params[0].type_name == \"int\"\n    assert result.params[0].description == \"The first number.\"\n    assert result.returns[0].type_name == \"int\"\n    assert result.returns[0].description == \"The sum of x and y.\"\n\n\ndef test_parse_auto_prefers_style_with_more_meta():\n    \"\"\"AUTO should return the parse result with the most meta information.\"\"\"\n    mixed_doc = \"\"\"\n    Short description.\n\n    Args:\n        a (int): First argument.\n\n    Returns:\n        int: Result.\n    \"\"\"\n    # Explicit Google style parsing\n    google_result = parse(mixed_doc, style=DocstringStyle.GOOGLE)\n    # AUTO parsing should yield the same result because Google has the most meta\n    auto_result = parse(mixed_doc, style=DocstringStyle.AUTO)\n    assert google_result == auto_result\n    assert len(auto_result.params) == 1\n    assert auto_result.params[0].arg_name == \"a\"\n\n\ndef test_parse_invalid_docstring_raises_parse_error():\n    \"\"\"If no style matches, parse should raise the first ParseError encountered.\"\"\"\n    invalid_doc = \"Just some random text that does not conform to any style.\"\n    with pytest.raises(ParseError):\n        parse(invalid_doc, style=DocstringStyle.AUTO)\n```",
+        "reasoning": "We need to test parse function. Write three tests: normal parsing with google style, boundary: empty docstring returns empty Docstring? error: invalid style? Actually parse raises ParseError if none matched. We can craft a docstring that fails all styles: maybe random text. But parse will try all and if none succeed, exc will be first ParseError. We can assert that ParseError is raised. Also test that AUTO chooses best match: give a docstring that matches multiple styles? maybe google and numpydoc both parse? Use a simple docstring with short description only. Should return one with most meta? Hard. Maybe test that parse with explicit style returns same as AUTO? For same docstring, parse with google style equals parse with AUTO? Might be true. We'll test that. Use tmp_path not needed. We'll use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.056126651,
+    "prompt_tokens": 515,
+    "prompt_time": 0.000125288,
+    "completion_tokens": 609,
+    "completion_time": 0.700015262,
+    "total_tokens": 1124,
+    "total_time": 0.70014055,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 173
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg6zz0eawt8p2ey0z5vk9j",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom docstring_parser.parser import parse, DocstringStyle, ParseError\nfrom docstring_parser.common import Docstring\n\n\ndef test_parse_google_style_returns_docstring():\n    \"\"\"Parsing a Google‑style docstring should return a Docstring instance.\"\"\"\n    google_doc = \"\"\"\n    Short description.\n\n    Args:\n        x (int): The first number.\n        y (int): The second number.\n\n    Returns:\n        int: The sum of x and y.\n    \"\"\"\n    result = parse(google_doc, style=DocstringStyle.GOOGLE)\n    assert isinstance(result, Docstring)\n    assert result.short_description == \"Short description.\"\n    assert len(result.params) == 2\n    assert result.params[0].arg_name == \"x\"\n    assert result.params[0].type_name == \"int\"\n    assert result.params[0].description == \"The first number.\"\n    assert result.returns[0].type_name == \"int\"\n    assert result.returns[0].description == \"The sum of x and y.\"\n\n\ndef test_parse_auto_prefers_style_with_more_meta():\n    \"\"\"AUTO should return the parse result with the most meta information.\"\"\"\n    mixed_doc = \"\"\"\n    Short description.\n\n    Args:\n        a (int): First argument.\n\n    Returns:\n        int: Result.\n    \"\"\"\n    # Explicit Google style parsing\n    google_result = parse(mixed_doc, style=DocstringStyle.GOOGLE)\n    # AUTO parsing should yield the same result because Google has the most meta\n    auto_result = parse(mixed_doc, style=DocstringStyle.AUTO)\n    assert google_result == auto_result\n    assert len(auto_result.params) == 1\n    assert auto_result.params[0].arg_name == \"a\"\n\n\ndef test_parse_invalid_docstring_raises_parse_error():\n    \"\"\"If no style matches, parse should raise the first ParseError encountered.\"\"\"\n    invalid_doc = \"Just some random text that does not conform to any style.\"\n    with pytest.raises(ParseError):\n        parse(invalid_doc, style=DocstringStyle.AUTO)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0885991100221872
+}

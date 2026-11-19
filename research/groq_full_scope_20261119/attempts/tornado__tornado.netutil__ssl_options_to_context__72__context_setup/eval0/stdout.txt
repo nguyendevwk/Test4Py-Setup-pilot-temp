@@ -1,0 +1,77 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_ssl_options_to_context_with_dict _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__ssl_options_to_context__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_ssl_options_to_context_wi0')
+
+    def test_ssl_options_to_context_with_dict(tmp_path):
+        # Create a temporary self‑signed cert file for testing
+        cert_file = tmp_path / "cert.pem"
+        key_file = tmp_path / "key.pem"
+        # Use openssl via subprocess to generate a simple cert
+        # (Python's ssl module can load a self‑signed cert without a CA)
+        os.system(
+            f"openssl req -x509 -newkey rsa:2048 -keyout {key_file} "
+            f"-out {cert_file} -days 1 -nodes -subj '/CN=localhost'"
+        )
+        options = {
+            "ssl_version": ssl.PROTOCOL_TLS_CLIENT,
+            "certfile": str(cert_file),
+            "keyfile": str(key_file),
+            "cert_reqs": ssl.CERT_NONE,
+            "ciphers": "ECDHE-RSA-AES128-GCM-SHA256",
+        }
+        ctx = ssl_options_to_context(options)
+        assert isinstance(ctx, ssl.SSLContext)
+        # Verify that the context was configured as expected
+        assert ctx.verify_mode == ssl.CERT_NONE
+        assert ctx.check_hostname is False
+        # The context should have the cipher we requested
+>       assert "ECDHE-RSA-AES128-GCM-SHA256" in ctx.get_ciphers()[0]["name"]
+E       AssertionError: assert 'ECDHE-RSA-AES128-GCM-SHA256' in 'TLS_AES_256_GCM_SHA384'
+
+test_generated.py:30: AssertionError
+----------------------------- Captured stderr call -----------------------------
+.+.+.....+.+.....+.............+...............+++++++++++++++++++++++++++++++++++++++*.+..............+++++++++++++++++++++++++++++++++++++++*................+......+..+....+...........+...+.......+..+.......+...+...++++++
+....+.....+++++++++++++++++++++++++++++++++++++++*..+...+..........+++++++++++++++++++++++++++++++++++++++*.+.+............+........+.+...+...+..............+...+...++++++
+-----
+_________________ test_ssl_options_to_context_server_side_flag _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__ssl_options_to_context__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_ssl_options_to_context_se0')
+
+    def test_ssl_options_to_context_server_side_flag(tmp_path):
+        # Generate a cert for server side
+        cert_file = tmp_path / "server_cert.pem"
+        key_file = tmp_path / "server_key.pem"
+        os.system(
+            f"openssl req -x509 -newkey rsa:2048 -keyout {key_file} "
+            f"-out {cert_file} -days 1 -nodes -subj '/CN=server'"
+        )
+        options = {
+            "ssl_version": ssl.PROTOCOL_TLS,
+            "certfile": str(cert_file),
+            "keyfile": str(key_file),
+        }
+        ctx = ssl_options_to_context(options, server_side=True)
+        assert isinstance(ctx, ssl.SSLContext)
+        # Server side should use PROTOCOL_TLS_SERVER by default
+>       assert ctx.protocol == ssl.PROTOCOL_TLS_SERVER
+E       assert <_SSLMethod.PROTOCOL_TLS: 2> == <_SSLMethod.PROTOCOL_TLS_SERVER: 17>
+E        +  where <_SSLMethod.PROTOCOL_TLS: 2> = <ssl.SSLContext object at 0x7f8b570bc6c0>.protocol
+E        +  and   <_SSLMethod.PROTOCOL_TLS_SERVER: 17> = ssl.PROTOCOL_TLS_SERVER
+
+test_generated.py:48: AssertionError
+----------------------------- Captured stderr call -----------------------------
+..+.............+.........+........+...+....+...+..+.+......+...+.....+......+.+.........+..+....+...............+...+..+.+...+.....+++++++++++++++++++++++++++++++++++++++*.................+++++++++++++++++++++++++++++++++++++++*.......+.............+...+..+.....................+.+.........+......+...+...+.........+.........+..+...+.+.....+.+..+......+....+...........+....+.....+.+.........+..+...+......+.+......+........+......+.+.........+......+...+...........+......+...+.+...+...+...+.................+....+........+.......+......+............+...+...+.....+......+...+..........+..+.+..................+..+...............+....+.........+.........+.....+...+...+....+...+........+.+......+..+.......+...+...+....................+...+......+.+...+...........+...+.+..............+.+.....+.+...+.....+.......+.....+....+..+.........+..........+...+.................+.+...+..++++++
+.+.+...+...+.....+...+....+..+....+++++++++++++++++++++++++++++++++++++++*.......+............+..............+.........+.+..............+............+...+.+......+++++++++++++++++++++++++++++++++++++++*.+..............+.......+.................+.......+.........+............++++++
+-----
+=============================== warnings summary ===============================
+research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__ssl_options_to_context__72__context_setup/eval0/test_generated.py::test_ssl_options_to_context_server_side_flag
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/netutil.py:619: DeprecationWarning: ssl.PROTOCOL_TLS is deprecated
+    context = ssl.SSLContext(ssl_options.get("ssl_version", default_version))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_ssl_options_to_context_with_dict - AssertionEr...
+FAILED test_generated.py::test_ssl_options_to_context_server_side_flag - asse...
+2 failed, 1 passed, 1 warning in 0.50s

@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-4f2ad011-62bc-4e1e-9541-43db884110b1",
+  "object": "chat.completion",
+  "created": 1795079431,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport sys\nimport pytest\nfrom httpie.output.writer import write_raw_data\nfrom httpie.context import Environment\nfrom httpie.models import OutputOptions, ProcessingOptions\nfrom httpie.cli.dicts import HTTPHeadersDict\n\n# Minimal Environment stub for testing\nclass DummyEnv(Environment):\n    def __init__(self):\n        super().__init__()\n        self.stdout = io.BytesIO()\n        self.stderr = io.BytesIO()\n        self.stdout_isatty = False\n        self.is_windows = False\n        self.stderr_isatty = False\n\ndef test_write_raw_data_writes_bytes_to_stdout():\n    env = DummyEnv()\n    data = b\"hello world\"\n    write_raw_data(env, data)\n    env.stdout.seek(0)\n    assert env.stdout.read() == b\"hello world\"\n\ndef test_write_raw_data_includes_headers_in_message():\n    env = DummyEnv()\n    data = b\"test\"\n    headers = HTTPHeadersDict({\"Content-Type\": \"text/plain\"})\n    write_raw_data(env, data, headers=headers)\n    env.stdout.seek(0)\n    # The output should contain the header line followed by the body\n    output = env.stdout.read().decode()\n    assert \"Content-Type: text/plain\" in output\n    assert output.strip().endswith(\"test\")\n\ndef test_write_raw_data_returns_none_and_handles_empty_processing_options():\n    env = DummyEnv()\n    data = b\"sample\"\n    result = write_raw_data(env, data, processing_options=ProcessingOptions())\n    assert result is None\n    env.stdout.seek(0)\n    assert env.stdout.read() == b\"sample\"\n```",
+        "reasoning": "We need three tests for write_raw_data. We can create a dummy Environment with stdout as BytesIO. Use simple data. Test that data written. Also test headers passed. And test that when output_options.any() false returns None. But write_raw_data always creates message with body. output_options from_message will have body=True. So maybe test that when processing_options.stream False flush behavior? Hard. Maybe test that write_raw_data writes to env.stdout. Use tmp_path to write file? Use BytesIO. We'll create a minimal Environment stub with needed attributes: stdout, stderr, stdout_isatty, is_windows, etc. Use simple class. Test 1: normal data writes. Test 2: headers passed. Test 3: when processing_options.stream True flush called? Hard to detect flush. Instead test that write_raw_data returns None. We'll just assert None."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005385621,
+    "prompt_tokens": 1169,
+    "prompt_time": 0.056392356,
+    "completion_tokens": 522,
+    "completion_time": 0.602319078,
+    "total_tokens": 1691,
+    "total_time": 0.658711434,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 177
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh4rktekzvss1q5q78610j",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport sys\nimport pytest\nfrom httpie.output.writer import write_raw_data\nfrom httpie.context import Environment\nfrom httpie.models import OutputOptions, ProcessingOptions\nfrom httpie.cli.dicts import HTTPHeadersDict\n\n# Minimal Environment stub for testing\nclass DummyEnv(Environment):\n    def __init__(self):\n        super().__init__()\n        self.stdout = io.BytesIO()\n        self.stderr = io.BytesIO()\n        self.stdout_isatty = False\n        self.is_windows = False\n        self.stderr_isatty = False\n\ndef test_write_raw_data_writes_bytes_to_stdout():\n    env = DummyEnv()\n    data = b\"hello world\"\n    write_raw_data(env, data)\n    env.stdout.seek(0)\n    assert env.stdout.read() == b\"hello world\"\n\ndef test_write_raw_data_includes_headers_in_message():\n    env = DummyEnv()\n    data = b\"test\"\n    headers = HTTPHeadersDict({\"Content-Type\": \"text/plain\"})\n    write_raw_data(env, data, headers=headers)\n    env.stdout.seek(0)\n    # The output should contain the header line followed by the body\n    output = env.stdout.read().decode()\n    assert \"Content-Type: text/plain\" in output\n    assert output.strip().endswith(\"test\")\n\ndef test_write_raw_data_returns_none_and_handles_empty_processing_options():\n    env = DummyEnv()\n    data = b\"sample\"\n    result = write_raw_data(env, data, processing_options=ProcessingOptions())\n    assert result is None\n    env.stdout.seek(0)\n    assert env.stdout.read() == b\"sample\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "57d27c04586a4a5880f6d0d472cda391",
+  "_api_plus_pacing_seconds": 1.1736009040032513
+}

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-4d15d7aa-9e9c-4f32-b7a8-cab4554ff211",
+  "object": "chat.completion",
+  "created": 1795076462,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom docstring_parser.numpydoc import parse\nfrom docstring_parser.common import Docstring, DocstringParam, DocstringReturns, DocstringRaises\n\ndef test_parse_full_docstring():\n    doc = \"\"\"\n    Short summary.\n\n    Parameters\n    ----------\n    x : int\n        The first parameter.\n    y : str, optional\n        The second parameter.\n\n    Returns\n    -------\n    bool\n        True if successful.\n\n    Raises\n    ------\n    ValueError\n        If an error occurs.\n    \"\"\"\n    parsed = parse(doc)\n    assert isinstance(parsed, Docstring)\n\n    # Parameters\n    assert len(parsed.params) == 2\n    param_names = {p.arg_name for p in parsed.params}\n    assert param_names == {\"x\", \"y\"}\n    x_param = next(p for p in parsed.params if p.arg_name == \"x\")\n    assert isinstance(x_param, DocstringParam)\n    assert x_param.type_name == \"int\"\n    assert x_param.description.strip() == \"The first parameter.\"\n\n    # Returns\n    assert len(parsed.returns) == 1\n    ret = parsed.returns[0]\n    assert isinstance(ret, DocstringReturns)\n    assert ret.type_name == \"bool\"\n    assert ret.description.strip() == \"True if successful.\"\n\n    # Raises\n    assert len(parsed.raises) == 1\n    raise_item = parsed.raises[0]\n    assert isinstance(raise_item, DocstringRaises)\n    assert raise_item.type_name == \"ValueError\"\n    assert raise_item.description.strip() == \"If an error occurs.\"\n\ndef test_parse_empty_and_none():\n    # Empty string should produce an empty Docstring\n    empty = parse(\"\")\n    assert isinstance(empty, Docstring)\n    assert empty.params == []\n    assert empty.returns == []\n    assert empty.raises == []\n\n    # None should also produce an empty Docstring\n    none_doc = parse(None)\n    assert isinstance(none_doc, Docstring)\n    assert none_doc.params == []\n    assert none_doc.returns == []\n    assert none_doc.raises == []\n\ndef test_parse_missing_sections():\n    doc = \"\"\"\n    Short summary.\n\n    Parameters\n    ----------\n    a : float\n        A float value.\n    \"\"\"\n    parsed = parse(doc)\n    assert isinstance(parsed, Docstring)\n\n    # Only params present\n    assert len(parsed.params) == 1\n    assert parsed.params[0].arg_name == \"a\"\n    assert parsed.params[0].type_name == \"float\"\n\n    # No returns or raises\n    assert parsed.returns == []\n    assert parsed.raises == []\n```",
+        "reasoning": "We need to test parse function. Need to import module. Let's assume package structure: docstring_parser.numpydoc. We'll write tests for normal, boundary, error. Use tmp_path? Not needed. Just test parsing of docstring. Use assert on fields. Let's craft docstring with params, returns, raises. Also test empty string returns empty Docstring. Also test error when None? parse accepts Optional[str] so None should return empty? Let's check implementation? Not provided. Assume returns empty Docstring. We'll test that. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053676888,
+    "prompt_tokens": 333,
+    "prompt_time": 0.029823149,
+    "completion_tokens": 659,
+    "completion_time": 0.75277984,
+    "total_tokens": 992,
+    "total_time": 0.782602989,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 113
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sea58ceghvjx5t53gkm0hj",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom docstring_parser.numpydoc import parse\nfrom docstring_parser.common import Docstring, DocstringParam, DocstringReturns, DocstringRaises\n\ndef test_parse_full_docstring():\n    doc = \"\"\"\n    Short summary.\n\n    Parameters\n    ----------\n    x : int\n        The first parameter.\n    y : str, optional\n        The second parameter.\n\n    Returns\n    -------\n    bool\n        True if successful.\n\n    Raises\n    ------\n    ValueError\n        If an error occurs.\n    \"\"\"\n    parsed = parse(doc)\n    assert isinstance(parsed, Docstring)\n\n    # Parameters\n    assert len(parsed.params) == 2\n    param_names = {p.arg_name for p in parsed.params}\n    assert param_names == {\"x\", \"y\"}\n    x_param = next(p for p in parsed.params if p.arg_name == \"x\")\n    assert isinstance(x_param, DocstringParam)\n    assert x_param.type_name == \"int\"\n    assert x_param.description.strip() == \"The first parameter.\"\n\n    # Returns\n    assert len(parsed.returns) == 1\n    ret = parsed.returns[0]\n    assert isinstance(ret, DocstringReturns)\n    assert ret.type_name == \"bool\"\n    assert ret.description.strip() == \"True if successful.\"\n\n    # Raises\n    assert len(parsed.raises) == 1\n    raise_item = parsed.raises[0]\n    assert isinstance(raise_item, DocstringRaises)\n    assert raise_item.type_name == \"ValueError\"\n    assert raise_item.description.strip() == \"If an error occurs.\"\n\ndef test_parse_empty_and_none():\n    # Empty string should produce an empty Docstring\n    empty = parse(\"\")\n    assert isinstance(empty, Docstring)\n    assert empty.params == []\n    assert empty.returns == []\n    assert empty.raises == []\n\n    # None should also produce an empty Docstring\n    none_doc = parse(None)\n    assert isinstance(none_doc, Docstring)\n    assert none_doc.params == []\n    assert none_doc.returns == []\n    assert none_doc.raises == []\n\ndef test_parse_missing_sections():\n    doc = \"\"\"\n    Short summary.\n\n    Parameters\n    ----------\n    a : float\n        A float value.\n    \"\"\"\n    parsed = parse(doc)\n    assert isinstance(parsed, Docstring)\n\n    # Only params present\n    assert len(parsed.params) == 1\n    assert parsed.params[0].arg_name == \"a\"\n    assert parsed.params[0].type_name == \"float\"\n\n    # No returns or raises\n    assert parsed.returns == []\n    assert parsed.raises == []\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.141357421001885
+}

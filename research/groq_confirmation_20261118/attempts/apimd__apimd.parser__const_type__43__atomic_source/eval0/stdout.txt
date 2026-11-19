@@ -1,0 +1,43 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_const_type_collections_and_calls _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-60/test_const_type_collections_an0')
+
+    def test_const_type_collections_and_calls(tmp_path):
+        # Empty tuple
+        node = ast.parse("()", mode="eval").body
+        assert const_type(node) == "tuple"
+    
+        # Tuple of ints
+        node = ast.parse("(1, 2, 3)", mode="eval").body
+        assert const_type(node) == "tuple[int]"
+    
+        # List of strings
+        node = ast.parse("['a', 'b']", mode="eval").body
+        assert const_type(node) == "list[str]"
+    
+        # Set of floats
+        node = ast.parse("{1.0, 2.0}", mode="eval").body
+        assert const_type(node) == "set[float]"
+    
+        # Dict with int keys and str values
+        node = ast.parse("{1: 'a', 2: 'b'}", mode="eval").body
+        assert const_type(node) == "dict[int, str]"
+    
+        # Call to built-in type
+        node = ast.parse("int()", mode="eval").body
+        assert const_type(node) == "int"
+    
+        # Call to PEP585 type alias
+        node = ast.parse("list[int]()", mode="eval").body
+>       assert const_type(node) == "list"
+E       AssertionError: assert 'Any' == 'list'
+E         
+E         - list
+E         + Any
+
+../../../../../../attempts/apimd__apimd.parser__const_type__43__atomic_source/eval0/test_generated.py:45: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/apimd__apimd.parser__const_type__43__atomic_source/eval0/test_generated.py::test_const_type_collections_and_calls
+1 failed, 2 passed in 0.14s

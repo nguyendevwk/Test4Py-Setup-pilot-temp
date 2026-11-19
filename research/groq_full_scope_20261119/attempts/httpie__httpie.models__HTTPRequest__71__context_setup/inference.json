@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-37d4189d-deb2-4dc1-a417-df2cfb6b02fb",
+  "object": "chat.completion",
+  "created": 1795079510,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport requests\nfrom urllib3.util import SKIP_HEADER, SKIPPABLE_HEADERS\nfrom httpie.models import HTTPRequest\n\ndef test_headers_includes_request_line_and_host(tmp_path):\n    # Create a request without Host header\n    req = requests.Request(\n        method=\"GET\",\n        url=\"http://example.com/path?query=1\",\n        headers={\"User-Agent\": \"test-agent\"},\n    )\n    prepared = req.prepare()\n    http_req = HTTPRequest(prepared)\n\n    headers_str = http_req.headers\n    # The request line should be first\n    assert headers_str.startswith(\"GET /path?query=1 HTTP/1.1\")\n    # Host header should be added automatically\n    assert \"Host: example.com\" in headers_str\n    # User-Agent should be present\n    assert \"User-Agent: test-agent\" in headers_str\n\ndef test_headers_skips_skippable_header(tmp_path):\n    # Create a request with a skippable header set to SKIP_HEADER\n    req = requests.Request(\n        method=\"POST\",\n        url=\"https://example.org\",\n        headers={\"Connection\": SKIP_HEADER, \"Accept\": \"application/json\"},\n    )\n    prepared = req.prepare()\n    http_req = HTTPRequest(prepared)\n\n    headers_str = http_req.headers\n    # Skippable header should not appear\n    assert \"Connection:\" not in headers_str\n    # Accept header should appear\n    assert \"Accept: application/json\" in headers_str\n\ndef test_body_encoding_and_iter_body(tmp_path):\n    # Body as a string should be encoded to bytes\n    req = requests.Request(\n        method=\"POST\",\n        url=\"https://example.org\",\n        data=\"string body\",\n    )\n    prepared = req.prepare()\n    http_req = HTTPRequest(prepared)\n\n    # Body property should return bytes\n    assert isinstance(http_req.body, bytes)\n    assert http_req.body == b\"string body\"\n\n    # iter_body should yield the body once\n    chunks = list(http_req.iter_body(chunk_size=10))\n    assert chunks == [b\"string body\"]\n```",
+        "reasoning": "We need tests for HTTPRequest. Use requests.Request to create orig. Test headers property with missing Host, with skippable header. Also body property with str. Third test iter_body."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004998326,
+    "prompt_tokens": 893,
+    "prompt_time": 0.056912039,
+    "completion_tokens": 483,
+    "completion_time": 0.548118954,
+    "total_tokens": 1376,
+    "total_time": 0.605030993,
+    "completion_tokens_details": {
+      "reasoning_tokens": 39
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh75cyecarccm7rc9y79cj",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport requests\nfrom urllib3.util import SKIP_HEADER, SKIPPABLE_HEADERS\nfrom httpie.models import HTTPRequest\n\ndef test_headers_includes_request_line_and_host(tmp_path):\n    # Create a request without Host header\n    req = requests.Request(\n        method=\"GET\",\n        url=\"http://example.com/path?query=1\",\n        headers={\"User-Agent\": \"test-agent\"},\n    )\n    prepared = req.prepare()\n    http_req = HTTPRequest(prepared)\n\n    headers_str = http_req.headers\n    # The request line should be first\n    assert headers_str.startswith(\"GET /path?query=1 HTTP/1.1\")\n    # Host header should be added automatically\n    assert \"Host: example.com\" in headers_str\n    # User-Agent should be present\n    assert \"User-Agent: test-agent\" in headers_str\n\ndef test_headers_skips_skippable_header(tmp_path):\n    # Create a request with a skippable header set to SKIP_HEADER\n    req = requests.Request(\n        method=\"POST\",\n        url=\"https://example.org\",\n        headers={\"Connection\": SKIP_HEADER, \"Accept\": \"application/json\"},\n    )\n    prepared = req.prepare()\n    http_req = HTTPRequest(prepared)\n\n    headers_str = http_req.headers\n    # Skippable header should not appear\n    assert \"Connection:\" not in headers_str\n    # Accept header should appear\n    assert \"Accept: application/json\" in headers_str\n\ndef test_body_encoding_and_iter_body(tmp_path):\n    # Body as a string should be encoded to bytes\n    req = requests.Request(\n        method=\"POST\",\n        url=\"https://example.org\",\n        data=\"string body\",\n    )\n    prepared = req.prepare()\n    http_req = HTTPRequest(prepared)\n\n    # Body property should return bytes\n    assert isinstance(http_req.body, bytes)\n    assert http_req.body == b\"string body\"\n\n    # iter_body should yield the body once\n    chunks = list(http_req.iter_body(chunk_size=10))\n    assert chunks == [b\"string body\"]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "e9ac40cbd9eb42d69e6a027f1f54ceab",
+  "_api_plus_pacing_seconds": 1.2728530439781025
+}

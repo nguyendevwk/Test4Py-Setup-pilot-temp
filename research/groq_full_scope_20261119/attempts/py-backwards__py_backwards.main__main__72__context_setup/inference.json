@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-e095bb9f-f39f-4ebf-9307-a787aca585f0",
+  "object": "chat.completion",
+  "created": 1795077856,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport builtins\nimport os\nimport sys\nimport types\nimport importlib\nimport pytest\nfrom py_backwards import main as py_backwards_main\nfrom py_backwards import const, exceptions, messages\n\n# Helper to run main with custom argv and capture output\ndef run_main(argv, tmp_path, capsys):\n    sys.argv = argv\n    # Ensure tmp_path is used for any file operations\n    return py_backwards_main.main(), capsys.readouterr()\n\ndef test_normal_compilation(tmp_path, capsys):\n    # Create a simple input file that uses f-string (Python 3.6 feature)\n    input_file = tmp_path / \"hello.py\"\n    input_file.write_text('print(f\"Hello {1+1}\")\\n')\n    output_file = tmp_path / \"out.py\"\n\n    # Run main\n    exit_code, captured = run_main(\n        [\"prog\", \"-i\", str(input_file), \"-o\", str(output_file), \"-t\", \"py36\"],\n        tmp_path,\n        capsys\n    )\n\n    # Assert successful exit\n    assert exit_code == 0\n    # Assert output file exists and contains transformed code\n    assert output_file.exists()\n    out_text = output_file.read_text()\n    assert 'print(\"Hello 2\")' in out_text\n    # Assert compilation result message printed\n    assert messages.compilation_result(\"1 file compiled\") in captured.out\n\ndef test_missing_input_file(tmp_path, capsys):\n    # Provide a non-existent input file\n    missing_file = tmp_path / \"does_not_exist.py\"\n    output_file = tmp_path / \"out.py\"\n\n    exit_code, captured = run_main(\n        [\"prog\", \"-i\", str(missing_file), \"-o\", str(output_file), \"-t\", \"py36\"],\n        tmp_path,\n        capsys\n    )\n\n    # Assert error exit\n    assert exit_code == 1\n    # Assert correct error message printed to stderr\n    assert messages.input_doesnt_exists([str(missing_file)]) in captured.err\n\ndef test_invalid_output_path(tmp_path, capsys):\n    # Create a valid input file\n    input_file = tmp_path / \"script.py\"\n    input_file.write_text('print(\"test\")\\n')\n    # Use a directory as output path (invalid)\n    output_dir = tmp_path / \"output_dir\"\n    output_dir.mkdir()\n\n    exit_code, captured = run_main(\n        [\"prog\", \"-i\", str(input_file), \"-o\", str(output_dir), \"-t\", \"py36\"],\n        tmp_path,\n        capsys\n    )\n\n    # Assert error exit\n    assert exit_code == 1\n    # Assert invalid output error message printed\n    assert messages.invalid_output([str(input_file)], str(output_dir)) in captured.err\n```",
+        "reasoning": "We need three tests for main. We can simulate command line args via monkeypatch sys.argv. Use tmp_path for files. Need to test normal: create a simple python file, run main, expect exit 0 and output file content. Also test error: e.g., input file missing triggers InputDoesntExists. Also test boundary: maybe invalid output path? Use PermissionError by making output dir unwritable? Hard. Maybe test that compilation result printed. Use capsys. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051702321,
+    "prompt_tokens": 614,
+    "prompt_time": 0.035957029,
+    "completion_tokens": 694,
+    "completion_time": 0.77969397,
+    "total_tokens": 1308,
+    "total_time": 0.815650999,
+    "completion_tokens_details": {
+      "reasoning_tokens": 101
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfmp7ne9n8q4ty1bv4n0m8",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport builtins\nimport os\nimport sys\nimport types\nimport importlib\nimport pytest\nfrom py_backwards import main as py_backwards_main\nfrom py_backwards import const, exceptions, messages\n\n# Helper to run main with custom argv and capture output\ndef run_main(argv, tmp_path, capsys):\n    sys.argv = argv\n    # Ensure tmp_path is used for any file operations\n    return py_backwards_main.main(), capsys.readouterr()\n\ndef test_normal_compilation(tmp_path, capsys):\n    # Create a simple input file that uses f-string (Python 3.6 feature)\n    input_file = tmp_path / \"hello.py\"\n    input_file.write_text('print(f\"Hello {1+1}\")\\n')\n    output_file = tmp_path / \"out.py\"\n\n    # Run main\n    exit_code, captured = run_main(\n        [\"prog\", \"-i\", str(input_file), \"-o\", str(output_file), \"-t\", \"py36\"],\n        tmp_path,\n        capsys\n    )\n\n    # Assert successful exit\n    assert exit_code == 0\n    # Assert output file exists and contains transformed code\n    assert output_file.exists()\n    out_text = output_file.read_text()\n    assert 'print(\"Hello 2\")' in out_text\n    # Assert compilation result message printed\n    assert messages.compilation_result(\"1 file compiled\") in captured.out\n\ndef test_missing_input_file(tmp_path, capsys):\n    # Provide a non-existent input file\n    missing_file = tmp_path / \"does_not_exist.py\"\n    output_file = tmp_path / \"out.py\"\n\n    exit_code, captured = run_main(\n        [\"prog\", \"-i\", str(missing_file), \"-o\", str(output_file), \"-t\", \"py36\"],\n        tmp_path,\n        capsys\n    )\n\n    # Assert error exit\n    assert exit_code == 1\n    # Assert correct error message printed to stderr\n    assert messages.input_doesnt_exists([str(missing_file)]) in captured.err\n\ndef test_invalid_output_path(tmp_path, capsys):\n    # Create a valid input file\n    input_file = tmp_path / \"script.py\"\n    input_file.write_text('print(\"test\")\\n')\n    # Use a directory as output path (invalid)\n    output_dir = tmp_path / \"output_dir\"\n    output_dir.mkdir()\n\n    exit_code, captured = run_main(\n        [\"prog\", \"-i\", str(input_file), \"-o\", str(output_dir), \"-t\", \"py36\"],\n        tmp_path,\n        capsys\n    )\n\n    # Assert error exit\n    assert exit_code == 1\n    # Assert invalid output error message printed\n    assert messages.invalid_output([str(input_file)], str(output_dir)) in captured.err\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.178097076015547
+}

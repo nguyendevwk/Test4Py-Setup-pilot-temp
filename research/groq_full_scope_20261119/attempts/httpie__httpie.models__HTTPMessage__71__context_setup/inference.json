@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-675e69af-6a3b-4177-9a59-c3ff53f10e34",
+  "object": "chat.completion",
+  "created": 1795078628,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.models import HTTPMessage\nfrom urllib3.util import SKIP_HEADER, SKIPPABLE_HEADERS\n\nclass DummyMessage(HTTPMessage):\n    def __init__(self, headers, body=b\"\"):\n        super().__init__(self)\n        self._orig = type(\"orig\", (), {\"headers\": headers, \"content\": body})()\n\n    def iter_body(self, chunk_size: int):\n        yield self._orig.content\n\n    def iter_lines(self, chunk_size: int):\n        yield (self._orig.content, b\"\\n\")\n\n    @property\n    def headers(self):\n        return \"\\n\".join(f\"{k}: {v}\" for k, v in self._orig.headers.items())\n\n    @property\n    def metadata(self):\n        return \"\"\n\ndef test_encoding_from_charset_header():\n    headers = {\"Content-Type\": \"text/plain; charset=utf-8\"}\n    msg = DummyMessage(headers)\n    assert msg.content_type == \"text/plain; charset=utf-8\"\n    assert msg.encoding == \"utf-8\"\n\ndef test_encoding_with_bytes_header():\n    headers = {\"Content-Type\": b\"text/html; charset=iso-8859-1\"}\n    msg = DummyMessage(headers)\n    assert msg.content_type == \"text/html; charset=iso-8859-1\"\n    assert msg.encoding == \"iso-8859-1\"\n\ndef test_encoding_missing_header():\n    headers = {}\n    msg = DummyMessage(headers)\n    assert msg.content_type == \"\"\n    assert msg.encoding == \"\"\n```",
+        "reasoning": "We need to test HTTPMessage. But it's abstract. We can create a subclass with minimal implementation. Use requests.Response? We can create a dummy object with headers and content. Use requests.models.Response? But easier: create a simple class with headers dict and content. For iter_body etc not needed. Just test encoding property and content_type. Use a response with Content-Type header with charset. Also test when header missing. Also test when header is bytes. Write three tests: 1) content_type string, encoding derived. 2) content_type bytes. 3) missing header returns empty. Use tmp_path not needed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047014085,
+    "prompt_tokens": 599,
+    "prompt_time": 0.034272445,
+    "completion_tokens": 450,
+    "completion_time": 0.507302173,
+    "total_tokens": 1049,
+    "total_time": 0.541574618,
+    "completion_tokens_details": {
+      "reasoning_tokens": 127
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgc8q8esa9c9evwgdh117h",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.models import HTTPMessage\nfrom urllib3.util import SKIP_HEADER, SKIPPABLE_HEADERS\n\nclass DummyMessage(HTTPMessage):\n    def __init__(self, headers, body=b\"\"):\n        super().__init__(self)\n        self._orig = type(\"orig\", (), {\"headers\": headers, \"content\": body})()\n\n    def iter_body(self, chunk_size: int):\n        yield self._orig.content\n\n    def iter_lines(self, chunk_size: int):\n        yield (self._orig.content, b\"\\n\")\n\n    @property\n    def headers(self):\n        return \"\\n\".join(f\"{k}: {v}\" for k, v in self._orig.headers.items())\n\n    @property\n    def metadata(self):\n        return \"\"\n\ndef test_encoding_from_charset_header():\n    headers = {\"Content-Type\": \"text/plain; charset=utf-8\"}\n    msg = DummyMessage(headers)\n    assert msg.content_type == \"text/plain; charset=utf-8\"\n    assert msg.encoding == \"utf-8\"\n\ndef test_encoding_with_bytes_header():\n    headers = {\"Content-Type\": b\"text/html; charset=iso-8859-1\"}\n    msg = DummyMessage(headers)\n    assert msg.content_type == \"text/html; charset=iso-8859-1\"\n    assert msg.encoding == \"iso-8859-1\"\n\ndef test_encoding_missing_header():\n    headers = {}\n    msg = DummyMessage(headers)\n    assert msg.content_type == \"\"\n    assert msg.encoding == \"\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9994700440438464
+}

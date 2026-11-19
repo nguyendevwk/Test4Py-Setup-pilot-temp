@@ -1,0 +1,27 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_context_translation_fallback_and_plural_context _____________
+
+    def test_context_translation_fallback_and_plural_context():
+        translations = DummyTranslations()
+        locale = GettextLocale("en", translations)
+        # Context with no translation (fallback to original)
+        context_msg = locale.pgettext("law", "right")
+        assert context_msg == "right"
+        # Context with translation (simulate by overriding gettext to return context)
+        def custom_gettext(msg):
+            if msg == "law" + CONTEXT_SEPARATOR + "right":
+                return "law_right"
+            return f"translated:{msg}"
+        translations.gettext = custom_gettext
+        context_msg_translated = locale.pgettext("law", "right")
+>       assert context_msg_translated == "law_right"
+E       AssertionError: assert 'right' == 'law_right'
+E         
+E         - law_right
+E         + right
+
+test_generated.py:48: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_context_translation_fallback_and_plural_context
+1 failed, 2 passed in 0.14s

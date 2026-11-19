@@ -1,0 +1,106 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_exception_writes_formatted_output ____________________
+
+captured_stderr = <_io.StringIO object at 0x7f452392fac0>
+
+    def test_exception_writes_formatted_output(captured_stderr):
+        """Normal case: exception writes title and formatted traceback."""
+        title = "TestError"
+        try:
+            raise ValueError("sample error")
+        except Exception:
+            exc_info = sys.exc_info()
+        exception(title, exc_info)
+    
+        output = captured_stderr.getvalue()
+        # Check that the title appears
+>       assert f"[WARN] {title}:" in output
+E       AssertionError: assert '[WARN] TestError:' in ''
+
+test_generated.py:32: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[41m[37m[1m[WARN] TestError:[0m
+Traceback (most recent call last):
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.logs__exception__72__verified_setup/eval0/test_generated.py", line 25, in test_exception_writes_formatted_output
+    raise ValueError("sample error")
+ValueError: sample error
+[41m[37m[1m----------------------------[0m
+
+_______________________ test_exception_with_empty_title ________________________
+
+captured_stderr = <_io.StringIO object at 0x7f452392fa30>
+
+    def test_exception_with_empty_title(captured_stderr):
+        """Boundary case: empty title should still produce a warning header."""
+        title = ""
+        try:
+            raise RuntimeError("empty title error")
+        except Exception:
+            exc_info = sys.exc_info()
+        exception(title, exc_info)
+    
+        output = captured_stderr.getvalue()
+        # Title is empty, but the header should still be present
+>       assert "[WARN] :" in output
+E       AssertionError: assert '[WARN] :' in ''
+
+test_generated.py:49: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[41m[37m[1m[WARN] :[0m
+Traceback (most recent call last):
+  File "/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.logs__exception__72__verified_setup/eval0/test_generated.py", line 42, in test_exception_with_empty_title
+    raise RuntimeError("empty title error")
+RuntimeError: empty title error
+[41m[37m[1m----------------------------[0m
+
+______________ test_exception_invalid_exc_info_raises_type_error _______________
+
+    def test_exception_invalid_exc_info_raises_type_error():
+        """Error case: passing invalid exc_info should raise TypeError."""
+        title = "Invalid"
+        # Pass a tuple that does not match the expected exc_info structure
+        invalid_exc_info = ("not", "a", "tuple")
+        with pytest.raises(TypeError):
+>           exception(title, invalid_exc_info)
+
+test_generated.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/logs.py:36: in exception
+    trace=''.join(format_exception(*exc_info))))
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/traceback.py:135: in format_exception
+    te = TracebackException(type(value), value, tb, limit=limit, compact=True)
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/exceptiongroup/_formatting.py:96: in __init__
+    self.stack = traceback.StackSummary.extract(
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/traceback.py:364: in extract
+    for f, lineno in frame_gen:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = 'tuple'
+
+    def walk_tb(tb):
+        """Walk a traceback yielding the frame and line number for each frame.
+    
+        This will follow tb.tb_next (and thus is in the opposite order to
+        walk_stack). Usually used with StackSummary.extract.
+        """
+        while tb is not None:
+>           yield tb.tb_frame, tb.tb_lineno
+E           AttributeError: 'str' object has no attribute 'tb_frame'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/traceback.py:329: AttributeError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_exception_writes_formatted_output - AssertionE...
+FAILED test_generated.py::test_exception_with_empty_title - AssertionError: a...
+FAILED test_generated.py::test_exception_invalid_exc_info_raises_type_error
+3 failed, 2 warnings in 0.28s

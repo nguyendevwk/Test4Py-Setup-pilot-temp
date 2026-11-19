@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-1283ce73-0735-42f8-912f-01b6c3b2825b",
+  "object": "chat.completion",
+  "created": 1795076772,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pathlib\nimport pytest\nfrom httpie.utils import get_site_paths\n\n@pytest.fixture\ndef compat_module(monkeypatch):\n    \"\"\"Provide a fake httpie.compat module with controlled attributes.\"\"\"\n    class FakeCompat:\n        MIN_SUPPORTED_PY_VERSION = [3, 6]\n        MAX_SUPPORTED_PY_VERSION = [3, 8]\n        is_frozen = False\n    monkeypatch.setitem(\n        sys.modules, 'httpie.compat', FakeCompat()\n    )\n    return FakeCompat\n\ndef test_get_site_paths_non_frozen(tmp_path, compat_module):\n    \"\"\"When the application is not frozen, only the original path is yielded.\"\"\"\n    compat_module.is_frozen = False\n    result = list(get_site_paths(tmp_path))\n    assert result == [tmp_path]\n    assert all(isinstance(p, pathlib.Path) for p in result)\n\ndef test_get_site_paths_frozen_range(tmp_path, compat_module):\n    \"\"\"When frozen, yield paths for each supported minor version.\"\"\"\n    compat_module.is_frozen = True\n    compat_module.MIN_SUPPORTED_PY_VERSION = [3, 6]\n    compat_module.MAX_SUPPORTED_PY_VERSION = [3, 8]\n    result = list(get_site_paths(tmp_path))\n    expected = [\n        tmp_path / 'site-packages' / 'py3.6',\n        tmp_path / 'site-packages' / 'py3.7',\n        tmp_path / 'site-packages' / 'py3.8',\n    ]\n    assert result == expected\n\ndef test_get_site_paths_frozen_boundary(tmp_path, compat_module):\n    \"\"\"When MIN and MAX are equal, only one path is yielded.\"\"\"\n    compat_module.is_frozen = True\n    compat_module.MIN_SUPPORTED_PY_VERSION = [3, 9]\n    compat_module.MAX_SUPPORTED_PY_VERSION = [3, 9]\n    result = list(get_site_paths(tmp_path))\n    expected = [tmp_path / 'site-packages' / 'py3.9']\n    assert result == expected\n```",
+        "reasoning": "We need to test get_site_paths. It imports httpie.compat MIN_SUPPORTED_PY_VERSION etc. We can't modify product. We need to test normal, boundary, error. We can create temporary directories. We need to simulate is_frozen True/False. But cannot modify product code. We can monkeypatch httpie.compat attributes via monkeypatch fixture. But tests should not use mocks? Instruction: \"Do not mock the target.\" But we can monkeypatch attributes? It's not mocking the target function, just its dependencies. It's allowed? Probably okay. We'll write three tests: 1) when is_frozen False, returns single path. 2) when is_frozen True with specific MIN/MAX, returns multiple. 3) boundary: MIN=MAX same. Use tmp_path. Use assert list of paths."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053695129,
+    "prompt_tokens": 482,
+    "prompt_time": 0.031744568,
+    "completion_tokens": 591,
+    "completion_time": 0.665834135,
+    "total_tokens": 1073,
+    "total_time": 0.697578703,
+    "completion_tokens_details": {
+      "reasoning_tokens": 166
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sekmbbe3narckjdnkbh13s",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pathlib\nimport pytest\nfrom httpie.utils import get_site_paths\n\n@pytest.fixture\ndef compat_module(monkeypatch):\n    \"\"\"Provide a fake httpie.compat module with controlled attributes.\"\"\"\n    class FakeCompat:\n        MIN_SUPPORTED_PY_VERSION = [3, 6]\n        MAX_SUPPORTED_PY_VERSION = [3, 8]\n        is_frozen = False\n    monkeypatch.setitem(\n        sys.modules, 'httpie.compat', FakeCompat()\n    )\n    return FakeCompat\n\ndef test_get_site_paths_non_frozen(tmp_path, compat_module):\n    \"\"\"When the application is not frozen, only the original path is yielded.\"\"\"\n    compat_module.is_frozen = False\n    result = list(get_site_paths(tmp_path))\n    assert result == [tmp_path]\n    assert all(isinstance(p, pathlib.Path) for p in result)\n\ndef test_get_site_paths_frozen_range(tmp_path, compat_module):\n    \"\"\"When frozen, yield paths for each supported minor version.\"\"\"\n    compat_module.is_frozen = True\n    compat_module.MIN_SUPPORTED_PY_VERSION = [3, 6]\n    compat_module.MAX_SUPPORTED_PY_VERSION = [3, 8]\n    result = list(get_site_paths(tmp_path))\n    expected = [\n        tmp_path / 'site-packages' / 'py3.6',\n        tmp_path / 'site-packages' / 'py3.7',\n        tmp_path / 'site-packages' / 'py3.8',\n    ]\n    assert result == expected\n\ndef test_get_site_paths_frozen_boundary(tmp_path, compat_module):\n    \"\"\"When MIN and MAX are equal, only one path is yielded.\"\"\"\n    compat_module.is_frozen = True\n    compat_module.MIN_SUPPORTED_PY_VERSION = [3, 9]\n    compat_module.MAX_SUPPORTED_PY_VERSION = [3, 9]\n    result = list(get_site_paths(tmp_path))\n    expected = [tmp_path / 'site-packages' / 'py3.9']\n    assert result == expected\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0716111960355192
+}

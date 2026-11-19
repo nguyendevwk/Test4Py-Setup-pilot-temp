@@ -1,0 +1,91 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_parse_from_object_class_attribute_docstrings _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-182/test_parse_from_object_class_a0')
+
+    def test_parse_from_object_class_attribute_docstrings(tmp_path):
+        # Create a temporary module file with a class that has attribute docstrings
+        module_code = textwrap.dedent(
+            """
+            class MyClass:
+                \"\"\"Example class.\n\n            Attributes:\n                attr1: The first attribute.\n                attr2: The second attribute.\n        \"\"\"
+    
+                attr1 = 1
+                attr2 = 2
+            """
+        )
+        module_file = tmp_path / "mymodule.py"
+        module_file.write_text(module_code)
+    
+        spec = importlib.util.spec_from_file_location("mymodule", module_file)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules["mymodule"] = mod
+        spec.loader.exec_module(mod)
+    
+        # Parse the class
+        doc = parser.parse_from_object(mod.MyClass, style=DocstringStyle.GOOGLE)
+    
+        # The class docstring should be parsed
+        assert isinstance(doc, Docstring)
+        assert doc.short_description == "Example class."
+    
+        # Attribute docstrings should be added
+>       attrs = {a.name: a for a in doc.attributes}
+E       AttributeError: 'Docstring' object has no attribute 'attributes'
+
+../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__44__atomic_verified_setup/eval0/test_generated.py:40: AttributeError
+______________ test_parse_from_object_module_attribute_docstrings ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-182/test_parse_from_object_module_0')
+
+    def test_parse_from_object_module_attribute_docstrings(tmp_path):
+        # Create a temporary module with module-level attribute docstrings
+        module_code = textwrap.dedent(
+            """
+            \"\"\"Module docstring.\n\n        Attributes:\n            module_attr: A module attribute.\n        \"\"\"
+    
+            module_attr = "value"
+            """
+        )
+        module_file = tmp_path / "modattr.py"
+        module_file.write_text(module_code)
+    
+        spec = importlib.util.spec_from_file_location("modattr", module_file)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules["modattr"] = mod
+        spec.loader.exec_module(mod)
+    
+        # Parse the module
+        doc = parser.parse_from_object(mod, style=DocstringStyle.GOOGLE)
+    
+        # Module docstring should be parsed
+        assert doc.short_description == "Module docstring."
+    
+        # Attribute docstrings should be added
+>       attrs = {a.name: a for a in doc.attributes}
+E       AttributeError: 'Docstring' object has no attribute 'attributes'
+
+../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__44__atomic_verified_setup/eval0/test_generated.py:71: AttributeError
+____________ test_parse_from_object_no_docstring_and_no_attributes _____________
+
+    def test_parse_from_object_no_docstring_and_no_attributes():
+        # Define a simple function with no docstring
+        def func_no_doc():
+            pass
+    
+        # Parse the function
+        doc = parser.parse_from_object(func_no_doc, style=DocstringStyle.GOOGLE)
+    
+        # The parsed Docstring should have empty fields
+        assert isinstance(doc, Docstring)
+>       assert doc.short_description == ""
+E       AssertionError: assert None == ''
+E        +  where None = <docstring_parser.common.Docstring object at 0x7fa70d266410>.short_description
+
+../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__44__atomic_verified_setup/eval0/test_generated.py:86: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__44__atomic_verified_setup/eval0/test_generated.py::test_parse_from_object_class_attribute_docstrings
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__44__atomic_verified_setup/eval0/test_generated.py::test_parse_from_object_module_attribute_docstrings
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__44__atomic_verified_setup/eval0/test_generated.py::test_parse_from_object_no_docstring_and_no_attributes
+3 failed in 0.20s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-203e3be4-5785-4632-bc55-2a836bcbd749",
+  "object": "chat.completion",
+  "created": 1795077629,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.transformers.base import BaseNodeTransformer\nfrom py_backwards.types import TransformationResult\n\n# Helper: create a simple AST from source code\ndef parse_source(src: str) -> typed_ast.AST:\n    return typed_ast.parse(src)\n\n# 1. Test that BaseNodeTransformer.transform returns unchanged tree and no changes flag\ndef test_base_transformer_no_change(tmp_path):\n    src = \"x = 1\\nprint(x)\"\n    tree = parse_source(src)\n    result: TransformationResult = BaseNodeTransformer.transform(tree)\n    # The tree should be the same object\n    assert result.tree is tree\n    # No changes should be reported\n    assert result.changed is False\n    # Dependencies should be empty list\n    assert result.dependencies == []\n\n# 2. Test that a subclass that modifies a node sets the changed flag\ndef test_subclass_modifies_node(tmp_path):\n    class IncrementTransformer(BaseNodeTransformer):\n        def visit_Name(self, node: typed_ast.Name):\n            # Replace every name with a constant 42\n            return typed_ast.Constant(value=42, kind=None)\n\n    src = \"a = b + c\"\n    tree = parse_source(src)\n    result: TransformationResult = IncrementTransformer.transform(tree)\n    # The tree should be modified\n    assert result.changed is True\n    # The transformed tree should no longer contain any Name nodes\n    names = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.Name)]\n    assert names == []\n\n# 3. Test that dependencies are propagated correctly from subclass\ndef test_subclass_dependencies(tmp_path):\n    class DepTransformer(BaseNodeTransformer):\n        dependencies = [\"dep1\", \"dep2\"]\n\n    src = \"x = 0\"\n    tree = parse_source(src)\n    result: TransformationResult = DepTransformer.transform(tree)\n    assert result.dependencies == [\"dep1\", \"dep2\"]\n```",
+        "reasoning": "We need to test BaseNodeTransformer.transform behavior. Need to import it. Also need a simple subclass to test. Use typed_ast ast3. Create a simple AST. Use BaseNodeTransformer to transform? It doesn't modify tree unless subclass overrides visit methods. So test that _tree_changed remains False. Also test dependencies list. Third test maybe subclass that changes node. Use a simple transformer that replaces all Name nodes with Constant? Use typed_ast. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054410989,
+    "prompt_tokens": 374,
+    "prompt_time": 0.022387909,
+    "completion_tokens": 512,
+    "completion_time": 0.580058517,
+    "total_tokens": 886,
+    "total_time": 0.602446426,
+    "completion_tokens_details": {
+      "reasoning_tokens": 94
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfdscvebrsqn66jk0e3vta",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.transformers.base import BaseNodeTransformer\nfrom py_backwards.types import TransformationResult\n\n# Helper: create a simple AST from source code\ndef parse_source(src: str) -> typed_ast.AST:\n    return typed_ast.parse(src)\n\n# 1. Test that BaseNodeTransformer.transform returns unchanged tree and no changes flag\ndef test_base_transformer_no_change(tmp_path):\n    src = \"x = 1\\nprint(x)\"\n    tree = parse_source(src)\n    result: TransformationResult = BaseNodeTransformer.transform(tree)\n    # The tree should be the same object\n    assert result.tree is tree\n    # No changes should be reported\n    assert result.changed is False\n    # Dependencies should be empty list\n    assert result.dependencies == []\n\n# 2. Test that a subclass that modifies a node sets the changed flag\ndef test_subclass_modifies_node(tmp_path):\n    class IncrementTransformer(BaseNodeTransformer):\n        def visit_Name(self, node: typed_ast.Name):\n            # Replace every name with a constant 42\n            return typed_ast.Constant(value=42, kind=None)\n\n    src = \"a = b + c\"\n    tree = parse_source(src)\n    result: TransformationResult = IncrementTransformer.transform(tree)\n    # The tree should be modified\n    assert result.changed is True\n    # The transformed tree should no longer contain any Name nodes\n    names = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.Name)]\n    assert names == []\n\n# 3. Test that dependencies are propagated correctly from subclass\ndef test_subclass_dependencies(tmp_path):\n    class DepTransformer(BaseNodeTransformer):\n        dependencies = [\"dep1\", \"dep2\"]\n\n    src = \"x = 0\"\n    tree = parse_source(src)\n    result: TransformationResult = DepTransformer.transform(tree)\n    assert result.dependencies == [\"dep1\", \"dep2\"]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9897614090004936
+}

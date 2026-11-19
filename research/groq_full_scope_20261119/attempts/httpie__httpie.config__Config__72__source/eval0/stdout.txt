@@ -1,0 +1,83 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_default_options_and_directory ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_default_options_and_direc0')
+
+    def test_default_options_and_directory(tmp_path):
+        """Config should load defaults and use the provided directory."""
+        # Create a config file with custom default_options
+        config_path = tmp_path / "config.json"
+        config_data = {"default_options": ["--verbose", "--timeout=30"]}
+        config_path.write_text(json.dumps(config_data), encoding="utf-8")
+    
+        # Instantiate Config pointing to tmp_path
+        cfg = Config(directory=tmp_path)
+    
+        # The default_options property should reflect the file content
+>       assert cfg.default_options == ["--verbose", "--timeout=30"]
+E       AssertionError: assert [] == ['--verbose', '--timeout=30']
+E         
+E         Right contains 2 more items, first extra item: '--verbose'
+E         Use -v to get more diff
+
+test_generated.py:21: AssertionError
+_____________________ test_plugins_and_version_info_paths ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_plugins_and_version_info_0')
+
+    def test_plugins_and_version_info_paths(tmp_path):
+        """Config should resolve plugins_dir and version_info_file correctly."""
+        # No custom paths in config; should use defaults relative to directory
+        cfg = Config(directory=tmp_path)
+    
+        # plugins_dir should resolve to <tmp_path>/plugins
+        expected_plugins = (tmp_path / "plugins").expanduser().resolve()
+        assert cfg.plugins_dir == expected_plugins
+    
+        # version_info_file should resolve to <tmp_path>/version_info.json
+        expected_version_file = (tmp_path / "version_info.json").expanduser().resolve()
+        assert cfg.version_info_file == expected_version_file
+    
+        # Now set custom paths in the config file
+        custom_data = {
+            "plugins_dir": "~/custom_plugins",
+            "version_info_file": "/tmp/custom_version.json"
+        }
+        (tmp_path / "config.json").write_text(json.dumps(custom_data), encoding="utf-8")
+    
+        # Reload config
+        cfg = Config(directory=tmp_path)
+    
+        # plugins_dir should expand ~ and resolve to absolute path
+>       assert cfg.plugins_dir == Path("~/custom_plugins").expanduser().resolve()
+E       AssertionError: assert PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_plugins_and_version_info_0/plugins') == PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__72__source/eval0/custom_plugins')
+E        +  where PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_plugins_and_version_info_0/plugins') = {'default_options': []}.plugins_dir
+E        +  and   PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__72__source/eval0/custom_plugins') = resolve()
+E        +    where resolve = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__72__source/eval0/custom_plugins').resolve
+E        +      where PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__72__source/eval0/custom_plugins') = expanduser()
+E        +        where expanduser = PosixPath('~/custom_plugins').expanduser
+E        +          where PosixPath('~/custom_plugins') = Path('~/custom_plugins')
+
+test_generated.py:52: AssertionError
+___________________________ test_developer_mode_flag ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_developer_mode_flag0')
+
+    def test_developer_mode_flag(tmp_path):
+        """developer_mode should return the value stored in the config."""
+        # Create config with developer_mode set to True
+        cfg_data = {"developer_mode": True}
+        (tmp_path / "config.json").write_text(json.dumps(cfg_data), encoding="utf-8")
+    
+        cfg = Config(directory=tmp_path)
+>       assert cfg.developer_mode is True
+E       AssertionError: assert None is True
+E        +  where None = {'default_options': []}.developer_mode
+
+test_generated.py:65: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_default_options_and_directory - AssertionError...
+FAILED test_generated.py::test_plugins_and_version_info_paths - AssertionErro...
+FAILED test_generated.py::test_developer_mode_flag - AssertionError: assert N...
+3 failed in 0.35s

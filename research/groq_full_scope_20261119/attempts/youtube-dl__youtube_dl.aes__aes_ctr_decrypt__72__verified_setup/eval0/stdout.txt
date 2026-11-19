@@ -1,0 +1,41 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_decrypt_identity_with_zero_key_and_counter ________________
+
+    def test_decrypt_identity_with_zero_key_and_counter():
+        """When key and counter are zero, decryption should return the original data."""
+        key = [0] * 16
+        counter_block = [0] * 16
+        counter = DummyCounter(counter_block)
+    
+        # Prepare data: 30 bytes (not a multiple of 16)
+        data = list(range(30))
+        # Encrypt: in CTR mode encryption is XOR with counter block
+        # Since counter block is zeros, ciphertext equals plaintext
+        ciphertext = data.copy()
+    
+        decrypted = aes_ctr_decrypt(ciphertext, key, counter)
+>       assert decrypted == data, "Decrypted data should match original when key and counter are zero"
+E       AssertionError: Decrypted data should match original when key and counter are zero
+E       assert [102, 232, 73...235, 143, ...] == [0, 1, 2, 3, 4, 5, ...]
+E         
+E         At index 0 diff: 102 != 0
+E         Use -v to get more diff
+
+test_generated.py:24: AssertionError
+_________________ test_decrypt_with_invalid_key_length_raises __________________
+
+    def test_decrypt_with_invalid_key_length_raises():
+        """Providing a key of invalid length should raise a ValueError from key_expansion."""
+        key = [0] * 10  # invalid length
+        counter_block = [0] * 16
+        counter = DummyCounter(counter_block)
+        data = [1, 2, 3]
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE ValueError
+
+test_generated.py:64: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_decrypt_identity_with_zero_key_and_counter - A...
+FAILED test_generated.py::test_decrypt_with_invalid_key_length_raises - Faile...
+2 failed, 1 passed in 1.26s

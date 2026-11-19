@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-3b49641a-1bbb-4622-965a-2617bf7f4d46",
+  "object": "chat.completion",
+  "created": 1795079073,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom thefuck.rules.vagrant_up import get_new_command\nfrom thefuck.shells import shell\n\nclass DummyCommand:\n    def __init__(self, script, parts):\n        self.script = script\n        self.script_parts = parts\n\ndef test_get_new_command_no_machine():\n    # Command with fewer than 3 parts: no machine specified\n    cmd = DummyCommand(\"vagrant up\", [\"vagrant\", \"up\"])\n    result = get_new_command(cmd)\n    # Should return a single command that starts all instances\n    assert isinstance(result, shell.Command)\n    assert result.command == \"vagrant up\"\n    assert result.script == \"vagrant up\"\n\ndef test_get_new_command_with_machine():\n    # Command with a machine name at index 2\n    cmd = DummyCommand(\"vagrant up web\", [\"vagrant\", \"up\", \"web\"])\n    result = get_new_command(cmd)\n    # Should return a list of two commands\n    assert isinstance(result, list)\n    assert len(result) == 2\n    # First command should target the specific machine\n    assert result[0].command == \"vagrant up web\"\n    assert result[0].script == \"vagrant up web\"\n    # Second command should start all instances\n    assert result[1].command == \"vagrant up\"\n    assert result[1].script == \"vagrant up\"\n\ndef test_get_new_command_with_extra_parts():\n    # Command with more than 3 parts: machine still taken from index 2\n    cmd = DummyCommand(\"vagrant up db --provision\", [\"vagrant\", \"up\", \"db\", \"--provision\"])\n    result = get_new_command(cmd)\n    # Should behave like the previous case\n    assert isinstance(result, list)\n    assert len(result) == 2\n    assert result[0].command == \"vagrant up db\"\n    assert result[0].script == \"vagrant up db\"\n    assert result[1].command == \"vagrant up\"\n    assert result[1].script == \"vagrant up\"\n```",
+        "reasoning": "We need to test get_new_command. Need to import command object. Use a simple mock? But cannot mock target. We can create a simple object with script_parts and script attributes. Use a simple class. Test three scenarios: no machine, one machine, more than 3 parts? Actually machine is cmds[2] if len>=3. So test when len<3 returns start_all_instances. Also test when machine present returns list. Also test that shell.and_ returns correct string? shell.and_ likely concatenates? We can inspect shell.and_ behavior? But we can just assert that returned command strings contain expected. Use tmp_path? Not needed. Just test logic. Use real shell.and_ from thefuck.shells. Let's import. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04861423,
+    "prompt_tokens": 325,
+    "prompt_time": 0.018917429,
+    "completion_tokens": 596,
+    "completion_time": 0.69882,
+    "total_tokens": 921,
+    "total_time": 0.717737429,
+    "completion_tokens_details": {
+      "reasoning_tokens": 155
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgsv1reqjv7s95nj4411s8",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom thefuck.rules.vagrant_up import get_new_command\nfrom thefuck.shells import shell\n\nclass DummyCommand:\n    def __init__(self, script, parts):\n        self.script = script\n        self.script_parts = parts\n\ndef test_get_new_command_no_machine():\n    # Command with fewer than 3 parts: no machine specified\n    cmd = DummyCommand(\"vagrant up\", [\"vagrant\", \"up\"])\n    result = get_new_command(cmd)\n    # Should return a single command that starts all instances\n    assert isinstance(result, shell.Command)\n    assert result.command == \"vagrant up\"\n    assert result.script == \"vagrant up\"\n\ndef test_get_new_command_with_machine():\n    # Command with a machine name at index 2\n    cmd = DummyCommand(\"vagrant up web\", [\"vagrant\", \"up\", \"web\"])\n    result = get_new_command(cmd)\n    # Should return a list of two commands\n    assert isinstance(result, list)\n    assert len(result) == 2\n    # First command should target the specific machine\n    assert result[0].command == \"vagrant up web\"\n    assert result[0].script == \"vagrant up web\"\n    # Second command should start all instances\n    assert result[1].command == \"vagrant up\"\n    assert result[1].script == \"vagrant up\"\n\ndef test_get_new_command_with_extra_parts():\n    # Command with more than 3 parts: machine still taken from index 2\n    cmd = DummyCommand(\"vagrant up db --provision\", [\"vagrant\", \"up\", \"db\", \"--provision\"])\n    result = get_new_command(cmd)\n    # Should behave like the previous case\n    assert isinstance(result, list)\n    assert len(result) == 2\n    assert result[0].command == \"vagrant up db\"\n    assert result[0].script == \"vagrant up db\"\n    assert result[1].command == \"vagrant up\"\n    assert result[1].script == \"vagrant up\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1023479939904064
+}

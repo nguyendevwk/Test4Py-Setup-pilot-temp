@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-5d3eb73f-8234-4227-ad5d-32af3ffc1aeb",
+  "object": "chat.completion",
+  "created": 1795079051,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\n\nfrom pypara.dcc import dcfc_30_360_isda\n\n\ndef test_normal_case_with_end_of_month_adjustments():\n    \"\"\"\n    Verify that the function correctly handles the 30/360 ISDA rules for\n    start dates on the 31st and asof dates on the 31st when the start\n    month has 30 days.\n    \"\"\"\n    # Start on 31st -> adjusted to 30th\n    start = datetime.date(2023, 1, 31)\n    # Asof on 31st of a month that has 30 days -> adjusted to 30th\n    asof = datetime.date(2023, 2, 28)  # February has 28 days, no adjustment needed\n    end = asof\n\n    # Expected nod: (28-30) + 30*(2-1) + 360*(0) = -2 + 30 = 28\n    expected_fraction = Decimal(28) / Decimal(360)\n    assert dcfc_30_360_isda(start, asof, end) == expected_fraction\n\n\ndef test_boundary_case_with_february_leap_year():\n    \"\"\"\n    Test the function on a leap year where the asof date is February 29th.\n    The 30/360 ISDA convention does not treat February 29th specially,\n    so the calculation should use the raw dates.\n    \"\"\"\n    start = datetime.date(2020, 1, 15)\n    asof = datetime.date(2020, 2, 29)  # Leap day\n    end = asof\n\n    # nod = (29-15) + 30*(2-1) + 360*0 = 14 + 30 = 44\n    expected_fraction = Decimal(44) / Decimal(360)\n    assert dcfc_30_360_isda(start, asof, end) == expected_fraction\n\n\ndef test_negative_fraction_when_start_after_asof():\n    \"\"\"\n    The function does not enforce start <= asof; it will compute a negative\n    day count fraction if start is after asof. This test ensures that\n    such a scenario produces a negative result rather than raising an error.\n    \"\"\"\n    start = datetime.date(2023, 3, 10)\n    asof = datetime.date(2023, 3, 5)  # asof earlier than start\n    end = asof\n\n    # nod = (5-10) + 30*(3-3) + 360*0 = -5\n    expected_fraction = Decimal(-5) / Decimal(360)\n    assert dcfc_30_360_isda(start, asof, end) == expected_fraction\n```",
+        "reasoning": "We need 3 test functions for dcfc_30_360_isda. Use datetime.date. Test normal, boundary, error? The function expects Date type but uses datetime.date. We'll import. Use tmp_path not needed. Just test outputs. Third test maybe when start > asof? But function doesn't check; but DCC uses. We'll test that if start.day==31 adjustment. Also test asof day 31 adjustment. Third test maybe negative nod? Use start after asof? It will compute negative fraction. We'll assert negative."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.056134077,
+    "prompt_tokens": 1846,
+    "prompt_time": 0.281525162,
+    "completion_tokens": 701,
+    "completion_time": 1.109800911,
+    "total_tokens": 2547,
+    "total_time": 1.391326073,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 111
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgs4eye5vvba6d83y2brg8",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\n\nfrom pypara.dcc import dcfc_30_360_isda\n\n\ndef test_normal_case_with_end_of_month_adjustments():\n    \"\"\"\n    Verify that the function correctly handles the 30/360 ISDA rules for\n    start dates on the 31st and asof dates on the 31st when the start\n    month has 30 days.\n    \"\"\"\n    # Start on 31st -> adjusted to 30th\n    start = datetime.date(2023, 1, 31)\n    # Asof on 31st of a month that has 30 days -> adjusted to 30th\n    asof = datetime.date(2023, 2, 28)  # February has 28 days, no adjustment needed\n    end = asof\n\n    # Expected nod: (28-30) + 30*(2-1) + 360*(0) = -2 + 30 = 28\n    expected_fraction = Decimal(28) / Decimal(360)\n    assert dcfc_30_360_isda(start, asof, end) == expected_fraction\n\n\ndef test_boundary_case_with_february_leap_year():\n    \"\"\"\n    Test the function on a leap year where the asof date is February 29th.\n    The 30/360 ISDA convention does not treat February 29th specially,\n    so the calculation should use the raw dates.\n    \"\"\"\n    start = datetime.date(2020, 1, 15)\n    asof = datetime.date(2020, 2, 29)  # Leap day\n    end = asof\n\n    # nod = (29-15) + 30*(2-1) + 360*0 = 14 + 30 = 44\n    expected_fraction = Decimal(44) / Decimal(360)\n    assert dcfc_30_360_isda(start, asof, end) == expected_fraction\n\n\ndef test_negative_fraction_when_start_after_asof():\n    \"\"\"\n    The function does not enforce start <= asof; it will compute a negative\n    day count fraction if start is after asof. This test ensures that\n    such a scenario produces a negative result rather than raising an error.\n    \"\"\"\n    start = datetime.date(2023, 3, 10)\n    asof = datetime.date(2023, 3, 5)  # asof earlier than start\n    end = asof\n\n    # nod = (5-10) + 30*(3-3) + 360*0 = -5\n    expected_fraction = Decimal(-5) / Decimal(360)\n    assert dcfc_30_360_isda(start, asof, end) == expected_fraction\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.7831742579583079
+}

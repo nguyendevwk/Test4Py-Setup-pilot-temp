@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-13eeb812-aad6-4af3-aaf8-869e2f7a3b11",
+  "object": "chat.completion",
+  "created": 1795077781,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport shutil\nimport tempfile\nimport pytest\nfrom tornado import locale\nfrom tornado._locale_data import LOCALE_NAMES\n\n# Helper to create a minimal .mo file for a custom locale\ndef _create_mo_file(tmp_path, lang_code, msgid, msgstr):\n    import polib\n    po = polib.POFile()\n    po.metadata = {\n        'Project-Id-Version': '1',\n        'Language': lang_code,\n    }\n    entry = polib.POEntry(msgid=msgid, msgstr=msgstr)\n    po.append(entry)\n    po_path = tmp_path / f\"{lang_code}.po\"\n    po.save(po_path)\n    po_path = po_path.with_suffix('.mo')\n    po.save_as_mofile(po_path)\n    return po_path\n\n@pytest.fixture\ndef custom_locale_dir(tmp_path):\n    \"\"\"Create a temporary locale directory with a custom locale.\"\"\"\n    locale_dir = tmp_path / \"locale\"\n    locale_dir.mkdir()\n    # Create a simple .mo file for language 'xx_YY'\n    _create_mo_file(locale_dir, \"xx_YY\", \"hello\", \"hola\")\n    # Add the directory to the locale search path\n    original_paths = locale._locale_paths.copy()\n    locale._locale_paths.insert(0, str(locale_dir))\n    yield locale_dir\n    # Restore original paths\n    locale._locale_paths = original_paths\n\ndef test_get_returns_closest_match(custom_locale_dir):\n    \"\"\"When a matching locale exists, get should return that locale.\"\"\"\n    # The custom locale 'xx_YY' should be found\n    loc = locale.get(\"xx_YY\")\n    assert loc.language == \"xx_YY\"\n    # Verify that translation works\n    assert loc.translate(\"hello\") == \"hola\"\n\ndef test_get_defaults_to_en_US_when_no_match():\n    \"\"\"If no locale matches, get should fall back to the default locale.\"\"\"\n    # Use a nonsense locale code that is unlikely to exist\n    loc = locale.get(\"zz_ZZ\")\n    # Default locale is en_US\n    assert loc.language == \"en_US\"\n    # The translation of a known string should be the original string\n    assert loc.translate(\"hello\") == \"hello\"\n\ndef test_get_handles_empty_and_invalid_inputs():\n    \"\"\"Calling get with no arguments or invalid strings should return default.\"\"\"\n    # No arguments: should return default\n    loc_default = locale.get()\n    assert loc_default.language == \"en_US\"\n\n    # Empty string: should also return default\n    loc_empty = locale.get(\"\")\n    assert loc_empty.language == \"en_US\"\n\n    # Passing a non-existent locale with a fallback list\n    loc_fallback = locale.get(\"nonexistent\", \"en_GB\")\n    # en_GB exists in LOCALE_NAMES, so it should be returned\n    assert loc_fallback.language == \"en_GB\"\n```",
+        "reasoning": "We need to test tornado.locale.get. We need to import tornado.locale. Use tmp_path for any file creation. We need three tests: normal match, boundary (no match default), error? maybe passing empty string? get expects *locale_codes. If none, returns default. Test that default is en_US. Also test that passing invalid code returns default. Also test that passing code that matches a locale file. We need to inspect available locales. In tornado._locale_data.LOCALE_NAMES. Let's import and see. We'll write tests accordingly."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049073092,
+    "prompt_tokens": 443,
+    "prompt_time": 0.015499407,
+    "completion_tokens": 718,
+    "completion_time": 1.125500521,
+    "total_tokens": 1161,
+    "total_time": 1.140999928,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 110
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfjcmxezrbje2s2ca88byk",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport shutil\nimport tempfile\nimport pytest\nfrom tornado import locale\nfrom tornado._locale_data import LOCALE_NAMES\n\n# Helper to create a minimal .mo file for a custom locale\ndef _create_mo_file(tmp_path, lang_code, msgid, msgstr):\n    import polib\n    po = polib.POFile()\n    po.metadata = {\n        'Project-Id-Version': '1',\n        'Language': lang_code,\n    }\n    entry = polib.POEntry(msgid=msgid, msgstr=msgstr)\n    po.append(entry)\n    po_path = tmp_path / f\"{lang_code}.po\"\n    po.save(po_path)\n    po_path = po_path.with_suffix('.mo')\n    po.save_as_mofile(po_path)\n    return po_path\n\n@pytest.fixture\ndef custom_locale_dir(tmp_path):\n    \"\"\"Create a temporary locale directory with a custom locale.\"\"\"\n    locale_dir = tmp_path / \"locale\"\n    locale_dir.mkdir()\n    # Create a simple .mo file for language 'xx_YY'\n    _create_mo_file(locale_dir, \"xx_YY\", \"hello\", \"hola\")\n    # Add the directory to the locale search path\n    original_paths = locale._locale_paths.copy()\n    locale._locale_paths.insert(0, str(locale_dir))\n    yield locale_dir\n    # Restore original paths\n    locale._locale_paths = original_paths\n\ndef test_get_returns_closest_match(custom_locale_dir):\n    \"\"\"When a matching locale exists, get should return that locale.\"\"\"\n    # The custom locale 'xx_YY' should be found\n    loc = locale.get(\"xx_YY\")\n    assert loc.language == \"xx_YY\"\n    # Verify that translation works\n    assert loc.translate(\"hello\") == \"hola\"\n\ndef test_get_defaults_to_en_US_when_no_match():\n    \"\"\"If no locale matches, get should fall back to the default locale.\"\"\"\n    # Use a nonsense locale code that is unlikely to exist\n    loc = locale.get(\"zz_ZZ\")\n    # Default locale is en_US\n    assert loc.language == \"en_US\"\n    # The translation of a known string should be the original string\n    assert loc.translate(\"hello\") == \"hello\"\n\ndef test_get_handles_empty_and_invalid_inputs():\n    \"\"\"Calling get with no arguments or invalid strings should return default.\"\"\"\n    # No arguments: should return default\n    loc_default = locale.get()\n    assert loc_default.language == \"en_US\"\n\n    # Empty string: should also return default\n    loc_empty = locale.get(\"\")\n    assert loc_empty.language == \"en_US\"\n\n    # Passing a non-existent locale with a fallback list\n    loc_fallback = locale.get(\"nonexistent\", \"en_GB\")\n    # en_GB exists in LOCALE_NAMES, so it should be returned\n    assert loc_fallback.language == \"en_GB\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.510681944026146
+}

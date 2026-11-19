@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-0591cf43-8486-4f35-af04-99c8e7a03516",
+  "object": "chat.completion",
+  "created": 1795076036,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.utils.snippet import VariablesReplacer\n\ndef test_replace_name_and_attribute():\n    # Original code with a variable and an attribute\n    src = \"x = y\\nobj.attr = z\"\n    tree = typed_ast.parse(src)\n\n    # Mapping: replace 'y' with 'y_unique', 'z' with 'z_unique', and 'attr' with 'attr_unique'\n    mapping = {\"y\": \"y_unique\", \"z\": \"z_unique\", \"attr\": \"attr_unique\"}\n    VariablesReplacer.replace(tree, mapping)\n\n    # Verify that the Name node 'y' was replaced\n    assign = tree.body[0]\n    assert isinstance(assign, typed_ast.Assign)\n    assert isinstance(assign.value, typed_ast.Name)\n    assert assign.value.id == \"y_unique\"\n\n    # Verify that the Attribute node 'attr' was replaced\n    assign2 = tree.body[1]\n    assert isinstance(assign2, typed_ast.Assign)\n    assert isinstance(assign2.value, typed_ast.Attribute)\n    assert assign2.value.attr == \"attr_unique\"\n\ndef test_replace_import_from_and_alias():\n    # Original code with an ImportFrom and alias\n    src = \"from mod.sub import foo as bar\\nfrom mod import baz\"\n    tree = typed_ast.parse(src)\n\n    # Mapping: replace module parts and alias names\n    mapping = {\"mod\": \"mod_unique\", \"foo\": \"foo_unique\", \"bar\": \"bar_unique\", \"baz\": \"baz_unique\"}\n    VariablesReplacer.replace(tree, mapping)\n\n    # Check first ImportFrom: module should be replaced\n    imp1 = tree.body[0]\n    assert isinstance(imp1, typed_ast.ImportFrom)\n    assert imp1.module == \"mod_unique.sub\"\n\n    # Check alias inside first ImportFrom\n    alias1 = imp1.names[0]\n    assert alias1.name == \"foo_unique\"\n    assert alias1.asname == \"bar_unique\"\n\n    # Check second ImportFrom: module should be replaced\n    imp2 = tree.body[1]\n    assert isinstance(imp2, typed_ast.ImportFrom)\n    assert imp2.module == \"mod_unique\"\n    assert imp2.names[0].name == \"baz_unique\"\n\ndef test_no_replacement_for_unmapped_names():\n    # Original code with names that are not in the mapping\n    src = \"a = b\\nc.d = e\"\n    tree = typed_ast.parse(src)\n\n    # Empty mapping: nothing should change\n    mapping = {}\n    VariablesReplacer.replace(tree, mapping)\n\n    # Verify that names remain unchanged\n    assign1 = tree.body[0]\n    assert isinstance(assign1, typed_ast.Assign)\n    assert assign1.value.id == \"b\"\n\n    assign2 = tree.body[1]\n    assert isinstance(assign2, typed_ast.Assign)\n    assert assign2.value.attr == \"d\"\n    assert assign2.value.value.id == \"c\"\n```",
+        "reasoning": "We need 3 tests. Use ast parsing. Test replacing Name, ImportFrom module. Use tmp_path? not needed. Just test AST transformation."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052112666,
+    "prompt_tokens": 1045,
+    "prompt_time": 0.062221783,
+    "completion_tokens": 656,
+    "completion_time": 0.749263557,
+    "total_tokens": 1701,
+    "total_time": 0.81148534,
+    "completion_tokens_details": {
+      "reasoning_tokens": 31
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdx4q0ec7vr0xtyryje2hf",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.utils.snippet import VariablesReplacer\n\ndef test_replace_name_and_attribute():\n    # Original code with a variable and an attribute\n    src = \"x = y\\nobj.attr = z\"\n    tree = typed_ast.parse(src)\n\n    # Mapping: replace 'y' with 'y_unique', 'z' with 'z_unique', and 'attr' with 'attr_unique'\n    mapping = {\"y\": \"y_unique\", \"z\": \"z_unique\", \"attr\": \"attr_unique\"}\n    VariablesReplacer.replace(tree, mapping)\n\n    # Verify that the Name node 'y' was replaced\n    assign = tree.body[0]\n    assert isinstance(assign, typed_ast.Assign)\n    assert isinstance(assign.value, typed_ast.Name)\n    assert assign.value.id == \"y_unique\"\n\n    # Verify that the Attribute node 'attr' was replaced\n    assign2 = tree.body[1]\n    assert isinstance(assign2, typed_ast.Assign)\n    assert isinstance(assign2.value, typed_ast.Attribute)\n    assert assign2.value.attr == \"attr_unique\"\n\ndef test_replace_import_from_and_alias():\n    # Original code with an ImportFrom and alias\n    src = \"from mod.sub import foo as bar\\nfrom mod import baz\"\n    tree = typed_ast.parse(src)\n\n    # Mapping: replace module parts and alias names\n    mapping = {\"mod\": \"mod_unique\", \"foo\": \"foo_unique\", \"bar\": \"bar_unique\", \"baz\": \"baz_unique\"}\n    VariablesReplacer.replace(tree, mapping)\n\n    # Check first ImportFrom: module should be replaced\n    imp1 = tree.body[0]\n    assert isinstance(imp1, typed_ast.ImportFrom)\n    assert imp1.module == \"mod_unique.sub\"\n\n    # Check alias inside first ImportFrom\n    alias1 = imp1.names[0]\n    assert alias1.name == \"foo_unique\"\n    assert alias1.asname == \"bar_unique\"\n\n    # Check second ImportFrom: module should be replaced\n    imp2 = tree.body[1]\n    assert isinstance(imp2, typed_ast.ImportFrom)\n    assert imp2.module == \"mod_unique\"\n    assert imp2.names[0].name == \"baz_unique\"\n\ndef test_no_replacement_for_unmapped_names():\n    # Original code with names that are not in the mapping\n    src = \"a = b\\nc.d = e\"\n    tree = typed_ast.parse(src)\n\n    # Empty mapping: nothing should change\n    mapping = {}\n    VariablesReplacer.replace(tree, mapping)\n\n    # Verify that names remain unchanged\n    assign1 = tree.body[0]\n    assert isinstance(assign1, typed_ast.Assign)\n    assert assign1.value.id == \"b\"\n\n    assign2 = tree.body[1]\n    assert isinstance(assign2, typed_ast.Assign)\n    assert assign2.value.attr == \"d\"\n    assert assign2.value.value.id == \"c\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1399828749708831
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-7c536394-65b1-40e4-8579-0be15c63db17",
+  "object": "chat.completion",
+  "created": 1795077054,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom pysnooper.variables import Exploding, Attrs, Keys, Indices\nfrom collections import OrderedDict\n\n# Test 1: Exploding with a mapping (dict) should delegate to Keys\ndef test_exploding_mapping():\n    source = \"data\"\n    data = {\"a\": 1, \"b\": 2}\n    var = Exploding(source)\n    # Use a dummy frame with locals containing data\n    class DummyFrame:\n        f_globals = {}\n        f_locals = {\"data\": data}\n    items = var.items(DummyFrame())\n    # First item is the source itself\n    assert items[0] == (\"data\", \"{'a': 1, 'b': 2}\")\n    # Subsequent items correspond to keys\n    expected_keys = {\"data.a\", \"data.b\"}\n    actual_keys = {k for k, _ in items[1:]}\n    assert actual_keys == expected_keys\n\n# Test 2: Exploding with a sequence (list) should delegate to Indices\ndef test_exploding_sequence():\n    source = \"lst\"\n    lst = [10, 20, 30]\n    var = Exploding(source)\n    class DummyFrame:\n        f_globals = {}\n        f_locals = {\"lst\": lst}\n    items = var.items(DummyFrame())\n    # First item is the source itself\n    assert items[0] == (\"lst\", \"[10, 20, 30]\")\n    # Subsequent items correspond to indices\n    expected_keys = {\"lst[0]\", \"lst[1]\", \"lst[2]\"}\n    actual_keys = {k for k, _ in items[1:]}\n    assert actual_keys == expected_keys\n\n# Test 3: Attrs should correctly format attributes and handle __slots__\ndef test_attrs_with_slots_and_dict():\n    class WithSlots:\n        __slots__ = (\"x\", \"y\")\n        def __init__(self):\n            self.x = 5\n            self.y = 6\n    obj = WithSlots()\n    obj.z = 7  # add a dict attribute\n    attrs = Attrs(\"obj\")\n    class DummyFrame:\n        f_globals = {}\n        f_locals = {\"obj\": obj}\n    items = attrs.items(DummyFrame())\n    # First item is the source itself\n    assert items[0] == (\"obj\", \"<__main__.WithSlots object at 0x...>\")\n    # Check that attributes from __slots__ and __dict__ are present\n    keys = {k for k, _ in items[1:]}\n    assert \".x\" in keys\n    assert \".y\" in keys\n    assert \".z\" in keys\n    # Verify that values are correctly represented\n    values = {k: v for k, v in items[1:]}\n    assert values[\".x\"] == \"5\"\n    assert values[\".y\"] == \"6\"\n    assert values[\".z\"] == \"7\"\n```",
+        "reasoning": "We need to test Exploding._items behavior. Use simple objects. Three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054432426,
+    "prompt_tokens": 988,
+    "prompt_time": 0.051218214,
+    "completion_tokens": 651,
+    "completion_time": 0.746802988,
+    "total_tokens": 1639,
+    "total_time": 0.798021202,
+    "completion_tokens_details": {
+      "reasoning_tokens": 18
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sew7h8ebaaak8art1a0mz2",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom pysnooper.variables import Exploding, Attrs, Keys, Indices\nfrom collections import OrderedDict\n\n# Test 1: Exploding with a mapping (dict) should delegate to Keys\ndef test_exploding_mapping():\n    source = \"data\"\n    data = {\"a\": 1, \"b\": 2}\n    var = Exploding(source)\n    # Use a dummy frame with locals containing data\n    class DummyFrame:\n        f_globals = {}\n        f_locals = {\"data\": data}\n    items = var.items(DummyFrame())\n    # First item is the source itself\n    assert items[0] == (\"data\", \"{'a': 1, 'b': 2}\")\n    # Subsequent items correspond to keys\n    expected_keys = {\"data.a\", \"data.b\"}\n    actual_keys = {k for k, _ in items[1:]}\n    assert actual_keys == expected_keys\n\n# Test 2: Exploding with a sequence (list) should delegate to Indices\ndef test_exploding_sequence():\n    source = \"lst\"\n    lst = [10, 20, 30]\n    var = Exploding(source)\n    class DummyFrame:\n        f_globals = {}\n        f_locals = {\"lst\": lst}\n    items = var.items(DummyFrame())\n    # First item is the source itself\n    assert items[0] == (\"lst\", \"[10, 20, 30]\")\n    # Subsequent items correspond to indices\n    expected_keys = {\"lst[0]\", \"lst[1]\", \"lst[2]\"}\n    actual_keys = {k for k, _ in items[1:]}\n    assert actual_keys == expected_keys\n\n# Test 3: Attrs should correctly format attributes and handle __slots__\ndef test_attrs_with_slots_and_dict():\n    class WithSlots:\n        __slots__ = (\"x\", \"y\")\n        def __init__(self):\n            self.x = 5\n            self.y = 6\n    obj = WithSlots()\n    obj.z = 7  # add a dict attribute\n    attrs = Attrs(\"obj\")\n    class DummyFrame:\n        f_globals = {}\n        f_locals = {\"obj\": obj}\n    items = attrs.items(DummyFrame())\n    # First item is the source itself\n    assert items[0] == (\"obj\", \"<__main__.WithSlots object at 0x...>\")\n    # Check that attributes from __slots__ and __dict__ are present\n    keys = {k for k, _ in items[1:]}\n    assert \".x\" in keys\n    assert \".y\" in keys\n    assert \".z\" in keys\n    # Verify that values are correctly represented\n    values = {k: v for k, v in items[1:]}\n    assert values[\".x\"] == \"5\"\n    assert values[\".y\"] == \"6\"\n    assert values[\".z\"] == \"7\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1695283189765178
+}

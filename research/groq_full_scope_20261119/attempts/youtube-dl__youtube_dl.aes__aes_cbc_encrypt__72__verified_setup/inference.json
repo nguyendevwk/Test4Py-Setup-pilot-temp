@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-a628b086-3d49-49a1-9663-d5de5ef8a3a2",
+  "object": "chat.completion",
+  "created": 1795079638,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.aes import aes_cbc_encrypt, key_expansion, aes_encrypt, xor, BLOCK_SIZE_BYTES\n\ndef test_aes_cbc_encrypt_basic_padding_and_length():\n    # 3-byte cleartext, 16-byte zero key and IV\n    data = [1, 2, 3]\n    key = [0] * 16\n    iv = [0] * 16\n\n    encrypted = aes_cbc_encrypt(data, key, iv)\n\n    # The output should be padded to the next multiple of BLOCK_SIZE_BYTES\n    expected_len = ((len(data) + BLOCK_SIZE_BYTES - 1) // BLOCK_SIZE_BYTES) * BLOCK_SIZE_BYTES\n    assert len(encrypted) == expected_len, \"Encrypted data length mismatch\"\n\n    # The encrypted data should differ from the padded plaintext\n    padded = data + [BLOCK_SIZE_BYTES - len(data)] * (BLOCK_SIZE_BYTES - len(data))\n    assert encrypted != padded, \"Encryption did not change the data\"\n\ndef test_aes_cbc_encrypt_full_block_padding():\n    # 16-byte cleartext, should add a full padding block of 16 bytes\n    data = list(range(16))\n    key = [0] * 16\n    iv = [0] * 16\n\n    encrypted = aes_cbc_encrypt(data, key, iv)\n\n    # Two blocks: original + padding\n    assert len(encrypted) == 32, \"Encrypted data should be two blocks long\"\n\n    # The second block should be all 16s (PKCS#7 padding)\n    second_block = encrypted[BLOCK_SIZE_BYTES:]\n    assert all(byte == 16 for byte in second_block), \"Padding block incorrect\"\n\ndef test_aes_cbc_encrypt_invalid_key_length_raises():\n    data = [1, 2, 3]\n    iv = [0] * 16\n\n    # Key lengths other than 16, 24, 32 should raise a ValueError\n    for bad_len in (15, 17, 23, 25, 31, 33):\n        key = [0] * bad_len\n        with pytest.raises(ValueError):\n            aes_cbc_encrypt(data, key, iv)\n```",
+        "reasoning": "Need to test aes_cbc_encrypt. Need to import from youtube_dl.aes. Let's inspect other functions? But we can test encryption with known key, iv, data and compare to expected output using known AES implementation? We can use cryptography library? Not allowed to install. But we can use built-in hashlib? No. We can use PyCryptodome? Not installed. We can use the same module's aes_encrypt? But that's internal. We can compute expected by using known AES CBC encryption from standard library? There's no AES in stdlib. Could use Crypto.Cipher? Not available. Maybe we can test that encryption is reversible by decrypting with same function? There's no decrypt function. But we can test that length of output equals padded length. Also test that changing iv changes output. Also test that key length restrictions? But key_expansion may raise error if wrong length. We can test that passing key of wrong length raises ValueError. Let's inspect key_expansion? Not provided. But we can assume it raises. We'll test that.\n\nWe need to import functions. Let's write tests accordingly. Use tmp_path? Not needed.\n\nTest1: normal encryption: data [1,2,3], key 16 bytes all zeros, iv 16 zeros. Compute output length = ceil(3/16)*16=16. So output length 16. Also test that output is not equal to input. Test2: boundary: data length exactly multiple of 16. e.g., 16 bytes. Padding should add full block of 16 bytes of value 16. So output length 32. Test3: error: key length not 16/24/32 raises ValueError.\n\nLet's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004653183,
+    "prompt_tokens": 469,
+    "prompt_time": 0.3459268,
+    "completion_tokens": 818,
+    "completion_time": 0.890551888,
+    "total_tokens": 1287,
+    "total_time": 1.236478688,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 348
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7shb207e1tt96fx2hpksjd7",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.aes import aes_cbc_encrypt, key_expansion, aes_encrypt, xor, BLOCK_SIZE_BYTES\n\ndef test_aes_cbc_encrypt_basic_padding_and_length():\n    # 3-byte cleartext, 16-byte zero key and IV\n    data = [1, 2, 3]\n    key = [0] * 16\n    iv = [0] * 16\n\n    encrypted = aes_cbc_encrypt(data, key, iv)\n\n    # The output should be padded to the next multiple of BLOCK_SIZE_BYTES\n    expected_len = ((len(data) + BLOCK_SIZE_BYTES - 1) // BLOCK_SIZE_BYTES) * BLOCK_SIZE_BYTES\n    assert len(encrypted) == expected_len, \"Encrypted data length mismatch\"\n\n    # The encrypted data should differ from the padded plaintext\n    padded = data + [BLOCK_SIZE_BYTES - len(data)] * (BLOCK_SIZE_BYTES - len(data))\n    assert encrypted != padded, \"Encryption did not change the data\"\n\ndef test_aes_cbc_encrypt_full_block_padding():\n    # 16-byte cleartext, should add a full padding block of 16 bytes\n    data = list(range(16))\n    key = [0] * 16\n    iv = [0] * 16\n\n    encrypted = aes_cbc_encrypt(data, key, iv)\n\n    # Two blocks: original + padding\n    assert len(encrypted) == 32, \"Encrypted data should be two blocks long\"\n\n    # The second block should be all 16s (PKCS#7 padding)\n    second_block = encrypted[BLOCK_SIZE_BYTES:]\n    assert all(byte == 16 for byte in second_block), \"Padding block incorrect\"\n\ndef test_aes_cbc_encrypt_invalid_key_length_raises():\n    data = [1, 2, 3]\n    iv = [0] * 16\n\n    # Key lengths other than 16, 24, 32 should raise a ValueError\n    for bad_len in (15, 17, 23, 25, 31, 33):\n        key = [0] * bad_len\n        with pytest.raises(ValueError):\n            aes_cbc_encrypt(data, key, iv)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "06366aa39e364211967246890045b5f1",
+  "_api_plus_pacing_seconds": 3.1654723569517955
+}

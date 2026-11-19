@@ -1,0 +1,52 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_decrypt_zero_plaintext __________________________
+
+    def test_decrypt_zero_plaintext():
+        """Decrypting a ciphertext of all zeros with zero key and IV should yield zeros."""
+        key = to_intlist(b'\x00' * 16)
+        iv = to_intlist(b'\x00' * 16)
+        # Ciphertext of 32 bytes (two blocks) all zeros
+        ciphertext = to_intlist(b'\x00' * 32)
+        plaintext = aes_cbc_decrypt(ciphertext, key, iv)
+>       assert plaintext == [0] * 32
+E       assert [20, 15, 15, 16, 17, 181, ...] == [0, 0, 0, 0, 0, 0, ...]
+E         
+E         At index 0 diff: 20 != 0
+E         Use -v to get more diff
+
+test_generated.py:15: AssertionError
+__________________________ test_decrypt_partial_block __________________________
+
+    def test_decrypt_partial_block():
+        """Decrypting a ciphertext whose length is not a multiple of the block size should
+        correctly truncate the output to the original length."""
+        key = to_intlist(b'\x00' * 16)
+        iv = to_intlist(b'\x00' * 16)
+        # 20 bytes ciphertext (1 full block + 4 bytes)
+        ciphertext = to_intlist(b'\x00' * 20)
+        plaintext = aes_cbc_decrypt(ciphertext, key, iv)
+        assert len(plaintext) == 20
+>       assert plaintext == [0] * 20
+E       assert [20, 15, 15, 16, 17, 181, ...] == [0, 0, 0, 0, 0, 0, ...]
+E         
+E         At index 0 diff: 20 != 0
+E         Use -v to get more diff
+
+test_generated.py:26: AssertionError
+___________________________ test_invalid_key_length ____________________________
+
+    def test_invalid_key_length():
+        """Providing a key of invalid length should raise a ValueError from key_expansion."""
+        key = to_intlist(b'\x00' * 10)  # invalid length
+        iv = to_intlist(b'\x00' * 16)
+        ciphertext = to_intlist(b'\x00' * 16)
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE ValueError
+
+test_generated.py:33: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_decrypt_zero_plaintext - assert [20, 15, 15, 1...
+FAILED test_generated.py::test_decrypt_partial_block - assert [20, 15, 15, 16...
+FAILED test_generated.py::test_invalid_key_length - Failed: DID NOT RAISE Val...
+3 failed in 0.73s

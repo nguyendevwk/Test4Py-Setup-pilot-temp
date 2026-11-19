@@ -1,0 +1,46 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_auto_register_provider __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/mimesis__mimesis.providers.base__BaseProvider__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_auto_register_provider0')
+
+    def test_auto_register_provider(tmp_path):
+        # Define a dummy provider subclass
+        class DummyProvider(BaseProvider):
+            class Meta:
+                name = "dummy"
+                auto_register = True
+    
+        # The registry should contain the provider after definition
+>       from mimesis.providers.registry import ProviderRegistry
+E       ModuleNotFoundError: No module named 'mimesis.providers.registry'
+
+test_generated.py:27: ModuleNotFoundError
+_____________________________ test_seed_and_reseed _____________________________
+
+    def test_seed_and_reseed():
+        # Create two providers with the same explicit seed
+        provider_a = BaseProvider(seed=12345)
+        provider_b = BaseProvider(seed=12345)
+    
+        # They should produce the same random number
+        assert provider_a.random.randint(1, 100) == provider_b.random.randint(1, 100)
+    
+        # Reseed provider_a with a different seed
+        provider_a.reseed(54321)
+        assert provider_a.random.randint(1, 100) != provider_b.random.randint(1, 100)
+    
+        # Reseed with MissingSeed (default) should use global seed if set
+        provider_c = BaseProvider()
+        provider_c.reseed()
+        # Ensure that reseeding with MissingSeed does not raise
+>       assert provider_c._has_seed() is True
+E       assert False is True
+E        +  where False = _has_seed()
+E        +    where _has_seed = <mimesis.providers.base.BaseProvider object at 0x7fdc8e482f80>._has_seed
+
+test_generated.py:55: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_auto_register_provider - ModuleNotFoundError: ...
+FAILED test_generated.py::test_seed_and_reseed - assert False is True
+2 failed, 1 passed in 0.18s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-8c987e67-4d7c-4f8f-b1a5-13c83839effb",
+  "object": "chat.completion",
+  "created": 1795076845,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport builtins\nimport types\nimport pytest\nfrom tqdm.contrib.telegram import tqdm_telegram, TelegramIO\nfrom tqdm.auto import tqdm as tqdm_auto\nfrom tqdm import TqdmWarning\nfrom warnings import warn\n\n# Helper to replace requests.Session.post\nclass DummyResponse:\n    def __init__(self, status=200, json_data=None):\n        self.status_code = status\n        self._json = json_data or {}\n    def json(self):\n        return self._json\n    def raise_for_status(self):\n        if self.status_code >= 400:\n            raise Exception(f\"HTTP {self.status_code}\")\n\ndef dummy_post(url, data=None):\n    # Simulate a 429 rate limit error\n    if \"sendMessage\" in url:\n        return DummyResponse(status=429, json_data={\"result\": {\"message_id\": 123}})\n    return DummyResponse()\n\n@pytest.fixture(autouse=True)\ndef patch_session(monkeypatch):\n    # Patch Session.post to avoid real network calls\n    monkeypatch.setattr(\"requests.Session.post\", dummy_post)\n\ndef test_tqdm_telegram_normal_iteration(tmp_path):\n    \"\"\"Verify that tqdm_telegram iterates correctly and writes updates.\"\"\"\n    # Capture write calls\n    writes = []\n\n    original_write = TelegramIO.write\n    def fake_write(self, s):\n        writes.append(s)\n        return original_write(self, s)\n    monkeypatch = pytest.MonkeyPatch()\n    monkeypatch.setattr(TelegramIO, \"write\", fake_write)\n\n    # Use a short iterable\n    data = list(range(3))\n    with tqdm_telegram(data, token=\"dummy\", chat_id=\"dummy\", disable=False) as bar:\n        for _ in bar:\n            pass\n\n    # Ensure at least one write call was made\n    assert writes, \"No write calls were made\"\n    # The last write should contain the final progress string\n    assert \"100%\" in writes[-1]\n\ndef test_tqdm_telegram_disable_flag(tmp_path):\n    \"\"\"When disable=True, no TelegramIO should be created or used.\"\"\"\n    # Ensure TelegramIO is not instantiated\n    with pytest.raises(AttributeError):\n        _ = tqdm_telegram([], token=\"dummy\", chat_id=\"dummy\", disable=True).tgio\n\ndef test_tqdm_telegram_rate_limit_warning(caplog):\n    \"\"\"A 429 response should trigger a warning via TqdmWarning.\"\"\"\n    with caplog.at_level(TqdmWarning):\n        bar = tqdm_telegram([], token=\"dummy\", chat_id=\"dummy\", disable=False)\n        # Trigger message_id property\n        _ = bar.tgio.message_id\n    # Check that a warning was logged\n    assert any(\n        record.levelname == \"WARNING\" and isinstance(record.message, str)\n        for record in caplog.records\n    )\n```",
+        "reasoning": "Need tests that don't hit network. Use monkeypatch to replace TelegramIO methods to avoid network. But cannot mock target. But we can instantiate tqdm_telegram with dummy token/chat_id; it will call TelegramIO which will try network. We can patch requests.Session.post to raise to avoid network. Use monkeypatch fixture. Three tests: normal iteration, disable flag, error handling. Use tmp_path for output? Not needed. We'll patch Session.post to raise exception with status_code 429 to test warn. Use caplog to capture warning. Also test that write called with correct text. We'll monkeypatch TelegramIO.write to record calls. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005463383,
+    "prompt_tokens": 1297,
+    "prompt_time": 0.066096019,
+    "completion_tokens": 718,
+    "completion_time": 0.819778482,
+    "total_tokens": 2015,
+    "total_time": 0.885874501,
+    "completion_tokens_details": {
+      "reasoning_tokens": 131
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7senvdmehfs32qf00dfgkz5",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport builtins\nimport types\nimport pytest\nfrom tqdm.contrib.telegram import tqdm_telegram, TelegramIO\nfrom tqdm.auto import tqdm as tqdm_auto\nfrom tqdm import TqdmWarning\nfrom warnings import warn\n\n# Helper to replace requests.Session.post\nclass DummyResponse:\n    def __init__(self, status=200, json_data=None):\n        self.status_code = status\n        self._json = json_data or {}\n    def json(self):\n        return self._json\n    def raise_for_status(self):\n        if self.status_code >= 400:\n            raise Exception(f\"HTTP {self.status_code}\")\n\ndef dummy_post(url, data=None):\n    # Simulate a 429 rate limit error\n    if \"sendMessage\" in url:\n        return DummyResponse(status=429, json_data={\"result\": {\"message_id\": 123}})\n    return DummyResponse()\n\n@pytest.fixture(autouse=True)\ndef patch_session(monkeypatch):\n    # Patch Session.post to avoid real network calls\n    monkeypatch.setattr(\"requests.Session.post\", dummy_post)\n\ndef test_tqdm_telegram_normal_iteration(tmp_path):\n    \"\"\"Verify that tqdm_telegram iterates correctly and writes updates.\"\"\"\n    # Capture write calls\n    writes = []\n\n    original_write = TelegramIO.write\n    def fake_write(self, s):\n        writes.append(s)\n        return original_write(self, s)\n    monkeypatch = pytest.MonkeyPatch()\n    monkeypatch.setattr(TelegramIO, \"write\", fake_write)\n\n    # Use a short iterable\n    data = list(range(3))\n    with tqdm_telegram(data, token=\"dummy\", chat_id=\"dummy\", disable=False) as bar:\n        for _ in bar:\n            pass\n\n    # Ensure at least one write call was made\n    assert writes, \"No write calls were made\"\n    # The last write should contain the final progress string\n    assert \"100%\" in writes[-1]\n\ndef test_tqdm_telegram_disable_flag(tmp_path):\n    \"\"\"When disable=True, no TelegramIO should be created or used.\"\"\"\n    # Ensure TelegramIO is not instantiated\n    with pytest.raises(AttributeError):\n        _ = tqdm_telegram([], token=\"dummy\", chat_id=\"dummy\", disable=True).tgio\n\ndef test_tqdm_telegram_rate_limit_warning(caplog):\n    \"\"\"A 429 response should trigger a warning via TqdmWarning.\"\"\"\n    with caplog.at_level(TqdmWarning):\n        bar = tqdm_telegram([], token=\"dummy\", chat_id=\"dummy\", disable=False)\n        # Trigger message_id property\n        _ = bar.tgio.message_id\n    # Check that a warning was logged\n    assert any(\n        record.levelname == \"WARNING\" and isinstance(record.message, str)\n        for record in caplog.records\n    )\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.252818514010869
+}

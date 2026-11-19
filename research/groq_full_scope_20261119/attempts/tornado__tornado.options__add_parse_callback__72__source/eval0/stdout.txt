@@ -1,0 +1,248 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_callback_invoked_after_parse _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.options__add_parse_callback__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_callback_invoked_after_pa0')
+
+    def test_callback_invoked_after_parse(tmp_path):
+        """The callback added via add_parse_callback is executed after parsing."""
+        counter = {"called": 0}
+    
+        def callback():
+            counter["called"] += 1
+    
+        options.add_parse_callback(callback)
+    
+        # Define a dummy option to trigger parsing
+        options.define("dummy", default="value", type=str, help="dummy option")
+    
+        # Simulate command line parsing
+        sys.argv = ["prog", "--dummy", "test"]
+>       options.parse_command_line()
+
+test_generated.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/options.py:717: in parse_command_line
+    return options.parse_command_line(args, final=final)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tornado.options.OptionParser object at 0x7f249a9b7eb0>
+args = ['prog', '--dummy', 'test'], final = True
+
+    def parse_command_line(
+        self, args: Optional[List[str]] = None, final: bool = True
+    ) -> List[str]:
+        """Parses all options given on the command line (defaults to
+        `sys.argv`).
+    
+        Options look like ``--option=value`` and are parsed according
+        to their ``type``. For boolean options, ``--option`` is
+        equivalent to ``--option=true``
+    
+        If the option has ``multiple=True``, comma-separated values
+        are accepted. For multi-value integer options, the syntax
+        ``x:y`` is also accepted and equivalent to ``range(x, y)``.
+    
+        Note that ``args[0]`` is ignored since it is the program name
+        in `sys.argv`.
+    
+        We return a list of all arguments that are not parsed as options.
+    
+        If ``final`` is ``False``, parse callbacks will not be run.
+        This is useful for applications that wish to combine configurations
+        from multiple sources.
+    
+        """
+        if args is None:
+            args = sys.argv
+        remaining = []  # type: List[str]
+        for i in range(1, len(args)):
+            # All things after the last option are command line arguments
+            if not args[i].startswith("-"):
+                remaining = args[i:]
+                break
+            if args[i] == "--":
+                remaining = args[i + 1 :]
+                break
+            arg = args[i].lstrip("-")
+            name, equals, value = arg.partition("=")
+            name = self._normalize_name(name)
+            if name not in self._options:
+                self.print_help()
+                raise Error("Unrecognized command line option: %r" % name)
+            option = self._options[name]
+            if not equals:
+                if option.type == bool:
+                    value = "true"
+                else:
+>                   raise Error("Option %r requires a value" % name)
+E                   tornado.options.Error: Option 'dummy' requires a value
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/options.py:361: Error
+________________________ test_multiple_callbacks_order _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.options__add_parse_callback__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_multiple_callbacks_order0')
+
+    def test_multiple_callbacks_order(tmp_path):
+        """Callbacks are called in the order they were added."""
+        order = []
+    
+        def first():
+            order.append("first")
+    
+        def second():
+            order.append("second")
+    
+        options.add_parse_callback(first)
+        options.add_parse_callback(second)
+    
+>       options.define("dummy", default="value", type=str, help="dummy option")
+
+test_generated.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/options.py:698: in define
+    return options.define(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tornado.options.OptionParser object at 0x7f249a9b7eb0>, name = 'dummy'
+default = 'value', type = <class 'str'>, help = 'dummy option', metavar = None
+multiple = False, group = None, callback = None
+
+    def define(
+        self,
+        name: str,
+        default: Any = None,
+        type: Optional[type] = None,
+        help: Optional[str] = None,
+        metavar: Optional[str] = None,
+        multiple: bool = False,
+        group: Optional[str] = None,
+        callback: Optional[Callable[[Any], None]] = None,
+    ) -> None:
+        """Defines a new command line option.
+    
+        ``type`` can be any of `str`, `int`, `float`, `bool`,
+        `~datetime.datetime`, or `~datetime.timedelta`. If no ``type``
+        is given but a ``default`` is, ``type`` is the type of
+        ``default``. Otherwise, ``type`` defaults to `str`.
+    
+        If ``multiple`` is True, the option value is a list of ``type``
+        instead of an instance of ``type``.
+    
+        ``help`` and ``metavar`` are used to construct the
+        automatically generated command line help string. The help
+        message is formatted like::
+    
+           --name=METAVAR      help string
+    
+        ``group`` is used to group the defined options in logical
+        groups. By default, command line options are grouped by the
+        file in which they are defined.
+    
+        Command line option names must be unique globally.
+    
+        If a ``callback`` is given, it will be run with the new value whenever
+        the option is changed.  This can be used to combine command-line
+        and file-based options::
+    
+            define("config", type=str, help="path to config file",
+                   callback=lambda path: parse_config_file(path, final=False))
+    
+        With this definition, options in the file specified by ``--config`` will
+        override options set earlier on the command line, but can be overridden
+        by later flags.
+    
+        """
+        normalized = self._normalize_name(name)
+        if normalized in self._options:
+>           raise Error(
+                "Option %r already defined in %s"
+                % (normalized, self._options[normalized].file_name)
+            )
+E           tornado.options.Error: Option 'dummy' already defined in /home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.options__add_parse_callback__72__source/eval0/test_generated.py
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/options.py:270: Error
+_____________________ test_callback_called_once_per_parse ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.options__add_parse_callback__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_callback_called_once_per_0')
+
+    def test_callback_called_once_per_parse(tmp_path):
+        """Each callback is invoked exactly once per parse invocation."""
+        counter = {"called": 0}
+    
+        def callback():
+            counter["called"] += 1
+    
+        options.add_parse_callback(callback)
+    
+>       options.define("dummy", default="value", type=str, help="dummy option")
+
+test_generated.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/options.py:698: in define
+    return options.define(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tornado.options.OptionParser object at 0x7f249a9b7eb0>, name = 'dummy'
+default = 'value', type = <class 'str'>, help = 'dummy option', metavar = None
+multiple = False, group = None, callback = None
+
+    def define(
+        self,
+        name: str,
+        default: Any = None,
+        type: Optional[type] = None,
+        help: Optional[str] = None,
+        metavar: Optional[str] = None,
+        multiple: bool = False,
+        group: Optional[str] = None,
+        callback: Optional[Callable[[Any], None]] = None,
+    ) -> None:
+        """Defines a new command line option.
+    
+        ``type`` can be any of `str`, `int`, `float`, `bool`,
+        `~datetime.datetime`, or `~datetime.timedelta`. If no ``type``
+        is given but a ``default`` is, ``type`` is the type of
+        ``default``. Otherwise, ``type`` defaults to `str`.
+    
+        If ``multiple`` is True, the option value is a list of ``type``
+        instead of an instance of ``type``.
+    
+        ``help`` and ``metavar`` are used to construct the
+        automatically generated command line help string. The help
+        message is formatted like::
+    
+           --name=METAVAR      help string
+    
+        ``group`` is used to group the defined options in logical
+        groups. By default, command line options are grouped by the
+        file in which they are defined.
+    
+        Command line option names must be unique globally.
+    
+        If a ``callback`` is given, it will be run with the new value whenever
+        the option is changed.  This can be used to combine command-line
+        and file-based options::
+    
+            define("config", type=str, help="path to config file",
+                   callback=lambda path: parse_config_file(path, final=False))
+    
+        With this definition, options in the file specified by ``--config`` will
+        override options set earlier on the command line, but can be overridden
+        by later flags.
+    
+        """
+        normalized = self._normalize_name(name)
+        if normalized in self._options:
+>           raise Error(
+                "Option %r already defined in %s"
+                % (normalized, self._options[normalized].file_name)
+            )
+E           tornado.options.Error: Option 'dummy' already defined in /home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.options__add_parse_callback__72__source/eval0/test_generated.py
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/options.py:270: Error
+=========================== short test summary info ============================
+FAILED test_generated.py::test_callback_invoked_after_parse - tornado.options...
+FAILED test_generated.py::test_multiple_callbacks_order - tornado.options.Err...
+FAILED test_generated.py::test_callback_called_once_per_parse - tornado.optio...
+3 failed in 0.42s

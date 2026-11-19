@@ -1,0 +1,23 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_iter_body_uses_converter_when_present __________________
+
+    def test_iter_body_uses_converter_when_present():
+        """When a converter is available, it should be applied before processing."""
+        body = b"json data"
+        msg = DummyMessage([body])
+        converter = DummyConverter("application/json", lambda b: b[::-1])  # reverse bytes
+        conversion = DummyConversion(converter)
+        stream = DummyStream(msg, conversion, "text/plain", lambda b: b + b"!")
+        result = list(stream.iter_body())
+        # converter changes mime to application/json and reverses body
+>       assert stream.mime == "application/json"
+E       AssertionError: assert 'text/plain' == 'application/json'
+E         
+E         - application/json
+E         + text/plain
+
+test_generated.py:72: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_iter_body_uses_converter_when_present - Assert...
+1 failed, 2 passed in 0.58s

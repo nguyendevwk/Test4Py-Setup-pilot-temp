@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a72dfc81-6a52-46f7-8817-04f48def45d1",
+  "object": "chat.completion",
+  "created": 1795079035,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.transformers.base import BaseImportRewrite\nfrom py_backwards.utils.snippet import import_rewrite\n\n\nclass DummyRewrite(BaseImportRewrite):\n    rewrites = [(\"oldpkg\", \"newpkg\")]\n\n\ndef parse_code(code: str):\n    \"\"\"Parse code into a typed_ast module and return the first statement.\"\"\"\n    module = typed_ast.parse(code)\n    return module.body[0]\n\n\ndef test_visit_import_rewrites_to_try():\n    \"\"\"Import of a matched module should be replaced with a Try node.\"\"\"\n    node = parse_code(\"import oldpkg\")\n    transformer = DummyRewrite()\n    result = transformer.visit_Import(node)\n    assert isinstance(result, typed_ast.Try)\n    # The body of the Try should contain the new import\n    new_import = result.body[0]\n    assert isinstance(new_import, typed_ast.Import)\n    assert new_import.names[0].name == \"newpkg\"\n\n\ndef test_visit_importfrom_module_rewrites():\n    \"\"\"ImportFrom of a matched module should be replaced with a Try node.\"\"\"\n    node = parse_code(\"from oldpkg import foo\")\n    transformer = DummyRewrite()\n    result = transformer.visit_ImportFrom(node)\n    assert isinstance(result, typed_ast.Try)\n    new_import_from = result.body[0]\n    assert isinstance(new_import_from, typed_ast.ImportFrom)\n    assert new_import_from.module == \"newpkg\"\n    assert new_import_from.names[0].name == \"foo\"\n\n\ndef test_visit_importfrom_names_rewrites():\n    \"\"\"ImportFrom with partially matched names should replace only those names.\"\"\"\n    node = parse_code(\"from oldpkg import foo, bar, baz\")\n    transformer = DummyRewrite()\n    result = transformer.visit_ImportFrom(node)\n    assert isinstance(result, typed_ast.Try)\n    # The Try body should contain two ImportFrom nodes: one for the module rename,\n    # one for the names that matched\n    bodies = result.body\n    # The first body is the module rename\n    assert bodies[0].module == \"newpkg\"\n    # The second body contains the renamed names\n    renamed_names = bodies[1].names\n    # Only 'foo' and 'bar' should be renamed to newpkg.foo and newpkg.bar\n    renamed_set = {alias.name for alias in renamed_names}\n    assert renamed_set == {\"foo\", \"bar\"}\n    # The original 'baz' should remain unchanged\n    assert bodies[2].module == \"oldpkg\"\n    assert bodies[2].names[0].name == \"baz\"\n```",
+        "reasoning": "We need tests for BaseImportRewrite. Need import of class. Use typed_ast ast3. We'll create subclass with rewrites. Test visit_Import replacing. Also ImportFrom module replace. And ImportFrom names replace. Use ast.parse to get nodes. Use BaseImportRewrite.visit. Ensure returned node is Try. Use ast.unparse? typed_ast may not have unparse. Use ast.dump. We'll check node type."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.248390608,
+    "prompt_tokens": 1150,
+    "prompt_time": 0.10044293,
+    "completion_tokens": 632,
+    "completion_time": 0.736690913,
+    "total_tokens": 1782,
+    "total_time": 0.837133843,
+    "completion_tokens_details": {
+      "reasoning_tokens": 86
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgrnp9em0syvcnb3324j09",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.transformers.base import BaseImportRewrite\nfrom py_backwards.utils.snippet import import_rewrite\n\n\nclass DummyRewrite(BaseImportRewrite):\n    rewrites = [(\"oldpkg\", \"newpkg\")]\n\n\ndef parse_code(code: str):\n    \"\"\"Parse code into a typed_ast module and return the first statement.\"\"\"\n    module = typed_ast.parse(code)\n    return module.body[0]\n\n\ndef test_visit_import_rewrites_to_try():\n    \"\"\"Import of a matched module should be replaced with a Try node.\"\"\"\n    node = parse_code(\"import oldpkg\")\n    transformer = DummyRewrite()\n    result = transformer.visit_Import(node)\n    assert isinstance(result, typed_ast.Try)\n    # The body of the Try should contain the new import\n    new_import = result.body[0]\n    assert isinstance(new_import, typed_ast.Import)\n    assert new_import.names[0].name == \"newpkg\"\n\n\ndef test_visit_importfrom_module_rewrites():\n    \"\"\"ImportFrom of a matched module should be replaced with a Try node.\"\"\"\n    node = parse_code(\"from oldpkg import foo\")\n    transformer = DummyRewrite()\n    result = transformer.visit_ImportFrom(node)\n    assert isinstance(result, typed_ast.Try)\n    new_import_from = result.body[0]\n    assert isinstance(new_import_from, typed_ast.ImportFrom)\n    assert new_import_from.module == \"newpkg\"\n    assert new_import_from.names[0].name == \"foo\"\n\n\ndef test_visit_importfrom_names_rewrites():\n    \"\"\"ImportFrom with partially matched names should replace only those names.\"\"\"\n    node = parse_code(\"from oldpkg import foo, bar, baz\")\n    transformer = DummyRewrite()\n    result = transformer.visit_ImportFrom(node)\n    assert isinstance(result, typed_ast.Try)\n    # The Try body should contain two ImportFrom nodes: one for the module rename,\n    # one for the names that matched\n    bodies = result.body\n    # The first body is the module rename\n    assert bodies[0].module == \"newpkg\"\n    # The second body contains the renamed names\n    renamed_names = bodies[1].names\n    # Only 'foo' and 'bar' should be renamed to newpkg.foo and newpkg.bar\n    renamed_set = {alias.name for alias in renamed_names}\n    assert renamed_set == {\"foo\", \"bar\"}\n    # The original 'baz' should remain unchanged\n    assert bodies[2].module == \"oldpkg\"\n    assert bodies[2].names[0].name == \"baz\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4540019050473347
+}

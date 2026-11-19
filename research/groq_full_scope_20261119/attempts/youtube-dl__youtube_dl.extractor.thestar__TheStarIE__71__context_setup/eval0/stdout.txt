@@ -1,0 +1,123 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_normal_extraction ____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f9c16a0cb80>
+extractor = <youtube_dl.extractor.thestar.TheStarIE object at 0x7f9c15a2e020>
+
+    def test_normal_extraction(monkeypatch, extractor):
+        # Simulate a webpage containing a brightcove id
+        fake_webpage = '''
+            <script>
+                var mainartBrightcoveVideoId = "1234567890";
+            </script>
+        '''
+        # Patch the download method to return our fake webpage
+        monkeypatch.setattr(extractor, "_download_webpage", lambda url, display_id: fake_webpage)
+        # Call the extractor on a valid URL
+>       result = extractor._real_extract("http://www.thestar.com/some/path/1234567890.html")
+
+test_generated.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/thestar.py:31: in _real_extract
+    brightcove_id = self._search_regex(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.thestar.TheStarIE object at 0x7f9c15a2e020>
+pattern = 'mainartBrightcoveVideoId["\\\']?\\s*:\\s*["\\\']?(\\d+)'
+string = '\n        <script>\n            var mainartBrightcoveVideoId = "1234567890";\n        </script>\n    '
+name = 'brightcove id', default = <object object at 0x7f9c17d8aab0>
+fatal = True, flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+__________________________ test_missing_brightcove_id __________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f9c15a2ee90>
+extractor = <youtube_dl.extractor.thestar.TheStarIE object at 0x7f9c15a2db10>
+
+    def test_missing_brightcove_id(monkeypatch, extractor):
+        # Simulate a webpage without the brightcove id
+        fake_webpage = "<html><body>No video id here</body></html>"
+        monkeypatch.setattr(extractor, "_download_webpage", lambda url, display_id: fake_webpage)
+        # Expect an ExtractorError when the regex fails
+        with pytest.raises(ExtractorError):
+>           extractor._real_extract("http://www.thestar.com/some/path/1234567890.html")
+
+test_generated.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/thestar.py:31: in _real_extract
+    brightcove_id = self._search_regex(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.thestar.TheStarIE object at 0x7f9c15a2db10>
+pattern = 'mainartBrightcoveVideoId["\\\']?\\s*:\\s*["\\\']?(\\d+)'
+string = '<html><body>No video id here</body></html>', name = 'brightcove id'
+default = <object object at 0x7f9c17d8aab0>, fatal = True, flags = 0
+group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+___________________________ test_invalid_url_pattern ___________________________
+
+extractor = <youtube_dl.extractor.thestar.TheStarIE object at 0x7f9c15a2f3a0>
+
+    def test_invalid_url_pattern(extractor):
+        # URL that does not match the extractor's regex should raise a ValueError
+        with pytest.raises(ValueError):
+>           extractor._match_id("http://www.invalid.com/notmatching.html")
+
+test_generated.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'youtube_dl.extractor.thestar.TheStarIE'>
+url = 'http://www.invalid.com/notmatching.html'
+
+    @classmethod
+    def _match_id(cls, url):
+        if '_VALID_URL_RE' not in cls.__dict__:
+            cls._VALID_URL_RE = re.compile(cls._VALID_URL)
+        m = cls._VALID_URL_RE.match(url)
+>       assert m
+E       AssertionError
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:422: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normal_extraction - AttributeError: 'NoneType'...
+FAILED test_generated.py::test_missing_brightcove_id - AttributeError: 'NoneT...
+FAILED test_generated.py::test_invalid_url_pattern - AssertionError
+3 failed in 1.63s

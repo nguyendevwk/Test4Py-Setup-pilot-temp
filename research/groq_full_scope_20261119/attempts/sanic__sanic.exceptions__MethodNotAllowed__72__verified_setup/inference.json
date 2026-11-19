@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-5be80061-b289-48bf-95f6-0ed2386c63df",
+  "object": "chat.completion",
+  "created": 1795078659,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.exceptions import MethodNotAllowed\n\n\ndef test_default_initialization():\n    \"\"\"MethodNotAllowed should set default status, quiet flag and empty method.\"\"\"\n    exc = MethodNotAllowed()\n    # status code from class attribute\n    assert exc.status_code == 405\n    # quiet defaults to True as defined in the class\n    assert exc.quiet is True\n    # method defaults to empty string\n    assert exc.method == \"\"\n    # allowed_methods should be None\n    assert exc.allowed_methods is None\n    # headers should contain at least the default ones from HTTPException\n    assert isinstance(exc.headers, dict)\n    # No Allow header when no allowed_methods provided\n    assert \"Allow\" not in exc.headers\n\n\ndef test_allowed_methods_header_and_method():\n    \"\"\"Providing allowed_methods should set the Allow header and method attribute.\"\"\"\n    allowed = [\"GET\", \"POST\"]\n    exc = MethodNotAllowed(method=\"PUT\", allowed_methods=allowed)\n    # method attribute set correctly\n    assert exc.method == \"PUT\"\n    # allowed_methods stored\n    assert exc.allowed_methods == allowed\n    # Allow header present and correctly formatted\n    assert exc.headers.get(\"Allow\") == \"GET, POST\"\n    # No other unexpected headers\n    assert set(exc.headers.keys()).issubset({\"Allow\"})\n\n\ndef test_custom_headers_merge():\n    \"\"\"Custom headers should be merged with the Allow header when allowed_methods is set.\"\"\"\n    custom = {\"X-Custom\": \"value\", \"Allow\": \"OLD\"}\n    exc = MethodNotAllowed(allowed_methods=[\"DELETE\"], headers=custom)\n    # The Allow header should be overridden by the allowed_methods value\n    assert exc.headers[\"Allow\"] == \"DELETE\"\n    # Custom header remains\n    assert exc.headers[\"X-Custom\"] == \"value\"\n    # No duplicate Allow header\n    assert list(exc.headers.keys()).count(\"Allow\") == 1\n```",
+        "reasoning": "We need tests for MethodNotAllowed. Likely inherits HTTPException. We can test that status_code is 405, headers include Allow when allowed_methods provided, method attribute set, quiet default True. Also test that passing message None uses default? But we can't inspect response. Just check attributes. Also test that passing headers merges. Let's write three tests: test_default_behavior, test_allowed_methods_header, test_custom_headers_merge."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052308255,
+    "prompt_tokens": 795,
+    "prompt_time": 0.094650624,
+    "completion_tokens": 491,
+    "completion_time": 0.520008108,
+    "total_tokens": 1286,
+    "total_time": 0.614658732,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 86
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgd75ee06rdt2e3hfyy1da",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.exceptions import MethodNotAllowed\n\n\ndef test_default_initialization():\n    \"\"\"MethodNotAllowed should set default status, quiet flag and empty method.\"\"\"\n    exc = MethodNotAllowed()\n    # status code from class attribute\n    assert exc.status_code == 405\n    # quiet defaults to True as defined in the class\n    assert exc.quiet is True\n    # method defaults to empty string\n    assert exc.method == \"\"\n    # allowed_methods should be None\n    assert exc.allowed_methods is None\n    # headers should contain at least the default ones from HTTPException\n    assert isinstance(exc.headers, dict)\n    # No Allow header when no allowed_methods provided\n    assert \"Allow\" not in exc.headers\n\n\ndef test_allowed_methods_header_and_method():\n    \"\"\"Providing allowed_methods should set the Allow header and method attribute.\"\"\"\n    allowed = [\"GET\", \"POST\"]\n    exc = MethodNotAllowed(method=\"PUT\", allowed_methods=allowed)\n    # method attribute set correctly\n    assert exc.method == \"PUT\"\n    # allowed_methods stored\n    assert exc.allowed_methods == allowed\n    # Allow header present and correctly formatted\n    assert exc.headers.get(\"Allow\") == \"GET, POST\"\n    # No other unexpected headers\n    assert set(exc.headers.keys()).issubset({\"Allow\"})\n\n\ndef test_custom_headers_merge():\n    \"\"\"Custom headers should be merged with the Allow header when allowed_methods is set.\"\"\"\n    custom = {\"X-Custom\": \"value\", \"Allow\": \"OLD\"}\n    exc = MethodNotAllowed(allowed_methods=[\"DELETE\"], headers=custom)\n    # The Allow header should be overridden by the allowed_methods value\n    assert exc.headers[\"Allow\"] == \"DELETE\"\n    # Custom header remains\n    assert exc.headers[\"X-Custom\"] == \"value\"\n    # No duplicate Allow header\n    assert list(exc.headers.keys()).count(\"Allow\") == 1\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0171123000327498
+}

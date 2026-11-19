@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-6d825fa6-f330-450b-8f12-eca8f9f11c37",
+  "object": "chat.completion",
+  "created": 1795078373,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport types\nimport pytest\nfrom flutils.decorators import cached_property\n\n\nclass Simple:\n    def __init__(self, value):\n        self.value = value\n\n    @cached_property\n    def computed(self):\n        \"\"\"Return the stored value plus one.\"\"\"\n        return self.value + 1\n\n\nclass AsyncSimple:\n    def __init__(self, value):\n        self.value = value\n\n    @cached_property\n    async def async_computed(self):\n        \"\"\"Return the stored value multiplied by two asynchronously.\"\"\"\n        await asyncio.sleep(0)  # simulate async work\n        return self.value * 2\n\n\ndef test_cached_property_evaluates_once_and_caches(tmp_path):\n    \"\"\"The property should compute once and then return the cached value.\"\"\"\n    obj = Simple(10)\n    # First access triggers computation\n    first = obj.computed\n    assert first == 11\n    # The value is stored in the instance dict\n    assert \"computed\" in obj.__dict__\n    # Subsequent access returns the cached value without recomputation\n    second = obj.computed\n    assert second == 11\n    # Mutating the underlying attribute should not affect the cached value\n    obj.value = 20\n    assert obj.computed == 11\n\n\ndef test_cached_property_deletion_resets_computation(tmp_path):\n    \"\"\"Deleting the cached attribute should force recomputation on next access.\"\"\"\n    obj = Simple(5)\n    assert obj.computed == 6\n    # Delete the cached value\n    del obj.computed\n    # The attribute is no longer in the instance dict\n    assert \"computed\" not in obj.__dict__\n    # Next access recomputes\n    assert obj.computed == 6\n    # Changing the underlying value should affect the recomputed result\n    obj.value = 7\n    del obj.computed\n    assert obj.computed == 8\n\n\n@pytest.mark.asyncio\nasync def test_cached_property_with_coroutine(tmp_path):\n    \"\"\"A coroutine property should be wrapped and cached as a Future.\"\"\"\n    obj = AsyncSimple(3)\n    # First access returns a coroutine object\n    coro = obj.async_computed\n    assert isinstance(coro, types.CoroutineType)\n    # Awaiting the coroutine yields the correct result\n    result = await coro\n    assert result == 6\n    # The coroutine result is cached as a Future in the instance dict\n    cached = obj.__dict__[\"async_computed\"]\n    assert isinstance(cached, asyncio.Future)\n    # Awaiting the cached future returns the same result\n    assert await cached == 6\n    # Subsequent access returns the same Future object\n    assert obj.async_computed is cached\n```",
+        "reasoning": "Need 3 tests: normal property, coroutine property, deletion resets. Use tmp_path? not needed. Just test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049265442,
+    "prompt_tokens": 691,
+    "prompt_time": 0.018145496,
+    "completion_tokens": 595,
+    "completion_time": 0.69392143,
+    "total_tokens": 1286,
+    "total_time": 0.712066926,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 25
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg4fpmenavcc0mtbaxkycg",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport types\nimport pytest\nfrom flutils.decorators import cached_property\n\n\nclass Simple:\n    def __init__(self, value):\n        self.value = value\n\n    @cached_property\n    def computed(self):\n        \"\"\"Return the stored value plus one.\"\"\"\n        return self.value + 1\n\n\nclass AsyncSimple:\n    def __init__(self, value):\n        self.value = value\n\n    @cached_property\n    async def async_computed(self):\n        \"\"\"Return the stored value multiplied by two asynchronously.\"\"\"\n        await asyncio.sleep(0)  # simulate async work\n        return self.value * 2\n\n\ndef test_cached_property_evaluates_once_and_caches(tmp_path):\n    \"\"\"The property should compute once and then return the cached value.\"\"\"\n    obj = Simple(10)\n    # First access triggers computation\n    first = obj.computed\n    assert first == 11\n    # The value is stored in the instance dict\n    assert \"computed\" in obj.__dict__\n    # Subsequent access returns the cached value without recomputation\n    second = obj.computed\n    assert second == 11\n    # Mutating the underlying attribute should not affect the cached value\n    obj.value = 20\n    assert obj.computed == 11\n\n\ndef test_cached_property_deletion_resets_computation(tmp_path):\n    \"\"\"Deleting the cached attribute should force recomputation on next access.\"\"\"\n    obj = Simple(5)\n    assert obj.computed == 6\n    # Delete the cached value\n    del obj.computed\n    # The attribute is no longer in the instance dict\n    assert \"computed\" not in obj.__dict__\n    # Next access recomputes\n    assert obj.computed == 6\n    # Changing the underlying value should affect the recomputed result\n    obj.value = 7\n    del obj.computed\n    assert obj.computed == 8\n\n\n@pytest.mark.asyncio\nasync def test_cached_property_with_coroutine(tmp_path):\n    \"\"\"A coroutine property should be wrapped and cached as a Future.\"\"\"\n    obj = AsyncSimple(3)\n    # First access returns a coroutine object\n    coro = obj.async_computed\n    assert isinstance(coro, types.CoroutineType)\n    # Awaiting the coroutine yields the correct result\n    result = await coro\n    assert result == 6\n    # The coroutine result is cached as a Future in the instance dict\n    cached = obj.__dict__[\"async_computed\"]\n    assert isinstance(cached, asyncio.Future)\n    # Awaiting the cached future returns the same result\n    assert await cached == 6\n    # Subsequent access returns the same Future object\n    assert obj.async_computed is cached\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.094003147969488
+}

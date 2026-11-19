@@ -1,0 +1,77 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_normal_fraction_computation _______________________
+
+    def test_normal_fraction_computation():
+        """Verify that the function returns the expected fraction for a typical period."""
+        start = datetime.date(2019, 3, 2)
+        asof = datetime.date(2019, 9, 10)
+        end = datetime.date(2020, 3, 2)
+    
+        result = dcfc_act_act_icma(start=start, asof=asof, end=end)
+        # The expected value is taken from the docstring example.
+        expected = Decimal("0.5245901639")
+>       assert result == expected, f"Expected {expected}, got {result}"
+E       AssertionError: Expected 0.5245901639, got 0.5245901639344262295081967213
+E       assert Decimal('0.5245901639344262295081967213') == Decimal('0.5245901639')
+
+test_generated.py:18: AssertionError
+_________________ test_boundary_zero_fraction_when_dates_equal _________________
+
+    def test_boundary_zero_fraction_when_dates_equal():
+        """When start, asof and end are the same, the fraction should be zero."""
+        d = datetime.date(2023, 1, 1)
+>       result = dcfc_act_act_icma(start=d, asof=d, end=d)
+
+test_generated.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+start = datetime.date(2023, 1, 1), asof = datetime.date(2023, 1, 1)
+end = datetime.date(2023, 1, 1), freq = None
+
+    @dcc("Act/Act (ICMA)", {"Actual/Actual (ICMA)", "ISMA-99", "Act/Act (ISMA)"})
+    def dcfc_act_act_icma(start: Date, asof: Date, end: Date, freq: Optional[Decimal] = None) -> Decimal:
+        """
+        Computes the day count fraction for "Act/Act (ICMA)" convention.
+    
+        :param start: The start date of the period.
+        :param asof: The date which the day count fraction to be calculated as of.
+        :param end: The end date of the period (a.k.a. termination date).
+        :return: Day count fraction.
+    
+        >>> ex1_start, ex1_asof, ex1_end = datetime.date(2019, 3, 2), datetime.date(2019, 9, 10), datetime.date(2020, 3, 2)
+        >>> round(dcfc_act_act_icma(start=ex1_start, asof=ex1_asof, end=ex1_end), 10)
+        Decimal('0.5245901639')
+        """
+        ## Get the number of actual days:
+        p1 = Decimal(_get_actual_day_count(start, asof))
+    
+        ## Get the number of days in the period:
+        p2 = Decimal(_get_actual_day_count(start, end))
+    
+        ## Compute the ratio and return:
+>       return p1 / p2 / Decimal(freq or ONE)
+E       decimal.InvalidOperation: [<class 'decimal.DivisionUndefined'>]
+
+../../../../groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/dcc.py:504: InvalidOperation
+__________________ test_fraction_zero_when_asof_out_of_range ___________________
+
+    def test_fraction_zero_when_asof_out_of_range():
+        """If asof is outside the [start, end] interval, the function should return zero."""
+        start = datetime.date(2023, 1, 1)
+        end = datetime.date(2023, 12, 31)
+    
+        # asof before start
+        asof_before = datetime.date(2022, 12, 31)
+        result_before = dcfc_act_act_icma(start=start, asof=asof_before, end=end)
+>       assert result_before == Decimal("0"), "Fraction should be zero when asof is before start"
+E       AssertionError: Fraction should be zero when asof is before start
+E       assert Decimal('-0.002747252747252747252747252747') == Decimal('0')
+E        +  where Decimal('0') = Decimal('0')
+
+test_generated.py:36: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normal_fraction_computation - AssertionError: ...
+FAILED test_generated.py::test_boundary_zero_fraction_when_dates_equal - deci...
+FAILED test_generated.py::test_fraction_zero_when_asof_out_of_range - Asserti...
+3 failed in 0.19s

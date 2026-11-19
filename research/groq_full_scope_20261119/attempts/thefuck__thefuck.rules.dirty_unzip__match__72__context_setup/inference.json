@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-6dae78c8-dad6-4f14-a44d-9110a7234b45",
+  "object": "chat.completion",
+  "created": 1795077998,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport zipfile\nimport pytest\nfrom thefuck.rules.dirty_unzip import match\n\nclass DummyCommand:\n    def __init__(self, script: str):\n        self.script = script\n        self.script_parts = script.split()\n\ndef create_zip(path, names):\n    with zipfile.ZipFile(path, 'w') as z:\n        for name in names:\n            z.writestr(name, b\"content\")\n\ndef test_match_returns_true_for_bad_zip(tmp_path):\n    # Create a zip with two files\n    zip_path = tmp_path / \"archive.zip\"\n    create_zip(zip_path, [\"file1.txt\", \"file2.txt\"])\n    cmd = DummyCommand(f\"unzip {zip_path}\")\n    assert match(cmd) is True\n\ndef test_match_returns_false_for_good_zip_and_no_d_flag(tmp_path):\n    # Create a zip with a single file\n    zip_path = tmp_path / \"single.zip\"\n    create_zip(zip_path, [\"only.txt\"])\n    cmd = DummyCommand(f\"unzip {zip_path}\")\n    assert match(cmd) is False\n\ndef test_match_returns_false_for_invalid_zip_and_d_flag(tmp_path):\n    # Create an invalid zip file\n    bad_zip_path = tmp_path / \"bad.zip\"\n    bad_zip_path.write_text(\"not a zip\")\n    cmd = DummyCommand(f\"unzip -d {bad_zip_path}\")\n    # '-d' flag should cause immediate False\n    assert match(cmd) is False\n```",
+        "reasoning": "We need to write tests for match function. Use tmp_path to create zip files. Test normal: command with zip file having >1 entries should return True. Boundary: zip with 1 entry returns False. Error: invalid zip file returns False. Also test that '-d' flag returns False. Use command object? The command is from thefuck library. We can create a simple object with script and script_parts attributes. Use a simple class. Ensure no external dependencies. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046149124,
+    "prompt_tokens": 447,
+    "prompt_time": 0.018118374,
+    "completion_tokens": 416,
+    "completion_time": 0.498652827,
+    "total_tokens": 863,
+    "total_time": 0.516771201,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 100
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfs1che0rvjpqa11d54wzx",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport zipfile\nimport pytest\nfrom thefuck.rules.dirty_unzip import match\n\nclass DummyCommand:\n    def __init__(self, script: str):\n        self.script = script\n        self.script_parts = script.split()\n\ndef create_zip(path, names):\n    with zipfile.ZipFile(path, 'w') as z:\n        for name in names:\n            z.writestr(name, b\"content\")\n\ndef test_match_returns_true_for_bad_zip(tmp_path):\n    # Create a zip with two files\n    zip_path = tmp_path / \"archive.zip\"\n    create_zip(zip_path, [\"file1.txt\", \"file2.txt\"])\n    cmd = DummyCommand(f\"unzip {zip_path}\")\n    assert match(cmd) is True\n\ndef test_match_returns_false_for_good_zip_and_no_d_flag(tmp_path):\n    # Create a zip with a single file\n    zip_path = tmp_path / \"single.zip\"\n    create_zip(zip_path, [\"only.txt\"])\n    cmd = DummyCommand(f\"unzip {zip_path}\")\n    assert match(cmd) is False\n\ndef test_match_returns_false_for_invalid_zip_and_d_flag(tmp_path):\n    # Create an invalid zip file\n    bad_zip_path = tmp_path / \"bad.zip\"\n    bad_zip_path.write_text(\"not a zip\")\n    cmd = DummyCommand(f\"unzip -d {bad_zip_path}\")\n    # '-d' flag should cause immediate False\n    assert match(cmd) is False\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9080272080027498
+}

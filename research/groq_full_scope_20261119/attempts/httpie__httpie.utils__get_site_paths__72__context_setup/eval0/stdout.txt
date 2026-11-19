@@ -1,0 +1,63 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_get_site_paths_non_frozen ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__get_site_paths__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_site_paths_non_frozen0')
+
+    def test_get_site_paths_non_frozen(tmp_path: Path):
+        # Ensure the environment is not frozen
+        httpie.compat.is_frozen = False
+        # Call the function with a temporary path
+        paths = list(get_site_paths(tmp_path))
+        # It should yield exactly one path
+        assert len(paths) == 1
+        # The yielded path should be the site-packages path for the given base
+        expected = as_site(tmp_path)
+        assert paths[0] == expected
+        # The path should exist (even if empty) and be a directory
+>       assert paths[0].is_dir()
+E       AssertionError: assert False
+E        +  where False = is_dir()
+E        +    where is_dir = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__get_s...s__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_site_paths_non_frozen0/lib/python3.10/site-packages').is_dir
+
+test_generated.py:21: AssertionError
+_____________________ test_get_site_paths_invalid_argument _____________________
+
+    def test_get_site_paths_invalid_argument():
+        # Passing a string instead of a Path should raise a TypeError
+>       with pytest.raises(TypeError):
+E       Failed: DID NOT RAISE TypeError
+
+test_generated.py:26: Failed
+__________________________ test_get_site_paths_frozen __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__get_site_paths__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_site_paths_frozen0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb55857bac0>
+
+    def test_get_site_paths_frozen(tmp_path: Path, monkeypatch):
+        # Patch the compatibility module to simulate a frozen environment
+        monkeypatch.setattr(httpie.compat, "is_frozen", True)
+        # Define supported Python versions for the test
+        monkeypatch.setattr(httpie.compat, "MIN_SUPPORTED_PY_VERSION", [3, 8])
+        monkeypatch.setattr(httpie.compat, "MAX_SUPPORTED_PY_VERSION", [3, 10])
+        # Call the function
+        paths = list(get_site_paths(tmp_path))
+        # It should yield one path per supported minor version
+        assert len(paths) == 3
+        # Verify that each yielded path corresponds to the correct Python version
+        expected_versions = ["3.8", "3.9", "3.10"]
+        for path, version in zip(paths, expected_versions):
+            # The path should contain the version string
+            assert version in str(path)
+            # The path should be a directory
+>           assert path.is_dir()
+E           AssertionError: assert False
+E            +  where False = is_dir()
+E            +    where is_dir = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__get_site_paths__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_site_paths_frozen0/lib/python3.8/site-packages').is_dir
+
+test_generated.py:46: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_site_paths_non_frozen - AssertionError: as...
+FAILED test_generated.py::test_get_site_paths_invalid_argument - Failed: DID ...
+FAILED test_generated.py::test_get_site_paths_frozen - AssertionError: assert...
+3 failed in 0.34s

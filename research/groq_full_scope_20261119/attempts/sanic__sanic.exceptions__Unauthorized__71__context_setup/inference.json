@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-e7400d61-d87d-4e56-ae92-c5cf43cc4128",
+  "object": "chat.completion",
+  "created": 1795078405,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.exceptions import Unauthorized\nfrom sanic.helpers import STATUS_CODES\n\ndef test_unauthorized_basic_challenge(tmp_path):\n    \"\"\"When a scheme and challenges are provided, the WWW-Authenticate header is set correctly.\"\"\"\n    exc = Unauthorized(\n        \"Auth required.\",\n        scheme=\"Basic\",\n        realm=\"Restricted Area\",\n        charset=\"UTF-8\",\n    )\n    # The header should contain all challenge parameters in the order they were passed\n    expected_header = 'Basic realm=\"Restricted Area\", charset=\"UTF-8\"'\n    assert exc.headers[\"WWW-Authenticate\"] == expected_header\n    # The status code and quiet flag should be as defined on the class\n    assert exc.status_code == 401\n    assert exc.quiet is True\n    # The message should be stored as a string\n    assert exc.message == \"Auth required.\"\n\ndef test_unauthorized_no_scheme_and_bytes_message():\n    \"\"\"If no scheme is given, the WWW-Authenticate header should not be added, and a bytes message is decoded.\"\"\"\n    raw_msg = b\"Binary message\"\n    exc = Unauthorized(raw_msg)\n    # No WWW-Authenticate header should be present\n    assert \"WWW-Authenticate\" not in exc.headers\n    # The message should be decoded to a string\n    assert exc.message == \"Binary message\"\n    # Default status code and quiet flag\n    assert exc.status_code == 401\n    assert exc.quiet is True\n\ndef test_unauthorized_default_message_from_status_code():\n    \"\"\"When message is None, the exception should use the standard status code message.\"\"\"\n    exc = Unauthorized(message=None)\n    # STATUS_CODES contains the standard reason phrase for 401\n    expected_msg = STATUS_CODES[401].decode()\n    assert exc.message == expected_msg\n    # The headers should still be empty (no scheme)\n    assert exc.headers == {}\n    # Quiet flag remains True\n    assert exc.quiet is True\n```",
+        "reasoning": "We need three tests: normal init, boundary with no scheme, error? maybe passing non-string challenge? But constructor expects challenges dict values. Test that headers updated correctly. Also test that message bytes decoded. Third test: passing None message leads to status code message. Use STATUS_CODES. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053338079,
+    "prompt_tokens": 1827,
+    "prompt_time": 0.082337457,
+    "completion_tokens": 473,
+    "completion_time": 0.523986295,
+    "total_tokens": 2300,
+    "total_time": 0.606323752,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 61
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg5eyre4tb327n147bm06g",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.exceptions import Unauthorized\nfrom sanic.helpers import STATUS_CODES\n\ndef test_unauthorized_basic_challenge(tmp_path):\n    \"\"\"When a scheme and challenges are provided, the WWW-Authenticate header is set correctly.\"\"\"\n    exc = Unauthorized(\n        \"Auth required.\",\n        scheme=\"Basic\",\n        realm=\"Restricted Area\",\n        charset=\"UTF-8\",\n    )\n    # The header should contain all challenge parameters in the order they were passed\n    expected_header = 'Basic realm=\"Restricted Area\", charset=\"UTF-8\"'\n    assert exc.headers[\"WWW-Authenticate\"] == expected_header\n    # The status code and quiet flag should be as defined on the class\n    assert exc.status_code == 401\n    assert exc.quiet is True\n    # The message should be stored as a string\n    assert exc.message == \"Auth required.\"\n\ndef test_unauthorized_no_scheme_and_bytes_message():\n    \"\"\"If no scheme is given, the WWW-Authenticate header should not be added, and a bytes message is decoded.\"\"\"\n    raw_msg = b\"Binary message\"\n    exc = Unauthorized(raw_msg)\n    # No WWW-Authenticate header should be present\n    assert \"WWW-Authenticate\" not in exc.headers\n    # The message should be decoded to a string\n    assert exc.message == \"Binary message\"\n    # Default status code and quiet flag\n    assert exc.status_code == 401\n    assert exc.quiet is True\n\ndef test_unauthorized_default_message_from_status_code():\n    \"\"\"When message is None, the exception should use the standard status code message.\"\"\"\n    exc = Unauthorized(message=None)\n    # STATUS_CODES contains the standard reason phrase for 401\n    expected_msg = STATUS_CODES[401].decode()\n    assert exc.message == expected_msg\n    # The headers should still be empty (no scheme)\n    assert exc.headers == {}\n    # Quiet flag remains True\n    assert exc.quiet is True\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0074970430578105
+}

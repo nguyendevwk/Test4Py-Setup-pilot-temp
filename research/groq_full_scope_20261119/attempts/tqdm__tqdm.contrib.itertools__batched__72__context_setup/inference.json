@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-5a64a218-2aa2-407a-8270-3c210e10bec3",
+  "object": "chat.completion",
+  "created": 1795076558,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport itertools\nimport math\nimport pytest\nfrom tqdm.contrib.itertools import batched\nfrom tqdm.auto import tqdm as tqdm_auto\n\ndef test_batched_basic():\n    data = list(range(10))\n    n = 3\n    result = batched(data, n)\n    # The returned object should be a tqdm instance\n    assert isinstance(result, tqdm_auto)\n    # Total should be ceil(len(data)/n)\n    assert result.total == math.ceil(len(data) / n)\n    # Collect batches and verify content\n    batches = list(result)\n    assert len(batches) == math.ceil(len(data) / n)\n    expected = [data[i:i+n] for i in range(0, len(data), n)]\n    assert batches == expected\n\ndef test_batched_file_iterable(tmp_path):\n    # Create a temporary file with 5 lines\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"\\n\".join(str(i) for i in range(5)))\n    with file_path.open() as f:\n        n = 2\n        result = batched(f, n)\n        # Total should be ceil(5/2) = 3\n        assert result.total == 3\n        # Collect batches and verify each batch contains the correct lines\n        batches = list(result)\n        assert len(batches) == 3\n        expected = [file_path.read_text().splitlines()[i:i+n] for i in range(0, 5, n)]\n        assert batches == expected\n\ndef test_batched_invalid():\n    # Passing a non-iterable should raise a TypeError from itertools.batched\n    with pytest.raises(TypeError):\n        list(batched(42, 3))\n```",
+        "reasoning": "We need to test batched. Use tmp_path for file? Not needed. Just test behavior. Use tqdm.contrib.itertools.batched. We need to import. Use tqdm.contrib.itertools import batched. Test normal: list of numbers, n=3. Check that output yields batches and progress bar? We can't check progress bar. But we can check that the iterator yields correct batches and that total is computed. We can capture the tqdm object? The function returns tqdm_class(itertools.batched(...)). tqdm_auto is tqdm from tqdm.auto. We can check that the returned object is a tqdm instance and that its total attribute is correct. Use isinstance. Also test boundary: n larger than iterable length. Test error: passing non-iterable? But batched expects iterable. Maybe passing None should raise TypeError? Actually itertools.batched will raise TypeError if iterable not iterable. So test that. Use pytest.raises. Ensure no mocks. Use tmp_path? Not needed. But requirement says temporary files must use tmp_path. We can create a temporary file and read lines. But not necessary. We can still create a file to test with file object as iterable. That uses tmp_path. Good. We'll test that passing a file object works and total computed from file lines. Use tmp_path to create file with 5 lines, n=2. total should be 3. Check. Let's write three tests: test_batched_basic, test_batched_file_iterable, test_batched_invalid."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051760878,
+    "prompt_tokens": 330,
+    "prompt_time": 0.017140262,
+    "completion_tokens": 673,
+    "completion_time": 0.793234191,
+    "total_tokens": 1003,
+    "total_time": 0.810374453,
+    "completion_tokens_details": {
+      "reasoning_tokens": 303
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sed2ffewysk2w2f7c76wca",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport itertools\nimport math\nimport pytest\nfrom tqdm.contrib.itertools import batched\nfrom tqdm.auto import tqdm as tqdm_auto\n\ndef test_batched_basic():\n    data = list(range(10))\n    n = 3\n    result = batched(data, n)\n    # The returned object should be a tqdm instance\n    assert isinstance(result, tqdm_auto)\n    # Total should be ceil(len(data)/n)\n    assert result.total == math.ceil(len(data) / n)\n    # Collect batches and verify content\n    batches = list(result)\n    assert len(batches) == math.ceil(len(data) / n)\n    expected = [data[i:i+n] for i in range(0, len(data), n)]\n    assert batches == expected\n\ndef test_batched_file_iterable(tmp_path):\n    # Create a temporary file with 5 lines\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"\\n\".join(str(i) for i in range(5)))\n    with file_path.open() as f:\n        n = 2\n        result = batched(f, n)\n        # Total should be ceil(5/2) = 3\n        assert result.total == 3\n        # Collect batches and verify each batch contains the correct lines\n        batches = list(result)\n        assert len(batches) == 3\n        expected = [file_path.read_text().splitlines()[i:i+n] for i in range(0, 5, n)]\n        assert batches == expected\n\ndef test_batched_invalid():\n    # Passing a non-iterable should raise a TypeError from itertools.batched\n    with pytest.raises(TypeError):\n        list(batched(42, 3))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.139601331029553
+}

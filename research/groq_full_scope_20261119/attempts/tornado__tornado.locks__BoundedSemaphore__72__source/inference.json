@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-28c8cf29-ef63-4721-a533-efd6447cc38e",
+  "object": "chat.completion",
+  "created": 1795079403,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport asyncio\nfrom tornado.locks import BoundedSemaphore\nfrom tornado import gen, ioloop\n\n# Helper to run a coroutine in the Tornado IOLoop\ndef run_sync(coro):\n    return ioloop.IOLoop.current().run_sync(coro)\n\n# Test 1: Normal acquire and release sequence\ndef test_bounded_semaphore_basic():\n    sem = BoundedSemaphore(value=2)\n    # Acquire twice, should succeed\n    run_sync(sem.acquire())\n    run_sync(sem.acquire())\n    # Now the semaphore is exhausted; a third acquire would block\n    # We test that the value is zero by attempting a non-blocking acquire\n    # which should raise a RuntimeError in Tornado's implementation\n    with pytest.raises(RuntimeError):\n        run_sync(sem.acquire(blocking=False))\n    # Release once and acquire again\n    sem.release()\n    run_sync(sem.acquire())\n    # After releasing twice, the semaphore should be back to initial value\n    assert sem._value == 2\n\n# Test 2: Releasing more times than the initial value raises ValueError\ndef test_bounded_semaphore_over_release():\n    sem = BoundedSemaphore(value=1)\n    run_sync(sem.acquire())\n    sem.release()\n    with pytest.raises(ValueError, match=\"Semaphore released too many times\"):\n        sem.release()\n\n# Test 3: Using the semaphore as an async context manager\n@pytest.mark.asyncio\nasync def test_bounded_semaphore_async_context():\n    sem = BoundedSemaphore(value=1)\n    async with sem:\n        # Inside the context, the semaphore should be acquired\n        assert sem._value == 0\n    # After exiting the context, the semaphore should be released\n    assert sem._value == 1\n```",
+        "reasoning": "Need tests for BoundedSemaphore. Need import from tornado.locks. Write three tests: normal acquire/release, boundary error when release too many, and error when initial value zero? maybe test that acquiring beyond initial blocks? But can't block. Use async? Use gen.coroutine? Use ioloop? Use tornado.testing? But simpler: use sync? BoundedSemaphore likely async? Actually tornado.locks.Semaphore is async context manager? Let's inspect? But we can't. We'll assume it's sync? Might be async. Use gen.Task? Might be easier to use ioloop to run. We'll just test release error. Use with pytest.raises. Also test that after acquiring all, release works until limit. Use tmp_path not needed. We'll just test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054976003,
+    "prompt_tokens": 422,
+    "prompt_time": 0.026428736,
+    "completion_tokens": 535,
+    "completion_time": 0.578342955,
+    "total_tokens": 957,
+    "total_time": 0.604771691,
+    "completion_tokens_details": {
+      "reasoning_tokens": 154
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh3xjgec6bp9hyfftcq48n",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport asyncio\nfrom tornado.locks import BoundedSemaphore\nfrom tornado import gen, ioloop\n\n# Helper to run a coroutine in the Tornado IOLoop\ndef run_sync(coro):\n    return ioloop.IOLoop.current().run_sync(coro)\n\n# Test 1: Normal acquire and release sequence\ndef test_bounded_semaphore_basic():\n    sem = BoundedSemaphore(value=2)\n    # Acquire twice, should succeed\n    run_sync(sem.acquire())\n    run_sync(sem.acquire())\n    # Now the semaphore is exhausted; a third acquire would block\n    # We test that the value is zero by attempting a non-blocking acquire\n    # which should raise a RuntimeError in Tornado's implementation\n    with pytest.raises(RuntimeError):\n        run_sync(sem.acquire(blocking=False))\n    # Release once and acquire again\n    sem.release()\n    run_sync(sem.acquire())\n    # After releasing twice, the semaphore should be back to initial value\n    assert sem._value == 2\n\n# Test 2: Releasing more times than the initial value raises ValueError\ndef test_bounded_semaphore_over_release():\n    sem = BoundedSemaphore(value=1)\n    run_sync(sem.acquire())\n    sem.release()\n    with pytest.raises(ValueError, match=\"Semaphore released too many times\"):\n        sem.release()\n\n# Test 3: Using the semaphore as an async context manager\n@pytest.mark.asyncio\nasync def test_bounded_semaphore_async_context():\n    sem = BoundedSemaphore(value=1)\n    async with sem:\n        # Inside the context, the semaphore should be acquired\n        assert sem._value == 0\n    # After exiting the context, the semaphore should be released\n    assert sem._value == 1\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "3a40516ecf5741ffb2196fbb8ceb9b80",
+  "_api_plus_pacing_seconds": 1.5107778360252269
+}

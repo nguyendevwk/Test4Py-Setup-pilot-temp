@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-ef1e40c8-4c9f-427f-971f-e78b52badcd2",
+  "object": "chat.completion",
+  "created": 1795079260,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\nfrom pypara.dcc import DCC\nfrom pypara.commons.zeitgeist import Date\nfrom pypara.currencies import Currency\nfrom pypara.monetary import Money\n\n# Helper: a simple DCC that always returns 1 for any fraction calculation\ndef one_fraction(start: Date, asof: Date, end: Date, freq: Decimal | None = None) -> Decimal:\n    return Decimal(1)\n\nsimple_dcc = DCC(\n    name=\"ONE\",\n    altnames=set(),\n    currencies=set(),\n    calculate_fraction_method=one_fraction,\n)\n\ndef test_calculate_fraction_normal_and_boundary():\n    start = Date(2024, 1, 1)\n    asof = Date(2024, 6, 1)\n    end = Date(2024, 12, 31)\n\n    # Normal case: asof within range\n    assert simple_dcc.calculate_fraction(start, asof, end) == Decimal(1)\n\n    # Boundary case: asof equals start\n    assert simple_dcc.calculate_fraction(start, start, end) == Decimal(1)\n\n    # Boundary case: asof equals end\n    assert simple_dcc.calculate_fraction(start, end, end) == Decimal(1)\n\n    # Error case: asof outside range\n    before = Date(2023, 12, 31)\n    after = Date(2025, 1, 1)\n    assert simple_dcc.calculate_fraction(start, before, end) == Decimal(0)\n    assert simple_dcc.calculate_fraction(start, after, end) == Decimal(0)\n\ndef test_calculate_daily_fraction():\n    start = Date(2024, 1, 1)\n    end = Date(2024, 12, 31)\n\n    # asof is after start: daily fraction should be 1 - 0 = 1\n    asof = Date(2024, 6, 1)\n    assert simple_dcc.calculate_daily_fraction(start, asof, end) == Decimal(1)\n\n    # asof is the start date: asof_minus_1 < start, so yfact = 0, tfact = 1\n    asof_start = start\n    assert simple_dcc.calculate_daily_fraction(start, asof_start, end) == Decimal(1)\n\n    # asof is before start: asof_minus_1 < start, tfact = 0, yfact = 0\n    asof_before = Date(2023, 12, 31)\n    assert simple_dcc.calculate_daily_fraction(start, asof_before, end) == Decimal(0)\n\ndef test_interest_and_coupon_calculation():\n    principal = Money(Decimal(1000), Currency(\"USD\"))\n    rate = Decimal(\"0.05\")  # 5% annual\n    start = Date(2024, 1, 1)\n    asof = Date(2024, 6, 1)\n    end = Date(2024, 12, 31)\n\n    # Interest: uses calculate_fraction which returns 1\n    interest = simple_dcc.interest(principal, rate, start, asof, end)\n    assert interest == principal * rate * Decimal(1)\n\n    # Coupon: prevdate is start, nextdate is end (since freq=1 year)\n    coupon = simple_dcc.coupon(principal, rate, start, asof, end, freq=1)\n    # coupon should equal interest calculated above\n    assert coupon == interest\n```",
+        "reasoning": "We need 3 tests. Use DCC instance. Need to import DCC. Use simple DCC with dummy calculate_fraction_method. Use NamedTuple. We'll create a DCC with trivial method that returns Decimal(1). Test calculate_fraction normal, boundary, error. Also test calculate_daily_fraction. Use tmp_path? not needed. Provide assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.058092591,
+    "prompt_tokens": 922,
+    "prompt_time": 0.118465762,
+    "completion_tokens": 821,
+    "completion_time": 0.954367538,
+    "total_tokens": 1743,
+    "total_time": 1.0728333,
+    "completion_tokens_details": {
+      "reasoning_tokens": 71
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgzgrce5ds7km3sevmqsxy",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\nfrom pypara.dcc import DCC\nfrom pypara.commons.zeitgeist import Date\nfrom pypara.currencies import Currency\nfrom pypara.monetary import Money\n\n# Helper: a simple DCC that always returns 1 for any fraction calculation\ndef one_fraction(start: Date, asof: Date, end: Date, freq: Decimal | None = None) -> Decimal:\n    return Decimal(1)\n\nsimple_dcc = DCC(\n    name=\"ONE\",\n    altnames=set(),\n    currencies=set(),\n    calculate_fraction_method=one_fraction,\n)\n\ndef test_calculate_fraction_normal_and_boundary():\n    start = Date(2024, 1, 1)\n    asof = Date(2024, 6, 1)\n    end = Date(2024, 12, 31)\n\n    # Normal case: asof within range\n    assert simple_dcc.calculate_fraction(start, asof, end) == Decimal(1)\n\n    # Boundary case: asof equals start\n    assert simple_dcc.calculate_fraction(start, start, end) == Decimal(1)\n\n    # Boundary case: asof equals end\n    assert simple_dcc.calculate_fraction(start, end, end) == Decimal(1)\n\n    # Error case: asof outside range\n    before = Date(2023, 12, 31)\n    after = Date(2025, 1, 1)\n    assert simple_dcc.calculate_fraction(start, before, end) == Decimal(0)\n    assert simple_dcc.calculate_fraction(start, after, end) == Decimal(0)\n\ndef test_calculate_daily_fraction():\n    start = Date(2024, 1, 1)\n    end = Date(2024, 12, 31)\n\n    # asof is after start: daily fraction should be 1 - 0 = 1\n    asof = Date(2024, 6, 1)\n    assert simple_dcc.calculate_daily_fraction(start, asof, end) == Decimal(1)\n\n    # asof is the start date: asof_minus_1 < start, so yfact = 0, tfact = 1\n    asof_start = start\n    assert simple_dcc.calculate_daily_fraction(start, asof_start, end) == Decimal(1)\n\n    # asof is before start: asof_minus_1 < start, tfact = 0, yfact = 0\n    asof_before = Date(2023, 12, 31)\n    assert simple_dcc.calculate_daily_fraction(start, asof_before, end) == Decimal(0)\n\ndef test_interest_and_coupon_calculation():\n    principal = Money(Decimal(1000), Currency(\"USD\"))\n    rate = Decimal(\"0.05\")  # 5% annual\n    start = Date(2024, 1, 1)\n    asof = Date(2024, 6, 1)\n    end = Date(2024, 12, 31)\n\n    # Interest: uses calculate_fraction which returns 1\n    interest = simple_dcc.interest(principal, rate, start, asof, end)\n    assert interest == principal * rate * Decimal(1)\n\n    # Coupon: prevdate is start, nextdate is end (since freq=1 year)\n    coupon = simple_dcc.coupon(principal, rate, start, asof, end, freq=1)\n    # coupon should equal interest calculated above\n    assert coupon == interest\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5081842810031958
+}

@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-73468990-0448-448c-a6ec-17aec4e1cfd7",
+  "object": "chat.completion",
+  "created": 1795079562,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.postprocessor.metadatafromtitle import MetadataFromTitlePP\n\n\nclass DummyDownloader:\n    def __init__(self):\n        self.messages = []\n\n    def to_screen(self, msg):\n        self.messages.append(msg)\n\n\ndef test_normal_parsing_and_messages():\n    downloader = DummyDownloader()\n    pp = MetadataFromTitlePP(downloader, \"%(title)s - %(artist)s\")\n    info = {\"title\": \"Hello - Adele\"}\n    out, updated = pp.run(info)\n\n    # The postprocessor should not modify the list of postprocessors\n    assert out == []\n\n    # The info dict should now contain the parsed fields\n    assert updated[\"title\"] == \"Hello\"\n    assert updated[\"artist\"] == \"Adele\"\n\n    # Messages should include parsed values\n    assert any(\"[fromtitle] parsed title: Hello\" in m for m in downloader.messages)\n    assert any(\"[fromtitle] parsed artist: Adele\" in m for m in downloader.messages)\n\n\ndef test_no_match_uses_original_title_and_logs_error():\n    downloader = DummyDownloader()\n    pp = MetadataFromTitlePP(downloader, \"%(artist)s - %(title)s\")\n    info = {\"title\": \"Just a random title\"}\n    out, updated = pp.run(info)\n\n    # No changes to info\n    assert updated[\"title\"] == \"Just a random title\"\n    assert \"artist\" not in updated\n\n    # Error message should be logged\n    assert any(\n        \"[fromtitle] Could not interpret title of video as\" in m\n        for m in downloader.messages\n    )\n\n\ndef test_format_to_regex_escapes_special_characters():\n    downloader = DummyDownloader()\n    # Title format contains regex special characters that must be escaped\n    pp = MetadataFromTitlePP(downloader, \"%(artist)s & %(title)s (live)\")\n    # The regex should escape '&' and '(' and ')'\n    regex = pp._titleregex\n    assert r'\\ &\\ ' in regex\n    assert r'\\(' in regex\n    assert r'\\)' in regex\n\n    # Test that it correctly parses a matching title\n    info = {\"title\": \"Coldplay & The Band (live)\"}\n    out, updated = pp.run(info)\n    assert updated[\"artist\"] == \"Coldplay\"\n    assert updated[\"title\"] == \"The Band (live)\"\n```",
+        "reasoning": "Need tests for MetadataFromTitlePP. Use dummy downloader with to_screen capturing. Test normal parsing, boundary where no match, and error? maybe missing placeholder? We'll test that regex conversion works. Use tmp_path? not needed. Provide three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005201303,
+    "prompt_tokens": 606,
+    "prompt_time": 0.032266771,
+    "completion_tokens": 555,
+    "completion_time": 0.591419096,
+    "total_tokens": 1161,
+    "total_time": 0.623685867,
+    "completion_tokens_details": {
+      "reasoning_tokens": 51
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh8rn3ebcrzf846j3q503j",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.postprocessor.metadatafromtitle import MetadataFromTitlePP\n\n\nclass DummyDownloader:\n    def __init__(self):\n        self.messages = []\n\n    def to_screen(self, msg):\n        self.messages.append(msg)\n\n\ndef test_normal_parsing_and_messages():\n    downloader = DummyDownloader()\n    pp = MetadataFromTitlePP(downloader, \"%(title)s - %(artist)s\")\n    info = {\"title\": \"Hello - Adele\"}\n    out, updated = pp.run(info)\n\n    # The postprocessor should not modify the list of postprocessors\n    assert out == []\n\n    # The info dict should now contain the parsed fields\n    assert updated[\"title\"] == \"Hello\"\n    assert updated[\"artist\"] == \"Adele\"\n\n    # Messages should include parsed values\n    assert any(\"[fromtitle] parsed title: Hello\" in m for m in downloader.messages)\n    assert any(\"[fromtitle] parsed artist: Adele\" in m for m in downloader.messages)\n\n\ndef test_no_match_uses_original_title_and_logs_error():\n    downloader = DummyDownloader()\n    pp = MetadataFromTitlePP(downloader, \"%(artist)s - %(title)s\")\n    info = {\"title\": \"Just a random title\"}\n    out, updated = pp.run(info)\n\n    # No changes to info\n    assert updated[\"title\"] == \"Just a random title\"\n    assert \"artist\" not in updated\n\n    # Error message should be logged\n    assert any(\n        \"[fromtitle] Could not interpret title of video as\" in m\n        for m in downloader.messages\n    )\n\n\ndef test_format_to_regex_escapes_special_characters():\n    downloader = DummyDownloader()\n    # Title format contains regex special characters that must be escaped\n    pp = MetadataFromTitlePP(downloader, \"%(artist)s & %(title)s (live)\")\n    # The regex should escape '&' and '(' and ')'\n    regex = pp._titleregex\n    assert r'\\ &\\ ' in regex\n    assert r'\\(' in regex\n    assert r'\\)' in regex\n\n    # Test that it correctly parses a matching title\n    info = {\"title\": \"Coldplay & The Band (live)\"}\n    out, updated = pp.run(info)\n    assert updated[\"artist\"] == \"Coldplay\"\n    assert updated[\"title\"] == \"The Band (live)\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "4840a2513ebd4cb7a4723c0fa3b9697b",
+  "_api_plus_pacing_seconds": 2.2354137179790996
+}

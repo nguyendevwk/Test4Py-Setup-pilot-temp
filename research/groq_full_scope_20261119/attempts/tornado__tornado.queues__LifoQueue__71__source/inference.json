@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-20c052fc-9ffb-489a-9ed8-088bd7a8a5ee",
+  "object": "chat.completion",
+  "created": 1795079351,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.queues import LifoQueue\n\n\n@pytest.mark.asyncio\nasync def test_lifo_order(tmp_path):\n    \"\"\"Items are retrieved in LIFO order.\"\"\"\n    q = LifoQueue()\n    q.put(1)\n    q.put(2)\n    q.put(3)\n\n    # The queue should return items in reverse order of insertion\n    assert await q.get() == 3\n    assert await q.get() == 2\n    assert await q.get() == 1\n\n\n@pytest.mark.asyncio\nasync def test_get_blocks_until_put(tmp_path):\n    \"\"\"`get` waits until an item is available.\"\"\"\n    q = LifoQueue()\n\n    async def producer():\n        await asyncio.sleep(0.1)\n        q.put(42)\n\n    async def consumer():\n        return await q.get()\n\n    # Run producer and consumer concurrently\n    result = await asyncio.gather(producer(), consumer())\n    # The consumer should receive the value put by the producer\n    assert result[1] == 42\n\n\n@pytest.mark.asyncio\nasync def test_get_after_close_raises(tmp_path):\n    \"\"\"After closing the queue, `get` raises RuntimeError.\"\"\"\n    q = LifoQueue()\n    q.close()\n    with pytest.raises(RuntimeError):\n        await q.get()\n```",
+        "reasoning": "Need tests for LifoQueue. Import from tornado.queues. Write three tests: normal push/pop order, boundary empty get raises? In tornado queues, get waits until item. But we can test that get on empty raises? Actually get is async and waits. We can test that after put, get returns correct. Also test that get blocks until put. Use asyncio. Third test error: putting None? Not error. Maybe test that put after close? LifoQueue inherits Queue; close? Let's inspect Queue. But we can't. We'll test that after close, get raises RuntimeError. Use q.close() then await q.get() expecting RuntimeError. Use pytest.raises. Use asyncio."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00543198,
+    "prompt_tokens": 448,
+    "prompt_time": 0.01441775,
+    "completion_tokens": 421,
+    "completion_time": 0.442901805,
+    "total_tokens": 869,
+    "total_time": 0.457319555,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 140
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh2anheb49pwbea6fe44p5",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.queues import LifoQueue\n\n\n@pytest.mark.asyncio\nasync def test_lifo_order(tmp_path):\n    \"\"\"Items are retrieved in LIFO order.\"\"\"\n    q = LifoQueue()\n    q.put(1)\n    q.put(2)\n    q.put(3)\n\n    # The queue should return items in reverse order of insertion\n    assert await q.get() == 3\n    assert await q.get() == 2\n    assert await q.get() == 1\n\n\n@pytest.mark.asyncio\nasync def test_get_blocks_until_put(tmp_path):\n    \"\"\"`get` waits until an item is available.\"\"\"\n    q = LifoQueue()\n\n    async def producer():\n        await asyncio.sleep(0.1)\n        q.put(42)\n\n    async def consumer():\n        return await q.get()\n\n    # Run producer and consumer concurrently\n    result = await asyncio.gather(producer(), consumer())\n    # The consumer should receive the value put by the producer\n    assert result[1] == 42\n\n\n@pytest.mark.asyncio\nasync def test_get_after_close_raises(tmp_path):\n    \"\"\"After closing the queue, `get` raises RuntimeError.\"\"\"\n    q = LifoQueue()\n    q.close()\n    with pytest.raises(RuntimeError):\n        await q.get()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8719442000146955
+}

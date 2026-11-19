@@ -1,0 +1,38 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_unwrap_context_recurses_into_context_chain ________________
+
+    def test_unwrap_context_recurses_into_context_chain():
+        """When an exception has a __context__ that is also an exception, unwrap_context should return the deepest exception."""
+        # Create a chain: deepest -> middle -> outer
+        deepest = KeyError("deep")
+        middle = RuntimeError("middle")
+        middle.__context__ = deepest
+        outer = IndexError("outer")
+        outer.__context__ = middle
+    
+        result = unwrap_context(outer)
+        assert result is deepest
+        assert isinstance(result, KeyError)
+>       assert str(result) == "deep"
+E       assert "'deep'" == 'deep'
+E         
+E         - deep
+E         + 'deep'
+E         ? +    +
+
+test_generated.py:24: AssertionError
+_________ test_unwrap_context_returns_outer_when_context_not_exception _________
+
+    def test_unwrap_context_returns_outer_when_context_not_exception():
+        """If __context__ is not an Exception (e.g., None), unwrap_context should return the original exception."""
+        exc = TypeError("type error")
+        # Explicitly set __context__ to a non-Exception value
+>       exc.__context__ = "not an exception"
+E       TypeError: exception context must be None or derive from BaseException
+
+test_generated.py:30: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_unwrap_context_recurses_into_context_chain - a...
+FAILED test_generated.py::test_unwrap_context_returns_outer_when_context_not_exception
+2 failed, 1 passed in 0.37s

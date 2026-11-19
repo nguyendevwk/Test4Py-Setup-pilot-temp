@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-95d95823-6d09-46ce-b604-d00da2f2c337",
+  "object": "chat.completion",
+  "created": 1795079578,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport logging\nimport pytest\nfrom concurrent import futures\nfrom tornado.concurrent import future_set_exception_unless_cancelled\nfrom tornado.log import app_log\n\n\ndef test_set_exception_on_active_future():\n    \"\"\"When the future is not cancelled, the exception is set.\"\"\"\n    fut = asyncio.Future()\n    exc = ValueError(\"test error\")\n    future_set_exception_unless_cancelled(fut, exc)\n    assert fut.exception() is exc\n    assert fut.done()\n    assert not fut.cancelled()\n\n\ndef test_log_and_no_exception_when_future_cancelled(tmp_path, caplog):\n    \"\"\"If the future is cancelled, the exception is logged and not set.\"\"\"\n    fut = asyncio.Future()\n    fut.cancel()\n    exc = RuntimeError(\"cancelled error\")\n    with caplog.at_level(logging.ERROR, logger=app_log.name):\n        future_set_exception_unless_cancelled(fut, exc)\n    # The future remains cancelled and has no exception\n    assert fut.cancelled()\n    assert fut.exception() is None\n    # The log contains the expected message and exc_info\n    assert any(\n        \"Exception after Future was cancelled\" in record.message\n        for record in caplog.records\n    )\n    # Ensure the exception is logged as exc_info\n    assert any(record.exc_info[1] is exc for record in caplog.records)\n\n\ndef test_invalid_state_error_on_done_future():\n    \"\"\"If the future is already done with a result, set_exception raises.\"\"\"\n    fut = futures.Future()\n    fut.set_result(42)\n    exc = KeyError(\"already done\")\n    with pytest.raises(asyncio.InvalidStateError):\n        future_set_exception_unless_cancelled(fut, exc)\n```",
+        "reasoning": "We need three tests: normal set exception, cancelled future logs error, and boundary maybe future already done? If future done with result, set_exception will raise InvalidStateError. Our function will call set_exception and raise. So test that exception propagates. Use tmp_path? not needed. Use pytest.raises. Use real future from concurrent.futures.Future or asyncio.Future. Use app_log? It's from tornado.log. We can capture logs via caplog. Test that when cancelled, no exception set. Use asyncio.Future. Ensure future.cancelled() true. After calling, future.exception() is None. And log captured. Third test: future already done with result, calling should raise InvalidStateError. Use concurrent.futures.Future set_result. Then call function and expect InvalidStateError. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004838565,
+    "prompt_tokens": 429,
+    "prompt_time": 0.022341512,
+    "completion_tokens": 520,
+    "completion_time": 0.554901205,
+    "total_tokens": 949,
+    "total_time": 0.577242717,
+    "completion_tokens_details": {
+      "reasoning_tokens": 162
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh9867eq0ts3j0szsrefse",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport logging\nimport pytest\nfrom concurrent import futures\nfrom tornado.concurrent import future_set_exception_unless_cancelled\nfrom tornado.log import app_log\n\n\ndef test_set_exception_on_active_future():\n    \"\"\"When the future is not cancelled, the exception is set.\"\"\"\n    fut = asyncio.Future()\n    exc = ValueError(\"test error\")\n    future_set_exception_unless_cancelled(fut, exc)\n    assert fut.exception() is exc\n    assert fut.done()\n    assert not fut.cancelled()\n\n\ndef test_log_and_no_exception_when_future_cancelled(tmp_path, caplog):\n    \"\"\"If the future is cancelled, the exception is logged and not set.\"\"\"\n    fut = asyncio.Future()\n    fut.cancel()\n    exc = RuntimeError(\"cancelled error\")\n    with caplog.at_level(logging.ERROR, logger=app_log.name):\n        future_set_exception_unless_cancelled(fut, exc)\n    # The future remains cancelled and has no exception\n    assert fut.cancelled()\n    assert fut.exception() is None\n    # The log contains the expected message and exc_info\n    assert any(\n        \"Exception after Future was cancelled\" in record.message\n        for record in caplog.records\n    )\n    # Ensure the exception is logged as exc_info\n    assert any(record.exc_info[1] is exc for record in caplog.records)\n\n\ndef test_invalid_state_error_on_done_future():\n    \"\"\"If the future is already done with a result, set_exception raises.\"\"\"\n    fut = futures.Future()\n    fut.set_result(42)\n    exc = KeyError(\"already done\")\n    with pytest.raises(asyncio.InvalidStateError):\n        future_set_exception_unless_cancelled(fut, exc)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "0ca67228b94046868372d19f276ca83a",
+  "_api_plus_pacing_seconds": 1.938372265023645
+}

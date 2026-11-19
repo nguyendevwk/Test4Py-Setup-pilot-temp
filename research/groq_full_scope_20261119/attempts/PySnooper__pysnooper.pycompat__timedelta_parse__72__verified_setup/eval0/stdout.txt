@@ -1,0 +1,33 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_timedelta_parse_normal __________________________
+
+    def test_timedelta_parse_normal():
+        # Normal case with all components present
+        td = timedelta_parse("02:30:15.123456")
+        assert td == datetime_module.timedelta(hours=2, minutes=30, seconds=15, microseconds=123456)
+        # Verify individual attributes
+>       assert td.total_seconds() == 2 * 3600 + 30 * 60 + 15
+E       assert 9015.123456 == (((2 * 3600) + (30 * 60)) + 15)
+E        +  where 9015.123456 = <built-in method total_seconds of datetime.timedelta object at 0x7fc7a5acb630>()
+E        +    where <built-in method total_seconds of datetime.timedelta object at 0x7fc7a5acb630> = datetime.timedelta(seconds=9015, microseconds=123456).total_seconds
+
+test_generated.py:10: AssertionError
+__________________ test_timedelta_parse_boundary_large_values __________________
+
+    def test_timedelta_parse_boundary_large_values():
+        # Boundary case with large numbers
+        td = timedelta_parse("1000:59:59.999999")
+        assert td == datetime_module.timedelta(hours=1000, minutes=59, seconds=59, microseconds=999999)
+        # Check that the total seconds reflect the large hour value
+        expected_seconds = 1000 * 3600 + 59 * 60 + 59
+>       assert td.total_seconds() == expected_seconds
+E       assert 3603599.999999 == 3603599
+E        +  where 3603599.999999 = <built-in method total_seconds of datetime.timedelta object at 0x7fc7a5aca9d0>()
+E        +    where <built-in method total_seconds of datetime.timedelta object at 0x7fc7a5aca9d0> = datetime.timedelta(days=41, seconds=61199, microseconds=999999).total_seconds
+
+test_generated.py:19: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_timedelta_parse_normal - assert 9015.123456 ==...
+FAILED test_generated.py::test_timedelta_parse_boundary_large_values - assert...
+2 failed, 1 passed in 0.11s

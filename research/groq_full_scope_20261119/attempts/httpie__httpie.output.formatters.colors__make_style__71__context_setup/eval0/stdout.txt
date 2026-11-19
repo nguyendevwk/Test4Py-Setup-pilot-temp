@@ -1,0 +1,77 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_make_style_formats_colors_and_inherits __________________
+
+    def test_make_style_formats_colors_and_inherits():
+        raw = {"Token.Keyword": "red bold", "Token.String": "green"}
+>       style_cls = make_style("TestStyle", raw, shade="dark")
+
+test_generated.py:7: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/output/formatters/colors.py:363: in make_style
+    'styles': {
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/output/formatters/colors.py:364: in <dictcomp>
+    key: format_value(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = 'red bold'
+
+    def format_value(value):
+>       return ' '.join(
+            get_color(part, shade) or part
+            for part in value.split()
+        )
+E       TypeError: sequence item 0: expected str instance, dict found
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/output/formatters/colors.py:356: TypeError
+_____________ test_make_style_with_empty_dict_returns_empty_styles _____________
+
+    def test_make_style_with_empty_dict_returns_empty_styles():
+        style_cls = make_style("EmptyStyle", {}, shade=None)
+        style_instance = style_cls()
+>       assert style_instance.styles == {}
+E       AssertionError: assert {Token: '', T...cape: '', ...} == {}
+E         
+E         Left contains 80 more items:
+E         {Token: ''}
+E         {Token.Comment: ''}
+E         {Token.Comment.Hashbang: ''}
+E         {Token.Comment.Multiline: ''}
+E         {Token.Comment.Preproc: ''}...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+test_generated.py:28: AssertionError
+___________ test_make_style_raises_type_error_on_invalid_raw_styles ____________
+
+    def test_make_style_raises_type_error_on_invalid_raw_styles():
+        with pytest.raises(TypeError):
+>           make_style("BadStyle", None, shade="light")
+
+test_generated.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'BadStyle', raw_styles = None, shade = 'light'
+
+    def make_style(name, raw_styles, shade):
+        def format_value(value):
+            return ' '.join(
+                get_color(part, shade) or part
+                for part in value.split()
+            )
+    
+        bases = (pygments.style.Style,)
+        data = {
+            'styles': {
+                key: format_value(value)
+>               for key, value in raw_styles.items()
+            }
+        }
+E       AttributeError: 'NoneType' object has no attribute 'items'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/output/formatters/colors.py:365: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_make_style_formats_colors_and_inherits - TypeE...
+FAILED test_generated.py::test_make_style_with_empty_dict_returns_empty_styles
+FAILED test_generated.py::test_make_style_raises_type_error_on_invalid_raw_styles
+3 failed in 0.47s

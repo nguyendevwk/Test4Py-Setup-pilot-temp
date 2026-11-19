@@ -1,0 +1,356 @@
+{
+  "status": "locked_exploratory_new_projects_not_paper_replication",
+  "model": "openai/gpt-oss-20b",
+  "seed_values": [
+    42,
+    43,
+    44
+  ],
+  "seed_caveat": "API seed best effort, not guaranteed determinism",
+  "arms": [
+    "source_only",
+    "ast_dependencies"
+  ],
+  "repair_rounds": 2,
+  "max_completion_tokens": 2048,
+  "temperature": 0.2,
+  "budget_usd": 2,
+  "targets": [
+    {
+      "id": "sty__sty.primitive__Style",
+      "project": "sty",
+      "module": "sty.primitive",
+      "symbol": "Style",
+      "file": "sty/primitive.py",
+      "source_sha256": "e575e1f14e80cf9e93af15d27970126e43210ad4f1a522388b1e18dfc4166fd8",
+      "source": "from collections import namedtuple\nfrom copy import deepcopy\nfrom typing import Callable, Dict, Iterable, List, NamedTuple, Tuple, Type, Union\nfrom sty.rendertype import RenderType\n\nclass Style(str):\n    \"\"\"\n    This type stores the different styling rules for the registers and the resulting\n    ANSI-sequence as a string.\n\n    For example:\n\n        fg.orange = Style(RgbFg(1,5,10), Sgr(1))\n\n        isinstance(fg.orange, Style) # True\n\n        isinstance(fg.orange, str) # True\n\n        str(fg.orange) # '\\x1b[38;2;1;5;10m\\x1b[1m' (The ASNI sequence for orange and bold)\n    \"\"\"\n\n    rules: Iterable[StylingRule]\n\n    def __new__(cls, *rules: StylingRule, value: str = \"\") -> \"Style\":\n        new_cls = str.__new__(cls, value)  # type: ignore\n        setattr(new_cls, \"rules\", rules)\n        return new_cls",
+      "dependencies": {
+        "policy": "production-dependencies-v1",
+        "max_chars": 14000,
+        "max_nodes": 12,
+        "chars": 77,
+        "snippets": [
+          {
+            "file": "sty/primitive.py",
+            "line": 12,
+            "symbol": "StylingRule",
+            "source": "StylingRule = Union[\"Style\", RenderType]"
+          },
+          {
+            "file": "sty/rendertype.py",
+            "line": 8,
+            "symbol": "RenderType",
+            "source": "class RenderType:\n    args: list = []"
+          }
+        ],
+        "omitted": [],
+        "scope": "static source excerpts only; no inferred expected values"
+      },
+      "root": "/tmp/council-study-sources/sty",
+      "preflight_pass": true,
+      "preflight_stderr": "",
+      "commit": "6f1774ef260be04bac356c101e3fca0ae5b38c70"
+    },
+    {
+      "id": "sty__sty.primitive__Register",
+      "project": "sty",
+      "module": "sty.primitive",
+      "symbol": "Register",
+      "file": "sty/primitive.py",
+      "source_sha256": "e575e1f14e80cf9e93af15d27970126e43210ad4f1a522388b1e18dfc4166fd8",
+      "source": "from collections import namedtuple\nfrom copy import deepcopy\nfrom typing import Callable, Dict, Iterable, List, NamedTuple, Tuple, Type, Union\nfrom sty.rendertype import RenderType\n\nclass Register:\n    \"\"\"\n    This is the base Register class. All default registers (fg, bg, ef, rs) are\n    created from this class. You can use it to create your own custom registers.\n    \"\"\"\n\n    def __init__(self):\n        self.renderfuncs: Renderfuncs = {}\n        self.is_muted = False\n        self.eightbit_call = lambda x: x\n        self.rgb_call = lambda r, g, b: (r, g, b)\n\n    def __setattr__(self, name: str, value: Style):\n        if isinstance(value, Style):\n            if self.is_muted:\n                rendered_style = Style(*value.rules, value=\"\")\n            else:\n                rendered, rules = _render_rules(self.renderfuncs, value.rules)\n                rendered_style = Style(*rules, value=rendered)\n\n            return super().__setattr__(name, rendered_style)\n        else:\n            # TODO: Why do we need this??? What should be set here?\n            return super().__setattr__(name, value)\n\n    def __call__(self, *args: Union[int, str], **kwargs) -> str:\n        \"\"\"\n        This function is to handle calls such as `fg(42)`, `bg(102, 49, 42)`, `fg('red')`.\n        \"\"\"\n\n        # Return empty str if object is muted.\n        if self.is_muted:\n            return \"\"\n\n        len_args = len(args)\n\n        if len_args == 1:\n            # If input is an 8bit color code, run 8bit render function.\n            if isinstance(args[0], int):\n                return self.eightbit_call(*args, **kwargs)\n\n            # If input is a string, return attribute with the name that matches\n            # input.\n            else:\n                return getattr(self, args[0])\n\n        # If input is an 24bit color code, run 24bit render function.\n        elif len_args == 3:\n            return self.rgb_call(*args, **kwargs)\n\n        else:\n            return \"\"\n\n    def set_eightbit_call(self, rendertype: Type[RenderType]) -> None:\n        \"\"\"\n        You can call a register-object directly. A call like this ``fg(144)``\n        is a Eightbit-call. With this method you can define the render-type for such calls.\n\n        :param rendertype: The new rendertype that is used for Eightbit-calls.\n        \"\"\"\n        func: Callable = self.renderfuncs[rendertype]\n        self.eightbit_call = func\n\n    def set_rgb_call(self, rendertype: Type[RenderType]) -> None:\n        \"\"\"\n        You can call a register-object directly. A call like this ``fg(10, 42, 255)``\n        is a RGB-call. With this method you can define the render-type for such calls.\n\n        :param rendertype: The new rendertype that is used for RGB-calls.\n        \"\"\"\n        func: Callable = self.renderfuncs[rendertype]\n        self.rgb_call = func\n\n    def set_renderfunc(self, rendertype: Type[RenderType], func: Callable) -> None:\n        \"\"\"\n        With this method you can add or replace render-functions for a given register-object:\n\n        :param rendertype: The render type for which the new renderfunc is used.\n        :param func: The new render function.\n        \"\"\"\n        # Save new render-func in register\n        self.renderfuncs.update({rendertype: func})\n\n        # Update style atributes and styles with the new renderfunc.\n        for attr_name in dir(self):\n            val = getattr(self, attr_name)\n            if isinstance(val, Style):\n                setattr(self, attr_name, val)\n\n    def mute(self) -> None:\n        \"\"\"\n        Sometimes it is useful to disable the formatting for a register-object. You can\n        do so by invoking this method.\n        \"\"\"\n        self.is_muted = True\n\n        for attr_name in dir(self):\n            val = getattr(self, attr_name)\n            if isinstance(val, Style):\n                setattr(self, attr_name, val)\n\n    def unmute(self) -> None:\n        \"\"\"\n        Use this method to unmute a previously muted register object.\n        \"\"\"\n        self.is_muted = False\n\n        for attr_name in dir(self):\n            val = getattr(self, attr_name)\n            if isinstance(val, Style):\n                setattr(self, attr_name, val)\n\n    def as_dict(self) -> Dict[str, str]:\n        \"\"\"\n        Export color register as dict.\n        \"\"\"\n        items: Dict[str, str] = {}\n\n        for name in dir(self):\n            if not name.startswith(\"_\") and isinstance(getattr(self, name), str):\n                items.update({name: str(getattr(self, name))})\n\n        return items\n\n    def as_namedtuple(self):\n        \"\"\"\n        Export color register as namedtuple.\n        \"\"\"\n        d = self.as_dict()\n        return namedtuple(\"StyleRegister\", d.keys())(*d.values())\n\n    def copy(self) -> \"Register\":\n        \"\"\"\n        Make a deepcopy of a register-object.\n        \"\"\"\n        return deepcopy(self)",
+      "dependencies": {
+        "policy": "production-dependencies-v1",
+        "max_chars": 14000,
+        "max_nodes": 12,
+        "chars": 1434,
+        "snippets": [
+          {
+            "file": "sty/primitive.py",
+            "line": 10,
+            "symbol": "Renderfuncs",
+            "source": "Renderfuncs = Dict[Type[RenderType], Callable]"
+          },
+          {
+            "file": "sty/primitive.py",
+            "line": 15,
+            "symbol": "Style",
+            "source": "class Style(str):\n    \"\"\"\n    This type stores the different styling rules for the registers and the resulting\n    ANSI-sequence as a string.\n\n    For example:\n\n        fg.orange = Style(RgbFg(1,5,10), Sgr(1))\n\n        isinstance(fg.orange, Style) # True\n\n        isinstance(fg.orange, str) # True\n\n        str(fg.orange) # '\\x1b[38;2;1;5;10m\\x1b[1m' (The ASNI sequence for orange and bold)\n    \"\"\"\n\n    rules: Iterable[StylingRule]\n\n    def __new__(cls, *rules: StylingRule, value: str = \"\") -> \"Style\":\n        new_cls = str.__new__(cls, value)  # type: ignore\n        setattr(new_cls, \"rules\", rules)\n        return new_cls"
+          },
+          {
+            "file": "sty/rendertype.py",
+            "line": 8,
+            "symbol": "RenderType",
+            "source": "class RenderType:\n    args: list = []"
+          },
+          {
+            "file": "sty/primitive.py",
+            "line": 39,
+            "symbol": "_render_rules",
+            "source": "def _render_rules(\n    renderfuncs: Renderfuncs,\n    rules: Iterable[StylingRule],\n) -> Tuple[str, Iterable[StylingRule]]:\n    rendered: str = \"\"\n    flattened_rules: List[StylingRule] = []\n\n    for rule in rules:\n        if isinstance(rule, RenderType):\n            f1: Callable = renderfuncs[type(rule)]\n            rendered += f1(*rule.args)\n            flattened_rules.append(rule)\n\n        elif isinstance(rule, Style):\n            r1, r2 = _render_rules(renderfuncs, rule.rules)\n            rendered += r1\n            flattened_rules.extend(r2)\n\n        else:\n            raise ValueError(\"Parameter 'rules' must be of type Iterable[Rule].\")\n\n    return rendered, flattened_rules"
+          },
+          {
+            "file": "sty/primitive.py",
+            "line": 12,
+            "symbol": "StylingRule",
+            "source": "StylingRule = Union[\"Style\", RenderType]"
+          }
+        ],
+        "omitted": [],
+        "scope": "static source excerpts only; no inferred expected values"
+      },
+      "root": "/tmp/council-study-sources/sty",
+      "preflight_pass": true,
+      "preflight_stderr": "",
+      "commit": "6f1774ef260be04bac356c101e3fca0ae5b38c70"
+    },
+    {
+      "id": "sty__sty.lib__mute",
+      "project": "sty",
+      "module": "sty.lib",
+      "symbol": "mute",
+      "file": "sty/lib.py",
+      "source_sha256": "8fd543b8057822f5ded50357c3be5364870541e878c2b1a1205ee325000fd905",
+      "source": "from sty.primitive import Register\n\ndef mute(*objects: Register) -> None:\n    \"\"\"\n    Use this function to mute multiple register-objects at once.\n\n    :param objects: Pass multiple register-objects to the function.\n    \"\"\"\n    err = ValueError(\n        \"The mute() method can only be used with objects that inherit \"\n        \"from the 'Register class'.\"\n    )\n    for obj in objects:\n        if not isinstance(obj, Register):\n            raise err\n        obj.mute()",
+      "dependencies": {
+        "policy": "production-dependencies-v1",
+        "max_chars": 14000,
+        "max_nodes": 12,
+        "chars": 6048,
+        "snippets": [
+          {
+            "file": "sty/primitive.py",
+            "line": 63,
+            "symbol": "Register",
+            "source": "class Register:\n    \"\"\"\n    This is the base Register class. All default registers (fg, bg, ef, rs) are\n    created from this class. You can use it to create your own custom registers.\n    \"\"\"\n\n    def __init__(self):\n        self.renderfuncs: Renderfuncs = {}\n        self.is_muted = False\n        self.eightbit_call = lambda x: x\n        self.rgb_call = lambda r, g, b: (r, g, b)\n\n    def __setattr__(self, name: str, value: Style):\n        if isinstance(value, Style):\n            if self.is_muted:\n                rendered_style = Style(*value.rules, value=\"\")\n            else:\n                rendered, rules = _render_rules(self.renderfuncs, value.rules)\n                rendered_style = Style(*rules, value=rendered)\n\n            return super().__setattr__(name, rendered_style)\n        else:\n            # TODO: Why do we need this??? What should be set here?\n            return super().__setattr__(name, value)\n\n    def __call__(self, *args: Union[int, str], **kwargs) -> str:\n        \"\"\"\n        This function is to handle calls such as `fg(42)`, `bg(102, 49, 42)`, `fg('red')`.\n        \"\"\"\n\n        # Return empty str if object is muted.\n        if self.is_muted:\n            return \"\"\n\n        len_args = len(args)\n\n        if len_args == 1:\n            # If input is an 8bit color code, run 8bit render function.\n            if isinstance(args[0], int):\n                return self.eightbit_call(*args, **kwargs)\n\n            # If input is a string, return attribute with the name that matches\n            # input.\n            else:\n                return getattr(self, args[0])\n\n        # If input is an 24bit color code, run 24bit render function.\n        elif len_args == 3:\n            return self.rgb_call(*args, **kwargs)\n\n        else:\n            return \"\"\n\n    def set_eightbit_call(self, rendertype: Type[RenderType]) -> None:\n        \"\"\"\n        You can call a register-object directly. A call like this ``fg(144)``\n        is a Eightbit-call. With this method you can define the render-type for such calls.\n\n        :param rendertype: The new rendertype that is used for Eightbit-calls.\n        \"\"\"\n        func: Callable = self.renderfuncs[rendertype]\n        self.eightbit_call = func\n\n    def set_rgb_call(self, rendertype: Type[RenderType]) -> None:\n        \"\"\"\n        You can call a register-object directly. A call like this ``fg(10, 42, 255)``\n        is a RGB-call. With this method you can define the render-type for such calls.\n\n        :param rendertype: The new rendertype that is used for RGB-calls.\n        \"\"\"\n        func: Callable = self.renderfuncs[rendertype]\n        self.rgb_call = func\n\n    def set_renderfunc(self, rendertype: Type[RenderType], func: Callable) -> None:\n        \"\"\"\n        With this method you can add or replace render-functions for a given register-object:\n\n        :param rendertype: The render type for which the new renderfunc is used.\n        :param func: The new render function.\n        \"\"\"\n        # Save new render-func in register\n        self.renderfuncs.update({rendertype: func})\n\n        # Update style atributes and styles with the new renderfunc.\n        for attr_name in dir(self):\n            val = getattr(self, attr_name)\n            if isinstance(val, Style):\n                setattr(self, attr_name, val)\n\n    def mute(self) -> None:\n        \"\"\"\n        Sometimes it is useful to disable the formatting for a register-object. You can\n        do so by invoking this method.\n        \"\"\"\n        self.is_muted = True\n\n        for attr_name in dir(self):\n            val = getattr(self, attr_name)\n            if isinstance(val, Style):\n                setattr(self, attr_name, val)\n\n    def unmute(self) -> None:\n        \"\"\"\n        Use this method to unmute a previously muted register object.\n        \"\"\"\n        self.is_muted = False\n\n        for attr_name in dir(self):\n            val = getattr(self, attr_name)\n            if isinstance(val, Style):\n                setattr(self, attr_name, val)\n\n    def as_dict(self) -> Dict[str, str]:\n        \"\"\"\n        Export color register as dict.\n        \"\"\"\n        items: Dict[str, str] = {}\n\n        for name in dir(self):\n            if not name.startswith(\"_\") and isinstance(getattr(self, name), str):\n                items.update({name: str(getattr(self, name))})\n\n        return items\n\n    def as_namedtuple(self):\n        \"\"\"\n        Export color register as namedtuple.\n        \"\"\"\n        d = self.as_dict()\n        return namedtuple(\"StyleRegister\", d.keys())(*d.values())\n\n    def copy(self) -> \"Register\":\n        \"\"\"\n        Make a deepcopy of a register-object.\n        \"\"\"\n        return deepcopy(self)"
+          },
+          {
+            "file": "sty/primitive.py",
+            "line": 10,
+            "symbol": "Renderfuncs",
+            "source": "Renderfuncs = Dict[Type[RenderType], Callable]"
+          },
+          {
+            "file": "sty/primitive.py",
+            "line": 15,
+            "symbol": "Style",
+            "source": "class Style(str):\n    \"\"\"\n    This type stores the different styling rules for the registers and the resulting\n    ANSI-sequence as a string.\n\n    For example:\n\n        fg.orange = Style(RgbFg(1,5,10), Sgr(1))\n\n        isinstance(fg.orange, Style) # True\n\n        isinstance(fg.orange, str) # True\n\n        str(fg.orange) # '\\x1b[38;2;1;5;10m\\x1b[1m' (The ASNI sequence for orange and bold)\n    \"\"\"\n\n    rules: Iterable[StylingRule]\n\n    def __new__(cls, *rules: StylingRule, value: str = \"\") -> \"Style\":\n        new_cls = str.__new__(cls, value)  # type: ignore\n        setattr(new_cls, \"rules\", rules)\n        return new_cls"
+          },
+          {
+            "file": "sty/rendertype.py",
+            "line": 8,
+            "symbol": "RenderType",
+            "source": "class RenderType:\n    args: list = []"
+          },
+          {
+            "file": "sty/primitive.py",
+            "line": 39,
+            "symbol": "_render_rules",
+            "source": "def _render_rules(\n    renderfuncs: Renderfuncs,\n    rules: Iterable[StylingRule],\n) -> Tuple[str, Iterable[StylingRule]]:\n    rendered: str = \"\"\n    flattened_rules: List[StylingRule] = []\n\n    for rule in rules:\n        if isinstance(rule, RenderType):\n            f1: Callable = renderfuncs[type(rule)]\n            rendered += f1(*rule.args)\n            flattened_rules.append(rule)\n\n        elif isinstance(rule, Style):\n            r1, r2 = _render_rules(renderfuncs, rule.rules)\n            rendered += r1\n            flattened_rules.extend(r2)\n\n        else:\n            raise ValueError(\"Parameter 'rules' must be of type Iterable[Rule].\")\n\n    return rendered, flattened_rules"
+          }
+        ],
+        "omitted": [],
+        "scope": "static source excerpts only; no inferred expected values"
+      },
+      "root": "/tmp/council-study-sources/sty",
+      "preflight_pass": true,
+      "preflight_stderr": "",
+      "commit": "6f1774ef260be04bac356c101e3fca0ae5b38c70"
+    },
+    {
+      "id": "pyMonet__pymonet.box__Box",
+      "project": "pyMonet",
+      "module": "pymonet.box",
+      "symbol": "Box",
+      "file": "pymonet/box.py",
+      "source_sha256": "f38622309f2732a2845ac1ce754c78a3b067ae148f3cf7b58af82e7f480fa560",
+      "source": "from typing import TypeVar, Generic, Callable\n\nclass Box(Generic[T]):\n    \"\"\"\n    Data type for storage any type of data\n    \"\"\"\n\n    def __init__(self, value: T) -> None:\n        \"\"\"\n        :param value: value to store in Box\n        :type value: Any\n        \"\"\"\n        self.value = value\n\n    def __eq__(self, other: object) -> bool:\n        return isinstance(other, Box) and self.value == other.value\n\n    def __str__(self) -> str:  # pragma: no cover\n        return 'Box[value={}]'.format(self.value)\n\n    def map(self, mapper: Callable[[T], U]) -> 'Box[U]':\n        \"\"\"\n        Take function (A) -> b and applied this function on current box value and returns new box with mapped value.\n\n        :param mapper: mapper function\n        :type mapper: Function(A) -> B\n        :returns: new box with mapped value\n        :rtype: Box[B]\n        \"\"\"\n        return Box(mapper(self.value))\n\n    def bind(self, mapper: Callable[[T], U]) -> U:\n        \"\"\"\n        Take function and applied this function on current box value and returns mapped value.\n\n        :param mapper: mapper function\n        :type mapper: Function(A) -> B\n        :returns: new box with mapped value\n        :rtype: B\n        \"\"\"\n        return mapper(self.value)\n\n    def ap(self, applicative):\n        \"\"\"\n        Applies the function inside the Box[A] structure to another applicative type.\n\n        :param applicative: applicative contains function\n        :type applicative: Box[B]\n        :returns: new Box with result of contains function\n        :rtype: Box[A(B)]\n        \"\"\"\n        return applicative.map(self.value)\n\n    def to_maybe(self):\n        \"\"\"\n        Transform Box into not empty Maybe.\n\n        :returns: non empty Maybe monad with previous value\n        :rtype: Maybe[A]\n        \"\"\"\n        from pymonet.maybe import Maybe\n\n        return Maybe.just(self.value)\n\n    def to_either(self):\n        \"\"\"\n        Transform Box into Right either.\n\n        :returns: right Either monad with previous value\n        :rtype: Right[A]\n        \"\"\"\n        from pymonet.either import Right\n\n        return Right(self.value)\n\n    def to_lazy(self):\n        \"\"\"\n        Transform Box into Lazy with returning value function.\n\n        :returns: not folded Lazy monad with function returning previous value\n        :rtype: Lazy[Function(() -> A)]\n        \"\"\"\n        from pymonet.lazy import Lazy\n\n        return Lazy(lambda: self.value)\n\n    def to_try(self):\n        \"\"\"\n        Transform Box into successfull Try.\n\n        :returns: successfull Try monad with previous value\n        :rtype: Try[A]\n        \"\"\"\n        from pymonet.monad_try import Try\n\n        return Try(self.value, is_success=True)\n\n    def to_validation(self):\n        \"\"\"\n        Transform Box into Validation.\n\n        :returns: successfull Validation monad with previous value\n        :rtype: Validation[A, []]\n        \"\"\"\n        from pymonet.validation import Validation\n\n        return Validation.success(self.value)",
+      "dependencies": {
+        "policy": "production-dependencies-v1",
+        "max_chars": 14000,
+        "max_nodes": 12,
+        "chars": 32,
+        "snippets": [
+          {
+            "file": "pymonet/box.py",
+            "line": 4,
+            "symbol": "T",
+            "source": "T = TypeVar('T')"
+          },
+          {
+            "file": "pymonet/box.py",
+            "line": 5,
+            "symbol": "U",
+            "source": "U = TypeVar('U')"
+          }
+        ],
+        "omitted": [],
+        "scope": "static source excerpts only; no inferred expected values"
+      },
+      "root": "/tmp/council-study-sources/pyMonet",
+      "preflight_pass": true,
+      "preflight_stderr": "",
+      "commit": "94610ee4f1c71aa5f50e0813539bf1a2ea279d70"
+    },
+    {
+      "id": "pyMonet__pymonet.maybe__Maybe",
+      "project": "pyMonet",
+      "module": "pymonet.maybe",
+      "symbol": "Maybe",
+      "file": "pymonet/maybe.py",
+      "source_sha256": "3eae381d6f93a809965630b02b5082eb9bc2a130e2860916ed9d9be2be3e4360",
+      "source": "from typing import TypeVar, Generic, Callable, Union\n\nclass Maybe(Generic[T]):\n    \"\"\"\n    Maybe type is the most common way of representing nothingness (or the null type).\n    Maybe is effectively abstract and has two concrete subtypes: Box (also Some) and Nothing.\n    \"\"\"\n\n    def __init__(self, value: T, is_nothing: bool) -> None:\n        self.is_nothing = is_nothing\n        if not is_nothing:\n            self.value = value\n\n    def __eq__(self, other: object) -> bool:\n        return isinstance(other, Maybe) and \\\n            self.is_nothing == other.is_nothing and \\\n            (self.is_nothing or self.value == other.value)\n\n    @classmethod\n    def just(cls, value: T) -> 'Maybe[T]':\n        \"\"\"\n        Create not empty maybe.\n\n        :param mapper: value to store in Maybe\n        :type mapper: Any\n        :returns: Maybe[Any]\n        \"\"\"\n        return Maybe(value, False)\n\n    @classmethod\n    def nothing(cls) -> 'Maybe[None]':\n        \"\"\"\n        Create empty maybe.\n\n        :returns: Maybe[None]\n        \"\"\"\n        return Maybe(None, True)\n\n    def map(self, mapper: Callable[[T], U]) -> Union['Maybe[U]', 'Maybe[None]']:\n        \"\"\"\n        If Maybe is empty return new empty Maybe, in other case\n        takes mapper function and returns new instance of Maybe\n        with result of mapper.\n\n        :param mapper: function to call with Maybe value\n        :type mapper: Function(A) -> B\n        :returns: Maybe[B | None]\n        \"\"\"\n        if self.is_nothing:\n            return Maybe.nothing()\n        return Maybe.just(\n            mapper(self.value)\n        )\n\n    def bind(self, mapper: Callable[[T], 'Maybe[U]']) -> Union['Maybe[U]', 'Maybe[None]']:\n        \"\"\"\n        If Maybe is empty return new empty Maybe, in other case\n        takes mapper function and returns result of mapper.\n\n        :param mapper: function to call with Maybe.value\n        :type mapper: Function(A) -> Maybe[B]\n        :returns: Maybe[B | None]\n        \"\"\"\n        if self.is_nothing:\n            return Maybe.nothing()\n        return mapper(self.value)\n\n    def ap(self, applicative):\n        \"\"\"\n        Applies the function inside the Maybe[A] structure to another applicative type for notempty Maybe.\n        For empty returns copy of itself\n\n        :param applicative: applicative contains function\n        :type applicative: Maybe[B]\n        :returns: new Maybe with result of contains function\n        :rtype: Maybe[A(B) | None]\n        \"\"\"\n        if self.is_nothing:\n            return Maybe.nothing()\n        return applicative.map(self.value)\n\n    def filter(self, filterer: Callable[[T], bool]) -> Union['Maybe[T]', 'Maybe[None]']:\n        \"\"\"\n        If Maybe is empty or filterer returns False return default_value, in other case\n        return new instance of Maybe with the same value.\n\n        :param filterer:\n        :type filterer: Function(A) -> Boolean\n        :returns: copy of self when filterer returns True, in other case empty Maybe\n        :rtype: Maybe[A] | Maybe[None]\n        \"\"\"\n        if self.is_nothing or not filterer(self.value):\n            return Maybe.nothing()\n        return Maybe.just(self.value)\n\n    def get_or_else(self, default_value: U) -> Union[T, U]:\n        \"\"\"\n        If Maybe is empty return default_value, in other case.\n\n        :param default_value: value to return if Maybe is empty\n        :type default_value: Any\n        :returns: value of Maybe or default_value\n        :rtype: A\n        \"\"\"\n        if self.is_nothing:\n            return default_value\n        return self.value\n\n    def to_either(self):\n        \"\"\"\n        Transform Maybe to Either.\n\n        :returns: Right monad with previous value when Maybe is not empty, in other case Left with None\n        :rtype: Either[A | None]\n        \"\"\"\n        from pymonet.either import Left, Right\n\n        if self.is_nothing:\n            return Left(None)\n        return Right(self.value)\n\n    def to_box(self):\n        \"\"\"\n        Transform Maybe to Box.\n\n        :returns: Box monad with previous value when Maybe is not empty, in other case Box with None\n        :rtype: Box[A | None]\n        \"\"\"\n        from pymonet.box import Box\n\n        if self.is_nothing:\n            return Box(None)\n        return Box(self.value)\n\n    def to_lazy(self):\n        \"\"\"\n        Transform Maybe to Try.\n\n        :returns: Lazy monad with function returning previous value in other case Left with None\n        :rtype: Lazy[Function() -> (A | None)]\n        \"\"\"\n        from pymonet.lazy import Lazy\n\n        if self.is_nothing:\n            return Lazy(lambda: None)\n        return Lazy(lambda: self.value)\n\n    def to_try(self):\n        \"\"\"\n        Transform Maybe to Try.\n\n        :returns: successfully Try with previous value when Maybe is not empty, othercase not successfully Try with None\n        :rtype: Try[A]\n        \"\"\"\n        from pymonet.monad_try import Try\n\n        if self.is_nothing:\n            return Try(None, is_success=False)\n        return Try(self.value, is_success=True)\n\n    def to_validation(self):\n        \"\"\"\n        Transform Maybe into Validation.\n\n        :returns: successfull Validation monad with previous value or None when Maybe is empty\n        :rtype: Validation[A, []]\n        \"\"\"\n        from pymonet.validation import Validation\n\n        if self.is_nothing:\n            return Validation.success(None)\n        return Validation.success(self.value)",
+      "dependencies": {
+        "policy": "production-dependencies-v1",
+        "max_chars": 14000,
+        "max_nodes": 12,
+        "chars": 32,
+        "snippets": [
+          {
+            "file": "pymonet/maybe.py",
+            "line": 4,
+            "symbol": "T",
+            "source": "T = TypeVar('T')"
+          },
+          {
+            "file": "pymonet/maybe.py",
+            "line": 5,
+            "symbol": "U",
+            "source": "U = TypeVar('U')"
+          }
+        ],
+        "omitted": [],
+        "scope": "static source excerpts only; no inferred expected values"
+      },
+      "root": "/tmp/council-study-sources/pyMonet",
+      "preflight_pass": true,
+      "preflight_stderr": "",
+      "commit": "94610ee4f1c71aa5f50e0813539bf1a2ea279d70"
+    },
+    {
+      "id": "pyMonet__pymonet.validation__Validation",
+      "project": "pyMonet",
+      "module": "pymonet.validation",
+      "symbol": "Validation",
+      "file": "pymonet/validation.py",
+      "source_sha256": "bf933aefb116883c6c0f08ad73e23ea8af7ad2e2c003acc077dc5f2b78166160",
+      "source": "\n\nclass Validation:\n    \"\"\"It that can hold either a success value or a failure value and has methods for accumulating errors\"\"\"\n\n    def __init__(self, value, errors):\n        self.value = value\n        self.errors = errors\n\n    def __eq__(self, other):\n        \"\"\"\n        Two Validations are equals when values and errors lists are equal.\n        \"\"\"\n        return (isinstance(other, Validation) and\n                self.errors == other.errors and\n                self.value == other.value)\n\n    def __str__(self):  # pragma: no cover\n        if self.is_success():\n            return 'Validation.success[{}]'.format(self.value)\n        return 'Validation.fail[{}, {}]'.format(self.value, self.errors)\n\n    @classmethod\n    def success(cls, value=None):\n        \"\"\"\n        Returns successful Validation with value and empty errors list.\n\n        :params value: value to store in Validation\n        :type value: A\n        :returns: Successful Validation\n        :rtype: Validation[A, []]\n        \"\"\"\n        return Validation(value, [])\n\n    @classmethod\n    def fail(cls, errors=[]):\n        \"\"\"\n        Returns failed Validation with None as value and errors list.\n\n        :params errors: list of errors to store\n        :type value: List[E]\n        :returns: Failed Validation\n        :rtype: Validation[None, List[E]]\n        \"\"\"\n        return Validation(None, errors)\n\n    def is_success(self):\n        \"\"\"\n        Returns True when errors list are empty.\n\n        :returns: True for empty errors list\n        :rtype: Boolean\n        \"\"\"\n        return len(self.errors) == 0\n\n    def is_fail(self):\n        \"\"\"\n        Returns True when errors list are not empty.\n\n        :returns: True for empty errors not list\n        :rtype: Boolean\n        \"\"\"\n        return len(self.errors) != 0\n\n    def map(self, mapper):\n        \"\"\"\n        Take function (A) -> B and applied this function on current Validation value.\n\n        :param mapper: mapper function\n        :type mapper: Function(A) -> B\n        :returns: new Validation with mapped value and previous errors\n        :rtype: Validation[B, List[E]]\n        \"\"\"\n        return Validation(mapper(self.value), self.errors)\n\n    def bind(self, folder):\n        \"\"\"\n        Take function and applied this function on current Validation value and returns folder result.\n\n        :param mapper: mapper function\n        :type mapper: Function(A) -> Validation[B, E]\n        :returns: new Validation with mapped value\n        :rtype: Validation[B, E]\n        \"\"\"\n        return folder(self.value)\n\n    def ap(self, fn):\n        \"\"\"\n        It takes as a parameter function returning another Validation.\n        Function is called with Validation value and returns new Validation with previous value\n        and concated new and old errors.\n\n        :param monad: monad contains function\n        :type monad: Function(A) -> Validation[Any, List[E]]\n        :returns: new validation with stored errors\n        :rtype: Validation[A, List[E]]\n        \"\"\"\n        return Validation(self.value, self.errors + fn(self.value).errors)\n\n    def to_either(self):\n        \"\"\"\n        Transform Validation to Either.\n\n        :returns: Right monad with previous value when Validation has no errors, in other case Left with errors list\n        :rtype: Right[A] | Left[E]\n        \"\"\"\n        from pymonet.either import Left, Right\n\n        if self.is_success():\n            return Right(self.value)\n        return Left(self.errors)\n\n    def to_maybe(self):\n        \"\"\"\n        Transform Validation to Maybe.\n\n        :returns: Maybe with Validation Value when Validation has no errors, in other case empty Maybe\n        :rtype: Maybe[A | None]\n        \"\"\"\n        from pymonet.maybe import Maybe\n\n        if self.is_success():\n            return Maybe.just(self.value)\n        return Maybe.nothing()\n\n    def to_box(self):\n        \"\"\"\n        Transform Validation to Box.\n\n        :returns: Box with Validation value\n        :rtype: Box[A]\n        \"\"\"\n        from pymonet.box import Box\n\n        return Box(self.value)\n\n    def to_lazy(self):\n        \"\"\"\n        Transform Validation to Try.\n\n        :returns: Lazy monad with function returning Validation value\n        :rtype: Lazy[Function() -> (A | None)]\n        \"\"\"\n        from pymonet.lazy import Lazy\n\n        return Lazy(lambda: self.value)\n\n    def to_try(self):\n        \"\"\"\n        Transform Validation to Try.\n\n        :returns: successfully Try with Validation value value. Try is successful when Validation has no errors\n        :rtype: Try[A]\n        \"\"\"\n        from pymonet.monad_try import Try\n\n        return Try(self.value, is_success=self.is_success())",
+      "dependencies": {
+        "policy": "production-dependencies-v1",
+        "max_chars": 14000,
+        "max_nodes": 12,
+        "chars": 0,
+        "snippets": [],
+        "omitted": [],
+        "scope": "static source excerpts only; no inferred expected values"
+      },
+      "root": "/tmp/council-study-sources/pyMonet",
+      "preflight_pass": true,
+      "preflight_stderr": "",
+      "commit": "94610ee4f1c71aa5f50e0813539bf1a2ea279d70"
+    },
+    {
+      "id": "pytutils__pytutils.props__lazyclassproperty",
+      "project": "pytutils",
+      "module": "pytutils.props",
+      "symbol": "lazyclassproperty",
+      "file": "pytutils/props.py",
+      "source_sha256": "27a13dd5b5c52f0e3e27a362b322d36c659e0f13fc3a309b7c365b471ae0dba7",
+      "source": "\n\ndef lazyclassproperty(fn):\n    \"\"\"\n    Lazy/Cached class property.\n    \"\"\"\n    attr_name = '_lazy_' + fn.__name__\n\n    @classproperty\n    def _lazyclassprop(cls):\n        if not hasattr(cls, attr_name):\n            setattr(cls, attr_name, fn(cls))\n        return getattr(cls, attr_name)\n\n    return _lazyclassprop",
+      "dependencies": {
+        "policy": "production-dependencies-v1",
+        "max_chars": 14000,
+        "max_nodes": 12,
+        "chars": 248,
+        "snippets": [
+          {
+            "file": "pytutils/props.py",
+            "line": 13,
+            "symbol": "classproperty",
+            "source": "classproperty = roclassproperty"
+          },
+          {
+            "file": "pytutils/props.py",
+            "line": 1,
+            "symbol": "roclassproperty",
+            "source": "class roclassproperty(object):\n    \"\"\"\n    Read-only class property descriptor factory/decorator.\n    \"\"\"\n\n    def __init__(self, f):\n        self.f = f\n\n    def __get__(self, obj, owner):\n        return self.f(owner)"
+          }
+        ],
+        "omitted": [],
+        "scope": "static source excerpts only; no inferred expected values"
+      },
+      "root": "/tmp/council-study-sources/pytutils",
+      "preflight_pass": true,
+      "preflight_stderr": "",
+      "commit": "d7a37c07802b08dbfdf9894e72d2b7d649c2d2af"
+    },
+    {
+      "id": "pytutils__pytutils.props__lazyperclassproperty",
+      "project": "pytutils",
+      "module": "pytutils.props",
+      "symbol": "lazyperclassproperty",
+      "file": "pytutils/props.py",
+      "source_sha256": "27a13dd5b5c52f0e3e27a362b322d36c659e0f13fc3a309b7c365b471ae0dba7",
+      "source": "\n\ndef lazyperclassproperty(fn):\n    \"\"\"\n    Lazy/Cached class property that stores separate instances per class/inheritor so there's no overlap.\n    \"\"\"\n\n    @classproperty\n    def _lazyclassprop(cls):\n        attr_name = '_%s_lazy_%s' % (cls.__name__, fn.__name__)\n        if not hasattr(cls, attr_name):\n            setattr(cls, attr_name, fn(cls))\n        return getattr(cls, attr_name)\n\n    return _lazyclassprop",
+      "dependencies": {
+        "policy": "production-dependencies-v1",
+        "max_chars": 14000,
+        "max_nodes": 12,
+        "chars": 248,
+        "snippets": [
+          {
+            "file": "pytutils/props.py",
+            "line": 13,
+            "symbol": "classproperty",
+            "source": "classproperty = roclassproperty"
+          },
+          {
+            "file": "pytutils/props.py",
+            "line": 1,
+            "symbol": "roclassproperty",
+            "source": "class roclassproperty(object):\n    \"\"\"\n    Read-only class property descriptor factory/decorator.\n    \"\"\"\n\n    def __init__(self, f):\n        self.f = f\n\n    def __get__(self, obj, owner):\n        return self.f(owner)"
+          }
+        ],
+        "omitted": [],
+        "scope": "static source excerpts only; no inferred expected values"
+      },
+      "root": "/tmp/council-study-sources/pytutils",
+      "preflight_pass": true,
+      "preflight_stderr": "",
+      "commit": "d7a37c07802b08dbfdf9894e72d2b7d649c2d2af"
+    },
+    {
+      "id": "pytutils__pytutils.excs__ok",
+      "project": "pytutils",
+      "module": "pytutils.excs",
+      "symbol": "ok",
+      "file": "pytutils/excs.py",
+      "source_sha256": "904d64de747ecbf94717e421f3ba9dc355a4901f321257d11841e1697dc455d1",
+      "source": "from contextlib import contextmanager\n\ndef ok(*exceptions):\n    \"\"\"Context manager to pass exceptions.\n    :param exceptions: Exceptions to pass\n    \"\"\"\n    try:\n        yield\n    except Exception as e:\n        if isinstance(e, exceptions):\n            pass\n        else:\n            raise e",
+      "dependencies": {
+        "policy": "production-dependencies-v1",
+        "max_chars": 14000,
+        "max_nodes": 12,
+        "chars": 0,
+        "snippets": [],
+        "omitted": [],
+        "scope": "static source excerpts only; no inferred expected values"
+      },
+      "root": "/tmp/council-study-sources/pytutils",
+      "preflight_pass": true,
+      "preflight_stderr": "",
+      "commit": "d7a37c07802b08dbfdf9894e72d2b7d649c2d2af"
+    }
+  ],
+  "planned": 54,
+  "selection": "Three projects chosen for pure-Python feasibility; nine symbols chosen before inference. Not random or representative.",
+  "primary": "suite pass + positive module coverage + replay + static assertion gate",
+  "pricing": {
+    "input_per_million": 0.075,
+    "output_per_million": 0.3,
+    "source": "https://console.groq.com/docs/model/openai/gpt-oss-20b"
+  },
+  "rules": "Write a complete pytest module testing the real imported target.\nUse production source as evidence. Test normal, boundary and error behavior.\nUse precise assertions, pytest.raises or unittest assertions; no tautologies,\nskips, xfail, suppression of unexpected exceptions or mocks of the target.\nDo not modify product code, install packages, access network or real user files.\nTemporary files must use tmp_path. Keep suites independent and deterministic.\nReturn exactly one complete Python code block. Do not output explanations.",
+  "runner_sha256": "47bdff0bc5c30f35f3abf08dc740136f5a6b16ca922a44973d3f1ad9fa4e9324",
+  "preparation_timestamp": 1795020551.8584428
+}

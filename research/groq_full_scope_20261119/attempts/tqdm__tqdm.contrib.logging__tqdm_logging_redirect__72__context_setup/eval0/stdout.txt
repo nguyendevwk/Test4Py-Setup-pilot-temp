@@ -1,0 +1,67 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_tqdm_logging_redirect_basic _______________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7fe0b45eec20>
+
+    def test_tqdm_logging_redirect_basic(capsys):
+        """Verify that logging messages are redirected to tqdm.write during a progress bar."""
+        logger = logging.getLogger("test_logger")
+        logger.setLevel(logging.INFO)
+    
+        # Capture the output of tqdm.write by redirecting sys.stdout temporarily
+        original_stdout = sys.stdout
+        sys.stdout = io.StringIO()
+    
+        with tqdm_logging_redirect(tqdm_class=tqdm, total=3) as pbar:
+            for i in range(3):
+                pbar.update()
+                if i == 1:
+                    logger.info("test message")
+    
+        # Restore stdout
+        output = sys.stdout.getvalue()
+        sys.stdout = original_stdout
+    
+        # The output should contain the tqdm progress bar and the redirected log message
+>       assert "test message" in output
+E       AssertionError: assert 'test message' in ''
+
+test_generated.py:29: AssertionError
+----------------------------- Captured stderr call -----------------------------
+  0%|          | 0/3 [00:00<?, ?it/s]                                     test message
+ 67%|██████▋   | 2/3 [00:00<00:00, 5899.16it/s]100%|██████████| 3/3 [00:00<00:00, 5622.39it/s]
+------------------------------ Captured log call -------------------------------
+INFO     test_logger:test_generated.py:22 test message
+__________________ test_tqdm_logging_redirect_zero_iterations __________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7fe0b4842680>
+
+    def test_tqdm_logging_redirect_zero_iterations(capsys):
+        """Progress bar with zero total should not raise and still redirect logs."""
+        logger = logging.getLogger("zero_logger")
+        logger.setLevel(logging.INFO)
+    
+        original_stdout = sys.stdout
+        sys.stdout = io.StringIO()
+    
+        with tqdm_logging_redirect(tqdm_class=tqdm, total=0) as pbar:
+            # No iterations, but log a message
+            logger.info("zero iteration message")
+    
+        output = sys.stdout.getvalue()
+        sys.stdout = original_stdout
+    
+>       assert "zero iteration message" in output
+E       AssertionError: assert 'zero iteration message' in ''
+
+test_generated.py:48: AssertionError
+----------------------------- Captured stderr call -----------------------------
+0it [00:00, ?it/s]                  zero iteration message
+0it [00:00, ?it/s]0it [00:00, ?it/s]
+------------------------------ Captured log call -------------------------------
+INFO     zero_logger:test_generated.py:43 zero iteration message
+=========================== short test summary info ============================
+FAILED test_generated.py::test_tqdm_logging_redirect_basic - AssertionError: ...
+FAILED test_generated.py::test_tqdm_logging_redirect_zero_iterations - Assert...
+2 failed, 1 passed in 0.15s

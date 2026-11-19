@@ -1,0 +1,116 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_fieldset_default_iterations_and_key_function _______________
+
+    def test_fieldset_default_iterations_and_key_function():
+        """Fieldset should return the default number of items and apply key function."""
+        fs = Fieldset()
+        # Use a simple field that returns a constant value
+>       result = fs("constant", key=lambda x: x.upper(), i=3)
+
+test_generated.py:9: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:403: in __call__
+    return [self.perform(name, key=key, **kwargs) for _ in range(iterations)]
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:403: in <listcomp>
+    return [self.perform(name, key=key, **kwargs) for _ in range(iterations)]
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:209: in perform
+    result = self._lookup_method(name)(**kwargs)
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:137: in _lookup_method
+    method = self._fuzzy_lookup(name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <mimesis.schema.Fieldset object at 0x7f94ff3f9ed0>, name = 'constant'
+
+    def _fuzzy_lookup(self, name: str) -> Any:
+        """A fuzzy method lookup.
+    
+        This method is called when the field definition
+        is fuzzy, like this: ``method``
+    
+        :param name: The field name.
+        :return: Callable object.
+        :raise FieldError: When field is invalid.
+        """
+        for provider_name in dir(self._generic):
+            provider = getattr(self._generic, provider_name)
+            if isinstance(provider, BaseProvider) and name in dir(provider):
+                return getattr(provider, name)
+    
+>       raise FieldError(name)
+E       mimesis.exceptions.FieldError: Field «constant» is not supported.
+
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:117: FieldError
+______________ test_fieldset_custom_iterations_kwarg_and_no_name _______________
+
+    def test_fieldset_custom_iterations_kwarg_and_no_name():
+        """Fieldset should respect custom iterations kwarg and work without a name."""
+        fs = Fieldset()
+        # When name is None, perform should still work (uses default provider)
+>       result = fs(i=5)
+
+test_generated.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:403: in __call__
+    return [self.perform(name, key=key, **kwargs) for _ in range(iterations)]
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:403: in <listcomp>
+    return [self.perform(name, key=key, **kwargs) for _ in range(iterations)]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <mimesis.schema.Fieldset object at 0x7f94fdf36b60>, name = None
+key = None, kwargs = {}
+
+    def perform(
+        self,
+        name: str | None = None,
+        key: Key = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Returns the value of the field by its name.
+    
+        It takes any string that represents the name of any method of
+        any supported data provider and the ``**kwargs`` of this method.
+    
+        .. note:: Some data providers have methods with the same names,
+            and in such cases, you can explicitly define that the method
+            belongs to data-provider ``field(name='provider.name')`` otherwise
+            it will return the data from the first provider which
+            has a method ``name``.
+    
+            Allowed delimiters: ``.``, ``:``, ``/`` and space:
+    
+            - ``provider.name``
+            - ``provider:name``
+            - ``provider/name``
+            - ``provider name``
+    
+        You can apply a *key function* to the result returned by
+        the method, by passing a parameter **key** with a callable
+        object which returns the final result.
+    
+        The key function has the option to accept two parameters: **result**
+        and **random**. In case you require access to a random instance within
+        the key function, you must modify the function to accept both of them,
+        where the first corresponds to the method result and the second
+        corresponds to the instance of random.
+    
+        :param name: Name of the method.
+        :param key: A key function (any callable object)
+            which will be applied to the result.
+        :param kwargs: Keyword arguments of the method.
+        :return: The result of the method.
+        :raises FieldError: If the field is missing or invalid.
+        :raises AliasesTypeError: If ``aliases`` is not a flat dictionary.
+        """
+        # Validate aliases before lookup
+        self._validate_aliases()
+    
+        if name is None:
+>           raise FieldError
+E           mimesis.exceptions.FieldError: A field name is required.
+
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:201: FieldError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_fieldset_default_iterations_and_key_function
+FAILED test_generated.py::test_fieldset_custom_iterations_kwarg_and_no_name
+2 failed, 1 passed in 0.23s

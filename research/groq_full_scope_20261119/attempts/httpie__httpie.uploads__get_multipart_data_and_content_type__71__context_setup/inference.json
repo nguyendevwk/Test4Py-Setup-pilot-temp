@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-87d5e7a8-5311-47f8-ae0d-215fd4d81d41",
+  "object": "chat.completion",
+  "created": 1795078184,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport pytest\nfrom httpie.uploads import get_multipart_data_and_content_type\n\ndef test_normal_multipart_with_file(tmp_path):\n    # Create a temporary file to upload\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"hello world\")\n    # Prepare multipart data: a text field and a file field\n    data = {\n        \"field1\": \"value1\",\n        \"file1\": (\"test.txt\", open(file_path, \"rb\"), \"text/plain\"),\n    }\n    encoder, content_type = get_multipart_data_and_content_type(data)\n    # The encoder should be a MultipartEncoder instance\n    assert hasattr(encoder, \"fields\") and encoder.fields == data\n    # Content type should include the boundary\n    assert content_type.startswith(\"multipart/form-data; boundary=\")\n    # The boundary in content_type should match encoder.boundary_value\n    assert encoder.boundary_value in content_type\n    # The encoder should produce a bytes payload containing the file content\n    payload = encoder.to_string()\n    assert b\"hello world\" in payload\n    # Clean up the opened file\n    encoder.fields[\"file1\"][1].close()\n\ndef test_boundary_override_and_custom_content_type():\n    # Prepare simple multipart data\n    data = {\"foo\": \"bar\"}\n    # Provide a custom boundary and content type\n    boundary = \"myboundary123\"\n    custom_ct = \"multipart/form-data; charset=utf-8\"\n    encoder, content_type = get_multipart_data_and_content_type(\n        data, boundary=boundary, content_type=custom_ct\n    )\n    # The encoder should use the provided boundary\n    assert encoder.boundary_value == boundary\n    # The content type should include the boundary appended\n    assert content_type == f\"{custom_ct}; boundary={boundary}\"\n    # The payload should contain the field value\n    payload = encoder.to_string()\n    assert b\"bar\" in payload\n\ndef test_invalid_input_raises_type_error():\n    # Passing a non-dict (e.g., a list) should raise a TypeError\n    with pytest.raises(TypeError):\n        get_multipart_data_and_content_type([\"not\", \"a\", \"dict\"])\n```",
+        "reasoning": "Need tests for get_multipart_data_and_content_type. Use tmp_path to create file. Test normal: data dict with file and field. Check content_type includes boundary. Test boundary override. Test error: passing non-dict? But function expects dict. Maybe passing None? Should raise TypeError. We'll test that."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049406378,
+    "prompt_tokens": 431,
+    "prompt_time": 0.022262351,
+    "completion_tokens": 535,
+    "completion_time": 0.611999542,
+    "total_tokens": 966,
+    "total_time": 0.634261893,
+    "completion_tokens_details": {
+      "reasoning_tokens": 65
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfypjbe3vs0mrzt1vqfjgh",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport pytest\nfrom httpie.uploads import get_multipart_data_and_content_type\n\ndef test_normal_multipart_with_file(tmp_path):\n    # Create a temporary file to upload\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"hello world\")\n    # Prepare multipart data: a text field and a file field\n    data = {\n        \"field1\": \"value1\",\n        \"file1\": (\"test.txt\", open(file_path, \"rb\"), \"text/plain\"),\n    }\n    encoder, content_type = get_multipart_data_and_content_type(data)\n    # The encoder should be a MultipartEncoder instance\n    assert hasattr(encoder, \"fields\") and encoder.fields == data\n    # Content type should include the boundary\n    assert content_type.startswith(\"multipart/form-data; boundary=\")\n    # The boundary in content_type should match encoder.boundary_value\n    assert encoder.boundary_value in content_type\n    # The encoder should produce a bytes payload containing the file content\n    payload = encoder.to_string()\n    assert b\"hello world\" in payload\n    # Clean up the opened file\n    encoder.fields[\"file1\"][1].close()\n\ndef test_boundary_override_and_custom_content_type():\n    # Prepare simple multipart data\n    data = {\"foo\": \"bar\"}\n    # Provide a custom boundary and content type\n    boundary = \"myboundary123\"\n    custom_ct = \"multipart/form-data; charset=utf-8\"\n    encoder, content_type = get_multipart_data_and_content_type(\n        data, boundary=boundary, content_type=custom_ct\n    )\n    # The encoder should use the provided boundary\n    assert encoder.boundary_value == boundary\n    # The content type should include the boundary appended\n    assert content_type == f\"{custom_ct}; boundary={boundary}\"\n    # The payload should contain the field value\n    payload = encoder.to_string()\n    assert b\"bar\" in payload\n\ndef test_invalid_input_raises_type_error():\n    # Passing a non-dict (e.g., a list) should raise a TypeError\n    with pytest.raises(TypeError):\n        get_multipart_data_and_content_type([\"not\", \"a\", \"dict\"])\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0345215660054237
+}

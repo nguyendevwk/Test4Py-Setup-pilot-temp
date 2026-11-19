@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-ba482c63-c6f6-44f5-8ac8-444c8a619465",
+  "object": "chat.completion",
+  "created": 1795076498,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typing import Dict\nfrom typed_ast import ast3 as ast\nfrom py_backwards.utils.snippet import extend_tree\nfrom py_backwards.utils.tree import find, get_non_exp_parent_and_index, replace_at\n\ndef test_extend_tree_replaces_call_with_variable(tmp_path):\n    # Create a simple AST with an extend call\n    source = \"extend(x)\"\n    tree = ast.parse(source)\n    # Prepare a variable mapping\n    class DummyVar:\n        def __repr__(self):\n            return \"<DummyVar>\"\n    variables: Dict[str, DummyVar] = {\"x\": DummyVar()}\n    # Apply extend_tree\n    extend_tree(tree, variables)\n    # After replacement, the tree should contain the DummyVar instance instead of the Call node\n    calls = list(find(tree, ast.Call))\n    assert len(calls) == 0  # no Call nodes left\n    # The root body should contain the DummyVar\n    assert tree.body[0] is variables[\"x\"]\n\ndef test_extend_tree_no_extend_call_leaves_tree_unchanged(tmp_path):\n    source = \"print('hello')\"\n    tree = ast.parse(source)\n    variables: Dict[str, object] = {}\n    # Capture the original tree structure\n    original_body = list(tree.body)\n    extend_tree(tree, variables)\n    # The tree should remain unchanged\n    assert tree.body == original_body\n    assert isinstance(tree.body[0], ast.Expr)\n\ndef test_extend_tree_missing_variable_raises_key_error(tmp_path):\n    source = \"extend(y)\"\n    tree = ast.parse(source)\n    variables: Dict[str, object] = {}  # y not provided\n    with pytest.raises(KeyError):\n        extend_tree(tree, variables)\n```",
+        "reasoning": "We need to test extend_tree. We need to create an AST with a call to extend. Use typed_ast ast3. We need to create variables dict mapping name to Variable. Variable type not defined; but we can use any object. extend_tree modifies tree: replace_at replaces node at index in parent with variables[node.args[0].id]. We need to test that replacement occurs. Also test boundary: no extend call. And error: missing variable key? It will KeyError. Write three tests. Use tmp_path? Not needed. Use ast.parse? typed_ast ast3 parse? Use typed_ast.ast3.parse? Let's import typed_ast.ast3 as ast. Use ast.parse to get AST. Then call extend_tree. Need find, get_non_exp_parent_and_index, replace_at functions from module. We'll import them. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053541043,
+    "prompt_tokens": 349,
+    "prompt_time": 0.010342627,
+    "completion_tokens": 540,
+    "completion_time": 0.593599905,
+    "total_tokens": 889,
+    "total_time": 0.603942532,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 172
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7seb8k9ehg9g09nwqv3b5n3",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typing import Dict\nfrom typed_ast import ast3 as ast\nfrom py_backwards.utils.snippet import extend_tree\nfrom py_backwards.utils.tree import find, get_non_exp_parent_and_index, replace_at\n\ndef test_extend_tree_replaces_call_with_variable(tmp_path):\n    # Create a simple AST with an extend call\n    source = \"extend(x)\"\n    tree = ast.parse(source)\n    # Prepare a variable mapping\n    class DummyVar:\n        def __repr__(self):\n            return \"<DummyVar>\"\n    variables: Dict[str, DummyVar] = {\"x\": DummyVar()}\n    # Apply extend_tree\n    extend_tree(tree, variables)\n    # After replacement, the tree should contain the DummyVar instance instead of the Call node\n    calls = list(find(tree, ast.Call))\n    assert len(calls) == 0  # no Call nodes left\n    # The root body should contain the DummyVar\n    assert tree.body[0] is variables[\"x\"]\n\ndef test_extend_tree_no_extend_call_leaves_tree_unchanged(tmp_path):\n    source = \"print('hello')\"\n    tree = ast.parse(source)\n    variables: Dict[str, object] = {}\n    # Capture the original tree structure\n    original_body = list(tree.body)\n    extend_tree(tree, variables)\n    # The tree should remain unchanged\n    assert tree.body == original_body\n    assert isinstance(tree.body[0], ast.Expr)\n\ndef test_extend_tree_missing_variable_raises_key_error(tmp_path):\n    source = \"extend(y)\"\n    tree = ast.parse(source)\n    variables: Dict[str, object] = {}  # y not provided\n    with pytest.raises(KeyError):\n        extend_tree(tree, variables)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9874517570133321
+}

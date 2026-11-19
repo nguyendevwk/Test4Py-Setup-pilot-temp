@@ -1,0 +1,49 @@
+```python
+import re
+import time
+
+import pytest
+
+from codetiming._timer import Timer
+
+
+def test_timer_start_stop_logs_and_records_elapsed():
+    """Verify that Timer logs initial and elapsed messages and records elapsed time."""
+    logs = []
+
+    def logger(msg: str) -> None:
+        logs.append(msg)
+
+    t = Timer(
+        name="test",
+        text="Elapsed: {seconds:.2f}s",
+        initial_text="Starting timer {name}",
+        logger=logger,
+    )
+
+    # Start the timer and check initial log
+    t.start()
+    assert logs == ["Starting timer test"], f"Unexpected initial log: {logs}"
+    assert t._start_time is not None, "Timer did not record start time"
+
+    # Wait a short duration
+    time.sleep(0.05)
+
+    # Stop the timer and check elapsed log and recorded time
+    elapsed = t.stop()
+    assert isinstance(elapsed, float), "stop() should return a float"
+    assert elapsed > 0, "Elapsed time should be positive"
+
+    # The last attribute should match the returned elapsed time
+    assert t.last == elapsed, "Timer.last should equal the returned elapsed time"
+
+    # Verify the elapsed log format
+    assert len(logs) == 2, f"Expected two log entries, got {len(logs)}"
+    match = re.match(r"Elapsed: (\d+\.\d+)s", logs[1])
+    assert match, f"Elapsed log did not match expected format: {logs[1]}"
+    logged_seconds = float(match.group(1))
+    # The logged seconds should be close to the actual elapsed time
+    assert logged_seconds == pytest.approx(elapsed, rel=0.1), (
+        f"Logged seconds {logged_seconds} differ from elapsed {elapsed}"
+    )
+```

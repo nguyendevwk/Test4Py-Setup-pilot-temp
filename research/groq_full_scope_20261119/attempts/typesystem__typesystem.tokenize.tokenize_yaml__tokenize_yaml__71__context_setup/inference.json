@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-d0e7adaa-14ca-4601-b2d8-9366fc78c586",
+  "object": "chat.completion",
+  "created": 1795079387,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_yaml import tokenize_yaml, ParseError, Position\nfrom typesystem.tokenize.tokens import ScalarToken, DictToken, ListToken\n\ndef test_tokenize_yaml_basic_structure():\n    yaml_text = \"\"\"\n    name: John\n    age: 30\n    hobbies:\n      - reading\n      - hiking\n    \"\"\"\n    token = tokenize_yaml(yaml_text)\n    assert isinstance(token, DictToken)\n    assert token.mapping[\"name\"] == \"John\"\n    assert token.mapping[\"age\"] == 30\n    hobbies = token.mapping[\"hobbies\"]\n    assert isinstance(hobbies, ListToken)\n    assert hobbies.value == [\"reading\", \"hiking\"]\n    # Verify positions are non-negative and within bounds\n    assert 0 <= token.start <= token.end < len(yaml_text)\n    for key, val in token.mapping.items():\n        if isinstance(val, ScalarToken):\n            assert 0 <= val.start <= val.end < len(yaml_text)\n\ndef test_tokenize_yaml_empty_content_raises():\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_yaml(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    assert isinstance(err.position, Position)\n    assert err.position.line_no == 1\n    assert err.position.column_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_yaml_invalid_syntax_raises():\n    bad_yaml = \"key: [unclosed list\"\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_yaml(bad_yaml)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    assert \"did not find expected\" in err.text or \"while parsing a flow sequence\" in err.text\n    # Position should point to the problematic character\n    assert isinstance(err.position, Position)\n    assert err.position.line_no == 1\n    assert err.position.column_no > 0\n    assert err.position.char_index > 0\n```",
+        "reasoning": "We need three tests: normal parsing, boundary empty string, error parsing. Use tmp_path for file? content string. Use pytest.raises for ParseError. Ensure import."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048742479,
+    "prompt_tokens": 1169,
+    "prompt_time": 0.069393887,
+    "completion_tokens": 467,
+    "completion_time": 0.534353978,
+    "total_tokens": 1636,
+    "total_time": 0.603747865,
+    "completion_tokens_details": {
+      "reasoning_tokens": 35
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh3dareg0ratn0qxserenf",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_yaml import tokenize_yaml, ParseError, Position\nfrom typesystem.tokenize.tokens import ScalarToken, DictToken, ListToken\n\ndef test_tokenize_yaml_basic_structure():\n    yaml_text = \"\"\"\n    name: John\n    age: 30\n    hobbies:\n      - reading\n      - hiking\n    \"\"\"\n    token = tokenize_yaml(yaml_text)\n    assert isinstance(token, DictToken)\n    assert token.mapping[\"name\"] == \"John\"\n    assert token.mapping[\"age\"] == 30\n    hobbies = token.mapping[\"hobbies\"]\n    assert isinstance(hobbies, ListToken)\n    assert hobbies.value == [\"reading\", \"hiking\"]\n    # Verify positions are non-negative and within bounds\n    assert 0 <= token.start <= token.end < len(yaml_text)\n    for key, val in token.mapping.items():\n        if isinstance(val, ScalarToken):\n            assert 0 <= val.start <= val.end < len(yaml_text)\n\ndef test_tokenize_yaml_empty_content_raises():\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_yaml(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    assert isinstance(err.position, Position)\n    assert err.position.line_no == 1\n    assert err.position.column_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_yaml_invalid_syntax_raises():\n    bad_yaml = \"key: [unclosed list\"\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_yaml(bad_yaml)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    assert \"did not find expected\" in err.text or \"while parsing a flow sequence\" in err.text\n    # Position should point to the problematic character\n    assert isinstance(err.position, Position)\n    assert err.position.line_no == 1\n    assert err.position.column_no > 0\n    assert err.position.char_index > 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "aace9bdf09414576b63b86b86f339bf2",
+  "_api_plus_pacing_seconds": 1.3109073219820857
+}

@@ -1,0 +1,32 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_validate_microseconds_and_offset _____________________
+
+    def test_validate_microseconds_and_offset():
+        fmt = DateTimeFormat()
+        input_str = "2023-07-21T15:30:45.123+02:00"
+        dt = fmt.validate(input_str)
+        assert dt == datetime.datetime(2023, 7, 21, 15, 30, 45, 123000,
+                                        tzinfo=datetime.timezone(datetime.timedelta(hours=2)))
+        # serialization should preserve the offset in ISO format
+        serialized = fmt.serialize(dt)
+>       assert serialized == "2023-07-21T15:30:45.123+02:00"
+E       AssertionError: assert '2023-07-21T1....123000+02:00' == '2023-07-21T1...:45.123+02:00'
+E         
+E         - 2023-07-21T15:30:45.123+02:00
+E         + 2023-07-21T15:30:45.123000+02:00
+E         ?                        +++
+
+test_generated.py:24: AssertionError
+_____________________ test_validate_invalid_format_raises ______________________
+
+    def test_validate_invalid_format_raises():
+        fmt = DateTimeFormat()
+>       with pytest.raises(fmt.ValidationError) as excinfo:
+E       AttributeError: 'DateTimeFormat' object has no attribute 'ValidationError'. Did you mean: 'validation_error'?
+
+test_generated.py:29: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_validate_microseconds_and_offset - AssertionEr...
+FAILED test_generated.py::test_validate_invalid_format_raises - AttributeErro...
+2 failed, 1 passed in 0.12s

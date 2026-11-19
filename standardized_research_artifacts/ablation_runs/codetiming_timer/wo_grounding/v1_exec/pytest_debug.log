@@ -1,0 +1,35 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________________ test_timer_start_stop_logging_and_timers ___________________
+
+    def test_timer_start_stop_logging_and_timers():
+        logs = []
+    
+        # Create a timer with custom logger and messages
+        timer = Timer(
+            name="test_timer",
+            initial_text="Timer {name} started",
+            text=lambda t: f"Elapsed: {t:.2f}s",
+            logger=logs.append,
+        )
+    
+        # Start the timer and verify initial log
+        timer.start()
+        assert logs[0] == "Timer test_timer started"
+    
+        # Stop the timer after a short delay and verify elapsed log
+        time.sleep(0.01)
+        elapsed = timer.stop()
+        assert logs[1].startswith("Elapsed: ")
+        assert elapsed > 0
+    
+        # Verify that the elapsed time was recorded in the class-wide Timers
+        recorded = Timer.timers.get("test_timer")
+>       assert recorded == [elapsed]
+E       assert 0.010158414021134377 == [0.010158414021134377]
+
+../../standardized_research_artifacts/ablation_runs/codetiming_timer/wo_grounding/v1_exec/test_run.py:28: AssertionError
+=========================== short test summary info ============================
+FAILED ../../standardized_research_artifacts/ablation_runs/codetiming_timer/wo_grounding/v1_exec/test_run.py::test_timer_start_stop_logging_and_timers
+1 failed in 0.14s
+

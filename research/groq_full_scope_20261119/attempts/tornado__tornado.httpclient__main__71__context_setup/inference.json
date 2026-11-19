@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-9b211315-9f46-4ced-b780-0d4ef3c88638",
+  "object": "chat.completion",
+  "created": 1795079520,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport pytest\nfrom tornado import httpserver, web, ioloop, httpclient, httputil\nfrom tornado.testing import AsyncTestCase, gen_test\nfrom tornado.ioloop import IOLoop\n\n# Helper to start a simple HTTP server in a background thread\ndef start_test_server(handler_class, port=0):\n    app = web.Application([(r\"/\", handler_class)])\n    server = httpserver.HTTPServer(app)\n    server.listen(port)\n    return server, server._port\n\nclass SimpleHandler(web.RequestHandler):\n    def get(self):\n        self.write(\"Hello, world!\")\n\nclass NotFoundHandler(web.RequestHandler):\n    def get(self):\n        self.set_status(404)\n        self.write(\"Not found\")\n\nclass DelayedHandler(web.RequestHandler):\n    async def get(self):\n        await asyncio.sleep(0.1)\n        self.write(\"Delayed response\")\n\n@pytest.mark.asyncio\nasync def test_successful_fetch(tmp_path):\n    \"\"\"HTTPClient should return a response with expected body for a 200 OK.\"\"\"\n    server, port = start_test_server(SimpleHandler)\n    client = httpclient.HTTPClient()\n    try:\n        url = f\"http://127.0.0.1:{port}/\"\n        response = client.fetch(url)\n        assert response.code == 200\n        assert response.body == b\"Hello, world!\"\n        assert isinstance(response, httpclient.HTTPResponse)\n    finally:\n        client.close()\n        server.stop()\n\n@pytest.mark.asyncio\nasync def test_404_error(tmp_path):\n    \"\"\"HTTPClient should raise HTTPError with code 404 and provide response.\"\"\"\n    server, port = start_test_server(NotFoundHandler)\n    client = httpclient.HTTPClient()\n    try:\n        url = f\"http://127.0.0.1:{port}/\"\n        with pytest.raises(httpclient.HTTPError) as excinfo:\n            client.fetch(url)\n        err = excinfo.value\n        assert err.code == 404\n        assert err.response is not None\n        assert err.response.code == 404\n        assert err.response.body == b\"Not found\"\n    finally:\n        client.close()\n        server.stop()\n\n@pytest.mark.asyncio\nasync def test_close_releases_resources(tmp_path):\n    \"\"\"After close, the client should not be usable and the IOLoop should be closed.\"\"\"\n    server, port = start_test_server(DelayedHandler)\n    client = httpclient.HTTPClient()\n    client.close()\n    # After close, attempting to fetch should raise RuntimeError due to closed IOLoop\n    url = f\"http://127.0.0.1:{port}/\"\n    with pytest.raises(RuntimeError):\n        client.fetch(url)\n    # Ensure the server is still running (so we didn't close it inadvertently)\n    server.stop()\n```",
+        "reasoning": "Need tests for HTTPClient fetch with local server? Use tornado.httpserver? But no network. We can test that HTTPClient raises HTTPError for 404 by using a local HTTP server via tornado.httpserver. Use IOLoop. Create simple handler returning 404. Use HTTPClient to fetch. Three tests: successful fetch returns body, 404 raises HTTPError, and close releases resources. Use tmp_path? not needed. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.006377677,
+    "prompt_tokens": 1552,
+    "prompt_time": 0.082979575,
+    "completion_tokens": 670,
+    "completion_time": 0.720229439,
+    "total_tokens": 2222,
+    "total_time": 0.803209014,
+    "completion_tokens_details": {
+      "reasoning_tokens": 90
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh7f69eg98bkfem53sw5vy",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport pytest\nfrom tornado import httpserver, web, ioloop, httpclient, httputil\nfrom tornado.testing import AsyncTestCase, gen_test\nfrom tornado.ioloop import IOLoop\n\n# Helper to start a simple HTTP server in a background thread\ndef start_test_server(handler_class, port=0):\n    app = web.Application([(r\"/\", handler_class)])\n    server = httpserver.HTTPServer(app)\n    server.listen(port)\n    return server, server._port\n\nclass SimpleHandler(web.RequestHandler):\n    def get(self):\n        self.write(\"Hello, world!\")\n\nclass NotFoundHandler(web.RequestHandler):\n    def get(self):\n        self.set_status(404)\n        self.write(\"Not found\")\n\nclass DelayedHandler(web.RequestHandler):\n    async def get(self):\n        await asyncio.sleep(0.1)\n        self.write(\"Delayed response\")\n\n@pytest.mark.asyncio\nasync def test_successful_fetch(tmp_path):\n    \"\"\"HTTPClient should return a response with expected body for a 200 OK.\"\"\"\n    server, port = start_test_server(SimpleHandler)\n    client = httpclient.HTTPClient()\n    try:\n        url = f\"http://127.0.0.1:{port}/\"\n        response = client.fetch(url)\n        assert response.code == 200\n        assert response.body == b\"Hello, world!\"\n        assert isinstance(response, httpclient.HTTPResponse)\n    finally:\n        client.close()\n        server.stop()\n\n@pytest.mark.asyncio\nasync def test_404_error(tmp_path):\n    \"\"\"HTTPClient should raise HTTPError with code 404 and provide response.\"\"\"\n    server, port = start_test_server(NotFoundHandler)\n    client = httpclient.HTTPClient()\n    try:\n        url = f\"http://127.0.0.1:{port}/\"\n        with pytest.raises(httpclient.HTTPError) as excinfo:\n            client.fetch(url)\n        err = excinfo.value\n        assert err.code == 404\n        assert err.response is not None\n        assert err.response.code == 404\n        assert err.response.body == b\"Not found\"\n    finally:\n        client.close()\n        server.stop()\n\n@pytest.mark.asyncio\nasync def test_close_releases_resources(tmp_path):\n    \"\"\"After close, the client should not be usable and the IOLoop should be closed.\"\"\"\n    server, port = start_test_server(DelayedHandler)\n    client = httpclient.HTTPClient()\n    client.close()\n    # After close, attempting to fetch should raise RuntimeError due to closed IOLoop\n    url = f\"http://127.0.0.1:{port}/\"\n    with pytest.raises(RuntimeError):\n        client.fetch(url)\n    # Ensure the server is still running (so we didn't close it inadvertently)\n    server.stop()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "f8108ce7202347cea57e71b5a1610fc5",
+  "_api_plus_pacing_seconds": 3.832045693008695
+}

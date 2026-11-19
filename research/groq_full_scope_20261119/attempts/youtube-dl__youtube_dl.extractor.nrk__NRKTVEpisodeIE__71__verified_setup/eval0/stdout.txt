@@ -1,0 +1,38 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_nrk_episode_extraction_normal ______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fe3168124a0>
+
+    def test_nrk_episode_extraction_normal(monkeypatch):
+        extractor = make_extractor()
+        url = "https://tv.nrk.no/serie/hellums-kro/sesong/1/episode/2"
+    
+        # Mock the webpage download to return a simple HTML containing the required meta tags
+        monkeypatch.setattr(extractor, "_download_webpage", lambda u, d: "<html></html>")
+    
+        # Mock JSON-LD search to return a dict with @id
+        mock_info = {"@id": "MUHH36005220"}
+        monkeypatch.setattr(extractor, "_search_json_ld", lambda w, d, default: mock_info)
+    
+        # Ensure other search helpers are not called
+        monkeypatch.setattr(extractor, "_html_search_meta", lambda *args, **kwargs: None)
+        monkeypatch.setattr(extractor, "_search_regex", lambda *args, **kwargs: None)
+    
+        # Perform extraction
+        result = extractor._real_extract(url)
+    
+        # Assertions on the returned info dict
+        assert result["_type"] == "url"
+        assert result["id"] == "MUHH36005220"
+        assert result["url"] == "nrk:MUHH36005220"
+        assert result["ie_key"] == NRKIE.ie_key()
+        assert result["season_number"] == 1
+        assert result["episode_number"] == 2
+>       assert result["display_id"] == "hellums-kro/sesong/1/episode/2"
+E       KeyError: 'display_id'
+
+test_generated.py:35: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_nrk_episode_extraction_normal - KeyError: 'dis...
+1 failed, 2 passed in 0.90s

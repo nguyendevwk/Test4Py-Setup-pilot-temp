@@ -1,0 +1,151 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_register_adds_codec_and_decodes _____________________
+
+    def test_register_adds_codec_and_decodes():
+        # Ensure codec is not registered before calling register
+        with pytest.raises(LookupError):
+            codecs.getdecoder(NAME)
+        # Register the codec
+        register()
+        # After registration, decoder should be available
+        decoder = codecs.getdecoder(NAME)
+        # Test decoding a known base64 string
+        decoded_bytes, _ = decoder(b"SGVsbG8gd29ybGQh")  # "Hello world!"
+>       assert decoded_bytes == b"Hello world!"
+E       AssertionError: assert 'U0dWc2JHOGdkMjl5YkdRaA==' == b'Hello world!'
+
+../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_verified_setup/eval0/test_generated.py:16: AssertionError
+_________________________ test_register_is_idempotent __________________________
+
+    def test_register_is_idempotent():
+        # Register once
+        register()
+        # Register again should not raise
+        register()
+        # Decoder should still work
+        decoder = codecs.getdecoder(NAME)
+        decoded_bytes, _ = decoder(b"VGVzdA==")  # "Test"
+>       assert decoded_bytes == b"Test"
+E       AssertionError: assert 'VkdWemRBPT0=' == b'Test'
+
+../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_verified_setup/eval0/test_generated.py:26: AssertionError
+________________ test_codec_roundtrip_with_encoder_and_decoder _________________
+
+text = b'Python 3.11', errors = 'strict'
+
+    def encode(
+            text: _STR,
+            errors: _STR = 'strict'
+    ) -> Tuple[bytes, int]:
+        """Convert the given ``text`` of base64 characters into the base64
+        decoded bytes.
+    
+        Args:
+            text (str): The string input.  The given string input can span
+                across many lines and be indented any number of spaces.
+            errors (str): Not used.  This argument exists to meet the
+                interface requirements.  Any value given to this argument
+                is ignored.
+    
+        Returns:
+            bytes: The given ``text`` converted into base64 bytes.
+            int: The length of the returned bytes.
+        """
+        # Convert the given 'text', that are of type UserString into a str.
+        text_input = str(text)
+    
+        # Cleanup whitespace.
+        text_str = text_input.strip()
+        text_str = '\n'.join(
+            filter(
+                lambda x: len(x) > 0,
+                map(lambda x: x.strip(), text_str.strip().splitlines())
+            )
+        )
+    
+        # Convert the cleaned text into utf8 bytes
+        text_bytes = text_str.encode('utf-8')
+        try:
+>           out = base64.decodebytes(text_bytes)
+
+flutils/codecs/b64.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = b"b'Python 3.11'"
+
+    def decodebytes(s):
+        """Decode a bytestring of base-64 data into a bytes object."""
+        _input_type_check(s)
+>       return binascii.a2b_base64(s)
+E       binascii.Error: Incorrect padding
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/base64.py:562: Error
+
+During handling of the above exception, another exception occurred:
+
+    def test_codec_roundtrip_with_encoder_and_decoder():
+        register()
+        encoder = codecs.getencoder(NAME)
+        decoder = codecs.getdecoder(NAME)
+        original = b"Python 3.11"
+>       encoded_bytes, _ = encoder(original)
+
+../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_verified_setup/eval0/test_generated.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = b'Python 3.11', errors = 'strict'
+
+    def encode(
+            text: _STR,
+            errors: _STR = 'strict'
+    ) -> Tuple[bytes, int]:
+        """Convert the given ``text`` of base64 characters into the base64
+        decoded bytes.
+    
+        Args:
+            text (str): The string input.  The given string input can span
+                across many lines and be indented any number of spaces.
+            errors (str): Not used.  This argument exists to meet the
+                interface requirements.  Any value given to this argument
+                is ignored.
+    
+        Returns:
+            bytes: The given ``text`` converted into base64 bytes.
+            int: The length of the returned bytes.
+        """
+        # Convert the given 'text', that are of type UserString into a str.
+        text_input = str(text)
+    
+        # Cleanup whitespace.
+        text_str = text_input.strip()
+        text_str = '\n'.join(
+            filter(
+                lambda x: len(x) > 0,
+                map(lambda x: x.strip(), text_str.strip().splitlines())
+            )
+        )
+    
+        # Convert the cleaned text into utf8 bytes
+        text_bytes = text_str.encode('utf-8')
+        try:
+            out = base64.decodebytes(text_bytes)
+        except Error as e:
+>           raise UnicodeEncodeError(
+                'b64',
+                text_input,
+                0,
+                len(text),
+                (
+                    f'{text_str!r} is not a proper bas64 character string: '
+                    f'{e}'
+                )
+            )
+E           UnicodeEncodeError: 'b64' codec can't encode characters in position 0-10: "b'Python 3.11'" is not a proper bas64 character string: Incorrect padding
+
+flutils/codecs/b64.py:52: UnicodeEncodeError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_verified_setup/eval0/test_generated.py::test_register_adds_codec_and_decodes
+FAILED ../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_verified_setup/eval0/test_generated.py::test_register_is_idempotent
+FAILED ../../../../../../attempts/flutils__flutils.codecs.b64__register__42__atomic_verified_setup/eval0/test_generated.py::test_codec_roundtrip_with_encoder_and_decoder
+3 failed in 0.16s

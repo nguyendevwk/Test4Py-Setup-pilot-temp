@@ -1,0 +1,78 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_success_and_either_conversion ______________________
+
+    def test_success_and_either_conversion():
+        val = Validation.success(42)
+        assert val.is_success()
+        assert val.is_fail() is False
+        assert val.value == 42
+        assert val.errors == []
+    
+        either = val.to_either()
+        assert isinstance(either, Right)
+        assert either.value == 42
+    
+        maybe = val.to_maybe()
+        assert isinstance(maybe, Maybe)
+>       assert maybe.is_present()
+E       AttributeError: 'Maybe' object has no attribute 'is_present'
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__45__atomic_source/eval0/test_generated.py:23: AttributeError
+__________________________ test_fail_and_bind_and_ap ___________________________
+
+    def test_fail_and_bind_and_ap():
+        errors = ["error1", "error2"]
+        val = Validation.fail(errors)
+        assert val.is_fail()
+        assert val.is_success() is False
+        assert val.value is None
+        assert val.errors == errors
+    
+        # bind should propagate the failure unchanged
+        def folder(x):
+            return Validation.success(x + 1)
+>       bound = val.bind(folder)
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__45__atomic_source/eval0/test_generated.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+pymonet/validation.py:83: in bind
+    return folder(self.value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+x = None
+
+    def folder(x):
+>       return Validation.success(x + 1)
+E       TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__45__atomic_source/eval0/test_generated.py:50: TypeError
+_________________________ test_map_and_either_failure __________________________
+
+    def test_map_and_either_failure():
+        val = Validation.success("hello")
+        mapped = val.map(str.upper)
+        assert mapped.value == "HELLO"
+        assert mapped.errors == []
+    
+        # map on failure should keep errors
+        fail_val = Validation.fail(["oops"])
+>       mapped_fail = fail_val.map(lambda x: x * 2)
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__45__atomic_source/eval0/test_generated.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+pymonet/validation.py:72: in map
+    return Validation(mapper(self.value), self.errors)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+x = None
+
+>   mapped_fail = fail_val.map(lambda x: x * 2)
+E   TypeError: unsupported operand type(s) for *: 'NoneType' and 'int'
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__45__atomic_source/eval0/test_generated.py:70: TypeError
+=========================== short test summary info ============================
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__45__atomic_source/eval0/test_generated.py::test_success_and_either_conversion
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__45__atomic_source/eval0/test_generated.py::test_fail_and_bind_and_ap
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__45__atomic_source/eval0/test_generated.py::test_map_and_either_failure
+3 failed in 0.15s

@@ -1,0 +1,27 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_noop_when_future_already_cancelled ____________________
+
+    def test_noop_when_future_already_cancelled():
+        """If the Future is cancelled, future_set_exc_info should not raise."""
+        loop = asyncio.new_event_loop()
+        future = loop.create_future()
+        future.cancel()
+        exc = ValueError("cancelled error")
+        exc_info = (type(exc), exc, exc.__traceback__)
+    
+        # No exception should be raised even though the Future is cancelled
+        future_set_exc_info(future, exc_info)
+    
+        # The Future remains cancelled and no exception is set
+        assert future.cancelled()
+>       assert future.exception() is None
+E       asyncio.exceptions.CancelledError
+
+test_generated.py:34: CancelledError
+------------------------------ Captured log call -------------------------------
+ERROR    tornado.application:concurrent.py:218 Exception after Future was cancelled
+ValueError: cancelled error
+=========================== short test summary info ============================
+FAILED test_generated.py::test_noop_when_future_already_cancelled - asyncio.e...
+1 failed, 2 passed in 0.14s

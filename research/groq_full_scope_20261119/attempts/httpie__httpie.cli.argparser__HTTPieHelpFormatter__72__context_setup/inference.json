@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-626a378c-fe91-4627-b341-581979141084",
+  "object": "chat.completion",
+  "created": 1795079665,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport argparse\nimport sys\nimport textwrap\nimport pytest\nfrom httpie.cli.argparser import HTTPieHelpFormatter\n\ndef test_usage_includes_only_positional_and_invalid_option():\n    # Create a parser that will raise an ArgumentError for an invalid option\n    parser = argparse.ArgumentParser(\n        prog='httpie',\n        formatter_class=HTTPieHelpFormatter,\n        add_help=False\n    )\n    # Add a positional argument and an optional argument\n    parser.add_argument('url', help='The URL to request')\n    parser.add_argument('--style', help='Style of output')\n    # Simulate passing an invalid option to trigger ArgumentError\n    with pytest.raises(SystemExit):\n        parser.parse_args(['--style=invalid', 'http://example.com'])\n    # Capture the usage string that would be printed\n    usage = parser.format_help()\n    # The usage should contain only the positional argument\n    assert 'usage:' in usage\n    assert 'url' in usage\n    assert '--style' not in usage\n    # The invalid option should not appear in the usage\n    assert 'invalid' not in usage\n\ndef test_split_lines_dedents_and_adds_blank_line():\n    formatter = HTTPieHelpFormatter()\n    # A help string with indentation and newlines\n    raw_help = textwrap.dedent(\"\"\"\n        This is a\n            multi-line\n        help text.\n    \"\"\")\n    lines = formatter._split_lines(raw_help, width=80)\n    # The first line should be the first line of the dedented text\n    assert lines[0] == 'This is a'\n    # The second line should be the second line without indentation\n    assert lines[1] == 'multi-line'\n    # The third line should be the third line\n    assert lines[2] == 'help text.'\n    # The last element should be an empty string due to the added blank line\n    assert lines[-1] == ''\n\ndef test_max_help_position_affects_alignment():\n    # Formatter with a very small max_help_position\n    formatter = HTTPieHelpFormatter(max_help_position=4)\n    parser = argparse.ArgumentParser(\n        prog='httpie',\n        formatter_class=lambda *args, **kwargs: formatter,\n        add_help=False\n    )\n    parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose output')\n    help_text = parser.format_help()\n    # The help text should align the description after 4 spaces\n    # Find the line containing the option\n    for line in help_text.splitlines():\n        if '--verbose' in line:\n            # The description should start at column 4 (index 4)\n            assert line[4:4+len('Enable verbose output')] == 'Enable verbose output'\n            break\n    else:\n        pytest.fail('Option line not found in help text')\n```",
+        "reasoning": "We need three tests for HTTPieHelpFormatter. Test normal formatting, boundary: max_help_position small, error handling when exception. Use argparse to create parser with formatter_class=HTTPieHelpFormatter. Add arguments. Check usage string. Also test that _split_lines dedents. Use tmp_path? not needed. Ensure no network. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00460275,
+    "prompt_tokens": 751,
+    "prompt_time": 0.014840978,
+    "completion_tokens": 672,
+    "completion_time": 0.716680877,
+    "total_tokens": 1423,
+    "total_time": 0.731521855,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 71
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7shbxhqej1b2z6nqarfqn76",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport argparse\nimport sys\nimport textwrap\nimport pytest\nfrom httpie.cli.argparser import HTTPieHelpFormatter\n\ndef test_usage_includes_only_positional_and_invalid_option():\n    # Create a parser that will raise an ArgumentError for an invalid option\n    parser = argparse.ArgumentParser(\n        prog='httpie',\n        formatter_class=HTTPieHelpFormatter,\n        add_help=False\n    )\n    # Add a positional argument and an optional argument\n    parser.add_argument('url', help='The URL to request')\n    parser.add_argument('--style', help='Style of output')\n    # Simulate passing an invalid option to trigger ArgumentError\n    with pytest.raises(SystemExit):\n        parser.parse_args(['--style=invalid', 'http://example.com'])\n    # Capture the usage string that would be printed\n    usage = parser.format_help()\n    # The usage should contain only the positional argument\n    assert 'usage:' in usage\n    assert 'url' in usage\n    assert '--style' not in usage\n    # The invalid option should not appear in the usage\n    assert 'invalid' not in usage\n\ndef test_split_lines_dedents_and_adds_blank_line():\n    formatter = HTTPieHelpFormatter()\n    # A help string with indentation and newlines\n    raw_help = textwrap.dedent(\"\"\"\n        This is a\n            multi-line\n        help text.\n    \"\"\")\n    lines = formatter._split_lines(raw_help, width=80)\n    # The first line should be the first line of the dedented text\n    assert lines[0] == 'This is a'\n    # The second line should be the second line without indentation\n    assert lines[1] == 'multi-line'\n    # The third line should be the third line\n    assert lines[2] == 'help text.'\n    # The last element should be an empty string due to the added blank line\n    assert lines[-1] == ''\n\ndef test_max_help_position_affects_alignment():\n    # Formatter with a very small max_help_position\n    formatter = HTTPieHelpFormatter(max_help_position=4)\n    parser = argparse.ArgumentParser(\n        prog='httpie',\n        formatter_class=lambda *args, **kwargs: formatter,\n        add_help=False\n    )\n    parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose output')\n    help_text = parser.format_help()\n    # The help text should align the description after 4 spaces\n    # Find the line containing the option\n    for line in help_text.splitlines():\n        if '--verbose' in line:\n            # The description should start at column 4 (index 4)\n            assert line[4:4+len('Enable verbose output')] == 'Enable verbose output'\n            break\n    else:\n        pytest.fail('Option line not found in help text')\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "46c455e879ca4cc1bef43b6b4e5ba290",
+  "_api_plus_pacing_seconds": 2.148906983959023
+}

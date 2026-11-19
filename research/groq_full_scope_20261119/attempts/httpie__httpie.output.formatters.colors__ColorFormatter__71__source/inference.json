@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-268f90b6-48e0-45d3-b300-bf678e7eb35d",
+  "object": "chat.completion",
+  "created": 1795079578,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport pytest\nfrom httpie.output.formatters.colors import ColorFormatter, AUTO_STYLE, PIE_STYLES\nfrom httpie.context import Environment\nfrom httpie.plugins import FormatterPlugin\n\n# Helper to create a minimal Environment with colors enabled\ndef make_env(colors=256):\n    env = Environment()\n    env.colors = colors\n    return env\n\ndef test_format_headers_basic():\n    \"\"\"Headers are highlighted with ANSI escape codes when colors are enabled.\"\"\"\n    env = make_env(colors=256)\n    formatter = ColorFormatter(env, color_scheme=AUTO_STYLE)\n    # Simple HTTP request headers\n    headers = \"GET / HTTP/1.1\\r\\nHost: example.com\\r\\n\\r\\n\"\n    highlighted = formatter.format_headers(headers)\n    # ANSI escape codes start with \\x1b[ and end with m\n    assert \"\\x1b[\" in highlighted\n    assert highlighted.endswith(\"\\x1b[0m\")  # reset code at end\n    # The original text should still be present\n    assert \"GET / HTTP/1.1\" in highlighted\n    assert \"Host: example.com\" in highlighted\n\ndef test_format_body_json_explicit():\n    \"\"\"Explicit JSON flag forces JSON lexer regardless of MIME type.\"\"\"\n    env = make_env(colors=256)\n    formatter = ColorFormatter(env, explicit_json=True)\n    body = '{\"key\": \"value\"}'\n    # MIME type that is not JSON\n    highlighted = formatter.format_body(body, mime=\"text/plain\")\n    # Should contain JSON lexer tokens (e.g., color for string)\n    assert \"\\x1b[\" in highlighted\n    assert \"value\" in highlighted\n    # Ensure the body is not returned unchanged\n    assert highlighted != body\n\ndef test_invalid_style_fallback():\n    \"\"\"Providing an unknown style falls back to Solarized256Style without error.\"\"\"\n    env = make_env(colors=256)\n    # Use a nonsense style name\n    formatter = ColorFormatter(env, color_scheme=\"nonexistent_style\")\n    # Format headers; should not raise and should use fallback style\n    headers = \"GET / HTTP/1.1\\r\\nHost: example.com\\r\\n\\r\\n\"\n    highlighted = formatter.format_headers(headers)\n    assert \"\\x1b[\" in highlighted\n    # The fallback style still produces ANSI codes\n    assert highlighted.endswith(\"\\x1b[0m\")\n```",
+        "reasoning": "We need tests for ColorFormatter. We need to import it. Use tmp_path for any file? Not needed. Test normal formatting: headers with simple HTTP. Test boundary: color_scheme auto style. Test error: invalid style leads to fallback Solarized256Style. Use assertions on output contains expected tokens? We can check that highlight returns non-empty and contains ANSI codes. Use pygments TerminalFormatter outputs ANSI. For invalid style, ensure no exception. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00874439,
+    "prompt_tokens": 1041,
+    "prompt_time": 9.6258e-05,
+    "completion_tokens": 594,
+    "completion_time": 0.729950577,
+    "total_tokens": 1635,
+    "total_time": 0.730046835,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 96
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh98kaegds5wdg9bn518g2",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport pytest\nfrom httpie.output.formatters.colors import ColorFormatter, AUTO_STYLE, PIE_STYLES\nfrom httpie.context import Environment\nfrom httpie.plugins import FormatterPlugin\n\n# Helper to create a minimal Environment with colors enabled\ndef make_env(colors=256):\n    env = Environment()\n    env.colors = colors\n    return env\n\ndef test_format_headers_basic():\n    \"\"\"Headers are highlighted with ANSI escape codes when colors are enabled.\"\"\"\n    env = make_env(colors=256)\n    formatter = ColorFormatter(env, color_scheme=AUTO_STYLE)\n    # Simple HTTP request headers\n    headers = \"GET / HTTP/1.1\\r\\nHost: example.com\\r\\n\\r\\n\"\n    highlighted = formatter.format_headers(headers)\n    # ANSI escape codes start with \\x1b[ and end with m\n    assert \"\\x1b[\" in highlighted\n    assert highlighted.endswith(\"\\x1b[0m\")  # reset code at end\n    # The original text should still be present\n    assert \"GET / HTTP/1.1\" in highlighted\n    assert \"Host: example.com\" in highlighted\n\ndef test_format_body_json_explicit():\n    \"\"\"Explicit JSON flag forces JSON lexer regardless of MIME type.\"\"\"\n    env = make_env(colors=256)\n    formatter = ColorFormatter(env, explicit_json=True)\n    body = '{\"key\": \"value\"}'\n    # MIME type that is not JSON\n    highlighted = formatter.format_body(body, mime=\"text/plain\")\n    # Should contain JSON lexer tokens (e.g., color for string)\n    assert \"\\x1b[\" in highlighted\n    assert \"value\" in highlighted\n    # Ensure the body is not returned unchanged\n    assert highlighted != body\n\ndef test_invalid_style_fallback():\n    \"\"\"Providing an unknown style falls back to Solarized256Style without error.\"\"\"\n    env = make_env(colors=256)\n    # Use a nonsense style name\n    formatter = ColorFormatter(env, color_scheme=\"nonexistent_style\")\n    # Format headers; should not raise and should use fallback style\n    headers = \"GET / HTTP/1.1\\r\\nHost: example.com\\r\\n\\r\\n\"\n    highlighted = formatter.format_headers(headers)\n    assert \"\\x1b[\" in highlighted\n    # The fallback style still produces ANSI codes\n    assert highlighted.endswith(\"\\x1b[0m\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "a1d80fff150b41ad8d6fa4f8d24e587f",
+  "_api_plus_pacing_seconds": 3.549520329979714
+}

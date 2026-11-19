@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-89f7a5f7-1f87-4fcc-ab61-a95665ad519a",
+  "object": "chat.completion",
+  "created": 1795078359,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport importlib.util\nimport inspect\nimport sys\nimport types\nimport pytest\nfrom docstring_parser import parse_from_object, DocstringStyle, ParseError\n\ndef test_parse_function_docstring():\n    \"\"\"Verify that a simple function's docstring is parsed correctly.\"\"\"\n    def sample_func(a, b):\n        \"\"\"Adds two numbers.\n\n        Parameters\n        ----------\n        a : int\n            First number.\n        b : int\n            Second number.\n\n        Returns\n        -------\n        int\n            Sum of a and b.\n        \"\"\"\n        return a + b\n\n    doc = parse_from_object(sample_func, style=DocstringStyle.GOOGLE)\n    assert doc.short_description == \"Adds two numbers.\"\n    assert len(doc.params) == 2\n    param_names = {p.arg_name for p in doc.params}\n    assert param_names == {\"a\", \"b\"}\n    assert doc.returns is not None\n    assert doc.returns.type_name == \"int\"\n\ndef test_parse_class_attribute_docstrings(tmp_path):\n    \"\"\"Verify that attribute docstrings defined in a module are parsed.\"\"\"\n    module_code = '''\n    \"\"\"Module docstring.\"\"\"\n\n    class MyClass:\n        \"\"\"Class docstring.\"\"\"\n        attr1 = 1\n        \"\"\"Attribute 1 description.\"\"\"\n        attr2 = \"two\"\n        \"\"\"Attribute 2 description.\"\"\"\n    '''\n    module_file = tmp_path / \"temp_module.py\"\n    module_file.write_text(module_code)\n    spec = importlib.util.spec_from_file_location(\"temp_module\", module_file)\n    temp_module = importlib.util.module_from_spec(spec)\n    sys.modules[\"temp_module\"] = temp_module\n    spec.loader.exec_module(temp_module)\n\n    doc = parse_from_object(temp_module, style=DocstringStyle.AUTO)\n    # Module docstring should be parsed\n    assert doc.short_description == \"Module docstring.\"\n    # Attribute docstrings should be added\n    attr_docs = {attr.name: attr.description for attr in doc.attributes}\n    assert attr_docs[\"attr1\"] == \"Attribute 1 description.\"\n    assert attr_docs[\"attr2\"] == \"Attribute 2 description.\"\n\ndef test_invalid_style_raises():\n    \"\"\"Verify that passing an invalid style raises ParseError.\"\"\"\n    def dummy():\n        \"\"\"Dummy docstring.\"\"\"\n        pass\n\n    with pytest.raises(ParseError):\n        parse_from_object(dummy, style=\"not_a_style\")\n```",
+        "reasoning": "We need tests for parse_from_object. Use tmp_path to create module? We can create a temporary module file with attribute docstrings. Use importlib.util.spec_from_file_location. Then test parsing. Also test normal function docstring. And error: passing object without __doc__? But all have. Maybe passing int? It has no __doc__? int has __doc__. But test that ParseError raised for unsupported style? Use invalid style? style param type. Probably test that attribute docstrings added. Also test that class attribute docstrings parsed. Use small module. Let's write three tests: test_parse_function_docstring, test_parse_class_attribute_docstrings, test_invalid_style_raises. Use docstring_parser.parse_from_object. Ensure no mocks. Use tmp_path to create module."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053304139,
+    "prompt_tokens": 536,
+    "prompt_time": 0.03851014,
+    "completion_tokens": 657,
+    "completion_time": 0.728146929,
+    "total_tokens": 1193,
+    "total_time": 0.766657069,
+    "completion_tokens_details": {
+      "reasoning_tokens": 160
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg41whex38r5y3dcg8c12h",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport importlib.util\nimport inspect\nimport sys\nimport types\nimport pytest\nfrom docstring_parser import parse_from_object, DocstringStyle, ParseError\n\ndef test_parse_function_docstring():\n    \"\"\"Verify that a simple function's docstring is parsed correctly.\"\"\"\n    def sample_func(a, b):\n        \"\"\"Adds two numbers.\n\n        Parameters\n        ----------\n        a : int\n            First number.\n        b : int\n            Second number.\n\n        Returns\n        -------\n        int\n            Sum of a and b.\n        \"\"\"\n        return a + b\n\n    doc = parse_from_object(sample_func, style=DocstringStyle.GOOGLE)\n    assert doc.short_description == \"Adds two numbers.\"\n    assert len(doc.params) == 2\n    param_names = {p.arg_name for p in doc.params}\n    assert param_names == {\"a\", \"b\"}\n    assert doc.returns is not None\n    assert doc.returns.type_name == \"int\"\n\ndef test_parse_class_attribute_docstrings(tmp_path):\n    \"\"\"Verify that attribute docstrings defined in a module are parsed.\"\"\"\n    module_code = '''\n    \"\"\"Module docstring.\"\"\"\n\n    class MyClass:\n        \"\"\"Class docstring.\"\"\"\n        attr1 = 1\n        \"\"\"Attribute 1 description.\"\"\"\n        attr2 = \"two\"\n        \"\"\"Attribute 2 description.\"\"\"\n    '''\n    module_file = tmp_path / \"temp_module.py\"\n    module_file.write_text(module_code)\n    spec = importlib.util.spec_from_file_location(\"temp_module\", module_file)\n    temp_module = importlib.util.module_from_spec(spec)\n    sys.modules[\"temp_module\"] = temp_module\n    spec.loader.exec_module(temp_module)\n\n    doc = parse_from_object(temp_module, style=DocstringStyle.AUTO)\n    # Module docstring should be parsed\n    assert doc.short_description == \"Module docstring.\"\n    # Attribute docstrings should be added\n    attr_docs = {attr.name: attr.description for attr in doc.attributes}\n    assert attr_docs[\"attr1\"] == \"Attribute 1 description.\"\n    assert attr_docs[\"attr2\"] == \"Attribute 2 description.\"\n\ndef test_invalid_style_raises():\n    \"\"\"Verify that passing an invalid style raises ParseError.\"\"\"\n    def dummy():\n        \"\"\"Dummy docstring.\"\"\"\n        pass\n\n    with pytest.raises(ParseError):\n        parse_from_object(dummy, style=\"not_a_style\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1763898759963922
+}

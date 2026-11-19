@@ -1,0 +1,31 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_parse_forwarded_success _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-197/test_parse_forwarded_success0')
+
+    def test_parse_forwarded_success(tmp_path):
+        # Header contains the secret and a by value
+        headers = DummyHeaders({
+            "forwarded": [
+                'for=192.0.2.60;by=203.0.113.43;secret=supersecret',
+                'for=198.51.100.17;by=203.0.113.44;secret=supersecret'
+            ]
+        })
+        config = DummyConfig(secret="supersecret")
+        result = parse_forwarded(headers, config)
+        # The function returns a dict-like object; check key/value pairs
+        assert isinstance(result, dict)
+        # The first element should be the leftmost occurrence
+>       assert result["by"] == "203.0.113.43"
+E       AssertionError: assert '203.0.113.44' == '203.0.113.43'
+E         
+E         - 203.0.113.43
+E         ?            ^
+E         + 203.0.113.44
+E         ?            ^
+
+../../../../../../attempts/sanic__sanic.headers__parse_forwarded__42__atomic_source/eval0/test_generated.py:28: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/sanic__sanic.headers__parse_forwarded__42__atomic_source/eval0/test_generated.py::test_parse_forwarded_success
+1 failed, 2 passed in 0.49s

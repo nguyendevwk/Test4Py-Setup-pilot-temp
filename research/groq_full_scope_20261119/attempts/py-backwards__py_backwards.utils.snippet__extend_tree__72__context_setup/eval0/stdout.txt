@@ -1,0 +1,88 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_extend_tree_replaces_call_with_ast_nodes _________________
+
+    def test_extend_tree_replaces_call_with_ast_nodes():
+        # Original code contains a call to extend('x')
+        src = "extend('x')"
+        tree = parse_source(src)
+    
+        # Variable mapping: 'x' -> list of AST nodes to insert
+        var_node = ast.Expr(value=ast.Constant(value=42))
+        variables: Dict[str, ast.AST] = {"x": [var_node]}
+    
+>       extend_tree(tree, variables)
+
+test_generated.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tree = <typed_ast._ast3.Module object at 0x7f6042f81e40>
+variables = {'x': [<typed_ast._ast3.Expr object at 0x7f6042f80280>]}
+
+    def extend_tree(tree: ast.AST, variables: Dict[str, Variable]) -> None:
+        for node in find(tree, ast.Call):
+            if isinstance(node.func, ast.Name) and node.func.id == 'extend':
+                parent, index = get_non_exp_parent_and_index(tree, node)
+>               replace_at(index, parent, variables[node.args[0].id])  # type: ignore
+E               AttributeError: 'Str' object has no attribute 'id'
+
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py:97: AttributeError
+_____________ test_extend_tree_multiple_calls_and_variable_as_ast ______________
+
+    def test_extend_tree_multiple_calls_and_variable_as_ast():
+        # Code with two extend calls
+        src = """
+    extend('a')
+    extend('b')
+    """
+        tree = parse_source(src)
+    
+        # Variables mapping: 'a' -> AST node, 'b' -> list of AST nodes
+        var_a = ast.Expr(value=ast.Constant(value="hello"))
+        var_b = [ast.Expr(value=ast.Constant(value=99))]
+        variables: Dict[str, ast.AST] = {"a": var_a, "b": var_b}
+    
+>       extend_tree(tree, variables)
+
+test_generated.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tree = <typed_ast._ast3.Module object at 0x7f6042e2f940>
+variables = {'a': <typed_ast._ast3.Expr object at 0x7f6042e2fb20>, 'b': [<typed_ast._ast3.Expr object at 0x7f6042e2f370>]}
+
+    def extend_tree(tree: ast.AST, variables: Dict[str, Variable]) -> None:
+        for node in find(tree, ast.Call):
+            if isinstance(node.func, ast.Name) and node.func.id == 'extend':
+                parent, index = get_non_exp_parent_and_index(tree, node)
+>               replace_at(index, parent, variables[node.args[0].id])  # type: ignore
+E               AttributeError: 'Str' object has no attribute 'id'
+
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py:97: AttributeError
+______________ test_extend_tree_missing_variable_raises_key_error ______________
+
+    def test_extend_tree_missing_variable_raises_key_error():
+        src = "extend('missing')"
+        tree = parse_source(src)
+        variables: Dict[str, ast.AST] = {}
+    
+        with pytest.raises(KeyError):
+>           extend_tree(tree, variables)
+
+test_generated.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tree = <typed_ast._ast3.Module object at 0x7f6042f831c0>, variables = {}
+
+    def extend_tree(tree: ast.AST, variables: Dict[str, Variable]) -> None:
+        for node in find(tree, ast.Call):
+            if isinstance(node.func, ast.Name) and node.func.id == 'extend':
+                parent, index = get_non_exp_parent_and_index(tree, node)
+>               replace_at(index, parent, variables[node.args[0].id])  # type: ignore
+E               AttributeError: 'Str' object has no attribute 'id'
+
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py:97: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extend_tree_replaces_call_with_ast_nodes - Att...
+FAILED test_generated.py::test_extend_tree_multiple_calls_and_variable_as_ast
+FAILED test_generated.py::test_extend_tree_missing_variable_raises_key_error
+3 failed in 0.17s

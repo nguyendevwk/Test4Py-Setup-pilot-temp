@@ -1,0 +1,79 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_generator_return_replaced_with_raise ___________________
+
+    def test_generator_return_replaced_with_raise():
+        code = """
+    def gen():
+        yield 1
+        return 5
+    """
+>       func = _parse_and_transform(code)
+
+test_generated.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+code = '\ndef gen():\n    yield 1\n    return 5\n'
+
+    def _parse_and_transform(code: str) -> ast.FunctionDef:
+        """Parse the code into a FunctionDef node and apply the transformer."""
+        module = ast.parse(code)
+        # The module body should contain a single FunctionDef
+        func = module.body[0]
+>       transformer = ReturnFromGeneratorTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:11: TypeError
+____________________ test_non_generator_function_unchanged _____________________
+
+    def test_non_generator_function_unchanged():
+        code = """
+    def foo():
+        x = 1
+        return x
+    """
+>       func = _parse_and_transform(code)
+
+test_generated.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+code = '\ndef foo():\n    x = 1\n    return x\n'
+
+    def _parse_and_transform(code: str) -> ast.FunctionDef:
+        """Parse the code into a FunctionDef node and apply the transformer."""
+        module = ast.parse(code)
+        # The module body should contain a single FunctionDef
+        func = module.body[0]
+>       transformer = ReturnFromGeneratorTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:11: TypeError
+_____________________ test_return_without_value_is_ignored _____________________
+
+    def test_return_without_value_is_ignored():
+        code = """
+    def gen():
+        yield 1
+        return
+    """
+>       func = _parse_and_transform(code)
+
+test_generated.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+code = '\ndef gen():\n    yield 1\n    return\n'
+
+    def _parse_and_transform(code: str) -> ast.FunctionDef:
+        """Parse the code into a FunctionDef node and apply the transformer."""
+        module = ast.parse(code)
+        # The module body should contain a single FunctionDef
+        func = module.body[0]
+>       transformer = ReturnFromGeneratorTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:11: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_generator_return_replaced_with_raise - TypeErr...
+FAILED test_generated.py::test_non_generator_function_unchanged - TypeError: ...
+FAILED test_generated.py::test_return_without_value_is_ignored - TypeError: B...
+3 failed in 0.14s

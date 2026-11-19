@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-d8080aa2-2c5a-4689-88d2-8d739f279ea0",
+  "object": "chat.completion",
+  "created": 1795078386,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.transformers.starred_unpacking import StarredUnpackingTransformer\n\ndef _parse(code: str) -> ast.AST:\n    \"\"\"Parse source code into a typed_ast AST.\"\"\"\n    return ast.parse(code)\n\ndef _ast_dump(node: ast.AST) -> str:\n    \"\"\"Return a canonical string representation of an AST node.\"\"\"\n    return ast.dump(node, annotate_fields=True, include_attributes=False)\n\ndef test_list_with_starred_unpacking():\n    \"\"\"Verify that a list containing a starred expression is transformed into a sum of lists.\"\"\"\n    code = \"[2, *range(10), 1]\"\n    tree = _parse(code)\n    transformer = StarredUnpackingTransformer()\n    transformer.visit(tree)\n    # The resulting node should be a BinOp representing [2] + list(range(10)) + [1]\n    expected = pyast.parse(\"[2] + list(range(10)) + [1]\").body[0].value\n    assert _ast_dump(tree.body[0].value) == _ast_dump(expected)\n\ndef test_call_with_multiple_starred_arguments():\n    \"\"\"Verify that a function call with multiple starred arguments is transformed correctly.\"\"\"\n    code = \"print(*range(1), *range(3))\"\n    tree = _parse(code)\n    transformer = StarredUnpackingTransformer()\n    transformer.visit(tree)\n    # The resulting call should have a single starred argument: list(range(1)) + list(range(3))\n    expected_call = pyast.parse(\"print(*(list(range(1)) + list(range(3))))\").body[0].value\n    assert _ast_dump(tree.body[0].value) == _ast_dump(expected_call)\n\ndef test_no_starred_no_change():\n    \"\"\"Ensure that nodes without starred expressions remain unchanged.\"\"\"\n    code = \"[1, 2, 3]\"\n    tree = _parse(code)\n    transformer = StarredUnpackingTransformer()\n    transformer.visit(tree)\n    # The AST should be identical to the original\n    original = pyast.parse(code).body[0].value\n    assert _ast_dump(tree.body[0].value) == _ast_dump(original)\n```",
+        "reasoning": "We need to test StarredUnpackingTransformer. We can parse code using typed_ast to get AST, apply transformer, then unparse? typed_ast doesn't have unparse. We can compare AST structure. Use ast.dump. Write tests: normal list, call, error? maybe no starred. Use tmp_path? not needed. Just test transformation."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054483138,
+    "prompt_tokens": 937,
+    "prompt_time": 0.054609728,
+    "completion_tokens": 541,
+    "completion_time": 0.597867366,
+    "total_tokens": 1478,
+    "total_time": 0.652477094,
+    "completion_tokens_details": {
+      "reasoning_tokens": 71
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg4wk2ega94y6rwjpm2wmm",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.transformers.starred_unpacking import StarredUnpackingTransformer\n\ndef _parse(code: str) -> ast.AST:\n    \"\"\"Parse source code into a typed_ast AST.\"\"\"\n    return ast.parse(code)\n\ndef _ast_dump(node: ast.AST) -> str:\n    \"\"\"Return a canonical string representation of an AST node.\"\"\"\n    return ast.dump(node, annotate_fields=True, include_attributes=False)\n\ndef test_list_with_starred_unpacking():\n    \"\"\"Verify that a list containing a starred expression is transformed into a sum of lists.\"\"\"\n    code = \"[2, *range(10), 1]\"\n    tree = _parse(code)\n    transformer = StarredUnpackingTransformer()\n    transformer.visit(tree)\n    # The resulting node should be a BinOp representing [2] + list(range(10)) + [1]\n    expected = pyast.parse(\"[2] + list(range(10)) + [1]\").body[0].value\n    assert _ast_dump(tree.body[0].value) == _ast_dump(expected)\n\ndef test_call_with_multiple_starred_arguments():\n    \"\"\"Verify that a function call with multiple starred arguments is transformed correctly.\"\"\"\n    code = \"print(*range(1), *range(3))\"\n    tree = _parse(code)\n    transformer = StarredUnpackingTransformer()\n    transformer.visit(tree)\n    # The resulting call should have a single starred argument: list(range(1)) + list(range(3))\n    expected_call = pyast.parse(\"print(*(list(range(1)) + list(range(3))))\").body[0].value\n    assert _ast_dump(tree.body[0].value) == _ast_dump(expected_call)\n\ndef test_no_starred_no_change():\n    \"\"\"Ensure that nodes without starred expressions remain unchanged.\"\"\"\n    code = \"[1, 2, 3]\"\n    tree = _parse(code)\n    transformer = StarredUnpackingTransformer()\n    transformer.visit(tree)\n    # The AST should be identical to the original\n    original = pyast.parse(code).body[0].value\n    assert _ast_dump(tree.body[0].value) == _ast_dump(original)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.054492260038387
+}

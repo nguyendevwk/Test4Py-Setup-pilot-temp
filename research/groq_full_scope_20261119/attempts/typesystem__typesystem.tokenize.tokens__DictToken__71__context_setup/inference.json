@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-8f914338-8ec9-45c0-8f9f-78ce6668d9a5",
+  "object": "chat.completion",
+  "created": 1795078676,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokens import DictToken, Token\nfrom typesystem.base import Position\n\n# Helper to create simple leaf tokens\ndef leaf(value, start, end, content=\"\"):\n    return Token(value, start, end, content)\n\ndef test_dict_token_value_and_lookup():\n    # Construct a DictToken with two key/value pairs\n    key1 = leaf(\"a\", 0, 0, \"a\")\n    val1 = leaf(1, 1, 1, \"1\")\n    key2 = leaf(\"b\", 2, 2, \"b\")\n    val2 = leaf(2, 3, 3, \"2\")\n    dtoken = DictToken({key1: val1, key2: val2}, 0, 3, \"a1b2\")\n\n    # value property should return a plain dict\n    assert dtoken.value == {\"a\": 1, \"b\": 2}\n\n    # lookup should retrieve the value token by key\n    assert dtoken.lookup([\"a\"]) is val1\n    assert dtoken.lookup([\"b\"]) is val2\n\n    # lookup_key should retrieve the key token\n    assert dtoken.lookup_key([\"a\"]) is key1\n    assert dtoken.lookup_key([\"b\"]) is key2\n\ndef test_dict_token_equality_and_repr():\n    key = leaf(\"x\", 0, 0, \"x\")\n    val = leaf(42, 1, 1, \"42\")\n    t1 = DictToken({key: val}, 0, 1, \"x42\")\n    t2 = DictToken({key: val}, 0, 1, \"x42\")\n    t3 = DictToken({key: val}, 0, 1, \"x42\")\n\n    # Tokens with identical structure and indices are equal\n    assert t1 == t2\n    assert t2 == t3\n    assert t1 == t3\n\n    # Representation should include class name and string slice\n    assert repr(t1).startswith(\"DictToken(\")\n    assert t1.string == \"x42\"\n\ndef test_dict_token_position_and_error():\n    key = leaf(\"k\", 0, 0, \"k\")\n    val = leaf(\"v\", 1, 1, \"v\")\n    dtoken = DictToken({key: val}, 0, 1, \"kv\")\n\n    # start and end positions should be correct\n    assert dtoken.start == Position(1, 1, 0)\n    assert dtoken.end == Position(1, 2, 1)\n\n    # Accessing a non-existent key should raise KeyError\n    with pytest.raises(KeyError):\n        dtoken._get_child_token(\"missing\")\n    with pytest.raises(KeyError):\n        dtoken._get_key_token(\"missing\")\n```",
+        "reasoning": "We need tests for DictToken. Use simple dict with string keys. Create token with value dict of Token? Actually DictToken expects _value to be dict of key tokens to value tokens. We can construct manually: key token is Token with value string. value token is Token with value int. Use start/end indices. Test value property, lookup, lookup_key. Also test equality."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.055095293,
+    "prompt_tokens": 931,
+    "prompt_time": 0.053014294,
+    "completion_tokens": 682,
+    "completion_time": 0.817451173,
+    "total_tokens": 1613,
+    "total_time": 0.870465467,
+    "completion_tokens_details": {
+      "reasoning_tokens": 78
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgdpnne5rbce4npf10j7gg",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokens import DictToken, Token\nfrom typesystem.base import Position\n\n# Helper to create simple leaf tokens\ndef leaf(value, start, end, content=\"\"):\n    return Token(value, start, end, content)\n\ndef test_dict_token_value_and_lookup():\n    # Construct a DictToken with two key/value pairs\n    key1 = leaf(\"a\", 0, 0, \"a\")\n    val1 = leaf(1, 1, 1, \"1\")\n    key2 = leaf(\"b\", 2, 2, \"b\")\n    val2 = leaf(2, 3, 3, \"2\")\n    dtoken = DictToken({key1: val1, key2: val2}, 0, 3, \"a1b2\")\n\n    # value property should return a plain dict\n    assert dtoken.value == {\"a\": 1, \"b\": 2}\n\n    # lookup should retrieve the value token by key\n    assert dtoken.lookup([\"a\"]) is val1\n    assert dtoken.lookup([\"b\"]) is val2\n\n    # lookup_key should retrieve the key token\n    assert dtoken.lookup_key([\"a\"]) is key1\n    assert dtoken.lookup_key([\"b\"]) is key2\n\ndef test_dict_token_equality_and_repr():\n    key = leaf(\"x\", 0, 0, \"x\")\n    val = leaf(42, 1, 1, \"42\")\n    t1 = DictToken({key: val}, 0, 1, \"x42\")\n    t2 = DictToken({key: val}, 0, 1, \"x42\")\n    t3 = DictToken({key: val}, 0, 1, \"x42\")\n\n    # Tokens with identical structure and indices are equal\n    assert t1 == t2\n    assert t2 == t3\n    assert t1 == t3\n\n    # Representation should include class name and string slice\n    assert repr(t1).startswith(\"DictToken(\")\n    assert t1.string == \"x42\"\n\ndef test_dict_token_position_and_error():\n    key = leaf(\"k\", 0, 0, \"k\")\n    val = leaf(\"v\", 1, 1, \"v\")\n    dtoken = DictToken({key: val}, 0, 1, \"kv\")\n\n    # start and end positions should be correct\n    assert dtoken.start == Position(1, 1, 0)\n    assert dtoken.end == Position(1, 2, 1)\n\n    # Accessing a non-existent key should raise KeyError\n    with pytest.raises(KeyError):\n        dtoken._get_child_token(\"missing\")\n    with pytest.raises(KeyError):\n        dtoken._get_key_token(\"missing\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2885263350326568
+}

@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-0b57b8d2-b4be-4b68-99c5-098334c65f53",
+  "object": "chat.completion",
+  "created": 1795079557,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.aes import key_schedule_core, RCON\n\ndef test_key_schedule_core_basic():\n    # Known input and expected output for rcon_iteration = 1\n    data = [0x00, 0x01, 0x02, 0x03]\n    expected = [0x7d, 0x77, 0x7b, 0x63]  # computed manually using AES S-box and RCON[1] = 0x01\n    result = key_schedule_core(data, 1)\n    assert result == expected\n    # Ensure the original data is unchanged\n    assert data == [0x00, 0x01, 0x02, 0x03]\n\ndef test_key_schedule_core_new_object():\n    data = [0x10, 0x20, 0x30, 0x40]\n    result = key_schedule_core(data, 2)\n    # The returned list should be a new object, not the same reference\n    assert result is not data\n    # The content should differ from the input\n    assert result != data\n\ndef test_key_schedule_core_invalid_rcon():\n    data = [0x00, 0x01, 0x02, 0x03]\n    # RCON has a finite length; using an index beyond its bounds should raise IndexError\n    with pytest.raises(IndexError):\n        key_schedule_core(data, len(RCON) + 1)\n```",
+        "reasoning": "Need to test key_schedule_core. Need to import from youtube_dl.aes. Let's inspect functions rotate, sub_bytes, RCON. They are in same module. We'll import them. We'll test normal behavior: given known input, expected output. Use known AES key schedule core example: For AES-128, key_schedule_core([0x00,0x01,0x02,0x03],1) should produce? Let's compute quickly: rotate: [0x01,0x02,0x03,0x00]; sub_bytes: apply S-box. We need S-box mapping. Hard. Maybe easier: test that function raises error on wrong length? But function expects list of 4 bytes. If length not 4, rotate will fail? rotate defined? Let's inspect rotate.We need to view module.We can't access internet but assume rotate defined earlier. Might be simple: rotate shifts left. sub_bytes uses S-box. Hard to compute expected. Maybe test that key_schedule_core returns list of 4 ints and that first element changes when rcon_iteration non-zero. Use property: output[0] != input[0] after rcon. Also test that rcon_iteration 0 leaves unchanged? Actually RCON[0] maybe 0x01? But we can test that output[0] equals input[0] ^ RCON[rcon_iteration] after sub_bytes? Hard.\n\nSimpler: test that function raises TypeError when data not list? But rotate expects list.\n\nMaybe test that key_schedule_core returns new list not same object. Use identity.\n\nAlso test boundary: rcon_iteration out of range? RCON defined length maybe 10. If out of range, IndexError.\n\nLet's craft tests:\n\n1. test_key_schedule_core_basic: provide known data [0x00,0x01,0x02,0x03] rcon_iteration=1. Compute expected manually using known AES S-box? Let's quickly compute: S-box mapping: 0x00->0x63, 0x01->0x7c, 0x02->0x77, 0x03->0x7b. So sub_bytes of [0x01,0x02,0x03,0x00] -> [0x7c,0x77,0x7b,0x63]. Then XOR first with RCON[1]. RCON[1] is 0x01? Actually RCON[1] = 0x01? In AES, RCON[1]=0x01, RCON[2]=0x02, etc. So output[0] = 0x7c ^ 0x01 = 0x7d. So expected [0x7d,0x77,0x7b,0x63]. We'll assert.\n\n2. test_key_schedule_core_identity: ensure output is new list not same object.\n\n3. test_key_schedule_core_invalid_rcon: passing rcon_iteration too large raises IndexError.\n\nLet's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004458385,
+    "prompt_tokens": 296,
+    "prompt_time": 0.004817335,
+    "completion_tokens": 962,
+    "completion_time": 1.966922112,
+    "total_tokens": 1258,
+    "total_time": 1.971739447,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 629
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh8jr8ec28zt0cep8652bn",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.aes import key_schedule_core, RCON\n\ndef test_key_schedule_core_basic():\n    # Known input and expected output for rcon_iteration = 1\n    data = [0x00, 0x01, 0x02, 0x03]\n    expected = [0x7d, 0x77, 0x7b, 0x63]  # computed manually using AES S-box and RCON[1] = 0x01\n    result = key_schedule_core(data, 1)\n    assert result == expected\n    # Ensure the original data is unchanged\n    assert data == [0x00, 0x01, 0x02, 0x03]\n\ndef test_key_schedule_core_new_object():\n    data = [0x10, 0x20, 0x30, 0x40]\n    result = key_schedule_core(data, 2)\n    # The returned list should be a new object, not the same reference\n    assert result is not data\n    # The content should differ from the input\n    assert result != data\n\ndef test_key_schedule_core_invalid_rcon():\n    data = [0x00, 0x01, 0x02, 0x03]\n    # RCON has a finite length; using an index beyond its bounds should raise IndexError\n    with pytest.raises(IndexError):\n        key_schedule_core(data, len(RCON) + 1)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "0cc752ed7c6644ac99cd4a954ae652d3",
+  "_api_plus_pacing_seconds": 3.0354896360076964
+}

@@ -1,0 +1,44 @@
+import numpy as np
+import pytest
+from src.whale_optimization import WhaleOptimization
+
+def test_optimize_updates_state_and_best_solution():
+    # deterministic random seed
+    np.random.seed(0)
+
+    # simple fitness: sum of squares of two coordinates
+    opt_func = lambda x, y: x**2 + y**2
+    constraints = [(-5, 5), (-5, 5)]
+    nsols = 3
+    b, a, a_step = 1.0, 2.0, 0.5
+
+    woa = WhaleOptimization(opt_func, constraints, nsols, b, a, a_step)
+
+    # initial state checks
+    assert woa._a == a
+    assert woa._sols.shape == (nsols, 2)
+
+    # run one optimization step
+    woa.optimize()
+
+    # a should have decreased by a_step
+    assert woa._a == a - a_step
+
+    # solutions shape unchanged
+    assert woa._sols.shape == (nsols, 2)
+
+    # compute fitness of new solutions
+    fitness = opt_func(woa._sols[:, 0], woa._sols[:, 1])
+    min_fitness = np.min(fitness)
+    best_index = np.argmin(fitness)
+    best_solution = woa._sols[best_index]
+
+    # best_solutions should contain one entry
+    assert len(woa._best_solutions) == 1
+    recorded_fitness, recorded_solution = woa._best_solutions[0]
+
+    # recorded fitness matches the minimal fitness
+    assert recorded_fitness == pytest.approx(min_fitness)
+
+    # recorded solution matches the best solution
+    np.testing.assert_array_almost_equal(recorded_solution, best_solution)

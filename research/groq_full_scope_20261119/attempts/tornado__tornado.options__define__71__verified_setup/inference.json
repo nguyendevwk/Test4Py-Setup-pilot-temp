@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b6d1a38d-ffe1-438a-8632-57f3dcb2bd43",
+  "object": "chat.completion",
+  "created": 1795076546,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport tornado.options as options\nfrom tornado.options import define\n\ndef test_define_basic(tmp_path):\n    # Define a simple option and verify it is stored correctly\n    option_name = \"test_basic\"\n    default_value = 42\n    define(option_name, default=default_value, type=int, help=\"basic test\")\n    # The option should now be present in the global options registry\n    opt = options.options.get(option_name)\n    assert opt is not None, f\"Option {option_name} not found after definition\"\n    assert opt.default == default_value\n    assert opt.type is int\n    assert opt.help == \"basic test\"\n    # Clean up for isolation\n    options.options.pop(option_name, None)\n\ndef test_define_multiple_with_callback(tmp_path):\n    # Define an option that accepts multiple values and uses a callback\n    option_name = \"test_multiple\"\n    callback_called = {\"called\": False, \"value\": None}\n\n    def callback(value):\n        callback_called[\"called\"] = True\n        callback_called[\"value\"] = value\n\n    define(\n        option_name,\n        default=[],\n        type=str,\n        multiple=True,\n        callback=callback,\n        help=\"multiple values test\",\n    )\n    opt = options.options.get(option_name)\n    assert opt is not None\n    assert opt.multiple is True\n    # Simulate setting the option to trigger the callback\n    opt.set([\"a\", \"b\", \"c\"])\n    assert callback_called[\"called\"] is True\n    assert callback_called[\"value\"] == [\"a\", \"b\", \"c\"]\n    # Clean up\n    options.options.pop(option_name, None)\n\ndef test_define_invalid_type_raises(tmp_path):\n    # Passing an invalid type should raise a TypeError during definition\n    with pytest.raises(TypeError):\n        define(\"invalid_type\", default=\"foo\", type=\"not_a_type\")\n```",
+        "reasoning": "We need to write tests for tornado.options.define. We need to import tornado.options. Let's inspect. But we can't modify product code. We'll write tests that call define and check behavior. Use tmp_path? Not needed. We'll test normal definition, boundary (multiple flag), error (invalid type). Use pytest.raises. Let's write three functions: test_define_basic, test_define_multiple, test_define_invalid_type. Use options module. Let's import tornado.options as options. Use define. Check that options.options dict contains entry. Also test that callback is called. For invalid type, maybe passing type that is not callable? Actually type param expects type. If we pass string, maybe error. Let's check behavior: In tornado.options, define function likely validates type. We'll assume passing type=int works. For invalid, pass type='notatype' and expect TypeError. We'll test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051455296,
+    "prompt_tokens": 438,
+    "prompt_time": 0.026073372,
+    "completion_tokens": 575,
+    "completion_time": 0.654782427,
+    "total_tokens": 1013,
+    "total_time": 0.680855799,
+    "completion_tokens_details": {
+      "reasoning_tokens": 175
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7secqgge1ebhnm4ckzqdddy",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport tornado.options as options\nfrom tornado.options import define\n\ndef test_define_basic(tmp_path):\n    # Define a simple option and verify it is stored correctly\n    option_name = \"test_basic\"\n    default_value = 42\n    define(option_name, default=default_value, type=int, help=\"basic test\")\n    # The option should now be present in the global options registry\n    opt = options.options.get(option_name)\n    assert opt is not None, f\"Option {option_name} not found after definition\"\n    assert opt.default == default_value\n    assert opt.type is int\n    assert opt.help == \"basic test\"\n    # Clean up for isolation\n    options.options.pop(option_name, None)\n\ndef test_define_multiple_with_callback(tmp_path):\n    # Define an option that accepts multiple values and uses a callback\n    option_name = \"test_multiple\"\n    callback_called = {\"called\": False, \"value\": None}\n\n    def callback(value):\n        callback_called[\"called\"] = True\n        callback_called[\"value\"] = value\n\n    define(\n        option_name,\n        default=[],\n        type=str,\n        multiple=True,\n        callback=callback,\n        help=\"multiple values test\",\n    )\n    opt = options.options.get(option_name)\n    assert opt is not None\n    assert opt.multiple is True\n    # Simulate setting the option to trigger the callback\n    opt.set([\"a\", \"b\", \"c\"])\n    assert callback_called[\"called\"] is True\n    assert callback_called[\"value\"] == [\"a\", \"b\", \"c\"]\n    # Clean up\n    options.options.pop(option_name, None)\n\ndef test_define_invalid_type_raises(tmp_path):\n    # Passing an invalid type should raise a TypeError during definition\n    with pytest.raises(TypeError):\n        define(\"invalid_type\", default=\"foo\", type=\"not_a_type\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0387619800167158
+}

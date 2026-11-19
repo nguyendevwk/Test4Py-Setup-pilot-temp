@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-375678bb-40d1-4c91-8e5d-a38813a12b2a",
+  "object": "chat.completion",
+  "created": 1795079665,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport argparse\nimport sys\nimport textwrap\nimport pytest\nfrom httpie.cli.argparser import HTTPieHelpFormatter\n\n\ndef test_split_lines_dedents_and_preserves_blank_lines(tmp_path):\n    \"\"\"_split_lines should dedent multiline help and keep blank lines.\"\"\"\n    formatter = HTTPieHelpFormatter()\n    raw_help = textwrap.dedent(\"\"\"\n        This is a test help text.\n            It has indentation.\n        And a blank line above.\n\n        End of help.\n    \"\"\")\n    lines = formatter._split_lines(raw_help, width=80)\n    # The first line should be the first non-indented line\n    assert lines[0] == \"This is a test help text.\"\n    # The second line should be dedented\n    assert lines[1] == \"It has indentation.\"\n    # The third line should be the blank line that was present\n    assert lines[2] == \"\"\n    # The last line should be the final line\n    assert lines[-1] == \"End of help.\"\n\n\ndef test_add_usage_shows_only_positional_arguments(tmp_path):\n    \"\"\"add_usage should only display positional arguments in the usage string.\"\"\"\n    parser = argparse.ArgumentParser(\n        prog=\"testprog\",\n        formatter_class=HTTPieHelpFormatter,\n        add_help=False,\n    )\n    # Add a positional argument and an optional one\n    parser.add_argument(\"positional\", help=\"positional argument\")\n    parser.add_argument(\"-o\", \"--optional\", help=\"optional argument\")\n    # Capture the usage string\n    usage_lines = []\n    def fake_print(*args, **kwargs):\n        usage_lines.append(\" \".join(args))\n    # Temporarily replace sys.stdout.write\n    original_write = sys.stdout.write\n    sys.stdout.write = fake_print\n    try:\n        parser.print_usage()\n    finally:\n        sys.stdout.write = original_write\n    # The usage should contain only the positional argument\n    usage_text = \" \".join(usage_lines)\n    assert \"positional\" in usage_text\n    assert \"-o\" not in usage_text\n    assert \"--optional\" not in usage_text\n\n\ndef test_add_usage_includes_action_on_invalid_option(tmp_path):\n    \"\"\"When an invalid option is passed, add_usage should include the offending action.\"\"\"\n    parser = argparse.ArgumentParser(\n        prog=\"testprog\",\n        formatter_class=HTTPieHelpFormatter,\n        add_help=False,\n    )\n    parser.add_argument(\"positional\", help=\"positional argument\")\n    parser.add_argument(\"-f\", \"--foo\", help=\"foo option\")\n    # Simulate parsing with an invalid option to trigger ArgumentError\n    with pytest.raises(SystemExit):\n        parser.parse_args([\"--invalid\"])\n    # Capture the usage string after the error\n    usage_lines = []\n    def fake_print(*args, **kwargs):\n        usage_lines.append(\" \".join(args))\n    original_write = sys.stdout.write\n    sys.stdout.write = fake_print\n    try:\n        parser.print_usage()\n    finally:\n        sys.stdout.write = original_write\n    usage_text = \" \".join(usage_lines)\n    # The usage should now include the invalid option action\n    assert \"--invalid\" in usage_text\n    # And still only show positional arguments\n    assert \"positional\" in usage_text\n    assert \"-f\" not in usage_text\n```",
+        "reasoning": "Need tests for HTTPieHelpFormatter. Test _split_lines, add_usage behavior. Use argparse to create parser with formatter. Test that help lines dedented. Also test that add_usage only shows positional. Third test error scenario."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005221721,
+    "prompt_tokens": 751,
+    "prompt_time": 0.053660643,
+    "completion_tokens": 740,
+    "completion_time": 0.774499016,
+    "total_tokens": 1491,
+    "total_time": 0.828159659,
+    "completion_tokens_details": {
+      "reasoning_tokens": 47
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7shbwnzedy9svjq088zg4t9",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport argparse\nimport sys\nimport textwrap\nimport pytest\nfrom httpie.cli.argparser import HTTPieHelpFormatter\n\n\ndef test_split_lines_dedents_and_preserves_blank_lines(tmp_path):\n    \"\"\"_split_lines should dedent multiline help and keep blank lines.\"\"\"\n    formatter = HTTPieHelpFormatter()\n    raw_help = textwrap.dedent(\"\"\"\n        This is a test help text.\n            It has indentation.\n        And a blank line above.\n\n        End of help.\n    \"\"\")\n    lines = formatter._split_lines(raw_help, width=80)\n    # The first line should be the first non-indented line\n    assert lines[0] == \"This is a test help text.\"\n    # The second line should be dedented\n    assert lines[1] == \"It has indentation.\"\n    # The third line should be the blank line that was present\n    assert lines[2] == \"\"\n    # The last line should be the final line\n    assert lines[-1] == \"End of help.\"\n\n\ndef test_add_usage_shows_only_positional_arguments(tmp_path):\n    \"\"\"add_usage should only display positional arguments in the usage string.\"\"\"\n    parser = argparse.ArgumentParser(\n        prog=\"testprog\",\n        formatter_class=HTTPieHelpFormatter,\n        add_help=False,\n    )\n    # Add a positional argument and an optional one\n    parser.add_argument(\"positional\", help=\"positional argument\")\n    parser.add_argument(\"-o\", \"--optional\", help=\"optional argument\")\n    # Capture the usage string\n    usage_lines = []\n    def fake_print(*args, **kwargs):\n        usage_lines.append(\" \".join(args))\n    # Temporarily replace sys.stdout.write\n    original_write = sys.stdout.write\n    sys.stdout.write = fake_print\n    try:\n        parser.print_usage()\n    finally:\n        sys.stdout.write = original_write\n    # The usage should contain only the positional argument\n    usage_text = \" \".join(usage_lines)\n    assert \"positional\" in usage_text\n    assert \"-o\" not in usage_text\n    assert \"--optional\" not in usage_text\n\n\ndef test_add_usage_includes_action_on_invalid_option(tmp_path):\n    \"\"\"When an invalid option is passed, add_usage should include the offending action.\"\"\"\n    parser = argparse.ArgumentParser(\n        prog=\"testprog\",\n        formatter_class=HTTPieHelpFormatter,\n        add_help=False,\n    )\n    parser.add_argument(\"positional\", help=\"positional argument\")\n    parser.add_argument(\"-f\", \"--foo\", help=\"foo option\")\n    # Simulate parsing with an invalid option to trigger ArgumentError\n    with pytest.raises(SystemExit):\n        parser.parse_args([\"--invalid\"])\n    # Capture the usage string after the error\n    usage_lines = []\n    def fake_print(*args, **kwargs):\n        usage_lines.append(\" \".join(args))\n    original_write = sys.stdout.write\n    sys.stdout.write = fake_print\n    try:\n        parser.print_usage()\n    finally:\n        sys.stdout.write = original_write\n    usage_text = \" \".join(usage_lines)\n    # The usage should now include the invalid option action\n    assert \"--invalid\" in usage_text\n    # And still only show positional arguments\n    assert \"positional\" in usage_text\n    assert \"-f\" not in usage_text\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "407b9b1214404b558252fdc43b14a4f2",
+  "_api_plus_pacing_seconds": 2.0933470600284636
+}

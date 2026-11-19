@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-00366f91-39ae-4cc4-8383-51eea07f9823",
+  "object": "chat.completion",
+  "created": 1795077692,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport builtins\nimport inspect\nimport os\nimport sys\nimport types\nimport tempfile\nimport importlib.util\nimport importlib.machinery\nimport importlib\nimport pytest\n\nfrom pysnooper.tracer import get_path_and_source_from_frame, UnavailableSource, source_and_path_cache\n\n\ndef create_module_with_source(tmp_path, name, source_code):\n    \"\"\"Create a temporary module file and import it.\"\"\"\n    file_path = tmp_path / f\"{name}.py\"\n    file_path.write_text(source_code)\n    spec = importlib.util.spec_from_file_location(name, str(file_path))\n    module = importlib.util.module_from_spec(spec)\n    sys.modules[name] = module\n    spec.loader.exec_module(module)\n    return module, file_path\n\n\ndef test_get_path_and_source_from_frame_reads_file_source(tmp_path):\n    \"\"\"Frame from a function defined in a real file should return that file path and source lines.\"\"\"\n    source_code = \"def foo():\\n    return 42\\n\"\n    module, file_path = create_module_with_source(tmp_path, \"temp_module\", source_code)\n\n    def wrapper():\n        return module.foo()\n\n    frame = inspect.currentframe()\n    # Move to the frame of wrapper\n    while frame.f_code.co_name != \"wrapper\":\n        frame = frame.f_back\n    path, source = get_path_and_source_from_frame(frame)\n    assert path == str(file_path)\n    assert isinstance(source, list)\n    assert source[0].strip() == \"def foo():\"\n    assert source[1].strip() == \"return 42\"\n\n\ndef test_get_path_and_source_from_frame_handles_bytes_source(tmp_path):\n    \"\"\"If the source is read as bytes, it should be decoded correctly.\"\"\"\n    # Create a file with a specific encoding declaration\n    source_code = \"# coding: latin-1\\n\" + \"def bar():\\n    return 'á'\\n\"\n    module, file_path = create_module_with_source(tmp_path, \"latin_module\", source_code)\n\n    def wrapper():\n        return module.bar()\n\n    frame = inspect.currentframe()\n    while frame.f_code.co_name != \"wrapper\":\n        frame = frame.f_back\n    path, source = get_path_and_source_from_frame(frame)\n    assert path == str(file_path)\n    assert isinstance(source, list)\n    # The decoded string should contain the accented character\n    assert source[1].strip() == \"return 'á'\"\n\n\ndef test_get_path_and_source_from_frame_unavailable_source(tmp_path):\n    \"\"\"When the file cannot be read, an UnavailableSource instance is returned.\"\"\"\n    # Create a module but delete its file to simulate missing source\n    module, file_path = create_module_with_source(tmp_path, \"missing_module\", \"def baz():\\n    pass\\n\")\n    os.remove(file_path)\n\n    def wrapper():\n        return module.baz()\n\n    frame = inspect.currentframe()\n    while frame.f_code.co_name != \"wrapper\":\n        frame = frame.f_back\n    path, source = get_path_and_source_from_frame(frame)\n    assert path == str(file_path)\n    assert isinstance(source, UnavailableSource)\n```",
+        "reasoning": "We need tests for get_path_and_source_from_frame. We'll create temporary file, frame from function defined in that file. Use tmp_path. Also test when source is bytes. And test when file not found leading to UnavailableSource. Need import UnavailableSource? It's defined elsewhere. We'll just check type. Use pytest.raises? Not needed. We'll import function."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.073214058,
+    "prompt_tokens": 943,
+    "prompt_time": 0.064637238,
+    "completion_tokens": 729,
+    "completion_time": 0.869336335,
+    "total_tokens": 1672,
+    "total_time": 0.933973573,
+    "completion_tokens_details": {
+      "reasoning_tokens": 74
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sffnv7ejdtsk2490km6z42",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport builtins\nimport inspect\nimport os\nimport sys\nimport types\nimport tempfile\nimport importlib.util\nimport importlib.machinery\nimport importlib\nimport pytest\n\nfrom pysnooper.tracer import get_path_and_source_from_frame, UnavailableSource, source_and_path_cache\n\n\ndef create_module_with_source(tmp_path, name, source_code):\n    \"\"\"Create a temporary module file and import it.\"\"\"\n    file_path = tmp_path / f\"{name}.py\"\n    file_path.write_text(source_code)\n    spec = importlib.util.spec_from_file_location(name, str(file_path))\n    module = importlib.util.module_from_spec(spec)\n    sys.modules[name] = module\n    spec.loader.exec_module(module)\n    return module, file_path\n\n\ndef test_get_path_and_source_from_frame_reads_file_source(tmp_path):\n    \"\"\"Frame from a function defined in a real file should return that file path and source lines.\"\"\"\n    source_code = \"def foo():\\n    return 42\\n\"\n    module, file_path = create_module_with_source(tmp_path, \"temp_module\", source_code)\n\n    def wrapper():\n        return module.foo()\n\n    frame = inspect.currentframe()\n    # Move to the frame of wrapper\n    while frame.f_code.co_name != \"wrapper\":\n        frame = frame.f_back\n    path, source = get_path_and_source_from_frame(frame)\n    assert path == str(file_path)\n    assert isinstance(source, list)\n    assert source[0].strip() == \"def foo():\"\n    assert source[1].strip() == \"return 42\"\n\n\ndef test_get_path_and_source_from_frame_handles_bytes_source(tmp_path):\n    \"\"\"If the source is read as bytes, it should be decoded correctly.\"\"\"\n    # Create a file with a specific encoding declaration\n    source_code = \"# coding: latin-1\\n\" + \"def bar():\\n    return 'á'\\n\"\n    module, file_path = create_module_with_source(tmp_path, \"latin_module\", source_code)\n\n    def wrapper():\n        return module.bar()\n\n    frame = inspect.currentframe()\n    while frame.f_code.co_name != \"wrapper\":\n        frame = frame.f_back\n    path, source = get_path_and_source_from_frame(frame)\n    assert path == str(file_path)\n    assert isinstance(source, list)\n    # The decoded string should contain the accented character\n    assert source[1].strip() == \"return 'á'\"\n\n\ndef test_get_path_and_source_from_frame_unavailable_source(tmp_path):\n    \"\"\"When the file cannot be read, an UnavailableSource instance is returned.\"\"\"\n    # Create a module but delete its file to simulate missing source\n    module, file_path = create_module_with_source(tmp_path, \"missing_module\", \"def baz():\\n    pass\\n\")\n    os.remove(file_path)\n\n    def wrapper():\n        return module.baz()\n\n    frame = inspect.currentframe()\n    while frame.f_code.co_name != \"wrapper\":\n        frame = frame.f_back\n    path, source = get_path_and_source_from_frame(frame)\n    assert path == str(file_path)\n    assert isinstance(source, UnavailableSource)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.355193885974586
+}

@@ -1,0 +1,68 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_annotation_with_value_replaced_by_assign _________________
+
+    def test_annotation_with_value_replaced_by_assign():
+        code = "a: int = 10\n"
+        tree = ast.parse(code, mode="exec")
+        result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)
+    
+        # Tree should have changed
+        assert result.tree_changed is True
+    
+        # Only one statement in the module body
+        assert len(result.tree.body) == 1
+        stmt = result.tree.body[0]
+        assert isinstance(stmt, ast.Assign)
+    
+        # Target should be the name 'a'
+        assert isinstance(stmt.targets[0], ast.Name)
+        assert stmt.targets[0].id == "a"
+    
+        # Value should be the constant 10
+>       assert isinstance(stmt.value, ast.Constant)
+E       AssertionError: assert False
+E        +  where False = isinstance(<typed_ast._ast3.Num object at 0x7f0c64aeb1c0>, <class 'typed_ast._ast3.Constant'>)
+E        +    where <typed_ast._ast3.Num object at 0x7f0c64aeb1c0> = <typed_ast._ast3.Assign object at 0x7f0c64aeb220>.value
+E        +    and   <class 'typed_ast._ast3.Constant'> = ast.Constant
+
+test_generated.py:24: AssertionError
+_____________________ test_annotation_inside_function_body _____________________
+
+    def test_annotation_inside_function_body():
+        code = """\
+    def f():
+        x: str = 'hi'
+    """
+        tree = ast.parse(code, mode="exec")
+        result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)
+    
+        # Tree should have changed
+        assert result.tree_changed is True
+    
+        # Function definition should be present
+        assert len(result.tree.body) == 1
+        func = result.tree.body[0]
+        assert isinstance(func, ast.FunctionDef)
+    
+        # Function body should contain one Assign statement
+        assert len(func.body) == 1
+        stmt = func.body[0]
+        assert isinstance(stmt, ast.Assign)
+    
+        # Target should be the name 'x'
+        assert isinstance(stmt.targets[0], ast.Name)
+        assert stmt.targets[0].id == "x"
+    
+        # Value should be the constant 'hi'
+>       assert isinstance(stmt.value, ast.Constant)
+E       AssertionError: assert False
+E        +  where False = isinstance(<typed_ast._ast3.Str object at 0x7f0c6493eec0>, <class 'typed_ast._ast3.Constant'>)
+E        +    where <typed_ast._ast3.Str object at 0x7f0c6493eec0> = <typed_ast._ast3.Assign object at 0x7f0c6493ed70>.value
+E        +    and   <class 'typed_ast._ast3.Constant'> = ast.Constant
+
+test_generated.py:67: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_annotation_with_value_replaced_by_assign - Ass...
+FAILED test_generated.py::test_annotation_inside_function_body - AssertionErr...
+2 failed, 1 passed in 0.14s

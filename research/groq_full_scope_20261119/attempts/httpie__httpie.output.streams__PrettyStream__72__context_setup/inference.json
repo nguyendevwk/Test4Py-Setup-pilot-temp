@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-fd665fcb-93cf-4a47-9a34-82f01005d305",
+  "object": "chat.completion",
+  "created": 1795076480,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.streams import PrettyStream, BinarySuppressedError\nfrom httpie.models import HTTPMessage, OutputOptions\nfrom httpie.encoding import UTF8\nfrom httpie.context import Environment\nfrom httpie.processing import Conversion, Formatting\nfrom httpie.utils import parse_content_type_header\n\n# Dummy conversion that turns binary into text\nclass DummyConversion(Conversion):\n    def get_converter(self, mime):\n        return DummyConverter() if mime == \"application/octet-stream\" else None\n\nclass DummyConverter:\n    def convert(self, body_bytes):\n        # pretend the binary is a UTF-8 encoded string\n        return \"application/json\", body_bytes.decode(\"utf-8\")\n\n# Dummy formatting that just returns the content unchanged\nclass DummyFormatting(Formatting):\n    def format_headers(self, headers): return headers\n    def format_metadata(self, metadata): return metadata\n    def format_body(self, content, mime): return content\n\n# Helper to create a message with given body lines\nclass DummyMessage(HTTPMessage):\n    def __init__(self, body_lines, content_type=\"text/plain\"):\n        self._body_lines = body_lines\n        self.content_type = content_type\n        self.encoding = \"utf-8\"\n        self.headers = \"HTTP/1.1 200 OK\"\n        self.metadata = \"\"\n\n    def iter_lines(self, chunk_size):\n        for line in self._body_lines:\n            yield line.encode(\"utf-8\"), b\"\\n\"\n\n    def __repr__(self):\n        return f\"<DummyMessage {self.content_type}>\"\n\ndef test_prettystream_normal_text(tmp_path):\n    msg = DummyMessage([b\"hello\", b\"world\"])\n    opts = OutputOptions(headers=True, body=True, meta=False)\n    stream = PrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        output_options=opts,\n        env=Environment(stdout_isatty=False),\n    )\n    result = b\"\".join(stream)\n    # headers + blank line + body lines + newlines\n    assert result.startswith(b\"HTTP/1.1 200 OK\\r\\n\\r\\n\")\n    assert b\"hello\\nworld\\n\" in result\n\ndef test_prettystream_binary_suppressed(tmp_path):\n    msg = DummyMessage([b\"\\x00\\x01\\x02\"])\n    opts = OutputOptions(headers=True, body=True, meta=False)\n    stream = PrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        output_options=opts,\n        env=Environment(stdout_isatty=False),\n    )\n    with pytest.raises(BinarySuppressedError):\n        list(stream.iter_body())\n\ndef test_prettystream_converter_used(tmp_path):\n    msg = DummyMessage([b\"{\\\"key\\\":\\\"value\\\"}\"])\n    msg.content_type = \"application/octet-stream\"\n    opts = OutputOptions(headers=True, body=True, meta=False)\n    stream = PrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        output_options=opts,\n        env=Environment(stdout_isatty=False),\n    )\n    body_chunks = list(stream.iter_body())\n    # After conversion, mime should be application/json and body unchanged\n    assert body_chunks == [b\"{\\\"key\\\":\\\"value\\\"}\\n\"]\n```",
+        "reasoning": "Need tests for PrettyStream iter_body behavior: normal text, binary suppression, converter usage. Use dummy Conversion, Formatting, HTTPMessage. Create simple classes."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054385025,
+    "prompt_tokens": 1644,
+    "prompt_time": 0.083505031,
+    "completion_tokens": 724,
+    "completion_time": 0.808377949,
+    "total_tokens": 2368,
+    "total_time": 0.89188298,
+    "completion_tokens_details": {
+      "reasoning_tokens": 32
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7seapzpean8v5cwrv3gde6d",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.streams import PrettyStream, BinarySuppressedError\nfrom httpie.models import HTTPMessage, OutputOptions\nfrom httpie.encoding import UTF8\nfrom httpie.context import Environment\nfrom httpie.processing import Conversion, Formatting\nfrom httpie.utils import parse_content_type_header\n\n# Dummy conversion that turns binary into text\nclass DummyConversion(Conversion):\n    def get_converter(self, mime):\n        return DummyConverter() if mime == \"application/octet-stream\" else None\n\nclass DummyConverter:\n    def convert(self, body_bytes):\n        # pretend the binary is a UTF-8 encoded string\n        return \"application/json\", body_bytes.decode(\"utf-8\")\n\n# Dummy formatting that just returns the content unchanged\nclass DummyFormatting(Formatting):\n    def format_headers(self, headers): return headers\n    def format_metadata(self, metadata): return metadata\n    def format_body(self, content, mime): return content\n\n# Helper to create a message with given body lines\nclass DummyMessage(HTTPMessage):\n    def __init__(self, body_lines, content_type=\"text/plain\"):\n        self._body_lines = body_lines\n        self.content_type = content_type\n        self.encoding = \"utf-8\"\n        self.headers = \"HTTP/1.1 200 OK\"\n        self.metadata = \"\"\n\n    def iter_lines(self, chunk_size):\n        for line in self._body_lines:\n            yield line.encode(\"utf-8\"), b\"\\n\"\n\n    def __repr__(self):\n        return f\"<DummyMessage {self.content_type}>\"\n\ndef test_prettystream_normal_text(tmp_path):\n    msg = DummyMessage([b\"hello\", b\"world\"])\n    opts = OutputOptions(headers=True, body=True, meta=False)\n    stream = PrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        output_options=opts,\n        env=Environment(stdout_isatty=False),\n    )\n    result = b\"\".join(stream)\n    # headers + blank line + body lines + newlines\n    assert result.startswith(b\"HTTP/1.1 200 OK\\r\\n\\r\\n\")\n    assert b\"hello\\nworld\\n\" in result\n\ndef test_prettystream_binary_suppressed(tmp_path):\n    msg = DummyMessage([b\"\\x00\\x01\\x02\"])\n    opts = OutputOptions(headers=True, body=True, meta=False)\n    stream = PrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        output_options=opts,\n        env=Environment(stdout_isatty=False),\n    )\n    with pytest.raises(BinarySuppressedError):\n        list(stream.iter_body())\n\ndef test_prettystream_converter_used(tmp_path):\n    msg = DummyMessage([b\"{\\\"key\\\":\\\"value\\\"}\"])\n    msg.content_type = \"application/octet-stream\"\n    opts = OutputOptions(headers=True, body=True, meta=False)\n    stream = PrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        output_options=opts,\n        env=Environment(stdout_isatty=False),\n    )\n    body_chunks = list(stream.iter_body())\n    # After conversion, mime should be application/json and body unchanged\n    assert body_chunks == [b\"{\\\"key\\\":\\\"value\\\"}\\n\"]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2707241420284845
+}

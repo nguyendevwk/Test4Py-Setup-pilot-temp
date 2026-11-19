@@ -1,0 +1,52 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_parse_normal_docstring __________________________
+
+    def test_parse_normal_docstring():
+        doc = """
+        Short summary.
+    
+        Longer description that spans
+        multiple lines.
+    
+        Args:
+            x (int): The first argument.
+            y (str): The second argument.
+    
+        Returns:
+            bool: True if successful.
+    
+        Raises:
+            ValueError: If the input is invalid.
+        """
+        result = parse(doc)
+        assert isinstance(result, Docstring)
+        # Summary and description
+        assert result.short_description == "Short summary."
+        assert "Longer description" in result.long_description
+        # Parameters
+        assert len(result.params) == 2
+        param_x = next(p for p in result.params if p.arg_name == "x")
+        assert param_x.type_name == "int"
+        assert param_x.description == "The first argument."
+        param_y = next(p for p in result.params if p.arg_name == "y")
+        assert param_y.type_name == "str"
+        # Returns
+>       assert len(result.returns) == 1
+E       TypeError: object of type 'DocstringReturns' has no len()
+
+../../../../../../attempts/docstring_parser__docstring_parser.google__parse__44__atomic_verified_setup/eval0/test_generated.py:35: TypeError
+__________________________ test_parse_empty_docstring __________________________
+
+    def test_parse_empty_docstring():
+        result = parse("")
+        assert isinstance(result, Docstring)
+>       assert result.short_description == ""
+E       AssertionError: assert None == ''
+E        +  where None = <docstring_parser.common.Docstring object at 0x7f1763207400>.short_description
+
+../../../../../../attempts/docstring_parser__docstring_parser.google__parse__44__atomic_verified_setup/eval0/test_generated.py:50: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.google__parse__44__atomic_verified_setup/eval0/test_generated.py::test_parse_normal_docstring
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.google__parse__44__atomic_verified_setup/eval0/test_generated.py::test_parse_empty_docstring
+2 failed, 1 passed in 0.16s

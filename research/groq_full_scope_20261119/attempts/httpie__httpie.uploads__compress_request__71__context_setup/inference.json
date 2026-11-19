@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-76dc528d-237a-4a3c-b350-3e1ded458d8c",
+  "object": "chat.completion",
+  "created": 1795079462,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport zlib\nimport requests\nimport pytest\n\nfrom httpie.uploads import compress_request\n\n\ndef test_compress_request_with_string_body(tmp_path):\n    # Prepare a request with a string body that compresses well\n    body = \"a\" * 1000  # highly compressible\n    req = requests.Request(\"POST\", \"http://example.com\", data=body)\n    prepared = req.prepare()\n\n    compress_request(prepared, always=False)\n\n    # Body should be compressed\n    assert prepared.body is not None\n    assert isinstance(prepared.body, bytes)\n    # Content-Encoding header should be set\n    assert prepared.headers.get(\"Content-Encoding\") == \"deflate\"\n    # Content-Length should match compressed size\n    assert int(prepared.headers[\"Content-Length\"]) == len(prepared.body)\n    # Verify that the compressed data decompresses to original\n    decompressed = zlib.decompress(prepared.body)\n    assert decompressed.decode() == body\n\n\ndef test_compress_request_with_file_like_body(tmp_path):\n    # Create a temporary file with content that compresses poorly\n    file_path = tmp_path / \"data.bin\"\n    file_path.write_bytes(b\"\\x00\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\x09\")  # random bytes\n    with open(file_path, \"rb\") as f:\n        req = requests.Request(\"POST\", \"http://example.com\", data=f)\n        prepared = req.prepare()\n\n    compress_request(prepared, always=False)\n\n    # Since data is not compressible, body should remain unchanged\n    assert prepared.body is not None\n    assert isinstance(prepared.body, bytes)\n    assert prepared.body == file_path.read_bytes()\n    # No Content-Encoding header should be added\n    assert \"Content-Encoding\" not in prepared.headers\n    assert \"Content-Length\" not in prepared.headers\n\n\ndef test_compress_request_with_always_flag(tmp_path):\n    # Prepare a request with a body that is not compressible\n    body = b\"\\x00\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\x09\"\n    req = requests.Request(\"POST\", \"http://example.com\", data=body)\n    prepared = req.prepare()\n\n    compress_request(prepared, always=True)\n\n    # Body should be compressed even though not economical\n    assert prepared.body is not None\n    assert isinstance(prepared.body, bytes)\n    assert prepared.headers.get(\"Content-Encoding\") == \"deflate\"\n    assert int(prepared.headers[\"Content-Length\"]) == len(prepared.body)\n    # Decompress to verify integrity\n    decompressed = zlib.decompress(prepared.body)\n    assert decompressed == body\n```",
+        "reasoning": "We need tests for compress_request. Use tmp_path to create file-like. Test normal string body, file-like, bytes. Check header changes. Also test that when not economical and always False, body unchanged. Also test that when always True, body compressed even if not economical. Use requests.PreparedRequest. Let's craft."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00538649,
+    "prompt_tokens": 445,
+    "prompt_time": 0.02322486,
+    "completion_tokens": 635,
+    "completion_time": 0.679194465,
+    "total_tokens": 1080,
+    "total_time": 0.702419325,
+    "completion_tokens_details": {
+      "reasoning_tokens": 65
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh5ptney9agtgrbakzrehy",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport zlib\nimport requests\nimport pytest\n\nfrom httpie.uploads import compress_request\n\n\ndef test_compress_request_with_string_body(tmp_path):\n    # Prepare a request with a string body that compresses well\n    body = \"a\" * 1000  # highly compressible\n    req = requests.Request(\"POST\", \"http://example.com\", data=body)\n    prepared = req.prepare()\n\n    compress_request(prepared, always=False)\n\n    # Body should be compressed\n    assert prepared.body is not None\n    assert isinstance(prepared.body, bytes)\n    # Content-Encoding header should be set\n    assert prepared.headers.get(\"Content-Encoding\") == \"deflate\"\n    # Content-Length should match compressed size\n    assert int(prepared.headers[\"Content-Length\"]) == len(prepared.body)\n    # Verify that the compressed data decompresses to original\n    decompressed = zlib.decompress(prepared.body)\n    assert decompressed.decode() == body\n\n\ndef test_compress_request_with_file_like_body(tmp_path):\n    # Create a temporary file with content that compresses poorly\n    file_path = tmp_path / \"data.bin\"\n    file_path.write_bytes(b\"\\x00\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\x09\")  # random bytes\n    with open(file_path, \"rb\") as f:\n        req = requests.Request(\"POST\", \"http://example.com\", data=f)\n        prepared = req.prepare()\n\n    compress_request(prepared, always=False)\n\n    # Since data is not compressible, body should remain unchanged\n    assert prepared.body is not None\n    assert isinstance(prepared.body, bytes)\n    assert prepared.body == file_path.read_bytes()\n    # No Content-Encoding header should be added\n    assert \"Content-Encoding\" not in prepared.headers\n    assert \"Content-Length\" not in prepared.headers\n\n\ndef test_compress_request_with_always_flag(tmp_path):\n    # Prepare a request with a body that is not compressible\n    body = b\"\\x00\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\x09\"\n    req = requests.Request(\"POST\", \"http://example.com\", data=body)\n    prepared = req.prepare()\n\n    compress_request(prepared, always=True)\n\n    # Body should be compressed even though not economical\n    assert prepared.body is not None\n    assert isinstance(prepared.body, bytes)\n    assert prepared.headers.get(\"Content-Encoding\") == \"deflate\"\n    assert int(prepared.headers[\"Content-Length\"]) == len(prepared.body)\n    # Decompress to verify integrity\n    decompressed = zlib.decompress(prepared.body)\n    assert decompressed == body\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "a10e4963861542cbb0f9870ef227c09d",
+  "_api_plus_pacing_seconds": 1.2576351179741323
+}

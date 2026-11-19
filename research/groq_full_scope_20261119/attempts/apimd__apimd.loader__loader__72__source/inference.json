@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-45ce8f19-8dbe-4ae6-845e-afa601726197",
+  "object": "chat.completion",
+  "created": 1795077062,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport importlib\nimport importlib.util\nimport importlib.machinery\nimport importlib.abc\nimport importlib\nimport types\nimport pytest\nfrom apimd.loader import loader\n\n# Helper to create a temporary package structure\ndef create_pkg(tmp_path, name, files):\n    pkg_dir = tmp_path / name\n    pkg_dir.mkdir()\n    for fname, content in files.items():\n        (pkg_dir / fname).write_text(content)\n    # create __init__.py to make it a package\n    (pkg_dir / \"__init__.py\").write_text(\"\")\n    return pkg_dir\n\ndef test_loader_parses_python_module(tmp_path):\n    # Create a simple package with one .py module\n    pkg_dir = create_pkg(tmp_path, \"mypkg\", {\"mod.py\": \"x = 42\"})\n    # Run loader\n    result = loader(str(pkg_dir), str(pkg_dir), link=False, level=0, toc=False)\n    # The compiled output should contain the module name\n    assert \"mypkg.mod\" in result\n    # It should also contain the code we wrote\n    assert \"x = 42\" in result\n\ndef test_loader_parses_stub_and_skips_py(tmp_path):\n    # Create a package with a .pyi stub but no .py\n    pkg_dir = create_pkg(tmp_path, \"stubpkg\", {\"mod.pyi\": \"def foo() -> int: ...\"})\n    result = loader(str(pkg_dir), str(pkg_dir), link=False, level=0, toc=False)\n    # Should contain the module name and the stub signature\n    assert \"stubpkg.mod\" in result\n    assert \"def foo() -> int\" in result\n\ndef test_loader_returns_empty_for_no_modules(tmp_path):\n    # Create an empty package\n    pkg_dir = create_pkg(tmp_path, \"emptypkg\", {})\n    result = loader(str(pkg_dir), str(pkg_dir), link=False, level=0, toc=False)\n    # No modules to parse, result should be empty string\n    assert result == \"\"\n```",
+        "reasoning": "Need tests for loader function. We can create temporary package structure with .py files and maybe .pyi. Test that loader returns compiled string containing expected content. Also test error when missing file? loader doesn't raise. Maybe test that extension suffix handling: create dummy extension file? Hard. Instead test that loader skips pure py when .py exists. Use simple Parser? We don't know Parser implementation. But we can inspect compiled output? Might be complex. Maybe test that loader returns string and includes module names. Hard without knowing Parser. Maybe we can mock Parser? But instruction says no mocks. So maybe test that loader returns non-empty string when given a simple package. We'll create a package with one module. Ensure loader returns string containing module name. Let's assume compile returns something containing module names. We'll just assert that output contains the module name. Also test that when only .pyi present, it still parses. And test that when no files, returns empty string. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054176214,
+    "prompt_tokens": 553,
+    "prompt_time": 0.032801985,
+    "completion_tokens": 639,
+    "completion_time": 0.715775264,
+    "total_tokens": 1192,
+    "total_time": 0.748577249,
+    "completion_tokens_details": {
+      "reasoning_tokens": 197
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sewf2wea3vmwmtzypdgmdy",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport importlib\nimport importlib.util\nimport importlib.machinery\nimport importlib.abc\nimport importlib\nimport types\nimport pytest\nfrom apimd.loader import loader\n\n# Helper to create a temporary package structure\ndef create_pkg(tmp_path, name, files):\n    pkg_dir = tmp_path / name\n    pkg_dir.mkdir()\n    for fname, content in files.items():\n        (pkg_dir / fname).write_text(content)\n    # create __init__.py to make it a package\n    (pkg_dir / \"__init__.py\").write_text(\"\")\n    return pkg_dir\n\ndef test_loader_parses_python_module(tmp_path):\n    # Create a simple package with one .py module\n    pkg_dir = create_pkg(tmp_path, \"mypkg\", {\"mod.py\": \"x = 42\"})\n    # Run loader\n    result = loader(str(pkg_dir), str(pkg_dir), link=False, level=0, toc=False)\n    # The compiled output should contain the module name\n    assert \"mypkg.mod\" in result\n    # It should also contain the code we wrote\n    assert \"x = 42\" in result\n\ndef test_loader_parses_stub_and_skips_py(tmp_path):\n    # Create a package with a .pyi stub but no .py\n    pkg_dir = create_pkg(tmp_path, \"stubpkg\", {\"mod.pyi\": \"def foo() -> int: ...\"})\n    result = loader(str(pkg_dir), str(pkg_dir), link=False, level=0, toc=False)\n    # Should contain the module name and the stub signature\n    assert \"stubpkg.mod\" in result\n    assert \"def foo() -> int\" in result\n\ndef test_loader_returns_empty_for_no_modules(tmp_path):\n    # Create an empty package\n    pkg_dir = create_pkg(tmp_path, \"emptypkg\", {})\n    result = loader(str(pkg_dir), str(pkg_dir), link=False, level=0, toc=False)\n    # No modules to parse, result should be empty string\n    assert result == \"\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1129545790026896
+}

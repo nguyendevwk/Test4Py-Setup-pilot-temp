@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-bd9c2a90-10cd-44db-bac1-de41f088b7ae",
+  "object": "chat.completion",
+  "created": 1795076311,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport builtins\nimport types\nimport pytest\nfrom pathlib import Path\n\n# Import the target function and its module\nfrom cookiecutter.prompt import prompt_and_delete, read_user_yes_no\n\n\ndef test_no_input_deletes_file(tmp_path):\n    \"\"\"When no_input is True, the function should delete the file and return True.\"\"\"\n    # Create a temporary file\n    file_path = tmp_path / \"temp.txt\"\n    file_path.write_text(\"content\")\n\n    # Ensure the file exists before calling\n    assert file_path.exists()\n\n    # Call the function with no_input=True\n    result = prompt_and_delete(file_path, no_input=True)\n\n    # The function should return True and the file should be removed\n    assert result is True\n    assert not file_path.exists()\n\n\ndef test_reuse_returns_false(tmp_path, monkeypatch):\n    \"\"\"When the user declines deletion but accepts reuse, the function should return False.\"\"\"\n    # Create a temporary directory\n    dir_path = tmp_path / \"temp_dir\"\n    dir_path.mkdir()\n\n    # Ensure the directory exists before calling\n    assert dir_path.exists()\n\n    # Patch read_user_yes_no to simulate user responses:\n    # first call (delete prompt) returns False, second call (reuse prompt) returns True\n    responses = iter([False, True])\n    monkeypatch.setattr(\n        \"cookiecutter.prompt.read_user_yes_no\",\n        lambda *args, **kwargs: next(responses),\n    )\n\n    # Call the function with no_input=False (default)\n    result = prompt_and_delete(dir_path, no_input=False)\n\n    # The function should return False and the directory should remain\n    assert result is False\n    assert dir_path.exists()\n\n\ndef test_exit_on_no_reuse(tmp_path, monkeypatch):\n    \"\"\"When the user declines both deletion and reuse, the function should exit.\"\"\"\n    # Create a temporary file\n    file_path = tmp_path / \"temp.txt\"\n    file_path.write_text(\"content\")\n\n    # Ensure the file exists before calling\n    assert file_path.exists()\n\n    # Patch read_user_yes_no to simulate user responses:\n    # first call (delete prompt) returns False, second call (reuse prompt) returns False\n    responses = iter([False, False])\n    monkeypatch.setattr(\n        \"cookiecutter.prompt.read_user_yes_no\",\n        lambda *args, **kwargs: next(responses),\n    )\n\n    # The function should raise SystemExit\n    with pytest.raises(SystemExit):\n        prompt_and_delete(file_path, no_input=False)\n\n    # The file should still exist after the exit\n    assert file_path.exists()\n```",
+        "reasoning": "We need tests for prompt_and_delete. It uses read_user_yes_no which is not defined here; likely imported from somewhere? Not in code. Might be missing. But we can test behavior by mocking read_user_yes_no? But cannot mock target. We can test no_input True path: should delete file or dir. Use tmp_path to create file and dir. Ensure deletion. Also test when ok_to_delete False and ok_to_reuse True: returns False. But need to simulate read_user_yes_no responses. Since cannot mock, maybe we can monkeypatch by temporarily setting global read_user_yes_no in module. That's allowed? It's part of target. We can assign. That's not mocking the target function but modifying global. It's allowed. We'll patch in test. Use context manager. Also test sys.exit path: when both false, should exit. Use pytest.raises(SystemExit). We'll patch read_user_yes_no to return False twice. Ensure exit. Let's write three tests: test_no_input_deletes_file, test_reuse_returns_false, test_exit_on_no_reuse."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051740422,
+    "prompt_tokens": 569,
+    "prompt_time": 0.029109357,
+    "completion_tokens": 768,
+    "completion_time": 0.848451409,
+    "total_tokens": 1337,
+    "total_time": 0.877560766,
+    "completion_tokens_details": {
+      "reasoning_tokens": 216
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7se5htre8drq7wy8wxwtrjj",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport builtins\nimport types\nimport pytest\nfrom pathlib import Path\n\n# Import the target function and its module\nfrom cookiecutter.prompt import prompt_and_delete, read_user_yes_no\n\n\ndef test_no_input_deletes_file(tmp_path):\n    \"\"\"When no_input is True, the function should delete the file and return True.\"\"\"\n    # Create a temporary file\n    file_path = tmp_path / \"temp.txt\"\n    file_path.write_text(\"content\")\n\n    # Ensure the file exists before calling\n    assert file_path.exists()\n\n    # Call the function with no_input=True\n    result = prompt_and_delete(file_path, no_input=True)\n\n    # The function should return True and the file should be removed\n    assert result is True\n    assert not file_path.exists()\n\n\ndef test_reuse_returns_false(tmp_path, monkeypatch):\n    \"\"\"When the user declines deletion but accepts reuse, the function should return False.\"\"\"\n    # Create a temporary directory\n    dir_path = tmp_path / \"temp_dir\"\n    dir_path.mkdir()\n\n    # Ensure the directory exists before calling\n    assert dir_path.exists()\n\n    # Patch read_user_yes_no to simulate user responses:\n    # first call (delete prompt) returns False, second call (reuse prompt) returns True\n    responses = iter([False, True])\n    monkeypatch.setattr(\n        \"cookiecutter.prompt.read_user_yes_no\",\n        lambda *args, **kwargs: next(responses),\n    )\n\n    # Call the function with no_input=False (default)\n    result = prompt_and_delete(dir_path, no_input=False)\n\n    # The function should return False and the directory should remain\n    assert result is False\n    assert dir_path.exists()\n\n\ndef test_exit_on_no_reuse(tmp_path, monkeypatch):\n    \"\"\"When the user declines both deletion and reuse, the function should exit.\"\"\"\n    # Create a temporary file\n    file_path = tmp_path / \"temp.txt\"\n    file_path.write_text(\"content\")\n\n    # Ensure the file exists before calling\n    assert file_path.exists()\n\n    # Patch read_user_yes_no to simulate user responses:\n    # first call (delete prompt) returns False, second call (reuse prompt) returns False\n    responses = iter([False, False])\n    monkeypatch.setattr(\n        \"cookiecutter.prompt.read_user_yes_no\",\n        lambda *args, **kwargs: next(responses),\n    )\n\n    # The function should raise SystemExit\n    with pytest.raises(SystemExit):\n        prompt_and_delete(file_path, no_input=False)\n\n    # The file should still exist after the exit\n    assert file_path.exists()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.202275918039959
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-cdc9fcf9-df0c-47e3-b4a2-552dff05e597",
+  "object": "chat.completion",
+  "created": 1795076596,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport pytest\nfrom pathlib import Path\nfrom jinja2 import Environment\nfrom cookiecutter.prompt import prompt_choice_for_config, render_variable\n\n# Helper to create a minimal cookiecutter dict and Jinja2 environment\n@pytest.fixture\ndef env_and_dict(tmp_path: Path):\n    env = Environment()\n    cookiecutter_dict = {\"project_name\": \"Test Project\"}\n    return env, cookiecutter_dict\n\ndef test_prompt_choice_for_config_no_input_returns_first_rendered(env_and_dict):\n    env, cookiecutter_dict = env_and_dict\n    # Options contain Jinja2 expressions that refer to cookiecutter variables\n    options = [\"{{ cookiecutter.project_name }}\", \"{{ cookiecutter.project_name | lower }}\"]\n    result = prompt_choice_for_config(\n        cookiecutter_dict,\n        env,\n        key=\"project_name\",\n        options=options,\n        no_input=True,\n        prompts=None,\n        prefix=\"\",\n    )\n    # The first rendered option should be the original project name\n    assert result == \"Test Project\"\n\ndef test_prompt_choice_for_config_no_input_empty_options_raises(env_and_dict):\n    env, cookiecutter_dict = env_and_dict\n    options = []\n    with pytest.raises(ValueError, match=\"The list of choices is empty\"):\n        prompt_choice_for_config(\n            cookiecutter_dict,\n            env,\n            key=\"project_name\",\n            options=options,\n            no_input=True,\n            prompts=None,\n            prefix=\"\",\n        )\n\ndef test_render_variable_handles_nested_structures(env_and_dict):\n    env, cookiecutter_dict = env_and_dict\n    # Nested dict and list with Jinja2 expressions\n    raw = {\n        \"name\": \"{{ cookiecutter.project_name }}\",\n        \"tags\": [\"{{ cookiecutter.project_name }}\", \"demo\"],\n        \"config\": {\"enabled\": True, \"path\": \"{{ cookiecutter.project_name | replace(' ', '_') }}\"},\n    }\n    rendered = render_variable(env, raw, cookiecutter_dict)\n    assert isinstance(rendered, dict)\n    assert rendered[\"name\"] == \"Test Project\"\n    assert rendered[\"tags\"] == [\"Test Project\", \"demo\"]\n    assert rendered[\"config\"][\"path\"] == \"Test_Project\"\n    assert rendered[\"config\"][\"enabled\"] is True\n```",
+        "reasoning": "Need tests for prompt_choice_for_config. Use tmp_path to create env? We need Jinja2 Environment. Use from jinja2 import Environment. Test normal: no_input False, prompts provided. But Prompt.ask requires interactive. We can't. So test no_input True path. Also test error when options empty. Also test that rendered_options uses env rendering. Use simple env. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049375988,
+    "prompt_tokens": 1214,
+    "prompt_time": 0.063808016,
+    "completion_tokens": 568,
+    "completion_time": 0.650186206,
+    "total_tokens": 1782,
+    "total_time": 0.713994222,
+    "completion_tokens_details": {
+      "reasoning_tokens": 81
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7see7nkepj90ad8yt8qk40c",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport pytest\nfrom pathlib import Path\nfrom jinja2 import Environment\nfrom cookiecutter.prompt import prompt_choice_for_config, render_variable\n\n# Helper to create a minimal cookiecutter dict and Jinja2 environment\n@pytest.fixture\ndef env_and_dict(tmp_path: Path):\n    env = Environment()\n    cookiecutter_dict = {\"project_name\": \"Test Project\"}\n    return env, cookiecutter_dict\n\ndef test_prompt_choice_for_config_no_input_returns_first_rendered(env_and_dict):\n    env, cookiecutter_dict = env_and_dict\n    # Options contain Jinja2 expressions that refer to cookiecutter variables\n    options = [\"{{ cookiecutter.project_name }}\", \"{{ cookiecutter.project_name | lower }}\"]\n    result = prompt_choice_for_config(\n        cookiecutter_dict,\n        env,\n        key=\"project_name\",\n        options=options,\n        no_input=True,\n        prompts=None,\n        prefix=\"\",\n    )\n    # The first rendered option should be the original project name\n    assert result == \"Test Project\"\n\ndef test_prompt_choice_for_config_no_input_empty_options_raises(env_and_dict):\n    env, cookiecutter_dict = env_and_dict\n    options = []\n    with pytest.raises(ValueError, match=\"The list of choices is empty\"):\n        prompt_choice_for_config(\n            cookiecutter_dict,\n            env,\n            key=\"project_name\",\n            options=options,\n            no_input=True,\n            prompts=None,\n            prefix=\"\",\n        )\n\ndef test_render_variable_handles_nested_structures(env_and_dict):\n    env, cookiecutter_dict = env_and_dict\n    # Nested dict and list with Jinja2 expressions\n    raw = {\n        \"name\": \"{{ cookiecutter.project_name }}\",\n        \"tags\": [\"{{ cookiecutter.project_name }}\", \"demo\"],\n        \"config\": {\"enabled\": True, \"path\": \"{{ cookiecutter.project_name | replace(' ', '_') }}\"},\n    }\n    rendered = render_variable(env, raw, cookiecutter_dict)\n    assert isinstance(rendered, dict)\n    assert rendered[\"name\"] == \"Test Project\"\n    assert rendered[\"tags\"] == [\"Test Project\", \"demo\"]\n    assert rendered[\"config\"][\"path\"] == \"Test_Project\"\n    assert rendered[\"config\"][\"enabled\"] is True\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0470006659743376
+}

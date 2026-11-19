@@ -1,0 +1,34 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_handle_import_level_behavior _______________________
+
+    def test_handle_import_level_behavior():
+        mgr = ImportManager()
+        # Normal module path, not an __init__ file
+        mgr.set_current_mod("pkg.subpkg.module", "module.py")
+        # level 1: relative import one level up
+        mod_name, package = mgr._handle_import_level("foo", 1)
+        assert mod_name == ".foo"
+        assert package == "pkg.subpkg"
+    
+        # level 0: absolute import
+        mod_name, package = mgr._handle_import_level("bar", 0)
+        assert mod_name == "bar"
+        assert package == ""
+    
+        # __init__ file case: current module is a package
+        mgr.set_current_mod("pkg.subpkg", os.path.join("pkg", "subpkg", "__init__.py"))
+        mgr.input_file = os.path.abspath(os.path.join("pkg", "subpkg", "__init__.py"))
+        mod_name, package = mgr._handle_import_level("baz", 1)
+        assert mod_name == ".baz"
+>       assert package == "pkg"
+E       AssertionError: assert 'pkg.subpkg' == 'pkg'
+E         
+E         - pkg
+E         + pkg.subpkg
+
+../../scientific_n5_results/pycg_imports/council_enhanced/seed_42/v2_exec/test_run.py:25: AssertionError
+=========================== short test summary info ============================
+FAILED ../../scientific_n5_results/pycg_imports/council_enhanced/seed_42/v2_exec/test_run.py::test_handle_import_level_behavior
+1 failed in 0.10s
+

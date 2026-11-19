@@ -1,0 +1,83 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_raise_exc_info_raises_provided_exception _________________
+
+    def test_raise_exc_info_raises_provided_exception():
+        """raise_exc_info should raise the exception passed in exc_info."""
+        exc_type = ValueError
+        exc_value = ValueError("test error")
+        tb = exc_value.__traceback__
+        exc_info: Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]] = (
+            exc_type,
+            exc_value,
+            tb,
+        )
+        with pytest.raises(ValueError) as excinfo:
+            raise_exc_info(exc_info)
+        # The raised exception should be the same instance
+        assert excinfo.value is exc_value
+        # The traceback should be the one we passed in
+>       assert excinfo.value.__traceback__ is tb
+E       AssertionError: assert <traceback object at 0x7f6b757e5340> is None
+E        +  where <traceback object at 0x7f6b757e5340> = ValueError('test error').__traceback__
+E        +    where ValueError('test error') = <ExceptionInfo ValueError('test error') tblen=2>.value
+
+test_generated.py:24: AssertionError
+__________________ test_raise_exc_info_clears_local_reference __________________
+
+    def test_raise_exc_info_clears_local_reference():
+        """After raise_exc_info returns, the local exc_info reference should be cleared."""
+        exc_type = RuntimeError
+        exc_value = RuntimeError("cleanup test")
+        tb = exc_value.__traceback__
+        exc_info: Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]] = (
+            exc_type,
+            exc_value,
+            tb,
+        )
+        try:
+>           raise_exc_info(exc_info)
+
+test_generated.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+exc_info = (None, None, None)
+
+    def raise_exc_info(
+        exc_info: Tuple[Optional[type], Optional[BaseException], Optional["TracebackType"]],
+    ) -> typing.NoReturn:
+        try:
+            if exc_info[1] is not None:
+>               raise exc_info[1].with_traceback(exc_info[2])
+E               RuntimeError: cleanup test
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/util.py:152: RuntimeError
+
+During handling of the above exception, another exception occurred:
+
+    def test_raise_exc_info_clears_local_reference():
+        """After raise_exc_info returns, the local exc_info reference should be cleared."""
+        exc_type = RuntimeError
+        exc_value = RuntimeError("cleanup test")
+        tb = exc_value.__traceback__
+        exc_info: Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]] = (
+            exc_type,
+            exc_value,
+            tb,
+        )
+        try:
+            raise_exc_info(exc_info)
+        except RuntimeError:
+            # After the exception is raised, the local variable exc_info inside raise_exc_info
+            # should have been set to (None, None, None). We cannot inspect that directly,
+            # but we can confirm that the function does not leak the traceback reference
+            # by ensuring that the traceback of the caught exception is the original one.
+>           assert exc_value.__traceback__ is tb
+E           AssertionError: assert <traceback object at 0x7f6b75eb8f80> is None
+E            +  where <traceback object at 0x7f6b75eb8f80> = RuntimeError('cleanup test').__traceback__
+
+test_generated.py:56: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_raise_exc_info_raises_provided_exception - Ass...
+FAILED test_generated.py::test_raise_exc_info_clears_local_reference - Assert...
+2 failed, 1 passed in 0.16s

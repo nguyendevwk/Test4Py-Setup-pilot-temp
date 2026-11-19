@@ -1,0 +1,39 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_base_transformer_no_change ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/py-backwards__py_backwards.transformers.base__BaseNodeTransformer__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_base_transformer_no_chang0')
+
+    def test_base_transformer_no_change(tmp_path):
+        src = "x = 1\nprint(x)"
+        tree = parse_source(src)
+        result: TransformationResult = BaseNodeTransformer.transform(tree)
+        # The tree should be the same object
+        assert result.tree is tree
+        # No changes should be reported
+>       assert result.changed is False
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:19: AttributeError
+_________________________ test_subclass_modifies_node __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/py-backwards__py_backwards.transformers.base__BaseNodeTransformer__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_subclass_modifies_node0')
+
+    def test_subclass_modifies_node(tmp_path):
+        class IncrementTransformer(BaseNodeTransformer):
+            def visit_Name(self, node: typed_ast.Name):
+                # Replace every name with a constant 42
+                return typed_ast.Constant(value=42, kind=None)
+    
+        src = "a = b + c"
+        tree = parse_source(src)
+        result: TransformationResult = IncrementTransformer.transform(tree)
+        # The tree should be modified
+>       assert result.changed is True
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:34: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_base_transformer_no_change - AttributeError: '...
+FAILED test_generated.py::test_subclass_modifies_node - AttributeError: 'Tran...
+2 failed, 1 passed in 0.15s

@@ -1,0 +1,104 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_bundled_and_user_paths __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.corrector__get_rules_import_paths__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_bundled_and_user_paths0')
+restore_sys_path = None, restore_user_dir = None
+
+    def test_bundled_and_user_paths(tmp_path, restore_sys_path, restore_user_dir):
+        """The first two yielded paths are the bundled rules directory and the user rules directory."""
+        # Set user_dir to a temporary directory
+        settings.user_dir = tmp_path
+    
+        # Call the generator and collect results
+        paths = list(get_rules_import_paths())
+    
+        # The bundled rules path should be a subdirectory of this module's directory
+        bundled = Path(__file__).parent.joinpath('rules')
+>       assert paths[0] == bundled
+E       AssertionError: assert PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules') == PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.corrector__get_rules_import_paths__71__source/eval0/rules')
+
+test_generated.py:39: AssertionError
+___________________________ test_contrib_with_rules ____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.corrector__get_rules_import_paths__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_contrib_with_rules0')
+restore_sys_path = None, restore_user_dir = None
+
+    def test_contrib_with_rules(tmp_path, restore_sys_path, restore_user_dir):
+        """Contrib modules that contain a 'rules' subdirectory are yielded."""
+        # Create a dummy contrib module directory with a 'rules' subdirectory
+        contrib_dir = tmp_path / "thefuck_contrib_example"
+        contrib_dir.mkdir()
+        rules_dir = contrib_dir / "rules"
+        rules_dir.mkdir()
+    
+        # Add the temporary directory to sys.path
+        sys.path.insert(0, str(tmp_path))
+    
+        # Call the generator and collect results
+>       paths = list(get_rules_import_paths())
+
+test_generated.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_rules_import_paths():
+        """Yields all rules import paths.
+    
+        :rtype: Iterable[Path]
+    
+        """
+        # Bundled rules:
+        yield Path(__file__).parent.joinpath('rules')
+        # Rules defined by user:
+>       yield settings.user_dir.joinpath('rules')
+E       AttributeError: 'NoneType' object has no attribute 'joinpath'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:31: AttributeError
+__________________________ test_contrib_without_rules __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.corrector__get_rules_import_paths__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_contrib_without_rules0')
+restore_sys_path = None, restore_user_dir = None
+
+    def test_contrib_without_rules(tmp_path, restore_sys_path, restore_user_dir):
+        """Contrib modules without a 'rules' subdirectory are not yielded."""
+        # Create a dummy contrib module directory without a 'rules' subdirectory
+        contrib_dir = tmp_path / "thefuck_contrib_norules"
+        contrib_dir.mkdir()
+    
+        # Add the temporary directory to sys.path
+        sys.path.insert(0, str(tmp_path))
+    
+        # Call the generator and collect results
+>       paths = list(get_rules_import_paths())
+
+test_generated.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_rules_import_paths():
+        """Yields all rules import paths.
+    
+        :rtype: Iterable[Path]
+    
+        """
+        # Bundled rules:
+        yield Path(__file__).parent.joinpath('rules')
+        # Rules defined by user:
+>       yield settings.user_dir.joinpath('rules')
+E       AttributeError: 'NoneType' object has no attribute 'joinpath'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:31: AttributeError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_bundled_and_user_paths - AssertionError: asser...
+FAILED test_generated.py::test_contrib_with_rules - AttributeError: 'NoneType...
+FAILED test_generated.py::test_contrib_without_rules - AttributeError: 'NoneT...
+3 failed, 2 warnings in 0.54s

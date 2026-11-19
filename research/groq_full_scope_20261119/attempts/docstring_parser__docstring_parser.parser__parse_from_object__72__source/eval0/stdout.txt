@@ -1,0 +1,76 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+__________ test_parse_from_object_with_class_and_attribute_docstrings __________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_from_object_with_cl0')
+
+    def test_parse_from_object_with_class_and_attribute_docstrings(tmp_path):
+        """Verify that attribute docstrings are added to a class."""
+        # Create a temporary module file with a class that has an attribute docstring
+        module_code = textwrap.dedent(
+            """
+            class MyClass:
+                \"\"\"Class docstring.\"\"\"
+    
+                my_attr = 42
+                \"\"\"The value of my_attr.\n\n            :type: int\"\"\"
+            """
+        )
+        module_path = tmp_path / "mymodule.py"
+        module_path.write_text(module_code)
+    
+        # Import the module
+        spec = importlib.util.spec_from_file_location("mymodule", module_path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules["mymodule"] = module
+        spec.loader.exec_module(module)
+    
+        # Parse the class
+        doc = parse_from_object(module.MyClass, style=DocstringStyle.AUTO)
+    
+        # The class docstring should be parsed
+        assert doc.short_description == "Class docstring."
+        # The attribute docstring should be present in the parsed attributes
+>       attr_docs = {a.name: a for a in doc.attributes}
+E       AttributeError: 'Docstring' object has no attribute 'attributes'
+
+test_generated.py:42: AttributeError
+___________ test_parse_from_object_invalid_style_raises_parse_error ____________
+
+    def test_parse_from_object_invalid_style_raises_parse_error():
+        """Passing an unsupported style should raise ParseError."""
+        # Define a simple function with a docstring
+        def dummy():
+            """Just a docstring."""
+            pass
+    
+        # Attempt to parse with an invalid style (not part of DocstringStyle enum)
+        with pytest.raises(ParseError):
+>           parse_from_object(dummy, style="invalid_style")  # type: ignore[arg-type]
+
+test_generated.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/parser.py:74: in parse_from_object
+    docstring = parse(obj.__doc__, style=style)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = 'Just a docstring.', style = 'invalid_style'
+
+    def parse(
+        text: T.Optional[str], style: DocstringStyle = DocstringStyle.AUTO
+    ) -> Docstring:
+        """Parse the docstring into its components.
+    
+        :param text: docstring text to parse
+        :param style: docstring style
+        :returns: parsed docstring representation
+        """
+        if style != DocstringStyle.AUTO:
+>           return _STYLE_MAP[style].parse(text)
+E           KeyError: 'invalid_style'
+
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/parser.py:33: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_from_object_with_class_and_attribute_docstrings
+FAILED test_generated.py::test_parse_from_object_invalid_style_raises_parse_error
+2 failed, 1 passed in 0.17s

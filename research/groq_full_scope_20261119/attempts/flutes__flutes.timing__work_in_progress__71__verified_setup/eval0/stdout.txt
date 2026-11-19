@@ -1,0 +1,41 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_work_in_progress_normal _________________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7fa56192c6d0>
+
+    def test_work_in_progress_normal(capsys):
+        """Verify that the context manager prints the start and end messages
+        and measures a non‑negative duration."""
+        with work_in_progress("Test task"):
+            time.sleep(0.01)
+        out, err = capsys.readouterr()
+        # The output should contain the description, ellipsis, and the done message
+        assert "Test task... " in out
+        assert "done. (" in out
+        # The duration should be at least 0.01 seconds
+        duration_str = out.split("done. (")[1].rstrip("s)")
+>       duration = float(duration_str)
+E       ValueError: could not convert string to float: '0.01s)\n'
+
+test_generated.py:17: ValueError
+_______________________ test_work_in_progress_zero_sleep _______________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7fa56192ffa0>
+
+    def test_work_in_progress_zero_sleep(capsys):
+        """Boundary case: no sleep, duration should be very small but non‑negative."""
+        with work_in_progress("Zero sleep"):
+            pass
+        out, err = capsys.readouterr()
+        assert "Zero sleep... " in out
+        assert "done. (" in out
+        duration_str = out.split("done. (")[1].rstrip("s)")
+>       duration = float(duration_str)
+E       ValueError: could not convert string to float: '0.00s)\n'
+
+test_generated.py:29: ValueError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_work_in_progress_normal - ValueError: could no...
+FAILED test_generated.py::test_work_in_progress_zero_sleep - ValueError: coul...
+2 failed, 1 passed in 0.15s

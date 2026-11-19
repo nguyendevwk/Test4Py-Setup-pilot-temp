@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-18bb5c70-49bd-478c-a4b5-e6fbd108df44",
+  "object": "chat.completion",
+  "created": 1795078748,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport os\nimport tempfile\nimport shutil\nimport pytest\nfrom tornado.log import define_logging_options, enable_pretty_logging\nfrom tornado.options import Options\n\n# Helper to create a fresh Options instance with no side effects\ndef fresh_options():\n    return Options()\n\ndef test_size_rotation_handler(tmp_path):\n    opts = fresh_options()\n    define_logging_options(opts)\n    # Configure options for size rotation\n    opts.logging = \"debug\"\n    opts.log_file_prefix = str(tmp_path / \"logfile.log\")\n    opts.log_file_max_size = 1024  # small size for test\n    opts.log_file_num_backups = 2\n    opts.log_rotate_mode = \"size\"\n    opts.log_to_stderr = False\n\n    enable_pretty_logging(opts)\n    logger = logging.getLogger()\n    # Find the RotatingFileHandler\n    file_handler = next(\n        (h for h in logger.handlers if isinstance(h, logging.handlers.RotatingFileHandler)),\n        None,\n    )\n    assert file_handler is not None, \"RotatingFileHandler not added\"\n    assert file_handler.baseFilename == opts.log_file_prefix\n    assert file_handler.maxBytes == opts.log_file_max_size\n    assert file_handler.backupCount == opts.log_file_num_backups\n    # Clean up handlers\n    logger.handlers.clear()\n\ndef test_time_rotation_handler(tmp_path):\n    opts = fresh_options()\n    define_logging_options(opts)\n    # Configure options for time rotation\n    opts.logging = \"info\"\n    opts.log_file_prefix = str(tmp_path / \"time.log\")\n    opts.log_rotate_mode = \"time\"\n    opts.log_rotate_when = \"S\"  # rotate every second\n    opts.log_rotate_interval = 1\n    opts.log_file_num_backups = 1\n    opts.log_to_stderr = False\n\n    enable_pretty_logging(opts)\n    logger = logging.getLogger()\n    # Find the TimedRotatingFileHandler\n    time_handler = next(\n        (h for h in logger.handlers if isinstance(h, logging.handlers.TimedRotatingFileHandler)),\n        None,\n    )\n    assert time_handler is not None, \"TimedRotatingFileHandler not added\"\n    assert time_handler.baseFilename == opts.log_file_prefix\n    assert time_handler.when == opts.log_rotate_when\n    assert time_handler.interval == opts.log_rotate_interval\n    assert time_handler.backupCount == opts.log_file_num_backups\n    # Clean up handlers\n    logger.handlers.clear()\n\ndef test_invalid_rotate_mode_raises():\n    opts = fresh_options()\n    define_logging_options(opts)\n    opts.logging = \"warning\"\n    opts.log_file_prefix = \"/dev/null\"  # dummy path\n    opts.log_rotate_mode = \"invalid_mode\"\n    opts.log_to_stderr = False\n\n    with pytest.raises(ValueError) as excinfo:\n        enable_pretty_logging(opts)\n    assert \"The value of log_rotate_mode option should be\" in str(excinfo.value)\n```",
+        "reasoning": "Need tests for define_logging_options and enable_pretty_logging. Use tmp_path for file. Test that options defined, and that enable_pretty_logging raises ValueError for invalid mode. Also test that log_to_stderr adds handler. Use tornado.options? We'll import tornado.options and use a fresh Options? Use tornado.options.Options? We can create a new Options instance via tornado.options.Options() but not sure. Simpler: use tornado.options.Options() to create local options. Then call define_logging_options on it. Then set values and call enable_pretty_logging. Check handlers. Test 1: normal size rotation. Test 2: time rotation. Test 3: invalid mode raises ValueError. Use tmp_path for file prefix. Ensure no real files? RotatingFileHandler will create file. Use tmp_path. After test, remove handlers. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052674653,
+    "prompt_tokens": 1179,
+    "prompt_time": 0.070158197,
+    "completion_tokens": 793,
+    "completion_time": 0.885170003,
+    "total_tokens": 1972,
+    "total_time": 0.9553282,
+    "completion_tokens_details": {
+      "reasoning_tokens": 174
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgfxj5edyrk3jvrapt7arr",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport os\nimport tempfile\nimport shutil\nimport pytest\nfrom tornado.log import define_logging_options, enable_pretty_logging\nfrom tornado.options import Options\n\n# Helper to create a fresh Options instance with no side effects\ndef fresh_options():\n    return Options()\n\ndef test_size_rotation_handler(tmp_path):\n    opts = fresh_options()\n    define_logging_options(opts)\n    # Configure options for size rotation\n    opts.logging = \"debug\"\n    opts.log_file_prefix = str(tmp_path / \"logfile.log\")\n    opts.log_file_max_size = 1024  # small size for test\n    opts.log_file_num_backups = 2\n    opts.log_rotate_mode = \"size\"\n    opts.log_to_stderr = False\n\n    enable_pretty_logging(opts)\n    logger = logging.getLogger()\n    # Find the RotatingFileHandler\n    file_handler = next(\n        (h for h in logger.handlers if isinstance(h, logging.handlers.RotatingFileHandler)),\n        None,\n    )\n    assert file_handler is not None, \"RotatingFileHandler not added\"\n    assert file_handler.baseFilename == opts.log_file_prefix\n    assert file_handler.maxBytes == opts.log_file_max_size\n    assert file_handler.backupCount == opts.log_file_num_backups\n    # Clean up handlers\n    logger.handlers.clear()\n\ndef test_time_rotation_handler(tmp_path):\n    opts = fresh_options()\n    define_logging_options(opts)\n    # Configure options for time rotation\n    opts.logging = \"info\"\n    opts.log_file_prefix = str(tmp_path / \"time.log\")\n    opts.log_rotate_mode = \"time\"\n    opts.log_rotate_when = \"S\"  # rotate every second\n    opts.log_rotate_interval = 1\n    opts.log_file_num_backups = 1\n    opts.log_to_stderr = False\n\n    enable_pretty_logging(opts)\n    logger = logging.getLogger()\n    # Find the TimedRotatingFileHandler\n    time_handler = next(\n        (h for h in logger.handlers if isinstance(h, logging.handlers.TimedRotatingFileHandler)),\n        None,\n    )\n    assert time_handler is not None, \"TimedRotatingFileHandler not added\"\n    assert time_handler.baseFilename == opts.log_file_prefix\n    assert time_handler.when == opts.log_rotate_when\n    assert time_handler.interval == opts.log_rotate_interval\n    assert time_handler.backupCount == opts.log_file_num_backups\n    # Clean up handlers\n    logger.handlers.clear()\n\ndef test_invalid_rotate_mode_raises():\n    opts = fresh_options()\n    define_logging_options(opts)\n    opts.logging = \"warning\"\n    opts.log_file_prefix = \"/dev/null\"  # dummy path\n    opts.log_rotate_mode = \"invalid_mode\"\n    opts.log_to_stderr = False\n\n    with pytest.raises(ValueError) as excinfo:\n        enable_pretty_logging(opts)\n    assert \"The value of log_rotate_mode option should be\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3646636650082655
+}

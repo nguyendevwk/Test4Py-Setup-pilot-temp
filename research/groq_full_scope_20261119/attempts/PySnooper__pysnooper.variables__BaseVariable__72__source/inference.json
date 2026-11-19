@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-edc07feb-4cfd-4500-860e-0ec872a5a13e",
+  "object": "chat.completion",
+  "created": 1795077585,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport types\nfrom pysnooper import variables\n\n# Minimal concrete implementation of BaseVariable for testing\nclass DummyVariable(variables.BaseVariable):\n    def _items(self, key, normalize=False):\n        # Return a single item tuple for demonstration\n        return ((key, key),)\n\ndef test_items_success(tmp_path):\n    # Create a dummy variable that evaluates to a string\n    var = DummyVariable(\"'hello world'\")\n    # Build a frame with globals and locals that the eval will use\n    frame = types.FrameType(\n        None, None, None, None, {}, {}, None, None, None, None, None, None, None\n    )\n    # The eval should succeed and return the string\n    result = var.items(frame)\n    assert result == ((\"hello world\", \"hello world\"),)\n\ndef test_items_exception():\n    # Source that raises ZeroDivisionError when evaluated\n    var = DummyVariable(\"1/0\")\n    frame = types.FrameType(\n        None, None, None, None, {}, {}, None, None, None, None, None, None, None\n    )\n    # items should return an empty tuple on exception\n    assert var.items(frame) == ()\n\ndef test_equality_and_hash():\n    var1 = DummyVariable(\"x\", exclude=('y',))\n    var2 = DummyVariable(\"x\", exclude=('y',))\n    var3 = DummyVariable(\"x\", exclude=('z',))\n    # Equality based on fingerprint\n    assert var1 == var2\n    assert var1 != var3\n    # Hash consistency\n    assert hash(var1) == hash(var2)\n    assert hash(var1) != hash(var3)\n```",
+        "reasoning": "Need tests for BaseVariable. But it's abstract; need concrete subclass. Maybe there is one in module? Not provided. We can create a minimal subclass in test to test behavior. Use utils.ensure_tuple? We can't import utils? It's in same package. We'll import from pysnooper.variables. We'll create subclass SimpleVariable that returns items as list of (key, value). For testing items method. Also test fingerprint equality, hash. Use tmp_path? Not needed. Provide three tests: test_items_success, test_items_exception, test_equality_hash. Use pytest.raises? For exception test, we can pass source that raises error. Use source '1/0'. Ensure items returns empty tuple. Also test exclude tuple conversion. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.446683291,
+    "prompt_tokens": 461,
+    "prompt_time": 0.029537455,
+    "completion_tokens": 510,
+    "completion_time": 0.571323582,
+    "total_tokens": 971,
+    "total_time": 0.600861037,
+    "completion_tokens_details": {
+      "reasoning_tokens": 150
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfcdvne4z83c5tbr1vz7fg",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport types\nfrom pysnooper import variables\n\n# Minimal concrete implementation of BaseVariable for testing\nclass DummyVariable(variables.BaseVariable):\n    def _items(self, key, normalize=False):\n        # Return a single item tuple for demonstration\n        return ((key, key),)\n\ndef test_items_success(tmp_path):\n    # Create a dummy variable that evaluates to a string\n    var = DummyVariable(\"'hello world'\")\n    # Build a frame with globals and locals that the eval will use\n    frame = types.FrameType(\n        None, None, None, None, {}, {}, None, None, None, None, None, None, None\n    )\n    # The eval should succeed and return the string\n    result = var.items(frame)\n    assert result == ((\"hello world\", \"hello world\"),)\n\ndef test_items_exception():\n    # Source that raises ZeroDivisionError when evaluated\n    var = DummyVariable(\"1/0\")\n    frame = types.FrameType(\n        None, None, None, None, {}, {}, None, None, None, None, None, None, None\n    )\n    # items should return an empty tuple on exception\n    assert var.items(frame) == ()\n\ndef test_equality_and_hash():\n    var1 = DummyVariable(\"x\", exclude=('y',))\n    var2 = DummyVariable(\"x\", exclude=('y',))\n    var3 = DummyVariable(\"x\", exclude=('z',))\n    # Equality based on fingerprint\n    assert var1 == var2\n    assert var1 != var3\n    # Hash consistency\n    assert hash(var1) == hash(var2)\n    assert hash(var1) != hash(var3)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.350118100992404
+}

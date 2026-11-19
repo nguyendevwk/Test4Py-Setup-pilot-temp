@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-20ad18c4-f227-4f5d-a98b-7a510922ee13",
+  "object": "chat.completion",
+  "created": 1795079540,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport zlib\nimport pytest\nfrom tornado.util import GzipDecompressor\n\n\ndef test_normal_decompression(tmp_path):\n    # Create a gzip-compressed byte string\n    original = b\"Hello, world! \" * 10\n    compressor = zlib.compressobj(level=9, method=zlib.DEFLATED,\n                                  wbits=16 + zlib.MAX_WBITS)\n    compressed = compressor.compress(original) + compressor.flush()\n\n    # Decompress using GzipDecompressor\n    decompressor = GzipDecompressor()\n    chunk = decompressor.decompress(compressed)\n    assert chunk == original\n    assert decompressor.unconsumed_tail == b\"\"\n    assert decompressor.flush() == b\"\"\n\n\ndef test_max_length_boundary(tmp_path):\n    # Compress a known string\n    original = b\"Boundary test data\" * 5\n    compressor = zlib.compressobj(level=6, method=zlib.DEFLATED,\n                                  wbits=16 + zlib.MAX_WBITS)\n    compressed = compressor.compress(original) + compressor.flush()\n\n    # Decompress with a small max_length to force unconsumed_tail\n    decompressor = GzipDecompressor()\n    first_part = decompressor.decompress(compressed, max_length=10)\n    assert first_part == original[:10]\n    tail = decompressor.unconsumed_tail\n    assert tail != b\"\"\n    # Feed the remaining tail\n    second_part = decompressor.decompress(tail)\n    assert second_part == original[10:]\n    assert decompressor.unconsumed_tail == b\"\"\n    assert decompressor.flush() == b\"\"\n\n\ndef test_truncated_input_raises(tmp_path):\n    # Create a gzip stream and truncate it\n    original = b\"Truncated data test\"\n    compressor = zlib.compressobj(level=6, method=zlib.DEFLATED,\n                                  wbits=16 + zlib.MAX_WBITS)\n    compressed = compressor.compress(original) + compressor.flush()\n    truncated = compressed[:-5]  # remove last 5 bytes\n\n    decompressor = GzipDecompressor()\n    decompressor.decompress(truncated)\n    with pytest.raises(zlib.error):\n        decompressor.flush()\n```",
+        "reasoning": "We need 3 tests. Test normal decompression, boundary max_length, error truncated. Use tmp_path to create gzip file? We can compress data using zlib with gzip header. Use zlib.compressobj(16+MAX_WBITS). Test decompress returns original. Boundary: decompress with max_length small to force unconsumed_tail. Error: feed incomplete gzip data and expect exception on flush. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004819325,
+    "prompt_tokens": 637,
+    "prompt_time": 0.010328899,
+    "completion_tokens": 549,
+    "completion_time": 0.805191736,
+    "total_tokens": 1186,
+    "total_time": 0.815520635,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 84
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh82qyeb28fr4sjayaw19z",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport zlib\nimport pytest\nfrom tornado.util import GzipDecompressor\n\n\ndef test_normal_decompression(tmp_path):\n    # Create a gzip-compressed byte string\n    original = b\"Hello, world! \" * 10\n    compressor = zlib.compressobj(level=9, method=zlib.DEFLATED,\n                                  wbits=16 + zlib.MAX_WBITS)\n    compressed = compressor.compress(original) + compressor.flush()\n\n    # Decompress using GzipDecompressor\n    decompressor = GzipDecompressor()\n    chunk = decompressor.decompress(compressed)\n    assert chunk == original\n    assert decompressor.unconsumed_tail == b\"\"\n    assert decompressor.flush() == b\"\"\n\n\ndef test_max_length_boundary(tmp_path):\n    # Compress a known string\n    original = b\"Boundary test data\" * 5\n    compressor = zlib.compressobj(level=6, method=zlib.DEFLATED,\n                                  wbits=16 + zlib.MAX_WBITS)\n    compressed = compressor.compress(original) + compressor.flush()\n\n    # Decompress with a small max_length to force unconsumed_tail\n    decompressor = GzipDecompressor()\n    first_part = decompressor.decompress(compressed, max_length=10)\n    assert first_part == original[:10]\n    tail = decompressor.unconsumed_tail\n    assert tail != b\"\"\n    # Feed the remaining tail\n    second_part = decompressor.decompress(tail)\n    assert second_part == original[10:]\n    assert decompressor.unconsumed_tail == b\"\"\n    assert decompressor.flush() == b\"\"\n\n\ndef test_truncated_input_raises(tmp_path):\n    # Create a gzip stream and truncate it\n    original = b\"Truncated data test\"\n    compressor = zlib.compressobj(level=6, method=zlib.DEFLATED,\n                                  wbits=16 + zlib.MAX_WBITS)\n    compressed = compressor.compress(original) + compressor.flush()\n    truncated = compressed[:-5]  # remove last 5 bytes\n\n    decompressor = GzipDecompressor()\n    decompressor.decompress(truncated)\n    with pytest.raises(zlib.error):\n        decompressor.flush()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "d9d32c0c654242e791f38ba84e40a5e6",
+  "_api_plus_pacing_seconds": 1.5709341549663804
+}

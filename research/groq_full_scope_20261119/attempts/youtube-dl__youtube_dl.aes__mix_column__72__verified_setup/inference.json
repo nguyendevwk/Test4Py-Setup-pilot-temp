@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-36b29278-39c2-476b-ad6a-f8568715347d",
+  "object": "chat.completion",
+  "created": 1795079476,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.aes import mix_column\n\ndef test_mix_column_known_example():\n    # Standard AES mix column matrix\n    matrix = [\n        [0x02, 0x03, 0x01, 0x01],\n        [0x01, 0x02, 0x03, 0x01],\n        [0x01, 0x01, 0x02, 0x03],\n        [0x03, 0x01, 0x01, 0x02],\n    ]\n    data = [0x87, 0xF2, 0x4D, 0x97]\n    expected = [0xFE, 0x6A, 0xE5, 0xF5]\n    result = mix_column(data, matrix)\n    assert result == expected, f\"Expected {expected}, got {result}\"\n\ndef test_mix_column_zero_and_all_ones():\n    # Zero data with any matrix should yield zeros\n    zero_matrix = [[0, 0, 0, 0] for _ in range(4)]\n    zero_data = [0, 0, 0, 0]\n    assert mix_column(zero_data, zero_matrix) == [0, 0, 0, 0]\n\n    # All 0xFF data with matrix of all ones should yield all 0xFF\n    ones_matrix = [[1, 1, 1, 1] for _ in range(4)]\n    ff_data = [0xFF, 0xFF, 0xFF, 0xFF]\n    assert mix_column(ff_data, ones_matrix) == [0xFF, 0xFF, 0xFF, 0xFF]\n\ndef test_mix_column_invalid_input():\n    # Data list too short should raise IndexError\n    matrix = [[1, 1, 1, 1] for _ in range(4)]\n    short_data = [0x01, 0x02, 0x03]  # only 3 elements\n    with pytest.raises(IndexError):\n        mix_column(short_data, matrix)\n\n    # Matrix row too short should raise IndexError\n    bad_matrix = [[1, 1, 1] for _ in range(4)]  # each row has only 3 elements\n    data = [0x01, 0x02, 0x03, 0x04]\n    with pytest.raises(IndexError):\n        mix_column(data, bad_matrix)\n```",
+        "reasoning": "We need to test mix_column. We need to import from youtube_dl.aes. Let's inspect expected behavior: mix_column takes data list of 4 ints and matrix 4x4 ints. It multiplies each data[column] by matrix[row][column] using rijndael_mul (from same module). We need to test normal, boundary, error. We can test with known AES mix column matrix. Use known example: data [0x87,0xF2,0x4D,0x97] and matrix standard mix column. The result should be [0xFE,0x6A,0xE5,0xF5] maybe? Let's quickly compute? Standard mix column matrix: [[2,3,1,1],[1,2,3,1],[1,1,2,3],[3,1,1,2]] in hex. Using that, known example from AES spec: input [0x87,0xF2,0x4D,0x97] output [0xFE,0x6A,0xE5,0xF5]. Yes. So test that.\n\nBoundary: test with zeros matrix and data all zeros -> output zeros. Also test with data values 0xFF and matrix all 1s: multiplication of 0xFF by 1 in GF(2^8) is 0xFF. So output all 0xFF.\n\nError: test passing data length not 4 should raise? The function doesn't check length, but will index out of range. So we can test that passing data length 3 raises IndexError. Use pytest.raises(IndexError). Also matrix wrong shape? It will index matrix[row][column] but if matrix row shorter, IndexError. So test that.\n\nWe need to import mix_column and rijndael_mul? Only mix_column. But we need to compute expected output using known values. We'll just assert equality.\n\nImplement three test functions: test_mix_column_known, test_mix_column_zero, test_mix_column_error.\n\nUse tmp_path? Not needed. But requirement says temporary files must use tmp_path. Not needed.\n\nReturn code block."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004532405,
+    "prompt_tokens": 324,
+    "prompt_time": 0.005587088,
+    "completion_tokens": 996,
+    "completion_time": 1.08894214,
+    "total_tokens": 1320,
+    "total_time": 1.094529228,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 447
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh63qge91awmqczaj96k5z",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.aes import mix_column\n\ndef test_mix_column_known_example():\n    # Standard AES mix column matrix\n    matrix = [\n        [0x02, 0x03, 0x01, 0x01],\n        [0x01, 0x02, 0x03, 0x01],\n        [0x01, 0x01, 0x02, 0x03],\n        [0x03, 0x01, 0x01, 0x02],\n    ]\n    data = [0x87, 0xF2, 0x4D, 0x97]\n    expected = [0xFE, 0x6A, 0xE5, 0xF5]\n    result = mix_column(data, matrix)\n    assert result == expected, f\"Expected {expected}, got {result}\"\n\ndef test_mix_column_zero_and_all_ones():\n    # Zero data with any matrix should yield zeros\n    zero_matrix = [[0, 0, 0, 0] for _ in range(4)]\n    zero_data = [0, 0, 0, 0]\n    assert mix_column(zero_data, zero_matrix) == [0, 0, 0, 0]\n\n    # All 0xFF data with matrix of all ones should yield all 0xFF\n    ones_matrix = [[1, 1, 1, 1] for _ in range(4)]\n    ff_data = [0xFF, 0xFF, 0xFF, 0xFF]\n    assert mix_column(ff_data, ones_matrix) == [0xFF, 0xFF, 0xFF, 0xFF]\n\ndef test_mix_column_invalid_input():\n    # Data list too short should raise IndexError\n    matrix = [[1, 1, 1, 1] for _ in range(4)]\n    short_data = [0x01, 0x02, 0x03]  # only 3 elements\n    with pytest.raises(IndexError):\n        mix_column(short_data, matrix)\n\n    # Matrix row too short should raise IndexError\n    bad_matrix = [[1, 1, 1] for _ in range(4)]  # each row has only 3 elements\n    data = [0x01, 0x02, 0x03, 0x04]\n    with pytest.raises(IndexError):\n        mix_column(data, bad_matrix)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "f6daa3445aae4f3096bcebfd63f81c26",
+  "_api_plus_pacing_seconds": 2.346930546045769
+}

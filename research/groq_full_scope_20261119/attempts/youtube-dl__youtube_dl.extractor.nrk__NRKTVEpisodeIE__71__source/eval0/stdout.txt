@@ -1,0 +1,47 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_extract_with_json_ld ___________________________
+
+    def test_extract_with_json_ld():
+        """Test extraction when JSON‑LD contains the NRK id."""
+        # Prepare a minimal webpage containing JSON‑LD with @id
+        json_ld = {
+            "@id": "MUHH36005220",
+            "name": "Hellums kro - 2. Kro, krig og kjærlighet",
+            "description": "Some description",
+            "duration": 1563.92,
+            "ageLimit": 6,
+            "episode": "2. Kro, krig og kjærlighet",
+            "series": "Hellums kro"
+        }
+        webpage = f'<script type="application/ld+json">{json.dumps(json_ld)}</script>'
+        extractor = DummyNRKTVEpisodeIE(webpage, json_ld=json_ld)
+        info = extractor._real_extract(
+            'https://tv.nrk.no/serie/hellums-kro/sesong/1/episode/2')
+        assert info['id'] == 'MUHH36005220'
+        assert info['season_number'] == 1
+        assert info['episode_number'] == 2
+>       assert info['title'] == 'Hellums kro - 2. Kro, krig og kjærlighet'
+E       KeyError: 'title'
+
+test_generated.py:54: KeyError
+__________________________ test_extract_with_meta_tag __________________________
+
+    def test_extract_with_meta_tag():
+        """Test extraction when JSON‑LD is missing but meta tag provides NRK id."""
+        # Webpage without JSON‑LD but with meta tag
+        webpage = '<meta name="nrk:program-id" content="MSUI14000816">'
+        extractor = DummyNRKTVEpisodeIE(webpage, meta_id="MSUI14000816")
+        info = extractor._real_extract(
+            'https://tv.nrk.no/serie/backstage/sesong/1/episode/8')
+        assert info['id'] == 'MSUI14000816'
+        assert info['season_number'] == 1
+        assert info['episode_number'] == 8
+>       assert info['title'] == 'Backstage - 8. episode'
+E       KeyError: 'title'
+
+test_generated.py:70: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extract_with_json_ld - KeyError: 'title'
+FAILED test_generated.py::test_extract_with_meta_tag - KeyError: 'title'
+2 failed, 1 passed in 1.20s

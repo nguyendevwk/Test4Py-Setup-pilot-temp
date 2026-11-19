@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-8729d8a2-9599-4b42-bbbf-c06b00bcc2cc",
+  "object": "chat.completion",
+  "created": 1795076399,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport builtins\nimport sys\nimport types as pytypes\nimport pytest\nfrom thefuck.entrypoints.fix_command import fix_command, _get_raw_command\nfrom thefuck import logs, settings, const, types, conf, corrector, ui, utils\n\n# Helper objects for tests\nclass DummyCommand:\n    def __init__(self, script):\n        self.script = script\n    def run(self, original):\n        self.executed_with = original\n\nclass DummyKnownArgs(pytypes.SimpleNamespace):\n    def __init__(self, force_command=None, command=None):\n        super().__init__(force_command=force_command, command=command)\n\n@pytest.fixture\ndef monkeypatch_settings(monkeypatch):\n    monkeypatch.setattr(settings, \"init\", lambda *_, **__: None)\n\ndef test_fix_command_empty_command(monkeypatch, monkeypatch_settings):\n    \"\"\"When Command.from_raw_script raises EmptyCommand, fix_command returns None.\"\"\"\n    known_args = DummyKnownArgs(command=[\"echo\", \"hi\"])\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: (_ for _ in ()).throw(conf.EmptyCommand()))\n    # Ensure no side effects\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [])\n    monkeypatch.setattr(ui, \"select_command\", lambda _: None)\n    result = fix_command(known_args)\n    assert result is None\n\ndef test_fix_command_runs_selected(monkeypatch, monkeypatch_settings, tmp_path):\n    \"\"\"When a corrected command is selected, its run method is called with the original command.\"\"\"\n    known_args = DummyKnownArgs(force_command=[\"echo\", \"test\"])\n    # Mock Command.from_raw_script to return a DummyCommand\n    original_cmd = DummyCommand(\"echo test\")\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: original_cmd)\n    # Provide a corrected command that will be selected\n    corrected = DummyCommand(\"echo corrected\")\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [corrected])\n    monkeypatch.setattr(ui, \"select_command\", lambda _: corrected)\n    # Capture logs to avoid clutter\n    monkeypatch.setattr(logs, \"debug_time\", lambda *_, **__: pytypes.SimpleNamespace(__enter__=lambda self: None, __exit__=lambda *__: None))\n    fix_command(known_args)\n    assert hasattr(corrected, \"executed_with\")\n    assert corrected.executed_with is original_cmd\n\ndef test_fix_command_no_selection_exits(monkeypatch, monkeypatch_settings):\n    \"\"\"When no command is selected, fix_command exits with status 1.\"\"\"\n    known_args = DummyKnownArgs(command=[\"false\"])\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: DummyCommand(\"false\"))\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [])\n    monkeypatch.setattr(ui, \"select_command\", lambda _: None)\n    monkeypatch.setattr(logs, \"debug_time\", lambda *_, **__: pytypes.SimpleNamespace(__enter__=lambda self: None, __exit__=lambda *__: None))\n    with pytest.raises(SystemExit) as excinfo:\n        fix_command(known_args)\n    assert excinfo.value.code == 1\n```",
+        "reasoning": "We need tests for fix_command. We can simulate known_args with attributes. Use tmp_path for environment? We need to test normal, boundary, error. Use monkeypatch to patch get_corrected_commands, select_command, Command.from_raw_script etc. But cannot mock target. But we can patch imported functions? It's allowed to patch? It says no mocks of target. But we can patch dependencies? Probably allowed. We'll test behavior: when EmptyCommand raised, returns None. When no selected_command, sys.exit called. Use monkeypatch to patch select_command to return None and capture sys.exit via pytest.raises(SystemExit). Also test that when selected_command.run called with command. Use a dummy command object. Use known_args with force_command. Use settings.init to be no-op? settings is imported; we can patch settings.init to do nothing. Use monkeypatch. Provide minimal Command class with from_raw_script returning dummy. Use get_corrected_commands returning list of dummy commands with run method. Use select_command returning first. Ensure run called. Use flags. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052419263,
+    "prompt_tokens": 563,
+    "prompt_time": 0.115486512,
+    "completion_tokens": 895,
+    "completion_time": 1.111649835,
+    "total_tokens": 1458,
+    "total_time": 1.227136347,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 215
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se878seq39zvj40zqqvaad",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport builtins\nimport sys\nimport types as pytypes\nimport pytest\nfrom thefuck.entrypoints.fix_command import fix_command, _get_raw_command\nfrom thefuck import logs, settings, const, types, conf, corrector, ui, utils\n\n# Helper objects for tests\nclass DummyCommand:\n    def __init__(self, script):\n        self.script = script\n    def run(self, original):\n        self.executed_with = original\n\nclass DummyKnownArgs(pytypes.SimpleNamespace):\n    def __init__(self, force_command=None, command=None):\n        super().__init__(force_command=force_command, command=command)\n\n@pytest.fixture\ndef monkeypatch_settings(monkeypatch):\n    monkeypatch.setattr(settings, \"init\", lambda *_, **__: None)\n\ndef test_fix_command_empty_command(monkeypatch, monkeypatch_settings):\n    \"\"\"When Command.from_raw_script raises EmptyCommand, fix_command returns None.\"\"\"\n    known_args = DummyKnownArgs(command=[\"echo\", \"hi\"])\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: (_ for _ in ()).throw(conf.EmptyCommand()))\n    # Ensure no side effects\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [])\n    monkeypatch.setattr(ui, \"select_command\", lambda _: None)\n    result = fix_command(known_args)\n    assert result is None\n\ndef test_fix_command_runs_selected(monkeypatch, monkeypatch_settings, tmp_path):\n    \"\"\"When a corrected command is selected, its run method is called with the original command.\"\"\"\n    known_args = DummyKnownArgs(force_command=[\"echo\", \"test\"])\n    # Mock Command.from_raw_script to return a DummyCommand\n    original_cmd = DummyCommand(\"echo test\")\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: original_cmd)\n    # Provide a corrected command that will be selected\n    corrected = DummyCommand(\"echo corrected\")\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [corrected])\n    monkeypatch.setattr(ui, \"select_command\", lambda _: corrected)\n    # Capture logs to avoid clutter\n    monkeypatch.setattr(logs, \"debug_time\", lambda *_, **__: pytypes.SimpleNamespace(__enter__=lambda self: None, __exit__=lambda *__: None))\n    fix_command(known_args)\n    assert hasattr(corrected, \"executed_with\")\n    assert corrected.executed_with is original_cmd\n\ndef test_fix_command_no_selection_exits(monkeypatch, monkeypatch_settings):\n    \"\"\"When no command is selected, fix_command exits with status 1.\"\"\"\n    known_args = DummyKnownArgs(command=[\"false\"])\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: DummyCommand(\"false\"))\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [])\n    monkeypatch.setattr(ui, \"select_command\", lambda _: None)\n    monkeypatch.setattr(logs, \"debug_time\", lambda *_, **__: pytypes.SimpleNamespace(__enter__=lambda self: None, __exit__=lambda *__: None))\n    with pytest.raises(SystemExit) as excinfo:\n        fix_command(known_args)\n    assert excinfo.value.code == 1\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5761796539882198
+}

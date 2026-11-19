@@ -1,0 +1,73 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_empty_headers_returns_status_line_and_blank_line _____________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/sanic__sanic.headers__format_http1_response__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_empty_headers_returns_sta0')
+
+    def test_empty_headers_returns_status_line_and_blank_line(tmp_path):
+        status = 200
+        headers = []
+        result = format_http1_response(status, headers)
+        expected = (
+            f"{STATUS_CODES[status]} {status}\r\n".encode() + b"\r\n"
+        )
+>       assert result == expected
+E       assert b'HTTP/1.1 200 OK\r\n\r\n' == b"b'OK' 200\r\n\r\n"
+E         
+E         At index 0 diff: b'H' != b'b'
+E         Use -v to get more diff
+
+test_generated.py:12: AssertionError
+________________ test_multiple_headers_are_formatted_correctly _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/sanic__sanic.headers__format_http1_response__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_multiple_headers_are_form0')
+
+    def test_multiple_headers_are_formatted_correctly(tmp_path):
+        status = 404
+        headers = [
+            (b"Content-Type", b"text/html"),
+            (b"X-Custom-Header", b"Value"),
+        ]
+        result = format_http1_response(status, headers)
+        expected = (
+            f"{STATUS_CODES[status]} {status}\r\n".encode()
+            + b"Content-Type: text/html\r\n"
+            + b"X-Custom-Header: Value\r\n"
+            + b"\r\n"
+        )
+>       assert result == expected
+E       assert b'HTTP/1.1 40...Value\r\n\r\n' == b"b'Not Found...Value\r\n\r\n"
+E         
+E         At index 0 diff: b'H' != b'b'
+E         Use -v to get more diff
+
+test_generated.py:28: AssertionError
+__________________ test_non_ascii_header_values_are_preserved __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/sanic__sanic.headers__format_http1_response__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_non_ascii_header_values_a0')
+
+    def test_non_ascii_header_values_are_preserved(tmp_path):
+        status = 500
+        headers = [
+            (b"Content-Type", b"text/plain; charset=utf-8"),
+            (b"X-Emoji", "😀".encode()),
+        ]
+        result = format_http1_response(status, headers)
+        expected = (
+            f"{STATUS_CODES[status]} {status}\r\n".encode()
+            + b"Content-Type: text/plain; charset=utf-8\r\n"
+            + b"X-Emoji: \xf0\x9f\x98\x80\r\n"
+            + b"\r\n"
+        )
+>       assert result == expected
+E       assert b'HTTP/1.1 50...8\x80\r\n\r\n' == b"b'Internal ...8\x80\r\n\r\n"
+E         
+E         At index 0 diff: b'H' != b'b'
+E         Use -v to get more diff
+
+test_generated.py:46: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_empty_headers_returns_status_line_and_blank_line
+FAILED test_generated.py::test_multiple_headers_are_formatted_correctly - ass...
+FAILED test_generated.py::test_non_ascii_header_values_are_preserved - assert...
+3 failed in 0.34s

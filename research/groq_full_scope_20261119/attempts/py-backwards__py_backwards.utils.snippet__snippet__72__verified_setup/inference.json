@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-cca9211f-0765-43c3-90fb-9f18d4b4243d",
+  "object": "chat.completion",
+  "created": 1795077385,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport inspect\nimport types\nimport pytest\nfrom py_backwards.utils.snippet import snippet\nfrom typed_ast import ast3 as typed_ast\n\ndef test_snippet_basic_returns_constant():\n    # A simple function that returns a constant\n    def f():\n        return 42\n\n    snip = snippet(f)\n    body = snip.get_body()\n    # body should contain a single Return node\n    assert len(body) == 1\n    node = body[0]\n    assert isinstance(node, typed_ast.Return)\n    assert isinstance(node.value, typed_ast.Constant)\n    assert node.value.value == 42\n\ndef test_snippet_variable_replacement_with_value():\n    # Function that uses a variable in its return expression\n    def g():\n        return x + 1\n\n    snip = snippet(g)\n    # Replace variable `x` with a concrete value\n    body = snip.get_body(x=10)\n    # The body should contain a Return node with a BinOp\n    node = body[0]\n    assert isinstance(node, typed_ast.Return)\n    assert isinstance(node.value, typed_ast.BinOp)\n    # The left side of the BinOp should be the constant 10\n    left = node.value.left\n    assert isinstance(left, typed_ast.Constant)\n    assert left.value == 10\n    # The right side should be the constant 1\n    right = node.value.right\n    assert isinstance(right, typed_ast.Constant)\n    assert right.value == 1\n\ndef test_snippet_variable_replacement_with_ast_name():\n    # Function that uses a variable in its return expression\n    def h():\n        return y * 2\n\n    snip = snippet(h)\n    # Replace variable `y` with an AST Name node\n    body = snip.get_body(y=typed_ast.Name(id='z', ctx=typed_ast.Load()))\n    node = body[0]\n    assert isinstance(node, typed_ast.Return)\n    assert isinstance(node.value, typed_ast.BinOp)\n    # The left side should now be a Name node with id 'z'\n    left = node.value.left\n    assert isinstance(left, typed_ast.Name)\n    assert left.id == 'z'\n    # The right side should be the constant 2\n    right = node.value.right\n    assert isinstance(right, typed_ast.Constant)\n    assert right.value == 2\n```",
+        "reasoning": "We need to write tests for snippet class. But we don't have full implementation. We need to import snippet from py_backwards.utils.snippet. We need to test normal, boundary, error. Use tmp_path. Since we can't modify product code. We'll write tests that create simple functions and check that get_body returns expected AST nodes. Also test that passing ast.Name variable works. Also test error when snippet_kwargs not matching? Maybe passing wrong type? But code accepts any. Maybe test that variables replaced correctly. We'll use ast.parse and inspect. Let's write three tests:\n\n1. test_snippet_basic: simple function that returns 1. snippet.get_body returns body list with a Return node. Assert first node is ast.Return and its value is ast.Constant 1.\n\n2. test_snippet_variable_replacement: function uses variable x in return. Pass snippet_kwargs with x=5. Expect body contains Return with Constant 5.\n\n3. test_snippet_ast_name_replacement: function uses variable y. Pass snippet_kwargs with y=ast.Name(id='z'). Expect body contains Return with Name id 'z'.\n\nNeed to import ast from typed_ast.ast3. Use that. Ensure we use get_source from helpers? But snippet uses get_source internally. We'll just call snippet.get_body.\n\nLet's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.280769587,
+    "prompt_tokens": 544,
+    "prompt_time": 0.336551594,
+    "completion_tokens": 765,
+    "completion_time": 1.119124207,
+    "total_tokens": 1309,
+    "total_time": 1.455675801,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 263
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sf69s2evkr9v2zb0r8y6nh",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport inspect\nimport types\nimport pytest\nfrom py_backwards.utils.snippet import snippet\nfrom typed_ast import ast3 as typed_ast\n\ndef test_snippet_basic_returns_constant():\n    # A simple function that returns a constant\n    def f():\n        return 42\n\n    snip = snippet(f)\n    body = snip.get_body()\n    # body should contain a single Return node\n    assert len(body) == 1\n    node = body[0]\n    assert isinstance(node, typed_ast.Return)\n    assert isinstance(node.value, typed_ast.Constant)\n    assert node.value.value == 42\n\ndef test_snippet_variable_replacement_with_value():\n    # Function that uses a variable in its return expression\n    def g():\n        return x + 1\n\n    snip = snippet(g)\n    # Replace variable `x` with a concrete value\n    body = snip.get_body(x=10)\n    # The body should contain a Return node with a BinOp\n    node = body[0]\n    assert isinstance(node, typed_ast.Return)\n    assert isinstance(node.value, typed_ast.BinOp)\n    # The left side of the BinOp should be the constant 10\n    left = node.value.left\n    assert isinstance(left, typed_ast.Constant)\n    assert left.value == 10\n    # The right side should be the constant 1\n    right = node.value.right\n    assert isinstance(right, typed_ast.Constant)\n    assert right.value == 1\n\ndef test_snippet_variable_replacement_with_ast_name():\n    # Function that uses a variable in its return expression\n    def h():\n        return y * 2\n\n    snip = snippet(h)\n    # Replace variable `y` with an AST Name node\n    body = snip.get_body(y=typed_ast.Name(id='z', ctx=typed_ast.Load()))\n    node = body[0]\n    assert isinstance(node, typed_ast.Return)\n    assert isinstance(node.value, typed_ast.BinOp)\n    # The left side should now be a Name node with id 'z'\n    left = node.value.left\n    assert isinstance(left, typed_ast.Name)\n    assert left.id == 'z'\n    # The right side should be the constant 2\n    right = node.value.right\n    assert isinstance(right, typed_ast.Constant)\n    assert right.value == 2\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 2.1111997469561175
+}

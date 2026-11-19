@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-76237950-f7d3-49d1-b7f2-6a1ac2baf9e9",
+  "object": "chat.completion",
+  "created": 1795078787,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport io\nimport pytest\nfrom httpie.cli.requestitems import RequestItems, SEPARATOR_HEADER, SEPARATOR_QUERY_PARAM, SEPARATOR_DATA_STRING, SEPARATOR_FILE_UPLOAD, SEPARATOR_HEADER_EMPTY\nfrom httpie.cli.argtypes import KeyValueArg\nfrom httpie.cli.constants import RequestType\n\ndef make_arg(key, value, sep, orig=None):\n    \"\"\"Helper to create a KeyValueArg with minimal required attributes.\"\"\"\n    if orig is None:\n        orig = f\"{key}{sep}{value}\"\n    return KeyValueArg(key=key, value=value, sep=sep, orig=orig)\n\ndef test_normal_header_and_query_and_data(tmp_path):\n    # Create a temporary file for data embedding\n    data_file = tmp_path / \"data.txt\"\n    data_file.write_text(\"file content\")\n    # Build arguments\n    args = [\n        make_arg(\"X-Custom\", \"value\", SEPARATOR_HEADER),\n        make_arg(\"q\", \"search\", SEPARATOR_QUERY_PARAM),\n        make_arg(\"payload\", \"simple\", SEPARATOR_DATA_STRING),\n        make_arg(\"file\", f\"{data_file}::text/plain\", SEPARATOR_FILE_UPLOAD),\n    ]\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n    # Header\n    assert items.headers[\"X-Custom\"] == \"value\"\n    # Query param\n    assert items.params[\"q\"] == \"search\"\n    # Data\n    assert items.data[\"payload\"] == \"simple\"\n    # File upload\n    filename, fileobj, mime = items.files[\"file\"]\n    assert filename == \"data.txt\"\n    assert mime == \"text/plain\"\n    assert fileobj.read() == b\"file content\"\n    fileobj.close()\n\ndef test_empty_header_error():\n    # Empty header should raise ParseError\n    args = [make_arg(\"Empty\", \"\", SEPARATOR_HEADER_EMPTY)]\n    with pytest.raises(Exception) as excinfo:\n        RequestItems.from_args(args)\n    assert \"Invalid item\" in str(excinfo.value)\n\ndef test_multipart_order_preservation(tmp_path):\n    # Create two files\n    file1 = tmp_path / \"a.txt\"\n    file1.write_text(\"a\")\n    file2 = tmp_path / \"b.txt\"\n    file2.write_text(\"b\")\n    # Arguments with multipart separator\n    args = [\n        make_arg(\"part1\", f\"{file1}::text/plain\", SEPARATOR_FILE_UPLOAD),\n        make_arg(\"part2\", f\"{file2}::text/plain\", SEPARATOR_FILE_UPLOAD),\n    ]\n    items = RequestItems.from_args(args)\n    # multipart_data should preserve insertion order\n    keys = list(items.multipart_data.keys())\n    assert keys == [\"part1\", \"part2\"]\n    # Verify file contents\n    for key in keys:\n        filename, fileobj, mime = items.files[key]\n        content = fileobj.read()\n        fileobj.close()\n        assert content == (b\"a\" if key == \"part1\" else b\"b\")\n        assert mime == \"text/plain\"\n```",
+        "reasoning": "We need three tests. Use tmp_path for file. Test normal header, query, data. Also test error: empty header invalid. Also test multipart data ordering? maybe test that multipart_data preserves order. We'll create KeyValueArg? It's from .argtypes. We can construct manually: KeyValueArg has attributes key, value, sep, orig. We'll import it. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052841274,
+    "prompt_tokens": 1891,
+    "prompt_time": 0.105966731,
+    "completion_tokens": 718,
+    "completion_time": 0.837496872,
+    "total_tokens": 2609,
+    "total_time": 0.943463603,
+    "completion_tokens_details": {
+      "reasoning_tokens": 79
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgh33eenrvbmzq2ap5swr4",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport io\nimport pytest\nfrom httpie.cli.requestitems import RequestItems, SEPARATOR_HEADER, SEPARATOR_QUERY_PARAM, SEPARATOR_DATA_STRING, SEPARATOR_FILE_UPLOAD, SEPARATOR_HEADER_EMPTY\nfrom httpie.cli.argtypes import KeyValueArg\nfrom httpie.cli.constants import RequestType\n\ndef make_arg(key, value, sep, orig=None):\n    \"\"\"Helper to create a KeyValueArg with minimal required attributes.\"\"\"\n    if orig is None:\n        orig = f\"{key}{sep}{value}\"\n    return KeyValueArg(key=key, value=value, sep=sep, orig=orig)\n\ndef test_normal_header_and_query_and_data(tmp_path):\n    # Create a temporary file for data embedding\n    data_file = tmp_path / \"data.txt\"\n    data_file.write_text(\"file content\")\n    # Build arguments\n    args = [\n        make_arg(\"X-Custom\", \"value\", SEPARATOR_HEADER),\n        make_arg(\"q\", \"search\", SEPARATOR_QUERY_PARAM),\n        make_arg(\"payload\", \"simple\", SEPARATOR_DATA_STRING),\n        make_arg(\"file\", f\"{data_file}::text/plain\", SEPARATOR_FILE_UPLOAD),\n    ]\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n    # Header\n    assert items.headers[\"X-Custom\"] == \"value\"\n    # Query param\n    assert items.params[\"q\"] == \"search\"\n    # Data\n    assert items.data[\"payload\"] == \"simple\"\n    # File upload\n    filename, fileobj, mime = items.files[\"file\"]\n    assert filename == \"data.txt\"\n    assert mime == \"text/plain\"\n    assert fileobj.read() == b\"file content\"\n    fileobj.close()\n\ndef test_empty_header_error():\n    # Empty header should raise ParseError\n    args = [make_arg(\"Empty\", \"\", SEPARATOR_HEADER_EMPTY)]\n    with pytest.raises(Exception) as excinfo:\n        RequestItems.from_args(args)\n    assert \"Invalid item\" in str(excinfo.value)\n\ndef test_multipart_order_preservation(tmp_path):\n    # Create two files\n    file1 = tmp_path / \"a.txt\"\n    file1.write_text(\"a\")\n    file2 = tmp_path / \"b.txt\"\n    file2.write_text(\"b\")\n    # Arguments with multipart separator\n    args = [\n        make_arg(\"part1\", f\"{file1}::text/plain\", SEPARATOR_FILE_UPLOAD),\n        make_arg(\"part2\", f\"{file2}::text/plain\", SEPARATOR_FILE_UPLOAD),\n    ]\n    items = RequestItems.from_args(args)\n    # multipart_data should preserve insertion order\n    keys = list(items.multipart_data.keys())\n    assert keys == [\"part1\", \"part2\"]\n    # Verify file contents\n    for key in keys:\n        filename, fileobj, mime = items.files[key]\n        content = fileobj.read()\n        fileobj.close()\n        assert content == (b\"a\" if key == \"part1\" else b\"b\")\n        assert mime == \"text/plain\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3577280070167035
+}

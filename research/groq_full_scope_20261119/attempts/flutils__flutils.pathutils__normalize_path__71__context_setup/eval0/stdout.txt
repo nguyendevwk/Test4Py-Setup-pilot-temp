@@ -1,0 +1,30 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_normalize_with_home_and_env _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__normalize_path__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_normalize_with_home_and_e0')
+
+    def test_normalize_with_home_and_env(tmp_path):
+        # Set up environment variable and home directory
+        os.environ["TEST_VAR"] = "subdir"
+        # Create a temporary directory to act as the user's home
+        home_dir = tmp_path / "home"
+        home_dir.mkdir()
+        # Monkeypatch getpass.getuser to return a user whose home is home_dir
+        original_getuser = os.getlogin if hasattr(os, "getlogin") else None
+        try:
+            os.getlogin = lambda: "dummy_user"
+            # Create a dummy user entry in pwd module
+            import pwd
+            pwd.getpwnam = lambda u: type("pwd", (), {"pw_dir": str(home_dir)})()
+            # Path containing ~ and env var
+            input_path = "~/folder/${TEST_VAR}/file.txt"
+            result = normalize_path(input_path)
+            expected = Path(home_dir, "folder", "subdir", "file.txt")
+>           assert result == expected
+E           AssertionError: assert PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__normalize_path__71__context_setup/eval0/folder/subdir/file.txt') == PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils_...th__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_normalize_with_home_and_e0/home/folder/subdir/file.txt')
+
+test_generated.py:24: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normalize_with_home_and_env - AssertionError: ...
+1 failed, 2 passed in 0.10s

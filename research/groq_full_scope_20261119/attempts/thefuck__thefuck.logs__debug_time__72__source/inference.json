@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-3d1a9676-4e10-4d55-8fa5-512e3fa1a7b1",
+  "object": "chat.completion",
+  "created": 1795076833,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport time\nimport types\nimport pytest\nfrom contextlib import contextmanager\n\n# Import the module under test\nimport thefuck.logs as logs\n\n\ndef test_debug_time_yields_and_calls_debug(monkeypatch):\n    \"\"\"Verify that debug_time yields control and calls debug with a time delta.\"\"\"\n    called = {}\n    def fake_debug(msg):\n        called['msg'] = msg\n    monkeypatch.setattr(logs, 'debug', fake_debug)\n\n    with logs.debug_time('test') as ctx:\n        # Inside the context manager, ctx should be None\n        assert ctx is None\n    # After exiting, debug should have been called\n    assert 'msg' in called\n    assert called['msg'].startswith('test took: ')\n    # The time delta should be a string representation of a timedelta\n    assert isinstance(called['msg'].split('took: ')[1], str)\n\n\ndef test_debug_time_with_sleep(monkeypatch):\n    \"\"\"Ensure that the reported time delta reflects actual elapsed time.\"\"\"\n    called = {}\n    def fake_debug(msg):\n        called['msg'] = msg\n    monkeypatch.setattr(logs, 'debug', fake_debug)\n\n    with logs.debug_time('sleep'):\n        time.sleep(0.05)  # sleep for 50 ms\n    # Extract the numeric part of the timedelta string\n    delta_str = called['msg'].split('took: ')[1]\n    # Convert to seconds (approximate)\n    seconds = float(delta_str.split(' ')[0])\n    # The elapsed time should be at least 0.05 seconds\n    assert seconds >= 0.05\n\n\ndef test_debug_time_propagates_exceptions(monkeypatch):\n    \"\"\"Check that exceptions inside the context are propagated and debug is still called.\"\"\"\n    called = {}\n    def fake_debug(msg):\n        called['msg'] = msg\n    monkeypatch.setattr(logs, 'debug', fake_debug)\n\n    with pytest.raises(RuntimeError):\n        with logs.debug_time('error'):\n            raise RuntimeError('boom')\n    # Even though an exception occurred, debug should still have been called\n    assert 'msg' in called\n    assert called['msg'].startswith('error took: ')\n```",
+        "reasoning": "We need to test debug_time contextmanager. It yields, then finally calls debug. debug is imported from .? not defined. But we can patch? We cannot mock target. But we can test that it yields and that debug called? Can't mock. But we can test that it yields and that after exit, debug called? But debug is not defined in snippet. Probably in same module. We can't modify. We can import module and check that debug_time is a contextmanager. We can test that it yields and that it records time difference. We can monkeypatch debug function in module to capture call. But that's mocking target? It's allowed to patch? It's not mocking the target function itself? It's patching debug inside module. It's allowed? Probably okay. We'll patch module.debug to capture. Use tmp_path? Not needed. We'll write three tests: normal yield, boundary small sleep, error inside context. Use pytest.raises to check that exception propagates. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004908855,
+    "prompt_tokens": 288,
+    "prompt_time": 0.134327715,
+    "completion_tokens": 661,
+    "completion_time": 0.682723745,
+    "total_tokens": 949,
+    "total_time": 0.81705146,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 197
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7senfk6e3qrnhg2nvz01c53",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport time\nimport types\nimport pytest\nfrom contextlib import contextmanager\n\n# Import the module under test\nimport thefuck.logs as logs\n\n\ndef test_debug_time_yields_and_calls_debug(monkeypatch):\n    \"\"\"Verify that debug_time yields control and calls debug with a time delta.\"\"\"\n    called = {}\n    def fake_debug(msg):\n        called['msg'] = msg\n    monkeypatch.setattr(logs, 'debug', fake_debug)\n\n    with logs.debug_time('test') as ctx:\n        # Inside the context manager, ctx should be None\n        assert ctx is None\n    # After exiting, debug should have been called\n    assert 'msg' in called\n    assert called['msg'].startswith('test took: ')\n    # The time delta should be a string representation of a timedelta\n    assert isinstance(called['msg'].split('took: ')[1], str)\n\n\ndef test_debug_time_with_sleep(monkeypatch):\n    \"\"\"Ensure that the reported time delta reflects actual elapsed time.\"\"\"\n    called = {}\n    def fake_debug(msg):\n        called['msg'] = msg\n    monkeypatch.setattr(logs, 'debug', fake_debug)\n\n    with logs.debug_time('sleep'):\n        time.sleep(0.05)  # sleep for 50 ms\n    # Extract the numeric part of the timedelta string\n    delta_str = called['msg'].split('took: ')[1]\n    # Convert to seconds (approximate)\n    seconds = float(delta_str.split(' ')[0])\n    # The elapsed time should be at least 0.05 seconds\n    assert seconds >= 0.05\n\n\ndef test_debug_time_propagates_exceptions(monkeypatch):\n    \"\"\"Check that exceptions inside the context are propagated and debug is still called.\"\"\"\n    called = {}\n    def fake_debug(msg):\n        called['msg'] = msg\n    monkeypatch.setattr(logs, 'debug', fake_debug)\n\n    with pytest.raises(RuntimeError):\n        with logs.debug_time('error'):\n            raise RuntimeError('boom')\n    # Even though an exception occurred, debug should still have been called\n    assert 'msg' in called\n    assert called['msg'].startswith('error took: ')\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1670977040193975
+}

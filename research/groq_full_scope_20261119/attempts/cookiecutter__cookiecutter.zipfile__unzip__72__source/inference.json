@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-206b38e7-1411-4255-9441-9c3611ced19b",
+  "object": "chat.completion",
+  "created": 1795076106,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport zipfile\nimport tempfile\nfrom pathlib import Path\n\nimport pytest\n\nfrom cookiecutter.zipfile import unzip\nfrom cookiecutter.exceptions import InvalidZipRepository\n\n\ndef test_unzip_local_zip_with_top_level(tmp_path):\n    \"\"\"Unzip a valid local zip containing a top‑level directory.\"\"\"\n    # Create a zip file with a top‑level directory and a file inside\n    top_dir = \"project\"\n    zip_path = tmp_path / \"archive.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        zf.writestr(f\"{top_dir}/\", \"\")  # directory entry\n        zf.writestr(f\"{top_dir}/README.md\", \"# Test\")\n\n    # Call unzip on the local file\n    result = unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path)\n\n    # The returned path should point to the extracted directory\n    extracted = Path(result)\n    assert extracted.is_dir()\n    assert (extracted / \"README.md\").read_text() == \"# Test\"\n    # The temporary extraction directory should be inside a temp dir\n    assert extracted.parent.name.startswith(\"tmp\")\n\n\ndef test_unzip_empty_zip_raises(tmp_path):\n    \"\"\"Unzip should raise InvalidZipRepository for an empty zip file.\"\"\"\n    empty_zip = tmp_path / \"empty.zip\"\n    with zipfile.ZipFile(empty_zip, \"w\") as zf:\n        pass  # no entries\n\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(empty_zip), is_url=False, clone_to_dir=tmp_path)\n\n    assert \"empty\" in str(excinfo.value).lower()\n\n\ndef test_unzip_missing_top_level_directory_raises(tmp_path):\n    \"\"\"Unzip should raise InvalidZipRepository if the first entry is not a directory.\"\"\"\n    bad_zip = tmp_path / \"bad.zip\"\n    with zipfile.ZipFile(bad_zip, \"w\") as zf:\n        zf.writestr(\"file.txt\", \"content\")  # no top‑level directory\n\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(bad_zip), is_url=False, clone_to_dir=tmp_path)\n\n    assert \"top-level directory\" in str(excinfo.value).lower()\n```",
+        "reasoning": "Need tests: 1) normal unzip local zip with top-level dir. 2) error empty zip. 3) error missing top-level dir. Use tmp_path. Use zipfile to create."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047983082,
+    "prompt_tokens": 1221,
+    "prompt_time": 0.061466574,
+    "completion_tokens": 525,
+    "completion_time": 0.804709499,
+    "total_tokens": 1746,
+    "total_time": 0.866176073,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 42
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sdz92hew1r7jb1g5gqskbh",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport zipfile\nimport tempfile\nfrom pathlib import Path\n\nimport pytest\n\nfrom cookiecutter.zipfile import unzip\nfrom cookiecutter.exceptions import InvalidZipRepository\n\n\ndef test_unzip_local_zip_with_top_level(tmp_path):\n    \"\"\"Unzip a valid local zip containing a top‑level directory.\"\"\"\n    # Create a zip file with a top‑level directory and a file inside\n    top_dir = \"project\"\n    zip_path = tmp_path / \"archive.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        zf.writestr(f\"{top_dir}/\", \"\")  # directory entry\n        zf.writestr(f\"{top_dir}/README.md\", \"# Test\")\n\n    # Call unzip on the local file\n    result = unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path)\n\n    # The returned path should point to the extracted directory\n    extracted = Path(result)\n    assert extracted.is_dir()\n    assert (extracted / \"README.md\").read_text() == \"# Test\"\n    # The temporary extraction directory should be inside a temp dir\n    assert extracted.parent.name.startswith(\"tmp\")\n\n\ndef test_unzip_empty_zip_raises(tmp_path):\n    \"\"\"Unzip should raise InvalidZipRepository for an empty zip file.\"\"\"\n    empty_zip = tmp_path / \"empty.zip\"\n    with zipfile.ZipFile(empty_zip, \"w\") as zf:\n        pass  # no entries\n\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(empty_zip), is_url=False, clone_to_dir=tmp_path)\n\n    assert \"empty\" in str(excinfo.value).lower()\n\n\ndef test_unzip_missing_top_level_directory_raises(tmp_path):\n    \"\"\"Unzip should raise InvalidZipRepository if the first entry is not a directory.\"\"\"\n    bad_zip = tmp_path / \"bad.zip\"\n    with zipfile.ZipFile(bad_zip, \"w\") as zf:\n        zf.writestr(\"file.txt\", \"content\")  # no top‑level directory\n\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(bad_zip), is_url=False, clone_to_dir=tmp_path)\n\n    assert \"top-level directory\" in str(excinfo.value).lower()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.217980915971566
+}

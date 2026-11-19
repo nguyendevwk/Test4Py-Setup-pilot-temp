@@ -1,0 +1,80 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+______________________________ test_allof_success ______________________________
+
+self = <typesystem.fields.Integer object at 0x7f5f65c603d0>, value = 'hello'
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        if value is None and self.allow_null:
+            return None
+        elif value == "" and self.allow_null and self.coerce_types:
+            return None
+        elif value is None:
+            raise self.validation_error("null")
+        elif isinstance(value, bool):
+            raise self.validation_error("type")
+        elif (
+            self.numeric_type is int
+            and isinstance(value, float)
+            and not value.is_integer()
+        ):
+            raise self.validation_error("integer")
+        elif not isinstance(value, (int, float)) and not self.coerce_types:
+            raise self.validation_error("type")
+    
+        try:
+            if isinstance(value, str):
+                # Casting to a decimal first gives more lenient parsing.
+>               value = decimal.Decimal(value)
+E               decimal.InvalidOperation: [<class 'decimal.ConversionSyntax'>]
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:260: InvalidOperation
+
+During handling of the above exception, another exception occurred:
+
+    def test_allof_success():
+        """AllOf should validate when all child fields accept the value."""
+        field = AllOf(all_of=[String(min_length=1), Integer(minimum=0)])
+        # String(min_length=1) accepts "hello", Integer(minimum=0) accepts 5
+>       assert field.validate("hello") == "hello"
+
+test_generated.py:9: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/composites.py:72: in validate
+    child.validate(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.fields.Integer object at 0x7f5f65c603d0>, value = 'hello'
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        if value is None and self.allow_null:
+            return None
+        elif value == "" and self.allow_null and self.coerce_types:
+            return None
+        elif value is None:
+            raise self.validation_error("null")
+        elif isinstance(value, bool):
+            raise self.validation_error("type")
+        elif (
+            self.numeric_type is int
+            and isinstance(value, float)
+            and not value.is_integer()
+        ):
+            raise self.validation_error("integer")
+        elif not isinstance(value, (int, float)) and not self.coerce_types:
+            raise self.validation_error("type")
+    
+        try:
+            if isinstance(value, str):
+                # Casting to a decimal first gives more lenient parsing.
+                value = decimal.Decimal(value)
+            if self.numeric_type is not None:
+                value = self.numeric_type(value)
+        except (TypeError, ValueError, decimal.InvalidOperation):
+>           raise self.validation_error("type")
+E           typesystem.base.ValidationError: Must be a number.
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:264: ValidationError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_allof_success - typesystem.base.ValidationErro...
+1 failed, 2 passed in 0.15s

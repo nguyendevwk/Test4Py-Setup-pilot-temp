@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-0de95a10-702e-4fa3-929d-ef00827ea6b7",
+  "object": "chat.completion",
+  "created": 1795079572,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport types\nfrom tornado.util import Configurable, import_object\n\n\nclass DummyBase(Configurable):\n    \"\"\"A minimal concrete implementation of Configurable for testing.\"\"\"\n\n    @classmethod\n    def configurable_base(cls):\n        return cls\n\n    @classmethod\n    def configurable_default(cls):\n        return DummyImpl\n\n    def initialize(self, *args, **kwargs):\n        # store initialization data for assertions\n        self._init_args = args\n        self._init_kwargs = kwargs\n\n\nclass DummyImpl(DummyBase):\n    \"\"\"Concrete implementation used by default.\"\"\"\n\n    def initialize(self, *args, **kwargs):\n        super().initialize(*args, **kwargs)\n        self._impl_marker = True\n\n\nclass AlternateImpl(DummyBase):\n    \"\"\"Alternate implementation used when configured.\"\"\"\n\n    def initialize(self, *args, **kwargs):\n        super().initialize(*args, **kwargs)\n        self._impl_marker = False\n\n\ndef test_configure_with_class_and_kwargs(tmp_path):\n    # Ensure default implementation is used initially\n    instance = DummyBase()\n    assert isinstance(instance, DummyImpl)\n    assert instance._impl_marker is True\n    assert instance._init_kwargs == {}\n\n    # Configure to use AlternateImpl with a keyword argument\n    DummyBase.configure(AlternateImpl, foo=\"bar\")\n    instance2 = DummyBase()\n    assert isinstance(instance2, AlternateImpl)\n    assert instance2._impl_marker is False\n    assert instance2._init_kwargs[\"foo\"] == \"bar\"\n\n    # Clean up configuration for other tests\n    DummyBase.configure(None)\n\n\ndef test_configure_with_string_import_and_error():\n    # Importing a valid class by string should work\n    DummyBase.configure(\"tornado.util.AlternateImpl\")\n    instance = DummyBase()\n    assert isinstance(instance, AlternateImpl)\n    DummyBase.configure(None)\n\n    # Importing a non‑existent module should raise ImportError\n    with pytest.raises(ImportError):\n        DummyBase.configure(\"tornado.util.nonexistent_module\")\n\n    # Importing a non‑existent attribute should raise ImportError\n    with pytest.raises(ImportError):\n        DummyBase.configure(\"tornado.util.NonExistentClass\")\n\n    # Importing a valid module but wrong type should raise ValueError\n    with pytest.raises(ValueError):\n        DummyBase.configure(\"tornado.util.types\")  # types module is not a subclass\n\n\ndef test_invalid_subclass_configuration():\n    # Attempt to configure with an unrelated class should raise ValueError\n    class Unrelated:\n        pass\n\n    with pytest.raises(ValueError):\n        DummyBase.configure(Unrelated)\n\n    # Attempt to configure with a subclass that does not inherit from DummyBase\n    class NotDerived(DummyBase):\n        pass\n\n    # This should be allowed because it is a subclass of DummyBase\n    DummyBase.configure(NotDerived)\n    instance = DummyBase()\n    assert isinstance(instance, NotDerived)\n    DummyBase.configure(None)\n```",
+        "reasoning": "Need tests for Configurable. Create dummy subclass. Test configure with class and kwargs, and string import. Also test error when invalid subclass. Three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004726549,
+    "prompt_tokens": 1670,
+    "prompt_time": 0.092163824,
+    "completion_tokens": 637,
+    "completion_time": 0.701967579,
+    "total_tokens": 2307,
+    "total_time": 0.794131403,
+    "completion_tokens_details": {
+      "reasoning_tokens": 32
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh92apet79p97kq3ak8p3r",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport types\nfrom tornado.util import Configurable, import_object\n\n\nclass DummyBase(Configurable):\n    \"\"\"A minimal concrete implementation of Configurable for testing.\"\"\"\n\n    @classmethod\n    def configurable_base(cls):\n        return cls\n\n    @classmethod\n    def configurable_default(cls):\n        return DummyImpl\n\n    def initialize(self, *args, **kwargs):\n        # store initialization data for assertions\n        self._init_args = args\n        self._init_kwargs = kwargs\n\n\nclass DummyImpl(DummyBase):\n    \"\"\"Concrete implementation used by default.\"\"\"\n\n    def initialize(self, *args, **kwargs):\n        super().initialize(*args, **kwargs)\n        self._impl_marker = True\n\n\nclass AlternateImpl(DummyBase):\n    \"\"\"Alternate implementation used when configured.\"\"\"\n\n    def initialize(self, *args, **kwargs):\n        super().initialize(*args, **kwargs)\n        self._impl_marker = False\n\n\ndef test_configure_with_class_and_kwargs(tmp_path):\n    # Ensure default implementation is used initially\n    instance = DummyBase()\n    assert isinstance(instance, DummyImpl)\n    assert instance._impl_marker is True\n    assert instance._init_kwargs == {}\n\n    # Configure to use AlternateImpl with a keyword argument\n    DummyBase.configure(AlternateImpl, foo=\"bar\")\n    instance2 = DummyBase()\n    assert isinstance(instance2, AlternateImpl)\n    assert instance2._impl_marker is False\n    assert instance2._init_kwargs[\"foo\"] == \"bar\"\n\n    # Clean up configuration for other tests\n    DummyBase.configure(None)\n\n\ndef test_configure_with_string_import_and_error():\n    # Importing a valid class by string should work\n    DummyBase.configure(\"tornado.util.AlternateImpl\")\n    instance = DummyBase()\n    assert isinstance(instance, AlternateImpl)\n    DummyBase.configure(None)\n\n    # Importing a non‑existent module should raise ImportError\n    with pytest.raises(ImportError):\n        DummyBase.configure(\"tornado.util.nonexistent_module\")\n\n    # Importing a non‑existent attribute should raise ImportError\n    with pytest.raises(ImportError):\n        DummyBase.configure(\"tornado.util.NonExistentClass\")\n\n    # Importing a valid module but wrong type should raise ValueError\n    with pytest.raises(ValueError):\n        DummyBase.configure(\"tornado.util.types\")  # types module is not a subclass\n\n\ndef test_invalid_subclass_configuration():\n    # Attempt to configure with an unrelated class should raise ValueError\n    class Unrelated:\n        pass\n\n    with pytest.raises(ValueError):\n        DummyBase.configure(Unrelated)\n\n    # Attempt to configure with a subclass that does not inherit from DummyBase\n    class NotDerived(DummyBase):\n        pass\n\n    # This should be allowed because it is a subclass of DummyBase\n    DummyBase.configure(NotDerived)\n    instance = DummyBase()\n    assert isinstance(instance, NotDerived)\n    DummyBase.configure(None)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "5835baaad6a4455e807cc181767f918e",
+  "_api_plus_pacing_seconds": 8.171263385971542
+}

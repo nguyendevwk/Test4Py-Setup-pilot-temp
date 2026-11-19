@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-f8f65961-9332-4f29-9a03-fdabd09ad9c2",
+  "object": "chat.completion",
+  "created": 1795079218,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport pytest\nfrom tornado.options import parse_command_line, options\n\n\ndef test_parse_command_line_remains_args():\n    \"\"\"When given a list of arguments, the function returns the\n    unparsed arguments after processing known options.\"\"\"\n    # Register a dummy option to consume one argument\n    options.define(\"foo\", default=\"bar\", type=str, help=\"dummy option\")\n    # Pass an option and an extra positional argument\n    remaining = parse_command_line([\"--foo\", \"baz\", \"positional\"])\n    # The option should be consumed and the positional argument returned\n    assert remaining == [\"positional\"]\n    # The option value should be updated\n    assert options.foo == \"baz\"\n\n\ndef test_parse_command_line_uses_sys_argv(monkeypatch):\n    \"\"\"When args is None, parse_command_line uses sys.argv.\"\"\"\n    # Prepare a fake sys.argv\n    fake_argv = [\"script.py\", \"--foo\", \"baz\", \"positional\"]\n    monkeypatch.setattr(sys, \"argv\", fake_argv)\n    # Ensure the option is defined\n    options.define(\"foo\", default=\"bar\", type=str, help=\"dummy option\")\n    remaining = parse_command_line()\n    # The option should be consumed and the positional argument returned\n    assert remaining == [\"positional\"]\n    assert options.foo == \"baz\"\n\n\ndef test_parse_command_line_invalid_option_raises_system_exit():\n    \"\"\"Passing an unknown option should cause a SystemExit.\"\"\"\n    # Ensure the option is not defined\n    if hasattr(options, \"unknown\"):\n        delattr(options, \"unknown\")\n    with pytest.raises(SystemExit) as excinfo:\n        parse_command_line([\"--unknown\", \"value\"])\n    # SystemExit should have code 2 (typical for argparse errors)\n    assert excinfo.value.code == 2\n```",
+        "reasoning": "We need to test parse_command_line from tornado.options. We need to import tornado.options. We'll write tests that check normal parsing, boundary, error. Use tmp_path? maybe not needed. Use pytest.raises for error. Let's write three tests: 1) normal: passing args list returns remaining args. 2) boundary: passing None uses sys.argv. But can't rely on sys.argv. We can set sys.argv temporarily. Use monkeypatch. 3) error: passing invalid option triggers SystemExit? Actually OptionParser.parse_command_line may raise SystemExit on bad option. We'll test that. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048793239,
+    "prompt_tokens": 433,
+    "prompt_time": 0.027071968,
+    "completion_tokens": 508,
+    "completion_time": 0.593633799,
+    "total_tokens": 941,
+    "total_time": 0.620705767,
+    "completion_tokens_details": {
+      "reasoning_tokens": 124
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgy8dqe9crsaj07x7sme6d",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport pytest\nfrom tornado.options import parse_command_line, options\n\n\ndef test_parse_command_line_remains_args():\n    \"\"\"When given a list of arguments, the function returns the\n    unparsed arguments after processing known options.\"\"\"\n    # Register a dummy option to consume one argument\n    options.define(\"foo\", default=\"bar\", type=str, help=\"dummy option\")\n    # Pass an option and an extra positional argument\n    remaining = parse_command_line([\"--foo\", \"baz\", \"positional\"])\n    # The option should be consumed and the positional argument returned\n    assert remaining == [\"positional\"]\n    # The option value should be updated\n    assert options.foo == \"baz\"\n\n\ndef test_parse_command_line_uses_sys_argv(monkeypatch):\n    \"\"\"When args is None, parse_command_line uses sys.argv.\"\"\"\n    # Prepare a fake sys.argv\n    fake_argv = [\"script.py\", \"--foo\", \"baz\", \"positional\"]\n    monkeypatch.setattr(sys, \"argv\", fake_argv)\n    # Ensure the option is defined\n    options.define(\"foo\", default=\"bar\", type=str, help=\"dummy option\")\n    remaining = parse_command_line()\n    # The option should be consumed and the positional argument returned\n    assert remaining == [\"positional\"]\n    assert options.foo == \"baz\"\n\n\ndef test_parse_command_line_invalid_option_raises_system_exit():\n    \"\"\"Passing an unknown option should cause a SystemExit.\"\"\"\n    # Ensure the option is not defined\n    if hasattr(options, \"unknown\"):\n        delattr(options, \"unknown\")\n    with pytest.raises(SystemExit) as excinfo:\n        parse_command_line([\"--unknown\", \"value\"])\n    # SystemExit should have code 2 (typical for argparse errors)\n    assert excinfo.value.code == 2\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0450532810064033
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-5ae95be9-e627-45d9-bdb3-fd796aef308a",
+  "object": "chat.completion",
+  "created": 1795078362,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport inspect\nimport types\nimport pytest\nfrom docstring_parser.parser import parse_from_object\nfrom docstring_parser.common import Docstring, DocstringStyle, ParseError\n\n\ndef test_parse_from_object_function_docstring():\n    \"\"\"Normal case: parse a simple function docstring.\"\"\"\n    def sample_func(x, y):\n        \"\"\"Return the sum of x and y.\n\n        Parameters\n        ----------\n        x : int\n            First number.\n        y : int\n            Second number.\n\n        Returns\n        -------\n        int\n            The sum of x and y.\n        \"\"\"\n        return x + y\n\n    doc = parse_from_object(sample_func, style=DocstringStyle.GOOGLE)\n    assert isinstance(doc, Docstring)\n    assert doc.summary == \"Return the sum of x and y.\"\n    assert len(doc.params) == 2\n    param_names = {p.arg_name for p in doc.params}\n    assert param_names == {\"x\", \"y\"}\n    assert doc.returns is not None\n    assert doc.returns.type_name == \"int\"\n\n\ndef test_parse_from_object_class_attribute_docstrings(tmp_path):\n    \"\"\"Boundary case: parse a class with attribute docstrings defined in source.\"\"\"\n    # Create a temporary module file with a class that has attribute docstrings.\n    module_code = '''\nclass MyClass:\n    \"\"\"A simple class with attributes.\"\"\"\n\n    attr1 = 1  # :type int: The first attribute.\n    attr2 = \"two\"  # :type str: The second attribute.\n'''\n    module_path = tmp_path / \"mymodule.py\"\n    module_path.write_text(module_code)\n\n    # Dynamically import the module\n    spec = types.ModuleType(\"mymodule\")\n    with open(module_path, \"r\") as f:\n        exec(f.read(), spec.__dict__)\n\n    # Parse the class object\n    doc = parse_from_object(spec.MyClass, style=DocstringStyle.AUTO)\n    assert isinstance(doc, Docstring)\n    # The class docstring should be parsed\n    assert doc.summary == \"A simple class with attributes.\"\n    # Attribute docstrings should be added to the docstring's meta\n    # The meta dict keys are attribute names\n    assert \"attr1\" in doc.meta\n    assert \"attr2\" in doc.meta\n    # The attribute docs should contain the type information\n    assert doc.meta[\"attr1\"].type_name == \"int\"\n    assert doc.meta[\"attr2\"].type_name == \"str\"\n\n\ndef test_parse_from_object_missing_docstring_raises():\n    \"\"\"Error case: passing an object with no docstring should raise ParseError.\"\"\"\n    class NoDoc:\n        pass\n\n    # Remove the __doc__ attribute to simulate missing docstring\n    NoDoc.__doc__ = None\n\n    with pytest.raises(ParseError):\n        parse_from_object(NoDoc, style=DocstringStyle.AUTO)\n```",
+        "reasoning": "We need 3 tests for parse_from_object. Use tmp_path for module? We can create a dummy class with attribute docstrings. Use add_attribute_docstrings. Test normal: simple function docstring. Boundary: class with attribute docstring. Error: passing object without __doc__? but all have. Maybe passing non-string docstring? Actually parse expects text optional. If obj.__doc__ None, parse(None) returns? parse(None) will go through styles, each parse may raise ParseError. Might raise. So test that ParseError raised. Use pytest.raises. Ensure no mocks. Use tmp_path to create a module file? We can use types.ModuleType to create module with __doc__? But module docstring is module.__doc__. For attribute docstrings, we need class with attributes and docstrings defined via comments? In docstring_parser, attribute docstrings are defined as comments after attribute? Actually add_attribute_docstrings reads source code. We can create a class with attribute and docstring comment. Use inspect.getsource? Might be complex. Instead test that for class, add_attribute_docstrings called but we can check that docstring.meta contains attribute docs? Might be heavy.\n\nSimpler: test that for function, parse_from_object returns Docstring with summary. For class, docstring has no attributes but still returns. For error, pass object with __doc__ None and style AUTO, expecting ParseError. Use pytest.raises(ParseError). Need import ParseError.\n\nImplement tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.055870407,
+    "prompt_tokens": 845,
+    "prompt_time": 0.050875112,
+    "completion_tokens": 906,
+    "completion_time": 1.029235672,
+    "total_tokens": 1751,
+    "total_time": 1.080110784,
+    "completion_tokens_details": {
+      "reasoning_tokens": 303
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg43taet7anq9mtzj97q18",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport inspect\nimport types\nimport pytest\nfrom docstring_parser.parser import parse_from_object\nfrom docstring_parser.common import Docstring, DocstringStyle, ParseError\n\n\ndef test_parse_from_object_function_docstring():\n    \"\"\"Normal case: parse a simple function docstring.\"\"\"\n    def sample_func(x, y):\n        \"\"\"Return the sum of x and y.\n\n        Parameters\n        ----------\n        x : int\n            First number.\n        y : int\n            Second number.\n\n        Returns\n        -------\n        int\n            The sum of x and y.\n        \"\"\"\n        return x + y\n\n    doc = parse_from_object(sample_func, style=DocstringStyle.GOOGLE)\n    assert isinstance(doc, Docstring)\n    assert doc.summary == \"Return the sum of x and y.\"\n    assert len(doc.params) == 2\n    param_names = {p.arg_name for p in doc.params}\n    assert param_names == {\"x\", \"y\"}\n    assert doc.returns is not None\n    assert doc.returns.type_name == \"int\"\n\n\ndef test_parse_from_object_class_attribute_docstrings(tmp_path):\n    \"\"\"Boundary case: parse a class with attribute docstrings defined in source.\"\"\"\n    # Create a temporary module file with a class that has attribute docstrings.\n    module_code = '''\nclass MyClass:\n    \"\"\"A simple class with attributes.\"\"\"\n\n    attr1 = 1  # :type int: The first attribute.\n    attr2 = \"two\"  # :type str: The second attribute.\n'''\n    module_path = tmp_path / \"mymodule.py\"\n    module_path.write_text(module_code)\n\n    # Dynamically import the module\n    spec = types.ModuleType(\"mymodule\")\n    with open(module_path, \"r\") as f:\n        exec(f.read(), spec.__dict__)\n\n    # Parse the class object\n    doc = parse_from_object(spec.MyClass, style=DocstringStyle.AUTO)\n    assert isinstance(doc, Docstring)\n    # The class docstring should be parsed\n    assert doc.summary == \"A simple class with attributes.\"\n    # Attribute docstrings should be added to the docstring's meta\n    # The meta dict keys are attribute names\n    assert \"attr1\" in doc.meta\n    assert \"attr2\" in doc.meta\n    # The attribute docs should contain the type information\n    assert doc.meta[\"attr1\"].type_name == \"int\"\n    assert doc.meta[\"attr2\"].type_name == \"str\"\n\n\ndef test_parse_from_object_missing_docstring_raises():\n    \"\"\"Error case: passing an object with no docstring should raise ParseError.\"\"\"\n    class NoDoc:\n        pass\n\n    # Remove the __doc__ attribute to simulate missing docstring\n    NoDoc.__doc__ = None\n\n    with pytest.raises(ParseError):\n        parse_from_object(NoDoc, style=DocstringStyle.AUTO)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.510357461986132
+}

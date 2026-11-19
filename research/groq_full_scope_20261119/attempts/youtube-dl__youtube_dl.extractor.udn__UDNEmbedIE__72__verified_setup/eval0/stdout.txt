@@ -1,0 +1,155 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_extract_with_options_and_formats _____________________
+
+    def test_extract_with_options_and_formats():
+        # Page containing a valid `options` JSON with video URLs.
+        page = """
+            <html>
+            <script>
+            var options = {"video":{"mp4":"//cdn.example.com/video_720p_500.mp4","hls":"//cdn.example.com/playlist.m3u8"},
+                           "title":"Test Video",
+                           "poster":"https://cdn.example.com/thumb.jpg"};
+            </script>
+            </html>
+        """
+        extractor = DummyUDNIE(page)
+>       result = extractor._real_extract('http://video.udn.com/embed/news/12345')
+
+test_generated.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/udn.py:46: in _real_extract
+    options_str = self._html_search_regex(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1021: in _html_search_regex
+    res = self._search_regex(pattern, string, name, default, fatal, flags, group)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyUDNIE object at 0x7f5daef46e00>
+pattern = 'var\\s+options\\s*=\\s*([^;]+);'
+string = '\n        <html>\n        <script>\n        var options = {"video":{"mp4":"//cdn.example.com/video_720p_500.mp4","hls...deo",\n                       "poster":"https://cdn.example.com/thumb.jpg"};\n        </script>\n        </html>\n    '
+name = 'options', default = <object object at 0x7f5db0332120>, fatal = True
+flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+________________________ test_extract_youtube_redirect _________________________
+
+    def test_extract_youtube_redirect():
+        # Page where options contain a YouTube URL
+        page = """
+            <html>
+            <script>
+            var options = {"video":{"youtube":"https://www.youtube.com/watch?v=dQw4w9WgXcQ"},
+                           "title":"YouTube Redirect",
+                           "poster":"https://cdn.example.com/thumb2.jpg"};
+            </script>
+            </html>
+        """
+        extractor = DummyUDNIE(page)
+>       result = extractor._real_extract('https://video.udn.com/embed/news/67890')
+
+test_generated.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/udn.py:46: in _real_extract
+    options_str = self._html_search_regex(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1021: in _html_search_regex
+    res = self._search_regex(pattern, string, name, default, fatal, flags, group)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyUDNIE object at 0x7f5dade68520>
+pattern = 'var\\s+options\\s*=\\s*([^;]+);'
+string = '\n        <html>\n        <script>\n        var options = {"video":{"youtube":"https://www.youtube.com/watch?v=dQw4w9...ct",\n                       "poster":"https://cdn.example.com/thumb2.jpg"};\n        </script>\n        </html>\n    '
+name = 'options', default = <object object at 0x7f5db0332120>, fatal = True
+flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+________________ test_extract_without_options_parsing_fallback _________________
+
+    def test_extract_without_options_parsing_fallback():
+        # Page missing the `options` variable; fallback regexes are used.
+        page = """
+            <html>
+            <script>
+            var options_str = {"video":{"mp4":"//cdn.example.com/video_480p_300.mp4"},
+                               "title":"Fallback Video",
+                               "poster":"https://cdn.example.com/thumb3.jpg"};
+            </script>
+            </html>
+        """
+        # Provide the page content that contains the fallback JSON string.
+        extractor = DummyUDNIE(page)
+>       result = extractor._real_extract('http://video.udn.com/embed/news/54321')
+
+test_generated.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/udn.py:46: in _real_extract
+    options_str = self._html_search_regex(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1021: in _html_search_regex
+    res = self._search_regex(pattern, string, name, default, fatal, flags, group)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyUDNIE object at 0x7f5dade44b50>
+pattern = 'var\\s+options\\s*=\\s*([^;]+);'
+string = '\n        <html>\n        <script>\n        var options_str = {"video":{"mp4":"//cdn.example.com/video_480p_300.mp4"}...\n                           "poster":"https://cdn.example.com/thumb3.jpg"};\n        </script>\n        </html>\n    '
+name = 'options', default = <object object at 0x7f5db0332120>, fatal = True
+flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extract_with_options_and_formats - AttributeEr...
+FAILED test_generated.py::test_extract_youtube_redirect - AttributeError: 'No...
+FAILED test_generated.py::test_extract_without_options_parsing_fallback - Att...
+3 failed in 1.82s

@@ -1,0 +1,58 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_parse_normal_docstring __________________________
+
+    def test_parse_normal_docstring():
+        doc = """
+        This function does something.
+    
+        Args:
+            x (int): The first argument.
+            y (str): The second argument.
+    
+        Returns:
+            bool: True if successful, False otherwise.
+    
+        Raises:
+            ValueError: If x is negative.
+            TypeError: If y is not a string.
+    
+        Examples:
+            >>> result = my_func(1, "test")
+            >>> result
+            True
+        """
+        parsed = parse(doc)
+        assert isinstance(parsed, Docstring)
+        # Parameters
+        assert len(parsed.params) == 2
+        param_names = {p.arg_name for p in parsed.params}
+        assert param_names == {"x", "y"}
+        # Return
+        assert parsed.returns is not None
+        assert parsed.returns.type_name == "bool"
+        # Raises
+        assert len(parsed.raises) == 2
+        raise_names = {r.type_name for r in parsed.raises}
+        assert raise_names == {"ValueError", "TypeError"}
+        # Examples
+        assert len(parsed.examples) == 1
+        example = parsed.examples[0]
+        assert isinstance(example, type(parsed.examples[0]))
+>       assert example.source.strip().startswith(">>>")
+E       AttributeError: 'DocstringExample' object has no attribute 'source'
+
+../../../../../../attempts/docstring_parser__docstring_parser.google__parse__43__atomic_source/eval0/test_generated.py:42: AttributeError
+__________________________ test_parse_empty_docstring __________________________
+
+    def test_parse_empty_docstring():
+        parsed = parse("")
+        assert isinstance(parsed, Docstring)
+>       assert parsed.meta.short_description == ""
+E       AttributeError: 'list' object has no attribute 'short_description'
+
+../../../../../../attempts/docstring_parser__docstring_parser.google__parse__43__atomic_source/eval0/test_generated.py:50: AttributeError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.google__parse__43__atomic_source/eval0/test_generated.py::test_parse_normal_docstring
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.google__parse__43__atomic_source/eval0/test_generated.py::test_parse_empty_docstring
+2 failed, 1 passed in 0.17s

@@ -1,0 +1,79 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_get_local_reprs_order_and_repr ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_local_reprs_order_and0')
+
+    def test_get_local_reprs_order_and_repr(tmp_path):
+        # Define a function with several local variables
+        def sample():
+            a = 1
+            b = "hello"
+            c = [1, 2, 3]
+            d = {"key": "value"}
+            e = 3.14159
+            return locals()
+    
+        # Capture the frame of the function call
+        frame = inspect.currentframe()
+        # Call get_local_reprs on the frame of sample()
+        result = get_local_reprs(frame, max_length=10, normalize=True)
+    
+        # The result should be an OrderedDict preserving the order of co_varnames
+        # plus any additional locals (here all are defined in the function)
+        expected_keys = ["a", "b", "c", "d", "e"]
+>       assert list(result.keys()) == expected_keys
+E       AssertionError: assert ['tmp_path', ...ple', 'frame'] == ['a', 'b', 'c', 'd', 'e']
+E         
+E         At index 0 diff: 'tmp_path' != 'a'
+E         Right contains 2 more items, first extra item: 'd'
+E         Use -v to get more diff
+
+test_generated.py:26: AssertionError
+___________________ test_get_local_reprs_with_watch_variable ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_local_reprs_with_watc0')
+
+    def test_get_local_reprs_with_watch_variable(tmp_path):
+        # Create a dummy watch variable that returns a dict of items
+        class DummyWatch:
+            def items(self, frame, normalize):
+                return {"watch1": "value1", "watch2": "value2"}
+    
+        # Define a function with locals
+        def sample():
+            x = 42
+            y = "test"
+            return locals()
+    
+        frame = inspect.currentframe()
+        watch = DummyWatch()
+>       result = get_local_reprs(frame, watch=(watch,), normalize=False)
+
+test_generated.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+frame = <frame at 0x556254a72f70, file '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnoo...__get_local_reprs__72__verified_setup/eval0/test_generated.py', line 49, code test_get_local_reprs_with_watch_variable>
+watch = (<test_generated.test_get_local_reprs_with_watch_variable.<locals>.DummyWatch object at 0x7f1a72e99840>,)
+custom_repr = (), max_length = None, normalize = False
+
+    def get_local_reprs(frame, watch=(), custom_repr=(), max_length=None, normalize=False):
+        code = frame.f_code
+        vars_order = (code.co_varnames + code.co_cellvars + code.co_freevars +
+                      tuple(frame.f_locals.keys()))
+    
+        result_items = [(key, utils.get_shortish_repr(value, custom_repr,
+                                                      max_length, normalize))
+                        for key, value in frame.f_locals.items()]
+        result_items.sort(key=lambda key_value: vars_order.index(key_value[0]))
+        result = collections.OrderedDict(result_items)
+    
+        for variable in watch:
+>           result.update(sorted(variable.items(frame, normalize)))
+E           ValueError: too many values to unpack (expected 2)
+
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/tracer.py:44: ValueError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_local_reprs_order_and_repr - AssertionErro...
+FAILED test_generated.py::test_get_local_reprs_with_watch_variable - ValueErr...
+2 failed, 1 passed in 0.14s

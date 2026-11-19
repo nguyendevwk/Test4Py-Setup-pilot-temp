@@ -1,0 +1,36 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______ test_get_custom_loader_creates_node_and_edge_and_returns_loader ________
+
+    def test_get_custom_loader_creates_node_and_edge_and_returns_loader():
+        ig = DummyImportManager()
+        fullname = "pkg.module"
+        path = "/path/to/module.py"
+    
+        # Scenario 1: node does not exist
+        Loader = get_custom_loader(ig)
+        loader1 = Loader(fullname, path)
+        assert ig.edges == [fullname]
+        assert ig.nodes == {fullname: {}}
+        assert ig.filepaths[fullname] == path
+        assert ig.create_node_calls == 1
+        assert loader1.get_filename(fullname) == path
+        assert loader1.get_data(path) == ""
+    
+        # Scenario 2: node already exists
+        ig2 = DummyImportManager()
+        ig2.create_node(fullname)
+        ig2.set_filepath(fullname, "/old/path")
+        Loader2 = get_custom_loader(ig2)
+        loader2 = Loader2(fullname, path)
+        assert ig2.edges == [fullname]
+        assert ig2.filepaths[fullname] == path  # updated to new path
+>       assert ig2.create_node_calls == 0
+E       assert 2 == 0
+E        +  where 2 = <test_run.DummyImportManager object at 0x7fdef9718100>.create_node_calls
+
+../v1_raw/test_run.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED ../v1_raw/test_run.py::test_get_custom_loader_creates_node_and_edge_and_returns_loader
+1 failed in 0.07s
+

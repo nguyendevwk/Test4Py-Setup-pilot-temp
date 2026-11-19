@@ -1,0 +1,62 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_replacement_cancels_waiting _______________________
+
+    def test_replacement_cancels_waiting():
+        """Submitting a second task should cancel the waiting task and keep the running one."""
+        worker = MonoWorker()
+        order = []
+    
+        def long_task():
+            order.append("start")
+            time.sleep(0.2)
+            order.append("end")
+    
+        def quick_task():
+            order.append("quick")
+    
+        # Submit long task (will be running)
+        long_future = worker.submit(long_task)
+        # Submit quick task (should replace waiting)
+        quick_future = worker.submit(quick_task)
+    
+        # The quick task should be cancelled before it starts
+>       assert quick_future.cancelled()
+E       assert False
+E        +  where False = cancelled()
+E        +    where cancelled = <Future at 0x7fd7fe60fdf0 state=pending>.cancelled
+
+../../../../../../../groq_context_development_20261119/attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__46__atomic_source/eval0/test_generated.py:46: AssertionError
+_______________________ test_running_task_not_cancelled ________________________
+
+    def test_running_task_not_cancelled():
+        """Ensure that a running task is never cancelled when a new task is submitted."""
+        worker = MonoWorker()
+        order = []
+    
+        def task_a():
+            order.append("a_start")
+            time.sleep(0.1)
+            order.append("a_end")
+    
+        def task_b():
+            order.append("b_start")
+            time.sleep(0.05)
+            order.append("b_end")
+    
+        # Submit first task
+        future_a = worker.submit(task_a)
+        # Immediately submit second task
+        future_b = worker.submit(task_b)
+    
+        # The second task should be cancelled (waiting)
+>       assert future_b.cancelled()
+E       assert False
+E        +  where False = cancelled()
+E        +    where cancelled = <Future at 0x7fd7fe5e4400 state=pending>.cancelled
+
+../../../../../../../groq_context_development_20261119/attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__46__atomic_source/eval0/test_generated.py:75: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_context_development_20261119/attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__46__atomic_source/eval0/test_generated.py::test_replacement_cancels_waiting
+FAILED ../../../../../../../groq_context_development_20261119/attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__46__atomic_source/eval0/test_generated.py::test_running_task_not_cancelled
+2 failed, 1 passed in 0.26s

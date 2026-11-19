@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-41152b21-e32b-4be9-8b2b-c2342441a247",
+  "object": "chat.completion",
+  "created": 1795078469,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\n# Import the target function\nfrom httpie.config import get_default_config_dir, ENV_HTTPIE_CONFIG_DIR, ENV_XDG_CONFIG_HOME, DEFAULT_RELATIVE_LEGACY_CONFIG_DIR, DEFAULT_CONFIG_DIRNAME, DEFAULT_RELATIVE_XDG_CONFIG_HOME, DEFAULT_WINDOWS_CONFIG_DIR, is_windows\n\n\ndef test_env_var_overrides_all(tmp_path, monkeypatch):\n    \"\"\"When HTTPIE_CONFIG_DIR is set, it takes precedence over everything else.\"\"\"\n    # Set the environment variable to a temporary directory\n    env_dir = tmp_path / \"env_config\"\n    env_dir.mkdir()\n    monkeypatch.setenv(ENV_HTTPIE_CONFIG_DIR, str(env_dir))\n\n    # Ensure other conditions are false\n    monkeypatch.delenv(ENV_XDG_CONFIG_HOME, raising=False)\n    monkeypatch.setattr(Path, \"home\", lambda: tmp_path / \"home\")\n    monkeypatch.setattr(is_windows, \"__call__\", lambda: False)\n\n    # Call the function\n    result = get_default_config_dir()\n\n    # Assert that the returned path is exactly the env var path\n    assert result == env_dir\n    assert result.is_absolute()\n\n\ndef test_legacy_config_dir_exists(tmp_path, monkeypatch):\n    \"\"\"If the legacy ~/.httpie directory exists, it is returned.\"\"\"\n    # Simulate a home directory\n    home_dir = tmp_path / \"home\"\n    home_dir.mkdir()\n    # Create the legacy config directory\n    legacy_dir = home_dir / DEFAULT_RELATIVE_LEGACY_CONFIG_DIR\n    legacy_dir.mkdir()\n\n    # Ensure env var is not set\n    monkeypatch.delenv(ENV_HTTPIE_CONFIG_DIR, raising=False)\n    # Ensure XDG env var is not set\n    monkeypatch.delenv(ENV_XDG_CONFIG_HOME, raising=False)\n    # Patch Path.home to return our fake home\n    monkeypatch.setattr(Path, \"home\", lambda: home_dir)\n    # Ensure not on Windows\n    monkeypatch.setattr(is_windows, \"__call__\", lambda: False)\n\n    # Call the function\n    result = get_default_config_dir()\n\n    # Assert that the legacy directory is returned\n    assert result == legacy_dir\n    assert result.is_dir()\n\n\ndef test_xdg_default_when_no_env_or_legacy(tmp_path, monkeypatch):\n    \"\"\"When no env var or legacy directory, XDG default is used.\"\"\"\n    # Simulate a home directory without legacy config\n    home_dir = tmp_path / \"home\"\n    home_dir.mkdir()\n\n    # Ensure env var is not set\n    monkeypatch.delenv(ENV_HTTPIE_CONFIG_DIR, raising=False)\n    # Ensure XDG env var is not set\n    monkeypatch.delenv(ENV_XDG_CONFIG_HOME, raising=False)\n    # Patch Path.home to return our fake home\n    monkeypatch.setattr(Path, \"home\", lambda: home_dir)\n    # Ensure not on Windows\n    monkeypatch.setattr(is_windows, \"__call__\", lambda: False)\n\n    # Call the function\n    result = get_default_config_dir()\n\n    # Expected path: $HOME/.config/httpie\n    expected = home_dir / DEFAULT_RELATIVE_XDG_CONFIG_HOME / DEFAULT_CONFIG_DIRNAME\n    assert result == expected\n    assert result.is_absolute()\n```",
+        "reasoning": "We need to test get_default_config_dir. Need three tests: env var, legacy exists, XDG default. Use tmp_path. Also test Windows? but is_windows flag from compat. We can't modify. Assume is_windows False. We'll simulate legacy by creating dir. Use monkeypatch to set env. Use tmp_path for home? Path.home() uses actual home. We can monkeypatch Path.home to return tmp_path. Use monkeypatch context. Also need to import function. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054338121,
+    "prompt_tokens": 573,
+    "prompt_time": 0.005796918,
+    "completion_tokens": 800,
+    "completion_time": 1.188073118,
+    "total_tokens": 1373,
+    "total_time": 1.193870036,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 101
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg7c8cep5rfxy01yy50k19",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\n# Import the target function\nfrom httpie.config import get_default_config_dir, ENV_HTTPIE_CONFIG_DIR, ENV_XDG_CONFIG_HOME, DEFAULT_RELATIVE_LEGACY_CONFIG_DIR, DEFAULT_CONFIG_DIRNAME, DEFAULT_RELATIVE_XDG_CONFIG_HOME, DEFAULT_WINDOWS_CONFIG_DIR, is_windows\n\n\ndef test_env_var_overrides_all(tmp_path, monkeypatch):\n    \"\"\"When HTTPIE_CONFIG_DIR is set, it takes precedence over everything else.\"\"\"\n    # Set the environment variable to a temporary directory\n    env_dir = tmp_path / \"env_config\"\n    env_dir.mkdir()\n    monkeypatch.setenv(ENV_HTTPIE_CONFIG_DIR, str(env_dir))\n\n    # Ensure other conditions are false\n    monkeypatch.delenv(ENV_XDG_CONFIG_HOME, raising=False)\n    monkeypatch.setattr(Path, \"home\", lambda: tmp_path / \"home\")\n    monkeypatch.setattr(is_windows, \"__call__\", lambda: False)\n\n    # Call the function\n    result = get_default_config_dir()\n\n    # Assert that the returned path is exactly the env var path\n    assert result == env_dir\n    assert result.is_absolute()\n\n\ndef test_legacy_config_dir_exists(tmp_path, monkeypatch):\n    \"\"\"If the legacy ~/.httpie directory exists, it is returned.\"\"\"\n    # Simulate a home directory\n    home_dir = tmp_path / \"home\"\n    home_dir.mkdir()\n    # Create the legacy config directory\n    legacy_dir = home_dir / DEFAULT_RELATIVE_LEGACY_CONFIG_DIR\n    legacy_dir.mkdir()\n\n    # Ensure env var is not set\n    monkeypatch.delenv(ENV_HTTPIE_CONFIG_DIR, raising=False)\n    # Ensure XDG env var is not set\n    monkeypatch.delenv(ENV_XDG_CONFIG_HOME, raising=False)\n    # Patch Path.home to return our fake home\n    monkeypatch.setattr(Path, \"home\", lambda: home_dir)\n    # Ensure not on Windows\n    monkeypatch.setattr(is_windows, \"__call__\", lambda: False)\n\n    # Call the function\n    result = get_default_config_dir()\n\n    # Assert that the legacy directory is returned\n    assert result == legacy_dir\n    assert result.is_dir()\n\n\ndef test_xdg_default_when_no_env_or_legacy(tmp_path, monkeypatch):\n    \"\"\"When no env var or legacy directory, XDG default is used.\"\"\"\n    # Simulate a home directory without legacy config\n    home_dir = tmp_path / \"home\"\n    home_dir.mkdir()\n\n    # Ensure env var is not set\n    monkeypatch.delenv(ENV_HTTPIE_CONFIG_DIR, raising=False)\n    # Ensure XDG env var is not set\n    monkeypatch.delenv(ENV_XDG_CONFIG_HOME, raising=False)\n    # Patch Path.home to return our fake home\n    monkeypatch.setattr(Path, \"home\", lambda: home_dir)\n    # Ensure not on Windows\n    monkeypatch.setattr(is_windows, \"__call__\", lambda: False)\n\n    # Call the function\n    result = get_default_config_dir()\n\n    # Expected path: $HOME/.config/httpie\n    expected = home_dir / DEFAULT_RELATIVE_XDG_CONFIG_HOME / DEFAULT_CONFIG_DIRNAME\n    assert result == expected\n    assert result.is_absolute()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.6423223479650915
+}

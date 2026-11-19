@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-b8fe5ebe-7b40-45c8-a395-9240f61b7ee4",
+  "object": "chat.completion",
+  "created": 1795078807,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\n\nfrom pypara.accounting.ledger import build_general_ledger\nfrom pypara.accounting.accounts import Account\nfrom pypara.accounting.generic import Balance\nfrom pypara.accounting.journaling import JournalEntry, Posting\nfrom pypara.commons.zeitgeist import DateRange\nfrom pypara.commons.numbers import Quantity\n\n\ndef test_build_general_ledger_with_initial_and_entries():\n    # Period\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n\n    # Accounts\n    cash = Account(\"Cash\")\n    revenue = Account(\"Revenue\")\n\n    # Initial balances\n    initial = {cash: Balance(period.since, Quantity(Decimal(\"1000.00\")))}\n\n    # Journal entries\n    entries = [\n        JournalEntry(\n            date=datetime.date(2023, 6, 15),\n            postings=[\n                Posting(account=cash, amount=Quantity(Decimal(\"200.00\"))),\n                Posting(account=revenue, amount=Quantity(Decimal(\"-200.00\"))),\n            ],\n        ),\n        JournalEntry(\n            date=datetime.date(2023, 9, 10),\n            postings=[\n                Posting(account=cash, amount=Quantity(Decimal(\"-50.00\"))),\n                Posting(account=revenue, amount=Quantity(Decimal(\"50.00\"))),\n            ],\n        ),\n    ]\n\n    ledger = build_general_ledger(period, entries, initial)\n\n    # Check that both accounts exist in the ledger\n    assert cash in ledger.ledgers\n    assert revenue in ledger.ledgers\n\n    # Verify balances\n    cash_balance = ledger.ledgers[cash].balance\n    revenue_balance = ledger.ledgers[revenue].balance\n\n    assert cash_balance.amount == Decimal(\"1150.00\")\n    assert revenue_balance.amount == Decimal(\"-150.00\")\n\n\ndef test_build_general_ledger_includes_boundary_dates():\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acct = Account(\"Bank\")\n    initial = {acct: Balance(period.since, Quantity(Decimal(\"500.00\")))}\n\n    entries = [\n        JournalEntry(\n            date=period.since,\n            postings=[Posting(account=acct, amount=Quantity(Decimal(\"100.00\")))],\n        ),\n        JournalEntry(\n            date=period.until,\n            postings=[Posting(account=acct, amount=Quantity(Decimal(\"-50.00\")))],\n        ),\n    ]\n\n    ledger = build_general_ledger(period, entries, initial)\n\n    final_balance = ledger.ledgers[acct].balance.amount\n    assert final_balance == Decimal(\"550.00\")  # 500 + 100 - 50\n\n\ndef test_build_general_ledger_no_initial_and_no_entries():\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    initial = {}\n    entries = []\n\n    ledger = build_general_ledger(period, entries, initial)\n\n    # Ledger should be empty\n    assert len(ledger.ledgers) == 0\n```",
+        "reasoning": "We need tests for build_general_ledger. Need minimal classes: DateRange, JournalEntry, Posting, Account, Balance, Ledger, GeneralLedger, InitialBalances. Likely available in package. We'll import. Write tests: normal case with entries, boundary date inclusion, error? maybe missing initial? But function handles. Test that ledger balances correct. Use tmp_path? not needed. Just create objects. Use Decimal. Let's write three tests: 1) normal entries with initial balances. 2) boundary dates: entry exactly on since and until included. 3) no initial balances and no entries: ledger empty. Use assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.096989631,
+    "prompt_tokens": 556,
+    "prompt_time": 0.060031978,
+    "completion_tokens": 801,
+    "completion_time": 1.451674465,
+    "total_tokens": 1357,
+    "total_time": 1.511706443,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 129
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sghpb3ev0t1xrvk7yjaycv",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\n\nfrom pypara.accounting.ledger import build_general_ledger\nfrom pypara.accounting.accounts import Account\nfrom pypara.accounting.generic import Balance\nfrom pypara.accounting.journaling import JournalEntry, Posting\nfrom pypara.commons.zeitgeist import DateRange\nfrom pypara.commons.numbers import Quantity\n\n\ndef test_build_general_ledger_with_initial_and_entries():\n    # Period\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n\n    # Accounts\n    cash = Account(\"Cash\")\n    revenue = Account(\"Revenue\")\n\n    # Initial balances\n    initial = {cash: Balance(period.since, Quantity(Decimal(\"1000.00\")))}\n\n    # Journal entries\n    entries = [\n        JournalEntry(\n            date=datetime.date(2023, 6, 15),\n            postings=[\n                Posting(account=cash, amount=Quantity(Decimal(\"200.00\"))),\n                Posting(account=revenue, amount=Quantity(Decimal(\"-200.00\"))),\n            ],\n        ),\n        JournalEntry(\n            date=datetime.date(2023, 9, 10),\n            postings=[\n                Posting(account=cash, amount=Quantity(Decimal(\"-50.00\"))),\n                Posting(account=revenue, amount=Quantity(Decimal(\"50.00\"))),\n            ],\n        ),\n    ]\n\n    ledger = build_general_ledger(period, entries, initial)\n\n    # Check that both accounts exist in the ledger\n    assert cash in ledger.ledgers\n    assert revenue in ledger.ledgers\n\n    # Verify balances\n    cash_balance = ledger.ledgers[cash].balance\n    revenue_balance = ledger.ledgers[revenue].balance\n\n    assert cash_balance.amount == Decimal(\"1150.00\")\n    assert revenue_balance.amount == Decimal(\"-150.00\")\n\n\ndef test_build_general_ledger_includes_boundary_dates():\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    acct = Account(\"Bank\")\n    initial = {acct: Balance(period.since, Quantity(Decimal(\"500.00\")))}\n\n    entries = [\n        JournalEntry(\n            date=period.since,\n            postings=[Posting(account=acct, amount=Quantity(Decimal(\"100.00\")))],\n        ),\n        JournalEntry(\n            date=period.until,\n            postings=[Posting(account=acct, amount=Quantity(Decimal(\"-50.00\")))],\n        ),\n    ]\n\n    ledger = build_general_ledger(period, entries, initial)\n\n    final_balance = ledger.ledgers[acct].balance.amount\n    assert final_balance == Decimal(\"550.00\")  # 500 + 100 - 50\n\n\ndef test_build_general_ledger_no_initial_and_no_entries():\n    period = DateRange(datetime.date(2023, 1, 1), datetime.date(2023, 12, 31))\n    initial = {}\n    entries = []\n\n    ledger = build_general_ledger(period, entries, initial)\n\n    # Ledger should be empty\n    assert len(ledger.ledgers) == 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.9803710390115157
+}

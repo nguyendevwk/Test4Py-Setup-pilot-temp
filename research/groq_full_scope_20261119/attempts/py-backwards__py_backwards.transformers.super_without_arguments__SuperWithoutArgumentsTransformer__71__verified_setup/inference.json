@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-d15abfaa-6898-4376-b091-8333895a9add",
+  "object": "chat.completion",
+  "created": 1795076171,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.transformers.super_without_arguments import SuperWithoutArgumentsTransformer\nfrom py_backwards.exceptions import NodeNotFound\nfrom py_backwards.utils.helpers import warn\n\n\ndef find_super_call(tree):\n    for node in ast.walk(tree):\n        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == \"super\":\n            return node\n    return None\n\n\ndef test_super_without_arguments_transforms_inside_method(tmp_path):\n    src = \"\"\"\nclass A:\n    def foo(self):\n        super()\n\"\"\"\n    tree = ast.parse(src)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call = find_super_call(tree)\n    assert call is not None\n    assert len(call.args) == 2\n    assert isinstance(call.args[0], ast.Name) and call.args[0].id == \"A\"\n    assert isinstance(call.args[1], ast.Name) and call.args[1].id == \"self\"\n\n\ndef test_super_without_arguments_warns_outside_class(tmp_path, caplog):\n    src = \"\"\"\ndef bar():\n    super()\n\"\"\"\n    tree = ast.parse(src)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call = find_super_call(tree)\n    assert call is not None\n    # No arguments should be added\n    assert len(call.args) == 0\n    # Warning should be logged\n    assert any(\"super() outside of class\" in rec.message for rec in caplog.records)\n\n\ndef test_super_without_arguments_no_change_when_args_present(tmp_path):\n    src = \"\"\"\nclass B:\n    def baz(self):\n        super(1, 2)\n\"\"\"\n    tree = ast.parse(src)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call = find_super_call(tree)\n    assert call is not None\n    # Arguments should remain unchanged\n    assert len(call.args) == 2\n    assert isinstance(call.args[0], ast.Num) and call.args[0].n == 1\n    assert isinstance(call.args[1], ast.Num) and call.args[1].n == 2\n```",
+        "reasoning": "We need to write tests for SuperWithoutArgumentsTransformer. We need to import it. We'll create code that builds an AST from source using typed_ast.ast3.parse? typed_ast provides ast3.parse. We'll transform and then unparse? typed_ast doesn't have unparse. We can inspect the transformed AST nodes. We'll test that super() inside method becomes super(Cls, self). Also test warnings? warn function maybe prints. We can capture warnings via caplog? warn likely logs. But we can test that if super() outside function or class, it warns and no change. We'll use tmp_path to write source? Not needed. We'll just parse string.\n\nTest1: normal: class A: def m(self): super() -> after transform, node.args[0].id == 'A', node.args[1].id == 'self'.\n\nTest2: boundary: super() inside nested function? Should warn and not change? But if inside function but not class, warn 'outside of class'. We'll test that.\n\nTest3: error: super() with arguments already? Should not change. We'll test that.\n\nImplement tests. Use typed_ast.ast3.parse. Use transformer.visit(tree). Then find Call node. Use ast.walk. Use assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051563287,
+    "prompt_tokens": 543,
+    "prompt_time": 0.032192352,
+    "completion_tokens": 716,
+    "completion_time": 0.793985156,
+    "total_tokens": 1259,
+    "total_time": 0.826177508,
+    "completion_tokens_details": {
+      "reasoning_tokens": 252
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7se1968eerv5yejp0fhh5y4",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.transformers.super_without_arguments import SuperWithoutArgumentsTransformer\nfrom py_backwards.exceptions import NodeNotFound\nfrom py_backwards.utils.helpers import warn\n\n\ndef find_super_call(tree):\n    for node in ast.walk(tree):\n        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == \"super\":\n            return node\n    return None\n\n\ndef test_super_without_arguments_transforms_inside_method(tmp_path):\n    src = \"\"\"\nclass A:\n    def foo(self):\n        super()\n\"\"\"\n    tree = ast.parse(src)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call = find_super_call(tree)\n    assert call is not None\n    assert len(call.args) == 2\n    assert isinstance(call.args[0], ast.Name) and call.args[0].id == \"A\"\n    assert isinstance(call.args[1], ast.Name) and call.args[1].id == \"self\"\n\n\ndef test_super_without_arguments_warns_outside_class(tmp_path, caplog):\n    src = \"\"\"\ndef bar():\n    super()\n\"\"\"\n    tree = ast.parse(src)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call = find_super_call(tree)\n    assert call is not None\n    # No arguments should be added\n    assert len(call.args) == 0\n    # Warning should be logged\n    assert any(\"super() outside of class\" in rec.message for rec in caplog.records)\n\n\ndef test_super_without_arguments_no_change_when_args_present(tmp_path):\n    src = \"\"\"\nclass B:\n    def baz(self):\n        super(1, 2)\n\"\"\"\n    tree = ast.parse(src)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call = find_super_call(tree)\n    assert call is not None\n    # Arguments should remain unchanged\n    assert len(call.args) == 2\n    assert isinstance(call.args[0], ast.Num) and call.args[0].n == 1\n    assert isinstance(call.args[1], ast.Num) and call.args[1].n == 2\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2699761420371942
+}

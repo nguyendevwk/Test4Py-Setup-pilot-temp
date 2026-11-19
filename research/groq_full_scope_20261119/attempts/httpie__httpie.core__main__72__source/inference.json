@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-3ffea86f-55e2-44c4-bd58-263dce6da636",
+  "object": "chat.completion",
+  "created": 1795077102,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport inspect\nimport pytest\nfrom httpie.core import main\nfrom httpie.status import ExitStatus\n\ndef test_main_signature():\n    \"\"\"Verify that main accepts the expected parameters and returns ExitStatus.\"\"\"\n    sig = inspect.signature(main)\n    assert sig.parameters[\"args\"].default == pytest.importorskip(\"sys\").argv\n    assert sig.parameters[\"env\"].default is not None\n    assert sig.return_annotation is ExitStatus\n\ndef test_main_returns_exit_status_type():\n    \"\"\"Calling main with minimal arguments should return an ExitStatus instance.\"\"\"\n    # Use a minimal argument list that is unlikely to trigger complex logic\n    # but still allows main to run without raising unexpected exceptions.\n    # We catch any exception to ensure the function returns ExitStatus when possible.\n    try:\n        result = main(args=[\"httpie\", \"--version\"])\n    except Exception as exc:\n        # If an exception occurs, ensure it's not a TypeError from wrong signature\n        assert not isinstance(exc, TypeError)\n        raise\n    assert isinstance(result, ExitStatus)\n\ndef test_main_invalid_args_type():\n    \"\"\"Passing a non-list to args should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        main(args=\"not a list\")\n```",
+        "reasoning": "We need to test main function. But it depends on many modules. Hard. Maybe test that calling main with no args returns ExitStatus? But program not defined. Likely fails. Maybe skip? But cannot skip. Maybe test that main raises TypeError if args not list? But main expects list. We can test that passing non-list raises TypeError? It will accept any iterable? It passes to raw_main. Hard.\n\nMaybe test that main returns ExitStatus when called with empty list? But raw_main likely errors. Can't.\n\nMaybe test that main imports correctly? Not.\n\nGiven constraints, maybe create dummy args that cause error and assert raises? But we don't know behavior.\n\nProbably cannot test. Maybe skip? But cannot skip.\n\nThus maybe test that main signature exists and returns ExitStatus type? Use inspect. But calling main will run raw_main. We can patch raw_main? Not allowed.\n\nThus maybe test that main accepts args parameter and env parameter. Use inspect.signature. That's independent. Let's do that."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049322734,
+    "prompt_tokens": 518,
+    "prompt_time": 0.014894354,
+    "completion_tokens": 463,
+    "completion_time": 0.868547272,
+    "total_tokens": 981,
+    "total_time": 0.883441626,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 204
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sexnzfe7zrt8ez688dpzb3",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport inspect\nimport pytest\nfrom httpie.core import main\nfrom httpie.status import ExitStatus\n\ndef test_main_signature():\n    \"\"\"Verify that main accepts the expected parameters and returns ExitStatus.\"\"\"\n    sig = inspect.signature(main)\n    assert sig.parameters[\"args\"].default == pytest.importorskip(\"sys\").argv\n    assert sig.parameters[\"env\"].default is not None\n    assert sig.return_annotation is ExitStatus\n\ndef test_main_returns_exit_status_type():\n    \"\"\"Calling main with minimal arguments should return an ExitStatus instance.\"\"\"\n    # Use a minimal argument list that is unlikely to trigger complex logic\n    # but still allows main to run without raising unexpected exceptions.\n    # We catch any exception to ensure the function returns ExitStatus when possible.\n    try:\n        result = main(args=[\"httpie\", \"--version\"])\n    except Exception as exc:\n        # If an exception occurs, ensure it's not a TypeError from wrong signature\n        assert not isinstance(exc, TypeError)\n        raise\n    assert isinstance(result, ExitStatus)\n\ndef test_main_invalid_args_type():\n    \"\"\"Passing a non-list to args should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        main(args=\"not a list\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2803067849599756
+}

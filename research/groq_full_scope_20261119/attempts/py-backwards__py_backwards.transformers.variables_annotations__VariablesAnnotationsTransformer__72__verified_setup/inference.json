@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-02b769bf-18a1-40bd-96b1-bcbd779dbf2d",
+  "object": "chat.completion",
+  "created": 1795079117,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\n\nfrom py_backwards.transformers.variables_annotations import VariablesAnnotationsTransformer\nfrom py_backwards.types import TransformationResult\n\n\ndef build_tree(source: str) -> typed_ast.AST:\n    \"\"\"Parse source code into a typed_ast AST.\"\"\"\n    return typed_ast.parse(source, mode=\"exec\")\n\n\ndef get_assign_targets(tree: typed_ast.AST):\n    \"\"\"Return a list of target names from Assign nodes in the tree.\"\"\"\n    targets = []\n    for node in typed_ast.walk(tree):\n        if isinstance(node, typed_ast.Assign):\n            for t in node.targets:\n                if isinstance(t, typed_ast.Name):\n                    targets.append(t.id)\n    return targets\n\n\ndef get_assign_values(tree: typed_ast.AST):\n    \"\"\"Return a list of values (as strings) from Assign nodes in the tree.\"\"\"\n    values = []\n    for node in typed_ast.walk(tree):\n        if isinstance(node, typed_ast.Assign):\n            if isinstance(node.value, typed_ast.Constant):\n                values.append(node.value.value)\n    return values\n\n\ndef test_transformer_removes_annotation_and_keeps_value():\n    src = \"\"\"\na: int = 10\nb: str\n\"\"\"\n    tree = build_tree(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # The tree should have changed\n    assert result.tree_changed is True\n\n    # There should be no AnnAssign nodes left\n    ann_assigns = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.AnnAssign)]\n    assert ann_assigns == []\n\n    # There should be one Assign node for 'a' with value 10\n    assigns = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.Assign)]\n    assert len(assigns) == 1\n    assign = assigns[0]\n    assert isinstance(assign.targets[0], typed_ast.Name)\n    assert assign.targets[0].id == \"a\"\n    assert isinstance(assign.value, typed_ast.Constant)\n    assert assign.value.value == 10\n\n    # The type_comment should be preserved\n    assert assign.type_comment == \"int\"\n\n\ndef test_transformer_removes_annotation_without_value():\n    src = \"\"\"\nx: float\n\"\"\"\n    tree = build_tree(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # The tree should have changed\n    assert result.tree_changed is True\n\n    # No AnnAssign nodes should remain\n    ann_assigns = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.AnnAssign)]\n    assert ann_assigns == []\n\n    # No Assign nodes should be added because there was no value\n    assigns = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.Assign)]\n    assert assigns == []\n\n\ndef test_transformer_does_not_modify_tree_without_annassign():\n    src = \"\"\"\ndef foo():\n    return 42\n\"\"\"\n    tree = build_tree(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # The tree should not have changed\n    assert result.tree_changed is False\n\n    # The structure should be identical to the original\n    original_code = typed_ast.unparse(tree)\n    transformed_code = typed_ast.unparse(result.tree)\n    assert original_code == transformed_code\n```",
+        "reasoning": "Need tests for transformer. We'll create small AST using typed_ast ast3. Use ast.parse? typed_ast provides parse? Use ast.parse from typed_ast? Use ast.parse from typed_ast.ast3? We'll import ast from typed_ast.ast3. Use ast.parse. Then apply transformer.transform. Check resulting tree. Use ast.unparse? typed_ast may not have unparse. Instead inspect nodes. We'll check that AnnAssign removed and Assign added. Write three tests: normal with value, without value, and error when node outside body? Hard to create. Maybe create AnnAssign at module level? That is body. For error scenario, maybe AnnAssign inside expression? Hard. We'll just test normal and boundary. Third test: ensure tree_changed flag. Use simple."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.059841464,
+    "prompt_tokens": 497,
+    "prompt_time": 0.037664925,
+    "completion_tokens": 849,
+    "completion_time": 0.96150728,
+    "total_tokens": 1346,
+    "total_time": 0.999172205,
+    "completion_tokens_details": {
+      "reasoning_tokens": 154
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgv5sversbsmthtt39t0t1",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\n\nfrom py_backwards.transformers.variables_annotations import VariablesAnnotationsTransformer\nfrom py_backwards.types import TransformationResult\n\n\ndef build_tree(source: str) -> typed_ast.AST:\n    \"\"\"Parse source code into a typed_ast AST.\"\"\"\n    return typed_ast.parse(source, mode=\"exec\")\n\n\ndef get_assign_targets(tree: typed_ast.AST):\n    \"\"\"Return a list of target names from Assign nodes in the tree.\"\"\"\n    targets = []\n    for node in typed_ast.walk(tree):\n        if isinstance(node, typed_ast.Assign):\n            for t in node.targets:\n                if isinstance(t, typed_ast.Name):\n                    targets.append(t.id)\n    return targets\n\n\ndef get_assign_values(tree: typed_ast.AST):\n    \"\"\"Return a list of values (as strings) from Assign nodes in the tree.\"\"\"\n    values = []\n    for node in typed_ast.walk(tree):\n        if isinstance(node, typed_ast.Assign):\n            if isinstance(node.value, typed_ast.Constant):\n                values.append(node.value.value)\n    return values\n\n\ndef test_transformer_removes_annotation_and_keeps_value():\n    src = \"\"\"\na: int = 10\nb: str\n\"\"\"\n    tree = build_tree(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # The tree should have changed\n    assert result.tree_changed is True\n\n    # There should be no AnnAssign nodes left\n    ann_assigns = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.AnnAssign)]\n    assert ann_assigns == []\n\n    # There should be one Assign node for 'a' with value 10\n    assigns = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.Assign)]\n    assert len(assigns) == 1\n    assign = assigns[0]\n    assert isinstance(assign.targets[0], typed_ast.Name)\n    assert assign.targets[0].id == \"a\"\n    assert isinstance(assign.value, typed_ast.Constant)\n    assert assign.value.value == 10\n\n    # The type_comment should be preserved\n    assert assign.type_comment == \"int\"\n\n\ndef test_transformer_removes_annotation_without_value():\n    src = \"\"\"\nx: float\n\"\"\"\n    tree = build_tree(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # The tree should have changed\n    assert result.tree_changed is True\n\n    # No AnnAssign nodes should remain\n    ann_assigns = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.AnnAssign)]\n    assert ann_assigns == []\n\n    # No Assign nodes should be added because there was no value\n    assigns = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.Assign)]\n    assert assigns == []\n\n\ndef test_transformer_does_not_modify_tree_without_annassign():\n    src = \"\"\"\ndef foo():\n    return 42\n\"\"\"\n    tree = build_tree(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # The tree should not have changed\n    assert result.tree_changed is False\n\n    # The structure should be identical to the original\n    original_code = typed_ast.unparse(tree)\n    transformed_code = typed_ast.unparse(result.tree)\n    assert original_code == transformed_code\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4315139910322614
+}

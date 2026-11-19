@@ -1,0 +1,50 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_format_style_help_default_behavior ____________________
+
+    def test_format_style_help_default_behavior():
+        # Provide a custom list of styles and verify the output contains them
+        styles = ["monokai", "solarized", "dracula"]
+        result = format_style_help(styles)
+        # The default style should be mentioned
+        assert f'Output coloring style (default is "{DEFAULT_STYLE}")' in result
+        # The provided styles should appear in the output, each on a new line
+        for style in styles:
+>           assert f'    {style}' in result
+E           assert '    solarized' in '\n    Output coloring style (default is "auto"). It can be one of:\n\n        monokai, solarized, dracula\n    \nThe ...ronment variable is set to "xterm-256color" or similar\n(e.g., via `export TERM=xterm-256color\' in your ~/.bashrc).\n'
+
+test_generated.py:13: AssertionError
+____________________ test_format_style_help_isolation_mode _____________________
+
+    def test_format_style_help_isolation_mode():
+        # When isolation_mode is True, the function should use BUNDLED_STYLES
+        result = format_style_help([], isolation_mode=True)
+        # The output should include the isolation mode header
+        assert 'For finding out all available styles in your system' in result
+        # All bundled styles should be listed, sorted alphabetically
+        sorted_bundled = sorted(BUNDLED_STYLES)
+        for style in sorted_bundled:
+>           assert f'    {style}' in result
+E           assert '    pie' in '\n    Output coloring style (default is "auto"). It can be one of:\n\n        auto, pie, pie-dark, pie-light, solariz...ronment variable is set to "xterm-256color" or similar\n(e.g., via `export TERM=xterm-256color\' in your ~/.bashrc).\n'
+
+test_generated.py:27: AssertionError
+_________________ test_format_style_help_wrapping_and_spacing __________________
+
+    def test_format_style_help_wrapping_and_spacing():
+        # Provide a long list of styles to test text wrapping at 60 characters
+        long_styles = [f"style{i}" for i in range(20)]
+        result = format_style_help(long_styles)
+        # The wrapped text should not exceed 60 characters per line after stripping
+        for line in result.splitlines():
+            stripped = line.strip()
+            if stripped and not stripped.startswith('Output') and not stripped.startswith('The'):
+>               assert len(stripped) <= 60
+E               AssertionError: assert 63 <= 60
+E                +  where 63 = len('For non-auto styles to work properly, please make sure that the')
+
+test_generated.py:39: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_format_style_help_default_behavior - assert ' ...
+FAILED test_generated.py::test_format_style_help_isolation_mode - assert '   ...
+FAILED test_generated.py::test_format_style_help_wrapping_and_spacing - Asser...
+3 failed in 0.55s

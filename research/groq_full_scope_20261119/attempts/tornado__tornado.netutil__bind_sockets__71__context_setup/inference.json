@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-7b058be4-3312-4432-82a4-a220c9eb0a19",
+  "object": "chat.completion",
+  "created": 1795079513,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport socket\nimport pytest\nfrom tornado.netutil import bind_sockets\n\ndef test_bind_sockets_all_interfaces(tmp_path):\n    # Bind to port 0 on all interfaces (empty string address)\n    sockets = bind_sockets(0, address=\"\")\n    # Expect at least one socket (IPv4 or IPv6)\n    assert sockets, \"No sockets returned\"\n    for s in sockets:\n        # Socket should be non-blocking and listening\n        assert s.getblocking() is False\n        assert s.getsockname()[1] != 0  # port assigned\n        # Try to connect to the socket to ensure it is listening\n        with socket.socket(s.family, socket.SOCK_STREAM) as client:\n            client.settimeout(1)\n            client.connect(s.getsockname())\n            client.shutdown(socket.SHUT_RDWR)\n\ndef test_bind_sockets_reuse_port(tmp_path):\n    # Bind two sockets on the same port with reuse_port enabled\n    sockets1 = bind_sockets(0, reuse_port=True)\n    port = sockets1[0].getsockname()[1]\n    sockets2 = bind_sockets(port, reuse_port=True)\n    # Both sockets should be listening on the same port\n    assert sockets2[0].getsockname()[1] == port\n    # Verify that both sockets can accept connections simultaneously\n    with socket.socket(sockets1[0].family, socket.SOCK_STREAM) as client1, \\\n         socket.socket(sockets2[0].family, socket.SOCK_STREAM) as client2:\n        client1.settimeout(1)\n        client2.settimeout(1)\n        client1.connect(sockets1[0].getsockname())\n        client2.connect(sockets2[0].getsockname())\n        client1.shutdown(socket.SHUT_RDWR)\n        client2.shutdown(socket.SHUT_RDWR)\n\ndef test_bind_sockets_invalid_port():\n    # Negative port numbers should raise OSError\n    with pytest.raises(OSError):\n        bind_sockets(-1)\n```",
+        "reasoning": "Need 3 tests: normal bind to localhost port 0, check returned socket listening, port assigned. boundary: reuse_port True on unsupported platform? but platform likely supports. maybe test that ValueError raised when reuse_port True and socket.SOL_SOCKET missing? Actually check if socket has SO_REUSEPORT. On many platforms yes. Could test that passing address \"\" returns listening on all interfaces. error: passing invalid port negative raises OSError. Use pytest.raises. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005618247,
+    "prompt_tokens": 1559,
+    "prompt_time": 0.089320234,
+    "completion_tokens": 520,
+    "completion_time": 0.5835852,
+    "total_tokens": 2079,
+    "total_time": 0.672905434,
+    "completion_tokens_details": {
+      "reasoning_tokens": 97
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh789ce1s9g1eamspxj600",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport socket\nimport pytest\nfrom tornado.netutil import bind_sockets\n\ndef test_bind_sockets_all_interfaces(tmp_path):\n    # Bind to port 0 on all interfaces (empty string address)\n    sockets = bind_sockets(0, address=\"\")\n    # Expect at least one socket (IPv4 or IPv6)\n    assert sockets, \"No sockets returned\"\n    for s in sockets:\n        # Socket should be non-blocking and listening\n        assert s.getblocking() is False\n        assert s.getsockname()[1] != 0  # port assigned\n        # Try to connect to the socket to ensure it is listening\n        with socket.socket(s.family, socket.SOCK_STREAM) as client:\n            client.settimeout(1)\n            client.connect(s.getsockname())\n            client.shutdown(socket.SHUT_RDWR)\n\ndef test_bind_sockets_reuse_port(tmp_path):\n    # Bind two sockets on the same port with reuse_port enabled\n    sockets1 = bind_sockets(0, reuse_port=True)\n    port = sockets1[0].getsockname()[1]\n    sockets2 = bind_sockets(port, reuse_port=True)\n    # Both sockets should be listening on the same port\n    assert sockets2[0].getsockname()[1] == port\n    # Verify that both sockets can accept connections simultaneously\n    with socket.socket(sockets1[0].family, socket.SOCK_STREAM) as client1, \\\n         socket.socket(sockets2[0].family, socket.SOCK_STREAM) as client2:\n        client1.settimeout(1)\n        client2.settimeout(1)\n        client1.connect(sockets1[0].getsockname())\n        client2.connect(sockets2[0].getsockname())\n        client1.shutdown(socket.SHUT_RDWR)\n        client2.shutdown(socket.SHUT_RDWR)\n\ndef test_bind_sockets_invalid_port():\n    # Negative port numbers should raise OSError\n    with pytest.raises(OSError):\n        bind_sockets(-1)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "217fbf98aa0a4519b1ffad6e07c31692",
+  "_api_plus_pacing_seconds": 1.4404719729791395
+}

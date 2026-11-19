@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-6a153b25-31ba-41e9-8021-23259c277024",
+  "object": "chat.completion",
+  "created": 1795076602,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport warnings\nimport pytest\nfrom dataclasses import dataclass, field\nfrom typing import Optional, Union, List, Tuple\nfrom uuid import UUID\nfrom datetime import datetime\nfrom decimal import Decimal\n\nfrom dataclasses_json.mm import build_type, _TimestampField, _UnionField, _TupleVarLen\nfrom dataclasses_json import dataclass_json\nfrom marshmallow import Schema, fields\n\n# Helper dataclasses for testing\n@dataclass_json\n@dataclass\nclass Inner:\n    x: int\n\n@dataclass_json\n@dataclass\nclass Outer:\n    inner: Inner\n    opt: Optional[int]\n    union: Union[int, str]\n    lst: List[int]\n    tup: Tuple[int, ...]\n    uuid: UUID\n    dec: Decimal\n    ts: datetime\n\n# Test 1: Nested dataclass field is correctly converted to Nested schema\ndef test_nested_dataclass_field():\n    schema = Outer.schema()\n    nested_field = schema.fields[\"inner\"]\n    assert isinstance(nested_field, fields.Nested)\n    assert nested_field.schema.__class__ is Inner.schema().__class__\n    # Ensure that nested field is not a plain Field\n    assert not isinstance(nested_field, fields.Field)\n\n# Test 2: Optional and Union fields are handled correctly\ndef test_optional_and_union_fields():\n    schema = Outer.schema()\n    # Optional field should allow None\n    opt_field = schema.fields[\"opt\"]\n    assert opt_field.allow_none is True\n    # Union field should be an instance of _UnionField\n    union_field = schema.fields[\"union\"]\n    assert isinstance(union_field, _UnionField)\n    # Serialize a value of each union type\n    data_int = {\"union\": 42}\n    data_str = {\"union\": \"hello\"}\n    assert schema.dump(data_int)[\"union\"] == 42\n    assert schema.dump(data_str)[\"union\"] == \"hello\"\n\n# Test 3: Special types (UUID, Decimal, datetime, tuple) are mapped to correct marshmallow fields\ndef test_special_type_mappings():\n    schema = Outer.schema()\n    # UUID field\n    uuid_field = schema.fields[\"uuid\"]\n    assert isinstance(uuid_field, fields.UUID)\n    # Decimal field\n    dec_field = schema.fields[\"dec\"]\n    assert isinstance(dec_field, fields.Decimal)\n    # Timestamp field\n    ts_field = schema.fields[\"ts\"]\n    assert isinstance(ts_field, _TimestampField)\n    # Tuple field should be _TupleVarLen for variable length homogeneous tuples\n    tup_field = schema.fields[\"tup\"]\n    assert isinstance(tup_field, _TupleVarLen)\n    # List field should be List\n    lst_field = schema.fields[\"lst\"]\n    assert isinstance(lst_field, fields.List)\n```",
+        "reasoning": "Need tests for build_type. Use dataclasses_json? but we can import build_type. We'll create simple dataclasses. Test nested dataclass, optional, union. Use tmp_path? not needed. Just test behavior."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047361031,
+    "prompt_tokens": 1789,
+    "prompt_time": 0.090887109,
+    "completion_tokens": 616,
+    "completion_time": 0.703720138,
+    "total_tokens": 2405,
+    "total_time": 0.794607247,
+    "completion_tokens_details": {
+      "reasoning_tokens": 45
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7seee70ev6s82d28mp9apq4",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport warnings\nimport pytest\nfrom dataclasses import dataclass, field\nfrom typing import Optional, Union, List, Tuple\nfrom uuid import UUID\nfrom datetime import datetime\nfrom decimal import Decimal\n\nfrom dataclasses_json.mm import build_type, _TimestampField, _UnionField, _TupleVarLen\nfrom dataclasses_json import dataclass_json\nfrom marshmallow import Schema, fields\n\n# Helper dataclasses for testing\n@dataclass_json\n@dataclass\nclass Inner:\n    x: int\n\n@dataclass_json\n@dataclass\nclass Outer:\n    inner: Inner\n    opt: Optional[int]\n    union: Union[int, str]\n    lst: List[int]\n    tup: Tuple[int, ...]\n    uuid: UUID\n    dec: Decimal\n    ts: datetime\n\n# Test 1: Nested dataclass field is correctly converted to Nested schema\ndef test_nested_dataclass_field():\n    schema = Outer.schema()\n    nested_field = schema.fields[\"inner\"]\n    assert isinstance(nested_field, fields.Nested)\n    assert nested_field.schema.__class__ is Inner.schema().__class__\n    # Ensure that nested field is not a plain Field\n    assert not isinstance(nested_field, fields.Field)\n\n# Test 2: Optional and Union fields are handled correctly\ndef test_optional_and_union_fields():\n    schema = Outer.schema()\n    # Optional field should allow None\n    opt_field = schema.fields[\"opt\"]\n    assert opt_field.allow_none is True\n    # Union field should be an instance of _UnionField\n    union_field = schema.fields[\"union\"]\n    assert isinstance(union_field, _UnionField)\n    # Serialize a value of each union type\n    data_int = {\"union\": 42}\n    data_str = {\"union\": \"hello\"}\n    assert schema.dump(data_int)[\"union\"] == 42\n    assert schema.dump(data_str)[\"union\"] == \"hello\"\n\n# Test 3: Special types (UUID, Decimal, datetime, tuple) are mapped to correct marshmallow fields\ndef test_special_type_mappings():\n    schema = Outer.schema()\n    # UUID field\n    uuid_field = schema.fields[\"uuid\"]\n    assert isinstance(uuid_field, fields.UUID)\n    # Decimal field\n    dec_field = schema.fields[\"dec\"]\n    assert isinstance(dec_field, fields.Decimal)\n    # Timestamp field\n    ts_field = schema.fields[\"ts\"]\n    assert isinstance(ts_field, _TimestampField)\n    # Tuple field should be _TupleVarLen for variable length homogeneous tuples\n    tup_field = schema.fields[\"tup\"]\n    assert isinstance(tup_field, _TupleVarLen)\n    # List field should be List\n    lst_field = schema.fields[\"lst\"]\n    assert isinstance(lst_field, fields.List)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1344245570362546
+}

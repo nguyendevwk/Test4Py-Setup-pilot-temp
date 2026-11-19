@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b4dfb27f-7bbb-408a-b5e7-a49df435fc64",
+  "object": "chat.completion",
+  "created": 1795076103,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport zipfile\nimport tempfile\nimport pytest\nfrom pathlib import Path\nfrom cookiecutter.zipfile import unzip, InvalidZipRepository\n\n\ndef create_zip_with_dir(tmp_path: Path, dir_name: str, file_name: str = \"file.txt\") -> Path:\n    \"\"\"Create a zip file containing a single directory with one file.\"\"\"\n    zip_path = tmp_path / \"archive.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        zf.writestr(f\"{dir_name}/\", \"\")  # directory entry\n        zf.writestr(f\"{dir_name}/{file_name}\", \"content\")\n    return zip_path\n\n\ndef create_empty_zip(tmp_path: Path) -> Path:\n    \"\"\"Create an empty zip file.\"\"\"\n    zip_path = tmp_path / \"empty.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        pass\n    return zip_path\n\n\ndef create_zip_without_dir(tmp_path: Path) -> Path:\n    \"\"\"Create a zip file that does not start with a top‑level directory.\"\"\"\n    zip_path = tmp_path / \"nodir.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        zf.writestr(\"file.txt\", \"content\")\n    return zip_path\n\n\ndef test_unzip_success(tmp_path: Path):\n    \"\"\"Unzip a valid archive containing a top‑level directory.\"\"\"\n    zip_path = create_zip_with_dir(tmp_path, \"project\")\n    result = unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path)\n    # The returned path should point to the extracted directory\n    assert Path(result).name == \"project\"\n    # The extracted directory should contain the file we added\n    extracted_file = Path(result) / \"file.txt\"\n    assert extracted_file.is_file()\n    assert extracted_file.read_text() == \"content\"\n\n\ndef test_unzip_empty_archive(tmp_path: Path):\n    \"\"\"Unzipping an empty archive should raise InvalidZipRepository.\"\"\"\n    zip_path = create_empty_zip(tmp_path)\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path)\n    assert \"is empty\" in str(excinfo.value)\n\n\ndef test_unzip_missing_top_level_dir(tmp_path: Path):\n    \"\"\"Unzipping an archive that lacks a top‑level directory should raise InvalidZipRepository.\"\"\"\n    zip_path = create_zip_without_dir(tmp_path)\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path)\n    assert \"does not include a top-level directory\" in str(excinfo.value)\n```",
+        "reasoning": "Need tests: normal unzip local zip with top-level dir, empty zip error, missing top-level dir error. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.102002716,
+    "prompt_tokens": 1221,
+    "prompt_time": 0.087087588,
+    "completion_tokens": 599,
+    "completion_time": 0.669704584,
+    "total_tokens": 1820,
+    "total_time": 0.756792172,
+    "completion_tokens_details": {
+      "reasoning_tokens": 27
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sdz6k6er1sqmy15bnvy56y",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport zipfile\nimport tempfile\nimport pytest\nfrom pathlib import Path\nfrom cookiecutter.zipfile import unzip, InvalidZipRepository\n\n\ndef create_zip_with_dir(tmp_path: Path, dir_name: str, file_name: str = \"file.txt\") -> Path:\n    \"\"\"Create a zip file containing a single directory with one file.\"\"\"\n    zip_path = tmp_path / \"archive.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        zf.writestr(f\"{dir_name}/\", \"\")  # directory entry\n        zf.writestr(f\"{dir_name}/{file_name}\", \"content\")\n    return zip_path\n\n\ndef create_empty_zip(tmp_path: Path) -> Path:\n    \"\"\"Create an empty zip file.\"\"\"\n    zip_path = tmp_path / \"empty.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        pass\n    return zip_path\n\n\ndef create_zip_without_dir(tmp_path: Path) -> Path:\n    \"\"\"Create a zip file that does not start with a top‑level directory.\"\"\"\n    zip_path = tmp_path / \"nodir.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        zf.writestr(\"file.txt\", \"content\")\n    return zip_path\n\n\ndef test_unzip_success(tmp_path: Path):\n    \"\"\"Unzip a valid archive containing a top‑level directory.\"\"\"\n    zip_path = create_zip_with_dir(tmp_path, \"project\")\n    result = unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path)\n    # The returned path should point to the extracted directory\n    assert Path(result).name == \"project\"\n    # The extracted directory should contain the file we added\n    extracted_file = Path(result) / \"file.txt\"\n    assert extracted_file.is_file()\n    assert extracted_file.read_text() == \"content\"\n\n\ndef test_unzip_empty_archive(tmp_path: Path):\n    \"\"\"Unzipping an empty archive should raise InvalidZipRepository.\"\"\"\n    zip_path = create_empty_zip(tmp_path)\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path)\n    assert \"is empty\" in str(excinfo.value)\n\n\ndef test_unzip_missing_top_level_dir(tmp_path: Path):\n    \"\"\"Unzipping an archive that lacks a top‑level directory should raise InvalidZipRepository.\"\"\"\n    zip_path = create_zip_without_dir(tmp_path)\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path)\n    assert \"does not include a top-level directory\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.284670957014896
+}

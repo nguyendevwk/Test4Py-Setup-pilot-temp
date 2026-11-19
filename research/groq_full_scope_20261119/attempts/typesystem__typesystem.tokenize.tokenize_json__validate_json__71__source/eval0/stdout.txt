@@ -1,0 +1,202 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_validate_json_success __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/typesystem__typesystem.tokenize.tokenize_json__validate_json__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_validate_json_success0')
+
+    def test_validate_json_success(tmp_path):
+        """Validate a correct JSON string against a schema."""
+        json_content = '{"name": "Alice", "age": 30}'
+>       value, errors = validate_json(json_content, Person)
+
+test_generated.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/tokenize_json.py:197: in validate_json
+    return validate_with_positions(token=token, validator=validator)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+token = DictToken('{"name": "Alice", "age": 30}')
+validator = <class 'test_generated.Person'>
+
+    def validate_with_positions(
+        *, token: Token, validator: typing.Union[Field, Schema]
+    ) -> typing.Any:
+        try:
+>           return validator.validate(token.value)
+E           TypeError: Schema.validate() missing 1 required positional argument: 'value'
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/positional_validation.py:13: TypeError
+______________________ test_validate_json_invalid_syntax _______________________
+
+content = '{"name": "Bob", "age": 25'
+
+    def tokenize_json(content: typing.Union[str, bytes]) -> Token:
+        if isinstance(content, bytes):
+            content = content.decode("utf-8", "ignore")
+    
+        if not content.strip():
+            # Handle the empty string case explicitly for clear error messaging.
+            position = Position(column_no=1, line_no=1, char_index=0)
+            raise ParseError(text="No content.", code="no_content", position=position)
+    
+        decoder = _TokenizingDecoder(content=content)
+        try:
+>           return decoder.decode(content)
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/tokenize_json.py:176: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/json/decoder.py:337: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/json/decoder.py:353: in raw_decode
+    obj, end = self.scan_once(s, idx)
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/tokenize_json.py:151: in scan_once
+    return _scan_once(string, idx)
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/tokenize_json.py:120: in _scan_once
+    value, end = parse_object(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s_and_end = ('{"name": "Bob", "age": 25', 1), strict = True
+scan_once = <function _make_scanner.<locals>._scan_once at 0x7f1730ecb490>
+memo = {}, content = '{"name": "Bob", "age": 25'
+_w = <built-in method match of re.Pattern object at 0x7f1731d797d0>
+_ws = ' \t\n\r'
+
+    def _TokenizingJSONObject(
+        s_and_end: typing.Tuple[str, int],
+        strict: bool,
+        scan_once: typing.Callable[[str, int], typing.Tuple[Token, int]],
+        memo: dict,
+        content: str,
+        _w: typing.Callable = WHITESPACE.match,
+        _ws: str = WHITESPACE_STR,
+    ) -> typing.Tuple[dict, int]:
+        s, end = s_and_end
+        pairs: typing.List[typing.Tuple[Token, Token]] = []
+        pairs_append = pairs.append
+        memo_get = memo.setdefault
+        # Use a slice to prevent IndexError from being raised, the following
+        # check will raise a more specific ValueError if the string is empty
+        nextchar = s[end : end + 1]
+        # Normally we expect nextchar == '"'
+        if nextchar != '"':
+            if nextchar in _ws:
+                end = _w(s, end).end()
+                nextchar = s[end : end + 1]
+            # Trivial empty object
+            if nextchar == "}":
+                return {}, end + 1
+            elif nextchar != '"':
+                raise JSONDecodeError(
+                    "Expecting property name enclosed in double quotes", s, end
+                )
+        end += 1
+        while True:
+            start = end - 1
+            key, end = scanstring(s, end, strict)
+            key = memo_get(key, key)
+            key = ScalarToken(memo_get(key, key), start, end - 1, content)
+            # To skip some function call overhead we optimize the fast paths where
+            # the JSON key separator is ": " or just ":".
+            if s[end : end + 1] != ":":
+                end = _w(s, end).end()
+                if s[end : end + 1] != ":":
+                    raise JSONDecodeError("Expecting ':' delimiter", s, end)
+            end += 1
+    
+            try:
+                if s[end] in _ws:
+                    end += 1
+                    if s[end] in _ws:
+                        end = _w(s, end + 1).end()
+            except IndexError:
+                pass
+    
+            try:
+                value, end = scan_once(s, end)
+            except StopIteration as err:
+                raise JSONDecodeError("Expecting value", s, err.value) from None
+            pairs_append((key, value))
+            try:
+                nextchar = s[end]
+                if nextchar in _ws:
+                    end = _w(s, end + 1).end()
+                    nextchar = s[end]
+            except IndexError:
+                nextchar = ""
+            end += 1
+    
+            if nextchar == "}":
+                break
+            elif nextchar != ",":
+>               raise JSONDecodeError("Expecting ',' delimiter", s, end - 1)
+E               json.decoder.JSONDecodeError: Expecting ',' delimiter: line 1 column 26 (char 25)
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/tokenize_json.py:87: JSONDecodeError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/typesystem__typesystem.tokenize.tokenize_json__validate_json__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_validate_json_invalid_syn0')
+
+    def test_validate_json_invalid_syntax(tmp_path):
+        """Validate a malformed JSON string and ensure an error is reported."""
+        bad_json = '{"name": "Bob", "age": 25'  # missing closing brace
+>       value, errors = validate_json(bad_json, Person)
+
+test_generated.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/tokenize_json.py:196: in validate_json
+    token = tokenize_json(content)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+content = '{"name": "Bob", "age": 25'
+
+    def tokenize_json(content: typing.Union[str, bytes]) -> Token:
+        if isinstance(content, bytes):
+            content = content.decode("utf-8", "ignore")
+    
+        if not content.strip():
+            # Handle the empty string case explicitly for clear error messaging.
+            position = Position(column_no=1, line_no=1, char_index=0)
+            raise ParseError(text="No content.", code="no_content", position=position)
+    
+        decoder = _TokenizingDecoder(content=content)
+        try:
+            return decoder.decode(content)
+        except JSONDecodeError as exc:
+            # Handle cases that result in a JSON parse error.
+            position = Position(column_no=exc.colno, line_no=exc.lineno, char_index=exc.pos)
+>           raise ParseError(text=exc.msg + ".", code="parse_error", position=position)
+E           typesystem.base.ParseError: Expecting ',' delimiter.
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/tokenize_json.py:180: ParseError
+_____________________ test_validate_json_validation_error ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/typesystem__typesystem.tokenize.tokenize_json__validate_json__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_validate_json_validation_0')
+
+    def test_validate_json_validation_error(tmp_path):
+        """Validate JSON that fails schema validation."""
+        bad_json = '{"name": "Charlie", "age": "not a number"}'
+>       value, errors = validate_json(bad_json, Person)
+
+test_generated.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/tokenize_json.py:197: in validate_json
+    return validate_with_positions(token=token, validator=validator)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+token = DictToken('{"name": "Charlie", "age": "not a number"}')
+validator = <class 'test_generated.Person'>
+
+    def validate_with_positions(
+        *, token: Token, validator: typing.Union[Field, Schema]
+    ) -> typing.Any:
+        try:
+>           return validator.validate(token.value)
+E           TypeError: Schema.validate() missing 1 required positional argument: 'value'
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/positional_validation.py:13: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_validate_json_success - TypeError: Schema.vali...
+FAILED test_generated.py::test_validate_json_invalid_syntax - typesystem.base...
+FAILED test_generated.py::test_validate_json_validation_error - TypeError: Sc...
+3 failed in 0.19s

@@ -1,0 +1,30 @@
+```python
+import numpy as np
+import pytest
+from src.whale_optimization import WhaleOptimization
+
+def test_constrain_solution_clipping():
+    # Setup a WhaleOptimization instance with simple constraints
+    woa = WhaleOptimization(
+        opt_func=lambda x, y: 0,
+        constraints=[(-5, 5), (-5, 5)],
+        nsols=1,
+        b=1,
+        a=1,
+        a_step=0.1
+    )
+
+    # Test values outside the bounds are clipped
+    out_of_bounds = np.array([10, -10])
+    constrained = woa._constrain_solution(out_of_bounds)
+    assert constrained == [5, -5], "Values should be clipped to the bounds"
+    # Original array should remain unchanged
+    assert np.array_equal(out_of_bounds, np.array([10, -10]))
+
+    # Test values within the bounds remain unchanged
+    in_bounds = np.array([3, -2])
+    constrained_in_bounds = woa._constrain_solution(in_bounds)
+    assert constrained_in_bounds == [3, -2], "Values within bounds should stay the same"
+    # Ensure the returned type is a list
+    assert isinstance(constrained_in_bounds, list)
+```

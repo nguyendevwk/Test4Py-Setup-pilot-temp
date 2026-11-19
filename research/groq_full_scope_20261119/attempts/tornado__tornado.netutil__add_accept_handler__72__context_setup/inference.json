@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-071de2b6-fbd3-415b-8e45-d307f8a0cc2c",
+  "object": "chat.completion",
+  "created": 1795078999,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport socket\nimport pytest\nfrom tornado.netutil import add_accept_handler\nfrom tornado.ioloop import IOLoop\n\ndef test_add_accept_handler_accepts_connection(tmp_path):\n    \"\"\"The handler should accept a connection and invoke the callback.\"\"\"\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen()\n    server.setblocking(False)\n\n    received = []\n\n    def cb(conn, addr):\n        received.append((conn, addr))\n        conn.close()\n\n    remove = add_accept_handler(server, cb)\n\n    # Connect a client\n    client = socket.create_connection(server.getsockname())\n    client.close()\n\n    # Run the IOLoop until the callback is called\n    loop = IOLoop.current()\n    loop.add_timeout(loop.time() + 0.1, loop.stop)\n    loop.start()\n\n    assert len(received) == 1\n    conn, addr = received[0]\n    assert isinstance(conn, socket.socket)\n    assert addr == server.getsockname()\n\n    # Removing the handler stops further callbacks\n    remove()\n    client2 = socket.create_connection(server.getsockname())\n    client2.close()\n    loop.add_timeout(loop.time() + 0.1, loop.stop)\n    loop.start()\n    assert len(received) == 1  # no new callback\n\n    server.close()\n\n\ndef test_add_accept_handler_backlog_limit(tmp_path):\n    \"\"\"The handler should accept up to _DEFAULT_BACKLOG connections.\"\"\"\n    from tornado.netutil import _DEFAULT_BACKLOG\n\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen(_DEFAULT_BACKLOG)\n    server.setblocking(False)\n\n    received = []\n\n    def cb(conn, addr):\n        received.append((conn, addr))\n        conn.close()\n\n    add_accept_handler(server, cb)\n\n    # Open many clients, more than the backlog\n    clients = []\n    for _ in range(_DEFAULT_BACKLOG + 5):\n        try:\n            c = socket.create_connection(server.getsockname())\n            clients.append(c)\n        except OSError:\n            # Some OS may refuse more than backlog connections\n            break\n\n    loop = IOLoop.current()\n    loop.add_timeout(loop.time() + 0.1, loop.stop)\n    loop.start()\n\n    # The number of callbacks should not exceed the backlog\n    assert len(received) <= _DEFAULT_BACKLOG\n    for conn, _ in received:\n        conn.close()\n    for c in clients:\n        c.close()\n    server.close()\n\n\ndef test_add_accept_handler_handles_blockingioerror(tmp_path):\n    \"\"\"When no connections are pending, the handler should exit gracefully.\"\"\"\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen()\n    server.setblocking(False)\n\n    called = False\n\n    def cb(conn, addr):\n        nonlocal called\n        called = True\n        conn.close()\n\n    add_accept_handler(server, cb)\n\n    loop = IOLoop.current()\n    loop.add_timeout(loop.time() + 0.1, loop.stop)\n    loop.start()\n\n    assert not called  # no connection, callback should not run\n    server.close()\n```",
+        "reasoning": "Need tests: normal accept, boundary backlog, error handling. Use socketpair? Use server socket listening, client connect. Test that callback called. Test removal stops. Third test error: simulate BlockingIOError by non-blocking? Use socket with no connections? Accept handler should return. Use tmp_path? Not needed. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052320602,
+    "prompt_tokens": 933,
+    "prompt_time": 0.016815618,
+    "completion_tokens": 826,
+    "completion_time": 1.045689858,
+    "total_tokens": 1759,
+    "total_time": 1.0625054760000001,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 69
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgqjcxesk8qyqm7tcwx7dq",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport socket\nimport pytest\nfrom tornado.netutil import add_accept_handler\nfrom tornado.ioloop import IOLoop\n\ndef test_add_accept_handler_accepts_connection(tmp_path):\n    \"\"\"The handler should accept a connection and invoke the callback.\"\"\"\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen()\n    server.setblocking(False)\n\n    received = []\n\n    def cb(conn, addr):\n        received.append((conn, addr))\n        conn.close()\n\n    remove = add_accept_handler(server, cb)\n\n    # Connect a client\n    client = socket.create_connection(server.getsockname())\n    client.close()\n\n    # Run the IOLoop until the callback is called\n    loop = IOLoop.current()\n    loop.add_timeout(loop.time() + 0.1, loop.stop)\n    loop.start()\n\n    assert len(received) == 1\n    conn, addr = received[0]\n    assert isinstance(conn, socket.socket)\n    assert addr == server.getsockname()\n\n    # Removing the handler stops further callbacks\n    remove()\n    client2 = socket.create_connection(server.getsockname())\n    client2.close()\n    loop.add_timeout(loop.time() + 0.1, loop.stop)\n    loop.start()\n    assert len(received) == 1  # no new callback\n\n    server.close()\n\n\ndef test_add_accept_handler_backlog_limit(tmp_path):\n    \"\"\"The handler should accept up to _DEFAULT_BACKLOG connections.\"\"\"\n    from tornado.netutil import _DEFAULT_BACKLOG\n\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen(_DEFAULT_BACKLOG)\n    server.setblocking(False)\n\n    received = []\n\n    def cb(conn, addr):\n        received.append((conn, addr))\n        conn.close()\n\n    add_accept_handler(server, cb)\n\n    # Open many clients, more than the backlog\n    clients = []\n    for _ in range(_DEFAULT_BACKLOG + 5):\n        try:\n            c = socket.create_connection(server.getsockname())\n            clients.append(c)\n        except OSError:\n            # Some OS may refuse more than backlog connections\n            break\n\n    loop = IOLoop.current()\n    loop.add_timeout(loop.time() + 0.1, loop.stop)\n    loop.start()\n\n    # The number of callbacks should not exceed the backlog\n    assert len(received) <= _DEFAULT_BACKLOG\n    for conn, _ in received:\n        conn.close()\n    for c in clients:\n        c.close()\n    server.close()\n\n\ndef test_add_accept_handler_handles_blockingioerror(tmp_path):\n    \"\"\"When no connections are pending, the handler should exit gracefully.\"\"\"\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen()\n    server.setblocking(False)\n\n    called = False\n\n    def cb(conn, addr):\n        nonlocal called\n        called = True\n        conn.close()\n\n    add_accept_handler(server, cb)\n\n    loop = IOLoop.current()\n    loop.add_timeout(loop.time() + 0.1, loop.stop)\n    loop.start()\n\n    assert not called  # no connection, callback should not run\n    server.close()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4715391200152226
+}

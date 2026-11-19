@@ -1,0 +1,57 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_no_unpacking_keeps_dict _________________________
+
+    def test_no_unpacking_keeps_dict():
+        """A dict without unpacking should remain unchanged."""
+        # {1: 2, 3: 4}
+        dict_node = build_dict_node([
+            (typed_ast.Num(n=1), typed_ast.Num(n=2)),
+            (typed_ast.Num(n=3), typed_ast.Num(n=4)),
+        ])
+        module = build_module_from_dict(dict_node)
+    
+>       transformer = DictUnpackingTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:34: TypeError
+_________________________ test_unpacking_merges_dicts __________________________
+
+    def test_unpacking_merges_dicts():
+        """A dict with unpacking should be transformed into a merge call."""
+        # {1: 1, **dict_a}
+        dict_a = typed_ast.Name(id='dict_a', ctx=typed_ast.Load())
+        dict_node = build_dict_node([
+            (typed_ast.Num(n=1), typed_ast.Num(n=1)),
+            (None, dict_a),  # represents **dict_a
+        ])
+        module = build_module_from_dict(dict_node)
+    
+>       transformer = DictUnpackingTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:56: TypeError
+______________________ test_multiple_unpackings_and_order ______________________
+
+    def test_multiple_unpackings_and_order():
+        """Multiple unpackings should preserve order and merge correctly."""
+        # {1: 1, **dict_a, 2: 2, **dict_b}
+        dict_a = typed_ast.Name(id='dict_a', ctx=typed_ast.Load())
+        dict_b = typed_ast.Name(id='dict_b', ctx=typed_ast.Load())
+        dict_node = build_dict_node([
+            (typed_ast.Num(n=1), typed_ast.Num(n=1)),
+            (None, dict_a),
+            (typed_ast.Num(n=2), typed_ast.Num(n=2)),
+            (None, dict_b),
+        ])
+        module = build_module_from_dict(dict_node)
+    
+>       transformer = DictUnpackingTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:96: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_no_unpacking_keeps_dict - TypeError: BaseNodeT...
+FAILED test_generated.py::test_unpacking_merges_dicts - TypeError: BaseNodeTr...
+FAILED test_generated.py::test_multiple_unpackings_and_order - TypeError: Bas...
+3 failed in 0.16s

@@ -1,0 +1,66 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_waiting_task_replacement _________________________
+
+    def test_waiting_task_replacement():
+        """Submitting a new task while one is waiting should replace the waiting task."""
+        worker = MonoWorker()
+        order = []
+    
+        def first_task():
+            time.sleep(0.2)
+            order.append("first")
+    
+        def second_task():
+            time.sleep(0.1)
+            order.append("second")
+    
+        # Submit first task
+        worker.submit(first_task)
+        # Submit second task immediately; it should replace the waiting one
+        worker.submit(second_task)
+    
+        # Wait for the running task to finish
+        # The running task is the second_task because the first was replaced
+        # The first task should never run
+        # Since the pool has only one worker, the second_task will run immediately
+        # and the first_task will be cancelled
+        # Wait a bit longer than the longest task
+        time.sleep(0.3)
+>       assert order == ["second"]
+E       AssertionError: assert ['first', 'second'] == ['second']
+E         
+E         At index 0 diff: 'first' != 'second'
+E         Left contains one more item: 'second'
+E         Use -v to get more diff
+
+../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__42__atomic_source/eval0/test_generated.py:49: AssertionError
+______________________ test_cancellation_of_running_task _______________________
+
+    def test_cancellation_of_running_task():
+        """If a running task is cancelled, it should not complete."""
+        worker = MonoWorker()
+        flag = {"ran": False}
+    
+        def long_task():
+            # This task will be cancelled before it finishes
+            for _ in range(5):
+                time.sleep(0.1)
+            flag["ran"] = True
+    
+        # Submit the long task
+        future = worker.submit(long_task)
+        # Immediately cancel the running task
+        cancelled = future.cancel()
+        # Since the task is already running, cancel() should return False
+        assert cancelled is False
+        # Wait to ensure the task would have finished if not cancelled
+        time.sleep(0.6)
+>       assert flag["ran"] is False
+E       assert True is False
+
+../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__42__atomic_source/eval0/test_generated.py:71: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__42__atomic_source/eval0/test_generated.py::test_waiting_task_replacement
+FAILED ../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__42__atomic_source/eval0/test_generated.py::test_cancellation_of_running_task
+2 failed, 1 passed in 1.24s

@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-81ac1c2a-238a-48c5-a765-964020bb40b4",
+  "object": "chat.completion",
+  "created": 1795079559,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.aes import key_schedule_core, RCON, SBOX\n\ndef test_key_schedule_core_normal():\n    # Input data and rcon_iteration chosen arbitrarily\n    data = [0x00, 0x01, 0x02, 0x03]\n    rcon_iteration = 1\n    # Expected result computed manually\n    rotated = data[1:] + [data[0]]          # [0x01, 0x02, 0x03, 0x00]\n    substituted = [SBOX[x] for x in rotated]  # apply SBOX\n    substituted[0] ^= RCON[rcon_iteration]   # XOR with RCON[1] (0x01)\n    expected = substituted\n    result = key_schedule_core(data, rcon_iteration)\n    assert result == expected, f\"Expected {expected}, got {result}\"\n\ndef test_key_schedule_core_rcon_out_of_bounds():\n    data = [0x00, 0x01, 0x02, 0x03]\n    # RCON has indices 0..10; index 11 should raise IndexError\n    with pytest.raises(IndexError):\n        key_schedule_core(data, 11)\n\ndef test_key_schedule_core_single_byte():\n    # Test with a single-byte list; rotate and sub_bytes should still work\n    data = [0x5a]\n    rcon_iteration = 0\n    rotated = data[1:] + [data[0]]          # same single element\n    substituted = [SBOX[x] for x in rotated]\n    substituted[0] ^= RCON[rcon_iteration]   # XOR with RCON[0] (0x8d)\n    expected = substituted\n    result = key_schedule_core(data, rcon_iteration)\n    assert result == expected, f\"Expected {expected}, got {result}\"\n```",
+        "reasoning": "Need 3 tests for key_schedule_core. Test normal: known input produce expected. Use example: data [0x00,0x01,0x02,0x03], rcon_iteration 1. Compute manually? Let's compute via code. We'll write test that compares to expected computed by applying rotate, sub_bytes, xor. Use known SBOX mapping. We'll compute expected in test. Also test boundary: rcon_iteration out of range? RCON length 11; if >10 should IndexError. test raises. Third test: data length not 4? Should still work? rotate expects list; but if length 1? test with length 1. It will rotate same, sub_bytes works. So test that output equals expected. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005255126,
+    "prompt_tokens": 1823,
+    "prompt_time": 0.008115347,
+    "completion_tokens": 562,
+    "completion_time": 0.57719952,
+    "total_tokens": 2385,
+    "total_time": 0.585314867,
+    "prompt_tokens_details": {
+      "cached_tokens": 1792
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 157
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh8ngdeddrfw8z6wb9pm64",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.aes import key_schedule_core, RCON, SBOX\n\ndef test_key_schedule_core_normal():\n    # Input data and rcon_iteration chosen arbitrarily\n    data = [0x00, 0x01, 0x02, 0x03]\n    rcon_iteration = 1\n    # Expected result computed manually\n    rotated = data[1:] + [data[0]]          # [0x01, 0x02, 0x03, 0x00]\n    substituted = [SBOX[x] for x in rotated]  # apply SBOX\n    substituted[0] ^= RCON[rcon_iteration]   # XOR with RCON[1] (0x01)\n    expected = substituted\n    result = key_schedule_core(data, rcon_iteration)\n    assert result == expected, f\"Expected {expected}, got {result}\"\n\ndef test_key_schedule_core_rcon_out_of_bounds():\n    data = [0x00, 0x01, 0x02, 0x03]\n    # RCON has indices 0..10; index 11 should raise IndexError\n    with pytest.raises(IndexError):\n        key_schedule_core(data, 11)\n\ndef test_key_schedule_core_single_byte():\n    # Test with a single-byte list; rotate and sub_bytes should still work\n    data = [0x5a]\n    rcon_iteration = 0\n    rotated = data[1:] + [data[0]]          # same single element\n    substituted = [SBOX[x] for x in rotated]\n    substituted[0] ^= RCON[rcon_iteration]   # XOR with RCON[0] (0x8d)\n    expected = substituted\n    result = key_schedule_core(data, rcon_iteration)\n    assert result == expected, f\"Expected {expected}, got {result}\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "c28f7d206bfa41379b2edf26283f8703",
+  "_api_plus_pacing_seconds": 4.157228292955551
+}

@@ -1,0 +1,42 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_session_mounts_http_and_https_adapters __________________
+
+    def test_session_mounts_http_and_https_adapters():
+        """
+        Verify that the returned session has the custom HTTPie adapters mounted
+        for both http:// and https:// prefixes.
+        """
+        session = build_requests_session(verify=True)
+        # The adapters should be instances of HTTPieHTTPAdapter and HTTPieHTTPSAdapter
+        http_adapter = session.adapters.get('http://')
+        https_adapter = session.adapters.get('https://')
+        assert http_adapter is not None, "HTTP adapter not mounted"
+        assert https_adapter is not None, "HTTPS adapter not mounted"
+        # Ensure they are of the expected types
+>       from httpie.adapters import HTTPieHTTPAdapter, HTTPieHTTPSAdapter
+E       ImportError: cannot import name 'HTTPieHTTPSAdapter' from 'httpie.adapters' (/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/adapters.py)
+
+test_generated.py:23: ImportError
+______________ test_build_requests_session_verify_and_ssl_version ______________
+
+    def test_build_requests_session_verify_and_ssl_version():
+        """
+        Verify that the HTTPS adapter is configured with the correct verify flag
+        and ssl_version mapping when provided.
+        """
+        # Use a known ssl_version key from AVAILABLE_SSL_VERSION_ARG_MAPPING
+        from httpie.ssl_ import AVAILABLE_SSL_VERSION_ARG_MAPPING
+        ssl_key = next(iter(AVAILABLE_SSL_VERSION_ARG_MAPPING))
+        session = build_requests_session(verify=False, ssl_version=ssl_key)
+        https_adapter = session.adapters.get('https://')
+        # The adapter should have the verify attribute set to False
+>       assert hasattr(https_adapter, "verify")
+E       AssertionError: assert False
+E        +  where False = hasattr(<httpie.ssl_.HTTPieHTTPSAdapter object at 0x7fe7f5ca8640>, 'verify')
+
+test_generated.py:56: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_session_mounts_http_and_https_adapters - Impor...
+FAILED test_generated.py::test_build_requests_session_verify_and_ssl_version
+2 failed, 1 passed in 0.49s

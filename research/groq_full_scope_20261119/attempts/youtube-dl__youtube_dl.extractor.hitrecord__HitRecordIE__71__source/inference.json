@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-8ceb3837-8e7d-425d-931a-cab45ffa4fca",
+  "object": "chat.completion",
+  "created": 1795078855,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.extractor.hitrecord import HitRecordIE\nfrom youtube_dl.utils import clean_html\n\nclass DummyHitRecordIE(HitRecordIE):\n    \"\"\"Subclass that overrides _download_json to return a controlled payload.\"\"\"\n    def __init__(self, payload):\n        super().__init__()\n        self._payload = payload\n\n    def _download_json(self, url, video_id, *args, **kwargs):\n        return self._payload\n\n\ndef test_normal_extraction(tmp_path):\n    # Payload mimicking a typical API response\n    payload = {\n        \"title\": \"Test Video\",\n        \"source_url\": {\"mp4_url\": \"https://example.com/video.mp4\"},\n        \"body\": \"<p>Some <b>description</b></p>\",\n        \"duration\": 123456,  # milliseconds\n        \"created_at_i\": 1609459200,\n        \"user\": {\"username\": \"tester\", \"id\": 42},\n        \"total_views_count\": 1000,\n        \"hearts_count\": 200,\n        \"comments_count\": 30,\n        \"tags\": [{\"text\": \"tag1\"}, {\"text\": \"tag2\"}],\n    }\n    ie = DummyHitRecordIE(payload)\n    result = ie._real_extract(\"https://hitrecord.org/records/12345\")\n\n    assert result[\"id\"] == \"12345\"\n    assert result[\"url\"] == \"https://example.com/video.mp4\"\n    assert result[\"title\"] == \"Test Video\"\n    assert result[\"description\"] == \"Some description\"\n    assert result[\"duration\"] == 123.456\n    assert result[\"timestamp\"] == 1609459200\n    assert result[\"uploader\"] == \"tester\"\n    assert result[\"uploader_id\"] == \"42\"\n    assert result[\"view_count\"] == 1000\n    assert result[\"like_count\"] == 200\n    assert result[\"comment_count\"] == 30\n    assert result[\"tags\"] == [\"tag1\", \"tag2\"]\n\n\ndef test_missing_tags_and_optional_fields(tmp_path):\n    # Payload with no tags and missing optional numeric fields\n    payload = {\n        \"title\": \"No Tags Video\",\n        \"source_url\": {\"mp4_url\": \"https://example.com/no_tags.mp4\"},\n        \"body\": \"<p>No tags here</p>\",\n        \"duration\": None,\n        \"created_at_i\": None,\n        \"user\": {\"username\": \"no_tags_user\", \"id\": 99},\n        \"total_views_count\": None,\n        \"hearts_count\": None,\n        \"comments_count\": None,\n        \"tags\": [],\n    }\n    ie = DummyHitRecordIE(payload)\n    result = ie._real_extract(\"https://hitrecord.org/records/67890\")\n\n    assert result[\"tags\"] is None\n    assert result[\"duration\"] is None\n    assert result[\"timestamp\"] is None\n    assert result[\"view_count\"] is None\n    assert result[\"like_count\"] is None\n    assert result[\"comment_count\"] is None\n    assert result[\"uploader\"] == \"no_tags_user\"\n    assert result[\"uploader_id\"] == \"99\"\n\n\ndef test_invalid_url_raises_value_error():\n    # The extractor should raise a ValueError when the URL does not match the pattern\n    ie = HitRecordIE()\n    with pytest.raises(ValueError):\n        ie._real_extract(\"https://example.com/not_a_hitrecord_url\")\n```",
+        "reasoning": "We need tests for HitRecordIE. We can instantiate and call _real_extract with a mocked download_json? But cannot mock target. We can use real network? Not allowed. We can use a dummy subclass overriding _download_json to return predefined data. But that modifies target? We can subclass in test. That's allowed. So test normal extraction, boundary tags empty, error when missing fields? Use custom subclass. Three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.081886063,
+    "prompt_tokens": 791,
+    "prompt_time": 0.027801366,
+    "completion_tokens": 817,
+    "completion_time": 1.00266209,
+    "total_tokens": 1608,
+    "total_time": 1.030463456,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 87
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgk5r3e4e8j4v9gzv0jpdv",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.extractor.hitrecord import HitRecordIE\nfrom youtube_dl.utils import clean_html\n\nclass DummyHitRecordIE(HitRecordIE):\n    \"\"\"Subclass that overrides _download_json to return a controlled payload.\"\"\"\n    def __init__(self, payload):\n        super().__init__()\n        self._payload = payload\n\n    def _download_json(self, url, video_id, *args, **kwargs):\n        return self._payload\n\n\ndef test_normal_extraction(tmp_path):\n    # Payload mimicking a typical API response\n    payload = {\n        \"title\": \"Test Video\",\n        \"source_url\": {\"mp4_url\": \"https://example.com/video.mp4\"},\n        \"body\": \"<p>Some <b>description</b></p>\",\n        \"duration\": 123456,  # milliseconds\n        \"created_at_i\": 1609459200,\n        \"user\": {\"username\": \"tester\", \"id\": 42},\n        \"total_views_count\": 1000,\n        \"hearts_count\": 200,\n        \"comments_count\": 30,\n        \"tags\": [{\"text\": \"tag1\"}, {\"text\": \"tag2\"}],\n    }\n    ie = DummyHitRecordIE(payload)\n    result = ie._real_extract(\"https://hitrecord.org/records/12345\")\n\n    assert result[\"id\"] == \"12345\"\n    assert result[\"url\"] == \"https://example.com/video.mp4\"\n    assert result[\"title\"] == \"Test Video\"\n    assert result[\"description\"] == \"Some description\"\n    assert result[\"duration\"] == 123.456\n    assert result[\"timestamp\"] == 1609459200\n    assert result[\"uploader\"] == \"tester\"\n    assert result[\"uploader_id\"] == \"42\"\n    assert result[\"view_count\"] == 1000\n    assert result[\"like_count\"] == 200\n    assert result[\"comment_count\"] == 30\n    assert result[\"tags\"] == [\"tag1\", \"tag2\"]\n\n\ndef test_missing_tags_and_optional_fields(tmp_path):\n    # Payload with no tags and missing optional numeric fields\n    payload = {\n        \"title\": \"No Tags Video\",\n        \"source_url\": {\"mp4_url\": \"https://example.com/no_tags.mp4\"},\n        \"body\": \"<p>No tags here</p>\",\n        \"duration\": None,\n        \"created_at_i\": None,\n        \"user\": {\"username\": \"no_tags_user\", \"id\": 99},\n        \"total_views_count\": None,\n        \"hearts_count\": None,\n        \"comments_count\": None,\n        \"tags\": [],\n    }\n    ie = DummyHitRecordIE(payload)\n    result = ie._real_extract(\"https://hitrecord.org/records/67890\")\n\n    assert result[\"tags\"] is None\n    assert result[\"duration\"] is None\n    assert result[\"timestamp\"] is None\n    assert result[\"view_count\"] is None\n    assert result[\"like_count\"] is None\n    assert result[\"comment_count\"] is None\n    assert result[\"uploader\"] == \"no_tags_user\"\n    assert result[\"uploader_id\"] == \"99\"\n\n\ndef test_invalid_url_raises_value_error():\n    # The extractor should raise a ValueError when the URL does not match the pattern\n    ie = HitRecordIE()\n    with pytest.raises(ValueError):\n        ie._real_extract(\"https://example.com/not_a_hitrecord_url\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.490501096996013
+}

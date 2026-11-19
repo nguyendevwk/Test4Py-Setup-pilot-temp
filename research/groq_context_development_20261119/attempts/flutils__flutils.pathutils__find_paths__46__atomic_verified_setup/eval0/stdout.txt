@@ -1,0 +1,49 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_find_paths_normal ____________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-263/test_find_paths_normal0')
+
+    def test_find_paths_normal(tmp_path):
+        # Setup: create a directory with files and subdirectory
+        (tmp_path / "file_one").write_text("a")
+        (tmp_path / "file_two").write_text("b")
+        (tmp_path / "dir_one").mkdir()
+        (tmp_path / "dir_one" / "inner.txt").write_text("c")
+    
+        # Use a glob pattern that matches files only
+        pattern = str(tmp_path / "*")
+        # Resolve pattern to absolute path for comparison
+        expected = sorted([p for p in tmp_path.iterdir() if p.is_file()])
+    
+        # Run find_paths and collect results
+        result = sorted(find_paths(pattern))
+>       assert result == expected, f"Expected {expected}, got {result}"
+E       AssertionError: Expected [PosixPath('/tmp/pytest-of-heurix/pytest-263/test_find_paths_normal0/file_one'), PosixPath('/tmp/pytest-of-heurix/pytest-263/test_find_paths_normal0/file_two')], got [PosixPath('/tmp/pytest-of-heurix/pytest-263/test_find_paths_normal0/dir_one'), PosixPath('/tmp/pytest-of-heurix/pytest-263/test_find_paths_normal0/file_one'), PosixPath('/tmp/pytest-of-heurix/pytest-263/test_find_paths_normal0/file_two')]
+E       assert [PosixPath('/...l0/file_two')] == [PosixPath('/...l0/file_two')]
+E         
+E         At index 0 diff: PosixPath('/tmp/pytest-of-heurix/pytest-263/test_find_paths_normal0/dir_one') != PosixPath('/tmp/pytest-of-heurix/pytest-263/test_find_paths_normal0/file_one')
+E         Left contains one more item: PosixPath('/tmp/pytest-of-heurix/pytest-263/test_find_paths_normal0/file_two')
+E         Use -v to get more diff
+
+../../../../../../../groq_context_development_20261119/attempts/flutils__flutils.pathutils__find_paths__46__atomic_verified_setup/eval0/test_generated.py:21: AssertionError
+_______________________ test_find_paths_invalid_pattern ________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-263/test_find_paths_invalid_patter0')
+
+    def test_find_paths_invalid_pattern(tmp_path):
+        # Setup: create a simple file
+        (tmp_path / "file.txt").write_text("content")
+    
+        # Use an invalid glob pattern that Path.glob will reject
+        # For example, unmatched bracket
+        pattern = str(tmp_path / "[invalid")
+        # normalize_path will not raise, but Path.glob will raise ValueError
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE ValueError
+
+../../../../../../../groq_context_development_20261119/attempts/flutils__flutils.pathutils__find_paths__46__atomic_verified_setup/eval0/test_generated.py:41: Failed
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_context_development_20261119/attempts/flutils__flutils.pathutils__find_paths__46__atomic_verified_setup/eval0/test_generated.py::test_find_paths_normal
+FAILED ../../../../../../../groq_context_development_20261119/attempts/flutils__flutils.pathutils__find_paths__46__atomic_verified_setup/eval0/test_generated.py::test_find_paths_invalid_pattern
+2 failed, 1 passed in 0.13s

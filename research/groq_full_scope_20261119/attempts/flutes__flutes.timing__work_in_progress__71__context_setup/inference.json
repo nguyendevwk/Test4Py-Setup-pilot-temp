@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-34911020-10d8-449f-9ca8-ee6ae038cf6a",
+  "object": "chat.completion",
+  "created": 1795076125,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport time\nimport pytest\nfrom flutes.timing import work_in_progress\n\ndef test_work_in_progress_normal(tmp_path, capsys):\n    \"\"\"Verify normal execution prints start and end messages with elapsed time.\"\"\"\n    start = time.time()\n    with work_in_progress(\"Test normal\"):\n        time.sleep(0.1)  # simulate work\n    end = time.time()\n    captured = capsys.readouterr()\n    # Check that the start message is printed\n    assert captured.out.startswith(\"Test normal... \")\n    # Check that the end message contains \"done.\" and a time in seconds\n    assert \"done. (\" in captured.out\n    assert captured.out.strip().endswith(\"s)\")\n    # Ensure the elapsed time reported is within reasonable bounds\n    reported_time = float(captured.out.split(\"(\")[-1].rstrip(\"s)\"))\n    assert 0.09 <= reported_time <= 0.5\n    # Ensure the actual elapsed time matches the reported time within tolerance\n    assert abs(reported_time - (end - start)) < 0.1\n\ndef test_work_in_progress_zero_sleep(tmp_path, capsys):\n    \"\"\"Boundary case: zero sleep should still report a small elapsed time.\"\"\"\n    with work_in_progress(\"Zero sleep\"):\n        pass  # no work\n    captured = capsys.readouterr()\n    assert captured.out.startswith(\"Zero sleep... \")\n    assert \"done. (\" in captured.out\n    reported_time = float(captured.out.split(\"(\")[-1].rstrip(\"s)\"))\n    # The reported time should be very small but not negative\n    assert reported_time >= 0.0\n    assert reported_time < 0.1\n\ndef test_work_in_progress_exception(tmp_path, capsys):\n    \"\"\"Ensure that an exception inside the block still triggers the end message.\"\"\"\n    with pytest.raises(RuntimeError):\n        with work_in_progress(\"Error test\"):\n            raise RuntimeError(\"boom\")\n    captured = capsys.readouterr()\n    # The start message should be printed\n    assert captured.out.startswith(\"Error test... \")\n    # The end message should still appear even though an exception was raised\n    assert \"done. (\" in captured.out\n    assert captured.out.strip().endswith(\"s)\")\n```",
+        "reasoning": "We need to test work_in_progress context manager. It's a generator yielding. We can test that it prints correct messages and measures time. Use capsys. Three tests: normal block, function decorator? Actually it's a context manager only. Test that time printed approx. Use tmp_path to create file? Just test that it yields. Use time.sleep to simulate. Test boundary: zero sleep. Test error: raise inside block and ensure it still prints done? Actually if exception, yield will propagate? It will still execute after yield? In context manager, if exception occurs, the code after yield still runs? In generator context manager, if exception, the finally part runs? Actually generator context manager: after yield, the code after yield runs regardless of exception? I think yes. So test that even with exception, it prints done. Use pytest.raises to catch. Use capsys."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05201538,
+    "prompt_tokens": 472,
+    "prompt_time": 0.041908737,
+    "completion_tokens": 650,
+    "completion_time": 0.760928879,
+    "total_tokens": 1122,
+    "total_time": 0.802837616,
+    "completion_tokens_details": {
+      "reasoning_tokens": 177
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdzvmxeq0bjq42szdrgsnd",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport time\nimport pytest\nfrom flutes.timing import work_in_progress\n\ndef test_work_in_progress_normal(tmp_path, capsys):\n    \"\"\"Verify normal execution prints start and end messages with elapsed time.\"\"\"\n    start = time.time()\n    with work_in_progress(\"Test normal\"):\n        time.sleep(0.1)  # simulate work\n    end = time.time()\n    captured = capsys.readouterr()\n    # Check that the start message is printed\n    assert captured.out.startswith(\"Test normal... \")\n    # Check that the end message contains \"done.\" and a time in seconds\n    assert \"done. (\" in captured.out\n    assert captured.out.strip().endswith(\"s)\")\n    # Ensure the elapsed time reported is within reasonable bounds\n    reported_time = float(captured.out.split(\"(\")[-1].rstrip(\"s)\"))\n    assert 0.09 <= reported_time <= 0.5\n    # Ensure the actual elapsed time matches the reported time within tolerance\n    assert abs(reported_time - (end - start)) < 0.1\n\ndef test_work_in_progress_zero_sleep(tmp_path, capsys):\n    \"\"\"Boundary case: zero sleep should still report a small elapsed time.\"\"\"\n    with work_in_progress(\"Zero sleep\"):\n        pass  # no work\n    captured = capsys.readouterr()\n    assert captured.out.startswith(\"Zero sleep... \")\n    assert \"done. (\" in captured.out\n    reported_time = float(captured.out.split(\"(\")[-1].rstrip(\"s)\"))\n    # The reported time should be very small but not negative\n    assert reported_time >= 0.0\n    assert reported_time < 0.1\n\ndef test_work_in_progress_exception(tmp_path, capsys):\n    \"\"\"Ensure that an exception inside the block still triggers the end message.\"\"\"\n    with pytest.raises(RuntimeError):\n        with work_in_progress(\"Error test\"):\n            raise RuntimeError(\"boom\")\n    captured = capsys.readouterr()\n    # The start message should be printed\n    assert captured.out.startswith(\"Error test... \")\n    # The end message should still appear even though an exception was raised\n    assert \"done. (\" in captured.out\n    assert captured.out.strip().endswith(\"s)\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1408317260211334
+}

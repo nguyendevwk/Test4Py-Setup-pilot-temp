@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-3714d877-b3bd-4a66-9ea8-ad81d1a0845e",
+  "object": "chat.completion",
+  "created": 1795077464,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import walk_body\n\ndef test_walk_body_simple_if():\n    \"\"\"walk_body should traverse nodes inside an If statement.\"\"\"\n    source = \"\"\"\nif True:\n    a = 1\nelse:\n    b = 2\nc = 3\n\"\"\"\n    module = ast.parse(source)\n    body = module.body\n    nodes = list(walk_body(body))\n    # Expect the assignment nodes in order: a=1, b=2, c=3\n    assert len(nodes) == 3\n    assert isinstance(nodes[0], ast.Assign)\n    assert isinstance(nodes[1], ast.Assign)\n    assert isinstance(nodes[2], ast.Assign)\n    # Check that the targets are correct\n    assert nodes[0].targets[0].id == \"a\"\n    assert nodes[1].targets[0].id == \"b\"\n    assert nodes[2].targets[0].id == \"c\"\n\ndef test_walk_body_empty_and_try():\n    \"\"\"walk_body should handle empty bodies and Try blocks correctly.\"\"\"\n    source = \"\"\"\ntry:\n    pass\nexcept Exception:\n    x = 5\nelse:\n    y = 6\nfinally:\n    z = 7\n\"\"\"\n    module = ast.parse(source)\n    body = module.body\n    nodes = list(walk_body(body))\n    # There should be three assignments: x=5, y=6, z=7\n    assert len(nodes) == 3\n    targets = [node.targets[0].id for node in nodes]\n    assert targets == [\"x\", \"y\", \"z\"]\n\ndef test_walk_body_invalid_input():\n    \"\"\"walk_body should raise a TypeError when given a non-iterable input.\"\"\"\n    with pytest.raises(TypeError):\n        list(walk_body(42))\n```",
+        "reasoning": "We need tests for walk_body. We can create AST nodes manually. Use ast.parse to get body. Test normal: simple if. Boundary: empty body. Error: passing non-ast node? But function expects Sequence[stmt]; passing int should raise TypeError? It will iterate over int? int is not iterable, so TypeError. Use pytest.raises. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053526294,
+    "prompt_tokens": 538,
+    "prompt_time": 0.030046853,
+    "completion_tokens": 462,
+    "completion_time": 0.51317604,
+    "total_tokens": 1000,
+    "total_time": 0.543222893,
+    "completion_tokens_details": {
+      "reasoning_tokens": 78
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sf8qt9ekb9t5yqdpjd1wdp",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import walk_body\n\ndef test_walk_body_simple_if():\n    \"\"\"walk_body should traverse nodes inside an If statement.\"\"\"\n    source = \"\"\"\nif True:\n    a = 1\nelse:\n    b = 2\nc = 3\n\"\"\"\n    module = ast.parse(source)\n    body = module.body\n    nodes = list(walk_body(body))\n    # Expect the assignment nodes in order: a=1, b=2, c=3\n    assert len(nodes) == 3\n    assert isinstance(nodes[0], ast.Assign)\n    assert isinstance(nodes[1], ast.Assign)\n    assert isinstance(nodes[2], ast.Assign)\n    # Check that the targets are correct\n    assert nodes[0].targets[0].id == \"a\"\n    assert nodes[1].targets[0].id == \"b\"\n    assert nodes[2].targets[0].id == \"c\"\n\ndef test_walk_body_empty_and_try():\n    \"\"\"walk_body should handle empty bodies and Try blocks correctly.\"\"\"\n    source = \"\"\"\ntry:\n    pass\nexcept Exception:\n    x = 5\nelse:\n    y = 6\nfinally:\n    z = 7\n\"\"\"\n    module = ast.parse(source)\n    body = module.body\n    nodes = list(walk_body(body))\n    # There should be three assignments: x=5, y=6, z=7\n    assert len(nodes) == 3\n    targets = [node.targets[0].id for node in nodes]\n    assert targets == [\"x\", \"y\", \"z\"]\n\ndef test_walk_body_invalid_input():\n    \"\"\"walk_body should raise a TypeError when given a non-iterable input.\"\"\"\n    with pytest.raises(TypeError):\n        list(walk_body(42))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8832578590372577
+}

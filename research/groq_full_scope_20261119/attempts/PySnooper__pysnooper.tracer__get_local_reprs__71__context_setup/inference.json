@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-6ad2bfb0-8dc8-49d3-bce6-a9d1a4b3ab36",
+  "object": "chat.completion",
+  "created": 1795077804,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport inspect\nimport collections\nimport pytest\nfrom pysnooper.tracer import get_local_reprs\n\ndef test_get_local_reprs_order_and_repr(tmp_path):\n    # Define a function with local variables and a nested function to capture a frame\n    def inner():\n        a = 1\n        b = \"hello world\"\n        c = [1, 2, 3]\n        # Capture the current frame\n        return inspect.currentframe()\n\n    frame = inner()\n    # Call get_local_reprs without any special options\n    result = get_local_reprs(frame)\n\n    # The result should be an OrderedDict preserving the order of local variables\n    assert isinstance(result, collections.OrderedDict)\n    # The keys should match the local variable names in the order they were defined\n    assert list(result.keys()) == [\"a\", \"b\", \"c\"]\n    # The representations should be the shortish reprs of the values\n    assert result[\"a\"] == \"1\"\n    assert result[\"b\"] == \"'hello world'\"\n    assert result[\"c\"] == \"[1, 2, 3]\"\n\ndef test_get_local_reprs_custom_repr_and_max_length(tmp_path):\n    # Define a function with a local variable that will be represented specially\n    def inner():\n        data = {\"key\": \"value\", \"long\": \"x\" * 50}\n        return inspect.currentframe()\n\n    frame = inner()\n    # Custom repr: replace representation of dicts with a fixed string\n    def custom_repr(obj):\n        if isinstance(obj, dict):\n            return \"<dict>\"\n        return None\n\n    result = get_local_reprs(frame, custom_repr=custom_repr, max_length=10)\n    # The dict should use the custom representation\n    assert result[\"data\"] == \"<dict>\"\n    # The max_length should truncate the representation of the long string if it were shown\n    # Since custom_repr overrides, we test that a non-dict value respects max_length\n    def custom_repr_none(obj):\n        return None\n    frame2 = inner()\n    result2 = get_local_reprs(frame2, custom_repr=custom_repr_none, max_length=10)\n    # The long string should be truncated to 10 characters\n    assert result2[\"data\"] == \"{'key': 'value', 'long': 'xxxxxxxxxx'}\"\n\ndef test_get_local_reprs_watch_and_error(tmp_path):\n    # Define a function to capture a frame\n    def inner():\n        x = 42\n        return inspect.currentframe()\n\n    frame = inner()\n\n    # Define a watch object that provides items\n    class DummyWatch:\n        def items(self, frame, normalize):\n            # Return a dict with a key that is not in the frame locals\n            return {\"watch_key\": \"watch_value\"}\n\n    watch_obj = DummyWatch()\n    result = get_local_reprs(frame, watch=[watch_obj])\n    # The watch key should be added to the result\n    assert \"watch_key\" in result\n    assert result[\"watch_key\"] == \"watch_value\"\n\n    # Define a watch object that lacks the required items method to trigger an error\n    class BadWatch:\n        pass\n\n    bad_watch = BadWatch()\n    with pytest.raises(AttributeError):\n        get_local_reprs(frame, watch=[bad_watch])\n```",
+        "reasoning": "We need to test get_local_reprs. We'll create a function that defines locals, call get_local_reprs on its frame. Use tmp_path? Not needed. We'll test normal behavior: ordering, custom_repr, max_length, normalize. Also watch variable: maybe use CommonVariable? But that's private. Instead we can create a simple watch that returns items. But watch expects variable objects with items(frame, normalize). We can create a dummy class. Test boundary: max_length truncation. Error: passing non-callable? maybe passing invalid watch? But function will call variable.items; if missing, error. We'll test that it raises AttributeError. Provide a watch object lacking items. Use pytest.raises. Ensure no mocks. Use real utils.get_shortish_repr? It's in utils. We'll just rely. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053632482,
+    "prompt_tokens": 413,
+    "prompt_time": 0.023159596,
+    "completion_tokens": 860,
+    "completion_time": 0.942890046,
+    "total_tokens": 1273,
+    "total_time": 0.966049642,
+    "completion_tokens_details": {
+      "reasoning_tokens": 166
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfk332e6bbwwc04qxfm2c0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport inspect\nimport collections\nimport pytest\nfrom pysnooper.tracer import get_local_reprs\n\ndef test_get_local_reprs_order_and_repr(tmp_path):\n    # Define a function with local variables and a nested function to capture a frame\n    def inner():\n        a = 1\n        b = \"hello world\"\n        c = [1, 2, 3]\n        # Capture the current frame\n        return inspect.currentframe()\n\n    frame = inner()\n    # Call get_local_reprs without any special options\n    result = get_local_reprs(frame)\n\n    # The result should be an OrderedDict preserving the order of local variables\n    assert isinstance(result, collections.OrderedDict)\n    # The keys should match the local variable names in the order they were defined\n    assert list(result.keys()) == [\"a\", \"b\", \"c\"]\n    # The representations should be the shortish reprs of the values\n    assert result[\"a\"] == \"1\"\n    assert result[\"b\"] == \"'hello world'\"\n    assert result[\"c\"] == \"[1, 2, 3]\"\n\ndef test_get_local_reprs_custom_repr_and_max_length(tmp_path):\n    # Define a function with a local variable that will be represented specially\n    def inner():\n        data = {\"key\": \"value\", \"long\": \"x\" * 50}\n        return inspect.currentframe()\n\n    frame = inner()\n    # Custom repr: replace representation of dicts with a fixed string\n    def custom_repr(obj):\n        if isinstance(obj, dict):\n            return \"<dict>\"\n        return None\n\n    result = get_local_reprs(frame, custom_repr=custom_repr, max_length=10)\n    # The dict should use the custom representation\n    assert result[\"data\"] == \"<dict>\"\n    # The max_length should truncate the representation of the long string if it were shown\n    # Since custom_repr overrides, we test that a non-dict value respects max_length\n    def custom_repr_none(obj):\n        return None\n    frame2 = inner()\n    result2 = get_local_reprs(frame2, custom_repr=custom_repr_none, max_length=10)\n    # The long string should be truncated to 10 characters\n    assert result2[\"data\"] == \"{'key': 'value', 'long': 'xxxxxxxxxx'}\"\n\ndef test_get_local_reprs_watch_and_error(tmp_path):\n    # Define a function to capture a frame\n    def inner():\n        x = 42\n        return inspect.currentframe()\n\n    frame = inner()\n\n    # Define a watch object that provides items\n    class DummyWatch:\n        def items(self, frame, normalize):\n            # Return a dict with a key that is not in the frame locals\n            return {\"watch_key\": \"watch_value\"}\n\n    watch_obj = DummyWatch()\n    result = get_local_reprs(frame, watch=[watch_obj])\n    # The watch key should be added to the result\n    assert \"watch_key\" in result\n    assert result[\"watch_key\"] == \"watch_value\"\n\n    # Define a watch object that lacks the required items method to trigger an error\n    class BadWatch:\n        pass\n\n    bad_watch = BadWatch()\n    with pytest.raises(AttributeError):\n        get_local_reprs(frame, watch=[bad_watch])\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3445854149758816
+}

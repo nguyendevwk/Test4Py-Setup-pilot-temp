@@ -1,0 +1,137 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_make_request_kwargs_with_json_and_headers ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.client__make_request_kwargs__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_make_request_kwargs_with_0')
+
+    def test_make_request_kwargs_with_json_and_headers(tmp_path):
+        env = DummyEnvironment()
+        ns = argparse.Namespace(
+            method="POST",
+            url="http://example.com/api",
+            data={"key": "value"},
+            json=True,
+            form=False,
+            files=None,
+            multipart=False,
+            boundary=None,
+            headers=HTTPHeadersDict({"X-Custom": "123"}),
+            auth=None,
+            params={},
+            offline=False,
+            chunked=False,
+        )
+        kwargs = make_request_kwargs(env, ns)
+        # Body should be JSON string
+        assert kwargs["method"] == "post"
+        assert kwargs["url"] == "http://example.com/api"
+>       assert kwargs["headers"]["X-Custom"] == "123"
+E       AssertionError: assert b'123' == '123'
+
+test_generated.py:36: AssertionError
+______________ test_make_request_kwargs_with_multipart_and_files _______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.client__make_request_kwargs__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_make_request_kwargs_with_1')
+
+    def test_make_request_kwargs_with_multipart_and_files(tmp_path):
+        env = DummyEnvironment()
+        # Create a temporary file to upload
+        file_path = tmp_path / "test.txt"
+        file_path.write_text("hello world")
+        ns = argparse.Namespace(
+            method="PUT",
+            url="http://example.com/upload",
+            data=None,
+            json=False,
+            form=True,
+            files=[str(file_path)],
+            multipart=True,
+            boundary="myboundary",
+            headers=HTTPHeadersDict({"Content-Type": "multipart/form-data"}),
+            auth=None,
+            params={},
+            offline=False,
+            chunked=False,
+        )
+>       kwargs = make_request_kwargs(env, ns)
+
+test_generated.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = <DummyEnvironment {'config': {'default_options': []},
+ 'quiet': 0,
+ 'stdin_encoding': 'utf-8',
+ 'stdout_encoding': 'utf-8'}>
+args = Namespace(method='PUT', url='http://example.com/upload', data=None, json=False, form=True, files=['/home/heurix/Docume..., headers=<HTTPHeadersDict('Content-Type': 'multipart/form-data')>, auth=None, params={}, offline=False, chunked=False)
+base_headers = None
+request_body_read_callback = <function <lambda> at 0x7f4e2a5cd6c0>
+
+    def make_request_kwargs(
+        env: Environment,
+        args: argparse.Namespace,
+        base_headers: HTTPHeadersDict = None,
+        request_body_read_callback=lambda chunk: chunk
+    ) -> dict:
+        """
+        Translate our `args` into `requests.Request` keyword arguments.
+    
+        """
+        files = args.files
+        # Serialize JSON data, if needed.
+        data = args.data
+        auto_json = data and not args.form
+        if (args.json or auto_json) and isinstance(data, dict):
+            data = json_dict_to_request_body(data)
+    
+        # Finalize headers.
+        headers = make_default_headers(args)
+        if base_headers:
+            headers.update(base_headers)
+        headers.update(args.headers)
+        if args.offline and args.chunked and 'Transfer-Encoding' not in headers:
+            # When online, we let requests set the header instead to be able more
+            # easily verify chunking is taking place.
+            headers['Transfer-Encoding'] = 'chunked'
+        headers = finalize_headers(headers)
+    
+        if (args.form and files) or args.multipart:
+            data, headers['Content-Type'] = get_multipart_data_and_content_type(
+>               data=args.multipart_data,
+                boundary=args.boundary,
+                content_type=args.headers.get('Content-Type'),
+            )
+E           AttributeError: 'Namespace' object has no attribute 'multipart_data'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/client.py:355: AttributeError
+_______________ test_make_request_kwargs_offline_chunked_header ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.client__make_request_kwargs__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_make_request_kwargs_offli0')
+
+    def test_make_request_kwargs_offline_chunked_header(tmp_path):
+        env = DummyEnvironment()
+        ns = argparse.Namespace(
+            method="GET",
+            url="http://example.com/stream",
+            data=None,
+            json=False,
+            form=False,
+            files=None,
+            multipart=False,
+            boundary=None,
+            headers=HTTPHeadersDict(),
+            auth=None,
+            params={},
+            offline=True,
+            chunked=True,
+        )
+        kwargs = make_request_kwargs(env, ns)
+        # When offline and chunked, Transfer-Encoding should be set to chunked
+>       assert kwargs["headers"]["Transfer-Encoding"] == "chunked"
+E       AssertionError: assert b'chunked' == 'chunked'
+
+test_generated.py:94: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_make_request_kwargs_with_json_and_headers - As...
+FAILED test_generated.py::test_make_request_kwargs_with_multipart_and_files
+FAILED test_generated.py::test_make_request_kwargs_offline_chunked_header - A...
+3 failed in 0.79s

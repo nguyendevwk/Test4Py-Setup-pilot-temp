@@ -1,0 +1,64 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_modify_instance_attributes ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.plugins.base__BasePlugin__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_modify_instance_attribute0')
+
+    def test_modify_instance_attributes(tmp_path):
+        """Instance attributes can be modified independently of the class."""
+        plugin = BasePlugin()
+        plugin.name = "Auth"
+        plugin.description = "Test authentication plugin"
+        plugin.package_name = "httpie.plugins.auth"
+    
+        assert plugin.name == "Auth"
+        assert plugin.description == "Test authentication plugin"
+        assert plugin.package_name == "httpie.plugins.auth"
+    
+        # Ensure the class attributes remain unchanged
+        assert BasePlugin.name is None
+        assert BasePlugin.description is None
+        assert BasePlugin.package_name is None
+    
+        # Use tmp_path to create a temporary file as required by the test guidelines
+        temp_file = tmp_path / "plugin_info.txt"
+        temp_file.write_text(f"{plugin.name}\n{plugin.description}\n{plugin.package_name}")
+>       assert temp_file.read_text() == "Auth\nTest authentication plugin\nhttpie.plugins.auth\n"
+E       AssertionError: assert 'Auth\nTest a....plugins.auth' == 'Auth\nTest a...lugins.auth\n'
+E         
+E         Skipping 40 identical leading characters in diff, use -v to show
+E         - lugins.auth
+E         ?            -
+E         + lugins.auth
+
+test_generated.py:32: AssertionError
+________________ test_class_attribute_inheritance_and_isolation ________________
+
+    def test_class_attribute_inheritance_and_isolation():
+        """Subclassing should inherit default attributes, and changes are isolated."""
+        class CustomPlugin(BasePlugin):
+            pass
+    
+        # Subclass inherits the default None values
+        custom = CustomPlugin()
+        assert custom.name is None
+        assert custom.description is None
+        assert custom.package_name is None
+    
+        # Changing subclass attributes does not affect the base class
+        custom.name = "Custom"
+        assert custom.name == "Custom"
+        assert BasePlugin.name is None
+    
+        # Changing base class attributes does not affect the subclass instance
+        BasePlugin.description = "Base description"
+        assert BasePlugin.description == "Base description"
+>       assert custom.description is None
+E       AssertionError: assert 'Base description' is None
+E        +  where 'Base description' = <test_generated.test_class_attribute_inheritance_and_isolation.<locals>.CustomPlugin object at 0x7f0a41d20fa0>.description
+
+test_generated.py:54: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_modify_instance_attributes - AssertionError: a...
+FAILED test_generated.py::test_class_attribute_inheritance_and_isolation - As...
+2 failed, 1 passed in 0.19s

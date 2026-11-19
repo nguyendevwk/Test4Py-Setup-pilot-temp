@@ -1,0 +1,57 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_number_valid_and_precision ________________________
+
+    def test_number_valid_and_precision():
+        """Validate a normal number and check precision rounding."""
+        field = Number(minimum=0, maximum=10, precision="0.01")
+        # Valid integer input
+        assert field.validate(5) == 5
+        # Valid float input within bounds
+        assert field.validate(3.14159) == 3.14
+        # String input coerced to decimal and rounded
+>       assert field.validate("2.71828") == 2.72
+E       AssertionError: assert Decimal('2.72') == 2.72
+E        +  where Decimal('2.72') = validate('2.71828')
+E        +    where validate = <typesystem.fields.Number object at 0x7f338450c520>.validate
+
+test_generated.py:14: AssertionError
+____________________ test_number_boundary_exclusive_and_nan ____________________
+
+    def test_number_boundary_exclusive_and_nan():
+        """Test exclusive bounds and non‑finite values."""
+        field = Number(
+            exclusive_minimum=0,
+            exclusive_maximum=5,
+            coerce_types=True,
+        )
+        # Value equal to exclusive_minimum should fail
+        with pytest.raises(Exception) as excinfo:
+            field.validate(0)
+>       assert "exclusive_minimum" in str(excinfo.value)
+E       AssertionError: assert 'exclusive_minimum' in 'Must be greater than 0.'
+E        +  where 'Must be greater than 0.' = str(ValidationError(text='Must be greater than 0.', code='exclusive_minimum'))
+E        +    where ValidationError(text='Must be greater than 0.', code='exclusive_minimum') = <ExceptionInfo ValidationError(text='Must be greater than 0.', code='exclusive_minimum') tblen=2>.value
+
+test_generated.py:33: AssertionError
+___________________ test_number_multiple_of_and_type_errors ____________________
+
+    def test_number_multiple_of_and_type_errors():
+        """Check multiple_of constraint and type validation."""
+        field = Number(multiple_of=3)
+        # Valid multiple
+        assert field.validate(9) == 9
+        # Invalid multiple raises error
+        with pytest.raises(Exception) as excinfo:
+            field.validate(10)
+>       assert "multiple_of" in str(excinfo.value)
+E       AssertionError: assert 'multiple_of' in 'Must be a multiple of 3.'
+E        +  where 'Must be a multiple of 3.' = str(ValidationError(text='Must be a multiple of 3.', code='multiple_of'))
+E        +    where ValidationError(text='Must be a multiple of 3.', code='multiple_of') = <ExceptionInfo ValidationError(text='Must be a multiple of 3.', code='multiple_of') tblen=2>.value
+
+test_generated.py:55: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_number_valid_and_precision - AssertionError: a...
+FAILED test_generated.py::test_number_boundary_exclusive_and_nan - AssertionE...
+FAILED test_generated.py::test_number_multiple_of_and_type_errors - Assertion...
+3 failed in 0.14s

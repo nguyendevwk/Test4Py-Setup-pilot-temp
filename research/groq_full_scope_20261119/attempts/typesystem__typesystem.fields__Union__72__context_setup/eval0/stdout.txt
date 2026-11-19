@@ -1,0 +1,53 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_union_success_matching_child _______________________
+
+    def test_union_success_matching_child():
+        union = Union(any_of=[IntField(), StrField()])
+>       assert union.validate(42) == 42
+
+test_generated.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.fields.Union object at 0x7f53013c7d60>, value = 42
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        if value is None and self.allow_null:
+            return None
+        elif value is None:
+            raise self.validation_error("null")
+    
+        candidate_errors = []
+        for child in self.any_of:
+>           validated, error = child.validate_or_error(value)
+E           AttributeError: 'IntField' object has no attribute 'validate_or_error'
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:720: AttributeError
+______________________ test_union_error_single_candidate _______________________
+
+    def test_union_error_single_candidate():
+        union = Union(any_of=[IntField(), StrField()])
+        with pytest.raises(ValidationError) as excinfo:
+>           union.validate(3.14)  # float does not match any child
+
+test_generated.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.fields.Union object at 0x7f530140ba60>, value = 3.14
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        if value is None and self.allow_null:
+            return None
+        elif value is None:
+            raise self.validation_error("null")
+    
+        candidate_errors = []
+        for child in self.any_of:
+>           validated, error = child.validate_or_error(value)
+E           AttributeError: 'IntField' object has no attribute 'validate_or_error'
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:720: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_union_success_matching_child - AttributeError:...
+FAILED test_generated.py::test_union_error_single_candidate - AttributeError:...
+2 failed, 1 passed in 0.18s

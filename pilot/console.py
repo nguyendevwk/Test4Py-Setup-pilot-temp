@@ -24,10 +24,14 @@ class Console:
                                     'Status:', 'Reports:', 'Complete.', 'Stopped at')):
                 return
             repetitive = 'model_call_' in text or text.startswith('[GPU]') or 'waiting for next event' in text
+            progress=text.startswith('[progress:')
+            structural=any(token in text for token in ('/step_start ','/step_end ','/items ','/function_start ',
+                '/function_end ','/round_start ','/round_end ','/module_start ','/module_end ','/mutant_end ','/worker_end ','/worker_completed ','/ready '))
+            repetitive=repetitive or progress
             now = time.monotonic()
             if repetitive and now - self.last.get(label, float('-inf')) < self.interval:
                 return
-            if self.lines >= self.limit:
+            if self.lines >= self.limit and not (progress or structural):
                 if not self.notified:
                     print('[console] Display limit reached; experiment continues. Full output remains in log files.', flush=True)
                     self.notified = True

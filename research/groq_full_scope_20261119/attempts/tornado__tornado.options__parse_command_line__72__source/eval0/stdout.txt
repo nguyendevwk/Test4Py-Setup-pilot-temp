@@ -1,0 +1,46 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___ test_parse_command_line_parses_known_options_and_returns_remaining_args ____
+
+    def test_parse_command_line_parses_known_options_and_returns_remaining_args():
+        # Define a simple integer option
+        options.define("count", default=0, type=int, help="Number of items")
+        # Simulate command line arguments
+        args = ["--count", "5", "positional1", "positional2"]
+        remaining = options.parse_command_line(args)
+        # The option should be parsed and stored
+>       assert options.options.count == 5
+E       assert 0 == 5
+E        +  where 0 = <tornado.options.OptionParser object at 0x7fb3908dbdc0>.count
+E        +    where <tornado.options.OptionParser object at 0x7fb3908dbdc0> = options.options
+
+test_generated.py:21: AssertionError
+_____ test_parse_command_line_final_flag_stops_parsing_at_first_non_option _____
+
+    def test_parse_command_line_final_flag_stops_parsing_at_first_non_option():
+        # Define a boolean option
+        options.define("verbose", default=False, type=bool, help="Verbose mode")
+        # Simulate command line where a non-option appears before an option
+        args = ["positional1", "--verbose", "positional2"]
+        remaining = options.parse_command_line(args, final=True)
+        # Since final=True, parsing stops at the first non-option
+>       assert options.options.verbose is False  # default unchanged
+E       assert True is False
+E        +  where True = <tornado.options.OptionParser object at 0x7fb3908dbdc0>.verbose
+E        +    where <tornado.options.OptionParser object at 0x7fb3908dbdc0> = options.options
+
+test_generated.py:32: AssertionError
+_____________ test_parse_command_line_unknown_option_raises_error ______________
+
+    def test_parse_command_line_unknown_option_raises_error():
+        # No options defined
+        args = ["--unknown", "value"]
+>       with pytest.raises(SystemExit) as excinfo:
+E       Failed: DID NOT RAISE SystemExit
+
+test_generated.py:38: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_command_line_parses_known_options_and_returns_remaining_args
+FAILED test_generated.py::test_parse_command_line_final_flag_stops_parsing_at_first_non_option
+FAILED test_generated.py::test_parse_command_line_unknown_option_raises_error
+3 failed in 0.16s

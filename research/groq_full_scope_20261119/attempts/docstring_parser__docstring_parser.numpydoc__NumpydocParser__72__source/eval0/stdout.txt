@@ -1,0 +1,62 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_parse_basic_description_and_params ____________________
+
+    def test_parse_basic_description_and_params():
+        parser = NumpydocParser()
+        doc = """
+        Short description.
+    
+        Long description that spans
+        multiple lines.
+    
+        Parameters
+        ----------
+        x : int
+            The first parameter.
+        y : str
+            The second parameter.
+        """
+        result = parser.parse(doc)
+        assert result.style == DocstringStyle.NUMPYDOC
+        assert result.short_description == "Short description."
+        assert result.long_description == "Long description that spans\nmultiple lines."
+        assert result.blank_after_short_description is True
+>       assert result.blank_after_long_description is False
+E       assert True is False
+E        +  where True = <docstring_parser.common.Docstring object at 0x7fac42c878e0>.blank_after_long_description
+
+test_generated.py:25: AssertionError
+_________________ test_blank_line_handling_in_long_description _________________
+
+    def test_blank_line_handling_in_long_description():
+        parser = NumpydocParser()
+        doc = """
+        Short line.
+    
+        \n\nLong description starts after two blank lines.
+    
+        Parameters
+        ----------
+        z : float
+            Value.
+        """
+        result = parser.parse(doc)
+        # The long description should start after the two blank lines
+>       assert result.long_description == "Long description starts after two blank lines."
+E       AssertionError: assert 'Long descrip...       Value.' == 'Long descrip... blank lines.'
+E         
+E         Skipping 35 identical leading characters in diff, use -v to show
+E         - lank lines.
+E         + lank lines.
+E         ?            +
+E         + 
+E         +     Parameters...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+test_generated.py:64: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_basic_description_and_params - assert Tr...
+FAILED test_generated.py::test_blank_line_handling_in_long_description - Asse...
+2 failed, 1 passed in 0.15s

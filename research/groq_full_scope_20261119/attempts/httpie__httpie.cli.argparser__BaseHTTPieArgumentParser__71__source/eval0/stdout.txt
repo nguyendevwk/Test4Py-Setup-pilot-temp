@@ -1,0 +1,90 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_parse_args_sets_debug_and_traceback ___________________
+
+    def test_parse_args_sets_debug_and_traceback():
+        env = DummyEnvironment()
+        parser = BaseHTTPieArgumentParser()
+        # Pass --debug flag
+>       ns = parser.parse_args(env, args=["--debug"])
+
+test_generated.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = BaseHTTPieArgumentParser(prog='__main__.py', usage=None, description=None, formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=True)
+env = <test_generated.DummyEnvironment object at 0x7ff8f296d840>
+args = ['--debug'], namespace = None
+
+    def parse_args(
+        self,
+        env: Environment,
+        args=None,
+        namespace=None
+    ) -> argparse.Namespace:
+        self.env = env
+        self.args, no_options = self.parse_known_args(args, namespace)
+>       if self.args.debug:
+E       AttributeError: 'Namespace' object has no attribute 'debug'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/cli/argparser.py:98: AttributeError
+______________________ test_parse_args_detects_stdin_data ______________________
+
+    def test_parse_args_detects_stdin_data():
+        # Simulate non-tty stdin with data
+        stdin = io.BytesIO(b"data")
+        env = DummyEnvironment(stdin=stdin, stdin_isatty=False)
+        parser = BaseHTTPieArgumentParser()
+>       ns = parser.parse_args(env, args=[])
+
+test_generated.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = BaseHTTPieArgumentParser(prog='__main__.py', usage=None, description=None, formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=True)
+env = <test_generated.DummyEnvironment object at 0x7ff8f2ab8ca0>, args = []
+namespace = None
+
+    def parse_args(
+        self,
+        env: Environment,
+        args=None,
+        namespace=None
+    ) -> argparse.Namespace:
+        self.env = env
+        self.args, no_options = self.parse_known_args(args, namespace)
+>       if self.args.debug:
+E       AttributeError: 'Namespace' object has no attribute 'debug'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/cli/argparser.py:98: AttributeError
+_________________ test_print_message_routes_to_correct_stream __________________
+
+    def test_print_message_routes_to_correct_stream():
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        env = DummyEnvironment(stdout=stdout, stderr=stderr)
+        parser = BaseHTTPieArgumentParser()
+        parser.env = env
+        # Test message to stdout
+>       parser._print_message("hello stdout", file=sys.stdout)
+
+test_generated.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/cli/argparser.py:125: in _print_message
+    super()._print_message(message, file)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = BaseHTTPieArgumentParser(prog='__main__.py', usage=None, description=None, formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=True)
+message = b'hello stdout', file = <_io.StringIO object at 0x7ff8f28e5bd0>
+
+    def _print_message(self, message, file=None):
+        if message:
+            if file is None:
+                file = _sys.stderr
+>           file.write(message)
+E           TypeError: string argument expected, got 'bytes'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:2573: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_args_sets_debug_and_traceback - Attribut...
+FAILED test_generated.py::test_parse_args_detects_stdin_data - AttributeError...
+FAILED test_generated.py::test_print_message_routes_to_correct_stream - TypeE...
+3 failed in 0.68s

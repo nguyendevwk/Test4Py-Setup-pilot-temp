@@ -1,0 +1,82 @@
+F.F.F                                                                    [100%]
+=================================== FAILURES ===================================
+_____________________ test_lazyclassproperty_caches_value ______________________
+
+    def test_lazyclassproperty_caches_value():
+        counter = Counter()
+    
+        class Test:
+            @lazyclassproperty
+            def value(cls):
+                return counter.inc(cls)
+    
+        # First access triggers computation
+        assert Test.value == 1
+        assert counter.calls == 1
+    
+        # Subsequent accesses return cached value
+        assert Test.value == 1
+        assert counter.calls == 1
+    
+        # Access from subclass inherits cached value but recomputes for subclass
+        class Sub(Test):
+            pass
+    
+        assert Sub.value == 1
+        assert counter.calls == 1  # still 1 because Sub inherits cached value
+    
+        # If subclass overrides the property, it recomputes
+        class SubOverride(Test):
+            @lazyclassproperty
+            def value(cls):
+                return counter.inc(cls)
+    
+>       assert SubOverride.value == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = <class 'test_generated.test_lazyclassproperty_caches_value.<locals>.SubOverride'>.value
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyclassproperty__44__ast_dependencies/eval0/test_generated.py:44: AssertionError
+______________________ test_lazyclassproperty_is_readonly ______________________
+
+    def test_lazyclassproperty_is_readonly():
+        class TestReadOnly:
+            @lazyclassproperty
+            def data(cls):
+                return [1, 2, 3]
+    
+        # Access property
+        assert TestReadOnly.data == [1, 2, 3]
+    
+        # Attempt to set attribute should raise AttributeError
+>       with pytest.raises(AttributeError):
+E       Failed: DID NOT RAISE AttributeError
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyclassproperty__44__ast_dependencies/eval0/test_generated.py:74: Failed
+__________________ test_lazyclassproperty_multiple_instances ___________________
+
+    def test_lazyclassproperty_multiple_instances():
+        counter = Counter()
+    
+        class TestMulti:
+            @lazyclassproperty
+            def val(cls):
+                return counter.inc(cls)
+    
+        # Multiple accesses across different classes
+        class A(TestMulti):
+            pass
+    
+        class B(TestMulti):
+            pass
+    
+        assert A.val == 1
+>       assert B.val == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = <class 'test_generated.test_lazyclassproperty_multiple_instances.<locals>.B'>.val
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyclassproperty__44__ast_dependencies/eval0/test_generated.py:110: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyclassproperty__44__ast_dependencies/eval0/test_generated.py::test_lazyclassproperty_caches_value
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyclassproperty__44__ast_dependencies/eval0/test_generated.py::test_lazyclassproperty_is_readonly
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyclassproperty__44__ast_dependencies/eval0/test_generated.py::test_lazyclassproperty_multiple_instances
+3 failed, 2 passed in 0.11s

@@ -1,0 +1,51 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_normal_fraction_with_leap_year ______________________
+
+    def test_normal_fraction_with_leap_year():
+        """Test a typical period that includes a leap day."""
+        start = datetime.date(2007, 12, 28)
+        asof = datetime.date(2008, 2, 29)  # 2008 is a leap year
+        end = asof
+        result = dcfc_act_365_a(start, asof, end)
+        # Expected fraction: 61 days / 366
+        expected = decimal.Decimal(61) / decimal.Decimal(366)
+>       assert result == expected
+E       AssertionError: assert Decimal('0.1721311475409836065573770492') == Decimal('0.1666666666666666666666666667')
+
+test_generated.py:14: AssertionError
+______________________ test_boundary_fraction_no_leap_day ______________________
+
+    def test_boundary_fraction_no_leap_day():
+        """Test a period that ends exactly on the last day of a non‑leap year."""
+        start = datetime.date(2007, 12, 28)
+        asof = datetime.date(2008, 2, 28)  # 2008 is a leap year but asof is before Feb 29
+        end = asof
+        result = dcfc_act_365_a(start, asof, end)
+        # Expected fraction: 60 days / 365
+        expected = decimal.Decimal(60) / decimal.Decimal(365)
+>       assert result == expected
+E       AssertionError: assert Decimal('0.1698630136986301369863013699') == Decimal('0.1643835616438356164383561644')
+
+test_generated.py:25: AssertionError
+____________________ test_error_fraction_with_invalid_dates ____________________
+
+    def test_error_fraction_with_invalid_dates():
+        """Test that the function handles an invalid date range by returning 0."""
+        start = datetime.date(2024, 5, 1)
+        asof = datetime.date(2024, 4, 30)  # asof before start
+        end = datetime.date(2024, 6, 1)
+        result = dcfc_act_365_a(start, asof, end)
+        # The implementation does not explicitly check order, but the fraction should be 0
+        # because the day count is negative and division by 365/366 yields 0.
+>       assert result == decimal.Decimal(0)
+E       AssertionError: assert Decimal('-0.002739726027397260273972602740') == Decimal('0')
+E        +  where Decimal('0') = <class 'decimal.Decimal'>(0)
+E        +    where <class 'decimal.Decimal'> = decimal.Decimal
+
+test_generated.py:36: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normal_fraction_with_leap_year - AssertionErro...
+FAILED test_generated.py::test_boundary_fraction_no_leap_day - AssertionError...
+FAILED test_generated.py::test_error_fraction_with_invalid_dates - AssertionE...
+3 failed in 0.21s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b2d87938-19c8-45c1-b063-3c410be0dcd0",
+  "object": "chat.completion",
+  "created": 1795076396,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport builtins\nimport sys\nimport types as pytypes\nimport pytest\nfrom thefuck.entrypoints.fix_command import fix_command\nfrom thefuck import logs, const, settings, types, exceptions, ui, utils, corrector\n\n# Helper to create a dummy command object\nclass DummyCommand:\n    def __init__(self):\n        self.ran = False\n    def run(self, _):\n        self.ran = True\n\ndef test_fix_command_empty_command(monkeypatch):\n    \"\"\"When Command.from_raw_script raises EmptyCommand, fix_command returns None.\"\"\"\n    dummy_settings = pytypes.SimpleNamespace()\n    monkeypatch.setattr(settings, \"init\", lambda _: None)\n    monkeypatch.setattr(const, \"RAW_COMMAND\", \"dummy\")\n    monkeypatch.setattr(utils, \"get_alias\", lambda _: None)\n    monkeypatch.setattr(utils, \"get_all_executables\", lambda: [])\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: (_ for _ in ()).throw(exceptions.EmptyCommand()))\n    monkeypatch.setattr(ui, \"select_command\", lambda _: None)\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [])\n    # Ensure _get_raw_command returns something\n    monkeypatch.setattr(fix_command, \"_get_raw_command\", lambda _: \"dummy\")\n    result = fix_command([])\n    assert result is None\n\ndef test_fix_command_no_corrections(monkeypatch):\n    \"\"\"When no corrected commands are available, fix_command exits with status 1.\"\"\"\n    dummy_settings = pytypes.SimpleNamespace()\n    monkeypatch.setattr(settings, \"init\", lambda _: None)\n    monkeypatch.setattr(const, \"RAW_COMMAND\", \"dummy\")\n    monkeypatch.setattr(utils, \"get_alias\", lambda _: None)\n    monkeypatch.setattr(utils, \"get_all_executables\", lambda: [])\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: DummyCommand())\n    monkeypatch.setattr(ui, \"select_command\", lambda _: None)\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [])\n    monkeypatch.setattr(fix_command, \"_get_raw_command\", lambda _: \"dummy\")\n    with pytest.raises(SystemExit) as excinfo:\n        fix_command([])\n    assert excinfo.value.code == 1\n\ndef test_fix_command_success(monkeypatch):\n    \"\"\"When a correction is selected, its run method is called.\"\"\"\n    dummy_settings = pytypes.SimpleNamespace()\n    monkeypatch.setattr(settings, \"init\", lambda _: None)\n    monkeypatch.setattr(const, \"RAW_COMMAND\", \"dummy\")\n    monkeypatch.setattr(utils, \"get_alias\", lambda _: None)\n    monkeypatch.setattr(utils, \"get_all_executables\", lambda: [])\n    dummy_cmd = DummyCommand()\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: dummy_cmd)\n    selected = DummyCommand()\n    monkeypatch.setattr(ui, \"select_command\", lambda _: selected)\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [selected])\n    monkeypatch.setattr(fix_command, \"_get_raw_command\", lambda _: \"dummy\")\n    fix_command([])\n    assert selected.ran is True\n```",
+        "reasoning": "We need to test fix_command. We can simulate known_args, but need to mock settings.init? Can't modify product. But we can use real settings. We can create a temporary command file? The function reads raw command via _get_raw_command which likely reads from environment? We can't access private. But we can test that when EmptyCommand raised, function returns None. We can monkeypatch types.Command.from_raw_script to raise EmptyCommand. Use monkeypatch fixture. Also test that when corrected_commands empty, sys.exit called. Use capsys to capture exit? Actually sys.exit raises SystemExit. Use pytest.raises(SystemExit). Also test normal flow: monkeypatch get_corrected_commands to return list with one command object that has run method. Ensure run called. Use a dummy command. Also monkeypatch select_command to return that command. Also monkeypatch settings.init to no-op. Also monkeypatch _get_raw_command to return something. Need to import the function. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052725436,
+    "prompt_tokens": 429,
+    "prompt_time": 0.026673641,
+    "completion_tokens": 875,
+    "completion_time": 0.983766974,
+    "total_tokens": 1304,
+    "total_time": 1.010440615,
+    "completion_tokens_details": {
+      "reasoning_tokens": 198
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se84rbepatqvbcf9a6dd5e",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport builtins\nimport sys\nimport types as pytypes\nimport pytest\nfrom thefuck.entrypoints.fix_command import fix_command\nfrom thefuck import logs, const, settings, types, exceptions, ui, utils, corrector\n\n# Helper to create a dummy command object\nclass DummyCommand:\n    def __init__(self):\n        self.ran = False\n    def run(self, _):\n        self.ran = True\n\ndef test_fix_command_empty_command(monkeypatch):\n    \"\"\"When Command.from_raw_script raises EmptyCommand, fix_command returns None.\"\"\"\n    dummy_settings = pytypes.SimpleNamespace()\n    monkeypatch.setattr(settings, \"init\", lambda _: None)\n    monkeypatch.setattr(const, \"RAW_COMMAND\", \"dummy\")\n    monkeypatch.setattr(utils, \"get_alias\", lambda _: None)\n    monkeypatch.setattr(utils, \"get_all_executables\", lambda: [])\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: (_ for _ in ()).throw(exceptions.EmptyCommand()))\n    monkeypatch.setattr(ui, \"select_command\", lambda _: None)\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [])\n    # Ensure _get_raw_command returns something\n    monkeypatch.setattr(fix_command, \"_get_raw_command\", lambda _: \"dummy\")\n    result = fix_command([])\n    assert result is None\n\ndef test_fix_command_no_corrections(monkeypatch):\n    \"\"\"When no corrected commands are available, fix_command exits with status 1.\"\"\"\n    dummy_settings = pytypes.SimpleNamespace()\n    monkeypatch.setattr(settings, \"init\", lambda _: None)\n    monkeypatch.setattr(const, \"RAW_COMMAND\", \"dummy\")\n    monkeypatch.setattr(utils, \"get_alias\", lambda _: None)\n    monkeypatch.setattr(utils, \"get_all_executables\", lambda: [])\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: DummyCommand())\n    monkeypatch.setattr(ui, \"select_command\", lambda _: None)\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [])\n    monkeypatch.setattr(fix_command, \"_get_raw_command\", lambda _: \"dummy\")\n    with pytest.raises(SystemExit) as excinfo:\n        fix_command([])\n    assert excinfo.value.code == 1\n\ndef test_fix_command_success(monkeypatch):\n    \"\"\"When a correction is selected, its run method is called.\"\"\"\n    dummy_settings = pytypes.SimpleNamespace()\n    monkeypatch.setattr(settings, \"init\", lambda _: None)\n    monkeypatch.setattr(const, \"RAW_COMMAND\", \"dummy\")\n    monkeypatch.setattr(utils, \"get_alias\", lambda _: None)\n    monkeypatch.setattr(utils, \"get_all_executables\", lambda: [])\n    dummy_cmd = DummyCommand()\n    monkeypatch.setattr(types.Command, \"from_raw_script\", lambda _: dummy_cmd)\n    selected = DummyCommand()\n    monkeypatch.setattr(ui, \"select_command\", lambda _: selected)\n    monkeypatch.setattr(corrector, \"get_corrected_commands\", lambda _: [selected])\n    monkeypatch.setattr(fix_command, \"_get_raw_command\", lambda _: \"dummy\")\n    fix_command([])\n    assert selected.ran is True\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3878598400042392
+}

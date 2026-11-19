@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-732b493b-e148-4807-aa08-58de7240862d",
+  "object": "chat.completion",
+  "created": 1795079493,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules.lein_not_task import get_new_command\nfrom thefuck.utils import replace_command, get_all_matched_commands\n\nclass DummyCommand:\n    def __init__(self, command, output):\n        self.command = command\n        self.output = output\n\ndef test_get_new_command_replaces_broken_task():\n    # Simulate a lein output that reports a missing task and suggests a correction\n    output = (\n        \"lein: 'mytask' is not a task\\n\"\n        \"Did you mean this? lein mytask\\n\"\n        \"Did you mean this? lein mytask2\\n\"\n    )\n    cmd = DummyCommand(\"lein mytask\", output)\n    new_cmd = get_new_command(cmd)\n    # The broken task should be replaced by the first suggestion\n    assert new_cmd.command == \"lein mytask\"\n\ndef test_get_new_command_raises_when_no_match():\n    # Output that does not contain the expected pattern\n    output = \"lein: 'mytask' is not a task\\n\"\n    cmd = DummyCommand(\"lein mytask\", output)\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n\ndef test_get_new_command_uses_first_suggestion_when_multiple():\n    # Multiple suggestions are present; the first should be used\n    output = (\n        \"lein: 'mytask' is not a task\\n\"\n        \"Did you mean this? lein mytask1\\n\"\n        \"Did you mean this? lein mytask2\\n\"\n    )\n    cmd = DummyCommand(\"lein mytask\", output)\n    new_cmd = get_new_command(cmd)\n    assert new_cmd.command == \"lein mytask1\"\n```",
+        "reasoning": "We need to test get_new_command. We need to simulate command object with output attribute. Use simple class. Test normal: output contains \"'mytask' is not a task\" and a suggestion. Test boundary: no match? but function will error. We can test that it raises IndexError when no match. Third: multiple suggestions? ensure replace_command uses first? We can mock replace_command? but cannot modify product. We can import replace_command from thefuck.utils. But we don't want to rely on its behavior. Instead we can check that returned command has updated command string. Let's create dummy command with command attribute. replace_command returns new command object? Let's inspect? Can't. We'll assume it returns command object with command attribute updated. We'll test that new command.command contains suggestion. We'll create dummy command with command string and output. Use simple class. We'll import get_new_command. Use tmp_path? not needed. We'll just test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004882532,
+    "prompt_tokens": 313,
+    "prompt_time": 0.007845983,
+    "completion_tokens": 553,
+    "completion_time": 0.594243777,
+    "total_tokens": 866,
+    "total_time": 0.60208976,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 189
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh6n65e28865sndwn86ny0",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules.lein_not_task import get_new_command\nfrom thefuck.utils import replace_command, get_all_matched_commands\n\nclass DummyCommand:\n    def __init__(self, command, output):\n        self.command = command\n        self.output = output\n\ndef test_get_new_command_replaces_broken_task():\n    # Simulate a lein output that reports a missing task and suggests a correction\n    output = (\n        \"lein: 'mytask' is not a task\\n\"\n        \"Did you mean this? lein mytask\\n\"\n        \"Did you mean this? lein mytask2\\n\"\n    )\n    cmd = DummyCommand(\"lein mytask\", output)\n    new_cmd = get_new_command(cmd)\n    # The broken task should be replaced by the first suggestion\n    assert new_cmd.command == \"lein mytask\"\n\ndef test_get_new_command_raises_when_no_match():\n    # Output that does not contain the expected pattern\n    output = \"lein: 'mytask' is not a task\\n\"\n    cmd = DummyCommand(\"lein mytask\", output)\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n\ndef test_get_new_command_uses_first_suggestion_when_multiple():\n    # Multiple suggestions are present; the first should be used\n    output = (\n        \"lein: 'mytask' is not a task\\n\"\n        \"Did you mean this? lein mytask1\\n\"\n        \"Did you mean this? lein mytask2\\n\"\n    )\n    cmd = DummyCommand(\"lein mytask\", output)\n    new_cmd = get_new_command(cmd)\n    assert new_cmd.command == \"lein mytask1\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "5b8c9c039dd84d818a126b13b60180a8",
+  "_api_plus_pacing_seconds": 1.1797430260339752
+}

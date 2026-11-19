@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-4d529420-ccd0-4da3-af24-a12e7916fc1d",
+  "object": "chat.completion",
+  "created": 1795079350,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.queues import LifoQueue\nfrom tornado.concurrent import Future\nfrom tornado import gen\nfrom queue import Empty\n\n@pytest.mark.asyncio\nasync def test_lifo_order():\n    \"\"\"Items are retrieved in reverse order of insertion.\"\"\"\n    q = LifoQueue()\n    q.put(1)\n    q.put(2)\n    q.put(3)\n    assert await q.get() == 3\n    assert await q.get() == 2\n    assert await q.get() == 1\n\n@pytest.mark.asyncio\nasync def test_maxsize_and_blocking():\n    \"\"\"Queue respects maxsize and blocks on put until space is available.\"\"\"\n    q = LifoQueue(maxsize=1)\n    q.put(10)  # fills the queue\n    assert q.full()\n    # Start a coroutine that will put another item; it should block until we get.\n    async def delayed_put():\n        await q.put(20)\n        return \"done\"\n    task = asyncio.create_task(delayed_put())\n    # Give the event loop a moment to run the put coroutine (it should block)\n    await asyncio.sleep(0.1)\n    assert not task.done()  # still blocked\n    # Now get an item to free space\n    assert await q.get() == 10\n    # The put coroutine should now complete\n    assert await task == \"done\"\n    # Queue should contain the second item\n    assert await q.get() == 20\n\ndef test_get_nowait_empty():\n    \"\"\"get_nowait raises Empty when the queue is empty.\"\"\"\n    q = LifoQueue()\n    with pytest.raises(Empty):\n        q.get_nowait()\n```",
+        "reasoning": "We need to write tests for LifoQueue from tornado. We cannot modify product code. We need three independent test functions. Use tmp_path? Not needed. Just test behavior: normal put/get order, boundary maxsize, error when get from empty? LifoQueue inherits Queue; need to check behavior. Let's import from tornado.queues import LifoQueue. Test normal: put 1,2,3 get returns 3,2,1? Wait doc shows 1,2,3? Actually example shows put 3,2,1 then get returns 1,2,3. So LIFO: last put is 1? Wait they put 3,2,1 so queue order: [3,2,1]; pop returns 1. So LIFO. So test that.\n\nBoundary: maxsize=1, put two items should block? But we can't block. Maybe test that put raises? In Queue, put blocks if full. But we can test that after putting maxsize items, queue is full and put will block? Hard. Maybe test that maxsize is respected: after putting maxsize items, queue.full() returns True. And put will block until get. We can test that put returns after get.\n\nError: get from empty should block; we can test that get raises when timeout? Queue.get has timeout param. Use get_nowait? LifoQueue inherits Queue, which has get_nowait. So test that get_nowait raises queue.Empty.\n\nImplement tests using asyncio. Use pytest.mark.asyncio. Use pytest.raises for Empty. Use tmp_path not needed.\n\nLet's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005217692,
+    "prompt_tokens": 494,
+    "prompt_time": 0.025264562,
+    "completion_tokens": 690,
+    "completion_time": 0.72173124,
+    "total_tokens": 1184,
+    "total_time": 0.746995802,
+    "completion_tokens_details": {
+      "reasoning_tokens": 331
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh29hdegtbp3qgwvqazzdk",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.queues import LifoQueue\nfrom tornado.concurrent import Future\nfrom tornado import gen\nfrom queue import Empty\n\n@pytest.mark.asyncio\nasync def test_lifo_order():\n    \"\"\"Items are retrieved in reverse order of insertion.\"\"\"\n    q = LifoQueue()\n    q.put(1)\n    q.put(2)\n    q.put(3)\n    assert await q.get() == 3\n    assert await q.get() == 2\n    assert await q.get() == 1\n\n@pytest.mark.asyncio\nasync def test_maxsize_and_blocking():\n    \"\"\"Queue respects maxsize and blocks on put until space is available.\"\"\"\n    q = LifoQueue(maxsize=1)\n    q.put(10)  # fills the queue\n    assert q.full()\n    # Start a coroutine that will put another item; it should block until we get.\n    async def delayed_put():\n        await q.put(20)\n        return \"done\"\n    task = asyncio.create_task(delayed_put())\n    # Give the event loop a moment to run the put coroutine (it should block)\n    await asyncio.sleep(0.1)\n    assert not task.done()  # still blocked\n    # Now get an item to free space\n    assert await q.get() == 10\n    # The put coroutine should now complete\n    assert await task == \"done\"\n    # Queue should contain the second item\n    assert await q.get() == 20\n\ndef test_get_nowait_empty():\n    \"\"\"get_nowait raises Empty when the queue is empty.\"\"\"\n    q = LifoQueue()\n    with pytest.raises(Empty):\n        q.get_nowait()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1711314559797756
+}

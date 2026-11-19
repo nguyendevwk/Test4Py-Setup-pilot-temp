@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-86bae09b-fd7f-404c-b182-5cca71bba886",
+  "object": "chat.completion",
+  "created": 1795079553,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKPlaylistIE\n\n# Helper to create a minimal webpage with og tags\ndef make_webpage(title, description):\n    return f\"\"\"<html><head>\n    <meta property=\"og:title\" content=\"{title}\">\n    <meta property=\"og:description\" content=\"{description}\">\n    </head><body></body></html>\"\"\"\n\ndef test_valid_url_match():\n    \"\"\"NRKPlaylistIE should match valid NRK playlist URLs.\"\"\"\n    ie = NRKPlaylistIE()\n    valid_urls = [\n        \"http://www.nrk.no/troms/gjenopplev-den-historiske-solformorkelsen-1.12270763\",\n        \"https://nrk.no/kultur/bok/rivertonprisen-til-karin-fossum-1.12266449\",\n        \"http://nrk.no/nyheter/eksempel-1.12345678\",\n    ]\n    for url in valid_urls:\n        assert re.match(ie._VALID_URL, url), f\"URL should match: {url}\"\n    # URLs that should not match\n    invalid_urls = [\n        \"http://www.nrk.no/video/123456\",\n        \"https://nrk.no/skole/123456\",\n        \"http://example.com/nrk/no/123456\",\n    ]\n    for url in invalid_urls:\n        assert not re.match(ie._VALID_URL, url), f\"URL should not match: {url}\"\n\ndef test_extract_title_and_description():\n    \"\"\"_extract_title and _extract_description should return correct values from og tags.\"\"\"\n    ie = NRKPlaylistIE()\n    title = \"Test Title\"\n    description = \"Test Description\"\n    webpage = make_webpage(title, description)\n    extracted_title = ie._extract_title(webpage)\n    extracted_description = ie._extract_description(webpage)\n    assert extracted_title == title, \"Title extraction failed\"\n    assert extracted_description == description, \"Description extraction failed\"\n\ndef test_extract_title_fallback_and_missing_description():\n    \"\"\"_extract_title should not raise if og:title is missing; _extract_description should raise.\"\"\"\n    ie = NRKPlaylistIE()\n    # Webpage without og:title\n    webpage_no_title = \"<html><head></head><body></body></html>\"\n    # Should return None (fatal=False)\n    assert ie._extract_title(webpage_no_title) is None\n    # Webpage without og:description should raise ExtractorError\n    webpage_no_desc = \"<html><head><meta property=\\\"og:title\\\" content=\\\"Only Title\\\"></head><body></body></html>\"\n    with pytest.raises(Exception):\n        ie._extract_description(webpage_no_desc)\n```",
+        "reasoning": "We need to write tests for NRKPlaylistIE. We can't import private. We'll import from youtube_dl.extractor.nrk import NRKPlaylistIE. We'll test _extract_title and _extract_description with sample web pages. Also test _VALID_URL matching. Use tmp_path? Not needed. Just create dummy webpage strings. Use pytest. Three functions: test_valid_url_match, test_extract_title_description, test_invalid_url. Ensure no network. Use regex. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005390568,
+    "prompt_tokens": 697,
+    "prompt_time": 3.2759562349999998,
+    "completion_tokens": 668,
+    "completion_time": 0.694171398,
+    "total_tokens": 1365,
+    "total_time": 3.970127633,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 96
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh8cq5ejbax3typfwfckne",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKPlaylistIE\n\n# Helper to create a minimal webpage with og tags\ndef make_webpage(title, description):\n    return f\"\"\"<html><head>\n    <meta property=\"og:title\" content=\"{title}\">\n    <meta property=\"og:description\" content=\"{description}\">\n    </head><body></body></html>\"\"\"\n\ndef test_valid_url_match():\n    \"\"\"NRKPlaylistIE should match valid NRK playlist URLs.\"\"\"\n    ie = NRKPlaylistIE()\n    valid_urls = [\n        \"http://www.nrk.no/troms/gjenopplev-den-historiske-solformorkelsen-1.12270763\",\n        \"https://nrk.no/kultur/bok/rivertonprisen-til-karin-fossum-1.12266449\",\n        \"http://nrk.no/nyheter/eksempel-1.12345678\",\n    ]\n    for url in valid_urls:\n        assert re.match(ie._VALID_URL, url), f\"URL should match: {url}\"\n    # URLs that should not match\n    invalid_urls = [\n        \"http://www.nrk.no/video/123456\",\n        \"https://nrk.no/skole/123456\",\n        \"http://example.com/nrk/no/123456\",\n    ]\n    for url in invalid_urls:\n        assert not re.match(ie._VALID_URL, url), f\"URL should not match: {url}\"\n\ndef test_extract_title_and_description():\n    \"\"\"_extract_title and _extract_description should return correct values from og tags.\"\"\"\n    ie = NRKPlaylistIE()\n    title = \"Test Title\"\n    description = \"Test Description\"\n    webpage = make_webpage(title, description)\n    extracted_title = ie._extract_title(webpage)\n    extracted_description = ie._extract_description(webpage)\n    assert extracted_title == title, \"Title extraction failed\"\n    assert extracted_description == description, \"Description extraction failed\"\n\ndef test_extract_title_fallback_and_missing_description():\n    \"\"\"_extract_title should not raise if og:title is missing; _extract_description should raise.\"\"\"\n    ie = NRKPlaylistIE()\n    # Webpage without og:title\n    webpage_no_title = \"<html><head></head><body></body></html>\"\n    # Should return None (fatal=False)\n    assert ie._extract_title(webpage_no_title) is None\n    # Webpage without og:description should raise ExtractorError\n    webpage_no_desc = \"<html><head><meta property=\\\"og:title\\\" content=\\\"Only Title\\\"></head><body></body></html>\"\n    with pytest.raises(Exception):\n        ie._extract_description(webpage_no_desc)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "03e6c6962b554164b2858388e3929baf",
+  "_api_plus_pacing_seconds": 4.666965073964093
+}

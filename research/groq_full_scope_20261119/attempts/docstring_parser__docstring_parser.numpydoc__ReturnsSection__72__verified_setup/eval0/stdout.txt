@@ -1,0 +1,87 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_parse_item_with_valid_key_and_description ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring_parser.numpydoc__ReturnsSection__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_item_with_valid_key0')
+
+    def test_parse_item_with_valid_key_and_description(tmp_path):
+        """Verify that a correctly formatted key yields the expected DocstringReturns."""
+        section = ReturnsSection(title="Returns", key="return_value")
+        key = "value : int"
+        value = "   The integer value returned.\n   It is positive."
+        result = section._parse_item(key, value)
+    
+        assert isinstance(result, DocstringReturns)
+        assert result.args == ["return_value"]
+        assert result.return_name == "value"
+        assert result.type_name == "int"
+        assert result.is_generator is False
+        # description should be cleaned: leading/trailing whitespace removed, internal newlines collapsed
+>       assert result.description == "The integer value returned.\nIt is positive."
+E       AssertionError: assert 'The integer ... is positive.' == 'The integer ... is positive.'
+E         
+E           The integer value returned.
+E         - It is positive.
+E         +    It is positive.
+E         ? +++
+
+test_generated.py:19: AssertionError
+__________________ test_parse_item_with_missing_name_and_type __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring_parser.numpydoc__ReturnsSection__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_item_with_missing_n0')
+
+    def test_parse_item_with_missing_name_and_type(tmp_path):
+        """When the key does not match the regex, name and type should be None."""
+        section = ReturnsSection(title="Returns", key="return_value")
+        key = "just a description"
+        value = "No type or name provided."
+        result = section._parse_item(key, value)
+    
+        assert isinstance(result, DocstringReturns)
+        assert result.return_name is None
+>       assert result.type_name is None
+E       AssertionError: assert 'just a description' is None
+E        +  where 'just a description' = <docstring_parser.common.DocstringReturns object at 0x7f692da9a6e0>.type_name
+
+test_generated.py:30: AssertionError
+_________ test_parse_item_with_complex_type_and_multiline_description __________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring_parser.numpydoc__ReturnsSection__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_item_with_complex_t0')
+
+    def test_parse_item_with_complex_type_and_multiline_description(tmp_path):
+        """Test parsing of a key with a complex type and a multiline description."""
+        section = ReturnsSection(title="Returns", key="return_value")
+        key = "data : List[Dict[str, Any]]"
+        value = """
+            The data structure returned.
+            It contains a list of dictionaries.
+            Each dictionary maps strings to any type.
+        """
+        result = section._parse_item(key, value)
+    
+        assert isinstance(result, DocstringReturns)
+        assert result.return_name == "data"
+        assert result.type_name == "List[Dict[str, Any]]"
+        # description should be cleaned: leading/trailing whitespace removed, internal newlines collapsed
+        expected_description = (
+            "The data structure returned.\n"
+            "It contains a list of dictionaries.\n"
+            "Each dictionary maps strings to any type."
+        )
+>       assert result.description == expected_description
+E       AssertionError: assert 'The data str... to any type.' == 'The data str... to any type.'
+E         
+E           The data structure returned.
+E         - It contains a list of dictionaries.
+E         +         It contains a list of dictionaries.
+E         ? ++++++++
+E         - Each dictionary maps strings to any type.
+E         +         Each dictionary maps strings to any type.
+E         ? ++++++++
+
+test_generated.py:53: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_item_with_valid_key_and_description - As...
+FAILED test_generated.py::test_parse_item_with_missing_name_and_type - Assert...
+FAILED test_generated.py::test_parse_item_with_complex_type_and_multiline_description
+3 failed in 0.13s

@@ -1,0 +1,68 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_get_shortish_repr_basic _________________________
+
+    def test_get_shortish_repr_basic():
+        # Simple integer: repr is "1"
+        result = get_shortish_repr(1)
+        assert result == "1", "repr of integer should be unchanged"
+    
+        # String with newline: should have newlines removed
+        s = "line1\nline2\rline3"
+        result = get_shortish_repr(s)
+        assert "\n" not in result and "\r" not in result
+>       assert result == "line1line2line3", "newlines should be stripped"
+E       AssertionError: newlines should be stripped
+E       assert "'line1\\nline2\\rline3'" == 'line1line2line3'
+E         
+E         - line1line2line3
+E         + 'line1\nline2\rline3'
+E         ? +     ++     ++     +
+
+test_generated.py:16: AssertionError
+________________ test_get_shortish_repr_truncate_and_normalize _________________
+
+    def test_get_shortish_repr_truncate_and_normalize():
+        # Create a string that will be truncated
+        original = "0123456789"
+        # Truncate to 5 characters
+        truncated = get_shortish_repr(original, max_length=5)
+>       assert truncated == "01234", "should truncate to 5 characters"
+E       AssertionError: should truncate to 5 characters
+E       assert "'...'" == '01234'
+E         
+E         - 01234
+E         + '...'
+
+test_generated.py:32: AssertionError
+_____________________ test_get_shortish_repr_repr_failure ______________________
+
+    def test_get_shortish_repr_repr_failure():
+        # Define a custom repr that raises an exception
+        def bad_repr(obj):
+            raise RuntimeError("cannot represent")
+    
+        custom_repr = (object, bad_repr)
+        # Use an object instance
+        obj = object()
+>       result = get_shortish_repr(obj, custom_repr=custom_repr)
+
+test_generated.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/utils.py:68: in get_shortish_repr
+    repr_function = get_repr_function(item, custom_repr)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = <object object at 0x7ff243b1ece0>
+custom_repr = (<class 'object'>, <function test_get_shortish_repr_repr_failure.<locals>.bad_repr at 0x7ff23448f910>)
+
+    def get_repr_function(item, custom_repr):
+>       for condition, action in custom_repr:
+E       TypeError: cannot unpack non-iterable type object
+
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/utils.py:51: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_shortish_repr_basic - AssertionError: newl...
+FAILED test_generated.py::test_get_shortish_repr_truncate_and_normalize - Ass...
+FAILED test_generated.py::test_get_shortish_repr_repr_failure - TypeError: ca...
+3 failed in 0.14s

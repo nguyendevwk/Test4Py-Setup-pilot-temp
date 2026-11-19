@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a0410eba-22f4-4735-bc1f-0fb797fc6fb5",
+  "object": "chat.completion",
+  "created": 1795078008,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport itertools\nimport math\nimport pytest\n\nfrom tqdm.contrib.itertools import combinations as tqdm_combinations\n\n\nclass DummyTqdm:\n    \"\"\"Simple stand‑in for tqdm that records the iterable and total.\"\"\"\n    def __init__(self, iterable, total=None, **kwargs):\n        self.iterable = iterable\n        self.total = total\n        self.kwargs = kwargs\n\n    def __iter__(self):\n        return iter(self.iterable)\n\n\ndef test_combinations_normal():\n    \"\"\"Verify that combinations returns the correct items and total for a normal case.\"\"\"\n    data = [1, 2, 3, 4]\n    r = 2\n    # Use DummyTqdm to capture the total argument\n    result = tqdm_combinations(data, r, tqdm_class=DummyTqdm)\n    # The DummyTqdm instance should have the correct total\n    assert result.total == math.comb(len(data), r)\n    # The iterable should produce the expected combinations\n    expected = list(itertools.combinations(data, r))\n    assert list(result) == expected\n\n\ndef test_combinations_r_greater_than_len():\n    \"\"\"When r is greater than the length of the iterable, total should be 0.\"\"\"\n    data = [1, 2]\n    r = 3\n    result = tqdm_combinations(data, r, tqdm_class=DummyTqdm)\n    # Total should be set to 0\n    assert result.total == 0\n    # No combinations should be produced\n    assert list(result) == []\n\n\ndef test_combinations_iterable_without_len():\n    \"\"\"If the iterable has no __len__, total should remain None.\"\"\"\n    # Generator has no __len__\n    data = (x for x in range(5))\n    r = 2\n    result = tqdm_combinations(data, r, tqdm_class=DummyTqdm)\n    # Total should be None because len() is not available\n    assert result.total is None\n    # The iterable should still produce the correct combinations\n    expected = list(itertools.combinations(range(5), r))\n    assert list(result) == expected\n```",
+        "reasoning": "We need to write tests for this function. Use tmp_path? Not needed. Just test normal, boundary, error. Use pytest. Three functions. Test normal: combinations of list, r=2, check total and items. Test boundary: r>len => total 0. Test error: iterable not sized? maybe generator. Ensure total None leads to None? Actually if total None and iterable not sized, it will not set total, so tqdm_class receives total=None. We can check that. Use tqdm.auto? But we don't want to import tqdm? It's imported. We can use a dummy tqdm class that records total. Create a simple class. Use that as tqdm_class. Test that total passed correctly. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051831929,
+    "prompt_tokens": 337,
+    "prompt_time": 0.018191321,
+    "completion_tokens": 600,
+    "completion_time": 0.681531294,
+    "total_tokens": 937,
+    "total_time": 0.699722615,
+    "completion_tokens_details": {
+      "reasoning_tokens": 148
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfsagpewbbpre6hdm3nhtv",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport itertools\nimport math\nimport pytest\n\nfrom tqdm.contrib.itertools import combinations as tqdm_combinations\n\n\nclass DummyTqdm:\n    \"\"\"Simple stand‑in for tqdm that records the iterable and total.\"\"\"\n    def __init__(self, iterable, total=None, **kwargs):\n        self.iterable = iterable\n        self.total = total\n        self.kwargs = kwargs\n\n    def __iter__(self):\n        return iter(self.iterable)\n\n\ndef test_combinations_normal():\n    \"\"\"Verify that combinations returns the correct items and total for a normal case.\"\"\"\n    data = [1, 2, 3, 4]\n    r = 2\n    # Use DummyTqdm to capture the total argument\n    result = tqdm_combinations(data, r, tqdm_class=DummyTqdm)\n    # The DummyTqdm instance should have the correct total\n    assert result.total == math.comb(len(data), r)\n    # The iterable should produce the expected combinations\n    expected = list(itertools.combinations(data, r))\n    assert list(result) == expected\n\n\ndef test_combinations_r_greater_than_len():\n    \"\"\"When r is greater than the length of the iterable, total should be 0.\"\"\"\n    data = [1, 2]\n    r = 3\n    result = tqdm_combinations(data, r, tqdm_class=DummyTqdm)\n    # Total should be set to 0\n    assert result.total == 0\n    # No combinations should be produced\n    assert list(result) == []\n\n\ndef test_combinations_iterable_without_len():\n    \"\"\"If the iterable has no __len__, total should remain None.\"\"\"\n    # Generator has no __len__\n    data = (x for x in range(5))\n    r = 2\n    result = tqdm_combinations(data, r, tqdm_class=DummyTqdm)\n    # Total should be None because len() is not available\n    assert result.total is None\n    # The iterable should still produce the correct combinations\n    expected = list(itertools.combinations(range(5), r))\n    assert list(result) == expected\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0955425900174305
+}

@@ -1,0 +1,50 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_transform_replaces_str_with_unicode ___________________
+
+    def test_transform_replaces_str_with_unicode():
+        source = "x = str('hello')\nprint(str(x))"
+        tree = parse_source(source)
+    
+        result: TransformationResult = StringTypesTransformer.transform(tree)
+    
+        # The tree should have changed
+>       assert result.changed is True
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:26: AttributeError
+_____________________ test_transform_no_change_when_no_str _____________________
+
+    def test_transform_no_change_when_no_str():
+        source = "x = 42\nprint(x)"
+        tree = parse_source(source)
+    
+        result: TransformationResult = StringTypesTransformer.transform(tree)
+    
+        # The tree should not have changed
+>       assert result.changed is False
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:43: AttributeError
+__________________ test_transform_does_not_modify_other_names __________________
+
+    def test_transform_does_not_modify_other_names():
+        source = "str_value = 'test'\nprint(str_value)\nstr = 5"
+        tree = parse_source(source)
+    
+        result: TransformationResult = StringTypesTransformer.transform(tree)
+    
+        # Only the identifier 'str' used as a type should be changed
+        transformed_source = ast_to_source(result.tree)
+        # The variable name 'str_value' should remain unchanged
+        assert "str_value" in transformed_source
+        # The assignment to str should remain unchanged
+>       assert "str = 5" in transformed_source
+E       AssertionError: assert 'str = 5' in 'str_value = \nprint(str_value)\nunicode = '
+
+test_generated.py:61: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_transform_replaces_str_with_unicode - Attribut...
+FAILED test_generated.py::test_transform_no_change_when_no_str - AttributeErr...
+FAILED test_generated.py::test_transform_does_not_modify_other_names - Assert...
+3 failed in 0.15s

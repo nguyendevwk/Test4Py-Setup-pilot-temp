@@ -1,0 +1,87 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_import_rewrite_calls_previous_on_success _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7facf1fe9db0>
+
+    def test_import_rewrite_calls_previous_on_success(monkeypatch):
+        # Arrange: patch extend to record calls and succeed
+        recorder = CallRecorder()
+        monkeypatch.setattr("py_backwards.transformers.base.extend", recorder)
+    
+        previous = "prev_module"
+        current = "curr_module"
+    
+        # Act
+>       import_rewrite(previous, current)
+E       TypeError: 'snippet' object is not callable
+
+test_generated.py:21: TypeError
+______________ test_import_rewrite_calls_current_on_import_error _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7facf1842680>
+
+    def test_import_rewrite_calls_current_on_import_error(monkeypatch):
+        # Arrange: patch extend to raise ImportError on first call, then record
+        call_order = []
+    
+        def extend_side_effect(arg):
+            call_order.append(arg)
+            if arg == "prev_module":
+                raise ImportError("simulated import error")
+            # else succeed silently
+    
+        monkeypatch.setattr("py_backwards.transformers.base.extend", extend_side_effect)
+    
+        previous = "prev_module"
+        current = "curr_module"
+    
+        # Act
+>       import_rewrite(previous, current)
+E       TypeError: 'snippet' object is not callable
+
+test_generated.py:42: TypeError
+___________ test_import_rewrite_does_not_raise_when_extend_succeeds ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7facf1842470>
+
+    def test_import_rewrite_does_not_raise_when_extend_succeeds(monkeypatch):
+        # Arrange: patch extend to succeed for both arguments
+        recorder = CallRecorder()
+        monkeypatch.setattr("py_backwards.transformers.base.extend", recorder)
+    
+        previous = "prev_module"
+        current = "curr_module"
+    
+        # Act & Assert: no exception should be raised
+        try:
+>           import_rewrite(previous, current)
+E           TypeError: 'snippet' object is not callable
+
+test_generated.py:57: TypeError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7facf1842470>
+
+    def test_import_rewrite_does_not_raise_when_extend_succeeds(monkeypatch):
+        # Arrange: patch extend to succeed for both arguments
+        recorder = CallRecorder()
+        monkeypatch.setattr("py_backwards.transformers.base.extend", recorder)
+    
+        previous = "prev_module"
+        current = "curr_module"
+    
+        # Act & Assert: no exception should be raised
+        try:
+            import_rewrite(previous, current)
+        except Exception as e:
+>           pytest.fail(f"import_rewrite raised an unexpected exception: {e}")
+E           Failed: import_rewrite raised an unexpected exception: 'snippet' object is not callable
+
+test_generated.py:59: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_import_rewrite_calls_previous_on_success - Typ...
+FAILED test_generated.py::test_import_rewrite_calls_current_on_import_error
+FAILED test_generated.py::test_import_rewrite_does_not_raise_when_extend_succeeds
+3 failed in 0.14s

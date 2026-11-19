@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-fd077b11-102f-49fc-949a-21877411e736",
+  "object": "chat.completion",
+  "created": 1795079452,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport asyncio\nfrom tornado.locks import Lock\nfrom tornado import gen, ioloop\nfrom tornado.util import TimeoutError\n\n@pytest.mark.asyncio\nasync def test_lock_acquire_and_release():\n    lock = Lock()\n    # Initially unlocked, acquire should succeed immediately\n    await lock.acquire()\n    # After acquiring, lock should be held; attempting to acquire again should block\n    acquire_task = asyncio.create_task(lock.acquire())\n    await asyncio.sleep(0.1)  # give time for the task to start waiting\n    assert not acquire_task.done(), \"Second acquire should be pending\"\n    # Release the lock and ensure the waiting task completes\n    lock.release()\n    await acquire_task\n    # After both acquisitions, release again to clean up\n    lock.release()\n\n@pytest.mark.asyncio\nasync def test_lock_release_unlocked_raises():\n    lock = Lock()\n    # Releasing an unlocked lock should raise RuntimeError\n    with pytest.raises(RuntimeError, match=\"release unlocked lock\"):\n        lock.release()\n\n@pytest.mark.asyncio\nasync def test_lock_async_context_manager():\n    lock = Lock()\n    # Use async with to acquire and release automatically\n    async with lock:\n        # Inside the context, the lock should be held; a second acquire should block\n        acquire_task = asyncio.create_task(lock.acquire())\n        await asyncio.sleep(0.1)\n        assert not acquire_task.done(), \"Acquire inside context should be pending\"\n    # After exiting the context, the lock is released; the pending task should now complete\n    await acquire_task\n    # Clean up by releasing the lock acquired by the pending task\n    lock.release()\n```",
+        "reasoning": "We need three tests: normal acquire/release, boundary: releasing unlocked raises RuntimeError, and async context manager. Use tmp_path? not needed. Use tornado.ioloop? We can use gen.coroutine or async/await. Use pytest.mark.asyncio. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005452171,
+    "prompt_tokens": 827,
+    "prompt_time": 0.006823993,
+    "completion_tokens": 408,
+    "completion_time": 0.480914408,
+    "total_tokens": 1235,
+    "total_time": 0.487738401,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 57
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh5djteypaer1vnaxs6rtg",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport asyncio\nfrom tornado.locks import Lock\nfrom tornado import gen, ioloop\nfrom tornado.util import TimeoutError\n\n@pytest.mark.asyncio\nasync def test_lock_acquire_and_release():\n    lock = Lock()\n    # Initially unlocked, acquire should succeed immediately\n    await lock.acquire()\n    # After acquiring, lock should be held; attempting to acquire again should block\n    acquire_task = asyncio.create_task(lock.acquire())\n    await asyncio.sleep(0.1)  # give time for the task to start waiting\n    assert not acquire_task.done(), \"Second acquire should be pending\"\n    # Release the lock and ensure the waiting task completes\n    lock.release()\n    await acquire_task\n    # After both acquisitions, release again to clean up\n    lock.release()\n\n@pytest.mark.asyncio\nasync def test_lock_release_unlocked_raises():\n    lock = Lock()\n    # Releasing an unlocked lock should raise RuntimeError\n    with pytest.raises(RuntimeError, match=\"release unlocked lock\"):\n        lock.release()\n\n@pytest.mark.asyncio\nasync def test_lock_async_context_manager():\n    lock = Lock()\n    # Use async with to acquire and release automatically\n    async with lock:\n        # Inside the context, the lock should be held; a second acquire should block\n        acquire_task = asyncio.create_task(lock.acquire())\n        await asyncio.sleep(0.1)\n        assert not acquire_task.done(), \"Acquire inside context should be pending\"\n    # After exiting the context, the lock is released; the pending task should now complete\n    await acquire_task\n    # Clean up by releasing the lock acquired by the pending task\n    lock.release()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "fc15ce850b344892b29881d67fb73451",
+  "_api_plus_pacing_seconds": 1.2875343089690432
+}

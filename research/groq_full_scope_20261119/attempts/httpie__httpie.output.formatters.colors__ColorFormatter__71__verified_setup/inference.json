@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-83161b71-14cc-4c89-a563-defdbc9a4ca6",
+  "object": "chat.completion",
+  "created": 1795079577,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport re\nimport pygments\nimport pytest\nfrom httpie.output.formatters.colors import ColorFormatter\nfrom httpie.context import Environment\nfrom httpie.plugins import FormatterPlugin\n\n# Helper to create a minimal Environment with colors enabled\ndef make_env(colors=256):\n    env = Environment()\n    env.colors = colors\n    return env\n\ndef test_format_headers_includes_ansi_codes():\n    \"\"\"Headers should be syntax highlighted with ANSI escape codes.\"\"\"\n    env = make_env(colors=256)\n    formatter = ColorFormatter(env, color_scheme=\"monokai\")\n    headers = \"GET / HTTP/1.1\\r\\nHost: example.com\\r\\n\\r\\n\"\n    highlighted = formatter.format_headers(headers)\n    # ANSI escape codes start with \\x1b[ and end with m\n    assert re.search(r\"\\x1b\\[[0-9;]*m\", highlighted), \"No ANSI codes found in highlighted headers\"\n    # The output should not contain the raw header string\n    assert headers.strip() not in highlighted, \"Raw headers should be escaped\"\n\ndef test_get_lexer_for_body_returns_json_lexer_for_json_mime():\n    \"\"\"Explicit JSON flag or application/json mime should return a JSON lexer.\"\"\"\n    env = make_env(colors=256)\n    formatter = ColorFormatter(env, explicit_json=True)\n    body = '{\"key\": \"value\"}'\n    lexer = formatter.get_lexer_for_body(\"application/json\", body)\n    assert lexer is not None, \"Lexer should not be None for JSON\"\n    # The lexer should be a subclass of pygments.lexer.Lexer\n    assert issubclass(lexer, pygments.lexer.Lexer), \"Returned lexer is not a Pygments lexer\"\n\ndef test_get_lexer_for_body_returns_none_for_unknown_mime():\n    \"\"\"Unknown MIME types should result in no lexer and no highlighting.\"\"\"\n    env = make_env(colors=256)\n    formatter = ColorFormatter(env)\n    body = \"Some plain text\"\n    lexer = formatter.get_lexer_for_body(\"application/unknown\", body)\n    assert lexer is None, \"Lexer should be None for unsupported MIME type\"\n    # When lexer is None, format_body should return the original body unchanged\n    formatted = formatter.format_body(body, \"application/unknown\")\n    assert formatted == body, \"Body should be unchanged when no lexer is found\"\n```",
+        "reasoning": "Need tests for ColorFormatter. We can instantiate with dummy Environment. Need to import Environment? It's in context. We can create a minimal Environment with colors attribute. Use tmp_path for any file? Not needed. Test that format_headers returns highlighted string containing ANSI codes. Also test get_lexer_for_body returns JsonLexer when mime application/json. And error when unsupported mime returns None. Also test get_style_class fallback. We'll need to import ColorFormatter. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.006642568,
+    "prompt_tokens": 1041,
+    "prompt_time": 0.063542466,
+    "completion_tokens": 595,
+    "completion_time": 0.638744772,
+    "total_tokens": 1636,
+    "total_time": 0.702287238,
+    "completion_tokens_details": {
+      "reasoning_tokens": 95
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh973cebr9dd1aykj4hhcx",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport re\nimport pygments\nimport pytest\nfrom httpie.output.formatters.colors import ColorFormatter\nfrom httpie.context import Environment\nfrom httpie.plugins import FormatterPlugin\n\n# Helper to create a minimal Environment with colors enabled\ndef make_env(colors=256):\n    env = Environment()\n    env.colors = colors\n    return env\n\ndef test_format_headers_includes_ansi_codes():\n    \"\"\"Headers should be syntax highlighted with ANSI escape codes.\"\"\"\n    env = make_env(colors=256)\n    formatter = ColorFormatter(env, color_scheme=\"monokai\")\n    headers = \"GET / HTTP/1.1\\r\\nHost: example.com\\r\\n\\r\\n\"\n    highlighted = formatter.format_headers(headers)\n    # ANSI escape codes start with \\x1b[ and end with m\n    assert re.search(r\"\\x1b\\[[0-9;]*m\", highlighted), \"No ANSI codes found in highlighted headers\"\n    # The output should not contain the raw header string\n    assert headers.strip() not in highlighted, \"Raw headers should be escaped\"\n\ndef test_get_lexer_for_body_returns_json_lexer_for_json_mime():\n    \"\"\"Explicit JSON flag or application/json mime should return a JSON lexer.\"\"\"\n    env = make_env(colors=256)\n    formatter = ColorFormatter(env, explicit_json=True)\n    body = '{\"key\": \"value\"}'\n    lexer = formatter.get_lexer_for_body(\"application/json\", body)\n    assert lexer is not None, \"Lexer should not be None for JSON\"\n    # The lexer should be a subclass of pygments.lexer.Lexer\n    assert issubclass(lexer, pygments.lexer.Lexer), \"Returned lexer is not a Pygments lexer\"\n\ndef test_get_lexer_for_body_returns_none_for_unknown_mime():\n    \"\"\"Unknown MIME types should result in no lexer and no highlighting.\"\"\"\n    env = make_env(colors=256)\n    formatter = ColorFormatter(env)\n    body = \"Some plain text\"\n    lexer = formatter.get_lexer_for_body(\"application/unknown\", body)\n    assert lexer is None, \"Lexer should be None for unsupported MIME type\"\n    # When lexer is None, format_body should return the original body unchanged\n    formatted = formatter.format_body(body, \"application/unknown\")\n    assert formatted == body, \"Body should be unchanged when no lexer is found\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "5ff4c9dd275f4923b61005f540483430",
+  "_api_plus_pacing_seconds": 1.3775148800341412
+}

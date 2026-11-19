@@ -1,0 +1,166 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_walla_ie_basic_extraction ________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f9ce0c45780>
+
+    def test_walla_ie_basic_extraction(monkeypatch):
+        """Test normal extraction of title, description, thumbnail, duration, formats and subtitles."""
+        xml_content = """
+        <items>
+            <item>
+                <title>Test Title</title>
+                <synopsis>Test Description</synopsis>
+                <preview_pic>http://example.com/thumb.jpg</preview_pic>
+                <duration>120</duration>
+                <subtitles>
+                    <subtitle>
+                        <title>עברית</title>
+                        <src>http://example.com/subs.heb.srt</src>
+                    </subtitle>
+                    <subtitle>
+                        <title>English</title>
+                        <src>http://example.com/subs.eng.srt</src>
+                    </subtitle>
+                </subtitles>
+                <qualities>
+                    <quality>
+                        <title>720p</title>
+                        <src>playpath_720</src>
+                    </quality>
+                    <quality>
+                        <title>480p</title>
+                        <src>playpath_480</src>
+                    </quality>
+                </qualities>
+            </item>
+        </items>
+        """
+        # Monkeypatch the download method to return our fake XML
+        def fake_download_xml(url, display_id):
+            return _make_xml(xml_content).find("./items/item")
+    
+        ie = WallaIE()
+        monkeypatch.setattr(ie, "_download_xml", fake_download_xml)
+    
+        url = "http://vod.walla.co.il/movie/123456/test-title"
+>       result = ie._real_extract(url)
+
+test_generated.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/walla.py:47: in _real_extract
+    title = xpath_text(item, './title', 'title')
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/utils.py:1911: in xpath_text
+    n = xpath_element(node, xpath, name, fatal=fatal, default=default)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/utils.py:1892: in xpath_element
+    n = _find_xpath(xpath)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+xpath = './title'
+
+    def _find_xpath(xpath):
+>       return node.find(compat_xpath(xpath))
+E       AttributeError: 'NoneType' object has no attribute 'find'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/utils.py:1889: AttributeError
+__________________________ test_walla_ie_no_subtitles __________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f9ce0c46fb0>
+
+    def test_walla_ie_no_subtitles(monkeypatch):
+        """Test extraction when no subtitles are present."""
+        xml_content = """
+        <items>
+            <item>
+                <title>No Subtitles</title>
+                <synopsis>Desc</synopsis>
+                <preview_pic>http://example.com/thumb.jpg</preview_pic>
+                <duration>60</duration>
+                <qualities>
+                    <quality>
+                        <title>360p</title>
+                        <src>playpath_360</src>
+                    </quality>
+                </qualities>
+            </item>
+        </items>
+        """
+        def fake_download_xml(url, display_id):
+            return _make_xml(xml_content).find("./items/item")
+    
+        ie = WallaIE()
+        monkeypatch.setattr(ie, "_download_xml", fake_download_xml)
+    
+        url = "http://vod.walla.co.il/movie/654321/no-subtitles"
+>       result = ie._real_extract(url)
+
+test_generated.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/walla.py:47: in _real_extract
+    title = xpath_text(item, './title', 'title')
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/utils.py:1911: in xpath_text
+    n = xpath_element(node, xpath, name, fatal=fatal, default=default)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/utils.py:1892: in xpath_element
+    n = _find_xpath(xpath)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+xpath = './title'
+
+    def _find_xpath(xpath):
+>       return node.find(compat_xpath(xpath))
+E       AttributeError: 'NoneType' object has no attribute 'find'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/utils.py:1889: AttributeError
+_____________________ test_walla_ie_invalid_quality_format _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f9ce23ed150>
+
+    def test_walla_ie_invalid_quality_format(monkeypatch):
+        """Test that formats without a numeric height are still returned correctly."""
+        xml_content = """
+        <items>
+            <item>
+                <title>Invalid Quality</title>
+                <synopsis>Desc</synopsis>
+                <preview_pic>http://example.com/thumb.jpg</preview_pic>
+                <duration>30</duration>
+                <qualities>
+                    <quality>
+                        <title>unknown</title>
+                        <src>playpath_unknown</src>
+                    </quality>
+                </qualities>
+            </item>
+        </items>
+        """
+        def fake_download_xml(url, display_id):
+            return _make_xml(xml_content).find("./items/item")
+    
+        ie = WallaIE()
+        monkeypatch.setattr(ie, "_download_xml", fake_download_xml)
+    
+        url = "http://vod.walla.co.il/movie/111111/invalid-quality"
+>       result = ie._real_extract(url)
+
+test_generated.py:141: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/walla.py:47: in _real_extract
+    title = xpath_text(item, './title', 'title')
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/utils.py:1911: in xpath_text
+    n = xpath_element(node, xpath, name, fatal=fatal, default=default)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/utils.py:1892: in xpath_element
+    n = _find_xpath(xpath)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+xpath = './title'
+
+    def _find_xpath(xpath):
+>       return node.find(compat_xpath(xpath))
+E       AttributeError: 'NoneType' object has no attribute 'find'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/utils.py:1889: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_walla_ie_basic_extraction - AttributeError: 'N...
+FAILED test_generated.py::test_walla_ie_no_subtitles - AttributeError: 'NoneT...
+FAILED test_generated.py::test_walla_ie_invalid_quality_format - AttributeErr...
+3 failed in 2.21s

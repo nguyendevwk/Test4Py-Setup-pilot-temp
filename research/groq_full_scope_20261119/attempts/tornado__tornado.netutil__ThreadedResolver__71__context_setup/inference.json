@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-e6af4ca1-119e-4934-9007-814b84300c83",
+  "object": "chat.completion",
+  "created": 1795078322,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport socket\nimport concurrent.futures\nimport pytest\nfrom tornado.netutil import ThreadedResolver, _resolve_addr\n\ndef test_threadpool_singleton_and_pid_behavior():\n    # Create first resolver with 2 threads\n    resolver1 = ThreadedResolver()\n    resolver1.initialize(num_threads=2)\n    pool1 = resolver1.executor\n    assert isinstance(pool1, concurrent.futures.ThreadPoolExecutor)\n    assert pool1._max_workers == 2\n\n    # Creating a second resolver should reuse the same pool\n    resolver2 = ThreadedResolver()\n    resolver2.initialize(num_threads=5)  # different number should be ignored\n    pool2 = resolver2.executor\n    assert pool1 is pool2\n    assert pool2._max_workers == 2  # still 2, not 5\n\n    # Simulate a fork by manually changing the stored pid\n    original_pid = ThreadedResolver._threadpool_pid\n    ThreadedResolver._threadpool_pid = original_pid + 1  # pretend we forked\n    resolver3 = ThreadedResolver()\n    resolver3.initialize(num_threads=3)\n    pool3 = resolver3.executor\n    assert pool3 is not pool1  # new pool created\n    assert pool3._max_workers == 3\n    # Restore original pid for cleanliness\n    ThreadedResolver._threadpool_pid = original_pid\n\ndef test_resolve_localhost_returns_ipv4_and_ipv6():\n    resolver = ThreadedResolver()\n    resolver.initialize(num_threads=1)\n    # Resolve localhost on a common port (e.g., 80)\n    results = resolver.resolve(\"localhost\", 80, socket.AF_UNSPEC)\n    # Resolve returns a Future-like awaitable; get result synchronously\n    resolved = results.result()\n    families = {fam for fam, _ in resolved}\n    # Expect at least IPv4 and IPv6 addresses\n    assert socket.AF_INET in families\n    assert socket.AF_INET6 in families\n    # Each address tuple should contain the host and port\n    for fam, addr in resolved:\n        if fam == socket.AF_INET:\n            assert isinstance(addr, tuple) and len(addr) == 2\n            assert addr[1] == 80\n        elif fam == socket.AF_INET6:\n            assert isinstance(addr, tuple) and len(addr) == 4\n            assert addr[1] == 80\n\ndef test_resolve_invalid_host_raises_ioerror():\n    resolver = ThreadedResolver()\n    resolver.initialize(num_threads=1)\n    # Resolve an obviously invalid hostname; should raise IOError\n    with pytest.raises(IOError):\n        resolver.resolve(\"nonexistent.host.example\", 80).result()\n```",
+        "reasoning": "Need tests for ThreadedResolver._create_threadpool behavior across fork? can't fork. test that same pid returns same pool, different num_threads doesn't change pool. Also test initialize sets executor. third test resolve returns expected for localhost."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048316035,
+    "prompt_tokens": 1672,
+    "prompt_time": 0.11535633,
+    "completion_tokens": 612,
+    "completion_time": 0.663550028,
+    "total_tokens": 2284,
+    "total_time": 0.778906358,
+    "completion_tokens_details": {
+      "reasoning_tokens": 47
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg2x5ceb1bszt4sbywry58",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport socket\nimport concurrent.futures\nimport pytest\nfrom tornado.netutil import ThreadedResolver, _resolve_addr\n\ndef test_threadpool_singleton_and_pid_behavior():\n    # Create first resolver with 2 threads\n    resolver1 = ThreadedResolver()\n    resolver1.initialize(num_threads=2)\n    pool1 = resolver1.executor\n    assert isinstance(pool1, concurrent.futures.ThreadPoolExecutor)\n    assert pool1._max_workers == 2\n\n    # Creating a second resolver should reuse the same pool\n    resolver2 = ThreadedResolver()\n    resolver2.initialize(num_threads=5)  # different number should be ignored\n    pool2 = resolver2.executor\n    assert pool1 is pool2\n    assert pool2._max_workers == 2  # still 2, not 5\n\n    # Simulate a fork by manually changing the stored pid\n    original_pid = ThreadedResolver._threadpool_pid\n    ThreadedResolver._threadpool_pid = original_pid + 1  # pretend we forked\n    resolver3 = ThreadedResolver()\n    resolver3.initialize(num_threads=3)\n    pool3 = resolver3.executor\n    assert pool3 is not pool1  # new pool created\n    assert pool3._max_workers == 3\n    # Restore original pid for cleanliness\n    ThreadedResolver._threadpool_pid = original_pid\n\ndef test_resolve_localhost_returns_ipv4_and_ipv6():\n    resolver = ThreadedResolver()\n    resolver.initialize(num_threads=1)\n    # Resolve localhost on a common port (e.g., 80)\n    results = resolver.resolve(\"localhost\", 80, socket.AF_UNSPEC)\n    # Resolve returns a Future-like awaitable; get result synchronously\n    resolved = results.result()\n    families = {fam for fam, _ in resolved}\n    # Expect at least IPv4 and IPv6 addresses\n    assert socket.AF_INET in families\n    assert socket.AF_INET6 in families\n    # Each address tuple should contain the host and port\n    for fam, addr in resolved:\n        if fam == socket.AF_INET:\n            assert isinstance(addr, tuple) and len(addr) == 2\n            assert addr[1] == 80\n        elif fam == socket.AF_INET6:\n            assert isinstance(addr, tuple) and len(addr) == 4\n            assert addr[1] == 80\n\ndef test_resolve_invalid_host_raises_ioerror():\n    resolver = ThreadedResolver()\n    resolver.initialize(num_threads=1)\n    # Resolve an obviously invalid hostname; should raise IOError\n    with pytest.raises(IOError):\n        resolver.resolve(\"nonexistent.host.example\", 80).result()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1812723400071263
+}

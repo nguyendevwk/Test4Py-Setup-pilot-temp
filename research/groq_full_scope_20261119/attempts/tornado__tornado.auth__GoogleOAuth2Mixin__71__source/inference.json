@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-91ba5c22-f40a-40af-afcd-2e4ac7def258",
+  "object": "chat.completion",
+  "created": 1795079580,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport json\nimport pytest\nfrom tornado.web import RequestHandler\nfrom tornado.auth import GoogleOAuth2Mixin\nfrom tornado import escape\n\nclass DummyHandler(RequestHandler, GoogleOAuth2Mixin):\n    def initialize(self, **settings):\n        self.settings.update(settings)\n\n    def get_auth_http_client(self):\n        # Return a dummy http client that records the request\n        return DummyHTTPClient()\n\nclass DummyHTTPClient:\n    def __init__(self):\n        self.last_request = None\n\n    async def fetch(self, url, method=None, headers=None, body=None):\n        self.last_request = {\n            \"url\": url,\n            \"method\": method,\n            \"headers\": headers,\n            \"body\": body,\n        }\n        # Simulate a successful token response\n        return DummyResponse(b'{\"access_token\":\"dummy_token\",\"expires_in\":3600}')\n\nclass DummyResponse:\n    def __init__(self, body):\n        self.body = body\n\n@pytest.mark.asyncio\nasync def test_get_google_oauth_settings_returns_handler_settings():\n    handler = DummyHandler()\n    handler.settings[\"google_oauth\"] = {\"key\": \"client_id\", \"secret\": \"client_secret\"}\n    settings = handler.get_google_oauth_settings()\n    assert isinstance(settings, dict)\n    assert settings[\"key\"] == \"client_id\"\n    assert settings[\"secret\"] == \"client_secret\"\n\n@pytest.mark.asyncio\nasync def test_get_authenticated_user_uses_settings_when_missing_client_id_and_secret():\n    handler = DummyHandler()\n    handler.settings[\"google_oauth\"] = {\"key\": \"client_id\", \"secret\": \"client_secret\"}\n    # Call with None to trigger fallback to settings\n    result = await handler.get_authenticated_user(\n        redirect_uri=\"https://example.com/callback\",\n        code=\"dummy_code\",\n        client_id=None,\n        client_secret=None,\n    )\n    # Verify that the dummy http client was called with correct body\n    http = handler.get_auth_http_client()\n    body = http.last_request[\"body\"]\n    parsed = dict(urllib.parse.parse_qsl(body))\n    assert parsed[\"client_id\"] == \"client_id\"\n    assert parsed[\"client_secret\"] == \"client_secret\"\n    assert parsed[\"redirect_uri\"] == \"https://example.com/callback\"\n    assert parsed[\"code\"] == \"dummy_code\"\n    assert parsed[\"grant_type\"] == \"authorization_code\"\n    # Verify that the returned token matches the dummy response\n    assert result[\"access_token\"] == \"dummy_token\"\n    assert result[\"expires_in\"] == 3600\n\n@pytest.mark.asyncio\nasync def test_get_authenticated_user_overrides_settings_with_provided_client_id_and_secret():\n    handler = DummyHandler()\n    handler.settings[\"google_oauth\"] = {\"key\": \"client_id\", \"secret\": \"client_secret\"}\n    # Provide explicit client_id and client_secret\n    result = await handler.get_authenticated_user(\n        redirect_uri=\"https://example.com/callback\",\n        code=\"dummy_code\",\n        client_id=\"explicit_id\",\n        client_secret=\"explicit_secret\",\n    )\n    http = handler.get_auth_http_client()\n    body = http.last_request[\"body\"]\n    parsed = dict(urllib.parse.parse_qsl(body))\n    assert parsed[\"client_id\"] == \"explicit_id\"\n    assert parsed[\"client_secret\"] == \"explicit_secret\"\n    assert result[\"access_token\"] == \"dummy_token\"\n```",
+        "reasoning": "Need tests for get_authenticated_user. Can't hit network. So test that it raises error when missing settings? But can't mock http. We can test that get_google_oauth_settings returns dict from handler.settings. Use a dummy handler subclass. Also test that missing client_id uses settings. Third test: when client_id provided overrides. Use monkeypatch to replace get_auth_http_client to a dummy that records call. Use async test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004895571,
+    "prompt_tokens": 1412,
+    "prompt_time": 0.015418211,
+    "completion_tokens": 791,
+    "completion_time": 0.878606991,
+    "total_tokens": 2203,
+    "total_time": 0.894025202,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 86
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh99s1ebj9j8q4zze64tyd",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport json\nimport pytest\nfrom tornado.web import RequestHandler\nfrom tornado.auth import GoogleOAuth2Mixin\nfrom tornado import escape\n\nclass DummyHandler(RequestHandler, GoogleOAuth2Mixin):\n    def initialize(self, **settings):\n        self.settings.update(settings)\n\n    def get_auth_http_client(self):\n        # Return a dummy http client that records the request\n        return DummyHTTPClient()\n\nclass DummyHTTPClient:\n    def __init__(self):\n        self.last_request = None\n\n    async def fetch(self, url, method=None, headers=None, body=None):\n        self.last_request = {\n            \"url\": url,\n            \"method\": method,\n            \"headers\": headers,\n            \"body\": body,\n        }\n        # Simulate a successful token response\n        return DummyResponse(b'{\"access_token\":\"dummy_token\",\"expires_in\":3600}')\n\nclass DummyResponse:\n    def __init__(self, body):\n        self.body = body\n\n@pytest.mark.asyncio\nasync def test_get_google_oauth_settings_returns_handler_settings():\n    handler = DummyHandler()\n    handler.settings[\"google_oauth\"] = {\"key\": \"client_id\", \"secret\": \"client_secret\"}\n    settings = handler.get_google_oauth_settings()\n    assert isinstance(settings, dict)\n    assert settings[\"key\"] == \"client_id\"\n    assert settings[\"secret\"] == \"client_secret\"\n\n@pytest.mark.asyncio\nasync def test_get_authenticated_user_uses_settings_when_missing_client_id_and_secret():\n    handler = DummyHandler()\n    handler.settings[\"google_oauth\"] = {\"key\": \"client_id\", \"secret\": \"client_secret\"}\n    # Call with None to trigger fallback to settings\n    result = await handler.get_authenticated_user(\n        redirect_uri=\"https://example.com/callback\",\n        code=\"dummy_code\",\n        client_id=None,\n        client_secret=None,\n    )\n    # Verify that the dummy http client was called with correct body\n    http = handler.get_auth_http_client()\n    body = http.last_request[\"body\"]\n    parsed = dict(urllib.parse.parse_qsl(body))\n    assert parsed[\"client_id\"] == \"client_id\"\n    assert parsed[\"client_secret\"] == \"client_secret\"\n    assert parsed[\"redirect_uri\"] == \"https://example.com/callback\"\n    assert parsed[\"code\"] == \"dummy_code\"\n    assert parsed[\"grant_type\"] == \"authorization_code\"\n    # Verify that the returned token matches the dummy response\n    assert result[\"access_token\"] == \"dummy_token\"\n    assert result[\"expires_in\"] == 3600\n\n@pytest.mark.asyncio\nasync def test_get_authenticated_user_overrides_settings_with_provided_client_id_and_secret():\n    handler = DummyHandler()\n    handler.settings[\"google_oauth\"] = {\"key\": \"client_id\", \"secret\": \"client_secret\"}\n    # Provide explicit client_id and client_secret\n    result = await handler.get_authenticated_user(\n        redirect_uri=\"https://example.com/callback\",\n        code=\"dummy_code\",\n        client_id=\"explicit_id\",\n        client_secret=\"explicit_secret\",\n    )\n    http = handler.get_auth_http_client()\n    body = http.last_request[\"body\"]\n    parsed = dict(urllib.parse.parse_qsl(body))\n    assert parsed[\"client_id\"] == \"explicit_id\"\n    assert parsed[\"client_secret\"] == \"explicit_secret\"\n    assert result[\"access_token\"] == \"dummy_token\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "c6fdb879219440b9acec648600919f95",
+  "_api_plus_pacing_seconds": 9.470338965998963
+}

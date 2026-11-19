@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-4aec9fe8-5d1b-45ec-904f-d7914f8ee34c",
+  "object": "chat.completion",
+  "created": 1795076376,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom decimal import Decimal\n\nfrom pypara.dcc import DCCRegistry, DCC, dcc, Money, Currencies\n\n\ndef test_register_conflict_raises_type_error(tmp_path):\n    \"\"\"Registering a DCC with a duplicate main name or alternative name raises TypeError.\"\"\"\n    # Define a simple DCC function\n    @dcc(\"Test/Act\")\n    def _calc(start, asof, end, freq=None):\n        return Decimal(1)\n\n    # Attempt to register another DCC with the same main name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"Test/Act\")\n        def _dup(start, asof, end, freq=None):\n            return Decimal(2)\n\n    # Attempt to register a DCC with an alternative name that conflicts\n    @dcc(\"Unique/Act\", altnames={\"Conflict/Act\"})\n    def _unique(start, asof, end, freq=None):\n        return Decimal(3)\n\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"Another/Act\", altnames={\"Conflict/Act\"})\n        def _conflict(start, asof, end, freq=None):\n            return Decimal(4)\n\n\ndef test_find_case_insensitive_and_alternative_lookup():\n    \"\"\"DCCRegistry.find should locate conventions by stripped uppercase or alternative names.\"\"\"\n    # Register a convention with a mixed case name and alternative names\n    @dcc(\"Mixed/Case\", altnames={\"Alt/Name\", \"Another/Alt\"})\n    def _calc(start, asof, end, freq=None):\n        return Decimal(1)\n\n    # Direct lookup with exact name\n    assert DCCRegistry.find(\"Mixed/Case\") is not None\n\n    # Lookup with different case and surrounding whitespace\n    assert DCCRegistry.find(\"  mixed/case  \") is not None\n\n    # Lookup using an alternative name\n    assert DCCRegistry.find(\"Alt/Name\") is not None\n\n    # Lookup using another alternative name\n    assert DCCRegistry.find(\"Another/Alt\") is not None\n\n    # Ensure that a non‑existent name returns None\n    assert DCCRegistry.find(\"Nonexistent/Name\") is None\n\n\ndef test_interest_calculation_boundary_and_fraction():\n    \"\"\"Interest calculation should return zero when asof is outside the period.\"\"\"\n    # Create a principal Money instance\n    principal = Money.of(Currencies[\"USD\"], Decimal(1000), datetime.date.today())\n\n    # Register a simple DCC that returns 0.5 for any valid period\n    @dcc(\"Half/Year\")\n    def _half(start, asof, end, freq=None):\n        return Decimal(\"0.5\")\n\n    dcc_obj = DCCRegistry.find(\"Half/Year\")\n    assert dcc_obj is not None\n\n    # Case 1: asof within start and end -> interest should be 0.5 * rate * principal\n    start = datetime.date(2023, 1, 1)\n    end = datetime.date(2023, 12, 31)\n    asof = datetime.date(2023, 6, 30)\n    rate = Decimal(\"0.05\")  # 5%\n    interest = dcc_obj.interest(principal, rate, start, asof, end)\n    assert interest.qty == Decimal(\"25.00\")  # 1000 * 0.05 * 0.5\n\n    # Case 2: asof before start -> fraction should be 0, interest 0\n    asof_before = datetime.date(2022, 12, 31)\n    interest_before = dcc_obj.interest(principal, rate, start, asof_before, end)\n    assert interest_before.qty == Decimal(\"0.00\")\n\n    # Case 3: asof after end -> fraction should be 0, interest 0\n    asof_after = datetime.date(2024, 1, 1)\n    interest_after = dcc_obj.interest(principal, rate, start, asof_after, end)\n    assert interest_after.qty == Decimal(\"0.00\")\n```",
+        "reasoning": "Need tests for register conflict, find case-insensitive, and interest calculation boundary."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052441884,
+    "prompt_tokens": 3251,
+    "prompt_time": 0.183555129,
+    "completion_tokens": 887,
+    "completion_time": 0.986874034,
+    "total_tokens": 4138,
+    "total_time": 1.170429163,
+    "completion_tokens_details": {
+      "reasoning_tokens": 17
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se7gdnejqv1w0wjjd5m1md",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom decimal import Decimal\n\nfrom pypara.dcc import DCCRegistry, DCC, dcc, Money, Currencies\n\n\ndef test_register_conflict_raises_type_error(tmp_path):\n    \"\"\"Registering a DCC with a duplicate main name or alternative name raises TypeError.\"\"\"\n    # Define a simple DCC function\n    @dcc(\"Test/Act\")\n    def _calc(start, asof, end, freq=None):\n        return Decimal(1)\n\n    # Attempt to register another DCC with the same main name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"Test/Act\")\n        def _dup(start, asof, end, freq=None):\n            return Decimal(2)\n\n    # Attempt to register a DCC with an alternative name that conflicts\n    @dcc(\"Unique/Act\", altnames={\"Conflict/Act\"})\n    def _unique(start, asof, end, freq=None):\n        return Decimal(3)\n\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"Another/Act\", altnames={\"Conflict/Act\"})\n        def _conflict(start, asof, end, freq=None):\n            return Decimal(4)\n\n\ndef test_find_case_insensitive_and_alternative_lookup():\n    \"\"\"DCCRegistry.find should locate conventions by stripped uppercase or alternative names.\"\"\"\n    # Register a convention with a mixed case name and alternative names\n    @dcc(\"Mixed/Case\", altnames={\"Alt/Name\", \"Another/Alt\"})\n    def _calc(start, asof, end, freq=None):\n        return Decimal(1)\n\n    # Direct lookup with exact name\n    assert DCCRegistry.find(\"Mixed/Case\") is not None\n\n    # Lookup with different case and surrounding whitespace\n    assert DCCRegistry.find(\"  mixed/case  \") is not None\n\n    # Lookup using an alternative name\n    assert DCCRegistry.find(\"Alt/Name\") is not None\n\n    # Lookup using another alternative name\n    assert DCCRegistry.find(\"Another/Alt\") is not None\n\n    # Ensure that a non‑existent name returns None\n    assert DCCRegistry.find(\"Nonexistent/Name\") is None\n\n\ndef test_interest_calculation_boundary_and_fraction():\n    \"\"\"Interest calculation should return zero when asof is outside the period.\"\"\"\n    # Create a principal Money instance\n    principal = Money.of(Currencies[\"USD\"], Decimal(1000), datetime.date.today())\n\n    # Register a simple DCC that returns 0.5 for any valid period\n    @dcc(\"Half/Year\")\n    def _half(start, asof, end, freq=None):\n        return Decimal(\"0.5\")\n\n    dcc_obj = DCCRegistry.find(\"Half/Year\")\n    assert dcc_obj is not None\n\n    # Case 1: asof within start and end -> interest should be 0.5 * rate * principal\n    start = datetime.date(2023, 1, 1)\n    end = datetime.date(2023, 12, 31)\n    asof = datetime.date(2023, 6, 30)\n    rate = Decimal(\"0.05\")  # 5%\n    interest = dcc_obj.interest(principal, rate, start, asof, end)\n    assert interest.qty == Decimal(\"25.00\")  # 1000 * 0.05 * 0.5\n\n    # Case 2: asof before start -> fraction should be 0, interest 0\n    asof_before = datetime.date(2022, 12, 31)\n    interest_before = dcc_obj.interest(principal, rate, start, asof_before, end)\n    assert interest_before.qty == Decimal(\"0.00\")\n\n    # Case 3: asof after end -> fraction should be 0, interest 0\n    asof_after = datetime.date(2024, 1, 1)\n    interest_after = dcc_obj.interest(principal, rate, start, asof_after, end)\n    assert interest_after.qty == Decimal(\"0.00\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5643931700033136
+}

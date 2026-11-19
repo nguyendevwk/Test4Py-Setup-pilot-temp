@@ -1,0 +1,54 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_transformer_removes_annotation_and_keeps_value ______________
+
+    def test_transformer_removes_annotation_and_keeps_value():
+        src = """
+    a: int = 10
+    b: str
+    """
+        tree = build_tree(src)
+        result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)
+    
+        # The tree should have changed
+        assert result.tree_changed is True
+    
+        # There should be no AnnAssign nodes left
+        ann_assigns = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.AnnAssign)]
+        assert ann_assigns == []
+    
+        # There should be one Assign node for 'a' with value 10
+        assigns = [n for n in typed_ast.walk(result.tree) if isinstance(n, typed_ast.Assign)]
+        assert len(assigns) == 1
+        assign = assigns[0]
+        assert isinstance(assign.targets[0], typed_ast.Name)
+        assert assign.targets[0].id == "a"
+>       assert isinstance(assign.value, typed_ast.Constant)
+E       AssertionError: assert False
+E        +  where False = isinstance(<typed_ast._ast3.Num object at 0x7fa259614340>, <class 'typed_ast._ast3.Constant'>)
+E        +    where <typed_ast._ast3.Num object at 0x7fa259614340> = <typed_ast._ast3.Assign object at 0x7fa259614880>.value
+E        +    and   <class 'typed_ast._ast3.Constant'> = typed_ast.Constant
+
+test_generated.py:56: AssertionError
+___________ test_transformer_does_not_modify_tree_without_annassign ____________
+
+    def test_transformer_does_not_modify_tree_without_annassign():
+        src = """
+    def foo():
+        return 42
+    """
+        tree = build_tree(src)
+        result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)
+    
+        # The tree should not have changed
+        assert result.tree_changed is False
+    
+        # The structure should be identical to the original
+>       original_code = typed_ast.unparse(tree)
+E       AttributeError: module 'typed_ast.ast3' has no attribute 'unparse'. Did you mean: 'parse'?
+
+test_generated.py:94: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_transformer_removes_annotation_and_keeps_value
+FAILED test_generated.py::test_transformer_does_not_modify_tree_without_annassign
+2 failed, 1 passed in 0.14s

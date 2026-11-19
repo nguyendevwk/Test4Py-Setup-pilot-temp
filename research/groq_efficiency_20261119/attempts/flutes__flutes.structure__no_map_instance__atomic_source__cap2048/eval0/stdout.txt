@@ -1,0 +1,63 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_no_map_instance_sets_attribute_on_mutable ________________
+
+    def test_no_map_instance_sets_attribute_on_mutable():
+        """For mutable objects (e.g., list) the function should set the marker attribute."""
+        lst = [1, 2, 3]
+        result = no_map_instance(lst)
+        # The function should return the same instance
+>       assert result is lst
+E       assert [1, 2, 3] is [1, 2, 3]
+
+../../../../../../../groq_efficiency_20261119/attempts/flutes__flutes.structure__no_map_instance__atomic_source__cap2048/eval0/test_generated.py:12: AssertionError
+_____________ test_no_map_instance_on_custom_class_without_setattr _____________
+
+instance = <test_generated.test_no_map_instance_on_custom_class_without_setattr.<locals>.NoSetAttr object at 0x7f13b5e95040>
+
+    @no_type_check
+    def no_map_instance(instance: T) -> T:
+        r"""Register a container instance as `non-mappable`, i.e., it will be treated as a singleton object in
+        :func:`map_structure` and :func:`map_structure_zip`, its contents will not be traversed.
+    
+        :param instance: The container instance.
+        """
+        try:
+>           setattr(instance, _NO_MAP_INSTANCE_ATTR, True)
+E           AttributeError: 'NoSetAttr' object has no attribute '--no-map--'
+
+flutes/structure.py:68: AttributeError
+
+During handling of the above exception, another exception occurred:
+
+    def test_no_map_instance_on_custom_class_without_setattr():
+        """If the instance's class does not allow setting attributes, the fallback should still return an instance."""
+        class NoSetAttr:
+            __slots__ = ()
+        obj = NoSetAttr()
+>       result = no_map_instance(obj)
+
+../../../../../../../groq_efficiency_20261119/attempts/flutes__flutes.structure__no_map_instance__atomic_source__cap2048/eval0/test_generated.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+instance = <test_generated.test_no_map_instance_on_custom_class_without_setattr.<locals>.NoSetAttr object at 0x7f13b5e95040>
+
+    @no_type_check
+    def no_map_instance(instance: T) -> T:
+        r"""Register a container instance as `non-mappable`, i.e., it will be treated as a singleton object in
+        :func:`map_structure` and :func:`map_structure_zip`, its contents will not be traversed.
+    
+        :param instance: The container instance.
+        """
+        try:
+            setattr(instance, _NO_MAP_INSTANCE_ATTR, True)
+            return instance
+        except AttributeError:
+>           return _no_map_type(type(instance))(instance)
+E           TypeError: _no_mapNoSetAttr() takes no arguments
+
+flutes/structure.py:71: TypeError
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_efficiency_20261119/attempts/flutes__flutes.structure__no_map_instance__atomic_source__cap2048/eval0/test_generated.py::test_no_map_instance_sets_attribute_on_mutable
+FAILED ../../../../../../../groq_efficiency_20261119/attempts/flutes__flutes.structure__no_map_instance__atomic_source__cap2048/eval0/test_generated.py::test_no_map_instance_on_custom_class_without_setattr
+2 failed, 1 passed in 0.20s

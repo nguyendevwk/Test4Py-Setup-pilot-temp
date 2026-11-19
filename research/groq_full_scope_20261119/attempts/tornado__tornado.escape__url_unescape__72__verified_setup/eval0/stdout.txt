@@ -1,0 +1,35 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_url_unescape_bytes_and_plus_handling ___________________
+
+    def test_url_unescape_bytes_and_plus_handling():
+        # Input is bytes, plus signs should be converted to spaces
+        raw = b"Hello+World%21+%2B+%2B"
+        result = url_unescape(raw, encoding="utf-8", plus=True)
+        assert isinstance(result, str)
+        assert result == "Hello World! + +"
+    
+        # When plus is False, plus signs remain literal
+        result_no_plus = url_unescape(raw, encoding="utf-8", plus=False)
+>       assert result_no_plus == "Hello+World! + +"
+E       AssertionError: assert 'Hello+World!++++' == 'Hello+World! + +'
+E         
+E         - Hello+World! + +
+E         ?             - -
+E         + Hello+World!++++
+E         ?               ++
+
+test_generated.py:15: AssertionError
+__________________ test_url_unescape_invalid_encoding_raises ___________________
+
+    def test_url_unescape_invalid_encoding_raises():
+        # Using an unsupported encoding should raise a UnicodeDecodeError
+        raw = "äöü".encode("utf-8")
+>       with pytest.raises(UnicodeDecodeError):
+E       Failed: DID NOT RAISE UnicodeDecodeError
+
+test_generated.py:33: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_url_unescape_bytes_and_plus_handling - Asserti...
+FAILED test_generated.py::test_url_unescape_invalid_encoding_raises - Failed:...
+2 failed, 1 passed in 0.14s

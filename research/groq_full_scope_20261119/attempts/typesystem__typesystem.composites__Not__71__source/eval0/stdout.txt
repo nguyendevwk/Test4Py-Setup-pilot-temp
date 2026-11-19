@@ -1,0 +1,65 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_not_allows_non_matching_values ______________________
+
+    def test_not_allows_non_matching_values():
+        """Not should return the value when the negated field does not match."""
+        negated = EqualsField(target=42)
+        not_field = Not(negated)
+>       assert not_field.validate(10) == 10
+
+test_generated.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.composites.Not object at 0x7f372267a530>, value = 10
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        _, error = self.negated.validate_or_error(value)
+        if error:
+            return value
+>       raise self.validation_error("negated")
+E       typesystem.base.ValidationError: Must not match.
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/composites.py:94: ValidationError
+________________ test_not_boundary_with_none_and_different_type ________________
+
+    def test_not_boundary_with_none_and_different_type():
+        """Not should handle None and other types that do not match the negated field."""
+        negated = EqualsField(target=0)
+        not_field = Not(negated)
+        # None is not equal to 0, so validation should pass
+>       assert not_field.validate(None) is None
+
+test_generated.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.composites.Not object at 0x7f37230eefe0>, value = None
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        _, error = self.negated.validate_or_error(value)
+        if error:
+            return value
+>       raise self.validation_error("negated")
+E       typesystem.base.ValidationError: Must not match.
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/composites.py:94: ValidationError
+_____________________ test_not_raises_when_negated_matches _____________________
+
+    def test_not_raises_when_negated_matches():
+        """Not should raise a validation error when the negated field matches."""
+        negated = EqualsField(target=99)
+        not_field = Not(negated)
+        with pytest.raises(Exception) as excinfo:
+            not_field.validate(99)
+        # The error message should come from Not.errors["negated"]
+>       assert "Must not match." in str(excinfo.value)
+E       assert 'Must not match.' in "'equals'"
+E        +  where "'equals'" = str(KeyError('equals'))
+E        +    where KeyError('equals') = <ExceptionInfo KeyError('equals') tblen=6>.value
+
+test_generated.py:40: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_not_allows_non_matching_values - typesystem.ba...
+FAILED test_generated.py::test_not_boundary_with_none_and_different_type - ty...
+FAILED test_generated.py::test_not_raises_when_negated_matches - assert 'Must...
+3 failed in 0.13s

@@ -1,0 +1,97 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_get_local_reprs_order_and_repr ______________________
+
+    def test_get_local_reprs_order_and_repr():
+        # Define a function with several local variables
+        def sample():
+            a = 1
+            b = "hello"
+            c = [1, 2, 3]
+            return a, b, c
+    
+        # Capture the frame of the function call
+        frame = inspect.currentframe()
+        try:
+            # Call the function to populate locals
+            sample()
+            # Get the local representations from the caller's frame
+            local_reprs = get_local_reprs(frame)
+        finally:
+            del frame
+    
+        # The result should be an OrderedDict preserving the order of local variables
+        expected_keys = ["sample", "frame", "local_reprs", "a", "b", "c"]
+        # The function's local variables are a, b, c; other locals are from the test scope
+        # We only assert that the function's locals appear in the correct order
+>       assert list(local_reprs.keys())[-3:] == ["a", "b", "c"]
+E       AssertionError: assert ['sample', 'frame'] == ['a', 'b', 'c']
+E         
+E         At index 0 diff: 'sample' != 'a'
+E         Right contains one more item: 'c'
+E         Use -v to get more diff
+
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_source/eval0/test_generated.py:35: AssertionError
+________________ test_get_local_reprs_with_watch_and_normalize _________________
+
+    def test_get_local_reprs_with_watch_and_normalize():
+        # Define a function that creates a local variable
+        def sample():
+            x = 42
+            return x
+    
+        frame = inspect.currentframe()
+        try:
+            sample()
+            # Use DummyWatch to add a derived value to the result
+>           local_reprs = get_local_reprs(frame, watch=[DummyWatch()], normalize=True)
+
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_source/eval0/test_generated.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+frame = <frame at 0x7f775898de40, file '/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/attempt...t_local_reprs__43__atomic_source/eval0/test_generated.py', line 53, code test_get_local_reprs_with_watch_and_normalize>
+watch = [<test_generated.DummyWatch object at 0x7f7758fd4670>], custom_repr = ()
+max_length = None, normalize = True
+
+    def get_local_reprs(frame, watch=(), custom_repr=(), max_length=None, normalize=False):
+        code = frame.f_code
+        vars_order = (code.co_varnames + code.co_cellvars + code.co_freevars +
+                      tuple(frame.f_locals.keys()))
+    
+        result_items = [(key, utils.get_shortish_repr(value, custom_repr,
+                                                      max_length, normalize))
+                        for key, value in frame.f_locals.items()]
+        result_items.sort(key=lambda key_value: vars_order.index(key_value[0]))
+        result = collections.OrderedDict(result_items)
+    
+        for variable in watch:
+>           result.update(sorted(variable.items(frame, normalize)))
+E           ValueError: too many values to unpack (expected 2)
+
+pysnooper/tracer.py:44: ValueError
+__________________ test_get_local_reprs_max_length_truncation __________________
+
+    def test_get_local_reprs_max_length_truncation():
+        # Define a function with a long string local variable
+        def sample():
+            long_str = "a" * 1000  # 1000 characters
+            return long_str
+    
+        frame = inspect.currentframe()
+        try:
+            sample()
+            # Set max_length to 10 to force truncation
+            local_reprs = get_local_reprs(frame, max_length=10)
+        finally:
+            del frame
+    
+        # The representation of the long string should be truncated
+>       repr_value = local_reprs["long_str"]
+E       KeyError: 'long_str'
+
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_source/eval0/test_generated.py:77: KeyError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_source/eval0/test_generated.py::test_get_local_reprs_order_and_repr
+FAILED ../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_source/eval0/test_generated.py::test_get_local_reprs_with_watch_and_normalize
+FAILED ../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_source/eval0/test_generated.py::test_get_local_reprs_max_length_truncation
+3 failed in 0.18s

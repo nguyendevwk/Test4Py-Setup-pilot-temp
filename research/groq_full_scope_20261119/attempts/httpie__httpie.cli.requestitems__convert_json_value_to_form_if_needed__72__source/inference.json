@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-b2c42479-539b-4973-8eb0-00a1b990162b",
+  "object": "chat.completion",
+  "created": 1795079552,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.cli.requestitems import convert_json_value_to_form_if_needed\nfrom httpie.exceptions import ParseError\n\n# Dummy processor that simply returns the provided value or raises ParseError\ndef dummy_processor(value):\n    if value == \"raise\":\n        raise ParseError(\"dummy error\")\n    return value\n\ndef test_in_json_mode_returns_processor_directly():\n    \"\"\"When in_json_mode is True, the returned callable should be the original processor.\"\"\"\n    wrapper = convert_json_value_to_form_if_needed(True, dummy_processor)\n    # The wrapper should be the same object as dummy_processor\n    assert wrapper is dummy_processor\n    # Calling it should behave exactly like the original\n    assert wrapper(\"hello\") == \"hello\"\n    assert wrapper(123) == 123\n\ndef test_non_json_mode_converts_primitives_and_errors_on_complex():\n    \"\"\"When not in JSON mode, primitives are converted to strings; complex types raise ParseError.\"\"\"\n    wrapper = convert_json_value_to_form_if_needed(False, dummy_processor)\n\n    # Primitive types are converted to strings\n    assert wrapper(\"text\") == \"text\"\n    assert wrapper(42) == \"42\"\n    assert wrapper(3.14) == \"3.14\"\n\n    # Complex types (dict, list) should raise ParseError\n    with pytest.raises(ParseError, match=\"Cannot use complex JSON value types\"):\n        wrapper({\"key\": \"value\"})\n    with pytest.raises(ParseError, match=\"Cannot use complex JSON value types\"):\n        wrapper([1, 2, 3])\n\ndef test_non_json_mode_propagates_parse_error_from_processor():\n    \"\"\"If the underlying processor raises ParseError, it should be propagated unchanged.\"\"\"\n    wrapper = convert_json_value_to_form_if_needed(False, dummy_processor)\n    with pytest.raises(ParseError, match=\"dummy error\"):\n        wrapper(\"raise\")\n```",
+        "reasoning": "We need tests for convert_json_value_to_form_if_needed. We need to simulate processor returning various types and raising ParseError. Use a dummy processor. Test normal: in_json_mode True returns processor directly. Test boundary: processor returns int, float, str. In json mode False should convert to str. Test error: processor raises ParseError or returns complex type like dict -> should raise ParseError. Write three test functions. Use tmp_path? not needed. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005126182,
+    "prompt_tokens": 597,
+    "prompt_time": 0.011444626,
+    "completion_tokens": 486,
+    "completion_time": 0.516495424,
+    "total_tokens": 1083,
+    "total_time": 0.52794005,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 97
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh8f1semtb0va0dfcmh3j5",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.cli.requestitems import convert_json_value_to_form_if_needed\nfrom httpie.exceptions import ParseError\n\n# Dummy processor that simply returns the provided value or raises ParseError\ndef dummy_processor(value):\n    if value == \"raise\":\n        raise ParseError(\"dummy error\")\n    return value\n\ndef test_in_json_mode_returns_processor_directly():\n    \"\"\"When in_json_mode is True, the returned callable should be the original processor.\"\"\"\n    wrapper = convert_json_value_to_form_if_needed(True, dummy_processor)\n    # The wrapper should be the same object as dummy_processor\n    assert wrapper is dummy_processor\n    # Calling it should behave exactly like the original\n    assert wrapper(\"hello\") == \"hello\"\n    assert wrapper(123) == 123\n\ndef test_non_json_mode_converts_primitives_and_errors_on_complex():\n    \"\"\"When not in JSON mode, primitives are converted to strings; complex types raise ParseError.\"\"\"\n    wrapper = convert_json_value_to_form_if_needed(False, dummy_processor)\n\n    # Primitive types are converted to strings\n    assert wrapper(\"text\") == \"text\"\n    assert wrapper(42) == \"42\"\n    assert wrapper(3.14) == \"3.14\"\n\n    # Complex types (dict, list) should raise ParseError\n    with pytest.raises(ParseError, match=\"Cannot use complex JSON value types\"):\n        wrapper({\"key\": \"value\"})\n    with pytest.raises(ParseError, match=\"Cannot use complex JSON value types\"):\n        wrapper([1, 2, 3])\n\ndef test_non_json_mode_propagates_parse_error_from_processor():\n    \"\"\"If the underlying processor raises ParseError, it should be propagated unchanged.\"\"\"\n    wrapper = convert_json_value_to_form_if_needed(False, dummy_processor)\n    with pytest.raises(ParseError, match=\"dummy error\"):\n        wrapper(\"raise\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "149e3cd572664437aaa7baf318f17941",
+  "_api_plus_pacing_seconds": 1.3901799659943208
+}

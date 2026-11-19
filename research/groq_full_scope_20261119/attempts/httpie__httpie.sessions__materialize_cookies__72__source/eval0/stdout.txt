@@ -1,0 +1,71 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_materialize_cookies_basic ________________________
+
+    def test_materialize_cookies_basic():
+        # Create a cookie jar with a single cookie
+        jar = RequestsCookieJar()
+>       jar.set('sessionid', 'abc123', domain='example.com', path='/', secure=True, httponly=True)
+
+test_generated.py:9: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/requests/cookies.py:246: in set
+    c = create_cookie(name, value, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'sessionid', value = 'abc123'
+kwargs = {'domain': 'example.com', 'path': '/', 'secure': True, 'httponly': True}
+
+    def create_cookie(name: str, value: str, **kwargs: Any) -> Cookie:
+        """Make a cookie from underspecified parameters.
+    
+        By default, the pair of `name` and `value` will be set for the domain ''
+        and sent on every request (this is sometimes called a "supercookie").
+        """
+        result: dict[str, Any] = {
+            "version": 0,
+            "name": name,
+            "value": value,
+            "port": None,
+            "domain": "",
+            "path": "/",
+            "secure": False,
+            "expires": None,
+            "discard": True,
+            "comment": None,
+            "comment_url": None,
+            "rest": {"HttpOnly": None},
+            "rfc2109": False,
+        }
+    
+        badargs = set(kwargs) - set(result)
+        if badargs:
+>           raise TypeError(
+                f"create_cookie() got unexpected keyword arguments: {list(badargs)}"
+            )
+E           TypeError: create_cookie() got unexpected keyword arguments: ['httponly']
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/requests/cookies.py:518: TypeError
+_________________ test_materialize_cookies_multiple_and_order __________________
+
+    def test_materialize_cookies_multiple_and_order():
+        # Create a cookie jar with multiple cookies
+        jar = RequestsCookieJar()
+        jar.set('a', '1', domain='foo.com', path='/')
+        jar.set('b', '2', domain='bar.com', path='/')
+        jar.set('c', '3', domain='baz.com', path='/')
+        # Materialize the cookies
+        result = materialize_cookies(jar)
+        # The order of cookies in the result should match the order they were added
+        names = [c['name'] for c in result]
+>       assert names == ['a', 'b', 'c']
+E       AssertionError: assert ['b', 'c', 'a'] == ['a', 'b', 'c']
+E         
+E         At index 0 diff: 'b' != 'a'
+E         Use -v to get more diff
+
+test_generated.py:35: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_materialize_cookies_basic - TypeError: create_...
+FAILED test_generated.py::test_materialize_cookies_multiple_and_order - Asser...
+2 failed, 1 passed in 0.89s

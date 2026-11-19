@@ -1,0 +1,30 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________________ test_schema_validate_behavior _________________________
+
+    def test_schema_validate_behavior():
+        schema = Schema(
+            fields={
+                "username": String(max_length=50),
+                "age": Integer(default=18),
+            },
+            allow_null=True,
+        )
+        # Valid input returns the same dict
+        assert schema.validate({"username": "alice", "age": 30}) == {"username": "alice", "age": 30}
+        # Missing optional field uses default
+        assert schema.validate({"username": "bob"}) == {"username": "bob", "age": 18}
+        # Missing required field raises a ValidationError with a 'required' message
+        with pytest.raises(ValidationError) as excinfo:
+            schema.validate({"age": 25})
+>       assert any(msg.code == "required" and msg.index == ["username"] for msg in excinfo.value.messages)
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'method' object is not iterable
+
+../../expanded_120_results/typesystem_schema/council_enhanced/seed_43/v1_exec/test_run.py:21: TypeError
+=========================== short test summary info ============================
+FAILED ../../expanded_120_results/typesystem_schema/council_enhanced/seed_43/v1_exec/test_run.py::test_schema_validate_behavior
+1 failed in 0.22s
+
+/home/heurix/.cache/uv/archive-v0/ZMxlGZafGJre2eGL/lib/python3.12/site-packages/coverage/inorout.py:560: CoverageWarning: Module tests was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.17.3/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")

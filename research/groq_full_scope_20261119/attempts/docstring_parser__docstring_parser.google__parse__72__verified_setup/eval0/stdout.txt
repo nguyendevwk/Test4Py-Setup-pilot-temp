@@ -1,0 +1,73 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_parse_empty_docstring __________________________
+
+    def test_parse_empty_docstring():
+        """Parsing an empty string should return a Docstring with no components."""
+        result = parse("")
+        assert isinstance(result, Docstring)
+>       assert result.short_description == ""
+E       AssertionError: assert None == ''
+E        +  where None = <docstring_parser.common.Docstring object at 0x7f03762eb730>.short_description
+
+test_generated.py:9: AssertionError
+__________________________ test_parse_full_docstring ___________________________
+
+    def test_parse_full_docstring():
+        """A complete Google‑style docstring should be parsed into all expected parts."""
+        doc = """
+        Short description.
+    
+        Long description spanning
+        multiple lines.
+    
+        Args:
+            x (int): The first argument.
+            y (str): The second argument.
+    
+        Returns:
+            bool: True if successful.
+    
+        Raises:
+            ValueError: If an error occurs.
+        """
+        result = parse(doc)
+        assert isinstance(result, Docstring)
+        assert result.short_description == "Short description."
+        assert "Long description spanning" in result.long_description
+>       assert set(result.params.keys()) == {"x", "y"}
+E       AttributeError: 'list' object has no attribute 'keys'
+
+test_generated.py:38: AttributeError
+________________________ test_parse_invalid_type_raises ________________________
+
+    def test_parse_invalid_type_raises():
+        """Passing a non‑string type should raise a TypeError."""
+        with pytest.raises(TypeError):
+>           parse(42)  # type: ignore[arg-type]
+
+test_generated.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/google.py:301: in parse
+    return GoogleParser().parse(text)
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/google.py:215: in parse
+    text = inspect.cleandoc(text)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+doc = 42
+
+    def cleandoc(doc):
+        """Clean up indentation from docstrings.
+    
+        Any whitespace that can be uniformly removed from the second line
+        onwards is removed."""
+        try:
+>           lines = doc.expandtabs().split('\n')
+E           AttributeError: 'int' object has no attribute 'expandtabs'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:750: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_empty_docstring - AssertionError: assert...
+FAILED test_generated.py::test_parse_full_docstring - AttributeError: 'list' ...
+FAILED test_generated.py::test_parse_invalid_type_raises - AttributeError: 'i...
+3 failed in 0.25s

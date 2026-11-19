@@ -1,0 +1,54 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_act_365_l_normal_leap_year ________________________
+
+    def test_act_365_l_normal_leap_year():
+        """
+        Verify that the day count fraction for a period that includes a leap day
+        uses a denominator of 366 and returns the expected fraction.
+        """
+        start = datetime.date(2020, 2, 28)   # 2020 is a leap year
+        asof = datetime.date(2020, 3, 1)
+        end = datetime.date(2020, 3, 1)
+    
+        # The actual day count is 2 days (28 Feb -> 1 Mar)
+        actual_days = _get_actual_day_count(start, asof)
+        assert actual_days == 2
+    
+        # Denominator should be 366 because 2020 is a leap year
+        fraction = dcfc_act_365_l(start, asof, end)
+        expected = Decimal(actual_days) / Decimal(366)
+        assert fraction == expected
+>       assert fraction == Decimal('0.00546448087431694')
+E       AssertionError: assert Decimal('0.005464480874316939890710382514') == Decimal('0.00546448087431694')
+E        +  where Decimal('0.00546448087431694') = Decimal('0.00546448087431694')
+
+test_generated.py:27: AssertionError
+____________________ test_act_365_l_boundary_non_leap_year _____________________
+
+    def test_act_365_l_boundary_non_leap_year():
+        """
+        Verify that the day count fraction for a period that does not include a leap day
+        uses a denominator of 365 and returns the expected fraction.
+        """
+        start = datetime.date(2019, 12, 31)
+        asof = datetime.date(2020, 1, 1)
+        end = datetime.date(2020, 1, 1)
+    
+        # The actual day count is 1 day
+        actual_days = _get_actual_day_count(start, asof)
+        assert actual_days == 1
+    
+        # 2020 is a leap year, but the asof year is 2020, so denominator is 366
+        fraction = dcfc_act_365_l(start, asof, end)
+        expected = Decimal(actual_days) / Decimal(366)
+        assert fraction == expected
+>       assert fraction == Decimal('0.00273224043715847')
+E       AssertionError: assert Decimal('0.002732240437158469945355191257') == Decimal('0.00273224043715847')
+E        +  where Decimal('0.00273224043715847') = Decimal('0.00273224043715847')
+
+test_generated.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_act_365_l_normal_leap_year - AssertionError: a...
+FAILED test_generated.py::test_act_365_l_boundary_non_leap_year - AssertionEr...
+2 failed, 1 passed in 0.15s

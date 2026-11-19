@@ -1,0 +1,56 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_record_and_second_run __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.entrypoints.not_configured__main__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_record_and_second_run0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fd01fb4e0b0>
+
+    def test_record_and_second_run(tmp_path, monkeypatch):
+        """Ensure that recording a first run and detecting a second run works."""
+        # Patch the tracker path to use a temp file
+        tracker = tmp_path / "tracker.json"
+        monkeypatch.setattr(not_configured, "_get_not_configured_usage_tracker_path",
+                           lambda: tracker)
+    
+        # Ensure no tracker exists initially
+        assert not tracker.exists()
+    
+        # Record first run
+        not_configured._record_first_run()
+        assert tracker.exists()
+        with tracker.open() as f:
+            data = json.load(f)
+        assert "pid" in data and "time" in data
+        first_pid = data["pid"]
+        first_time = data["time"]
+    
+        # Simulate same shell process by patching _get_shell_pid
+        monkeypatch.setattr(not_configured, "_get_shell_pid", lambda: first_pid)
+    
+        # Patch _get_previous_command to return 'fuck'
+        monkeypatch.setattr(not_configured, "_get_previous_command", lambda: "fuck")
+    
+        # Immediately check second run detection
+        assert not_configured._is_second_run() is True
+    
+        # Simulate time passing beyond timeout
+        monkeypatch.setattr(time, "time", lambda: first_time + not_configured.const.CONFIGURATION_TIMEOUT + 1)
+>       assert not_configured._is_second_run() is False
+E       assert True is False
+E        +  where True = <function _is_second_run at 0x7fd01fb52b90>()
+E        +    where <function _is_second_run at 0x7fd01fb52b90> = not_configured._is_second_run
+
+test_generated.py:62: AssertionError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_record_and_second_run - assert True is False
+1 failed, 2 passed, 2 warnings in 0.17s

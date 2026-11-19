@@ -1,0 +1,22 @@
+{
+  "policy": "production-dependencies-v1",
+  "max_chars": 10000,
+  "max_nodes": 10,
+  "chars": 2431,
+  "snippets": [
+    {
+      "file": "codetiming/_timers.py",
+      "line": 16,
+      "symbol": "Timers",
+      "source": "class Timers(UserDict):\n    \"\"\"Custom dictionary that stores information about timers.\"\"\"\n\n    def __init__(self, *args: Any, **kwargs: Any) -> None:\n        \"\"\"Add a private dictionary keeping track of all timings\"\"\"\n        super().__init__(*args, **kwargs)\n        self._timings: Dict[str, List[float]] = collections.defaultdict(list)\n\n    def add(self, name: str, value: float) -> None:\n        \"\"\"Add a timing value to the given timer.\"\"\"\n        self._timings[name].append(value)\n        self.data.setdefault(name, 0)\n        self.data[name] += value\n\n    def clear(self) -> None:\n        \"\"\"Clear timers.\"\"\"\n        self.data.clear()\n        self._timings.clear()\n\n    def __setitem__(self, name: str, value: float) -> None:\n        \"\"\"Disallow setting of timer values.\"\"\"\n        raise TypeError(\n            f\"{self.__class__.__name__!r} does not support item assignment. \"\n            \"Use '.add()' to update values.\"\n        )\n\n    def apply(self, func: Callable[[List[float]], float], name: str) -> float:\n        \"\"\"Apply a function to the results of one named timer.\"\"\"\n        if name in self._timings:\n            return func(self._timings[name])\n        raise KeyError(name)\n\n    def count(self, name: str) -> float:\n        \"\"\"Number of timings.\"\"\"\n        return self.apply(len, name=name)\n\n    def total(self, name: str) -> float:\n        \"\"\"Total time for timers.\"\"\"\n        return self.apply(sum, name=name)\n\n    def min(self, name: str) -> float:\n        \"\"\"Minimal value of timings.\"\"\"\n        return self.apply(lambda values: min(values or [0]), name=name)\n\n    def max(self, name: str) -> float:\n        \"\"\"Maximal value of timings.\"\"\"\n        return self.apply(lambda values: max(values or [0]), name=name)\n\n    def mean(self, name: str) -> float:\n        \"\"\"Mean value of timings.\"\"\"\n        return self.apply(lambda values: statistics.mean(values or [0]), name=name)\n\n    def median(self, name: str) -> float:\n        \"\"\"Median value of timings.\"\"\"\n        return self.apply(lambda values: statistics.median(values or [0]), name=name)\n\n    def stdev(self, name: str) -> float:\n        \"\"\"Standard deviation of timings.\"\"\"\n        if name in self._timings:\n            value = self._timings[name]\n            return statistics.stdev(value) if len(value) >= 2 else math.nan\n        raise KeyError(name)"
+    },
+    {
+      "file": "codetiming/_timer.py",
+      "line": 38,
+      "symbol": "TimerError",
+      "source": "class TimerError(Exception):\n    \"\"\"A custom exception used to report errors in use of Timer class.\"\"\""
+    }
+  ],
+  "omitted": [],
+  "scope": "static source excerpts only; no inferred expected values"
+}

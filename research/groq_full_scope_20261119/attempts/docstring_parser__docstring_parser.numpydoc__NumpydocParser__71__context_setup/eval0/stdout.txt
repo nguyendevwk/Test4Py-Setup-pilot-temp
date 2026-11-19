@@ -1,0 +1,99 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_parse_basic_description_and_examples ___________________
+
+    def test_parse_basic_description_and_examples():
+        """Verify that a simple docstring with a short description, long description, and an examples section is parsed correctly."""
+        doc = textwrap.dedent("""
+            Short description.
+    
+            This is a long description that spans
+            multiple lines and provides more detail.
+    
+            Examples
+            --------
+            >>> 1 + 1
+            2
+            >>> 2 * 3
+            6
+        """)
+        parser = NumpydocParser()
+        result = parser.parse(doc)
+    
+        # Short and long description
+        assert result.short_description == "Short description."
+        assert result.long_description == "This is a long description that spans\nmultiple lines and provides more detail."
+        assert result.blank_after_short_description is True
+>       assert result.blank_after_long_description is False
+E       assert True is False
+E        +  where True = <docstring_parser.common.Docstring object at 0x7ff6f4aef850>.blank_after_long_description
+
+test_generated.py:29: AssertionError
+_________________ test_parse_parameters_and_returns_and_raises _________________
+
+    def test_parse_parameters_and_returns_and_raises():
+        """Verify that parameter, return, and raises sections are parsed into the correct meta objects."""
+        doc = textwrap.dedent("""
+            Parameters
+            ----------
+            x : int
+                The first integer.
+            y : float, optional
+                The second value. Defaults to 0.0.
+    
+            Returns
+            -------
+            result : int
+                The sum of x and y.
+    
+            Raises
+            ------
+            ValueError
+                If x is negative.
+        """)
+        parser = NumpydocParser()
+        result = parser.parse(doc)
+    
+        # Parameters
+        params = [m for m in result.meta if isinstance(m, DocstringParam)]
+        assert len(params) == 2
+        param_x, param_y = params
+>       assert param_x.args == ["parameters", "x"]
+E       AssertionError: assert ['param', 'x'] == ['parameters', 'x']
+E         
+E         At index 0 diff: 'param' != 'parameters'
+E         Use -v to get more diff
+
+test_generated.py:67: AssertionError
+____________________ test_parse_empty_and_invalid_sections _____________________
+
+    def test_parse_empty_and_invalid_sections():
+        """Verify that an empty docstring returns an empty Docstring and that unknown sections are ignored gracefully."""
+        parser = NumpydocParser()
+    
+        # Empty docstring
+        empty_result = parser.parse("")
+        assert empty_result.short_description is None
+        assert empty_result.long_description is None
+        assert empty_result.meta == []
+    
+        # Docstring with an unrecognized section header
+        doc = textwrap.dedent("""
+            This is a normal description.
+    
+            Unknown
+            ------
+            Some content that should be ignored.
+        """)
+        result = parser.parse(doc)
+        assert result.short_description == "This is a normal description."
+>       assert result.long_description is None
+E       AssertionError: assert 'Unknown\n------\nSome content that should be ignored.' is None
+E        +  where 'Unknown\n------\nSome content that should be ignored.' = <docstring_parser.common.Docstring object at 0x7ff6f4aefd90>.long_description
+
+test_generated.py:117: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_basic_description_and_examples - assert ...
+FAILED test_generated.py::test_parse_parameters_and_returns_and_raises - Asse...
+FAILED test_generated.py::test_parse_empty_and_invalid_sections - AssertionEr...
+3 failed in 0.17s

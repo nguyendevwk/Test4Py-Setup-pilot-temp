@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-6bce856f-20a0-4c49-a79e-5c00adc322cb",
+  "object": "chat.completion",
+  "created": 1795077441,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport time\nimport pytest\nfrom collections import deque\nfrom concurrent.futures import ThreadPoolExecutor, Future\nfrom tqdm.contrib.utils_worker import MonoWorker\n\n\ndef test_single_task_runs_and_completes():\n    \"\"\"Submitting a single task should run and complete.\"\"\"\n    worker = MonoWorker()\n    result_container = []\n\n    def task():\n        time.sleep(0.1)\n        result_container.append(\"done\")\n\n    future = worker.submit(task)\n    assert isinstance(future, Future)\n    # Wait for completion\n    future.result(timeout=1)\n    assert result_container == [\"done\"]\n    assert future.done()\n    # After completion, the deque should be empty\n    assert len(worker.futures) == 0\n\n\ndef test_waiting_task_replaced_by_latest_submission():\n    \"\"\"The most recent submission should replace any waiting task.\"\"\"\n    worker = MonoWorker()\n    order = []\n\n    def long_task():\n        time.sleep(0.2)\n        order.append(\"long\")\n\n    def short_task():\n        time.sleep(0.05)\n        order.append(\"short\")\n\n    # Submit long task first\n    long_future = worker.submit(long_task)\n    # Immediately submit short task, which should replace the waiting one\n    short_future = worker.submit(short_task)\n\n    # The deque should contain only the running long task\n    assert len(worker.futures) == 1\n    assert worker.futures[0] is long_future\n    assert not short_future.done()  # short task was cancelled\n\n    # Wait for the long task to finish\n    long_future.result(timeout=1)\n    assert order == [\"long\"]\n\n\ndef test_submission_of_failing_task_does_not_append_future():\n    \"\"\"If the submitted function raises, no Future should be appended.\"\"\"\n    worker = MonoWorker()\n    counter = 0\n\n    def failing_task():\n        nonlocal counter\n        counter += 1\n        raise ValueError(\"intentional failure\")\n\n    future = worker.submit(failing_task)\n    # The submit method catches the exception and does not return a Future\n    assert future is None\n    # The counter should have incremented once\n    assert counter == 1\n    # The deque should remain empty\n    assert len(worker.futures) == 0\n```",
+        "reasoning": "We need to test MonoWorker. Write three tests: normal submit, replacement of waiting, error handling. Use tmp_path? Not needed. Use ThreadPoolExecutor. We'll test that only one running, waiting replaced. Use simple functions. Use time.sleep to simulate. Use futures. Use pytest.raises for error? The submit catches exception and writes to tqdm_auto.write. We can't mock tqdm_auto. But we can test that if func raises, submit returns None and writes? Hard. Maybe test that if func raises, future not appended. Use a function that raises. Ensure no future returned. Also test that waiting replaced: submit two tasks quickly, second replaces waiting. Use a counter. Use time.sleep to keep first running. Use futures to check done. Let's code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046473605,
+    "prompt_tokens": 474,
+    "prompt_time": 0.026447283,
+    "completion_tokens": 628,
+    "completion_time": 0.691599962,
+    "total_tokens": 1102,
+    "total_time": 0.718047245,
+    "completion_tokens_details": {
+      "reasoning_tokens": 155
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sf8164ej8rrpxcwde1qdc6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport time\nimport pytest\nfrom collections import deque\nfrom concurrent.futures import ThreadPoolExecutor, Future\nfrom tqdm.contrib.utils_worker import MonoWorker\n\n\ndef test_single_task_runs_and_completes():\n    \"\"\"Submitting a single task should run and complete.\"\"\"\n    worker = MonoWorker()\n    result_container = []\n\n    def task():\n        time.sleep(0.1)\n        result_container.append(\"done\")\n\n    future = worker.submit(task)\n    assert isinstance(future, Future)\n    # Wait for completion\n    future.result(timeout=1)\n    assert result_container == [\"done\"]\n    assert future.done()\n    # After completion, the deque should be empty\n    assert len(worker.futures) == 0\n\n\ndef test_waiting_task_replaced_by_latest_submission():\n    \"\"\"The most recent submission should replace any waiting task.\"\"\"\n    worker = MonoWorker()\n    order = []\n\n    def long_task():\n        time.sleep(0.2)\n        order.append(\"long\")\n\n    def short_task():\n        time.sleep(0.05)\n        order.append(\"short\")\n\n    # Submit long task first\n    long_future = worker.submit(long_task)\n    # Immediately submit short task, which should replace the waiting one\n    short_future = worker.submit(short_task)\n\n    # The deque should contain only the running long task\n    assert len(worker.futures) == 1\n    assert worker.futures[0] is long_future\n    assert not short_future.done()  # short task was cancelled\n\n    # Wait for the long task to finish\n    long_future.result(timeout=1)\n    assert order == [\"long\"]\n\n\ndef test_submission_of_failing_task_does_not_append_future():\n    \"\"\"If the submitted function raises, no Future should be appended.\"\"\"\n    worker = MonoWorker()\n    counter = 0\n\n    def failing_task():\n        nonlocal counter\n        counter += 1\n        raise ValueError(\"intentional failure\")\n\n    future = worker.submit(failing_task)\n    # The submit method catches the exception and does not return a Future\n    assert future is None\n    # The counter should have incremented once\n    assert counter == 1\n    # The deque should remain empty\n    assert len(worker.futures) == 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0634435379761271
+}

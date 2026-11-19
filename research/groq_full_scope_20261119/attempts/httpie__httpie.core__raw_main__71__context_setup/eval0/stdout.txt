@@ -1,0 +1,198 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_raw_main_success _____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.core__raw_main__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_raw_main_success0')
+
+    def test_raw_main_success(tmp_path):
+        env = Environment()
+        env.stderr = io.StringIO()
+        env.stdout = io.StringIO()
+        parser = _make_parser()
+        args = ["httpie", "http://example.com"]
+>       status = raw_main(parser, _dummy_main_program, args=args, env=env)
+
+test_generated.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+parser = ArgumentParser(prog='httpie', usage=None, description=None, formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=True)
+main_program = <function _dummy_main_program at 0x7f0076a21bd0>
+args = ['http://example.com']
+env = <Environment {'apply_warnings_filter': <function Environment.apply_warnings_filter at 0x7f0076de7b50>,
+ 'args': Namesp...tty': False,
+ 'stdout': <_io.StringIO object at 0x7f00773abeb0>,
+ 'stdout_encoding': 'utf-8',
+ 'stdout_isatty': False}>
+use_default_options = True
+
+    def raw_main(
+        parser: argparse.ArgumentParser,
+        main_program: Callable[[argparse.Namespace, Environment], ExitStatus],
+        args: List[Union[str, bytes]] = sys.argv,
+        env: Environment = Environment(),
+        use_default_options: bool = True,
+    ) -> ExitStatus:
+        program_name, *args = args
+        env.program_name = os.path.basename(program_name)
+        args = decode_raw_args(args, env.stdin_encoding)
+    
+        if is_daemon_mode(args):
+            return run_daemon_task(env, args)
+    
+        plugin_manager.load_installed_plugins(env.config.plugins_dir)
+    
+        if use_default_options and env.config.default_options:
+            args = env.config.default_options + args
+    
+        include_debug_info = '--debug' in args
+        include_traceback = include_debug_info or '--traceback' in args
+    
+        def handle_generic_error(e, annotation=None):
+            msg = str(e)
+            if hasattr(e, 'request'):
+                request = e.request
+                if hasattr(request, 'url'):
+                    msg = (
+                        f'{msg} while doing a {request.method}'
+                        f' request to URL: {request.url}'
+                    )
+            if annotation:
+                msg += annotation
+            env.log_error(f'{type(e).__name__}: {msg}')
+            if include_traceback:
+                raise
+    
+        if include_debug_info:
+            print_debug_info(env)
+            if args == ['--debug']:
+                return ExitStatus.SUCCESS
+    
+        exit_status = ExitStatus.SUCCESS
+    
+        try:
+>           parsed_args = parser.parse_args(
+                args=args,
+                env=env,
+            )
+E           TypeError: ArgumentParser.parse_args() got an unexpected keyword argument 'env'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/core.py:77: TypeError
+_______________________ test_raw_main_nested_json_error ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.core__raw_main__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_raw_main_nested_json_erro0')
+
+    def test_raw_main_nested_json_error(tmp_path):
+        env = Environment()
+        env.stderr = io.StringIO()
+        env.stdout = io.StringIO()
+        parser = _make_parser()
+        # Simulate parser raising NestedJSONSyntaxError
+        def fake_parse_args(*_, **__):
+            from httpie.cli.nested_json import NestedJSONSyntaxError
+            raise NestedJSONSyntaxError("invalid json")
+        parser.parse_args = fake_parse_args
+        args = ["httpie", "http://example.com"]
+>       status = raw_main(parser, _dummy_main_program, args=args, env=env)
+
+test_generated.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/core.py:77: in raw_main
+    parsed_args = parser.parse_args(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+_ = ()
+__ = {'args': ['http://example.com'], 'env': <Environment {'apply_warnings_filter': <function Environment.apply_warnings_fi...ty': False,
+ 'stdout': <_io.StringIO object at 0x7f0076958c10>,
+ 'stdout_encoding': 'utf-8',
+ 'stdout_isatty': False}>}
+
+    def fake_parse_args(*_, **__):
+        from httpie.cli.nested_json import NestedJSONSyntaxError
+>       raise NestedJSONSyntaxError("invalid json")
+E       TypeError: NestedJSONSyntaxError.__init__() missing 2 required positional arguments: 'token' and 'message'
+
+test_generated.py:45: TypeError
+____________________________ test_raw_main_timeout _____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.core__raw_main__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_raw_main_timeout0')
+
+    def test_raw_main_timeout(tmp_path):
+        env = Environment()
+        env.stderr = io.StringIO()
+        env.stdout = io.StringIO()
+        parser = _make_parser()
+        def timeout_main(args, env):
+            raise requests.Timeout("timeout")
+        args = ["httpie", "http://example.com"]
+>       status = raw_main(parser, timeout_main, args=args, env=env)
+
+test_generated.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+parser = ArgumentParser(prog='httpie', usage=None, description=None, formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=True)
+main_program = <function test_raw_main_timeout.<locals>.timeout_main at 0x7f0076a225f0>
+args = ['http://example.com']
+env = <Environment {'apply_warnings_filter': <function Environment.apply_warnings_filter at 0x7f0076de7b50>,
+ 'args': Namesp...tty': False,
+ 'stdout': <_io.StringIO object at 0x7f0076a21fc0>,
+ 'stdout_encoding': 'utf-8',
+ 'stdout_isatty': False}>
+use_default_options = True
+
+    def raw_main(
+        parser: argparse.ArgumentParser,
+        main_program: Callable[[argparse.Namespace, Environment], ExitStatus],
+        args: List[Union[str, bytes]] = sys.argv,
+        env: Environment = Environment(),
+        use_default_options: bool = True,
+    ) -> ExitStatus:
+        program_name, *args = args
+        env.program_name = os.path.basename(program_name)
+        args = decode_raw_args(args, env.stdin_encoding)
+    
+        if is_daemon_mode(args):
+            return run_daemon_task(env, args)
+    
+        plugin_manager.load_installed_plugins(env.config.plugins_dir)
+    
+        if use_default_options and env.config.default_options:
+            args = env.config.default_options + args
+    
+        include_debug_info = '--debug' in args
+        include_traceback = include_debug_info or '--traceback' in args
+    
+        def handle_generic_error(e, annotation=None):
+            msg = str(e)
+            if hasattr(e, 'request'):
+                request = e.request
+                if hasattr(request, 'url'):
+                    msg = (
+                        f'{msg} while doing a {request.method}'
+                        f' request to URL: {request.url}'
+                    )
+            if annotation:
+                msg += annotation
+            env.log_error(f'{type(e).__name__}: {msg}')
+            if include_traceback:
+                raise
+    
+        if include_debug_info:
+            print_debug_info(env)
+            if args == ['--debug']:
+                return ExitStatus.SUCCESS
+    
+        exit_status = ExitStatus.SUCCESS
+    
+        try:
+>           parsed_args = parser.parse_args(
+                args=args,
+                env=env,
+            )
+E           TypeError: ArgumentParser.parse_args() got an unexpected keyword argument 'env'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/core.py:77: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_raw_main_success - TypeError: ArgumentParser.p...
+FAILED test_generated.py::test_raw_main_nested_json_error - TypeError: Nested...
+FAILED test_generated.py::test_raw_main_timeout - TypeError: ArgumentParser.p...
+3 failed in 1.05s

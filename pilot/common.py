@@ -140,7 +140,17 @@ def stream_command(args, cwd, timeout, env, log_path, label, heartbeat, console=
                 break
             except subprocess.TimeoutExpired:
                 if time.perf_counter() - last_output[0] >= heartbeat:
-                    console.write(f'[{label or "process"}] running {time.perf_counter()-started:.0f}s; waiting for next event', label=label or 'process')
+                    elapsed=time.perf_counter()-started
+                    progress_path=Path(log_path).parent/'progress.json' if log_path else None
+                    state={}
+                    if progress_path:
+                        try:state=json.loads(progress_path.read_text())
+                        except (OSError,ValueError):pass
+                    if state:
+                        from pilot.progress import live_summary
+                        console.write(f'[progress:{label or "process"}] elapsed={elapsed:.0f}s remaining<={max(0,timeout-elapsed):.0f}s | '+live_summary(state),label=label or 'process')
+                    else:
+                        console.write(f'[{label or "process"}] running {elapsed:.0f}s; remaining<={max(0,timeout-elapsed):.0f}s; waiting for next event', label=label or 'process')
         reader.join()
     return dict(command=list(map(str, args)), returncode=proc.returncode, timeout=expired,
         stdout=''.join(lines)[-12000:], stderr='', seconds=time.perf_counter()-started,

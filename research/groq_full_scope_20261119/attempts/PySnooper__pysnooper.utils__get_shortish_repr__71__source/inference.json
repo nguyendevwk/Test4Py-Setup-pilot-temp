@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-df0e3944-d752-4706-9d94-de7ebec1e3f6",
+  "object": "chat.completion",
+  "created": 1795076721,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom pysnooper.utils import get_shortish_repr, get_repr_function, truncate, normalize_repr\n\n\ndef test_custom_repr_and_normalization(tmp_path):\n    \"\"\"Verify that a custom representation is used and that normalization\n    does not alter the output when the custom repr is already short.\"\"\"\n    # Custom representation for integers\n    custom_repr = (int, lambda x: f\"int:{x}\")\n    result = get_shortish_repr(42, custom_repr=custom_repr, normalize=True)\n    # The custom repr should be applied\n    assert result == \"int:42\"\n    # Normalization should not change the already short string\n    assert normalize_repr(result) == result\n\n\ndef test_repr_failure_returns_placeholder():\n    \"\"\"When an object's __repr__ raises an exception, the function should\n    return the placeholder string 'REPR FAILED'.\"\"\"\n    class BadRepr:\n        def __repr__(self):\n            raise RuntimeError(\"bad repr\")\n\n    bad_obj = BadRepr()\n    result = get_shortish_repr(bad_obj)\n    assert result == \"REPR FAILED\"\n\n\ndef test_truncation_of_long_string(tmp_path):\n    \"\"\"Ensure that the representation is truncated to the specified maximum\n    length and that newlines are removed.\"\"\"\n    long_string = \"a\" * 100 + \"\\n\" + \"b\" * 100\n    # Use max_length to truncate to 10 characters\n    result = get_shortish_repr(long_string, max_length=10)\n    # The result should be the first 10 characters of the string without newlines\n    assert result == (\"a\" * 10)\n    # Verify that the newline was removed\n    assert \"\\n\" not in result\n```",
+        "reasoning": "Need tests for get_shortish_repr. Let's inspect other functions.We need to import get_shortish_repr from pysnooper.utils. Also need get_repr_function, truncate, normalize_repr. Let's open file.We don't have file content. But we can infer behavior: get_shortish_repr uses get_repr_function to get repr function. It handles exceptions, replaces newlines, optionally normalizes, truncates.\n\nWe need to test normal behavior, boundary, error. For error: pass object whose repr raises exception. For boundary: test max_length truncation. For normal: test custom_repr and normalize.\n\nWe need to know normalize_repr and truncate functions. Let's assume normalize_repr removes quotes? Not sure. But we can test that normalize=True results in no quotes? Might be too specific.\n\nBetter to test that when normalize=True, the output is same as without? We can just test that normalize=True doesn't raise error.\n\nWe can create custom_repr mapping: e.g., custom_repr=(int, lambda x: f\"int:{x}\").\n\nTest that get_shortish_repr(5, custom_repr=(int, lambda x: f\"int:{x}\")) returns \"int:5\".\n\nAlso test that if repr raises exception: create class with __repr__ raising. Then get_shortish_repr returns 'REPR FAILED'.\n\nAlso test truncation: create long string and set max_length=5, expect truncated string.\n\nWe need to import functions. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052209684,
+    "prompt_tokens": 335,
+    "prompt_time": 0.019716003,
+    "completion_tokens": 674,
+    "completion_time": 0.741134906,
+    "total_tokens": 1009,
+    "total_time": 0.760850909,
+    "completion_tokens_details": {
+      "reasoning_tokens": 298
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sej2dxecta26hp64jahs60",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom pysnooper.utils import get_shortish_repr, get_repr_function, truncate, normalize_repr\n\n\ndef test_custom_repr_and_normalization(tmp_path):\n    \"\"\"Verify that a custom representation is used and that normalization\n    does not alter the output when the custom repr is already short.\"\"\"\n    # Custom representation for integers\n    custom_repr = (int, lambda x: f\"int:{x}\")\n    result = get_shortish_repr(42, custom_repr=custom_repr, normalize=True)\n    # The custom repr should be applied\n    assert result == \"int:42\"\n    # Normalization should not change the already short string\n    assert normalize_repr(result) == result\n\n\ndef test_repr_failure_returns_placeholder():\n    \"\"\"When an object's __repr__ raises an exception, the function should\n    return the placeholder string 'REPR FAILED'.\"\"\"\n    class BadRepr:\n        def __repr__(self):\n            raise RuntimeError(\"bad repr\")\n\n    bad_obj = BadRepr()\n    result = get_shortish_repr(bad_obj)\n    assert result == \"REPR FAILED\"\n\n\ndef test_truncation_of_long_string(tmp_path):\n    \"\"\"Ensure that the representation is truncated to the specified maximum\n    length and that newlines are removed.\"\"\"\n    long_string = \"a\" * 100 + \"\\n\" + \"b\" * 100\n    # Use max_length to truncate to 10 characters\n    result = get_shortish_repr(long_string, max_length=10)\n    # The result should be the first 10 characters of the string without newlines\n    assert result == (\"a\" * 10)\n    # Verify that the newline was removed\n    assert \"\\n\" not in result\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1230042499955744
+}

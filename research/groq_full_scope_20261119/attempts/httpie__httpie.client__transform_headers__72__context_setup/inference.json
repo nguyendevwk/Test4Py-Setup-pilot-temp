@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-8e85dc89-1040-4004-8208-9ec420f3b4da",
+  "object": "chat.completion",
+  "created": 1795078285,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport requests\nfrom httpie.client import transform_headers, apply_missing_repeated_headers, IGNORE_CONTENT_LENGTH_METHODS\nfrom httpie.cli.dicts import HTTPHeadersDict\n\ndef test_remove_misplaced_content_length():\n    # Prepare a request with method OPTIONS and a Content-Length header that should be removed\n    req = requests.Request(\n        method=\"OPTIONS\",\n        url=\"http://example.com\",\n        headers={\"Content-Length\": \"123\"}\n    )\n    session = requests.Session()\n    prepared = session.prepare_request(req)\n\n    # Simulate requests adding a Content-Length of 0 for OPTIONS\n    prepared.headers[\"Content-Length\"] = \"0\"\n\n    transform_headers(req, prepared)\n\n    # The header should be removed because the original had a different value\n    assert \"Content-Length\" not in prepared.headers\n\ndef test_preserve_original_repeated_headers():\n    # Original request has two identical header names with different values\n    original_headers = HTTPHeadersDict([(\"X-Token\", \"first\"), (\"X-Token\", \"second\")])\n    req = requests.Request(\n        method=\"GET\",\n        url=\"http://example.com\",\n        headers=original_headers\n    )\n    session = requests.Session()\n    prepared = session.prepare_request(req)\n\n    # Simulate a header override that removes one of the values\n    prepared.headers.pop(\"X-Token\", None)\n    prepared.headers[\"X-Token\"] = \"first\"\n\n    apply_missing_repeated_headers(original_headers, prepared)\n\n    # After applying, both original values should be present again\n    values = prepared.headers.get_all(\"X-Token\")\n    assert set(values) == {\"first\", \"second\"}\n\ndef test_no_change_when_headers_match():\n    # Original request has a single header\n    original_headers = HTTPHeadersDict([(\"Accept\", \"application/json\")])\n    req = requests.Request(\n        method=\"GET\",\n        url=\"http://example.com\",\n        headers=original_headers\n    )\n    session = requests.Session()\n    prepared = session.prepare_request(req)\n\n    # Prepare request should already have the same header\n    assert prepared.headers[\"Accept\"] == \"application/json\"\n\n    apply_missing_repeated_headers(original_headers, prepared)\n\n    # No modification should occur\n    assert prepared.headers[\"Accept\"] == \"application/json\"\n```",
+        "reasoning": "Need tests for transform_headers and apply_missing_repeated_headers. Use requests.Request and PreparedRequest. We'll create a request with headers, prepare via session. Use get_httpie_session? but simpler: use requests.Session().prepare_request. Then call transform_headers. Test that Content-Length removed when method in IGNORE_CONTENT_LENGTH_METHODS and conditions. Also test that repeated headers preserved. Use tmp_path? not needed. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053607433,
+    "prompt_tokens": 807,
+    "prompt_time": 0.041105056,
+    "completion_tokens": 568,
+    "completion_time": 0.739109913,
+    "total_tokens": 1375,
+    "total_time": 0.780214969,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 87
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg1s9cep38qy7zvny5x5e1",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport requests\nfrom httpie.client import transform_headers, apply_missing_repeated_headers, IGNORE_CONTENT_LENGTH_METHODS\nfrom httpie.cli.dicts import HTTPHeadersDict\n\ndef test_remove_misplaced_content_length():\n    # Prepare a request with method OPTIONS and a Content-Length header that should be removed\n    req = requests.Request(\n        method=\"OPTIONS\",\n        url=\"http://example.com\",\n        headers={\"Content-Length\": \"123\"}\n    )\n    session = requests.Session()\n    prepared = session.prepare_request(req)\n\n    # Simulate requests adding a Content-Length of 0 for OPTIONS\n    prepared.headers[\"Content-Length\"] = \"0\"\n\n    transform_headers(req, prepared)\n\n    # The header should be removed because the original had a different value\n    assert \"Content-Length\" not in prepared.headers\n\ndef test_preserve_original_repeated_headers():\n    # Original request has two identical header names with different values\n    original_headers = HTTPHeadersDict([(\"X-Token\", \"first\"), (\"X-Token\", \"second\")])\n    req = requests.Request(\n        method=\"GET\",\n        url=\"http://example.com\",\n        headers=original_headers\n    )\n    session = requests.Session()\n    prepared = session.prepare_request(req)\n\n    # Simulate a header override that removes one of the values\n    prepared.headers.pop(\"X-Token\", None)\n    prepared.headers[\"X-Token\"] = \"first\"\n\n    apply_missing_repeated_headers(original_headers, prepared)\n\n    # After applying, both original values should be present again\n    values = prepared.headers.get_all(\"X-Token\")\n    assert set(values) == {\"first\", \"second\"}\n\ndef test_no_change_when_headers_match():\n    # Original request has a single header\n    original_headers = HTTPHeadersDict([(\"Accept\", \"application/json\")])\n    req = requests.Request(\n        method=\"GET\",\n        url=\"http://example.com\",\n        headers=original_headers\n    )\n    session = requests.Session()\n    prepared = session.prepare_request(req)\n\n    # Prepare request should already have the same header\n    assert prepared.headers[\"Accept\"] == \"application/json\"\n\n    apply_missing_repeated_headers(original_headers, prepared)\n\n    # No modification should occur\n    assert prepared.headers[\"Accept\"] == \"application/json\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1567397530307062
+}

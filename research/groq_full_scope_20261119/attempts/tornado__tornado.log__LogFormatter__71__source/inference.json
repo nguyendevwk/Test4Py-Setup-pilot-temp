@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-34f3b8d8-fa5d-4c2d-931a-af107dfe6642",
+  "object": "chat.completion",
+  "created": 1795079628,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport sys\nimport traceback\nimport types\nimport datetime\nimport pytest\nfrom tornado.log import LogFormatter\n\n# Helper to create a LogRecord with a specific message and level\ndef make_record(msg, level=logging.INFO, exc_info=None):\n    return logging.LogRecord(\n        name=\"test\",\n        level=level,\n        pathname=__file__,\n        lineno=10,\n        msg=msg,\n        args=(),\n        exc_info=exc_info,\n    )\n\ndef test_basic_formatting_no_color(tmp_path):\n    # Instantiate formatter with color disabled to avoid terminal checks\n    fmt = LogFormatter(color=False)\n    record = make_record(\"Hello world\", level=logging.INFO)\n    formatted = fmt.format(record)\n    # The formatted string should contain the message and level initial\n    assert \"Hello world\" in formatted\n    assert \"[I\" in formatted  # level initial\n    # No ANSI escape codes should be present\n    assert \"\\x1b\" not in formatted\n\ndef test_bytes_message_conversion(tmp_path):\n    # Pass a bytes message that cannot be decoded as utf-8\n    bad_bytes = b\"\\xff\\xfe\\xfd\"\n    record = make_record(bad_bytes, level=logging.ERROR)\n    fmt = LogFormatter(color=False)\n    formatted = fmt.format(record)\n    # The formatter should convert the bytes to a safe unicode representation\n    # which will be a string containing the repr of the bytes\n    assert \"Bad message\" not in formatted  # no exception\n    assert \"b'\\\\xff\\\\xfe\\\\xfd'\" in formatted or \"b'\\\\xff\\\\xfe\\\\xfd'\" in formatted\n\ndef test_exception_info_inclusion(tmp_path):\n    # Create an exception and capture its exc_info\n    try:\n        1 / 0\n    except ZeroDivisionError:\n        exc = sys.exc_info()\n    record = make_record(\"Error occurred\", level=logging.CRITICAL, exc_info=exc)\n    fmt = LogFormatter(color=False)\n    formatted = fmt.format(record)\n    # The formatted string should include the exception traceback\n    assert \"ZeroDivisionError\" in formatted\n    # The traceback lines should be indented by four spaces\n    assert \"\\n    \" in formatted\n    # The original message should appear before the traceback\n    assert formatted.split(\"\\n\")[0].strip().endswith(\"Error occurred\")\n```",
+        "reasoning": "Need tests for LogFormatter. Use tmp_path? Not needed. Test normal formatting, color disabled, error message handling. Use logging.LogRecord. Test that format returns expected string. Use a record with level INFO. Ensure color codes present when color enabled and stderr supports color? _stderr_supports_color uses curses? Might be false. We can monkeypatch _stderr_supports_color to True and curses to None to force ANSI. But cannot mock target. But we can instantiate with color=False to avoid color. So test normal formatting. Second test: record with bytes message causing _safe_unicode conversion. Third test: exception info formatting. Use record.exc_info. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004682038,
+    "prompt_tokens": 1536,
+    "prompt_time": 0.019067366,
+    "completion_tokens": 633,
+    "completion_time": 0.705557177,
+    "total_tokens": 2169,
+    "total_time": 0.724624543,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 136
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sharsbeesb2h2f6v4ayj8x",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport sys\nimport traceback\nimport types\nimport datetime\nimport pytest\nfrom tornado.log import LogFormatter\n\n# Helper to create a LogRecord with a specific message and level\ndef make_record(msg, level=logging.INFO, exc_info=None):\n    return logging.LogRecord(\n        name=\"test\",\n        level=level,\n        pathname=__file__,\n        lineno=10,\n        msg=msg,\n        args=(),\n        exc_info=exc_info,\n    )\n\ndef test_basic_formatting_no_color(tmp_path):\n    # Instantiate formatter with color disabled to avoid terminal checks\n    fmt = LogFormatter(color=False)\n    record = make_record(\"Hello world\", level=logging.INFO)\n    formatted = fmt.format(record)\n    # The formatted string should contain the message and level initial\n    assert \"Hello world\" in formatted\n    assert \"[I\" in formatted  # level initial\n    # No ANSI escape codes should be present\n    assert \"\\x1b\" not in formatted\n\ndef test_bytes_message_conversion(tmp_path):\n    # Pass a bytes message that cannot be decoded as utf-8\n    bad_bytes = b\"\\xff\\xfe\\xfd\"\n    record = make_record(bad_bytes, level=logging.ERROR)\n    fmt = LogFormatter(color=False)\n    formatted = fmt.format(record)\n    # The formatter should convert the bytes to a safe unicode representation\n    # which will be a string containing the repr of the bytes\n    assert \"Bad message\" not in formatted  # no exception\n    assert \"b'\\\\xff\\\\xfe\\\\xfd'\" in formatted or \"b'\\\\xff\\\\xfe\\\\xfd'\" in formatted\n\ndef test_exception_info_inclusion(tmp_path):\n    # Create an exception and capture its exc_info\n    try:\n        1 / 0\n    except ZeroDivisionError:\n        exc = sys.exc_info()\n    record = make_record(\"Error occurred\", level=logging.CRITICAL, exc_info=exc)\n    fmt = LogFormatter(color=False)\n    formatted = fmt.format(record)\n    # The formatted string should include the exception traceback\n    assert \"ZeroDivisionError\" in formatted\n    # The traceback lines should be indented by four spaces\n    assert \"\\n    \" in formatted\n    # The original message should appear before the traceback\n    assert formatted.split(\"\\n\")[0].strip().endswith(\"Error occurred\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "d3bb1320eec14c34a1bfae13ce2ddf6c",
+  "_api_plus_pacing_seconds": 2.3522943559801206
+}

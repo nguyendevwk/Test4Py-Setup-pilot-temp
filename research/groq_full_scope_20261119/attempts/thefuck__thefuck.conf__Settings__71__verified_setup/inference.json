@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-8dd7326a-e0ac-4ee6-81d8-99826fc9d7c7",
+  "object": "chat.completion",
+  "created": 1795078916,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport types\nimport importlib\nimport tempfile\nimport shutil\nimport pytest\nfrom pathlib import Path\n\n# Import the Settings class from the module under test\nfrom thefuck.conf import Settings\nfrom thefuck import const\n\n@pytest.fixture\ndef settings_instance(tmp_path):\n    \"\"\"Create a Settings instance with a temporary user directory.\"\"\"\n    # Patch the environment to point to the temporary directory\n    original_xdg = os.environ.get(\"XDG_CONFIG_HOME\")\n    os.environ[\"XDG_CONFIG_HOME\"] = str(tmp_path)\n    try:\n        s = Settings()\n        yield s\n    finally:\n        if original_xdg is not None:\n            os.environ[\"XDG_CONFIG_HOME\"] = original_xdg\n        else:\n            os.environ.pop(\"XDG_CONFIG_HOME\", None)\n\ndef test_init_creates_default_settings_file(settings_instance, tmp_path):\n    \"\"\"`init` should create a settings.py file with default headers and comments.\"\"\"\n    settings_instance.init()\n    settings_file = tmp_path / \"thefuck\" / \"settings.py\"\n    assert settings_file.is_file()\n    content = settings_file.read_text()\n    # Header must be present\n    assert const.SETTINGS_HEADER.strip() in content\n    # Each default setting should be commented\n    for key, default in const.DEFAULT_SETTINGS.items():\n        assert f\"# {key} = {default}\" in content\n\ndef test_env_overrides_settings(settings_instance, tmp_path):\n    \"\"\"Environment variables should override settings loaded from file.\"\"\"\n    # Prepare a custom settings file with a known value\n    user_dir = tmp_path / \"thefuck\"\n    user_dir.mkdir(parents=True)\n    settings_file = user_dir / \"settings.py\"\n    settings_file.write_text(\"require_confirmation = False\\n\")\n    # Set environment variable to override\n    os.environ[\"THEFUCK_REQUIRE_CONFIRMATION\"] = \"true\"\n    # Re-initialize Settings to load from file and env\n    settings_instance.init()\n    # The environment value should win\n    assert settings_instance.require_confirmation is True\n    # Clean up\n    os.environ.pop(\"THEFUCK_REQUIRE_CONFIRMATION\")\n\ndef test_args_override_settings(settings_instance, tmp_path):\n    \"\"\"Command line arguments should override settings loaded from file and env.\"\"\"\n    # Prepare a custom settings file with a known value\n    user_dir = tmp_path / \"thefuck\"\n    user_dir.mkdir(parents=True)\n    settings_file = user_dir / \"settings.py\"\n    settings_file.write_text(\"debug = False\\n\")\n    # Create a simple args namespace\n    class Args:\n        yes = True\n        debug = True\n        repeat = 3\n    args = Args()\n    # Re-initialize Settings to load from file, env, and args\n    settings_instance.init(args=args)\n    # Args should override file values\n    assert settings_instance.require_confirmation is False  # yes=True -> False\n    assert settings_instance.debug is True\n    assert settings_instance.repeat == 3\n```",
+        "reasoning": "We need three tests. Use tmp_path to create config dir. Test that init creates settings file with defaults. Test env override. Test args override."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046756806,
+    "prompt_tokens": 1145,
+    "prompt_time": 0.07173842,
+    "completion_tokens": 654,
+    "completion_time": 0.724673637,
+    "total_tokens": 1799,
+    "total_time": 0.796412057,
+    "completion_tokens_details": {
+      "reasoning_tokens": 31
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgn1d7ejdbrbve1w3g9jcv",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport types\nimport importlib\nimport tempfile\nimport shutil\nimport pytest\nfrom pathlib import Path\n\n# Import the Settings class from the module under test\nfrom thefuck.conf import Settings\nfrom thefuck import const\n\n@pytest.fixture\ndef settings_instance(tmp_path):\n    \"\"\"Create a Settings instance with a temporary user directory.\"\"\"\n    # Patch the environment to point to the temporary directory\n    original_xdg = os.environ.get(\"XDG_CONFIG_HOME\")\n    os.environ[\"XDG_CONFIG_HOME\"] = str(tmp_path)\n    try:\n        s = Settings()\n        yield s\n    finally:\n        if original_xdg is not None:\n            os.environ[\"XDG_CONFIG_HOME\"] = original_xdg\n        else:\n            os.environ.pop(\"XDG_CONFIG_HOME\", None)\n\ndef test_init_creates_default_settings_file(settings_instance, tmp_path):\n    \"\"\"`init` should create a settings.py file with default headers and comments.\"\"\"\n    settings_instance.init()\n    settings_file = tmp_path / \"thefuck\" / \"settings.py\"\n    assert settings_file.is_file()\n    content = settings_file.read_text()\n    # Header must be present\n    assert const.SETTINGS_HEADER.strip() in content\n    # Each default setting should be commented\n    for key, default in const.DEFAULT_SETTINGS.items():\n        assert f\"# {key} = {default}\" in content\n\ndef test_env_overrides_settings(settings_instance, tmp_path):\n    \"\"\"Environment variables should override settings loaded from file.\"\"\"\n    # Prepare a custom settings file with a known value\n    user_dir = tmp_path / \"thefuck\"\n    user_dir.mkdir(parents=True)\n    settings_file = user_dir / \"settings.py\"\n    settings_file.write_text(\"require_confirmation = False\\n\")\n    # Set environment variable to override\n    os.environ[\"THEFUCK_REQUIRE_CONFIRMATION\"] = \"true\"\n    # Re-initialize Settings to load from file and env\n    settings_instance.init()\n    # The environment value should win\n    assert settings_instance.require_confirmation is True\n    # Clean up\n    os.environ.pop(\"THEFUCK_REQUIRE_CONFIRMATION\")\n\ndef test_args_override_settings(settings_instance, tmp_path):\n    \"\"\"Command line arguments should override settings loaded from file and env.\"\"\"\n    # Prepare a custom settings file with a known value\n    user_dir = tmp_path / \"thefuck\"\n    user_dir.mkdir(parents=True)\n    settings_file = user_dir / \"settings.py\"\n    settings_file.write_text(\"debug = False\\n\")\n    # Create a simple args namespace\n    class Args:\n        yes = True\n        debug = True\n        repeat = 3\n    args = Args()\n    # Re-initialize Settings to load from file, env, and args\n    settings_instance.init(args=args)\n    # Args should override file values\n    assert settings_instance.require_confirmation is False  # yes=True -> False\n    assert settings_instance.debug is True\n    assert settings_instance.repeat == 3\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2089434550143778
+}

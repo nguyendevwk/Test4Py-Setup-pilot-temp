@@ -1,0 +1,35 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_______ test_apply_missing_repeated_headers_restores_all_original_values _______
+
+    def test_apply_missing_repeated_headers_restores_all_original_values():
+        # Original headers contain the same header twice with different values
+        original = HTTPHeadersDict([("X-Test", "value1"), ("X-Test", "value2")])
+        # Prepared request has only the first value
+        prepared = requests.PreparedRequest()
+        prepared.headers = {"X-Test": "value1"}
+        apply_missing_repeated_headers(original, prepared)
+        # After merging, both values should be present
+>       assert set(prepared.headers.get_all("X-Test")) == {"value1", "value2"}
+E       AttributeError: 'HTTPHeadersDict' object has no attribute 'get_all'. Did you mean: 'getall'?
+
+test_generated.py:15: AttributeError
+_ test_apply_missing_repeated_headers_is_case_insensitive_and_preserves_overridden_value _
+
+    def test_apply_missing_repeated_headers_is_case_insensitive_and_preserves_overridden_value():
+        original = HTTPHeadersDict([("X-Case", "A"), ("X-Case", "B")])
+        prepared = requests.PreparedRequest()
+        # Simulate an overridden header value that is not in original
+        prepared.headers = {"X-CASE": "C"}
+        apply_missing_repeated_headers(original, prepared)
+        # Since "C" is not among original values, it should be preserved
+        assert prepared.headers["X-CASE"] == "C"
+        # Original values should not be added because the current value was overridden
+>       assert set(prepared.headers.get_all("X-CASE")) == {"C"}
+E       AttributeError: 'HTTPHeadersDict' object has no attribute 'get_all'. Did you mean: 'getall'?
+
+test_generated.py:42: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_apply_missing_repeated_headers_restores_all_original_values
+FAILED test_generated.py::test_apply_missing_repeated_headers_is_case_insensitive_and_preserves_overridden_value
+2 failed, 1 passed in 0.86s

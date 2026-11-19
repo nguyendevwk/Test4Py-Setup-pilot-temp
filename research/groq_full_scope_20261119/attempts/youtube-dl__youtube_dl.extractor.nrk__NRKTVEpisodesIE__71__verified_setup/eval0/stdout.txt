@@ -1,0 +1,61 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________________ test_extract_title ______________________________
+
+    def test_extract_title():
+        """_extract_title should return the title from a simple HTML snippet."""
+        html = "<html><body><h1>Sample Episode Title</h1></body></html>"
+        extractor = NRKTVEpisodesIE()
+>       title = extractor._extract_title(html)
+
+test_generated.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/nrk.py:843: in _extract_title
+    return self._html_search_regex(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1021: in _html_search_regex
+    res = self._search_regex(pattern, string, name, default, fatal, flags, group)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.nrk.NRKTVEpisodesIE object at 0x7f4f01dc7850>
+pattern = '<h1>([^<]+)</h1>'
+string = '<html><body><h1>Sample Episode Title</h1></body></html>'
+name = 'title', default = <object object at 0x7f4f10b3e2c0>, fatal = False
+flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+______________________________ test_item_re_match ______________________________
+
+    def test_item_re_match():
+        """_ITEM_RE should match an HTML element containing a data-episode attribute."""
+        # Construct a minimal string that contains the expected data-episode attribute
+        # The attribute value is a numeric ID; we use 12345 for testing.
+        html = '<div data-episode="12345"></div>'
+        # The pattern should match the entire attribute string
+        pattern = re.compile(NRKTVEpisodesIE._ITEM_RE)
+        match = pattern.search(html)
+>       assert match is not None
+E       assert None is not None
+
+test_generated.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extract_title - AttributeError: 'NoneType' obj...
+FAILED test_generated.py::test_item_re_match - assert None is not None
+2 failed, 1 passed in 1.00s

@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-785de76a-0e6b-4cc9-81c9-1cdc0f23df84",
+  "object": "chat.completion",
+  "created": 1795079372,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport decimal\nimport pytest\nfrom pypara.dcc import dcfc_30_e_plus_360\n\ndef test_normal_fraction_calculation():\n    \"\"\"Test a typical case where dates are within the same month.\"\"\"\n    start = datetime.date(2023, 1, 15)\n    asof = datetime.date(2023, 2, 15)\n    end = asof\n    result = dcfc_30_e_plus_360(start, asof, end)\n    # 30 days difference, so fraction should be 30/360 = 0.083333...\n    assert result == decimal.Decimal('0.08333333333333333333333333333')\n\ndef test_day_31_adjustment_and_end_of_month():\n    \"\"\"Test that a start date of the 31st is adjusted to the 30th and\n    that an asof date of the 31st is moved to the next day.\"\"\"\n    start = datetime.date(2023, 1, 31)   # should become 2023-01-30\n    asof = datetime.date(2023, 2, 28)    # asof day 28, no adjustment\n    end = asof\n    result = dcfc_30_e_plus_360(start, asof, end)\n    # nod = (28-30) + 30*(2-1) = -2 + 30 = 28\n    assert result == decimal.Decimal('0.07777777777777777777777777778')\n\n    # Test asof adjustment: asof is 31st\n    asof31 = datetime.date(2023, 2, 28) + datetime.timedelta(days=1)  # 2023-03-01\n    result2 = dcfc_30_e_plus_360(start, asof31, asof31)\n    # nod = (1-30) + 30*(3-1) = -29 + 60 = 31\n    assert result2 == decimal.Decimal('0.08611111111111111111111111111')\n\ndef test_negative_fraction_for_invalid_date_order():\n    \"\"\"When asof is before start, the function should return a negative fraction.\"\"\"\n    start = datetime.date(2023, 5, 10)\n    asof = datetime.date(2023, 4, 10)  # earlier than start\n    end = asof\n    result = dcfc_30_e_plus_360(start, asof, end)\n    # nod = (10-10) + 30*(4-5) = 0 - 30 = -30\n    assert result == decimal.Decimal('-0.08333333333333333333333333333')\n```",
+        "reasoning": "We need three tests for dcfc_30_e_plus_360. Use tmp_path not needed. Just test normal, boundary, error. Error: if start > asof? function doesn't check, but returns nod/360. We can test that negative nod gives negative fraction. Also test day 31 adjustment. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048192881,
+    "prompt_tokens": 1835,
+    "prompt_time": 0.146888537,
+    "completion_tokens": 651,
+    "completion_time": 0.740041079,
+    "total_tokens": 2486,
+    "total_time": 0.886929616,
+    "completion_tokens_details": {
+      "reasoning_tokens": 68
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh2yk2ekst7jas58y1q1t1",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport decimal\nimport pytest\nfrom pypara.dcc import dcfc_30_e_plus_360\n\ndef test_normal_fraction_calculation():\n    \"\"\"Test a typical case where dates are within the same month.\"\"\"\n    start = datetime.date(2023, 1, 15)\n    asof = datetime.date(2023, 2, 15)\n    end = asof\n    result = dcfc_30_e_plus_360(start, asof, end)\n    # 30 days difference, so fraction should be 30/360 = 0.083333...\n    assert result == decimal.Decimal('0.08333333333333333333333333333')\n\ndef test_day_31_adjustment_and_end_of_month():\n    \"\"\"Test that a start date of the 31st is adjusted to the 30th and\n    that an asof date of the 31st is moved to the next day.\"\"\"\n    start = datetime.date(2023, 1, 31)   # should become 2023-01-30\n    asof = datetime.date(2023, 2, 28)    # asof day 28, no adjustment\n    end = asof\n    result = dcfc_30_e_plus_360(start, asof, end)\n    # nod = (28-30) + 30*(2-1) = -2 + 30 = 28\n    assert result == decimal.Decimal('0.07777777777777777777777777778')\n\n    # Test asof adjustment: asof is 31st\n    asof31 = datetime.date(2023, 2, 28) + datetime.timedelta(days=1)  # 2023-03-01\n    result2 = dcfc_30_e_plus_360(start, asof31, asof31)\n    # nod = (1-30) + 30*(3-1) = -29 + 60 = 31\n    assert result2 == decimal.Decimal('0.08611111111111111111111111111')\n\ndef test_negative_fraction_for_invalid_date_order():\n    \"\"\"When asof is before start, the function should return a negative fraction.\"\"\"\n    start = datetime.date(2023, 5, 10)\n    asof = datetime.date(2023, 4, 10)  # earlier than start\n    end = asof\n    result = dcfc_30_e_plus_360(start, asof, end)\n    # nod = (10-10) + 30*(4-5) = 0 - 30 = -30\n    assert result == decimal.Decimal('-0.08333333333333333333333333333')\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "13b87bc96d5a4f11bf56d564f68381db",
+  "_api_plus_pacing_seconds": 1.2521499239956029
+}

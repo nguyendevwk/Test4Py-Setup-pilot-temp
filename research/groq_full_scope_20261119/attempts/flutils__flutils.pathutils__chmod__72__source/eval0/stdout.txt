@@ -1,0 +1,37 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_chmod_glob_include_parent ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chmod__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_chmod_glob_include_parent0')
+
+    def test_chmod_glob_include_parent(tmp_path):
+        # Create a directory structure with files
+        parent = tmp_path / "parent"
+        parent.mkdir()
+        sub_dir = parent / "subdir"
+        sub_dir.mkdir()
+        file1 = parent / "file1.txt"
+        file1.write_text("a")
+        file2 = sub_dir / "file2.txt"
+        file2.write_text("b")
+        # Set initial modes
+        parent.chmod(0o755)
+        sub_dir.chmod(0o755)
+        file1.chmod(0o644)
+        file2.chmod(0o644)
+        # Apply chmod to all items under parent, include parent
+        glob_path = normalize_path(str(parent) + "/**")
+        chmod(glob_path, mode_file=0o600, mode_dir=0o700, include_parent=True)
+        # Verify parent directory mode changed
+>       assert stat.S_IMODE(os.stat(parent).st_mode) == 0o700
+E       AssertionError: assert 493 == 448
+E        +  where 493 = <built-in function S_IMODE>(16877)
+E        +    where <built-in function S_IMODE> = stat.S_IMODE
+E        +    and   16877 = os.stat_result(st_mode=16877, st_ino=9580360, st_dev=52, st_nlink=1, st_uid=1000, st_gid=1000, st_size=30, st_atime=1795078733, st_mtime=1795078733, st_ctime=1795078733).st_mode
+E        +      where os.stat_result(st_mode=16877, st_ino=9580360, st_dev=52, st_nlink=1, st_uid=1000, st_gid=1000, st_size=30, st_atime=1795078733, st_mtime=1795078733, st_ctime=1795078733) = <built-in function stat>(PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chmod__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_chmod_glob_include_parent0/parent'))
+E        +        where <built-in function stat> = os.stat
+
+test_generated.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_chmod_glob_include_parent - AssertionError: as...
+1 failed, 2 passed in 0.12s

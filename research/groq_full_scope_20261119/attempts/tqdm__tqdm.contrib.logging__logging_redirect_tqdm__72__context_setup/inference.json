@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-e7d8746b-748e-48d6-8df4-8d02d494e8e2",
+  "object": "chat.completion",
+  "created": 1795078126,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport sys\nimport io\nimport contextlib\n\nimport pytest\n\nfrom tqdm.contrib.logging import logging_redirect_tqdm, _TqdmLoggingHandler\n\n\ndef test_logging_redirect_to_tqdm_write(tmp_path):\n    \"\"\"When a console handler is present, messages are written via tqdm.write.\"\"\"\n    # Create a logger with a console StreamHandler\n    logger = logging.getLogger(\"test_logger\")\n    logger.setLevel(logging.INFO)\n    stream = io.StringIO()\n    console_handler = logging.StreamHandler(stream)\n    logger.handlers = [console_handler]\n\n    # Capture tqdm.write output\n    captured = io.StringIO()\n    with contextlib.redirect_stdout(captured):\n        with logging_redirect_tqdm([logger]):\n            logger.info(\"redirected message\")\n\n    # The message should appear in the captured stdout via tqdm.write\n    output = captured.getvalue()\n    assert \"redirected message\" in output\n    # The original console handler should not output to its stream\n    assert stream.getvalue() == \"\"\n\n\ndef test_no_console_handler_restores_original(tmp_path):\n    \"\"\"If a logger has no console handler, its handlers are unchanged after exit.\"\"\"\n    logger = logging.getLogger(\"no_console\")\n    logger.setLevel(logging.INFO)\n    file_handler = logging.FileHandler(tmp_path / \"log.txt\")\n    logger.handlers = [file_handler]\n\n    original_handlers = list(logger.handlers)\n\n    with logging_redirect_tqdm([logger]):\n        logger.info(\"message during context\")\n\n    # After exiting, handlers should be restored to original\n    assert logger.handlers == original_handlers\n    # The file should contain the message\n    with open(tmp_path / \"log.txt\", \"r\") as f:\n        content = f.read()\n    assert \"message during context\" in content\n\n\ndef test_default_loggers_use_root_and_restore(tmp_path):\n    \"\"\"When no loggers are provided, the root logger is used and restored.\"\"\"\n    root = logging.getLogger()\n    root.setLevel(logging.INFO)\n    stream = io.StringIO()\n    console_handler = logging.StreamHandler(stream)\n    root.handlers = [console_handler]\n\n    with logging_redirect_tqdm():\n        logging.info(\"root message\")\n\n    # After context, root handlers should be restored\n    assert root.handlers == [console_handler]\n    # The message should have been redirected via tqdm.write\n    # Since tqdm.write writes to stdout, capture it\n    captured = io.StringIO()\n    with contextlib.redirect_stdout(captured):\n        logging.info(\"root message\")\n    assert \"root message\" in captured.getvalue()\n```",
+        "reasoning": "We need three tests: normal redirect, boundary no loggers, error behavior? maybe when logger has no console handler. Test that original handlers restored. Use tmp_path? not needed. Use logging."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004820823,
+    "prompt_tokens": 885,
+    "prompt_time": 0.047538445,
+    "completion_tokens": 576,
+    "completion_time": 0.594613372,
+    "total_tokens": 1461,
+    "total_time": 0.642151817,
+    "completion_tokens_details": {
+      "reasoning_tokens": 41
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sfwy7me2drbj09f13dhnv5",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport sys\nimport io\nimport contextlib\n\nimport pytest\n\nfrom tqdm.contrib.logging import logging_redirect_tqdm, _TqdmLoggingHandler\n\n\ndef test_logging_redirect_to_tqdm_write(tmp_path):\n    \"\"\"When a console handler is present, messages are written via tqdm.write.\"\"\"\n    # Create a logger with a console StreamHandler\n    logger = logging.getLogger(\"test_logger\")\n    logger.setLevel(logging.INFO)\n    stream = io.StringIO()\n    console_handler = logging.StreamHandler(stream)\n    logger.handlers = [console_handler]\n\n    # Capture tqdm.write output\n    captured = io.StringIO()\n    with contextlib.redirect_stdout(captured):\n        with logging_redirect_tqdm([logger]):\n            logger.info(\"redirected message\")\n\n    # The message should appear in the captured stdout via tqdm.write\n    output = captured.getvalue()\n    assert \"redirected message\" in output\n    # The original console handler should not output to its stream\n    assert stream.getvalue() == \"\"\n\n\ndef test_no_console_handler_restores_original(tmp_path):\n    \"\"\"If a logger has no console handler, its handlers are unchanged after exit.\"\"\"\n    logger = logging.getLogger(\"no_console\")\n    logger.setLevel(logging.INFO)\n    file_handler = logging.FileHandler(tmp_path / \"log.txt\")\n    logger.handlers = [file_handler]\n\n    original_handlers = list(logger.handlers)\n\n    with logging_redirect_tqdm([logger]):\n        logger.info(\"message during context\")\n\n    # After exiting, handlers should be restored to original\n    assert logger.handlers == original_handlers\n    # The file should contain the message\n    with open(tmp_path / \"log.txt\", \"r\") as f:\n        content = f.read()\n    assert \"message during context\" in content\n\n\ndef test_default_loggers_use_root_and_restore(tmp_path):\n    \"\"\"When no loggers are provided, the root logger is used and restored.\"\"\"\n    root = logging.getLogger()\n    root.setLevel(logging.INFO)\n    stream = io.StringIO()\n    console_handler = logging.StreamHandler(stream)\n    root.handlers = [console_handler]\n\n    with logging_redirect_tqdm():\n        logging.info(\"root message\")\n\n    # After context, root handlers should be restored\n    assert root.handlers == [console_handler]\n    # The message should have been redirected via tqdm.write\n    # Since tqdm.write writes to stdout, capture it\n    captured = io.StringIO()\n    with contextlib.redirect_stdout(captured):\n        logging.info(\"root message\")\n    assert \"root message\" in captured.getvalue()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0169430749956518
+}

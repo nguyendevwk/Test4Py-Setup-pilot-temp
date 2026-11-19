@@ -1,0 +1,42 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+_______ test_second_submit_replaces_waiting_and_cancels_previous_waiting _______
+
+    def test_second_submit_replaces_waiting_and_cancels_previous_waiting():
+        worker = MonoWorker()
+        executed = []
+    
+        def long_task():
+            executed.append("long_started")
+            time.sleep(0.2)
+            executed.append("long_finished")
+            return "long"
+    
+        def short_task():
+            executed.append("short_started")
+            time.sleep(0.05)
+            executed.append("short_finished")
+            return "short"
+    
+        # Submit first long task
+        long_future = worker.submit(long_task)
+        # Immediately submit second short task, which should replace the waiting
+        short_future = worker.submit(short_task)
+    
+        # The deque should contain the running long task and the waiting short task
+        assert len(worker.futures) == 2
+        assert worker.futures[0] is long_future
+        assert worker.futures[1] is short_future
+    
+        # The short task should be cancelled before it starts
+>       assert short_future.cancelled() or short_future.done()
+E       assert (False or False)
+E        +  where False = cancelled()
+E        +    where cancelled = <Future at 0x7f5e20dcb790 state=pending>.cancelled
+E        +  and   False = done()
+E        +    where done = <Future at 0x7f5e20dcb790 state=pending>.done
+
+test_generated.py:59: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_second_submit_replaces_waiting_and_cancels_previous_waiting
+1 failed, 2 passed in 0.43s

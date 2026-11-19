@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-1e823d81-1977-4abb-9731-9cff92b35734",
+  "object": "chat.completion",
+  "created": 1795076117,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport typing\nimport dataclasses\nimport pytest\nfrom dataclasses import dataclass, field\nfrom dataclasses_json.mm import schema\nfrom marshmallow import fields\n\n# Helper dataclass for testing\n@dataclass\nclass TestData:\n    a: int\n    b: str = \"default\"\n    c: typing.Optional[float] = None\n    d: typing.List[int] = field(default_factory=list)\n    e: typing.Any = field(metadata={\"dataclasses_json\": {\"mm_field\": fields.String()}})\n\ndef test_schema_basic_fields():\n    \"\"\"Verify that required, default, optional and list fields are correctly represented.\"\"\"\n    result = schema(TestData, mixin=None, infer_missing=False)\n    # Required field 'a' should be present and of type Integer\n    assert \"a\" in result\n    assert isinstance(result[\"a\"], fields.Integer)\n    # Field 'b' has a default, so it should not be required\n    assert \"b\" in result\n    assert result[\"b\"].required is False\n    assert result[\"b\"].missing == \"default\"\n    # Optional field 'c' should allow None\n    assert \"c\" in result\n    assert result[\"c\"].allow_none is True\n    # List field 'd' should be a List field\n    assert \"d\" in result\n    assert isinstance(result[\"d\"], fields.List)\n    assert isinstance(result[\"d\"].inner, fields.Integer)\n    # Field 'e' uses a custom mm_field\n    assert \"e\" in result\n    assert result[\"e\"] is fields.String()\n\ndef test_schema_infer_missing():\n    \"\"\"When infer_missing is True, missing defaults should be inferred as None.\"\"\"\n    result = schema(TestData, mixin=None, infer_missing=True)\n    # Field 'b' should now be required because infer_missing=True\n    assert result[\"b\"].required is True\n    # Optional field 'c' should still allow None\n    assert result[\"c\"].allow_none is True\n    # Field 'd' should be required\n    assert result[\"d\"].required is True\n\ndef test_schema_missing_and_none_behavior():\n    \"\"\"Ensure that fields with None default are marked allow_none and missing correctly.\"\"\"\n    @dataclass\n    class NoneDefault:\n        x: typing.Optional[int] = None\n        y: typing.Optional[str] = field(default_factory=lambda: None)\n\n    result = schema(NoneDefault, mixin=None, infer_missing=False)\n    # Both fields should allow None\n    assert result[\"x\"].allow_none is True\n    assert result[\"y\"].allow_none is True\n    # Both should be required because no default value is provided\n    assert result[\"x\"].required is True\n    assert result[\"y\"].required is True\n```",
+        "reasoning": "Need tests for schema function. Use a simple dataclass. Test normal field, optional, default, missing. Also test custom mm_field. Use tmp_path? not needed. Just assert schema dict keys and field types."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053624459,
+    "prompt_tokens": 889,
+    "prompt_time": 0.01782899,
+    "completion_tokens": 626,
+    "completion_time": 0.823192945,
+    "total_tokens": 1515,
+    "total_time": 0.841021935,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 45
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sdzkskedbb9e8m1em5wt16",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport typing\nimport dataclasses\nimport pytest\nfrom dataclasses import dataclass, field\nfrom dataclasses_json.mm import schema\nfrom marshmallow import fields\n\n# Helper dataclass for testing\n@dataclass\nclass TestData:\n    a: int\n    b: str = \"default\"\n    c: typing.Optional[float] = None\n    d: typing.List[int] = field(default_factory=list)\n    e: typing.Any = field(metadata={\"dataclasses_json\": {\"mm_field\": fields.String()}})\n\ndef test_schema_basic_fields():\n    \"\"\"Verify that required, default, optional and list fields are correctly represented.\"\"\"\n    result = schema(TestData, mixin=None, infer_missing=False)\n    # Required field 'a' should be present and of type Integer\n    assert \"a\" in result\n    assert isinstance(result[\"a\"], fields.Integer)\n    # Field 'b' has a default, so it should not be required\n    assert \"b\" in result\n    assert result[\"b\"].required is False\n    assert result[\"b\"].missing == \"default\"\n    # Optional field 'c' should allow None\n    assert \"c\" in result\n    assert result[\"c\"].allow_none is True\n    # List field 'd' should be a List field\n    assert \"d\" in result\n    assert isinstance(result[\"d\"], fields.List)\n    assert isinstance(result[\"d\"].inner, fields.Integer)\n    # Field 'e' uses a custom mm_field\n    assert \"e\" in result\n    assert result[\"e\"] is fields.String()\n\ndef test_schema_infer_missing():\n    \"\"\"When infer_missing is True, missing defaults should be inferred as None.\"\"\"\n    result = schema(TestData, mixin=None, infer_missing=True)\n    # Field 'b' should now be required because infer_missing=True\n    assert result[\"b\"].required is True\n    # Optional field 'c' should still allow None\n    assert result[\"c\"].allow_none is True\n    # Field 'd' should be required\n    assert result[\"d\"].required is True\n\ndef test_schema_missing_and_none_behavior():\n    \"\"\"Ensure that fields with None default are marked allow_none and missing correctly.\"\"\"\n    @dataclass\n    class NoneDefault:\n        x: typing.Optional[int] = None\n        y: typing.Optional[str] = field(default_factory=lambda: None)\n\n    result = schema(NoneDefault, mixin=None, infer_missing=False)\n    # Both fields should allow None\n    assert result[\"x\"].allow_none is True\n    assert result[\"y\"].allow_none is True\n    # Both should be required because no default value is provided\n    assert result[\"x\"].required is True\n    assert result[\"y\"].required is True\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2084756580297835
+}

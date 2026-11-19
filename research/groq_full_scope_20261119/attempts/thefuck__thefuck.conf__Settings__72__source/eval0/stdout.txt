@@ -1,0 +1,82 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_settings_file_creation_and_loading ____________________
+
+settings_instance = {'user_dir': PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.conf__Settings__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_settings_file_creation_an0/thefuck')}
+
+    def test_settings_file_creation_and_loading(settings_instance):
+        """Verify that a default settings file is created and loaded correctly."""
+        # The init method should create the settings file and load defaults
+        settings_instance.init()
+        # The settings file should exist
+        settings_path = settings_instance.user_dir.joinpath("settings.py")
+        assert settings_path.is_file()
+        # The file should contain the header
+        content = settings_path.read_text()
+        assert const.SETTINGS_HEADER.strip() in content
+        # The loaded settings should contain all default keys
+        for key in const.DEFAULT_SETTINGS:
+>           assert key in settings_instance
+E           AssertionError: assert 'rules' in {'user_dir': PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.conf__Settings__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_settings_file_creation_an0/thefuck')}
+
+test_generated.py:37: AssertionError
+_________________________ test_settings_env_overrides __________________________
+
+settings_instance = {'user_dir': PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefu...nst: All rules enabled>, 'my_rule'], 'debug': True, 'priority': {'my_rule': 5, 'other_rule': 10}, 'history_limit': 200}
+
+    def test_settings_env_overrides(settings_instance):
+        """Verify that environment variables override file and default settings."""
+        # Set environment variables for a few settings
+        os.environ["THEFUCK_RULES"] = "DEFAULT_RULES:my_rule"
+        os.environ["THEFUCK_PRIORITY"] = "my_rule=5:other_rule=10"
+        os.environ["THEFUCK_DEBUG"] = "True"
+        os.environ["THEFUCK_HISTORY_LIMIT"] = "200"
+        # Initialize settings
+        settings_instance.init()
+        # Check that the overrides took effect
+>       assert settings_instance.rules == ["my_rule"]
+E       AssertionError: assert [<const: All ...d>, 'my_rule'] == ['my_rule']
+E         
+E         At index 0 diff: <const: All rules enabled> != 'my_rule'
+E         Left contains one more item: 'my_rule'
+E         Use -v to get more diff
+
+test_generated.py:52: AssertionError
+_________________________ test_settings_args_override __________________________
+
+settings_instance = {'user_dir': PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefu...: True, 'priority': {'my_rule': 5, 'other_rule': 10}, 'history_limit': 200, 'require_confirmation': False, 'repeat': 3}
+
+    def test_settings_args_override(settings_instance):
+        """Verify that command‑line arguments override env and file settings."""
+        # Prepare a fake args namespace
+        class Args:
+            yes = True
+            debug = False
+            repeat = 3
+        args = Args()
+        # Set an env variable that would normally override debug
+        os.environ["THEFUCK_DEBUG"] = "True"
+        # Initialize settings with args
+        settings_instance.init(args=args)
+        # The args should override env and defaults
+        assert settings_instance.require_confirmation is False  # yes=True flips to False
+>       assert settings_instance.debug is False  # args.debug overrides env
+E       AssertionError: assert True is False
+E        +  where True = {'user_dir': PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefu...: True, 'priority': {'my_rule': 5, 'other_rule': 10}, 'history_limit': 200, 'require_confirmation': False, 'repeat': 3}.debug
+
+test_generated.py:71: AssertionError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_settings_file_creation_and_loading - Assertion...
+FAILED test_generated.py::test_settings_env_overrides - AssertionError: asser...
+FAILED test_generated.py::test_settings_args_override - AssertionError: asser...
+3 failed, 2 warnings in 0.17s

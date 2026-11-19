@@ -1,0 +1,61 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_get_path_and_source_from_frame_reads_file_source _____________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_path_and_source_from_frame__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_path_and_source_from_0')
+
+    def test_get_path_and_source_from_frame_reads_file_source(tmp_path):
+        """Frame from a function defined in a real file should return that file path and source lines."""
+        source_code = "def foo():\n    return 42\n"
+        module, file_path = create_module_with_source(tmp_path, "temp_module", source_code)
+    
+        def wrapper():
+            return module.foo()
+    
+        frame = inspect.currentframe()
+        # Move to the frame of wrapper
+>       while frame.f_code.co_name != "wrapper":
+E       AttributeError: 'NoneType' object has no attribute 'f_code'
+
+test_generated.py:36: AttributeError
+___________ test_get_path_and_source_from_frame_handles_bytes_source ___________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_path_and_source_from_frame__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_path_and_source_from_1')
+
+    def test_get_path_and_source_from_frame_handles_bytes_source(tmp_path):
+        """If the source is read as bytes, it should be decoded correctly."""
+        # Create a file with a specific encoding declaration
+        source_code = "# coding: latin-1\n" + "def bar():\n    return 'á'\n"
+        module, file_path = create_module_with_source(tmp_path, "latin_module", source_code)
+    
+        def wrapper():
+            return module.bar()
+    
+        frame = inspect.currentframe()
+>       while frame.f_code.co_name != "wrapper":
+E       AttributeError: 'NoneType' object has no attribute 'f_code'
+
+test_generated.py:55: AttributeError
+____________ test_get_path_and_source_from_frame_unavailable_source ____________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_path_and_source_from_frame__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_path_and_source_from_2')
+
+    def test_get_path_and_source_from_frame_unavailable_source(tmp_path):
+        """When the file cannot be read, an UnavailableSource instance is returned."""
+        # Create a module but delete its file to simulate missing source
+        module, file_path = create_module_with_source(tmp_path, "missing_module", "def baz():\n    pass\n")
+        os.remove(file_path)
+    
+        def wrapper():
+            return module.baz()
+    
+        frame = inspect.currentframe()
+>       while frame.f_code.co_name != "wrapper":
+E       AttributeError: 'NoneType' object has no attribute 'f_code'
+
+test_generated.py:74: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_path_and_source_from_frame_reads_file_source
+FAILED test_generated.py::test_get_path_and_source_from_frame_handles_bytes_source
+FAILED test_generated.py::test_get_path_and_source_from_frame_unavailable_source
+3 failed in 0.12s

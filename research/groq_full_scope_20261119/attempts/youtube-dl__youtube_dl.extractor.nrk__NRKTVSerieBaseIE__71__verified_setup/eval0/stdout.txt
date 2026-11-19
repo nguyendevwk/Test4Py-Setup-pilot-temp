@@ -1,0 +1,28 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_extract_entries_valid_and_invalid ____________________
+
+    def test_extract_entries_valid_and_invalid():
+        ie = DummyNRKTVSerieBaseIE()
+        # Valid entries: mix of prfId and episodeId, both strings
+        entry_list = [
+            {'prfId': '12345', 'episodeId': 'ignored'},
+            {'episodeId': '67890'},
+            {'prfId': 123, 'episodeId': 'invalid_type'},  # invalid type
+            {'prfId': None},  # missing id
+        ]
+        results = ie._extract_entries(entry_list)
+        # Should return two results corresponding to the valid string ids
+        assert len(results) == 2
+        assert all(isinstance(r, dict) for r in results)
+        # Check that the URLs are correctly formed
+        assert results[0]['url'] == 'nrk:12345'
+        assert results[1]['url'] == 'nrk:67890'
+        # Ensure the IE key is NRKIE
+>       assert results[0]['ie'] == NRKIE.ie_key()
+E       KeyError: 'ie'
+
+test_generated.py:28: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extract_entries_valid_and_invalid - KeyError: ...
+1 failed, 2 passed in 1.38s

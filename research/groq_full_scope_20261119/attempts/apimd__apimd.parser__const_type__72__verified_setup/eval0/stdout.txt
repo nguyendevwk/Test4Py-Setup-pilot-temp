@@ -1,0 +1,40 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_constant_and_container_types _______________________
+
+    def test_constant_and_container_types():
+        # Constant
+        const_node = ast.parse("42").body[0].value
+        assert const_type(const_node) == "int"
+    
+        # Tuple
+        tuple_node = ast.parse("(1, 2)").body[0].value
+>       assert const_type(tuple_node) == "tuple[int, int]"
+E       AssertionError: assert 'tuple[int]' == 'tuple[int, int]'
+E         
+E         - tuple[int, int]
+E         ?          -----
+E         + tuple[int]
+
+test_generated.py:13: AssertionError
+__________________________ test_call_and_unknown_call __________________________
+
+    def test_call_and_unknown_call():
+        # Known call
+        call_node = ast.parse("int(5)").body[0].value
+        assert const_type(call_node) == "int"
+    
+        # Known call with PEP585 type
+        call_node_pep = ast.parse("list[int]([1, 2])").body[0].value
+        # The unparse of the func will be 'list[int]', which is in PEP585 keys
+>       assert const_type(call_node_pep) == "list[int]"
+E       AssertionError: assert 'Any' == 'list[int]'
+E         
+E         - list[int]
+E         + Any
+
+test_generated.py:52: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_constant_and_container_types - AssertionError:...
+FAILED test_generated.py::test_call_and_unknown_call - AssertionError: assert...
+2 failed, 1 passed in 0.13s

@@ -1,0 +1,48 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_format_style_help_normal _________________________
+
+    def test_format_style_help_normal():
+        # Use a small set of styles to keep output predictable
+        styles = ["monokai", "solarized", "gruvbox"]
+        result = format_style_help(styles)
+        # Default style should be mentioned
+        assert f'Output coloring style (default is "{DEFAULT_STYLE}")' in result
+        # Auto style description should be present
+        assert f'The "{AUTO_STYLE}" style follows your terminal\'s ANSI color styles.' in result
+        # All provided styles should appear in the wrapped list
+        for style in styles:
+>           assert f'    {style}' in result
+E           assert '    solarized' in '\n    Output coloring style (default is "auto"). It can be one of:\n\n        monokai, solarized, gruvbox\n    \nThe ...ronment variable is set to "xterm-256color" or similar\n(e.g., via `export TERM=xterm-256color\' in your ~/.bashrc).\n'
+
+test_generated.py:15: AssertionError
+____________________ test_format_style_help_isolation_mode _____________________
+
+    def test_format_style_help_isolation_mode():
+        # In isolation mode, the function should use BUNDLED_STYLES and add extra text
+        result = format_style_help([], isolation_mode=True)
+        # The isolation mode header should be present
+        assert 'For finding out all available styles in your system' in result
+        # The list should contain all bundled styles sorted
+        for style in sorted(BUNDLED_STYLES):
+>           assert f'    {style}' in result
+E           assert '    pie' in '\n    Output coloring style (default is "auto"). It can be one of:\n\n        auto, pie, pie-dark, pie-light, solariz...ronment variable is set to "xterm-256color" or similar\n(e.g., via `export TERM=xterm-256color\' in your ~/.bashrc).\n'
+
+test_generated.py:26: AssertionError
+__________________ test_format_style_help_wrapping_long_names __________________
+
+    def test_format_style_help_wrapping_long_names():
+        # Create a long style name to force wrapping
+        long_style = "this_is_a_very_long_style_name_that_exceeds_sixty_characters_in_length"
+        styles = [long_style, "short"]
+        result = format_style_help(styles)
+        # The long style should appear wrapped across multiple lines
+>       assert long_style in result
+E       assert 'this_is_a_very_long_style_name_that_exceeds_sixty_characters_in_length' in '\n    Output coloring style (default is "auto"). It can be one of:\n\n        this_is_a_very_long_style_name_that_exc...ronment variable is set to "xterm-256color" or similar\n(e.g., via `export TERM=xterm-256color\' in your ~/.bashrc).\n'
+
+test_generated.py:37: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_format_style_help_normal - assert '    solariz...
+FAILED test_generated.py::test_format_style_help_isolation_mode - assert '   ...
+FAILED test_generated.py::test_format_style_help_wrapping_long_names - assert...
+3 failed in 0.51s

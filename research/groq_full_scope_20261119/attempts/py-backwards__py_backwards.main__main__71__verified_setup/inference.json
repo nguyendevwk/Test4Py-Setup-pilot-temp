@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-83edead3-db4b-486b-9ca7-893ffaa162fd",
+  "object": "chat.completion",
+  "created": 1795077850,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport os\nimport importlib\nimport types\nimport pytest\nfrom pathlib import Path\n\n# Import the module under test\nimport py_backwards.main as main_module\n\n@pytest.fixture\ndef reset_sys_argv():\n    original = sys.argv\n    yield\n    sys.argv = original\n\ndef test_main_success(tmp_path, capsys, reset_sys_argv):\n    # Create a simple Python file that uses an f-string (Python 3.6 feature)\n    src_file = tmp_path / \"hello.py\"\n    src_file.write_text('print(f\"Hello, {1+1}\")\\n')\n\n    # Output directory\n    out_dir = tmp_path / \"out\"\n    out_dir.mkdir()\n\n    # Prepare command line arguments\n    sys.argv = [\n        \"py-backwards\",\n        \"-i\", str(src_file),\n        \"-o\", str(out_dir),\n        \"-t\", \"3.5\",  # target version\n    ]\n\n    # Run main\n    exit_code = main_module.main()\n\n    # Verify exit code is 0\n    assert exit_code == 0\n\n    # Verify output file exists\n    out_file = out_dir / src_file.name\n    assert out_file.exists()\n\n    # Verify that the output file contains the transformed code\n    # (the exact transformation is not specified, but it should not contain the original f-string)\n    out_text = out_file.read_text()\n    assert 'f\"Hello' not in out_text\n    assert 'Hello, 2' in out_text\n\n    # Verify that a compilation result message was printed\n    captured = capsys.readouterr()\n    assert \"Compilation finished\" in captured.out\n\ndef test_main_input_doesnt_exist(tmp_path, capsys, reset_sys_argv):\n    # Non-existent input file\n    fake_file = tmp_path / \"does_not_exist.py\"\n\n    # Output directory\n    out_dir = tmp_path / \"out\"\n    out_dir.mkdir()\n\n    sys.argv = [\n        \"py-backwards\",\n        \"-i\", str(fake_file),\n        \"-o\", str(out_dir),\n        \"-t\", \"3.5\",\n    ]\n\n    exit_code = main_module.main()\n\n    # Exit code should be 1 for error\n    assert exit_code == 1\n\n    # Error message should mention the missing input\n    captured = capsys.readouterr()\n    assert \"does_not_exist.py\" in captured.err\n    assert \"doesn't exist\" in captured.err\n\ndef test_main_invalid_input_output(tmp_path, capsys, reset_sys_argv):\n    # Create a source file\n    src_file = tmp_path / \"script.py\"\n    src_file.write_text('print(\"test\")\\n')\n\n    # Output path is a file, but input is a file (valid) – this should be fine\n    # To trigger InvalidInputOutput, we need input as a directory and output as a file\n    src_dir = tmp_path / \"src_dir\"\n    src_dir.mkdir()\n    (src_dir / \"mod.py\").write_text('print(\"mod\")\\n')\n\n    out_file = tmp_path / \"output.py\"  # file instead of directory\n\n    sys.argv = [\n        \"py-backwards\",\n        \"-i\", str(src_dir),\n        \"-o\", str(out_file),\n        \"-t\", \"3.5\",\n    ]\n\n    exit_code = main_module.main()\n\n    # Exit code should be 1 for error\n    assert exit_code == 1\n\n    # Error message should mention invalid output\n    captured = capsys.readouterr()\n    assert \"invalid output\" in captured.err\n    assert str(out_file) in captured.err\n```",
+        "reasoning": "We need three test functions for main. We can simulate command line args via monkeypatch sys.argv. Use tmp_path for files. Need to test normal, boundary, error. For normal: create a simple python file that uses f-string (Python3.6) and compile to older version? But compile_files likely transforms. We can just test that main returns 0 and prints result. But we don't know compile_files behavior. We can create a dummy file and check output file exists. For error: provide non-existent input to trigger InputDoesntExists. For boundary: maybe empty output folder? But compile_files may error. We'll just test that when output path is a file and input is folder triggers InvalidInputOutput. Use monkeypatch to set sys.argv. Use capsys to capture output. Use tmp_path. Ensure no network. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048316708,
+    "prompt_tokens": 614,
+    "prompt_time": 0.034375542,
+    "completion_tokens": 942,
+    "completion_time": 1.0657632910000001,
+    "total_tokens": 1556,
+    "total_time": 1.100138833,
+    "completion_tokens_details": {
+      "reasoning_tokens": 172
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfmg1fe88a79dm0rs9a99v",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport os\nimport importlib\nimport types\nimport pytest\nfrom pathlib import Path\n\n# Import the module under test\nimport py_backwards.main as main_module\n\n@pytest.fixture\ndef reset_sys_argv():\n    original = sys.argv\n    yield\n    sys.argv = original\n\ndef test_main_success(tmp_path, capsys, reset_sys_argv):\n    # Create a simple Python file that uses an f-string (Python 3.6 feature)\n    src_file = tmp_path / \"hello.py\"\n    src_file.write_text('print(f\"Hello, {1+1}\")\\n')\n\n    # Output directory\n    out_dir = tmp_path / \"out\"\n    out_dir.mkdir()\n\n    # Prepare command line arguments\n    sys.argv = [\n        \"py-backwards\",\n        \"-i\", str(src_file),\n        \"-o\", str(out_dir),\n        \"-t\", \"3.5\",  # target version\n    ]\n\n    # Run main\n    exit_code = main_module.main()\n\n    # Verify exit code is 0\n    assert exit_code == 0\n\n    # Verify output file exists\n    out_file = out_dir / src_file.name\n    assert out_file.exists()\n\n    # Verify that the output file contains the transformed code\n    # (the exact transformation is not specified, but it should not contain the original f-string)\n    out_text = out_file.read_text()\n    assert 'f\"Hello' not in out_text\n    assert 'Hello, 2' in out_text\n\n    # Verify that a compilation result message was printed\n    captured = capsys.readouterr()\n    assert \"Compilation finished\" in captured.out\n\ndef test_main_input_doesnt_exist(tmp_path, capsys, reset_sys_argv):\n    # Non-existent input file\n    fake_file = tmp_path / \"does_not_exist.py\"\n\n    # Output directory\n    out_dir = tmp_path / \"out\"\n    out_dir.mkdir()\n\n    sys.argv = [\n        \"py-backwards\",\n        \"-i\", str(fake_file),\n        \"-o\", str(out_dir),\n        \"-t\", \"3.5\",\n    ]\n\n    exit_code = main_module.main()\n\n    # Exit code should be 1 for error\n    assert exit_code == 1\n\n    # Error message should mention the missing input\n    captured = capsys.readouterr()\n    assert \"does_not_exist.py\" in captured.err\n    assert \"doesn't exist\" in captured.err\n\ndef test_main_invalid_input_output(tmp_path, capsys, reset_sys_argv):\n    # Create a source file\n    src_file = tmp_path / \"script.py\"\n    src_file.write_text('print(\"test\")\\n')\n\n    # Output path is a file, but input is a file (valid) – this should be fine\n    # To trigger InvalidInputOutput, we need input as a directory and output as a file\n    src_dir = tmp_path / \"src_dir\"\n    src_dir.mkdir()\n    (src_dir / \"mod.py\").write_text('print(\"mod\")\\n')\n\n    out_file = tmp_path / \"output.py\"  # file instead of directory\n\n    sys.argv = [\n        \"py-backwards\",\n        \"-i\", str(src_dir),\n        \"-o\", str(out_file),\n        \"-t\", \"3.5\",\n    ]\n\n    exit_code = main_module.main()\n\n    # Exit code should be 1 for error\n    assert exit_code == 1\n\n    # Error message should mention invalid output\n    captured = capsys.readouterr()\n    assert \"invalid output\" in captured.err\n    assert str(out_file) in captured.err\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.455701422994025
+}

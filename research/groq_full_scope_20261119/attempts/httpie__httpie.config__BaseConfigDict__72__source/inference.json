@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-903b64e6-2304-4dc5-9f6e-9da00cc83fa8",
+  "object": "chat.completion",
+  "created": 1795079661,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport os\nfrom pathlib import Path\n\nimport pytest\n\nfrom httpie.config import BaseConfigDict\nfrom httpie import __version__\n\n\ndef test_save_and_load_roundtrip(tmp_path: Path):\n    \"\"\"Test that a config can be saved and then loaded back with the same data.\"\"\"\n    cfg_path = tmp_path / \"config.json\"\n    cfg = BaseConfigDict(cfg_path)\n    cfg.update({\"foo\": \"bar\", \"number\": 42})\n    cfg.helpurl = \"https://example.com/help\"\n    cfg.about = \"Test config\"\n    cfg.save(bump_version=True)\n\n    # Ensure file exists and contains JSON\n    assert cfg_path.exists()\n    raw = cfg_path.read_text(encoding=\"utf-8\")\n    data = json.loads(raw)\n    assert data[\"foo\"] == \"bar\"\n    assert data[\"number\"] == 42\n    assert data[\"__meta__\"][\"httpie\"] == __version__\n    assert data[\"__meta__\"][\"help\"] == \"https://example.com/help\"\n    assert data[\"__meta__\"][\"about\"] == \"Test config\"\n\n    # Load into a new instance\n    new_cfg = BaseConfigDict(cfg_path)\n    new_cfg.load()\n    assert new_cfg[\"foo\"] == \"bar\"\n    assert new_cfg[\"number\"] == 42\n    assert new_cfg[\"__meta__\"][\"httpie\"] == __version__\n    assert new_cfg[\"__meta__\"][\"help\"] == \"https://example.com/help\"\n    assert new_cfg[\"__meta__\"][\"about\"] == \"Test config\"\n\n\ndef test_is_new_and_ensure_directory(tmp_path: Path):\n    \"\"\"Test that is_new reports correctly and ensure_directory creates the folder.\"\"\"\n    cfg_path = tmp_path / \"subdir\" / \"config.json\"\n    cfg = BaseConfigDict(cfg_path)\n\n    # Before creation, path does not exist\n    assert cfg.is_new() is True\n    assert not cfg_path.parent.exists()\n\n    # ensure_directory should create the parent directory\n    cfg.ensure_directory()\n    assert cfg_path.parent.exists()\n    assert cfg_path.parent.is_dir()\n\n    # After creation, is_new should be False\n    assert cfg.is_new() is False\n\n\ndef test_pre_and_post_process_hooks(tmp_path: Path):\n    \"\"\"Test that pre_process_data and post_process_data hooks are called.\"\"\"\n    class HookedConfig(BaseConfigDict):\n        def pre_process_data(self, data):\n            # Convert all string values to uppercase during load\n            return {k: v.upper() if isinstance(v, str) else v for k, v in data.items()}\n\n        def post_process_data(self, data):\n            # Add a marker during save\n            data = dict(data)  # copy to avoid mutating original\n            data[\"__meta__\"][\"saved\"] = True\n            return data\n\n    cfg_path = tmp_path / \"hook.json\"\n    cfg = HookedConfig(cfg_path)\n    cfg.update({\"msg\": \"hello\", \"count\": 3})\n    cfg.save()\n\n    # Load into a new instance and check pre_process_data effect\n    new_cfg = HookedConfig(cfg_path)\n    new_cfg.load()\n    assert new_cfg[\"msg\"] == \"HELLO\"\n    assert new_cfg[\"count\"] == 3\n\n    # Verify that post_process_data added the marker\n    raw = cfg_path.read_text(encoding=\"utf-8\")\n    data = json.loads(raw)\n    assert data[\"__meta__\"][\"saved\"] is True\n```",
+        "reasoning": "Need tests for load, save, is_new, ensure_directory. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005384395,
+    "prompt_tokens": 629,
+    "prompt_time": 0.033300533,
+    "completion_tokens": 750,
+    "completion_time": 0.786842808,
+    "total_tokens": 1379,
+    "total_time": 0.820143341,
+    "completion_tokens_details": {
+      "reasoning_tokens": 18
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7shbrnweentyvr6bwn1g6ye",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport os\nfrom pathlib import Path\n\nimport pytest\n\nfrom httpie.config import BaseConfigDict\nfrom httpie import __version__\n\n\ndef test_save_and_load_roundtrip(tmp_path: Path):\n    \"\"\"Test that a config can be saved and then loaded back with the same data.\"\"\"\n    cfg_path = tmp_path / \"config.json\"\n    cfg = BaseConfigDict(cfg_path)\n    cfg.update({\"foo\": \"bar\", \"number\": 42})\n    cfg.helpurl = \"https://example.com/help\"\n    cfg.about = \"Test config\"\n    cfg.save(bump_version=True)\n\n    # Ensure file exists and contains JSON\n    assert cfg_path.exists()\n    raw = cfg_path.read_text(encoding=\"utf-8\")\n    data = json.loads(raw)\n    assert data[\"foo\"] == \"bar\"\n    assert data[\"number\"] == 42\n    assert data[\"__meta__\"][\"httpie\"] == __version__\n    assert data[\"__meta__\"][\"help\"] == \"https://example.com/help\"\n    assert data[\"__meta__\"][\"about\"] == \"Test config\"\n\n    # Load into a new instance\n    new_cfg = BaseConfigDict(cfg_path)\n    new_cfg.load()\n    assert new_cfg[\"foo\"] == \"bar\"\n    assert new_cfg[\"number\"] == 42\n    assert new_cfg[\"__meta__\"][\"httpie\"] == __version__\n    assert new_cfg[\"__meta__\"][\"help\"] == \"https://example.com/help\"\n    assert new_cfg[\"__meta__\"][\"about\"] == \"Test config\"\n\n\ndef test_is_new_and_ensure_directory(tmp_path: Path):\n    \"\"\"Test that is_new reports correctly and ensure_directory creates the folder.\"\"\"\n    cfg_path = tmp_path / \"subdir\" / \"config.json\"\n    cfg = BaseConfigDict(cfg_path)\n\n    # Before creation, path does not exist\n    assert cfg.is_new() is True\n    assert not cfg_path.parent.exists()\n\n    # ensure_directory should create the parent directory\n    cfg.ensure_directory()\n    assert cfg_path.parent.exists()\n    assert cfg_path.parent.is_dir()\n\n    # After creation, is_new should be False\n    assert cfg.is_new() is False\n\n\ndef test_pre_and_post_process_hooks(tmp_path: Path):\n    \"\"\"Test that pre_process_data and post_process_data hooks are called.\"\"\"\n    class HookedConfig(BaseConfigDict):\n        def pre_process_data(self, data):\n            # Convert all string values to uppercase during load\n            return {k: v.upper() if isinstance(v, str) else v for k, v in data.items()}\n\n        def post_process_data(self, data):\n            # Add a marker during save\n            data = dict(data)  # copy to avoid mutating original\n            data[\"__meta__\"][\"saved\"] = True\n            return data\n\n    cfg_path = tmp_path / \"hook.json\"\n    cfg = HookedConfig(cfg_path)\n    cfg.update({\"msg\": \"hello\", \"count\": 3})\n    cfg.save()\n\n    # Load into a new instance and check pre_process_data effect\n    new_cfg = HookedConfig(cfg_path)\n    new_cfg.load()\n    assert new_cfg[\"msg\"] == \"HELLO\"\n    assert new_cfg[\"count\"] == 3\n\n    # Verify that post_process_data added the marker\n    raw = cfg_path.read_text(encoding=\"utf-8\")\n    data = json.loads(raw)\n    assert data[\"__meta__\"][\"saved\"] is True\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "d3b81a6b5ced48f48c8030cd149206ab",
+  "_api_plus_pacing_seconds": 2.235790931037627
+}

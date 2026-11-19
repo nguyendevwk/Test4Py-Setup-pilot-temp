@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-9a1820f6-93e8-45e6-8262-f2aaa6cf7533",
+  "object": "chat.completion",
+  "created": 1795077351,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport codecs\nimport importlib\nimport sys\n\nimport pytest\n\n# Import the target module\nmod = importlib.import_module(\"flutils.codecs.raw_utf8_escape\")\n\n# The codec name is expected to be defined in the module\nCODEC_NAME = getattr(mod, \"NAME\", None)\nassert CODEC_NAME is not None, \"Module must expose a NAME attribute\"\n\n\ndef test_register_adds_decoder_and_encoder():\n    \"\"\"Calling register should add a decoder and encoder for the codec name.\"\"\"\n    # Ensure the codec is not already registered\n    with pytest.raises(LookupError):\n        codecs.getdecoder(CODEC_NAME)\n\n    # Register the codec\n    mod.register()\n\n    # After registration, decoder and encoder should be available\n    decoder = codecs.getdecoder(CODEC_NAME)\n    encoder = codecs.getencoder(CODEC_NAME)\n\n    # Test that decoding a simple byte string returns the expected Unicode string\n    sample_bytes = b\"hello\\\\nworld\"\n    decoded, _ = decoder(sample_bytes)\n    assert decoded == \"hello\\\\nworld\"\n\n    # Test that encoding the same string returns the original bytes\n    encoded, _ = encoder(decoded)\n    assert encoded == sample_bytes\n\n\ndef test_register_is_idempotent():\n    \"\"\"Registering the codec multiple times should not raise an exception.\"\"\"\n    # First registration\n    mod.register()\n    # Second registration should be harmless\n    mod.register()\n    # Third registration should also be harmless\n    mod.register()\n\n    # Verify that the codec is still available\n    decoder = codecs.getdecoder(CODEC_NAME)\n    assert callable(decoder)\n\n\ndef test_codec_roundtrip_with_userstring():\n    \"\"\"The codec should correctly round‑trip a UserString instance.\"\"\"\n    from collections import UserString\n\n    # Register the codec\n    mod.register()\n\n    # Create a UserString containing escape sequences\n    original = UserString(\"foo\\\\tbar\\\\nbaz\")\n\n    # Encode the UserString to bytes\n    encoder = codecs.getencoder(CODEC_NAME)\n    encoded_bytes, _ = encoder(original)\n    assert isinstance(encoded_bytes, bytes)\n\n    # Decode the bytes back to a string\n    decoder = codecs.getdecoder(CODEC_NAME)\n    decoded_str, _ = decoder(encoded_bytes)\n    assert decoded_str == original\n\n    # The decoded string should be a plain str, not a UserString\n    assert not isinstance(decoded_str, UserString)\n```",
+        "reasoning": "We need to write tests for register function. It registers a codec named NAME. We need to inspect module to know NAME. But not provided. We assume module defines NAME somewhere. We'll import module and call register, then check that codecs.getdecoder(NAME) works. Also test that calling register twice doesn't error. Also test that after register, encoding works. Use tmp_path? Not needed. We'll just test codec. Ensure no network. We'll use pytest. Three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052327816,
+    "prompt_tokens": 329,
+    "prompt_time": 0.020256483,
+    "completion_tokens": 601,
+    "completion_time": 0.676457226,
+    "total_tokens": 930,
+    "total_time": 0.696713709,
+    "completion_tokens_details": {
+      "reasoning_tokens": 95
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sf59mee7b88c99fbpg1wgb",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport codecs\nimport importlib\nimport sys\n\nimport pytest\n\n# Import the target module\nmod = importlib.import_module(\"flutils.codecs.raw_utf8_escape\")\n\n# The codec name is expected to be defined in the module\nCODEC_NAME = getattr(mod, \"NAME\", None)\nassert CODEC_NAME is not None, \"Module must expose a NAME attribute\"\n\n\ndef test_register_adds_decoder_and_encoder():\n    \"\"\"Calling register should add a decoder and encoder for the codec name.\"\"\"\n    # Ensure the codec is not already registered\n    with pytest.raises(LookupError):\n        codecs.getdecoder(CODEC_NAME)\n\n    # Register the codec\n    mod.register()\n\n    # After registration, decoder and encoder should be available\n    decoder = codecs.getdecoder(CODEC_NAME)\n    encoder = codecs.getencoder(CODEC_NAME)\n\n    # Test that decoding a simple byte string returns the expected Unicode string\n    sample_bytes = b\"hello\\\\nworld\"\n    decoded, _ = decoder(sample_bytes)\n    assert decoded == \"hello\\\\nworld\"\n\n    # Test that encoding the same string returns the original bytes\n    encoded, _ = encoder(decoded)\n    assert encoded == sample_bytes\n\n\ndef test_register_is_idempotent():\n    \"\"\"Registering the codec multiple times should not raise an exception.\"\"\"\n    # First registration\n    mod.register()\n    # Second registration should be harmless\n    mod.register()\n    # Third registration should also be harmless\n    mod.register()\n\n    # Verify that the codec is still available\n    decoder = codecs.getdecoder(CODEC_NAME)\n    assert callable(decoder)\n\n\ndef test_codec_roundtrip_with_userstring():\n    \"\"\"The codec should correctly round‑trip a UserString instance.\"\"\"\n    from collections import UserString\n\n    # Register the codec\n    mod.register()\n\n    # Create a UserString containing escape sequences\n    original = UserString(\"foo\\\\tbar\\\\nbaz\")\n\n    # Encode the UserString to bytes\n    encoder = codecs.getencoder(CODEC_NAME)\n    encoded_bytes, _ = encoder(original)\n    assert isinstance(encoded_bytes, bytes)\n\n    # Decode the bytes back to a string\n    decoder = codecs.getdecoder(CODEC_NAME)\n    decoded_str, _ = decoder(encoded_bytes)\n    assert decoded_str == original\n\n    # The decoded string should be a plain str, not a UserString\n    assert not isinstance(decoded_str, UserString)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.079242751991842
+}

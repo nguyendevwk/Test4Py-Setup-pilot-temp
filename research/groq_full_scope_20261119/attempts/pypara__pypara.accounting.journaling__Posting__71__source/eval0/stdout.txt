@@ -1,0 +1,114 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_posting_is_debit_and_credit_logic ____________________
+
+    def test_posting_is_debit_and_credit_logic():
+        """Verify that is_debit and is_credit properties reflect the account type and direction."""
+        # Debit direction should be considered a debit for a normal account
+        posting_debit = Posting(
+            journal=DummyJournal(),
+            date=datetime.date.today(),
+>           account=Account(name="Cash", type=AccountType.ASSET),
+            direction=Direction.DEBIT,
+            amount=100.0,
+        )
+
+test_generated.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <enum 'AccountType'>, name = 'ASSET'
+
+    def __getattr__(cls, name):
+        """
+        Return the enum member matching `name`
+    
+        We use __getattr__ instead of descriptors or inserting into the enum
+        class' __dict__ in order to support `name` and `value` being both
+        properties for enum members (which live in the class' __dict__) and
+        enum members themselves.
+        """
+        if _is_dunder(name):
+            raise AttributeError(name)
+        try:
+            return cls._member_map_[name]
+        except KeyError:
+>           raise AttributeError(name) from None
+E           AttributeError: ASSET. Did you mean: 'ASSETS'?
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/enum.py:437: AttributeError
+______________________ test_posting_amount_boundary_zero _______________________
+
+    def test_posting_amount_boundary_zero():
+        """Posting with zero amount should still correctly report debit/credit status."""
+        posting_zero = Posting(
+            journal=DummyJournal(),
+            date=datetime.date.today(),
+>           account=Account(name="Revenue", type=AccountType.REVENUE),
+            direction=Direction.CREDIT,
+            amount=0.0,
+        )
+
+test_generated.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <enum 'AccountType'>, name = 'REVENUE'
+
+    def __getattr__(cls, name):
+        """
+        Return the enum member matching `name`
+    
+        We use __getattr__ instead of descriptors or inserting into the enum
+        class' __dict__ in order to support `name` and `value` being both
+        properties for enum members (which live in the class' __dict__) and
+        enum members themselves.
+        """
+        if _is_dunder(name):
+            raise AttributeError(name)
+        try:
+            return cls._member_map_[name]
+        except KeyError:
+>           raise AttributeError(name) from None
+E           AttributeError: REVENUE. Did you mean: 'REVENUES'?
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/enum.py:437: AttributeError
+____________________ test_posting_invalid_direction_raises _____________________
+
+    def test_posting_invalid_direction_raises():
+        """Providing an invalid direction type should raise a TypeError."""
+        with pytest.raises(TypeError):
+            Posting(
+                journal=DummyJournal(),
+                date=datetime.date.today(),
+>               account=Account(name="Expense", type=AccountType.EXPENSE),
+                direction="INVALID",  # not a Direction enum
+                amount=50.0,
+            )
+
+test_generated.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <enum 'AccountType'>, name = 'EXPENSE'
+
+    def __getattr__(cls, name):
+        """
+        Return the enum member matching `name`
+    
+        We use __getattr__ instead of descriptors or inserting into the enum
+        class' __dict__ in order to support `name` and `value` being both
+        properties for enum members (which live in the class' __dict__) and
+        enum members themselves.
+        """
+        if _is_dunder(name):
+            raise AttributeError(name)
+        try:
+            return cls._member_map_[name]
+        except KeyError:
+>           raise AttributeError(name) from None
+E           AttributeError: EXPENSE. Did you mean: 'EXPENSES'?
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/enum.py:437: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_posting_is_debit_and_credit_logic - AttributeE...
+FAILED test_generated.py::test_posting_amount_boundary_zero - AttributeError:...
+FAILED test_generated.py::test_posting_invalid_direction_raises - AttributeEr...
+3 failed in 0.27s

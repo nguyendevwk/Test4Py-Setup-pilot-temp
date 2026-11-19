@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-4e25b96c-c7a9-4c83-a09f-acb291142c87",
+  "object": "chat.completion",
+  "created": 1795078510,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport sys\nimport traceback\nfrom tornado.util import raise_exc_info\nfrom types import TracebackType\nfrom typing import Tuple, Optional, Type\n\n\ndef test_raise_exc_info_raises_provided_exception():\n    \"\"\"raise_exc_info should raise the exception passed in exc_info.\"\"\"\n    exc_type = ValueError\n    exc_value = ValueError(\"test error\")\n    tb = exc_value.__traceback__\n    exc_info: Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]] = (\n        exc_type,\n        exc_value,\n        tb,\n    )\n    with pytest.raises(ValueError) as excinfo:\n        raise_exc_info(exc_info)\n    # The raised exception should be the same instance\n    assert excinfo.value is exc_value\n    # The traceback should be the one we passed in\n    assert excinfo.value.__traceback__ is tb\n\n\ndef test_raise_exc_info_with_none_raises_type_error():\n    \"\"\"If exc_info[1] is None, raise_exc_info should raise TypeError.\"\"\"\n    exc_info: Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]] = (\n        None,\n        None,\n        None,\n    )\n    with pytest.raises(TypeError) as excinfo:\n        raise_exc_info(exc_info)\n    assert str(excinfo.value) == \"raise_exc_info called with no exception\"\n\n\ndef test_raise_exc_info_clears_local_reference():\n    \"\"\"After raise_exc_info returns, the local exc_info reference should be cleared.\"\"\"\n    exc_type = RuntimeError\n    exc_value = RuntimeError(\"cleanup test\")\n    tb = exc_value.__traceback__\n    exc_info: Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]] = (\n        exc_type,\n        exc_value,\n        tb,\n    )\n    try:\n        raise_exc_info(exc_info)\n    except RuntimeError:\n        # After the exception is raised, the local variable exc_info inside raise_exc_info\n        # should have been set to (None, None, None). We cannot inspect that directly,\n        # but we can confirm that the function does not leak the traceback reference\n        # by ensuring that the traceback of the caught exception is the original one.\n        assert exc_value.__traceback__ is tb\n    else:\n        pytest.fail(\"Expected RuntimeError to be raised\")\n```",
+        "reasoning": "We need three test functions for raise_exc_info. Test normal raising, boundary: exc_info with None exception should raise TypeError. Also test that traceback cleared? maybe check that after call, exc_info variable local? can't access. Maybe test that it doesn't return. Use pytest.raises. Also test that traceback is attached. Use a custom exception with custom traceback? Hard. Maybe create exception and capture traceback via sys.exc_info. Use try/except around raise_exc_info and check that the exception type and traceback match. Use pytest.raises to catch. Use context manager to capture traceback. Use traceback module. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053424238,
+    "prompt_tokens": 389,
+    "prompt_time": 0.020738239,
+    "completion_tokens": 629,
+    "completion_time": 0.70857569,
+    "total_tokens": 1018,
+    "total_time": 0.729313929,
+    "completion_tokens_details": {
+      "reasoning_tokens": 125
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg8ncnev6rkbwreynxvqmq",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport sys\nimport traceback\nfrom tornado.util import raise_exc_info\nfrom types import TracebackType\nfrom typing import Tuple, Optional, Type\n\n\ndef test_raise_exc_info_raises_provided_exception():\n    \"\"\"raise_exc_info should raise the exception passed in exc_info.\"\"\"\n    exc_type = ValueError\n    exc_value = ValueError(\"test error\")\n    tb = exc_value.__traceback__\n    exc_info: Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]] = (\n        exc_type,\n        exc_value,\n        tb,\n    )\n    with pytest.raises(ValueError) as excinfo:\n        raise_exc_info(exc_info)\n    # The raised exception should be the same instance\n    assert excinfo.value is exc_value\n    # The traceback should be the one we passed in\n    assert excinfo.value.__traceback__ is tb\n\n\ndef test_raise_exc_info_with_none_raises_type_error():\n    \"\"\"If exc_info[1] is None, raise_exc_info should raise TypeError.\"\"\"\n    exc_info: Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]] = (\n        None,\n        None,\n        None,\n    )\n    with pytest.raises(TypeError) as excinfo:\n        raise_exc_info(exc_info)\n    assert str(excinfo.value) == \"raise_exc_info called with no exception\"\n\n\ndef test_raise_exc_info_clears_local_reference():\n    \"\"\"After raise_exc_info returns, the local exc_info reference should be cleared.\"\"\"\n    exc_type = RuntimeError\n    exc_value = RuntimeError(\"cleanup test\")\n    tb = exc_value.__traceback__\n    exc_info: Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]] = (\n        exc_type,\n        exc_value,\n        tb,\n    )\n    try:\n        raise_exc_info(exc_info)\n    except RuntimeError:\n        # After the exception is raised, the local variable exc_info inside raise_exc_info\n        # should have been set to (None, None, None). We cannot inspect that directly,\n        # but we can confirm that the function does not leak the traceback reference\n        # by ensuring that the traceback of the caught exception is the original one.\n        assert exc_value.__traceback__ is tb\n    else:\n        pytest.fail(\"Expected RuntimeError to be raised\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1398367669899017
+}

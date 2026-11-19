@@ -1,0 +1,75 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_write_stream_with_colors_win_basic_behavior _______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.output.writer__write_stream_with_colors_win__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_write_stream_with_colors_0')
+
+    def test_write_stream_with_colors_win_basic_behavior(tmp_path):
+        # Prepare a stream with a color chunk and non-color chunks
+        chunks = [
+            b'plain',
+            b'\x1b[31mred\x1b[0m',
+            b'plain2',
+        ]
+        stream = DummyStream(chunks)
+        outfile = DummyTextIO(encoding='utf-8')
+    
+        write_stream_with_colors_win(stream, outfile, flush=False)
+    
+        # Non-color chunks should be written to the buffer
+        assert outfile.buffer.getvalue() == b'plainplain2'
+        # Color chunk should be decoded and written via write()
+>       assert outfile.written_text == ['red']
+E       AssertionError: assert ['\x1b[31mred\x1b[0m'] == ['red']
+E         
+E         At index 0 diff: '\x1b[31mred\x1b[0m' != 'red'
+E         Use -v to get more diff
+
+test_generated.py:44: AssertionError
+_______________ test_write_stream_with_colors_win_flush_behavior _______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.output.writer__write_stream_with_colors_win__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_write_stream_with_colors_1')
+
+    def test_write_stream_with_colors_win_flush_behavior(tmp_path):
+        # Stream with only color chunks
+        chunks = [b'\x1b[32mgreen\x1b[0m']
+        stream = DummyStream(chunks)
+        outfile = DummyTextIO(encoding='utf-8')
+    
+        write_stream_with_colors_win(stream, outfile, flush=True)
+    
+        # Buffer should remain empty
+        assert outfile.buffer.getvalue() == b''
+        # Text written correctly
+>       assert outfile.written_text == ['green']
+E       AssertionError: assert ['\x1b[32mgreen\x1b[0m'] == ['green']
+E         
+E         At index 0 diff: '\x1b[32mgreen\x1b[0m' != 'green'
+E         Use -v to get more diff
+
+test_generated.py:59: AssertionError
+_____________ test_write_stream_with_colors_win_encoding_handling ______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.output.writer__write_stream_with_colors_win__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_write_stream_with_colors_2')
+
+    def test_write_stream_with_colors_win_encoding_handling(tmp_path):
+        # Stream with a color chunk that contains non-ASCII characters
+        chunks = [b'\x1b[33m\xc3\xa9\x1b[0m']  # 'é' in UTF-8
+        stream = DummyStream(chunks)
+        outfile = DummyTextIO(encoding='utf-8')
+    
+        write_stream_with_colors_win(stream, outfile, flush=False)
+    
+        # The decoded text should be 'é'
+>       assert outfile.written_text == ['é']
+E       AssertionError: assert ['\x1b[33mé\x1b[0m'] == ['é']
+E         
+E         At index 0 diff: '\x1b[33mé\x1b[0m' != 'é'
+E         Use -v to get more diff
+
+test_generated.py:72: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_write_stream_with_colors_win_basic_behavior - ...
+FAILED test_generated.py::test_write_stream_with_colors_win_flush_behavior - ...
+FAILED test_generated.py::test_write_stream_with_colors_win_encoding_handling
+3 failed in 0.57s

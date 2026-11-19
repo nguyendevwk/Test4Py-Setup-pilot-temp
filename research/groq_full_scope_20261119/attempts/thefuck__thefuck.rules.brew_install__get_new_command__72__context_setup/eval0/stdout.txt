@@ -1,0 +1,53 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_get_new_command_no_formula_files _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.brew_install__get_new_command__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_new_command_no_formul0')
+
+    def test_get_new_command_no_formula_files(tmp_path):
+        # Create an empty brew formula directory
+        brew_dir = tmp_path / "Homebrew"
+        brew_dir.mkdir()
+        formula_dir = brew_dir / "Library/Formula"
+        formula_dir.mkdir(parents=True)
+    
+        # Monkeypatch the helper to return our fake brew path
+        original_get_brew_path_prefix = brew_install.get_brew_path_prefix
+        brew_install.get_brew_path_prefix = lambda: str(brew_dir)
+    
+        # Monkeypatch get_closest to return None when no formulas exist
+        original_get_closest = brew_install.get_closest
+        brew_install.get_closest = lambda name, formulas, cutoff: None
+    
+        # Prepare a command that triggers the rule
+        cmd = SimpleNamespace(
+            script="brew install abc",
+            output="Error: No available formula for abc\n"
+        )
+    
+        # Execute the rule; since no similar formula is found, replace_argument
+        # should leave the script unchanged
+        new_cmd = brew_install.get_new_command(cmd)
+    
+>       assert new_cmd == "brew install abc"
+E       AssertionError: assert 'brew install None' == 'brew install abc'
+E         
+E         - brew install abc
+E         ?              ^^^
+E         + brew install None
+E         ?              ^^^^
+
+test_generated.py:70: AssertionError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_new_command_no_formula_files - AssertionEr...
+1 failed, 2 passed, 2 warnings in 0.12s

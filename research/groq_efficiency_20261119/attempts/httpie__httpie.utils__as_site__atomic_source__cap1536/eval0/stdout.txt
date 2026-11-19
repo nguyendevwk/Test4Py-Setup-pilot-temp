@@ -1,0 +1,29 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_as_site_with_extra_vars _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-124/test_as_site_with_extra_vars0')
+
+    def test_as_site_with_extra_vars(tmp_path: Path):
+        """as_site should incorporate extra_vars into the path resolution."""
+        # Add a custom variable that is used in the format string for purelib
+        # (e.g., 'py_version' to force a specific Python version string)
+        custom_py_version = "3.9"
+        site_path = as_site(tmp_path, py_version=custom_py_version)
+        expected = Path(
+            sysconfig.get_path(
+                "purelib",
+                vars={"base": str(tmp_path), "py_version": custom_py_version},
+            )
+        )
+        assert site_path == expected
+        # Ensure the custom variable is reflected in the path string
+>       assert f"python{custom_py_version}" in site_path.as_posix()
+E       AssertionError: assert 'python3.9' in '/tmp/pytest-of-heurix/pytest-124/test_as_site_with_extra_vars0/lib/python3.10/site-packages'
+E        +  where '/tmp/pytest-of-heurix/pytest-124/test_as_site_with_extra_vars0/lib/python3.10/site-packages' = as_posix()
+E        +    where as_posix = PosixPath('/tmp/pytest-of-heurix/pytest-124/test_as_site_with_extra_vars0/lib/python3.10/site-packages').as_posix
+
+../../../../../../../groq_efficiency_20261119/attempts/httpie__httpie.utils__as_site__atomic_source__cap1536/eval0/test_generated.py:36: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_efficiency_20261119/attempts/httpie__httpie.utils__as_site__atomic_source__cap1536/eval0/test_generated.py::test_as_site_with_extra_vars
+1 failed, 2 passed in 0.38s

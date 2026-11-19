@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-10f3c989-16c4-478e-9436-7fbca19d2067",
+  "object": "chat.completion",
+  "created": 1795078347,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport pytest\nfrom youtube_dl.downloader.f4m import write_metadata_tag\n\ndef test_write_metadata_tag_empty():\n    \"\"\"When metadata is falsy, nothing is written to the stream.\"\"\"\n    stream = io.BytesIO()\n    write_metadata_tag(stream, b\"\")\n    assert stream.getvalue() == b\"\"\n\n\ndef test_write_metadata_tag_small():\n    \"\"\"Small metadata writes correct FLV script tag header and data.\"\"\"\n    stream = io.BytesIO()\n    metadata = b\"test\"\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n\n    # Expected structure:\n    # 1 byte SCRIPT_TAG (0x12)\n    # 3 bytes unsigned int 24 for metadata length\n    # 7 bytes zero padding\n    # metadata bytes\n    # 4 bytes unsigned int for total tag size (header + metadata)\n    assert data[0] == 0x12\n    # metadata length encoded in 3 bytes\n    assert data[1:4] == len(metadata).to_bytes(3, \"big\")\n    assert data[4:11] == b\"\\x00\\x00\\x00\\x00\\x00\\x00\\x00\"\n    assert data[11:11 + len(metadata)] == metadata\n    # total tag size: 11 (header) + len(metadata)\n    total_size = int.from_bytes(data[11 + len(metadata):15], \"big\")\n    assert total_size == 11 + len(metadata)\n\n\ndef test_write_metadata_tag_large():\n    \"\"\"Large metadata correctly encodes length and total size.\"\"\"\n    stream = io.BytesIO()\n    metadata = b\"a\" * 1000  # 1000 bytes\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n\n    # Check header byte\n    assert data[0] == 0x12\n    # Metadata length in 3 bytes\n    assert data[1:4] == len(metadata).to_bytes(3, \"big\")\n    # Padding\n    assert data[4:11] == b\"\\x00\\x00\\x00\\x00\\x00\\x00\\x00\"\n    # Metadata content\n    assert data[11:11 + len(metadata)] == metadata\n    # Total tag size\n    total_size = int.from_bytes(data[11 + len(metadata):15], \"big\")\n    assert total_size == 11 + len(metadata)\n```",
+        "reasoning": "Need tests for write_metadata_tag. Use BytesIO. Check that when metadata None or empty, nothing written. When metadata bytes, check header etc. Also boundary: large metadata. Ensure correct length fields. Use write_unsigned_int_24 and write_unsigned_int defined? Not in snippet. They are probably in same module. Let's inspect.We don't have full module. But we can import write_metadata_tag from youtube_dl.downloader.f4m. Let's assume write_unsigned_int_24 and write_unsigned_int exist. We'll test. Use tmp_path? Not needed. Just BytesIO. Ensure that after writing, stream.getvalue() matches expected. For empty metadata, length zero? Actually if metadata empty string, metadata truthy? empty bytes is False. So nothing. Test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047960674,
+    "prompt_tokens": 409,
+    "prompt_time": 0.012074324,
+    "completion_tokens": 668,
+    "completion_time": 0.845546307,
+    "total_tokens": 1077,
+    "total_time": 0.857620631,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 157
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg3p9gemhsx7eq3v01kk7y",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport pytest\nfrom youtube_dl.downloader.f4m import write_metadata_tag\n\ndef test_write_metadata_tag_empty():\n    \"\"\"When metadata is falsy, nothing is written to the stream.\"\"\"\n    stream = io.BytesIO()\n    write_metadata_tag(stream, b\"\")\n    assert stream.getvalue() == b\"\"\n\n\ndef test_write_metadata_tag_small():\n    \"\"\"Small metadata writes correct FLV script tag header and data.\"\"\"\n    stream = io.BytesIO()\n    metadata = b\"test\"\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n\n    # Expected structure:\n    # 1 byte SCRIPT_TAG (0x12)\n    # 3 bytes unsigned int 24 for metadata length\n    # 7 bytes zero padding\n    # metadata bytes\n    # 4 bytes unsigned int for total tag size (header + metadata)\n    assert data[0] == 0x12\n    # metadata length encoded in 3 bytes\n    assert data[1:4] == len(metadata).to_bytes(3, \"big\")\n    assert data[4:11] == b\"\\x00\\x00\\x00\\x00\\x00\\x00\\x00\"\n    assert data[11:11 + len(metadata)] == metadata\n    # total tag size: 11 (header) + len(metadata)\n    total_size = int.from_bytes(data[11 + len(metadata):15], \"big\")\n    assert total_size == 11 + len(metadata)\n\n\ndef test_write_metadata_tag_large():\n    \"\"\"Large metadata correctly encodes length and total size.\"\"\"\n    stream = io.BytesIO()\n    metadata = b\"a\" * 1000  # 1000 bytes\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n\n    # Check header byte\n    assert data[0] == 0x12\n    # Metadata length in 3 bytes\n    assert data[1:4] == len(metadata).to_bytes(3, \"big\")\n    # Padding\n    assert data[4:11] == b\"\\x00\\x00\\x00\\x00\\x00\\x00\\x00\"\n    # Metadata content\n    assert data[11:11 + len(metadata)] == metadata\n    # Total tag size\n    total_size = int.from_bytes(data[11 + len(metadata):15], \"big\")\n    assert total_size == 11 + len(metadata)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2302692799712531
+}

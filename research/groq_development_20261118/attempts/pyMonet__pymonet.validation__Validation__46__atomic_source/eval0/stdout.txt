@@ -1,0 +1,84 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_success_and_either_conversion ______________________
+
+    def test_success_and_either_conversion():
+        v = Validation.success(42)
+        assert v.is_success()
+        assert v.is_fail() is False
+        assert v.value == 42
+        assert v.errors == []
+        # to_either should produce Right
+        either = v.to_either()
+        assert isinstance(either, Right)
+        assert either.value == 42
+        # to_maybe should produce just
+        maybe = v.to_maybe()
+        assert isinstance(maybe, Maybe)
+>       assert maybe.is_present()
+E       AttributeError: 'Maybe' object has no attribute 'is_present'
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__46__atomic_source/eval0/test_generated.py:22: AttributeError
+_______________________ test_fail_and_either_conversion ________________________
+
+    def test_fail_and_either_conversion():
+        errors = ["error1", "error2"]
+        v = Validation.fail(errors)
+        assert v.is_fail()
+        assert v.is_success() is False
+        assert v.value is None
+        assert v.errors == errors
+        # to_either should produce Left
+        either = v.to_either()
+        assert isinstance(either, Left)
+        assert either.value == errors
+        # to_maybe should be nothing
+        maybe = v.to_maybe()
+        assert isinstance(maybe, Maybe)
+>       assert not maybe.is_present()
+E       AttributeError: 'Maybe' object has no attribute 'is_present'
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__46__atomic_source/eval0/test_generated.py:52: AttributeError
+________________________ test_map_bind_ap_and_equality _________________________
+
+    def test_map_bind_ap_and_equality():
+        v = Validation.success(3)
+        # map should transform value
+        mapped = v.map(lambda x: x * 2)
+        assert mapped.value == 6
+        assert mapped.errors == []
+        # bind should apply function returning Validation
+        bound = v.bind(lambda x: Validation.success(x + 1))
+        assert bound.value == 4
+        assert bound.errors == []
+        # ap should concatenate errors from function Validation
+        v2 = Validation.success(10)
+        fn_val = Validation.success(lambda x: x + 5)
+>       ap_res = v2.ap(fn_val)
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__46__atomic_source/eval0/test_generated.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <pymonet.validation.Validation object at 0x7f3a9e8c4af0>
+fn = <pymonet.validation.Validation object at 0x7f3a9e8c4a30>
+
+    def ap(self, fn):
+        """
+        It takes as a parameter function returning another Validation.
+        Function is called with Validation value and returns new Validation with previous value
+        and concated new and old errors.
+    
+        :param monad: monad contains function
+        :type monad: Function(A) -> Validation[Any, List[E]]
+        :returns: new validation with stored errors
+        :rtype: Validation[A, List[E]]
+        """
+>       return Validation(self.value, self.errors + fn(self.value).errors)
+E       TypeError: 'Validation' object is not callable
+
+pymonet/validation.py:96: TypeError
+=========================== short test summary info ============================
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__46__atomic_source/eval0/test_generated.py::test_success_and_either_conversion
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__46__atomic_source/eval0/test_generated.py::test_fail_and_either_conversion
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pyMonet__pymonet.validation__Validation__46__atomic_source/eval0/test_generated.py::test_map_bind_ap_and_equality
+3 failed in 0.15s

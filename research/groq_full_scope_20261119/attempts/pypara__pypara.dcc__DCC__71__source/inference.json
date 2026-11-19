@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-5d8b74a3-06cf-40be-aeb9-f36cb1d7fff9",
+  "object": "chat.completion",
+  "created": 1795079256,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\n\nfrom pypara.dcc import DCC\nfrom pypara.commons.zeitgeist import Date\nfrom pypara.currencies import Currency\nfrom pypara.monetary import Money\nfrom pypara.commons.numbers import ONE, ZERO\n\n\n# Helper day count method: simple ACT/365\ndef act_365(start: Date, asof: Date, end: Date, freq: Decimal | None = None) -> Decimal:\n    days = (asof - start).days\n    return Decimal(days) / Decimal(365)\n\n\ndef test_calculate_fraction_normal():\n    \"\"\"Normal case: asof between start and end.\"\"\"\n    dcc = DCC(\n        name=\"ACT/365\",\n        altnames=set(),\n        currencies=set(),\n        calculate_fraction_method=act_365,\n    )\n    start = Date(2024, 1, 1)\n    asof = Date(2024, 4, 1)  # 90 days after start\n    end = Date(2024, 12, 31)\n    frac = dcc.calculate_fraction(start, asof, end)\n    assert frac == Decimal(90) / Decimal(365)\n\n\ndef test_calculate_fraction_boundary():\n    \"\"\"Boundary case: asof equals start.\"\"\"\n    dcc = DCC(\n        name=\"ACT/365\",\n        altnames=set(),\n        currencies=set(),\n        calculate_fraction_method=act_365,\n    )\n    start = Date(2024, 1, 1)\n    asof = start\n    end = Date(2024, 12, 31)\n    frac = dcc.calculate_fraction(start, asof, end)\n    assert frac == ZERO\n\n\ndef test_interest_calculation():\n    \"\"\"Interest accrual using DCC.\"\"\"\n    dcc = DCC(\n        name=\"ACT/365\",\n        altnames=set(),\n        currencies=set(),\n        calculate_fraction_method=act_365,\n    )\n    principal = Money(Decimal(\"1000.00\"), Currency(\"USD\"))\n    rate = Decimal(\"0.05\")  # 5% annual\n    start = Date(2024, 1, 1)\n    asof = Date(2024, 7, 1)  # 181 days\n    interest = dcc.interest(principal, rate, start, asof)\n    expected = principal * rate * Decimal(181) / Decimal(365)\n    assert interest == expected\n```",
+        "reasoning": "Need tests for calculate_fraction, calculate_daily_fraction, interest. Use simple DCC with dummy method. Create a DCC instance with calculate_fraction_method that returns difference in days/365. Use Date from .commons. Assume Date is date. We'll import Date. Use tmp_path not needed. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048963367,
+    "prompt_tokens": 922,
+    "prompt_time": 0.022796451,
+    "completion_tokens": 588,
+    "completion_time": 1.021769571,
+    "total_tokens": 1510,
+    "total_time": 1.044566022,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 63
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgzdprekavnz2h6mcgja7e",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nfrom decimal import Decimal\nimport pytest\n\nfrom pypara.dcc import DCC\nfrom pypara.commons.zeitgeist import Date\nfrom pypara.currencies import Currency\nfrom pypara.monetary import Money\nfrom pypara.commons.numbers import ONE, ZERO\n\n\n# Helper day count method: simple ACT/365\ndef act_365(start: Date, asof: Date, end: Date, freq: Decimal | None = None) -> Decimal:\n    days = (asof - start).days\n    return Decimal(days) / Decimal(365)\n\n\ndef test_calculate_fraction_normal():\n    \"\"\"Normal case: asof between start and end.\"\"\"\n    dcc = DCC(\n        name=\"ACT/365\",\n        altnames=set(),\n        currencies=set(),\n        calculate_fraction_method=act_365,\n    )\n    start = Date(2024, 1, 1)\n    asof = Date(2024, 4, 1)  # 90 days after start\n    end = Date(2024, 12, 31)\n    frac = dcc.calculate_fraction(start, asof, end)\n    assert frac == Decimal(90) / Decimal(365)\n\n\ndef test_calculate_fraction_boundary():\n    \"\"\"Boundary case: asof equals start.\"\"\"\n    dcc = DCC(\n        name=\"ACT/365\",\n        altnames=set(),\n        currencies=set(),\n        calculate_fraction_method=act_365,\n    )\n    start = Date(2024, 1, 1)\n    asof = start\n    end = Date(2024, 12, 31)\n    frac = dcc.calculate_fraction(start, asof, end)\n    assert frac == ZERO\n\n\ndef test_interest_calculation():\n    \"\"\"Interest accrual using DCC.\"\"\"\n    dcc = DCC(\n        name=\"ACT/365\",\n        altnames=set(),\n        currencies=set(),\n        calculate_fraction_method=act_365,\n    )\n    principal = Money(Decimal(\"1000.00\"), Currency(\"USD\"))\n    rate = Decimal(\"0.05\")  # 5% annual\n    start = Date(2024, 1, 1)\n    asof = Date(2024, 7, 1)  # 181 days\n    interest = dcc.interest(principal, rate, start, asof)\n    expected = principal * rate * Decimal(181) / Decimal(365)\n    assert interest == expected\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4710853610304184
+}

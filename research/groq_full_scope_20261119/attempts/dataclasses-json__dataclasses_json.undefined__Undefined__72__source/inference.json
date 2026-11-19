@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-025f6d15-a106-43af-9451-e1df1dc4414a",
+  "object": "chat.completion",
+  "created": 1795076881,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom dataclasses_json.undefined import Undefined\nfrom dataclasses_json.utils import CatchAllVar\nfrom dataclasses_json.exceptions import UndefinedParameterError\n\ndef test_undefined_enum_members():\n    # The enum should expose exactly the three expected members\n    assert set(Undefined.__members__.keys()) == {\"INCLUDE\", \"RAISE\", \"EXCLUDE\"}\n    # Each member should be an instance of Undefined\n    for member in Undefined:\n        assert isinstance(member, Undefined)\n    # The value of each member should be a class (the handler)\n    assert isinstance(Undefined.INCLUDE.value, type)\n    assert isinstance(Undefined.RAISE.value, type)\n    assert isinstance(Undefined.EXCLUDE.value, type)\n\ndef test_include_behavior_with_extra_field(tmp_path):\n    # Define a simple dataclass that accepts an extra field via INCLUDE\n    from dataclasses import dataclass\n    from dataclasses_json import dataclass_json\n\n    @dataclass_json(undefined=Undefined.INCLUDE)\n    @dataclass\n    class Sample:\n        a: int\n\n    # When deserializing JSON with an unknown key, it should be stored in _extra\n    data = {\"a\": 1, \"b\": 2}\n    obj = Sample.from_dict(data)\n    # The known field is set correctly\n    assert obj.a == 1\n    # The unknown field is captured in _extra\n    assert hasattr(obj, \"_extra\")\n    assert obj._extra == {\"b\": 2}\n\ndef test_raise_behavior_with_missing_field():\n    # Define a dataclass that requires a field\n    from dataclasses import dataclass\n    from dataclasses_json import dataclass_json\n\n    @dataclass_json(undefined=Undefined.RAISE)\n    @dataclass\n    class Sample:\n        a: int\n\n    # Deserializing JSON missing the required field should raise ValidationError\n    data = {\"b\": 2}\n    with pytest.raises(ValidationError) as excinfo:\n        Sample.from_dict(data)\n    # The error message should mention the missing field\n    assert \"Missing required field\" in str(excinfo.value) or \"a\" in str(excinfo.value)\n```",
+        "reasoning": "We need to test Undefined enum. But its members refer to classes not defined in snippet. Likely in module. We just test that Undefined has members and values are classes? We can import module. Let's assume module name is dataclasses_json.undefined. We'll write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004906577,
+    "prompt_tokens": 337,
+    "prompt_time": 0.011056037,
+    "completion_tokens": 512,
+    "completion_time": 0.627088414,
+    "total_tokens": 849,
+    "total_time": 0.638144451,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 55
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sepyf4e9ta6e1tx0f6zgfb",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom dataclasses_json.undefined import Undefined\nfrom dataclasses_json.utils import CatchAllVar\nfrom dataclasses_json.exceptions import UndefinedParameterError\n\ndef test_undefined_enum_members():\n    # The enum should expose exactly the three expected members\n    assert set(Undefined.__members__.keys()) == {\"INCLUDE\", \"RAISE\", \"EXCLUDE\"}\n    # Each member should be an instance of Undefined\n    for member in Undefined:\n        assert isinstance(member, Undefined)\n    # The value of each member should be a class (the handler)\n    assert isinstance(Undefined.INCLUDE.value, type)\n    assert isinstance(Undefined.RAISE.value, type)\n    assert isinstance(Undefined.EXCLUDE.value, type)\n\ndef test_include_behavior_with_extra_field(tmp_path):\n    # Define a simple dataclass that accepts an extra field via INCLUDE\n    from dataclasses import dataclass\n    from dataclasses_json import dataclass_json\n\n    @dataclass_json(undefined=Undefined.INCLUDE)\n    @dataclass\n    class Sample:\n        a: int\n\n    # When deserializing JSON with an unknown key, it should be stored in _extra\n    data = {\"a\": 1, \"b\": 2}\n    obj = Sample.from_dict(data)\n    # The known field is set correctly\n    assert obj.a == 1\n    # The unknown field is captured in _extra\n    assert hasattr(obj, \"_extra\")\n    assert obj._extra == {\"b\": 2}\n\ndef test_raise_behavior_with_missing_field():\n    # Define a dataclass that requires a field\n    from dataclasses import dataclass\n    from dataclasses_json import dataclass_json\n\n    @dataclass_json(undefined=Undefined.RAISE)\n    @dataclass\n    class Sample:\n        a: int\n\n    # Deserializing JSON missing the required field should raise ValidationError\n    data = {\"b\": 2}\n    with pytest.raises(ValidationError) as excinfo:\n        Sample.from_dict(data)\n    # The error message should mention the missing field\n    assert \"Missing required field\" in str(excinfo.value) or \"a\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0039746669935994
+}

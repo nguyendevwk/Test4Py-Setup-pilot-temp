@@ -1,0 +1,29 @@
+import time
+import pytest
+from codetiming import Timer
+
+def test_timer_start_and_stop_logs_and_records():
+    logs = []
+
+    def logger(msg: str) -> None:
+        logs.append(msg)
+
+    t = Timer(name="perf_timer", initial_text="Timer {name} started", logger=logger)
+    t.start()
+    # After start, initial message should be logged
+    assert logs[0] == "Timer perf_timer started"
+
+    # Sleep to create measurable elapsed time
+    time.sleep(0.01)
+    elapsed = t.stop()
+
+    # After stop, elapsed time message should be logged
+    assert logs[1].startswith("Elapsed time: ")
+    # The elapsed time returned should be close to the sleep duration
+    assert elapsed == pytest.approx(t.last, rel=0.2)
+    # Timer's internal last field should match the returned value
+    assert t.last == elapsed
+
+    # The timers dictionary should record the elapsed time under the timer's name
+    recorded_total = t.timers.total("perf_timer")
+    assert recorded_total == pytest.approx(elapsed, rel=0.2)

@@ -35,11 +35,13 @@ def main():
             from pilot.runtime_limits import check_token_budget
             check_token_budget(length, dict(config,max_new_tokens=args.output_tokens))
             started = time.perf_counter()
+            print(f'[stress-probe] input={length} output={args.output_tokens} attention={config.get("attention_policy","auto")}',flush=True)
             total = torch.cuda.get_device_properties(0).total_memory
             torch.cuda.reset_peak_memory_stats()
             ids = torch.tensor([(token_ids*((length//len(token_ids))+1))[:length]], dtype=torch.long, device='cuda:0')
             mask = torch.ones_like(ids)
-            with torch.inference_mode():
+            from pilot.attention import generation_attention_context
+            with torch.inference_mode(), generation_attention_context(config):
                 out = backend.model.generate(input_ids=ids, attention_mask=mask, do_sample=False,
                        min_new_tokens=args.output_tokens, max_new_tokens=args.output_tokens,
                        pad_token_id=backend.tokenizer.eos_token_id)
@@ -62,6 +64,7 @@ def main():
         results['status'] = 'passed' if all(t['passed'] for t in results['tests']) else 'insufficient_headroom'
     except Exception as exc:
         results.update(status='failed', error=repr(exc), traceback=traceback.format_exc())
+        print('[stress-probe ERROR] '+repr(exc),flush=True)
     finally:
         write_json(args.output/'probe.json', results)
     print(json.dumps(results, indent=2), flush=True)

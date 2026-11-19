@@ -1,0 +1,37 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_generic_attribute_access_and_lazy_initialization _____________
+
+    def test_generic_attribute_access_and_lazy_initialization():
+        """Generic should lazily instantiate providers on first access."""
+        g = Generic(locale=Locale.EN)
+        # Initially, no provider attributes exist
+>       assert not hasattr(g, "dummy")
+E       AssertionError: assert not True
+E        +  where True = hasattr(<mimesis.providers.generic.Generic object at 0x7fcf9d2b1f30>, 'dummy')
+
+test_generated.py:27: AssertionError
+_________________ test_generic_reseed_propagates_to_providers __________________
+
+    def test_generic_reseed_propagates_to_providers():
+        """Reseeding Generic should reseed all contained providers."""
+        g = Generic(seed=123)
+        g.add_provider(DummyProvider)
+        provider = g.dummy
+        # Ensure provider has its own seed set
+        assert provider.seed == 123
+        # Change seed via reseed
+        g.reseed(456)
+        # Provider's seed should be updated
+        assert provider.seed == 456
+        # Reseed again with default (MissingSeed) should keep provider's seed unchanged
+        g.reseed()
+>       assert provider.seed == 456
+E       assert <mimesis.types._MissingSeed object at 0x7fcf9ddafc40> == 456
+E        +  where <mimesis.types._MissingSeed object at 0x7fcf9ddafc40> = <test_generated.DummyProvider object at 0x7fcf9d341bd0>.seed
+
+test_generated.py:55: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_generic_attribute_access_and_lazy_initialization
+FAILED test_generated.py::test_generic_reseed_propagates_to_providers - asser...
+2 failed, 1 passed in 0.19s

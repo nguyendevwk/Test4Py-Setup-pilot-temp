@@ -1,0 +1,361 @@
+"""Text rules that every style shares."""
+
+import copy as _copy
+import re
+import typing as T
+
+from .common import Docstring, DocstringDeprecated, DocstringParam
+
+
+def clean_str(string: str) -> T.Optional[str]:
+    """Strip a string, giving None if nothing is left."""
+    return string.strip() or None
+
+
+# Several names in one item head, as in ``x, y`` or ``*args, **kwargs``;
+# ``...`` is a name too, as in napoleon's ``arg1, arg2, ...``.
+_NAME = r"(?:\*{0,2}[A-Za-z_]\w*|\.\.\.)"
+_NAMES = re.compile(rf"{_NAME}(?:[ \t]*,[ \t]*{_NAME})+")
+_NAME_SEPARATOR = re.compile(r"[ \t]*,[ \t]*")
+
+
+def split_names(name: T.Optional[str]) -> T.Optional[T.List[str]]:
+    """Split an item head that lists several names, giving None for one
+    that does not."""
+    if not name or "," not in name or not _NAMES.fullmatch(name):
+        return None
+    return _NAME_SEPARATOR.split(name)
+
+
+_ESCAPE = re.compile(r"\\(.?)", flags=re.S)
+
+
+def unescape(name: str) -> str:
+    """Drop the backslashes escaping ReST markup in a name, as in
+    ``\\*\\*kwargs`` or ``class\\_``."""
+    return _ESCAPE.sub(r"\1", name) if "\\" in name else name
+
+
+def renamed(param: DocstringParam, name: str) -> DocstringParam:
+    """Copy a param under another name."""
+    copy = _copy.copy(param)
+    copy.arg_name = name
+    return copy
+
+
+# The lines after the first that go on with the first paragraph, each with
+# its newline: up to a blank line, or an indented one, which starts a block.
+_PARAGRAPH_LINES = re.compile(r"(?:\S[^\n]*(?:\n|\Z))*")
+
+
+def split_description(ret: Docstring, text: str) -> None:
+    """Set the short and long description from the text before any field.
+
+    The short description is the first paragraph: every line up to the
+    first blank or indented one, which an indented block would start. The
+    long description is everything after it. Its lines keep their indent
+    in the dedented docstring, the first one too, which stripping it would
+    lose.
+    """
+    first, newline, rest = text.partition("\n")
+    if newline and first.strip():
+        match = _PARAGRAPH_LINES.match(rest)
+        more = match.end() if match else 0
+        if more:
+            # More lines of the first paragraph.
+            first += "\n" + rest[:more].rstrip("\n")
+            newline = "\n" if rest[more - 1] == "\n" else ""
+            rest = rest[more:]
+    ret.short_description = first.strip() or None
+    if newline:
+        # A line of whitespace before more text ends the first paragraph as
+        # an empty one does.
+        ret.blank_after_short_description = rest.startswith("\n") or bool(
+            rest.strip() and not rest.partition("\n")[0].strip()
+        )
+        ret.blank_after_long_description = rest.endswith("\n\n")
+        long = rest.strip()
+        lead = rest[: len(rest) - len(rest.lstrip())]
+        if long and lead and not lead.endswith("\n"):
+            long = lead[lead.rfind("\n") + 1 :] + long
+        ret.long_description = long or None
+
+
+def leading_deprecation(
+    docstring: Docstring,
+) -> T.Optional[DocstringDeprecated]:
+    """Return the deprecation to write right after the short description.
+
+    A deprecation that comes first goes there, as Numpydoc writes it,
+    with the long description read from after it. Not when the long
+    description is followed by a blank line, which it is only when written
+    before the directive, or when it starts indented, which would read
+    back as the directive's body.
+    """
+    top = docstring.meta[0] if docstring.meta else None
+    long = docstring.long_description
+    if not isinstance(top, DocstringDeprecated) or (
+        docstring.blank_after_long_description or (long and long[0].isspace())
+    ):
+        return None
+    return top
+
+
+def append_loose(
+    ret: Docstring, chunks: T.Iterable[str], blank_around: bool
+) -> None:
+    """Add text found between or after the fields to the long description.
+
+    :param chunks: the pieces of text, each a paragraph of its own
+    :param blank_around: mark the description as followed by blank lines
+    """
+    loose = "\n\n".join(part.strip() for part in chunks if part.strip())
+    if not loose:
+        return
+    if ret.short_description is None and ret.long_description is None:
+        # With nothing before the fields, the text is the description, as
+        # if written before them.
+        split_description(ret, loose + "\n\n" if blank_around else loose)
+        return
+    ret.long_description = (
+        f"{ret.long_description}\n\n{loose}" if ret.long_description else loose
+    )
+    if blank_around:
+        ret.blank_after_short_description = True
+        ret.blank_after_long_description = True
+    elif not ret.blank_after_short_description:
+        # Text written right after the summary, with no deprecation
+        # between them, is a paragraph of its own, which would otherwise
+        # read back as part of the summary.
+        if leading_deprecation(ret) is None:
+            ret.blank_after_short_description = True
+
+
+# One exception type: a dotted name, maybe marked as Sphinx does it
+# (``~pkg.Error``) or quoted (```Error```), with an optional subscript.
+EXCEPTION_TYPE = r"`?[~!]?[A-Za-z_][\w.]*(?:\[[^\]\n]*\])?`?"
+
+OPTIONAL_REGEX = re.compile(r"(?P<type>.*?)(?:, optional|\(optional\))$")
+
+# A default given in the type, as in:
+#
+#   copy : bool, default True
+#   copy : bool, default=True
+#   copy : bool, default: True
+#
+DEFAULT_REGEX = re.compile(
+    r"(?P<type>.*?)(?:, default|\(default\))(?: | |=| = |= |: |)*(?P<value>.*)$"  # noqa: E501
+)
+
+
+class TypeSpec(T.NamedTuple):
+    """A param's type with the marks of an optional param split off."""
+
+    type_name: T.Optional[str]
+    is_optional: bool
+    default: T.Optional[str]
+
+
+_CLOSING = {"(": ")", "[": "]", "{": "}"}
+
+
+def _split_commas(text: str) -> T.List[str]:
+    """Split a type on the commas outside brackets and quotes."""
+    parts = []
+    closing: T.List[str] = []
+    quote = ""
+    start = 0
+    for i, char in enumerate(text):
+        if quote:
+            if char == quote:
+                quote = ""
+        elif char in "'\"":
+            quote = char
+        elif char in _CLOSING:
+            closing.append(_CLOSING[char])
+        elif closing and char == closing[-1]:
+            closing.pop()
+        elif char == "," and not closing:
+            parts.append(text[start:i])
+            start = i + 1
+    parts.append(text[start:])
+    return parts
+
+
+# A part of a type that marks the param optional.
+_OPTIONAL = re.compile(r"\*?optional\*?", flags=re.I)
+# A part of a type that names the default, as in ``default 1``,
+# ``default=1``, ``default: 1``, ``default is 1``, ``defaults to 1`` or
+# ``defaults 1``.
+_DEFAULT_PART = re.compile(
+    r"defaults?(?:\s*[=:]\s*|\s+(?:is\s+|to\s+)?)(?P<value>\S.*)",
+    flags=re.I | re.S,
+)
+# The mark written after the type without a comma, as in ``int (optional)``.
+_OPTIONAL_SUFFIX = re.compile(r"\s*\(optional\)$", flags=re.I)
+
+
+def _strip_backticks(value: str) -> str:
+    return value.strip("`") or value
+
+
+# Whitespace a type is written with that is not a single space, which is
+# normalised outside quoted text.
+_LOOSE_SPACE = re.compile(r"\s\s|[^\S ]")
+_QUOTE = re.compile(r"[\"'`]")
+
+
+def type_spec(type_name: T.Optional[str]) -> TypeSpec:
+    """Split the marks of an optional param, and its default, off its type.
+
+    The type is split on the commas outside brackets and quotes:
+
+    - A part ``optional``, in any case or emphasized as ``*optional*``, a
+      part ending in ``(optional)`` and a part ending in ``?`` mark the
+      param optional.
+    - A part ``default 1``, ``default=1``, ``default: 1``, ``default is
+      1``, ``defaults to 1`` or ``defaults 1`` gives the default, without
+      backticks around it, and makes the param optional too.
+    - The other parts are the type, with each run of whitespace made one
+      space, unless the part quotes text.
+
+    The same rule holds in every style.
+    """
+    if type_name is None or not type_name.strip():
+        return TypeSpec(type_name=type_name, is_optional=False, default=None)
+    is_optional = False
+    default = None
+    kept = []
+    for part in _split_commas(type_name):
+        part = part.strip()
+        if _OPTIONAL.fullmatch(part):
+            is_optional = True
+            continue
+        match = _DEFAULT_PART.fullmatch(part)
+        if match is not None:
+            is_optional = True
+            default = _strip_backticks(match.group("value").strip())
+            continue
+        suffix = _OPTIONAL_SUFFIX.search(part)
+        if suffix is not None:
+            is_optional = True
+            part = part[: suffix.start()]
+        if part.endswith("?"):
+            is_optional = True
+            part = part[:-1].rstrip()
+        if part and _LOOSE_SPACE.search(part) and not _QUOTE.search(part):
+            part = " ".join(part.split())
+        if part:
+            kept.append(part)
+    return TypeSpec(
+        type_name=", ".join(kept) or None,
+        is_optional=is_optional,
+        default=default,
+    )
+
+
+# A default that a description states, as in "Defaults to 3.", "(default:
+# 3)" or "default is ``None`` if unset". The value must be one value: a
+# literal, a name, a call, or a quoted or bracketed expression, maybe
+# followed by a remark in parentheses or a condition. So "The default is to
+# use all of them." states no default, and neither does "the default
+# :meth:`run`".
+DEFAULT_IN_DESCRIPTION = re.compile(
+    r"(?<!\w)(?:defaults\s+to|default\s+(?:value\s+)?is|default:|default\s*=)"
+    r"\s*(?P<value>"
+    r"``[^`\n]+``|`[^`\n]+`"
+    r"|'[^'\n]*'|\"[^\"\n]*\""
+    r"|\([^()\n]*\)|\[[^\[\]\n]*\]|\{[^{}\n]*\}"
+    r"|[-+]?[\w.]*\w(?:\([^()\n]*\))?"
+    r")"
+    r"(?=\s*(?:[.,;)]|$)|\s+(?:\(|(?:if|when|unless)\b))",
+    flags=re.I | re.M,
+)
+
+
+def default_in(description: T.Optional[str]) -> T.Optional[str]:
+    """Find the default that a description states, if any."""
+    if not description:
+        return None
+    match = DEFAULT_IN_DESCRIPTION.search(description)
+    if match is None:
+        return None
+    return _strip_backticks(match.group("value"))
+
+
+def param_spec(
+    type_name: T.Optional[str], description: T.Optional[str]
+) -> TypeSpec:
+    """Read a param's type, with its default from the type or else from
+    its description. A param with a default is optional."""
+    spec = type_spec(type_name)
+    if spec.default is not None:
+        return spec
+    default = default_in(description)
+    if default is None:
+        return spec
+    return TypeSpec(
+        type_name=spec.type_name, is_optional=True, default=default
+    )
+
+
+class Example(T.NamedTuple):
+    """One example of an examples section, as doctest reads it."""
+
+    #: The text that introduces it, or None.
+    description: T.Optional[str]
+    #: The ``>>>`` lines with their ``...`` continuations and expected
+    #: output, or None for text after the last snippet.
+    snippet: T.Optional[str]
+
+
+def _intro(lines: T.List[str]) -> T.Optional[str]:
+    """Join the lines of an example's text, without blank lines around."""
+    text = "\n".join(lines).strip("\n")
+    return text if text.strip() else None
+
+
+def split_examples(text: str) -> T.List[Example]:
+    """Split an examples section into examples, the way doctest reads it.
+
+    A snippet is a ``>>>`` line, the ``...`` lines that continue it, and
+    its expected output: the lines up to a blank line or the next ``>>>``
+    line. The text before a snippet introduces it, and text after the last
+    snippet is an example of its own, with no snippet.
+    """
+    lines = text.split("\n")
+    examples: T.List[Example] = []
+    intro: T.List[str] = []
+    i = 0
+    count = len(lines)
+    while i < count:
+        line = lines[i]
+        source = line.lstrip()
+        if not source.startswith(">>>"):
+            intro.append(line)
+            i += 1
+            continue
+        # The continuations and output are indented at least as the
+        # prompt, as doctest wants.
+        indent = line[: len(line) - len(source)]
+        start = i
+        i += 1
+        while (
+            i < count
+            and lines[i].startswith(indent)
+            and lines[i].lstrip().startswith("...")
+        ):
+            i += 1
+        while (
+            i < count
+            and lines[i].strip()
+            and lines[i].startswith(indent)
+            and not lines[i].lstrip().startswith(">>>")
+        ):
+            i += 1
+        examples.append(Example(_intro(intro), "\n".join(lines[start:i])))
+        intro = []
+    description = _intro(intro)
+    if description is not None:
+        examples.append(Example(description, None))
+    return examples

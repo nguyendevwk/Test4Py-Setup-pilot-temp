@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-42914ea4-d0d7-49a5-8165-26e58ed6f0c8",
+  "object": "chat.completion",
+  "created": 1795079376,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport mmap\nimport pytest\nfrom thefuck.entrypoints.shell_logger import shell_logger, const, logs\n\ndef test_shell_logger_no_shell(monkeypatch, caplog):\n    # Ensure SHELL is not set\n    monkeypatch.delenv('SHELL', raising=False)\n    # Capture logs\n    caplog.set_level(logs.warn.__name__)\n    # Expect SystemExit with code 1\n    with pytest.raises(SystemExit) as excinfo:\n        shell_logger('/dev/null')\n    assert excinfo.value.code == 1\n    # Verify warning message logged\n    assert any(\"Shell logger doesn't support your platform.\" in rec.message for rec in caplog.records)\n\ndef test_shell_logger_creates_file(tmp_path, monkeypatch):\n    # Set SHELL to a harmless shell\n    monkeypatch.setenv('SHELL', '/bin/sh')\n    # Use a temporary file\n    output_file = tmp_path / \"logfile\"\n    # Run shell_logger in a subprocess to avoid exiting the test process\n    import subprocess, shlex\n    cmd = f\"{sys.executable} -c \\\"import thefuck.entrypoints.shell_logger as sl; sl.shell_logger('{output_file}')\\\"\"\n    result = subprocess.run(shlex.split(cmd), capture_output=True)\n    # shell_logger should exit with 0\n    assert result.returncode == 0\n    # File should exist and have the expected size\n    assert output_file.exists()\n    assert output_file.stat().st_size == const.LOG_SIZE_IN_BYTES\n    # File should be zeroed\n    with open(output_file, 'rb') as f:\n        data = f.read()\n    assert data == b'\\x00' * const.LOG_SIZE_IN_BYTES\n\ndef test_shell_logger_file_permissions(tmp_path, monkeypatch):\n    # Set SHELL to a harmless shell\n    monkeypatch.setenv('SHELL', '/bin/sh')\n    output_file = tmp_path / \"logfile\"\n    # Run shell_logger\n    import subprocess, shlex\n    cmd = f\"{sys.executable} -c \\\"import thefuck.entrypoints.shell_logger as sl; sl.shell_logger('{output_file}')\\\"\"\n    subprocess.run(shlex.split(cmd), check=True)\n    # Verify that the file is readable and writable by the owner\n    mode = os.stat(output_file).st_mode\n    assert mode & 0o600 == 0o600\n```",
+        "reasoning": "We need to test shell_logger. It writes to file, spawns shell, etc. Hard to test fully. Maybe test that when SHELL not set, it warns and exits. Use monkeypatch to set env. Use caplog. Also test that file created with size. Use tmp_path. Third test maybe boundary: output path. Use tmp_path. Use monkeypatch to set SHELL to /bin/sh. But _spawn is not defined here; likely in module. Can't import. We can test that it raises SystemExit with code 1 when SHELL missing. Also test that file created with correct size. Third test maybe that logs.warn called. Use caplog. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048605096,
+    "prompt_tokens": 403,
+    "prompt_time": 0.026565693,
+    "completion_tokens": 652,
+    "completion_time": 0.990150461,
+    "total_tokens": 1055,
+    "total_time": 1.016716154,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 141
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh324ze60sfczmnk6rmq47",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport mmap\nimport pytest\nfrom thefuck.entrypoints.shell_logger import shell_logger, const, logs\n\ndef test_shell_logger_no_shell(monkeypatch, caplog):\n    # Ensure SHELL is not set\n    monkeypatch.delenv('SHELL', raising=False)\n    # Capture logs\n    caplog.set_level(logs.warn.__name__)\n    # Expect SystemExit with code 1\n    with pytest.raises(SystemExit) as excinfo:\n        shell_logger('/dev/null')\n    assert excinfo.value.code == 1\n    # Verify warning message logged\n    assert any(\"Shell logger doesn't support your platform.\" in rec.message for rec in caplog.records)\n\ndef test_shell_logger_creates_file(tmp_path, monkeypatch):\n    # Set SHELL to a harmless shell\n    monkeypatch.setenv('SHELL', '/bin/sh')\n    # Use a temporary file\n    output_file = tmp_path / \"logfile\"\n    # Run shell_logger in a subprocess to avoid exiting the test process\n    import subprocess, shlex\n    cmd = f\"{sys.executable} -c \\\"import thefuck.entrypoints.shell_logger as sl; sl.shell_logger('{output_file}')\\\"\"\n    result = subprocess.run(shlex.split(cmd), capture_output=True)\n    # shell_logger should exit with 0\n    assert result.returncode == 0\n    # File should exist and have the expected size\n    assert output_file.exists()\n    assert output_file.stat().st_size == const.LOG_SIZE_IN_BYTES\n    # File should be zeroed\n    with open(output_file, 'rb') as f:\n        data = f.read()\n    assert data == b'\\x00' * const.LOG_SIZE_IN_BYTES\n\ndef test_shell_logger_file_permissions(tmp_path, monkeypatch):\n    # Set SHELL to a harmless shell\n    monkeypatch.setenv('SHELL', '/bin/sh')\n    output_file = tmp_path / \"logfile\"\n    # Run shell_logger\n    import subprocess, shlex\n    cmd = f\"{sys.executable} -c \\\"import thefuck.entrypoints.shell_logger as sl; sl.shell_logger('{output_file}')\\\"\"\n    subprocess.run(shlex.split(cmd), check=True)\n    # Verify that the file is readable and writable by the owner\n    mode = os.stat(output_file).st_mode\n    assert mode & 0o600 == 0o600\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "828b5ebd10df4d3fbd0a9b829422e16d",
+  "_api_plus_pacing_seconds": 1.7629445919883437
+}

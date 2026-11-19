@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-50453873-fbfd-4102-80d9-b6c476738d41",
+  "object": "chat.completion",
+  "created": 1795079393,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import parse_forwarded, fwd_normalize_address\n\nclass DummyHeaders:\n    def __init__(self, values):\n        self._values = values\n    def getall(self, name, default=None):\n        return self._values.get(name.lower(), default)\n\nclass DummyConfig:\n    def __init__(self, secret):\n        self.FORWARDED_SECRET = secret\n\ndef test_parse_forwarded_normal_and_normalization():\n    headers = DummyHeaders({\n        \"forwarded\": [\n            'for=192.0.2.60;proto=https;by=203.0.113.43',\n            'secret=supersecret'\n        ]\n    })\n    config = DummyConfig(secret=\"supersecret\")\n    result = parse_forwarded(headers, config)\n    assert isinstance(result, dict)\n    # by and for should be lowercased addresses\n    assert result[\"by\"] == \"203.0.113.43\"\n    assert result[\"for\"] == \"192.0.2.60\"\n    # proto should be lowercased\n    assert result[\"proto\"] == \"https\"\n    # secret should be omitted from the result\n    assert \"secret\" not in result\n\ndef test_parse_forwarded_invalid_port_omitted():\n    headers = DummyHeaders({\n        \"forwarded\": [\n            'for=192.0.2.60;port=notanumber;secret=supersecret'\n        ]\n    })\n    config = DummyConfig(secret=\"supersecret\")\n    result = parse_forwarded(headers, config)\n    assert isinstance(result, dict)\n    assert result[\"for\"] == \"192.0.2.60\"\n    # invalid port should be omitted\n    assert \"port\" not in result\n\ndef test_parse_forwarded_no_secret_returns_none():\n    headers = DummyHeaders({\n        \"forwarded\": [\n            'for=192.0.2.60;proto=https;by=203.0.113.43'\n        ]\n    })\n    config = DummyConfig(secret=\"supersecret\")\n    result = parse_forwarded(headers, config)\n    assert result is None\n```",
+        "reasoning": "We need three tests: normal parsing, boundary (e.g., multiple headers, secret not present), error (invalid port). Use tmp_path? Not needed. Just create dummy headers object with getall. Use simple dict with getall method. config object with FORWARDED_SECRET. Test that parse_forwarded returns dict with normalized values. Also test that invalid port string results in omission. Use pytest.raises? maybe test that fwd_normalize_address raises ValueError for unknown. But parse_forwarded won't call that if secret not matched. We can test fwd_normalize_address directly. But target is parse_forwarded. But we can test helper indirectly. Use config with secret. Provide header with secret and for=127.0.0.1;port=notint. Expect port omitted. Also test that multiple header lines combined. Third test: secret not present returns None. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.045926955,
+    "prompt_tokens": 1067,
+    "prompt_time": 0.026561624,
+    "completion_tokens": 632,
+    "completion_time": 0.72956845,
+    "total_tokens": 1699,
+    "total_time": 0.756130074,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 182
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh3kdsezaamr3aba99xzza",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import parse_forwarded, fwd_normalize_address\n\nclass DummyHeaders:\n    def __init__(self, values):\n        self._values = values\n    def getall(self, name, default=None):\n        return self._values.get(name.lower(), default)\n\nclass DummyConfig:\n    def __init__(self, secret):\n        self.FORWARDED_SECRET = secret\n\ndef test_parse_forwarded_normal_and_normalization():\n    headers = DummyHeaders({\n        \"forwarded\": [\n            'for=192.0.2.60;proto=https;by=203.0.113.43',\n            'secret=supersecret'\n        ]\n    })\n    config = DummyConfig(secret=\"supersecret\")\n    result = parse_forwarded(headers, config)\n    assert isinstance(result, dict)\n    # by and for should be lowercased addresses\n    assert result[\"by\"] == \"203.0.113.43\"\n    assert result[\"for\"] == \"192.0.2.60\"\n    # proto should be lowercased\n    assert result[\"proto\"] == \"https\"\n    # secret should be omitted from the result\n    assert \"secret\" not in result\n\ndef test_parse_forwarded_invalid_port_omitted():\n    headers = DummyHeaders({\n        \"forwarded\": [\n            'for=192.0.2.60;port=notanumber;secret=supersecret'\n        ]\n    })\n    config = DummyConfig(secret=\"supersecret\")\n    result = parse_forwarded(headers, config)\n    assert isinstance(result, dict)\n    assert result[\"for\"] == \"192.0.2.60\"\n    # invalid port should be omitted\n    assert \"port\" not in result\n\ndef test_parse_forwarded_no_secret_returns_none():\n    headers = DummyHeaders({\n        \"forwarded\": [\n            'for=192.0.2.60;proto=https;by=203.0.113.43'\n        ]\n    })\n    config = DummyConfig(secret=\"supersecret\")\n    result = parse_forwarded(headers, config)\n    assert result is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "9b0a1c5998b24dcf9dd1a30822ae17c2",
+  "_api_plus_pacing_seconds": 1.4643400910426863
+}

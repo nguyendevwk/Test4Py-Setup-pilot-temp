@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-dc6deac7-65e8-40be-91de-570829b6acdd",
+  "object": "chat.completion",
+  "created": 1795079618,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport os\nimport sys\nimport tempfile\nimport pytest\nfrom tornado.log import enable_pretty_logging\nfrom tornado.options import options as tornado_options\n\n# Helper to reset tornado options between tests\ndef reset_tornado_options():\n    tornado_options.logging = None\n    tornado_options.log_file_prefix = None\n    tornado_options.log_rotate_mode = None\n    tornado_options.log_file_max_size = None\n    tornado_options.log_file_num_backups = None\n    tornado_options.log_rotate_when = None\n    tornado_options.log_rotate_interval = None\n    tornado_options.log_to_stderr = None\n\n@pytest.fixture(autouse=True)\ndef cleanup():\n    yield\n    # Remove any handlers added to root logger\n    root = logging.getLogger()\n    for h in root.handlers[:]:\n        root.removeHandler(h)\n    reset_tornado_options()\n\ndef test_enable_pretty_logging_file_and_stderr(tmp_path):\n    # Configure options to write to a file and stderr\n    tornado_options.logging = \"debug\"\n    tornado_options.log_file_prefix = str(tmp_path / \"logfile.log\")\n    tornado_options.log_rotate_mode = \"size\"\n    tornado_options.log_file_max_size = 1024\n    tornado_options.log_file_num_backups = 1\n    tornado_options.log_to_stderr = True\n\n    enable_pretty_logging()\n\n    root = logging.getLogger()\n    # Check level\n    assert root.level == logging.DEBUG\n\n    # Verify file handler exists\n    file_handler = next(\n        (h for h in root.handlers if isinstance(h, logging.handlers.RotatingFileHandler)),\n        None,\n    )\n    assert file_handler is not None\n    assert file_handler.baseFilename == os.path.abspath(tornado_options.log_file_prefix)\n\n    # Verify stream handler exists\n    stream_handler = next(\n        (h for h in root.handlers if isinstance(h, logging.StreamHandler)), None\n    )\n    assert stream_handler is not None\n    # Emit a log and ensure file contains it\n    root.debug(\"test message\")\n    with open(tornado_options.log_file_prefix, encoding=\"utf-8\") as f:\n        content = f.read()\n    assert \"test message\" in content\n\ndef test_enable_pretty_logging_invalid_rotate_mode():\n    tornado_options.logging = \"info\"\n    tornado_options.log_file_prefix = \"dummy.log\"\n    tornado_options.log_rotate_mode = \"invalid_mode\"\n\n    with pytest.raises(ValueError) as excinfo:\n        enable_pretty_logging()\n    assert \"The value of log_rotate_mode option should be\" in str(excinfo.value)\n\ndef test_enable_pretty_logging_no_logging_option():\n    tornado_options.logging = None\n    # Ensure no handlers are added when logging is None\n    enable_pretty_logging()\n    root = logging.getLogger()\n    assert len(root.handlers) == 0\n```",
+        "reasoning": "We need three tests for enable_pretty_logging. Use tmp_path for file. Test normal: logging level set, file handler added. Boundary: log_rotate_mode invalid raises ValueError. Error: options.logging None returns. Use real tornado.log. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005110967,
+    "prompt_tokens": 642,
+    "prompt_time": 0.008999261,
+    "completion_tokens": 641,
+    "completion_time": 0.76244035,
+    "total_tokens": 1283,
+    "total_time": 0.771439611,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 53
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7shaf2ee7dsmay6hkpw178j",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport os\nimport sys\nimport tempfile\nimport pytest\nfrom tornado.log import enable_pretty_logging\nfrom tornado.options import options as tornado_options\n\n# Helper to reset tornado options between tests\ndef reset_tornado_options():\n    tornado_options.logging = None\n    tornado_options.log_file_prefix = None\n    tornado_options.log_rotate_mode = None\n    tornado_options.log_file_max_size = None\n    tornado_options.log_file_num_backups = None\n    tornado_options.log_rotate_when = None\n    tornado_options.log_rotate_interval = None\n    tornado_options.log_to_stderr = None\n\n@pytest.fixture(autouse=True)\ndef cleanup():\n    yield\n    # Remove any handlers added to root logger\n    root = logging.getLogger()\n    for h in root.handlers[:]:\n        root.removeHandler(h)\n    reset_tornado_options()\n\ndef test_enable_pretty_logging_file_and_stderr(tmp_path):\n    # Configure options to write to a file and stderr\n    tornado_options.logging = \"debug\"\n    tornado_options.log_file_prefix = str(tmp_path / \"logfile.log\")\n    tornado_options.log_rotate_mode = \"size\"\n    tornado_options.log_file_max_size = 1024\n    tornado_options.log_file_num_backups = 1\n    tornado_options.log_to_stderr = True\n\n    enable_pretty_logging()\n\n    root = logging.getLogger()\n    # Check level\n    assert root.level == logging.DEBUG\n\n    # Verify file handler exists\n    file_handler = next(\n        (h for h in root.handlers if isinstance(h, logging.handlers.RotatingFileHandler)),\n        None,\n    )\n    assert file_handler is not None\n    assert file_handler.baseFilename == os.path.abspath(tornado_options.log_file_prefix)\n\n    # Verify stream handler exists\n    stream_handler = next(\n        (h for h in root.handlers if isinstance(h, logging.StreamHandler)), None\n    )\n    assert stream_handler is not None\n    # Emit a log and ensure file contains it\n    root.debug(\"test message\")\n    with open(tornado_options.log_file_prefix, encoding=\"utf-8\") as f:\n        content = f.read()\n    assert \"test message\" in content\n\ndef test_enable_pretty_logging_invalid_rotate_mode():\n    tornado_options.logging = \"info\"\n    tornado_options.log_file_prefix = \"dummy.log\"\n    tornado_options.log_rotate_mode = \"invalid_mode\"\n\n    with pytest.raises(ValueError) as excinfo:\n        enable_pretty_logging()\n    assert \"The value of log_rotate_mode option should be\" in str(excinfo.value)\n\ndef test_enable_pretty_logging_no_logging_option():\n    tornado_options.logging = None\n    # Ensure no handlers are added when logging is None\n    enable_pretty_logging()\n    root = logging.getLogger()\n    assert len(root.handlers) == 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "e47df15827bb4e1f831e51d96e1f0f18",
+  "_api_plus_pacing_seconds": 3.6816039470140822
+}

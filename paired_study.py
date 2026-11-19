@@ -23,6 +23,7 @@ from pilot.benchmark import locate_module
 from pilot.module_mutation import pool
 from pilot.scheduling import execute_modes, gpu_slots
 from pilot.console import Console
+from pilot.progress import emit
 
 MODEL = 'Qwen/Qwen2.5-Coder-14B-Instruct'
 FRAME = {
@@ -33,21 +34,35 @@ FRAME = {
 }
 
 
-def build_plan(max_input_tokens=4096, max_new_tokens=512):
+def build_plan(max_input_tokens=4096, max_new_tokens=512, test_output_contract=None, mechanism=None):
+    if test_output_contract not in (None, 'single-test-v1'):
+        raise ValueError('Unknown test output contract')
+    if mechanism not in (None, 'api-contract-v1'):
+        raise ValueError('Unknown mechanism')
+    if mechanism and test_output_contract:
+        raise ValueError('API mechanism study must not reuse the failed one-test output constraint')
     files = [BASE/'paired_study.py', BASE/'benchmark_worker.py', BASE/'gpu_context_probe.py',
              BASE/'requirements-modern.txt', BASE/'requirements-paired.txt', *sorted((BASE/'pilot').glob('*.py')),
              BASE/'council/critic.py', BASE/'council/runner.py', BASE/'council/engine.py']
-    return dict(protocol='test4py-nf4-paired-pilot-v1', upstream=UPSTREAM, frame=FRAME,
+    plan = dict(protocol='test4py-nf4-paired-pilot-v1', upstream=UPSTREAM, frame=FRAME,
                 sampling='fixed development pilot, 3 modules/2 NA projects; not representative of 183',
-                small=dict(project='genty', modules=['genty.genty_repeat'], seeds=[42], rounds=1),
+                small=dict(project='genty', modules=['genty.genty_repeat','genty.genty_args'], seeds=[42], rounds=1),
                 main=dict(seeds=[42,43], rounds=3), arms=['baseline','improved'],
-                settings=dict(model=MODEL, quantization='nf4', max_input_tokens=max_input_tokens,
+                settings=dict(model=MODEL, quantization='nf4', attention_policy='t4-efficient-sdpa-v1', max_input_tokens=max_input_tokens,
                     max_new_tokens=max_new_tokens, max_sequence_tokens=max_input_tokens+max_new_tokens, embedding='BAAI/bge-large-en-v1.5',
                     embedding_device='cpu', cpu_threads=1, score_timeout=60,
                     prompt_policy='upstream-original', code_extraction='single-complete-block-v2',
                     paired_protocol=True, initialization_greedy=True, generation=dict(do_sample=True, temperature=0.7, top_p=0.95)),
-                mutation_limit=4, worker_timeout=3600,
+                mutation_limit=4, worker_timeout=3600, screen_budget_seconds=3600,
                 source_sha256={str(p.relative_to(BASE)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files})
+    if test_output_contract:
+        plan['settings']['test_output_contract'] = test_output_contract
+        plan['protocol'] += '+single-test-v1'
+    if mechanism:
+        plan['protocol'] += '+api-contract-v1'
+        plan['arms'] = ['baseline', 'api_contract']
+        plan['settings'].update(mechanism=mechanism,acceptance_policy='preserve-assertions-v1',api_contract_max_chars=2500)
+    return plan
 
 
 def validate_plan(root, plan):
@@ -160,7 +175,14 @@ def prepare(root, plan):
     return all(s['status']=='prepared' for s in state.values())
 
 
+def screen_remaining(root):
+    clock=json.loads((root/'screen-clock.json').read_text())
+    return max(0,clock['deadline_epoch']-time.time())
+
+
 def stress(root, plan, jobs):
+    if (root/'screen-clock.json').exists():
+        raise ValueError('Screen already attempted; preserve its time budget and use a new output')
     if not (root/'preflight.json').exists():
         raise ValueError('Run prepare first')
     ready=json.loads((root/'preflight.json').read_text())
@@ -177,11 +199,26 @@ def stress(root, plan, jobs):
         folder=root/('stress-gpu-'+str(gpu))
         if folder.exists():
             raise ValueError('Stress already attempted. Keep evidence; use a new output for another configuration.')
+    started=time.time()
+    write_json(root/'screen-clock.json',dict(started_epoch=started,
+               deadline_epoch=started+plan['screen_budget_seconds'],budget_seconds=plan['screen_budget_seconds'],
+               scope='stress including model downloads/load plus small; excludes CPU bootstrap/preparation'))
+    def probe(gpu, unused_slot):
+        folder=root/('stress-gpu-'+str(gpu))
         proc=command([sys.executable,BASE/'gpu_context_probe.py','--settings',root/'stress-settings.json',
                       '--output',folder,'--inputs',','.join(str(n) for n in (2048,4096,6144) if n<=settings['max_input_tokens']),
-                      '--output-tokens',str(settings['max_new_tokens'])],env=environment(gpu),timeout=1800,log_path=root/('stress-'+str(gpu)+'.log'),stream=True,label='stress-'+str(gpu),console=Console('compact'))
+                      '--output-tokens',str(settings['max_new_tokens'])],env=environment(gpu),timeout=max(1,min(1800,int(screen_remaining(root)))),log_path=root/('stress-'+str(gpu)+'.log'),stream=True,label='stress-'+str(gpu),console=Console('compact'))
         report=json.loads((folder/'probe.json').read_text()) if (folder/'probe.json').exists() else {}
-        results[str(gpu)]=dict(status=report.get('status','missing') if proc['returncode']==0 and not proc['timeout'] else 'failed',process=proc)
+        return dict(status=report.get('status','missing') if proc['returncode']==0 and not proc['timeout'] else 'failed',process=proc,
+                    probe=dict(status=report.get('status','missing'),tests=report.get('tests',[]),error=report.get('error')))
+    # Independent stress on both T4s concurrently; one probe process per GPU.
+    for gpu,result in execute_modes(slots,slots,probe):
+        results[str(gpu)]=result
+        print(f"[stress GPU {gpu}] {result['status']}; log: {root/('stress-'+str(gpu)+'.log')}",flush=True)
+        for test in result.get('probe',{}).get('tests',[]):
+            print('[stress] '+json.dumps(test),flush=True)
+        if result.get('probe',{}).get('error'):
+            print('[stress ERROR] '+result['probe']['error'],flush=True)
         write_json(root/'stress.json',dict(config_hash=digest(plan['settings']),plan_hash=digest(plan),
                    model_revision=settings['model_revision'],gpus=results))
     return all(r['status']=='passed' for r in results.values())
@@ -208,32 +245,68 @@ def collect(root, plan, stage, queue):
         folder=root/stage/key
         report=json.loads((folder/'report.json').read_text()) if (folder/'report.json').exists() else {}
         process=json.loads((folder/'process.json').read_text()) if (folder/'process.json').exists() else {}
+        worker_status='timeout' if process.get('timeout') else report.get('status','missing')
         done=report.get('status')=='execution_complete' and process.get('returncode')==0 and not process.get('timeout') and report.get('hardware_budget_ok',True) and not report.get('unexpected_generation_errors',0)
         process_ok=process_ok and done
         for module in task['modules']:
             row=next((dict(r) for r in report.get('modules',[]) if r['module']==module),
-                     dict(module=module,status='worker_incomplete',passed=None,line_pct=None,branch_pct=None,mutation_score=None))
+                     dict(module=module,status='timeout_unmeasured' if process.get('timeout') else 'worker_incomplete',passed=None,line_pct=None,branch_pct=None,mutation_score=None))
             row.update(arm=task['arm'],seed=task['seed'],project=task['project'],
-                       worker_status=report.get('status','missing'),worker_seconds=report.get('seconds'),
+                       worker_status=worker_status,worker_seconds=report.get('seconds') if report.get('seconds') is not None else process.get('seconds'),
                        input_tokens=report.get('input_tokens'),output_tokens=report.get('output_tokens'),
                        generation_input_tokens=report.get('generation_input_tokens'),
                        generation_output_tokens=report.get('generation_output_tokens'),
                        initialization_cache_hits=report.get('initialization_cache_hits'),
+                       gpu_peak_allocated_gib=report.get('gpu_peak_allocated_gib'),
+                       process_peak_rss_gib=report.get('process_peak_rss_gib'),
                        execution_complete=bool(done))
             rows.append(row)
+    measurement_exercised=any(r.get('status')=='scored' and r.get('line_pct') is not None for r in rows)
     write_json(root/(stage+'-summary.json'),dict(protocol=plan['protocol'],rows=rows,
-               planned_module_trials=sum(len(t['modules']) for t in queue),finished_module_rows=len(rows),
+               planned_module_trials=sum(len(t['modules']) for t in queue),reported_module_rows=len(rows),
+               finished_module_rows=sum(r['execution_complete'] for r in rows),
                execution_ready=process_ok,semantic_review_required=True,
+               measurement_path_exercised=measurement_exercised,
+               larger_ready=bool(process_ok and measurement_exercised),
                scope='paired pilot, not full paper reproduction; coverage is not assertion accuracy'))
     cols=['project','module','arm','seed','worker_status','status','passed','line_pct','branch_pct','mutation_score',
-          'worker_seconds','input_tokens','output_tokens','generation_input_tokens','generation_output_tokens','initialization_cache_hits']
+          'covered_lines','total_lines','covered_branches','total_branches',
+          'retained_collected_nodes','retained_passed_nodes','retained_failed_nodes','retained_error_nodes',
+          'retained_skipped_nodes','retained_suite_all_pass','retained_collection_complete',
+          'coverage_scope','mutants_planned','mutants_killed','mutants_survived','mutants_unresolved',
+          'semantic_assertion_accuracy','execution_complete',
+          'worker_seconds','input_tokens','output_tokens','generation_input_tokens','generation_output_tokens','initialization_cache_hits',
+          'gpu_peak_allocated_gib','process_peak_rss_gib']
     with (root/(stage+'-modules.csv')).open('w') as stream:
         writer=csv.DictWriter(stream,fieldnames=cols,extrasaction='ignore');writer.writeheader();writer.writerows(rows)
+    measures={}
+    for arm in plan['arms']:
+        group=[r for r in rows if r['arm']==arm]
+        def coverage_summary(prefix):
+            valid=[r for r in group if r.get(prefix+'_pct') is not None]
+            return dict(measured_trials=len(valid),missing_trials=len(group)-len(valid),
+                        macro_mean_pct=sum(r[prefix+'_pct'] for r in valid)/len(valid) if valid else None,
+                        interpretation='conditional on measured trials; not an unconditional treatment effect')
+        measures[arm]=dict(planned_module_trials=len(group),execution_complete_trials=sum(r['execution_complete'] for r in group),
+                retained_all_pass_trials=sum(r.get('retained_suite_all_pass') is True for r in group),
+                retained_all_pass_rate=sum(r.get('retained_suite_all_pass') is True for r in group)/len(group)
+                    if group and any(r.get('retained_suite_all_pass') is not None for r in group) else None,
+                observed_successes_per_planned=sum(r.get('retained_suite_all_pass') is True for r in group)/len(group) if group else None,
+                rate_status='complete' if group and all(r.get('retained_suite_all_pass') is not None for r in group) else 'incomplete_or_unmeasured',
+                retained_suite_unmeasured_trials=sum(r.get('retained_suite_all_pass') is None for r in group),
+                line=coverage_summary('line'),branch=coverage_summary('branch'),
+                mutation_measured_trials=sum(r.get('mutation_score') is not None for r in group),
+                hallucination_rate=None,semantic_assertion_accuracy=None,
+                review_status='not measured; requires common error taxonomy and source-based assertion review')
+    write_json(root/(stage+'-measurement-summary.json'),dict(arms=measures,
+               scope='retained suites after upstream generation/repair/reduction, not first-attempt accuracy',
+               note='Unavailable trials remain in planned denominator. Rates are observed successful trials/planned; missing coverage is never zero-imputed.'))
     # Pair only matching targets/seeds and original mutant pools. Do not compare unrelated means.
     paired=[]
     for a in rows:
         if a['arm']!='baseline':continue
-        b=next((r for r in rows if r['arm']=='improved' and (r['project'],r['module'],r['seed'])==(a['project'],a['module'],a['seed'])),None)
+        treatment='api_contract' if plan['settings'].get('mechanism') else 'improved'
+        b=next((r for r in rows if r['arm']==treatment and (r['project'],r['module'],r['seed'])==(a['project'],a['module'],a['seed'])),None)
         if b is None:continue
         compatible=bool(a.get('mutant_pool_hash') and a.get('mutant_pool_hash')==b.get('mutant_pool_hash'))
         comparable=bool(a['execution_complete'] and b['execution_complete'] and a['status']=='scored' and b['status']=='scored')
@@ -245,12 +318,22 @@ def collect(root, plan, stage, queue):
     def fmt(v):return 'NA' if v is None else str(round(v,3)) if isinstance(v,float) else str(v)
     lines=['# Upstream Test4Py NF4 paired pilot',f'Stage: {stage}. Engineering execution complete: {process_ok}.',
            'Baseline uses actual pinned Test4Py init/type inference/RAG/generation/repair. Shared CPU embeddings and extraction adapters are recorded.',
-           'Improved adds verified type/member context, source dependencies and stdlib-import repair; assertion-changing reductions receive no automatic improved credit.',
-           'All failures remain. Mutation pool is small; equivalent mutants not filtered. Oracle accuracy is not measured.',
+           ('api_contract adds bounded static API/closure evidence; both arms share the assertion-preservation acceptance policy.'
+            if plan['settings'].get('mechanism') else
+            'Improved adds verified type/member context, source dependencies and stdlib-import repair; assertion-changing reductions receive no automatic improved credit.'),
+           'All failures remain. Coverage uses replayed original-passing retained nodes, NOT an all-pass candidate suite. Retained-suite pass is reported separately.',
+           'Mutation pool is small; equivalent mutants not filtered. Oracle accuracy is not measured.',
            'Project costs are shared across its modules; do not sum repeated project cost columns per module.',
            'Greedy initialization uses an exact-prompt shared cache. Fresh token costs depend on warm-cache order, not treatment. Compare generation/repair costs separately; initialization seeds are not independent replicas.',
            '', '| Project | Module | Arm | Seed | Status | Pass nodes | Line % | Branch % | Mutation |',
            '|---|---|---|---|---|---|---|---|---|']
+    if plan['settings'].get('test_output_contract'):
+        lines.insert(3, 'Both arms use the shared single-test-v1 generation/repair output contract. '
+                        'This is an adapted upstream baseline; raw upstream prompts are not identical.')
+    if plan['settings'].get('mechanism'):
+        lines.insert(3, 'Mechanism ablation: shared concise-file instruction and assertion-preservation gate in both arms; '
+                        'api_contract adds only static API/closure evidence. Multiple pytest tests are allowed. '
+                        'The legacy improved arm is not used.')
     lines += ['| '+' | '.join(fmt(r.get(k)) for k in ['project','module','arm','seed','status','passed','line_pct','branch_pct','mutation_score'])+' |' for r in rows]
     (root/(stage+'-report.md')).write_text('\n'.join(lines)+'\n')
     return process_ok
@@ -265,22 +348,35 @@ def validate_stress(calibrated, plan, revisions, slots):
 
 def execute(root, plan, stage, jobs):
     preflight=json.loads((root/'preflight.json').read_text())
+    if set(preflight)!=set(plan['frame']) or any(p.get('status')!='prepared' for p in preflight.values()):
+        raise ValueError('Every locked project must pass preparation before inference')
     calibrated=json.loads((root/'stress.json').read_text())
     slots=gpu_slots(jobs,'0,1' if jobs==2 else '0')
     revisions=json.loads((root/'resolved_models.json').read_text())
     validate_stress(calibrated,plan,revisions,slots)
     if stage=='main':
         small=json.loads((root/'small-summary.json').read_text())
-        if not small['execution_ready']:
-            raise ValueError('Small upstream worker check incomplete; do not run larger stage')
+        if not small.get('larger_ready',False):
+            raise ValueError('Small hardware/framework check incomplete or no real measured coverage path; do not run larger stage')
     revisions=json.loads((root/'resolved_models.json').read_text())
-    from huggingface_hub import snapshot_download
-    embedding_path=snapshot_download(plan['settings']['embedding'],revision=revisions['embedding'],ignore_patterns=['*.onnx','onnx/*','*.h5','*.msgpack'])
     queue=tasks(plan,stage)
     if (root/stage).exists():
         raise ValueError('Stage already attempted; no score-driven retries in the same output')
     (root/stage).mkdir()
     write_json(root/(stage+'-queue.json'),queue)
+    emit(root,stage,'schedule',workers_finished=0,workers_total=len(queue),
+         planned_module_trials=sum(len(t['modules']) for t in queue))
+    # Download is bounded too: a parent-process HF request must not bypass the screen clock.
+    remaining=screen_remaining(root) if stage=='small' else plan['worker_timeout']
+    download=command([sys.executable,'-c',
+        "import sys; from huggingface_hub import snapshot_download; print(snapshot_download(sys.argv[1],revision=sys.argv[2],ignore_patterns=['*.onnx','onnx/*','*.h5','*.msgpack']))",
+        plan['settings']['embedding'],revisions['embedding']],env=environment(),
+        timeout=max(1,int(remaining)),log_path=root/(stage+'-embedding-download.log')) if remaining>0 else dict(returncode=124,timeout=True)
+    write_json(root/(stage+'-embedding-download.json'),download)
+    if download['returncode'] or download['timeout']:
+        collect(root,plan,stage,queue)
+        return False
+    embedding_path=download['stdout'].strip().splitlines()[-1]
     def run_one(task,gpu):
         name=task['project'];key=f"{name}-{task['seed']}-{task['arm']}"
         folder=root/stage/key;folder.mkdir()
@@ -304,15 +400,22 @@ def execute(root, plan, stage, jobs):
                     PYTHONPATH=os.pathsep.join([str(root/'upstream'),str(product),str(BASE)]),
                     TRANSFORMER_PATH=embedding_path,PYTHONHASHSEED=str(task['seed']),
                     PYTEST_DISABLE_PLUGIN_AUTOLOAD='1',PYTEST_PLUGINS='pytest_jsonreport.plugin'))
-            proc=command([python,BASE/'benchmark_worker.py',folder/'worker-settings.json'],cwd=product,env=env,
-                         timeout=plan['worker_timeout'],log_path=folder/'worker.log',stream=True,label=key,console=Console('compact'))
+            remaining=screen_remaining(root) if stage=='small' else plan['worker_timeout']
+            if remaining<=0:
+                write_json(folder/'report.json',dict(status='screen_budget_exhausted',error='No inference started after screen deadline'))
+                proc=dict(returncode=124,timeout=True,seconds=0)
+            else:
+                proc=command([python,BASE/'benchmark_worker.py',folder/'worker-settings.json'],cwd=product,env=env,
+                             timeout=max(1,min(plan['worker_timeout'],int(remaining))),log_path=folder/'worker.log',stream=True,label=key,console=Console('compact'))
             write_json(folder/'process.json',proc)
         except Exception as exc:
             write_json(folder/'report.json',dict(status='launch_failed',error=repr(exc)))
         return key
-    for _,key in execute_modes(queue,slots,run_one):
+    for completed,(_,key) in enumerate(execute_modes(queue,slots,run_one),1):
         print('Ended: '+key,flush=True)
         collect(root,plan,stage,queue)
+        emit(root,stage,'worker_completed',workers_finished=completed,workers_total=len(queue),
+             planned_module_trials=sum(len(t['modules']) for t in queue))
     return collect(root,plan,stage,queue)
 
 
@@ -335,11 +438,15 @@ def main():
     parser.add_argument('--jobs',type=int,choices=[1,2],default=2)
     parser.add_argument('--max-input-tokens',type=int,choices=[4096,6144])
     parser.add_argument('--max-new-tokens',type=int,choices=[512,1024])
+    parser.add_argument('--test-output-contract',choices=['single-test-v1'])
+    parser.add_argument('--mechanism',choices=['api-contract-v1'])
     args=parser.parse_args();root=args.output.resolve()
     saved = json.loads((root/'plan.json').read_text()) if args.action != 'plan' else None
     max_input=args.max_input_tokens or (saved['settings']['max_input_tokens'] if saved else 6144)
     max_output=args.max_new_tokens or (saved['settings']['max_new_tokens'] if saved else 1024)
-    plan=build_plan(max_input,max_output)
+    contract=args.test_output_contract or (saved['settings'].get('test_output_contract') if saved else None)
+    mechanism=args.mechanism or (saved['settings'].get('mechanism') if saved else None)
+    plan=build_plan(max_input,max_output,contract,mechanism)
     if args.action=='plan':
         root.mkdir(parents=True,exist_ok=False);write_json(root/'plan.json',plan)
         write_json(root/'environment.json',dict(python=sys.version,packages=package_versions()))
@@ -348,8 +455,10 @@ def main():
     ok=False
     try:
         if args.action=='prepare':ok=prepare(root,plan)
-        elif args.action=='stress':ok=stress(root,plan,args.jobs)
-        elif args.action in ('small','run'):ok=execute(root,plan,'small' if args.action=='small' else 'main',args.jobs)
+        elif args.action in ('stress','small','run'):
+            from pilot.gpu_lease import gpu_lease
+            with gpu_lease(root,gpu_slots(args.jobs,'0,1' if args.jobs==2 else '0'),args.action):
+                ok=stress(root,plan,args.jobs) if args.action=='stress' else execute(root,plan,'small' if args.action=='small' else 'main',args.jobs)
         elif args.action=='report':
             for stage in ('small','main'):
                 if (root/(stage+'-queue.json')).exists():collect(root,plan,stage,json.loads((root/(stage+'-queue.json')).read_text()))

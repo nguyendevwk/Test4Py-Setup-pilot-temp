@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-30e21540-e293-4398-8784-733994e7a174",
+  "object": "chat.completion",
+  "created": 1795079538,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport gzip\nimport zlib\nimport pytest\nfrom tornado.util import GzipDecompressor\n\n\ndef test_decompress_full_stream(tmp_path):\n    \"\"\"Decompress a complete gzip stream and verify the output.\"\"\"\n    original = b\"Hello, world! \" * 1000\n    compressed = gzip.compress(original)\n\n    decompressor = GzipDecompressor()\n    # Decompress in a single call\n    result = decompressor.decompress(compressed)\n    # Flush to get any remaining data\n    result += decompressor.flush()\n\n    assert result == original\n    assert decompressor.unconsumed_tail == b\"\"\n\n\ndef test_decompress_with_max_length(tmp_path):\n    \"\"\"Decompress with a max_length that forces unconsumed_tail to be non‑empty.\"\"\"\n    original = b\"abc\" * 500\n    compressed = gzip.compress(original)\n\n    decompressor = GzipDecompressor()\n    # Decompress only a small chunk\n    part1 = decompressor.decompress(compressed[:10], max_length=5)\n    part2 = decompressor.decompress(decompressor.unconsumed_tail, max_length=5)\n    # Continue until all data is processed\n    remaining = decompressor.decompress(compressed[10:], max_length=0)\n    remaining += decompressor.flush()\n\n    assert part1 + part2 + remaining == original\n    assert decompressor.unconsumed_tail == b\"\"\n\n\ndef test_decompress_truncated_input_raises():\n    \"\"\"Decompressing a truncated gzip stream should raise an error on flush.\"\"\"\n    original = b\"data that will be truncated\"\n    compressed = gzip.compress(original)\n\n    # Truncate the compressed data to simulate corruption\n    truncated = compressed[:-10]\n\n    decompressor = GzipDecompressor()\n    decompressor.decompress(truncated)\n    with pytest.raises(zlib.error):\n        decompressor.flush()\n```",
+        "reasoning": "Need tests for GzipDecompressor. Use tmp_path to create gzip file? We can compress data using zlib or gzip module. Use gzip.compress. Test normal decompression, boundary max_length, error on truncated. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005213024,
+    "prompt_tokens": 637,
+    "prompt_time": 0.041050758,
+    "completion_tokens": 446,
+    "completion_time": 0.484616794,
+    "total_tokens": 1083,
+    "total_time": 0.525667552,
+    "completion_tokens_details": {
+      "reasoning_tokens": 50
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh81nwe1x9etjfwzqm7cpb",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport gzip\nimport zlib\nimport pytest\nfrom tornado.util import GzipDecompressor\n\n\ndef test_decompress_full_stream(tmp_path):\n    \"\"\"Decompress a complete gzip stream and verify the output.\"\"\"\n    original = b\"Hello, world! \" * 1000\n    compressed = gzip.compress(original)\n\n    decompressor = GzipDecompressor()\n    # Decompress in a single call\n    result = decompressor.decompress(compressed)\n    # Flush to get any remaining data\n    result += decompressor.flush()\n\n    assert result == original\n    assert decompressor.unconsumed_tail == b\"\"\n\n\ndef test_decompress_with_max_length(tmp_path):\n    \"\"\"Decompress with a max_length that forces unconsumed_tail to be non‑empty.\"\"\"\n    original = b\"abc\" * 500\n    compressed = gzip.compress(original)\n\n    decompressor = GzipDecompressor()\n    # Decompress only a small chunk\n    part1 = decompressor.decompress(compressed[:10], max_length=5)\n    part2 = decompressor.decompress(decompressor.unconsumed_tail, max_length=5)\n    # Continue until all data is processed\n    remaining = decompressor.decompress(compressed[10:], max_length=0)\n    remaining += decompressor.flush()\n\n    assert part1 + part2 + remaining == original\n    assert decompressor.unconsumed_tail == b\"\"\n\n\ndef test_decompress_truncated_input_raises():\n    \"\"\"Decompressing a truncated gzip stream should raise an error on flush.\"\"\"\n    original = b\"data that will be truncated\"\n    compressed = gzip.compress(original)\n\n    # Truncate the compressed data to simulate corruption\n    truncated = compressed[:-10]\n\n    decompressor = GzipDecompressor()\n    decompressor.decompress(truncated)\n    with pytest.raises(zlib.error):\n        decompressor.flush()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "e266f4ffb82f4697a19c15e07ee0629f",
+  "_api_plus_pacing_seconds": 1.148579497996252
+}

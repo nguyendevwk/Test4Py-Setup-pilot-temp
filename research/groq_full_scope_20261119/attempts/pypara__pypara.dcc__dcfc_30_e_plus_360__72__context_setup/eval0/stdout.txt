@@ -1,0 +1,23 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_boundary_day_adjustments _________________________
+
+    def test_boundary_day_adjustments():
+        """Test the special handling of 31st days for start and asof dates."""
+        # Start on 31st -> should be treated as 30th
+        start = datetime.date(2007, 12, 31)
+        # Asof on 31st -> should be incremented by one day
+        asof = datetime.date(2008, 2, 28)  # 28th is not 31st, so no increment
+        end = asof
+        # Manually compute expected nod: (28-30)+30*(2-12)+360*(2008-2007) = -2+30*(-10)+360 = -2-300+360 = 58
+        expected_fraction = Decimal(58) / Decimal(360)
+        assert dcfc_30_e_plus_360(start, asof, end) == expected_fraction
+    
+        # Asof on 31st: increment by one day
+>       asof_31 = datetime.date(2008, 2, 31)
+E       ValueError: day is out of range for month
+
+test_generated.py:31: ValueError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_boundary_day_adjustments - ValueError: day is ...
+1 failed, 2 passed in 0.18s

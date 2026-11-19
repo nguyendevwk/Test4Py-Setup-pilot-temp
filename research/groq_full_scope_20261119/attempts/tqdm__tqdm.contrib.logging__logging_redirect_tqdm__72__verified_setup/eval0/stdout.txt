@@ -1,0 +1,52 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_logging_redirect_basic __________________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7fec50e2b970>
+
+    def test_logging_redirect_basic(capsys):
+        LOG = logging.getLogger("test_basic")
+        logging.basicConfig(level=logging.INFO, stream=sys.stdout, format="%(message)s")
+        with logging_redirect_tqdm():
+            for i in trange(5, desc="test"):
+                if i == 2:
+                    LOG.info("redirected message")
+        # Capture stdout after context
+        out, err = capsys.readouterr()
+        # The tqdm progress bar should be present
+>       assert "test" in out
+E       AssertionError: assert 'test' in ''
+
+test_generated.py:20: AssertionError
+__________________ test_logging_redirect_preserve_non_console __________________
+
+    def test_logging_redirect_preserve_non_console():
+        LOG = logging.getLogger("test_preserve")
+        # Add a console handler with a custom formatter
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(logging.Formatter(">>> %(message)s"))
+        LOG.addHandler(console_handler)
+        LOG.setLevel(logging.INFO)
+    
+        # Capture stdout
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            with logging_redirect_tqdm(loggers=[LOG]):
+                LOG.info("inside")
+        # The message should be redirected via tqdm.write, not the original console handler
+        # tqdm.write prefixes with a newline and does not use the formatter
+        captured = out.getvalue()
+>       assert "inside" in captured
+E       AssertionError: assert 'inside' in ''
+
+test_generated.py:67: AssertionError
+----------------------------- Captured stdout call -----------------------------
+>>> inside
+----------------------------- Captured stderr call -----------------------------
+inside
+------------------------------ Captured log call -------------------------------
+INFO     test_preserve:test_generated.py:63 inside
+=========================== short test summary info ============================
+FAILED test_generated.py::test_logging_redirect_basic - AssertionError: asser...
+FAILED test_generated.py::test_logging_redirect_preserve_non_console - Assert...
+2 failed, 1 passed in 0.18s

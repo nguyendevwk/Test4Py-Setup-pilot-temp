@@ -1,0 +1,96 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_load_nonexistent_file_raises_pyfileerror _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/sanic__sanic.utils__load_module_from_file_location__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_nonexistent_file_rai0')
+
+    def test_load_nonexistent_file_raises_pyfileerror(tmp_path):
+        """Test that loading a non‑existent file raises PyFileError."""
+        nonexistent_path = tmp_path / "does_not_exist.cfg"
+    
+        with pytest.raises(PyFileError) as excinfo:
+>           load_module_from_file_location(str(nonexistent_path))
+
+test_generated.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+location = '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/sanic__sanic.utils__load_module_from_file_location__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_nonexistent_file_rai0/does_not_exist.cfg'
+encoding = 'utf8', args = (), kwargs = {}
+
+    def load_module_from_file_location(
+        location: bytes | str | Path, encoding: str = "utf8", *args, **kwargs
+    ):  # noqa
+        """Returns loaded module provided as a file path.
+    
+        :param args:
+            Corresponds to importlib.util.spec_from_file_location location
+            parameters,but with this differences:
+            - It has to be of a string or bytes type.
+            - You can also use here environment variables
+              in format ${some_env_var}.
+              Mark that $some_env_var will not be resolved as environment variable.
+        :encoding:
+            If location parameter is of a bytes type, then use this encoding
+            to decode it into string.
+        :param args:
+            Corresponds to the rest of importlib.util.spec_from_file_location
+            parameters.
+        :param kwargs:
+            Corresponds to the rest of importlib.util.spec_from_file_location
+            parameters.
+    
+        For example You can:
+    
+            some_module = load_module_from_file_location(
+                "some_module_name",
+                "/some/path/${some_env_var}"
+            )
+        """
+        if isinstance(location, bytes):
+            location = location.decode(encoding)
+    
+        if isinstance(location, Path) or "/" in location or "$" in location:
+            if not isinstance(location, Path):
+                # A) Check if location contains any environment variables
+                #    in format ${some_env_var}.
+                env_vars_in_location = set(re_findall(r"\${(.+?)}", location))
+    
+                # B) Check these variables exists in environment.
+                not_defined_env_vars = env_vars_in_location.difference(
+                    os_environ.keys()
+                )
+                if not_defined_env_vars:
+                    raise LoadFileException(
+                        "The following environment variables are not set: "
+                        f"{', '.join(not_defined_env_vars)}"
+                    )
+    
+                # C) Substitute them in location.
+                for env_var in env_vars_in_location:
+                    location = location.replace(
+                        "${" + env_var + "}", os_environ[env_var]
+                    )
+    
+            location = str(location)
+            if ".py" in location:
+                name = location.split("/")[-1].split(".")[
+                    0
+                ]  # get just the file name without path and .py extension
+                _mod_spec = spec_from_file_location(
+                    name, location, *args, **kwargs
+                )
+                assert _mod_spec is not None  # type assertion for mypy
+                module = module_from_spec(_mod_spec)
+                _mod_spec.loader.exec_module(module)  # type: ignore
+    
+            else:
+                module = types.ModuleType("config")
+                module.__file__ = str(location)
+                try:
+>                   with open(location) as config_file:
+E                   FileNotFoundError: [Errno 2] Unable to load configuration file (e.strerror): '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/sanic__sanic.utils__load_module_from_file_location__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_nonexistent_file_rai0/does_not_exist.cfg'
+
+../../../../groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages/sanic/utils.py:124: FileNotFoundError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_load_nonexistent_file_raises_pyfileerror - Fil...
+1 failed, 2 passed in 0.35s

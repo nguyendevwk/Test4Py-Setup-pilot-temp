@@ -1,0 +1,72 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_parse_known_args_success _________________________
+
+    def test_parse_known_args_success():
+        """Valid arguments are parsed into a namespace without errors."""
+        parser = HTTPieManagerArgumentParser()
+        # Use a simple request: GET https://example.com
+        args = ["GET", "https://example.com"]
+        namespace, unknown = parser.parse_known_args(args)
+        assert isinstance(namespace, argparse.Namespace)
+>       assert namespace.method == "GET"
+E       AttributeError: 'Namespace' object has no attribute 'method'
+
+test_generated.py:13: AttributeError
+__________ test_parse_known_args_unknown_option_raises_argument_error __________
+
+    def test_parse_known_args_unknown_option_raises_argument_error():
+        """Unknown options trigger an ArgumentError via the overridden method."""
+        parser = HTTPieManagerArgumentParser()
+        # Pass an unknown flag that argparse would normally exit on
+        args = ["GET", "https://example.com", "--unknown"]
+>       with pytest.raises(argparse.ArgumentError) as excinfo:
+E       Failed: DID NOT RAISE ArgumentError
+
+test_generated.py:22: Failed
+_________ test_parse_known_args_system_exit_handled_as_argument_error __________
+
+    def test_parse_known_args_system_exit_handled_as_argument_error():
+        """When the parser exits with code 2 and no root attribute, an ArgumentError is raised."""
+        parser = HTTPieManagerArgumentParser()
+        # Provide an invalid combination that causes argparse to exit with code 2
+        args = ["--help", "GET", "https://example.com"]
+        with pytest.raises(argparse.ArgumentError) as excinfo:
+>           parser.parse_known_args(args)
+
+test_generated.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/cli/argparser.py:131: in parse_known_args
+    return super().parse_known_args(args, namespace)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:1866: in parse_known_args
+    namespace, args = self._parse_known_args(args, namespace)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:2079: in _parse_known_args
+    start_index = consume_optional(start_index)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:2019: in consume_optional
+    take_action(action, args, option_string)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:1943: in take_action
+    action(self, namespace, argument_values, option_string)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:1107: in __call__
+    parser.exit()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = HTTPieManagerArgumentParser(prog='__main__.py', usage=None, description=None, formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=True)
+status = 0, message = None
+
+    def exit(self, status=0, message=None):
+        if message:
+            self._print_message(message, _sys.stderr)
+>       _sys.exit(status)
+E       SystemExit: 0
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:2581: SystemExit
+----------------------------- Captured stdout call -----------------------------
+usage: __main__.py [-h]
+
+options:
+  -h, --help  show this help message and exit
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_known_args_success - AttributeError: 'Na...
+FAILED test_generated.py::test_parse_known_args_unknown_option_raises_argument_error
+FAILED test_generated.py::test_parse_known_args_system_exit_handled_as_argument_error
+3 failed in 0.91s

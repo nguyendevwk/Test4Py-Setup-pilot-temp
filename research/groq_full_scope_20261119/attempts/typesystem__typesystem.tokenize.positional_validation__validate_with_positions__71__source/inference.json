@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-d63cc6cb-5e82-45d3-b84c-9117116d2d0d",
+  "object": "chat.completion",
+  "created": 1795079396,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokens import Token\nfrom typesystem.fields import Field\nfrom typesystem.schemas import Schema\nfrom typesystem.tokenize.positional_validation import validate_with_positions\nfrom typesystem.base import ValidationError, Message\n\nclass DummySchema(Schema):\n    name = Field(str, required=True)\n\ndef test_validate_with_positions_success():\n    token = Token(value=\"hello\", start=0, end=5)\n    result = validate_with_positions(token=token, validator=Field(str))\n    assert result == \"hello\"\n\ndef test_validate_with_positions_required_field():\n    token = Token(value={}, start=10, end=20)\n    with pytest.raises(ValidationError) as excinfo:\n        validate_with_positions(token=token, validator=DummySchema)\n    errors = excinfo.value.messages()\n    assert len(errors) == 1\n    msg = errors[0]\n    assert isinstance(msg, Message)\n    assert msg.code == \"required\"\n    assert msg.text == \"The field 'name' is required.\"\n    assert msg.start_position == 10\n    assert msg.end_position == 20\n\ndef test_validate_with_positions_type_error():\n    token = Token(value=123, start=30, end=35)\n    with pytest.raises(ValidationError) as excinfo:\n        validate_with_positions(token=token, validator=Field(str))\n    errors = excinfo.value.messages()\n    assert len(errors) == 1\n    msg = errors[0]\n    assert msg.code == \"type\"\n    assert msg.text == \"Expected string, got int.\"\n    assert msg.start_position == 30\n    assert msg.end_position == 35\n```",
+        "reasoning": "We need to test validate_with_positions. Need to create Token, Field, Schema. Use typesystem library. We'll create simple schema with required field. Use tmp_path? Not needed. We'll test normal: token with value passes. Boundary: missing required field triggers error with positions. Error: validator not Field or Schema? But function expects validator. We'll test that ValidationError messages include positions. Use simple schema: class Person(Schema): name = Field(str, required=True). Create token representing dict with missing name. Token likely from typesystem.tokenize.tokens.Token. Need to construct Token with value dict and positions. Might be complex. Maybe easier: use Field directly. Field.validate expects value. For token, we can create Token with value dict and start/end positions. Token.lookup returns subtoken. We can create simple Token with start=0 end=10? Let's inspect typesystem.tokenize.tokens.Token. But offline. Assume Token has attributes value, start, end, lookup(index). For dict, lookup returns Token for key? Might be complex. Maybe easier: use Field validator and token with simple value. For required field, if missing, ValidationError thrown. But token.lookup may fail. Might be okay.\n\nSimpler: test that when validator raises ValidationError, the returned ValidationError has messages with start_position and end_position equal to token.start and token.end. Use a simple token with start=1, end=5. Use Field(str, required=True). token.value = None? That will raise required. Then validate_with_positions should raise ValidationError with message code 'required', start_position=1, end_position=5. We'll assert that.\n\nAlso test normal: token.value='abc', validator=Field(str). Should return 'abc'.\n\nThird test: boundary: token.value=123, validator=Field(str). Should raise ValidationError with code 'type' maybe. Check message text.\n\nImplement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053543276,
+    "prompt_tokens": 445,
+    "prompt_time": 0.024213431,
+    "completion_tokens": 736,
+    "completion_time": 0.833417123,
+    "total_tokens": 1181,
+    "total_time": 0.857630554,
+    "completion_tokens_details": {
+      "reasoning_tokens": 385
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh3ntmenn9n350v91xxe4r",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokens import Token\nfrom typesystem.fields import Field\nfrom typesystem.schemas import Schema\nfrom typesystem.tokenize.positional_validation import validate_with_positions\nfrom typesystem.base import ValidationError, Message\n\nclass DummySchema(Schema):\n    name = Field(str, required=True)\n\ndef test_validate_with_positions_success():\n    token = Token(value=\"hello\", start=0, end=5)\n    result = validate_with_positions(token=token, validator=Field(str))\n    assert result == \"hello\"\n\ndef test_validate_with_positions_required_field():\n    token = Token(value={}, start=10, end=20)\n    with pytest.raises(ValidationError) as excinfo:\n        validate_with_positions(token=token, validator=DummySchema)\n    errors = excinfo.value.messages()\n    assert len(errors) == 1\n    msg = errors[0]\n    assert isinstance(msg, Message)\n    assert msg.code == \"required\"\n    assert msg.text == \"The field 'name' is required.\"\n    assert msg.start_position == 10\n    assert msg.end_position == 20\n\ndef test_validate_with_positions_type_error():\n    token = Token(value=123, start=30, end=35)\n    with pytest.raises(ValidationError) as excinfo:\n        validate_with_positions(token=token, validator=Field(str))\n    errors = excinfo.value.messages()\n    assert len(errors) == 1\n    msg = errors[0]\n    assert msg.code == \"type\"\n    assert msg.text == \"Expected string, got int.\"\n    assert msg.start_position == 30\n    assert msg.end_position == 35\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "ea53855475bb45aab266ae9706a4c380",
+  "_api_plus_pacing_seconds": 1.3734097490087152
+}

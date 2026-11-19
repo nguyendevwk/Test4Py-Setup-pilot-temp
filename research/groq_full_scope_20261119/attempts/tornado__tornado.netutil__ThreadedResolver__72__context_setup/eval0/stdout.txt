@@ -1,0 +1,57 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_threadpool_reuse_same_pid ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__ThreadedResolver__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_threadpool_reuse_same_pid0')
+
+    def test_threadpool_reuse_same_pid(tmp_path):
+        """ThreadedResolver should reuse the same ThreadPoolExecutor within the same process."""
+        # Create two resolvers with different thread counts
+        r1 = ThreadedResolver()
+        r1.initialize(num_threads=2)
+        r2 = ThreadedResolver()
+        r2.initialize(num_threads=5)
+    
+        # The underlying executor should be the same instance
+        assert r1.executor is r2.executor
+        # The pool should have the size of the first created pool (2 threads)
+        assert isinstance(r1.executor, concurrent.futures.ThreadPoolExecutor)
+>       assert r1.executor._max_workers == 2
+E       assert 10 == 2
+E        +  where 10 = <concurrent.futures.thread.ThreadPoolExecutor object at 0x7f146c3ec730>._max_workers
+E        +    where <concurrent.futures.thread.ThreadPoolExecutor object at 0x7f146c3ec730> = <tornado.netutil.ThreadedResolver object at 0x7f146c3ec250>.executor
+
+test_generated.py:21: AssertionError
+____________________ test_resolve_returns_expected_address _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__ThreadedResolver__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_resolve_returns_expected_0')
+
+    def test_resolve_returns_expected_address(tmp_path):
+        """ThreadedResolver.resolve should return a list of (family, address) tuples."""
+        resolver = ThreadedResolver()
+        resolver.initialize(num_threads=3)
+        # Resolve a known host (localhost) on a common port
+        result = resolver.resolve("localhost", 80, socket.AF_INET)
+        # The result should be a list of tuples
+>       assert isinstance(result, list)
+E       assert False
+E        +  where False = isinstance(<Future pending>, list)
+
+test_generated.py:40: AssertionError
+____________________ test_resolve_invalid_host_raises_error ____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__ThreadedResolver__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_resolve_invalid_host_rais0')
+
+    def test_resolve_invalid_host_raises_error(tmp_path):
+        """Resolving an invalid hostname should raise an IOError."""
+        resolver = ThreadedResolver()
+        resolver.initialize(num_threads=1)
+>       with pytest.raises(IOError):
+E       Failed: DID NOT RAISE OSError
+
+test_generated.py:56: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_threadpool_reuse_same_pid - assert 10 == 2
+FAILED test_generated.py::test_resolve_returns_expected_address - assert False
+FAILED test_generated.py::test_resolve_invalid_host_raises_error - Failed: DI...
+3 failed in 0.20s

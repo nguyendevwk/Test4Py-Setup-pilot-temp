@@ -1,0 +1,50 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________________ test_class_manager_and_node_behavior _____________________
+
+    def test_class_manager_and_node_behavior():
+        cm = ClassManager()
+    
+        # Create a new ClassNode via ClassManager
+        node = cm.create('pkg.mod.ClassA', 'moduleA')
+        assert isinstance(node, ClassNode)
+        assert node.ns == 'pkg.mod.ClassA'
+        assert node.get_module() == 'moduleA'
+        assert node.get_mro() == ['pkg.mod.ClassA']
+    
+        # Repeated create with same name returns the same instance
+        same_node = cm.create('pkg.mod.ClassA', 'moduleB')
+        assert same_node is node
+        assert same_node.get_module() == 'moduleA'  # original module preserved
+    
+        # get returns the stored node
+        assert cm.get('pkg.mod.ClassA') is node
+    
+        # get on unknown name returns None
+        assert cm.get('unknown') is None
+    
+        # get_classes returns the internal mapping
+        classes = cm.get_classes()
+        assert isinstance(classes, dict)
+        assert classes['pkg.mod.ClassA'] is node
+    
+        # Test ClassNode add_parent behavior
+        node.add_parent('pkg.mod.Base')
+        assert node.get_mro() == ['pkg.mod.ClassA', 'pkg.mod.Base']
+    
+        node.add_parent(['pkg.mod.Base', 'pkg.mod.Interface'])
+        assert node.get_mro() == ['pkg.mod.ClassA', 'pkg.mod.Base', 'pkg.mod.Interface']
+    
+        # Adding an existing parent should not duplicate it
+        node.add_parent('pkg.mod.Base')
+>       assert node.get_mro() == ['pkg.mod.ClassA', 'pkg.mod.Base', 'pkg.mod.Interface']
+E       AssertionError: assert ['pkg.mod.Cla...pkg.mod.Base'] == ['pkg.mod.Cla...od.Interface']
+E         
+E         At index 1 diff: 'pkg.mod.Interface' != 'pkg.mod.Base'
+E         Use -v to get more diff
+
+../../standardized_research_artifacts/ablation_runs/pycg_classes/full_method/v1_exec/test_run.py:39: AssertionError
+=========================== short test summary info ============================
+FAILED ../../standardized_research_artifacts/ablation_runs/pycg_classes/full_method/v1_exec/test_run.py::test_class_manager_and_node_behavior
+1 failed in 0.14s
+

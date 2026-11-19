@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-84014717-d272-4b48-9566-58fab03c938b",
+  "object": "chat.completion",
+  "created": 1795078339,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.fields import Any, Int, Field\nfrom typesystem.composites import Not\n\n\ndef test_not_rejects_value_that_matches_negated():\n    \"\"\"Not should raise a validation error when the negated field accepts the value.\"\"\"\n    not_field = Not(Int())\n    with pytest.raises(Field.ValidationError) as excinfo:\n        not_field.validate(42)  # 42 is a valid int, so Not should reject it\n    assert \"Must not match.\" in str(excinfo.value)\n\n\ndef test_not_accepts_value_that_does_not_match_negated():\n    \"\"\"Not should accept values that the negated field rejects.\"\"\"\n    not_field = Not(Int())\n    # 3.14 is not an int, so Int rejects it; Not should accept it\n    result = not_field.validate(3.14)\n    assert result == 3.14\n\n\ndef test_not_accepts_null_when_negated_rejects_null():\n    \"\"\"Not should accept None if the negated field rejects it.\"\"\"\n    not_field = Not(Int())\n    # Int rejects None; Not should accept it\n    result = not_field.validate(None)\n    assert result is None\n```",
+        "reasoning": "We need to write tests for Not field. It inherits Field. We need to test normal, boundary, error. Use tmp_path? Not needed. Use pytest. We'll create a simple custom field that always passes or fails. Use typesystem.fields.Any? Let's inspect Field behavior. But we can't import typesystem? It's available. We'll test Not with Any? Any probably accepts any value. But Not should raise error if negated passes. So test that Not with Any will always error? Actually Any.validate_or_error returns (value, None). So Not will raise error. So test that Not(Any()) raises error. Also test with a custom field that fails validation: e.g., Field that requires int? Use typesystem.fields.Int? Let's import Int. Then Not(Int()) should pass for non-int values. For int value, should error. Also test boundary: None? Any allows null? Not should allow null? It inherits Field, but allow_null not allowed. So test that Not(Int()) with None passes? Int.validate_or_error likely fails on None. So Not should pass. Also test error message. Use pytest.raises and check error message. Let's write three tests: test_not_accepts_valid_value, test_not_accepts_invalid_value, test_not_accepts_null. Use tmp_path not needed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05350001,
+    "prompt_tokens": 356,
+    "prompt_time": 0.01007554,
+    "completion_tokens": 519,
+    "completion_time": 0.644573577,
+    "total_tokens": 875,
+    "total_time": 0.654649117,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 265
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg3eeye3ttnyxvck1dnnmk",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.fields import Any, Int, Field\nfrom typesystem.composites import Not\n\n\ndef test_not_rejects_value_that_matches_negated():\n    \"\"\"Not should raise a validation error when the negated field accepts the value.\"\"\"\n    not_field = Not(Int())\n    with pytest.raises(Field.ValidationError) as excinfo:\n        not_field.validate(42)  # 42 is a valid int, so Not should reject it\n    assert \"Must not match.\" in str(excinfo.value)\n\n\ndef test_not_accepts_value_that_does_not_match_negated():\n    \"\"\"Not should accept values that the negated field rejects.\"\"\"\n    not_field = Not(Int())\n    # 3.14 is not an int, so Int rejects it; Not should accept it\n    result = not_field.validate(3.14)\n    assert result == 3.14\n\n\ndef test_not_accepts_null_when_negated_rejects_null():\n    \"\"\"Not should accept None if the negated field rejects it.\"\"\"\n    not_field = Not(Int())\n    # Int rejects None; Not should accept it\n    result = not_field.validate(None)\n    assert result is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0355360810062848
+}

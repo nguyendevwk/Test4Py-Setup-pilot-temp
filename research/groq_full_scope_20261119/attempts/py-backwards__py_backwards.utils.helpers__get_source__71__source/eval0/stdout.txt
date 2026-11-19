@@ -1,0 +1,84 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_get_source_returns_clean_source _____________________
+
+    def test_get_source_returns_clean_source():
+        def sample_function(x, y=2):
+            """Example docstring."""
+            return x + y
+    
+        source = get_source(sample_function)
+        # The returned source should match the original function definition without
+        # leading indentation and with the correct signature.
+        expected = """def sample_function(x, y=2):
+            \"\"\"Example docstring.\"\"\"
+            return x + y"""
+>       assert source == expected
+E       assert 'def sample_f...eturn x + y\n' == 'def sample_f... return x + y'
+E         
+E           def sample_function(x, y=2):
+E         -         """Example docstring."""
+E         ? ----
+E         +     """Example docstring."""
+E         -         return x + y
+E         ? ----
+E         +     return x + y
+E         ?                 +
+
+test_generated.py:18: AssertionError
+__________________ test_get_source_raises_on_builtin_function __________________
+
+    def test_get_source_raises_on_builtin_function():
+        with pytest.raises(OSError):
+>           get_source(builtins.len)
+
+test_generated.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/helpers.py:34: in get_source
+    source_lines = getsource(fn).split('\n')
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:1139: in getsource
+    lines, lnum = getsourcelines(object)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:1121: in getsourcelines
+    lines, lnum = findsource(object)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:940: in findsource
+    file = getsourcefile(object)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:817: in getsourcefile
+    filename = getfile(object)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+object = <built-in function len>
+
+    def getfile(object):
+        """Work out which source or compiled file an object was defined in."""
+        if ismodule(object):
+            if getattr(object, '__file__', None):
+                return object.__file__
+            raise TypeError('{!r} is a built-in module'.format(object))
+        if isclass(object):
+            if hasattr(object, '__module__'):
+                module = sys.modules.get(object.__module__)
+                if getattr(module, '__file__', None):
+                    return module.__file__
+                if object.__module__ == '__main__':
+                    raise OSError('source code not available')
+            raise TypeError('{!r} is a built-in class'.format(object))
+        if ismethod(object):
+            object = object.__func__
+        if isfunction(object):
+            object = object.__code__
+        if istraceback(object):
+            object = object.tb_frame
+        if isframe(object):
+            object = object.f_code
+        if iscode(object):
+            return object.co_filename
+>       raise TypeError('module, class, method, function, traceback, frame, or '
+                        'code object was expected, got {}'.format(
+                        type(object).__name__))
+E       TypeError: module, class, method, function, traceback, frame, or code object was expected, got builtin_function_or_method
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:797: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_source_returns_clean_source - assert 'def ...
+FAILED test_generated.py::test_get_source_raises_on_builtin_function - TypeEr...
+2 failed, 1 passed in 0.23s

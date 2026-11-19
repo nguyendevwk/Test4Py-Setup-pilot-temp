@@ -1,0 +1,27 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_raise_exc_info_raises_original_exception _________________
+
+    def test_raise_exc_info_raises_original_exception():
+        """raise_exc_info should raise the exception provided in exc_info."""
+        exc = ValueError("test error")
+        tb = exc.__traceback__
+        exc_info: Tuple[Optional[type], Optional[BaseException], Optional[TracebackType]] = (
+            type(exc),
+            exc,
+            tb,
+        )
+        with pytest.raises(ValueError) as excinfo:
+            raise_exc_info(exc_info)
+        # The raised exception should be the same instance
+        assert excinfo.value is exc
+        # The traceback should be preserved
+>       assert excinfo.value.__traceback__ is tb
+E       AssertionError: assert <traceback object at 0x7f6ad87b4fc0> is None
+E        +  where <traceback object at 0x7f6ad87b4fc0> = ValueError('test error').__traceback__
+E        +    where ValueError('test error') = <ExceptionInfo ValueError('test error') tblen=2>.value
+
+test_generated.py:23: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_raise_exc_info_raises_original_exception - Ass...
+1 failed, 2 passed in 0.14s

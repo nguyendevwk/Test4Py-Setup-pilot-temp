@@ -1,0 +1,125 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_configure_with_class_and_kwargs _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.util__Configurable__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_configure_with_class_and_0')
+
+    def test_configure_with_class_and_kwargs(tmp_path):
+        # Ensure default implementation is used initially
+        instance = DummyBase()
+        assert isinstance(instance, DummyImpl)
+        assert instance._impl_marker is True
+        assert instance._init_kwargs == {}
+    
+        # Configure to use AlternateImpl with a keyword argument
+        DummyBase.configure(AlternateImpl, foo="bar")
+        instance2 = DummyBase()
+>       assert isinstance(instance2, AlternateImpl)
+E       assert False
+E        +  where False = isinstance(<test_generated.DummyImpl object at 0x7f7800c437c0>, AlternateImpl)
+
+test_generated.py:49: AssertionError
+_________________ test_configure_with_string_import_and_error __________________
+
+name = 'tornado.util.AlternateImpl'
+
+    def import_object(name: str) -> Any:
+        """Imports an object by name.
+    
+        ``import_object('x')`` is equivalent to ``import x``.
+        ``import_object('x.y.z')`` is equivalent to ``from x.y import z``.
+    
+        >>> import tornado.escape
+        >>> import_object('tornado.escape') is tornado.escape
+        True
+        >>> import_object('tornado.escape.utf8') is tornado.escape.utf8
+        True
+        >>> import_object('tornado') is tornado
+        True
+        >>> import_object('tornado.missing_module')
+        Traceback (most recent call last):
+            ...
+        ImportError: No module named missing_module
+        """
+        if name.count(".") == 0:
+            return __import__(name)
+    
+        parts = name.split(".")
+        obj = __import__(".".join(parts[:-1]), fromlist=[parts[-1]])
+        try:
+>           return getattr(obj, parts[-1])
+E           AttributeError: module 'tornado.util' has no attribute 'AlternateImpl'
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/util.py:132: AttributeError
+
+During handling of the above exception, another exception occurred:
+
+    def test_configure_with_string_import_and_error():
+        # Importing a valid class by string should work
+>       DummyBase.configure("tornado.util.AlternateImpl")
+
+test_generated.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/util.py:303: in configure
+    impl = typing.cast(Type[Configurable], import_object(impl))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'tornado.util.AlternateImpl'
+
+    def import_object(name: str) -> Any:
+        """Imports an object by name.
+    
+        ``import_object('x')`` is equivalent to ``import x``.
+        ``import_object('x.y.z')`` is equivalent to ``from x.y import z``.
+    
+        >>> import tornado.escape
+        >>> import_object('tornado.escape') is tornado.escape
+        True
+        >>> import_object('tornado.escape.utf8') is tornado.escape.utf8
+        True
+        >>> import_object('tornado') is tornado
+        True
+        >>> import_object('tornado.missing_module')
+        Traceback (most recent call last):
+            ...
+        ImportError: No module named missing_module
+        """
+        if name.count(".") == 0:
+            return __import__(name)
+    
+        parts = name.split(".")
+        obj = __import__(".".join(parts[:-1]), fromlist=[parts[-1]])
+        try:
+            return getattr(obj, parts[-1])
+        except AttributeError:
+>           raise ImportError("No module named %s" % parts[-1])
+E           ImportError: No module named AlternateImpl
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/util.py:134: ImportError
+_____________________ test_invalid_subclass_configuration ______________________
+
+    def test_invalid_subclass_configuration():
+        # Attempt to configure with an unrelated class should raise ValueError
+        class Unrelated:
+            pass
+    
+        with pytest.raises(ValueError):
+            DummyBase.configure(Unrelated)
+    
+        # Attempt to configure with a subclass that does not inherit from DummyBase
+        class NotDerived(DummyBase):
+            pass
+    
+        # This should be allowed because it is a subclass of DummyBase
+        DummyBase.configure(NotDerived)
+        instance = DummyBase()
+>       assert isinstance(instance, NotDerived)
+E       AssertionError: assert False
+E        +  where False = isinstance(<test_generated.DummyImpl object at 0x7f7800cefac0>, <class 'test_generated.test_invalid_subclass_configuration.<locals>.NotDerived'>)
+
+test_generated.py:92: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_configure_with_class_and_kwargs - assert False
+FAILED test_generated.py::test_configure_with_string_import_and_error - Impor...
+FAILED test_generated.py::test_invalid_subclass_configuration - AssertionErro...
+3 failed in 0.30s

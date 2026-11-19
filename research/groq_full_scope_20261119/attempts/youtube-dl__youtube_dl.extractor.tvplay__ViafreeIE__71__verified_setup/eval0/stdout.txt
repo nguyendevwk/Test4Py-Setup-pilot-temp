@@ -1,0 +1,165 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_suitable_excludes_tvplay _________________________
+
+    def test_suitable_excludes_tvplay():
+        """ViafreeIE.suitable should return False for URLs that TVPlayIE considers suitable."""
+        url = "http://www.viafree.no/programmer/underholdning/det-beste-vorspielet/sesong-2/episode-1"
+>       assert TVPlayIE.suitable(url) is True
+E       AssertionError: assert False is True
+E        +  where False = suitable('http://www.viafree.no/programmer/underholdning/det-beste-vorspielet/sesong-2/episode-1')
+E        +    where suitable = TVPlayIE.suitable
+
+test_generated.py:12: AssertionError
+__________________________ test_real_extract_success ___________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb106d27ca0>
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.tvplay__ViafreeIE__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_real_extract_success0')
+
+    def test_real_extract_success(monkeypatch, tmp_path):
+        """_real_extract should parse JSON and return expected fields."""
+        # Prepare dummy JSON responses
+        content_json = {
+            "_embedded": {
+                "viafreeBlocks": [
+                    {
+                        "_embedded": {
+                            "program": {
+                                "guid": "12345",
+                                "episode": {
+                                    "seriesTitle": "Test Series",
+                                    "episodeNumber": "7",
+                                    "seasonNumber": "2"
+                                },
+                                "video": {
+                                    "duration": {"milliseconds": 123456}
+                                },
+                                "availability": {"start": "2023-01-01T12:00:00Z"}
+                            }
+                        }
+                    }
+                ]
+            },
+            "meta": {
+                "title": "Test Title",
+                "image": "http://example.com/thumb.jpg",
+                "description": "Test description"
+            }
+        }
+    
+        stream_json = {
+            "embedded": {
+                "prioritizedStreams": [
+                    {
+                        "links": {
+                            "stream": {"href": "http://example.com/stream.m3u8"}
+                        }
+                    }
+                ]
+            }
+        }
+    
+        # Mock download_json to return our dummy data
+        def fake_download_json(url, name, *args, **kwargs):
+            if "viafree-content" in url:
+                return content_json
+            if "streamLink" in url:
+                return stream_json
+            raise ValueError(f"Unexpected URL: {url}")
+    
+        monkeypatch.setattr(ViafreeIE, "_download_json", fake_download_json)
+    
+        # Mock _extract_m3u8_formats to return a simple format list
+        def fake_extract_m3u8_formats(url, video_id, ext):
+            return [{"format_id": "720p", "url": url, "ext": ext}]
+        monkeypatch.setattr(ViafreeIE, "_extract_m3u8_formats", fake_extract_m3u8_formats)
+    
+        # Mock _sort_formats to do nothing
+        monkeypatch.setattr(ViafreeIE, "_sort_formats", lambda self, formats: None)
+    
+        # Instantiate extractor and call _real_extract
+        extractor = ViafreeIE()
+>       result = extractor._real_extract(
+            "http://www.viafree.no/programmer/underholdning/det-beste-vorspielet/sesong-2/episode-1"
+        )
+
+test_generated.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/tvplay.py:384: in _real_extract
+    content = self._download_json(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = <youtube_dl.extractor.tvplay.ViafreeIE object at 0x7fb106d27b50>
+name = 'https://viafree-content.mtg-api.com/viafree-content/v1/no/path/programmer/underholdning/det-beste-vorspielet/sesong-2/episode-1'
+args = ('programmer/underholdning/det-beste-vorspielet/sesong-2/episode-1',)
+kwargs = {}
+
+    def fake_download_json(url, name, *args, **kwargs):
+>       if "viafree-content" in url:
+E       TypeError: argument of type 'ViafreeIE' is not iterable
+
+test_generated.py:61: TypeError
+_____________________________ test_geo_restricted ______________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb107e7a8f0>
+
+    def test_geo_restricted(monkeypatch):
+        """_real_extract should raise geo restriction when stream link returns 403."""
+        # Dummy content JSON
+        content_json = {
+            "_embedded": {
+                "viafreeBlocks": [
+                    {
+                        "_embedded": {
+                            "program": {
+                                "guid": "12345",
+                                "episode": {},
+                                "video": {"duration": {"milliseconds": 0}},
+                                "availability": {"start": None}
+                            }
+                        }
+                    }
+                ]
+            },
+            "meta": {"title": "Test Title"}
+        }
+    
+        def fake_download_json(url, name, *args, **kwargs):
+            if "viafree-content" in url:
+                return content_json
+            if "streamLink" in url:
+                raise ExtractorError(
+                    "Forbidden",
+                    cause=compat_HTTPError(url, 403, "Forbidden", {}, None)
+                )
+            raise ValueError(f"Unexpected URL: {url}")
+    
+        monkeypatch.setattr(ViafreeIE, "_download_json", fake_download_json)
+    
+        extractor = ViafreeIE()
+        with pytest.raises(ExtractorError) as excinfo:
+>           extractor._real_extract(
+                "http://www.viafree.no/programmer/underholdning/det-beste-vorspielet/sesong-2/episode-1"
+            )
+
+test_generated.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/tvplay.py:384: in _real_extract
+    content = self._download_json(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = <youtube_dl.extractor.tvplay.ViafreeIE object at 0x7fb107e7acb0>
+name = 'https://viafree-content.mtg-api.com/viafree-content/v1/no/path/programmer/underholdning/det-beste-vorspielet/sesong-2/episode-1'
+args = ('programmer/underholdning/det-beste-vorspielet/sesong-2/episode-1',)
+kwargs = {}
+
+    def fake_download_json(url, name, *args, **kwargs):
+>       if "viafree-content" in url:
+E       TypeError: argument of type 'ViafreeIE' is not iterable
+
+test_generated.py:118: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_suitable_excludes_tvplay - AssertionError: ass...
+FAILED test_generated.py::test_real_extract_success - TypeError: argument of ...
+FAILED test_generated.py::test_geo_restricted - TypeError: argument of type '...
+3 failed in 0.78s

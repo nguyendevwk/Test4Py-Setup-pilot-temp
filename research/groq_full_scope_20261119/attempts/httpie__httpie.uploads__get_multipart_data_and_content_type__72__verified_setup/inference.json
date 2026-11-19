@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-8a882064-cdb9-437b-9b4f-f4f885b94116",
+  "object": "chat.completion",
+  "created": 1795078189,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.uploads import get_multipart_data_and_content_type\nfrom requests_toolbelt import MultipartEncoder\n\n\ndef test_default_content_type_and_boundary():\n    data = {\"file\": (\"test.txt\", b\"hello\", \"text/plain\")}\n    encoder, content_type = get_multipart_data_and_content_type(data)\n    assert isinstance(encoder, MultipartEncoder)\n    # encoder should contain the original fields\n    assert encoder.fields == data\n    # content_type should be the default from MultipartEncoder\n    assert content_type == encoder.content_type\n    # boundary should be present in the content_type\n    assert f\"boundary={encoder.boundary_value}\" in content_type\n\n\ndef test_provided_boundary_overrides_encoder():\n    data = {\"field\": (\"name\", \"value\")}\n    boundary = \"custom-boundary-123\"\n    encoder, content_type = get_multipart_data_and_content_type(data, boundary=boundary)\n    assert isinstance(encoder, MultipartEncoder)\n    # boundary should be the one we passed\n    assert encoder.boundary_value == boundary\n    # content_type should reflect the custom boundary\n    assert f\"boundary={boundary}\" in content_type\n    # content_type should still start with multipart/form-data\n    assert content_type.startswith(\"multipart/form-data\")\n\n\ndef test_content_type_without_boundary_appends_boundary():\n    data = {\"foo\": (\"bar\", \"baz\")}\n    custom_ct = \"multipart/mixed\"\n    encoder, content_type = get_multipart_data_and_content_type(data, content_type=custom_ct)\n    assert isinstance(encoder, MultipartEncoder)\n    # content_type should be the custom one with boundary appended\n    assert content_type.startswith(custom_ct)\n    assert f\"boundary={encoder.boundary_value}\" in content_type\n    # boundary should not be in the original custom_ct\n    assert \"boundary=\" not in custom_ct\n```",
+        "reasoning": "We need three test functions. Test normal: provide simple dict, no boundary, no content_type, assert returned encoder fields match, content_type contains boundary. Test boundary override: provide boundary, assert encoder.boundary_value matches. Test content_type override without boundary: provide content_type without boundary, assert appended. Also error? maybe passing non-dict? but function expects dict. Could test that passing None raises? But not necessary. We'll just test behavior. Use tmp_path? not needed. Use requests_toolbelt. Ensure installed. We'll import function."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.42737792,
+    "prompt_tokens": 431,
+    "prompt_time": 0.128582255,
+    "completion_tokens": 503,
+    "completion_time": 0.679118709,
+    "total_tokens": 934,
+    "total_time": 0.807700964,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 111
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfyvdme4vvs7evsbrdapdp",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.uploads import get_multipart_data_and_content_type\nfrom requests_toolbelt import MultipartEncoder\n\n\ndef test_default_content_type_and_boundary():\n    data = {\"file\": (\"test.txt\", b\"hello\", \"text/plain\")}\n    encoder, content_type = get_multipart_data_and_content_type(data)\n    assert isinstance(encoder, MultipartEncoder)\n    # encoder should contain the original fields\n    assert encoder.fields == data\n    # content_type should be the default from MultipartEncoder\n    assert content_type == encoder.content_type\n    # boundary should be present in the content_type\n    assert f\"boundary={encoder.boundary_value}\" in content_type\n\n\ndef test_provided_boundary_overrides_encoder():\n    data = {\"field\": (\"name\", \"value\")}\n    boundary = \"custom-boundary-123\"\n    encoder, content_type = get_multipart_data_and_content_type(data, boundary=boundary)\n    assert isinstance(encoder, MultipartEncoder)\n    # boundary should be the one we passed\n    assert encoder.boundary_value == boundary\n    # content_type should reflect the custom boundary\n    assert f\"boundary={boundary}\" in content_type\n    # content_type should still start with multipart/form-data\n    assert content_type.startswith(\"multipart/form-data\")\n\n\ndef test_content_type_without_boundary_appends_boundary():\n    data = {\"foo\": (\"bar\", \"baz\")}\n    custom_ct = \"multipart/mixed\"\n    encoder, content_type = get_multipart_data_and_content_type(data, content_type=custom_ct)\n    assert isinstance(encoder, MultipartEncoder)\n    # content_type should be the custom one with boundary appended\n    assert content_type.startswith(custom_ct)\n    assert f\"boundary={encoder.boundary_value}\" in content_type\n    # boundary should not be in the original custom_ct\n    assert \"boundary=\" not in custom_ct\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.583655952999834
+}

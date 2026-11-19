@@ -1,0 +1,36 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_get_base_url_returns_trimmed_value ____________________
+
+    def test_get_base_url_returns_trimmed_value():
+        xml = """
+        <manifest>
+            <baseURL>   https://example.com/stream/   </baseURL>
+        </manifest>
+        """
+        tree = compat_etree_fromstring(xml)
+>       assert get_base_url(tree) == "https://example.com/stream/"
+E       AssertionError: assert None == 'https://example.com/stream/'
+E        +  where None = get_base_url(<Element 'manifest' at 0x7f79ad196980>)
+
+test_generated.py:12: AssertionError
+______________ test_get_base_url_prefers_first_namespace_variant _______________
+
+    def test_get_base_url_prefers_first_namespace_variant():
+        xml = """
+        <manifest xmlns:ns="http://example.com/ns">
+            <ns:baseURL>https://ns.example.com/</ns:baseURL>
+            <baseURL>https://default.example.com/</baseURL>
+        </manifest>
+        """
+        tree = compat_etree_fromstring(xml)
+        # The function should return the first matching element, which is the namespaced one
+>       assert get_base_url(tree) == "https://ns.example.com/"
+E       AssertionError: assert None == 'https://ns.example.com/'
+E        +  where None = get_base_url(<Element 'manifest' at 0x7f79ad1b1080>)
+
+test_generated.py:32: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_base_url_returns_trimmed_value - Assertion...
+FAILED test_generated.py::test_get_base_url_prefers_first_namespace_variant
+2 failed, 1 passed in 1.32s

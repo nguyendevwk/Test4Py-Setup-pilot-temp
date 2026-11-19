@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-92c0a8cc-c638-4794-9fa4-66ba069e50b4",
+  "object": "chat.completion",
+  "created": 1795079172,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport pytest\nfrom pathlib import Path\nfrom httpie.sessions import get_httpie_session, Session\nfrom httpie.context import Environment\n\n@pytest.fixture\ndef env():\n    # Minimal Environment instance; defaults are sufficient for session creation\n    return Environment()\n\ndef test_anonymous_session_path(tmp_path, env):\n    # Anonymous session: path should be expanded user path\n    anon_name = \"~/my_session\"\n    config_dir = tmp_path\n    url = \"http://example.com\"\n    # Create an empty file at the expanded path to satisfy load()\n    expanded_path = Path(os.path.expanduser(anon_name))\n    expanded_path.parent.mkdir(parents=True, exist_ok=True)\n    expanded_path.touch()\n    session = get_httpie_session(env, config_dir, anon_name, None, url)\n    assert session.path == expanded_path\n    assert session.session_id == expanded_path\n    assert session.bound_host == \"example.com\"\n\ndef test_named_session_path_and_bound_host(tmp_path, env):\n    # Named session: path should be under config_dir with hostname dir\n    session_name = \"my_session\"\n    host = \"example.com\"\n    url = \"http://example.com\"\n    config_dir = tmp_path\n    # Expected path: config_dir / \"example.com-my_session\"\n    expected_path = config_dir / \"example.com-my_session\"\n    expected_path.touch()\n    session = get_httpie_session(env, config_dir, session_name, host, url)\n    assert session.path == expected_path\n    assert session.session_id == session_name\n    assert session.bound_host == \"example.com\"\n\ndef test_bound_host_port_stripping(tmp_path, env):\n    # When URL contains a port, bound_host should strip it\n    session_name = \"port_test\"\n    host = None\n    url = \"http://example.com:8080/path\"\n    config_dir = tmp_path\n    # Create empty file at expected path\n    expected_path = config_dir / \"example.com-port_test\"\n    expected_path.touch()\n    session = get_httpie_session(env, config_dir, session_name, host, url)\n    assert session.bound_host == \"example.com\"\n    assert session.path == expected_path\n```",
+        "reasoning": "We need to test get_httpie_session. We need to import it. We need to create dummy Environment, Session? Actually Session class is in same module? Not shown. But we can import get_httpie_session and rely on its behavior. We need to test normal, boundary, error. We can test that for anonymous session path expands. For non-anonymous, path constructed. Also test bound_hostname fallback. Use tmp_path. Use a dummy Environment object? Environment likely from .context. We can create a minimal stub? But we cannot modify product code. We can import Environment from httpie.context. Use default? Might need to instantiate with minimal args. Let's inspect context? Not available. But maybe Environment is simple dataclass. We can try to instantiate with default values. Use env = Environment() maybe. If fails, we can create a simple object with needed attributes? Session class likely expects env. But we can just call get_httpie_session and not use session further. But load() will try to read file. We can create empty file. Use tmp_path for config_dir. For anonymous session, path is expanded user. Use \"~\" path. Use os.path.expanduser. We'll test that session.path equals expanded path. For non-anonymous, path is config_dir / dirname. Use session_name \"my\". host \"example.com\". Check path endswith \"example.com-my\". Also test bound_hostname fallback: if host None and url has no hostname? Use url \"http://localhost\". host None -> bound_hostname from url_as_host. That function likely returns host. But we can test that bound_hostname is stripped port. Use url \"http://example.com:8080\". host None. Expect bound_host \"example.com\". Use session.bound_host attribute. Need to access session. So we need Session class. Import Session from httpie.sessions. Let's import. Use get_httpie_session. We'll create config_dir tmp_path. For anonymous, we need to create file at path? load() will read file. If file missing, maybe create empty. We'll create empty file. For non-anonymous, create empty file at path. Then call. Assertions. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046415093,
+    "prompt_tokens": 563,
+    "prompt_time": 0.047372654,
+    "completion_tokens": 906,
+    "completion_time": 1.003439694,
+    "total_tokens": 1469,
+    "total_time": 1.050812348,
+    "completion_tokens_details": {
+      "reasoning_tokens": 442
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgwv5getsa7e6f34q5d8h9",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport pytest\nfrom pathlib import Path\nfrom httpie.sessions import get_httpie_session, Session\nfrom httpie.context import Environment\n\n@pytest.fixture\ndef env():\n    # Minimal Environment instance; defaults are sufficient for session creation\n    return Environment()\n\ndef test_anonymous_session_path(tmp_path, env):\n    # Anonymous session: path should be expanded user path\n    anon_name = \"~/my_session\"\n    config_dir = tmp_path\n    url = \"http://example.com\"\n    # Create an empty file at the expanded path to satisfy load()\n    expanded_path = Path(os.path.expanduser(anon_name))\n    expanded_path.parent.mkdir(parents=True, exist_ok=True)\n    expanded_path.touch()\n    session = get_httpie_session(env, config_dir, anon_name, None, url)\n    assert session.path == expanded_path\n    assert session.session_id == expanded_path\n    assert session.bound_host == \"example.com\"\n\ndef test_named_session_path_and_bound_host(tmp_path, env):\n    # Named session: path should be under config_dir with hostname dir\n    session_name = \"my_session\"\n    host = \"example.com\"\n    url = \"http://example.com\"\n    config_dir = tmp_path\n    # Expected path: config_dir / \"example.com-my_session\"\n    expected_path = config_dir / \"example.com-my_session\"\n    expected_path.touch()\n    session = get_httpie_session(env, config_dir, session_name, host, url)\n    assert session.path == expected_path\n    assert session.session_id == session_name\n    assert session.bound_host == \"example.com\"\n\ndef test_bound_host_port_stripping(tmp_path, env):\n    # When URL contains a port, bound_host should strip it\n    session_name = \"port_test\"\n    host = None\n    url = \"http://example.com:8080/path\"\n    config_dir = tmp_path\n    # Create empty file at expected path\n    expected_path = config_dir / \"example.com-port_test\"\n    expected_path.touch()\n    session = get_httpie_session(env, config_dir, session_name, host, url)\n    assert session.bound_host == \"example.com\"\n    assert session.path == expected_path\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4824171789805405
+}

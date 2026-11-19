@@ -1,0 +1,62 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_settings_init_loads_all_sources _____________________
+
+temp_user_dir = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.conf__Settings__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_settings_init_loads_all_s0')
+
+    def test_settings_init_loads_all_sources(temp_user_dir):
+        # Create a minimal settings.py file with a custom value
+        settings_file = temp_user_dir / "thefuck" / "settings.py"
+        settings_file.parent.mkdir(parents=True, exist_ok=True)
+        settings_file.write_text("DEBUG = True\n")
+    
+        # Set environment variable to override a default
+        os.environ["THEFUCK_DEBUG"] = "False"
+    
+        # Prepare argparse namespace with flags
+        args = types.SimpleNamespace(yes=True, debug=False, repeat=3)
+    
+        # Instantiate Settings and initialize
+        settings = Settings(const.DEFAULT_SETTINGS)
+        settings.init(args=args)
+    
+        # Verify that the file value was loaded first
+>       assert settings["debug"] is True
+E       assert False is True
+
+test_generated.py:41: AssertionError
+__________________________ test_settings_env_parsing ___________________________
+
+temp_user_dir = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.conf__Settings__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_settings_env_parsing0')
+
+    def test_settings_env_parsing(temp_user_dir):
+        # Set various environment variables
+        os.environ["THEFUCK_RULES"] = "DEFAULT_RULES:my_rule"
+        os.environ["THEFUCK_PRIORITY"] = "my_rule=5:other=10"
+        os.environ["THEFUCK_WAIT_COMMAND"] = "2"
+        os.environ["THEFUCK_REQUIRE_CONFIRMATION"] = "True"
+        os.environ["THEFUCK_SLOW_COMMANDS"] = "cmd1:cmd2"
+    
+        settings = Settings(const.DEFAULT_SETTINGS)
+        settings.init(args=None)
+    
+        # Rules should include default rules and the custom one
+        assert "my_rule" in settings["rules"]
+>       assert "DEFAULT_RULES" in settings["rules"]
+E       AssertionError: assert 'DEFAULT_RULES' in [<const: All rules enabled>, 'my_rule']
+
+test_generated.py:65: AssertionError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_settings_init_loads_all_sources - assert False...
+FAILED test_generated.py::test_settings_env_parsing - AssertionError: assert ...
+2 failed, 1 passed, 2 warnings in 0.15s

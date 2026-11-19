@@ -1,0 +1,60 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_debug_time_measures_elapsed _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.logs__debug_time__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_debug_time_measures_elaps0')
+
+    def test_debug_time_measures_elapsed(tmp_path):
+        """Normal usage: debug_time should record elapsed time."""
+        fake_debug, calls = capture_debug()
+        # Monkey‑patch the module's debug function
+        import thefuck.logs
+        thefuck.logs.debug = fake_debug
+    
+        with debug_time("test_message"):
+            time.sleep(0.01)
+    
+        assert len(calls) == 1
+        msg = calls[0]
+        assert msg.startswith("test_message took: ")
+        # The elapsed time should be at least 0.01 seconds
+        elapsed_str = msg.split("took: ")[1]
+>       elapsed = float(elapsed_str.split()[0])
+E       ValueError: could not convert string to float: '0:00:00.010127'
+
+test_generated.py:34: ValueError
+__________________________ test_debug_time_zero_sleep __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.logs__debug_time__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_debug_time_zero_sleep0')
+
+    def test_debug_time_zero_sleep(tmp_path):
+        """Boundary case: no sleep, elapsed time should be very small."""
+        fake_debug, calls = capture_debug()
+        import thefuck.logs
+        thefuck.logs.debug = fake_debug
+    
+        with debug_time("zero_sleep"):
+            pass  # no delay
+    
+        assert len(calls) == 1
+        msg = calls[0]
+        assert msg.startswith("zero_sleep took: ")
+        elapsed_str = msg.split("took: ")[1]
+>       elapsed = float(elapsed_str.split()[0])
+E       ValueError: could not convert string to float: '0:00:00.000013'
+
+test_generated.py:51: ValueError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_debug_time_measures_elapsed - ValueError: coul...
+FAILED test_generated.py::test_debug_time_zero_sleep - ValueError: could not ...
+2 failed, 1 passed, 2 warnings in 0.14s

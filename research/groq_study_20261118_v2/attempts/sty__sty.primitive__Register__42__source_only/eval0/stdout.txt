@@ -1,0 +1,363 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+_________________________ test_register_call_behavior __________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-5/test_register_call_behavior0')
+
+    def test_register_call_behavior(tmp_path):
+        reg = Register()
+        # Register dummy render functions
+        reg.set_renderfunc(DummyRenderType, dummy_eightbit_render)
+        reg.set_eightbit_call(DummyRenderType)
+        reg.set_rgb_call(DummyRenderType)
+    
+        # 8bit call
+        assert reg(42) == "8bit:42"
+    
+        # 24bit call
+>       assert reg(10, 20, 30) == "rgb:10,20,30"
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sty.primitive.Register object at 0x7f31eaa726b0>, args = (10, 20, 30)
+kwargs = {}
+
+    def __call__(self, *args: Union[int, str], **kwargs) -> str:
+        """
+        This function is to handle calls such as `fg(42)`, `bg(102, 49, 42)`, `fg('red')`.
+        """
+    
+        # Return empty str if object is muted.
+        if self.is_muted:
+            return ""
+    
+        len_args = len(args)
+    
+        if len_args == 1:
+            # If input is an 8bit color code, run 8bit render function.
+            if isinstance(args[0], int):
+                return self.eightbit_call(*args, **kwargs)
+    
+            # If input is a string, return attribute with the name that matches
+            # input.
+            else:
+                return getattr(self, args[0])
+    
+        # If input is an 24bit color code, run 24bit render function.
+        elif len_args == 3:
+>           return self.rgb_call(*args, **kwargs)
+E           TypeError: dummy_eightbit_render() takes 1 positional argument but 3 were given
+
+sty/primitive.py:111: TypeError
+________________________ test_register_mute_and_unmute _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-5/test_register_mute_and_unmute0')
+
+    def test_register_mute_and_unmute(tmp_path):
+        reg = Register()
+        reg.set_renderfunc(DummyRenderType, dummy_eightbit_render)
+        reg.set_eightbit_call(DummyRenderType)
+    
+        # Set a style attribute
+>       reg.red = Style("red")
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sty/primitive.py:80: in __setattr__
+    rendered, rules = _render_rules(self.renderfuncs, value.rules)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+renderfuncs = {<class 'test_generated.DummyRenderType'>: <function dummy_eightbit_render at 0x7f31eaae1870>}
+rules = ('red',)
+
+    def _render_rules(
+        renderfuncs: Renderfuncs,
+        rules: Iterable[StylingRule],
+    ) -> Tuple[str, Iterable[StylingRule]]:
+        rendered: str = ""
+        flattened_rules: List[StylingRule] = []
+    
+        for rule in rules:
+            if isinstance(rule, RenderType):
+                f1: Callable = renderfuncs[type(rule)]
+                rendered += f1(*rule.args)
+                flattened_rules.append(rule)
+    
+            elif isinstance(rule, Style):
+                r1, r2 = _render_rules(renderfuncs, rule.rules)
+                rendered += r1
+                flattened_rules.extend(r2)
+    
+            else:
+>               raise ValueError("Parameter 'rules' must be of type Iterable[Rule].")
+E               ValueError: Parameter 'rules' must be of type Iterable[Rule].
+
+sty/primitive.py:58: ValueError
+_______________________ test_register_setattr_with_style _______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-5/test_register_setattr_with_sty0')
+
+    def test_register_setattr_with_style(tmp_path):
+        reg = Register()
+        reg.set_renderfunc(DummyRenderType, dummy_eightbit_render)
+        reg.set_eightbit_call(DummyRenderType)
+    
+        # Assign a Style instance
+>       reg.green = Style("green")
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sty/primitive.py:80: in __setattr__
+    rendered, rules = _render_rules(self.renderfuncs, value.rules)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+renderfuncs = {<class 'test_generated.DummyRenderType'>: <function dummy_eightbit_render at 0x7f31eaae1870>}
+rules = ('green',)
+
+    def _render_rules(
+        renderfuncs: Renderfuncs,
+        rules: Iterable[StylingRule],
+    ) -> Tuple[str, Iterable[StylingRule]]:
+        rendered: str = ""
+        flattened_rules: List[StylingRule] = []
+    
+        for rule in rules:
+            if isinstance(rule, RenderType):
+                f1: Callable = renderfuncs[type(rule)]
+                rendered += f1(*rule.args)
+                flattened_rules.append(rule)
+    
+            elif isinstance(rule, Style):
+                r1, r2 = _render_rules(renderfuncs, rule.rules)
+                rendered += r1
+                flattened_rules.extend(r2)
+    
+            else:
+>               raise ValueError("Parameter 'rules' must be of type Iterable[Rule].")
+E               ValueError: Parameter 'rules' must be of type Iterable[Rule].
+
+sty/primitive.py:58: ValueError
+_____________________ test_register_as_dict_and_namedtuple _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-5/test_register_as_dict_and_name0')
+
+    def test_register_as_dict_and_namedtuple(tmp_path):
+        reg = Register()
+        reg.set_renderfunc(DummyRenderType, dummy_eightbit_render)
+        reg.set_eightbit_call(DummyRenderType)
+    
+>       reg.red = Style("red")
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sty/primitive.py:80: in __setattr__
+    rendered, rules = _render_rules(self.renderfuncs, value.rules)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+renderfuncs = {<class 'test_generated.DummyRenderType'>: <function dummy_eightbit_render at 0x7f31eaae1870>}
+rules = ('red',)
+
+    def _render_rules(
+        renderfuncs: Renderfuncs,
+        rules: Iterable[StylingRule],
+    ) -> Tuple[str, Iterable[StylingRule]]:
+        rendered: str = ""
+        flattened_rules: List[StylingRule] = []
+    
+        for rule in rules:
+            if isinstance(rule, RenderType):
+                f1: Callable = renderfuncs[type(rule)]
+                rendered += f1(*rule.args)
+                flattened_rules.append(rule)
+    
+            elif isinstance(rule, Style):
+                r1, r2 = _render_rules(renderfuncs, rule.rules)
+                rendered += r1
+                flattened_rules.extend(r2)
+    
+            else:
+>               raise ValueError("Parameter 'rules' must be of type Iterable[Rule].")
+E               ValueError: Parameter 'rules' must be of type Iterable[Rule].
+
+sty/primitive.py:58: ValueError
+_________________________ test_register_copy_deepcopy __________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-5/test_register_copy_deepcopy0')
+
+    def test_register_copy_deepcopy(tmp_path):
+        reg = Register()
+        reg.set_renderfunc(DummyRenderType, dummy_eightbit_render)
+        reg.set_eightbit_call(DummyRenderType)
+    
+>       reg.red = Style("red")
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py:99: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sty/primitive.py:80: in __setattr__
+    rendered, rules = _render_rules(self.renderfuncs, value.rules)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+renderfuncs = {<class 'test_generated.DummyRenderType'>: <function dummy_eightbit_render at 0x7f31eaae1870>}
+rules = ('red',)
+
+    def _render_rules(
+        renderfuncs: Renderfuncs,
+        rules: Iterable[StylingRule],
+    ) -> Tuple[str, Iterable[StylingRule]]:
+        rendered: str = ""
+        flattened_rules: List[StylingRule] = []
+    
+        for rule in rules:
+            if isinstance(rule, RenderType):
+                f1: Callable = renderfuncs[type(rule)]
+                rendered += f1(*rule.args)
+                flattened_rules.append(rule)
+    
+            elif isinstance(rule, Style):
+                r1, r2 = _render_rules(renderfuncs, rule.rules)
+                rendered += r1
+                flattened_rules.extend(r2)
+    
+            else:
+>               raise ValueError("Parameter 'rules' must be of type Iterable[Rule].")
+E               ValueError: Parameter 'rules' must be of type Iterable[Rule].
+
+sty/primitive.py:58: ValueError
+_____________ test_register_set_renderfunc_updates_existing_styles _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-5/test_register_set_renderfunc_u0')
+
+    def test_register_set_renderfunc_updates_existing_styles(tmp_path):
+        reg = Register()
+        reg.set_renderfunc(DummyRenderType, dummy_eightbit_render)
+        reg.set_eightbit_call(DummyRenderType)
+    
+>       reg.red = Style("red")
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py:113: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sty/primitive.py:80: in __setattr__
+    rendered, rules = _render_rules(self.renderfuncs, value.rules)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+renderfuncs = {<class 'test_generated.DummyRenderType'>: <function dummy_eightbit_render at 0x7f31eaae1870>}
+rules = ('red',)
+
+    def _render_rules(
+        renderfuncs: Renderfuncs,
+        rules: Iterable[StylingRule],
+    ) -> Tuple[str, Iterable[StylingRule]]:
+        rendered: str = ""
+        flattened_rules: List[StylingRule] = []
+    
+        for rule in rules:
+            if isinstance(rule, RenderType):
+                f1: Callable = renderfuncs[type(rule)]
+                rendered += f1(*rule.args)
+                flattened_rules.append(rule)
+    
+            elif isinstance(rule, Style):
+                r1, r2 = _render_rules(renderfuncs, rule.rules)
+                rendered += r1
+                flattened_rules.extend(r2)
+    
+            else:
+>               raise ValueError("Parameter 'rules' must be of type Iterable[Rule].")
+E               ValueError: Parameter 'rules' must be of type Iterable[Rule].
+
+sty/primitive.py:58: ValueError
+_____________ test_register_call_invalid_arguments_raises_no_error _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-5/test_register_call_invalid_arg0')
+
+    def test_register_call_invalid_arguments_raises_no_error(tmp_path):
+        reg = Register()
+        reg.set_renderfunc(DummyRenderType, dummy_eightbit_render)
+        reg.set_eightbit_call(DummyRenderType)
+    
+        # Passing a non-int to 8bit call should not raise, but return empty string
+>       assert reg("not-an-int") == ""
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sty.primitive.Register object at 0x7f31eaa77be0>, args = ('not-an-int',)
+kwargs = {}
+
+    def __call__(self, *args: Union[int, str], **kwargs) -> str:
+        """
+        This function is to handle calls such as `fg(42)`, `bg(102, 49, 42)`, `fg('red')`.
+        """
+    
+        # Return empty str if object is muted.
+        if self.is_muted:
+            return ""
+    
+        len_args = len(args)
+    
+        if len_args == 1:
+            # If input is an 8bit color code, run 8bit render function.
+            if isinstance(args[0], int):
+                return self.eightbit_call(*args, **kwargs)
+    
+            # If input is a string, return attribute with the name that matches
+            # input.
+            else:
+>               return getattr(self, args[0])
+E               AttributeError: 'Register' object has no attribute 'not-an-int'
+
+sty/primitive.py:107: AttributeError
+______________ test_register_as_dict_excludes_private_and_non_str ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-5/test_register_as_dict_excludes0')
+
+    def test_register_as_dict_excludes_private_and_non_str(tmp_path):
+        reg = Register()
+        reg.set_renderfunc(DummyRenderType, dummy_eightbit_render)
+        reg.set_eightbit_call(DummyRenderType)
+    
+>       reg.red = Style("red")
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py:144: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sty/primitive.py:80: in __setattr__
+    rendered, rules = _render_rules(self.renderfuncs, value.rules)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+renderfuncs = {<class 'test_generated.DummyRenderType'>: <function dummy_eightbit_render at 0x7f31eaae1870>}
+rules = ('red',)
+
+    def _render_rules(
+        renderfuncs: Renderfuncs,
+        rules: Iterable[StylingRule],
+    ) -> Tuple[str, Iterable[StylingRule]]:
+        rendered: str = ""
+        flattened_rules: List[StylingRule] = []
+    
+        for rule in rules:
+            if isinstance(rule, RenderType):
+                f1: Callable = renderfuncs[type(rule)]
+                rendered += f1(*rule.args)
+                flattened_rules.append(rule)
+    
+            elif isinstance(rule, Style):
+                r1, r2 = _render_rules(renderfuncs, rule.rules)
+                rendered += r1
+                flattened_rules.extend(r2)
+    
+            else:
+>               raise ValueError("Parameter 'rules' must be of type Iterable[Rule].")
+E               ValueError: Parameter 'rules' must be of type Iterable[Rule].
+
+sty/primitive.py:58: ValueError
+=========================== short test summary info ============================
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py::test_register_call_behavior
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py::test_register_mute_and_unmute
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py::test_register_setattr_with_style
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py::test_register_as_dict_and_namedtuple
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py::test_register_copy_deepcopy
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py::test_register_set_renderfunc_updates_existing_styles
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py::test_register_call_invalid_arguments_raises_no_error
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/sty__sty.primitive__Register__42__source_only/eval0/test_generated.py::test_register_as_dict_excludes_private_and_non_str
+8 failed in 0.27s

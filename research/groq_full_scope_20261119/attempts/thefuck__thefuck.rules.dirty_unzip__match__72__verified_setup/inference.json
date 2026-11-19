@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-02f18969-bb95-4ca2-8498-8ce196683c40",
+  "object": "chat.completion",
+  "created": 1795077999,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport zipfile\nimport tempfile\nimport shutil\nimport pytest\n\nfrom thefuck.rules.dirty_unzip import match, _zip_file, _is_bad_zip\n\n\nclass DummyCommand:\n    def __init__(self, script: str):\n        self.script = script\n\n\ndef create_valid_zip(path: str):\n    with zipfile.ZipFile(path, \"w\") as zf:\n        zf.writestr(\"file.txt\", \"content\")\n\n\ndef create_corrupted_zip(path: str):\n    with zipfile.ZipFile(path, \"w\") as zf:\n        zf.writestr(\"file.txt\", \"content\")\n    # Truncate the file to corrupt it\n    with open(path, \"rb+\") as f:\n        f.truncate(10)\n\n\ndef test_match_with_valid_zip_returns_false(tmp_path):\n    zip_path = tmp_path / \"valid.zip\"\n    create_valid_zip(str(zip_path))\n    cmd = DummyCommand(f\"unzip {zip_path}\")\n    assert match(cmd) is False\n\n\ndef test_match_with_corrupted_zip_returns_true(tmp_path):\n    zip_path = tmp_path / \"bad.zip\"\n    create_corrupted_zip(str(zip_path))\n    cmd = DummyCommand(f\"unzip {zip_path}\")\n    assert match(cmd) is True\n\n\ndef test_match_with_d_flag_returns_false(tmp_path):\n    zip_path = tmp_path / \"valid.zip\"\n    create_valid_zip(str(zip_path))\n    cmd = DummyCommand(f\"unzip -d {zip_path}\")\n    assert match(cmd) is False\n```",
+        "reasoning": "We need to test match function. Need to create dummy command object with script attribute. Also need to simulate zipfile behavior. We can create temporary zip files. Use tmp_path. For bad zip: create zip with bad content? _is_bad_zip uses zipfile.ZipFile to test? Let's inspect _is_bad_zip. Not provided. But we can assume it returns True if zipfile.BadZipFile exception. So create a corrupted zip file. Use zipfile.ZipFile to write then truncate. Test normal: valid zip returns False. Boundary: script contains '-d' returns False. Error: missing zip file returns False. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053891838,
+    "prompt_tokens": 287,
+    "prompt_time": 0.0264693,
+    "completion_tokens": 459,
+    "completion_time": 0.538347908,
+    "total_tokens": 746,
+    "total_time": 0.564817208,
+    "completion_tokens_details": {
+      "reasoning_tokens": 131
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfs285ecgr9aqsexp1049p",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport zipfile\nimport tempfile\nimport shutil\nimport pytest\n\nfrom thefuck.rules.dirty_unzip import match, _zip_file, _is_bad_zip\n\n\nclass DummyCommand:\n    def __init__(self, script: str):\n        self.script = script\n\n\ndef create_valid_zip(path: str):\n    with zipfile.ZipFile(path, \"w\") as zf:\n        zf.writestr(\"file.txt\", \"content\")\n\n\ndef create_corrupted_zip(path: str):\n    with zipfile.ZipFile(path, \"w\") as zf:\n        zf.writestr(\"file.txt\", \"content\")\n    # Truncate the file to corrupt it\n    with open(path, \"rb+\") as f:\n        f.truncate(10)\n\n\ndef test_match_with_valid_zip_returns_false(tmp_path):\n    zip_path = tmp_path / \"valid.zip\"\n    create_valid_zip(str(zip_path))\n    cmd = DummyCommand(f\"unzip {zip_path}\")\n    assert match(cmd) is False\n\n\ndef test_match_with_corrupted_zip_returns_true(tmp_path):\n    zip_path = tmp_path / \"bad.zip\"\n    create_corrupted_zip(str(zip_path))\n    cmd = DummyCommand(f\"unzip {zip_path}\")\n    assert match(cmd) is True\n\n\ndef test_match_with_d_flag_returns_false(tmp_path):\n    zip_path = tmp_path / \"valid.zip\"\n    create_valid_zip(str(zip_path))\n    cmd = DummyCommand(f\"unzip -d {zip_path}\")\n    assert match(cmd) is False\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9366755409864709
+}

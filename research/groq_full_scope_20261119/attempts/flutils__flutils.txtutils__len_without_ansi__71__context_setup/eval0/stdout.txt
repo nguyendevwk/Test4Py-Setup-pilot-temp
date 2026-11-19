@@ -1,0 +1,65 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_len_without_ansi_single_string_with_ansi _________________
+
+    def test_len_without_ansi_single_string_with_ansi():
+        # ANSI escape codes should not be counted in the length
+        text = "\x1b[38;5;209mfoobar\x1b[0m"
+        assert len_without_ansi(text) == 6
+        # Verify that the function correctly strips the ANSI codes
+        stripped = _ANSI_RE.split(text)
+>       assert stripped == ['', 'foobar', '']
+E       AssertionError: assert ['', '\x1b[38...'\x1b[0m', ''] == ['', 'foobar', '']
+E         
+E         At index 1 diff: '\x1b[38;5;209m' != 'foobar'
+E         Left contains 2 more items, first extra item: '\x1b[0m'
+E         Use -v to get more diff
+
+test_generated.py:14: AssertionError
+_________________ test_len_without_ansi_edge_cases_and_errors __________________
+
+    def test_len_without_ansi_edge_cases_and_errors():
+        # Empty string should return 0
+        assert len_without_ansi("") == 0
+        # String with only ANSI codes should return 0
+        assert len_without_ansi("\x1b[0m\x1b[31m") == 0
+        # Non-string elements in the sequence should be ignored
+        seq = ["text", 123, None, "\x1b[32mgreen\x1b[0m"]
+        # Only "text" (4) and "green" (5) contribute to the length
+>       assert len_without_ansi(seq) == 9
+
+test_generated.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+seq = ['text', 123, None, '\x1b[32mgreen\x1b[0m']
+
+    def len_without_ansi(seq: Sequence) -> int:
+        """Return the character length of the given
+        :obj:`Sequence <typing.Sequence>` without counting any ANSI codes.
+    
+        *New in version 0.6*
+    
+        Args:
+             seq (:obj:`Sequence <typing.Sequence>`): A string or a list/tuple
+                 of strings.
+    
+        :rtype:
+            :obj:`int`
+    
+        Example:
+            >>> from flutils.txtutils import len_without_ansi
+            >>> text = '\\x1b[38;5;209mfoobar\\x1b[0m'
+            >>> len_without_ansi(text)
+            6
+        """
+        if hasattr(seq, 'capitalize'):
+            _text: str = cast(str, seq)
+            seq = [c for c in _ANSI_RE.split(_text) if c]
+>       seq = [c for c in chain(*map(_ANSI_RE.split, seq)) if c]
+E       TypeError: expected string or bytes-like object
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/txtutils.py:47: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_len_without_ansi_single_string_with_ansi - Ass...
+FAILED test_generated.py::test_len_without_ansi_edge_cases_and_errors - TypeE...
+2 failed, 1 passed in 0.13s

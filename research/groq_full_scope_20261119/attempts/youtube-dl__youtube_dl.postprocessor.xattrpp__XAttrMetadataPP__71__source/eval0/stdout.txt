@@ -1,0 +1,80 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_run_writes_expected_xattrs ________________________
+
+dummy_pp = (<youtube_dl.postprocessor.xattrpp.XAttrMetadataPP object at 0x7fd612736cb0>, PosixPath('/home/heurix/Documents/Test4P...stprocessor.xattrpp__XAttrMetadataPP__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_run_writes_expected_xattr0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fd6116d00d0>
+
+    def test_run_writes_expected_xattrs(dummy_pp, monkeypatch):
+        pp, tmp_path = dummy_pp
+        file = tmp_path / "video.mp4"
+        file.write_text("dummy")
+        info = {
+            'filepath': str(file),
+            'webpage_url': 'https://example.com',
+            'title': 'Test Video',
+            'upload_date': '20240101',
+            'description': 'A test',
+            'uploader': 'Tester',
+            'format': 'mp4',
+        }
+        written = []
+    
+        def fake_write_xattr(path, name, value):
+            written.append((name, value.decode()))
+>       monkeypatch.setattr(pp, 'write_xattr', fake_write_xattr)
+E       AttributeError: <youtube_dl.postprocessor.xattrpp.XAttrMetadataPP object at 0x7fd612736cb0> has no attribute 'write_xattr'
+
+test_generated.py:42: AttributeError
+__________________________ test_run_unavailable_error __________________________
+
+dummy_pp = (<youtube_dl.postprocessor.xattrpp.XAttrMetadataPP object at 0x7fd61173bbe0>, PosixPath('/home/heurix/Documents/Test4P...l.postprocessor.xattrpp__XAttrMetadataPP__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_run_unavailable_error0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fd61173bc40>
+
+    def test_run_unavailable_error(dummy_pp, monkeypatch):
+        pp, tmp_path = dummy_pp
+        file = tmp_path / "video.mp4"
+        file.write_text("dummy")
+        info = {'filepath': str(file)}
+    
+        def fake_write_xattr(path, name, value):
+            raise XAttrUnavailableError("xattr not available")
+        monkeypatch.setattr('youtube_dl.postprocessor.xattrpp.write_xattr', fake_write_xattr)
+    
+        pp.run(info)
+    
+>       assert any(msg[0] == 'error' and 'xattr not available' in msg[1] for msg in pp._downloader.messages)
+E       assert False
+E        +  where False = any(<generator object test_run_unavailable_error.<locals>.<genexpr> at 0x7fd6116dd3f0>)
+
+test_generated.py:73: AssertionError
+__________________________ test_run_no_space_warning ___________________________
+
+dummy_pp = (<youtube_dl.postprocessor.xattrpp.XAttrMetadataPP object at 0x7fd611777a00>, PosixPath('/home/heurix/Documents/Test4P...dl.postprocessor.xattrpp__XAttrMetadataPP__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_run_no_space_warning0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fd611777af0>
+
+    def test_run_no_space_warning(dummy_pp, monkeypatch):
+        pp, tmp_path = dummy_pp
+        file = tmp_path / "video.mp4"
+        file.write_text("dummy")
+        info = {
+            'filepath': str(file),
+            'title': 'Test',
+        }
+    
+        def fake_write_xattr(path, name, value):
+            raise XAttrMetadataError('NO_SPACE')
+        monkeypatch.setattr('youtube_dl.postprocessor.xattrpp.write_xattr', fake_write_xattr)
+    
+        pp.run(info)
+    
+>       assert any(msg[0] == 'warning' and "no disk space" in msg[1] for msg in pp._downloader.messages)
+E       assert False
+E        +  where False = any(<generator object test_run_no_space_warning.<locals>.<genexpr> at 0x7fd6116ddaf0>)
+
+test_generated.py:90: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_run_writes_expected_xattrs - AttributeError: <...
+FAILED test_generated.py::test_run_unavailable_error - assert False
+FAILED test_generated.py::test_run_no_space_warning - assert False
+3 failed in 0.72s

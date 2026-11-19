@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-20fbc33c-4cca-4212-956c-5d0ab34e7bfd",
+  "object": "chat.completion",
+  "created": 1795079179,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\n\nfrom py_backwards.transformers.python2_future import Python2FutureTransformer\nfrom py_backwards.utils.snippet import snippet\n\n\ndef test_target_attribute():\n    \"\"\"The transformer should expose the correct target tuple.\"\"\"\n    assert Python2FutureTransformer.target == (2, 7)\n\n\ndef test_visit_module_adds_future_imports(tmp_path):\n    \"\"\"visit_Module should prepend the required __future__ imports.\"\"\"\n    # Create a simple module with a single function definition\n    source = \"def foo():\\n    return 42\\n\"\n    module_node = snippet(source)\n\n    transformer = Python2FutureTransformer()\n    transformed = transformer.visit(module_node)\n\n    # The first four statements should be the future imports\n    import_names = [\n        (stmt.value.args[0].s, stmt.value.args[1].s)\n        for stmt in transformed.body[:4]\n        if isinstance(stmt, typed_ast.ImportFrom)\n    ]\n\n    expected = [\n        (\"__future__\", \"absolute_import\"),\n        (\"__future__\", \"division\"),\n        (\"__future__\", \"print_function\"),\n        (\"__future__\", \"unicode_literals\"),\n    ]\n    assert import_names == expected\n\n    # The remaining body should contain the original function definition\n    remaining_body = transformed.body[4:]\n    assert len(remaining_body) == 1\n    assert isinstance(remaining_body[0], typed_ast.FunctionDef)\n    assert remaining_body[0].name == \"foo\"\n\n\ndef test_visit_module_with_existing_imports(tmp_path):\n    \"\"\"If the module already contains future imports, they are duplicated.\"\"\"\n    # Module with an existing future import\n    source = (\n        \"from __future__ import division\\n\"\n        \"def bar():\\n    return 1\\n\"\n    )\n    module_node = snippet(source)\n\n    transformer = Python2FutureTransformer()\n    transformed = transformer.visit(module_node)\n\n    # Count how many division imports exist\n    division_imports = [\n        stmt\n        for stmt in transformed.body\n        if isinstance(stmt, typed_ast.ImportFrom)\n        and stmt.module == \"__future__\"\n        and any(arg.s == \"division\" for arg in stmt.value.args)\n    ]\n    # Should be two: one added by transformer, one original\n    assert len(division_imports) == 2\n```",
+        "reasoning": "We need to test Python2FutureTransformer. We need to import it. Use typed_ast ast3. We can create a simple module AST, apply transformer, check that imports added. Also test that it doesn't modify if already present? But code always adds. So test that body starts with imports. Also test that target attribute correct. Third test maybe error: passing non-Module node? But transformer expects Module. We can test that visiting other node returns unchanged? But BaseNodeTransformer likely handles. We'll just test that visiting a Module with empty body results in imports only. Use snippet to create AST? snippet likely returns ast.Module. Use snippet from utils.snippet. We'll import snippet. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.0478683,
+    "prompt_tokens": 362,
+    "prompt_time": 0.022869629,
+    "completion_tokens": 636,
+    "completion_time": 0.729478079,
+    "total_tokens": 998,
+    "total_time": 0.752347708,
+    "completion_tokens_details": {
+      "reasoning_tokens": 142
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgx2sneazs61g7jsvdpd4q",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\n\nfrom py_backwards.transformers.python2_future import Python2FutureTransformer\nfrom py_backwards.utils.snippet import snippet\n\n\ndef test_target_attribute():\n    \"\"\"The transformer should expose the correct target tuple.\"\"\"\n    assert Python2FutureTransformer.target == (2, 7)\n\n\ndef test_visit_module_adds_future_imports(tmp_path):\n    \"\"\"visit_Module should prepend the required __future__ imports.\"\"\"\n    # Create a simple module with a single function definition\n    source = \"def foo():\\n    return 42\\n\"\n    module_node = snippet(source)\n\n    transformer = Python2FutureTransformer()\n    transformed = transformer.visit(module_node)\n\n    # The first four statements should be the future imports\n    import_names = [\n        (stmt.value.args[0].s, stmt.value.args[1].s)\n        for stmt in transformed.body[:4]\n        if isinstance(stmt, typed_ast.ImportFrom)\n    ]\n\n    expected = [\n        (\"__future__\", \"absolute_import\"),\n        (\"__future__\", \"division\"),\n        (\"__future__\", \"print_function\"),\n        (\"__future__\", \"unicode_literals\"),\n    ]\n    assert import_names == expected\n\n    # The remaining body should contain the original function definition\n    remaining_body = transformed.body[4:]\n    assert len(remaining_body) == 1\n    assert isinstance(remaining_body[0], typed_ast.FunctionDef)\n    assert remaining_body[0].name == \"foo\"\n\n\ndef test_visit_module_with_existing_imports(tmp_path):\n    \"\"\"If the module already contains future imports, they are duplicated.\"\"\"\n    # Module with an existing future import\n    source = (\n        \"from __future__ import division\\n\"\n        \"def bar():\\n    return 1\\n\"\n    )\n    module_node = snippet(source)\n\n    transformer = Python2FutureTransformer()\n    transformed = transformer.visit(module_node)\n\n    # Count how many division imports exist\n    division_imports = [\n        stmt\n        for stmt in transformed.body\n        if isinstance(stmt, typed_ast.ImportFrom)\n        and stmt.module == \"__future__\"\n        and any(arg.s == \"division\" for arg in stmt.value.args)\n    ]\n    # Should be two: one added by transformer, one original\n    assert len(division_imports) == 2\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1839327350025997
+}

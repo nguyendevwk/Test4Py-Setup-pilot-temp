@@ -1,0 +1,75 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_rgb_call_and_attribute_access ______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-38/test_rgb_call_and_attribute_ac0')
+
+    def test_rgb_call_and_attribute_access(tmp_path):
+        reg = Register()
+        # Register a dummy render function for DummyRenderType
+        reg.set_renderfunc(DummyRenderType, lambda r, g, b: f"rgb({r},{g},{b})")
+        # Set the rgb call to use DummyRenderType
+        reg.set_rgb_call(DummyRenderType)
+        # RGB call should use the render function
+        assert reg(10, 20, 30) == "rgb(10,20,30)"
+        # Single string argument should return attribute value if exists
+        reg.red = "redcode"
+        assert reg("red") == "redcode"
+        # Unknown attribute should return empty string
+>       assert reg("unknown") == ""
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/sty__sty.primitive__Register__46__atomic_verified_setup/eval0/test_generated.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sty.primitive.Register object at 0x7f4bb6271420>, args = ('unknown',)
+kwargs = {}
+
+    def __call__(self, *args: Union[int, str], **kwargs) -> str:
+        """
+        This function is to handle calls such as `fg(42)`, `bg(102, 49, 42)`, `fg('red')`.
+        """
+    
+        # Return empty str if object is muted.
+        if self.is_muted:
+            return ""
+    
+        len_args = len(args)
+    
+        if len_args == 1:
+            # If input is an 8bit color code, run 8bit render function.
+            if isinstance(args[0], int):
+                return self.eightbit_call(*args, **kwargs)
+    
+            # If input is a string, return attribute with the name that matches
+            # input.
+            else:
+>               return getattr(self, args[0])
+E               AttributeError: 'Register' object has no attribute 'unknown'
+
+sty/primitive.py:107: AttributeError
+________________________ test_as_dict_and_as_namedtuple ________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-38/test_as_dict_and_as_namedtuple0')
+
+    def test_as_dict_and_as_namedtuple(tmp_path):
+        reg = Register()
+        # Add some string attributes
+        reg.red = "redcode"
+        reg.green = "greencode"
+        # as_dict should include only public string attributes
+        d = reg.as_dict()
+        assert isinstance(d, dict)
+        assert d["red"] == "redcode"
+        assert d["green"] == "greencode"
+        # No private attributes should be present
+        assert not any(k.startswith("_") for k in d)
+        # as_namedtuple should produce a namedtuple with the same values
+        nt = reg.as_namedtuple()
+>       assert isinstance(nt, namedtuple)
+E       TypeError: isinstance() arg 2 must be a type, a tuple of types, or a union
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/sty__sty.primitive__Register__46__atomic_verified_setup/eval0/test_generated.py:52: TypeError
+=========================== short test summary info ============================
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/sty__sty.primitive__Register__46__atomic_verified_setup/eval0/test_generated.py::test_rgb_call_and_attribute_access
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/sty__sty.primitive__Register__46__atomic_verified_setup/eval0/test_generated.py::test_as_dict_and_as_namedtuple
+2 failed, 1 passed in 0.13s

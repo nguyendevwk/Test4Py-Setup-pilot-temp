@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________________ test_parse_docstring_basic __________________________
+
+    def test_parse_docstring_basic():
+        doc = parse(":param name: param desc\n:type name: str\n:returns: return desc")
+        assert isinstance(doc, Docstring)
+        assert doc.short_description is None
+        assert doc.long_description is None
+        assert len(doc.meta) == 2
+    
+        param_meta = next(
+            m for m in doc.meta if isinstance(m, DocstringParam) and m.arg_name == "name"
+        )
+        assert param_meta.description == "param desc"
+        assert param_meta.type_name == "str"
+        assert param_meta.kind is Kind.PARAM
+    
+        returns_meta = next(m for m in doc.meta if isinstance(m, DocstringReturns))
+        assert returns_meta.description == "return desc"
+    
+        assert doc.params == [param_meta]
+>       assert doc.returns == [returns_meta]
+E       AssertionError: assert DocstringReturns(kind=Kind.RETURNS, key='returns', description='return desc') == [DocstringReturns(kind=Kind.RETURNS, key='returns', description='return desc')]
+E        +  where DocstringReturns(kind=Kind.RETURNS, key='returns', description='return desc') = Docstring(style=DocstringStyle.REST, meta=[DocstringParam(kind=Kind.PARAM, key='param', arg_name='name', type_name='str', description='param desc'), DocstringReturns(kind=Kind.RETURNS, key='returns', description='return desc')]).returns
+
+../../expanded_120_results/docstring_parser_rest/council_enhanced/seed_43/v2_exec/test_run.py:24: AssertionError
+=========================== short test summary info ============================
+FAILED ../../expanded_120_results/docstring_parser_rest/council_enhanced/seed_43/v2_exec/test_run.py::test_parse_docstring_basic
+1 failed in 0.29s
+

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-97f5d7ae-6207-41f6-b5ed-b2d93c8520c7",
+  "object": "chat.completion",
+  "created": 1795076928,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport typed_ast.ast3 as ast\nfrom py_backwards.transformers.yield_from import YieldFromTransformer\nfrom py_backwards.utils.tree import insert_at\n\n# Helper to create a simple module with a yield from inside an assignment\ndef make_module_with_yield_from():\n    # a = (yield from iterable)\n    assign = ast.Assign(\n        targets=[ast.Name(id='a', ctx=ast.Store())],\n        value=ast.YieldFrom(value=ast.Name(id='iterable', ctx=ast.Load()))\n    )\n    return ast.Module(body=[assign], type_ignores=[])\n\n# Helper to create a simple module with a yield from inside an expression\ndef make_module_with_yield_from_expr():\n    # yield from iterable\n    expr = ast.Expr(value=ast.YieldFrom(value=ast.Name(id='iterable', ctx=ast.Load())))\n    return ast.Module(body=[expr], type_ignores=[])\n\ndef test_get_yield_from_index_finds_assignment():\n    module = make_module_with_yield_from()\n    transformer = YieldFromTransformer()\n    # _get_yield_from_index should return 0 for the assignment\n    index = transformer._get_yield_from_index(module, ast.Assign)\n    assert index == 0, \"Expected to find YieldFrom in the first body element\"\n\ndef test_visit_removes_yield_from_nodes():\n    module = make_module_with_yield_from()\n    transformer = YieldFromTransformer()\n    transformed = transformer.visit(module)\n    # After transformation, there should be no YieldFrom nodes in the tree\n    yield_from_nodes = [node for node in ast.walk(transformed) if isinstance(node, ast.YieldFrom)]\n    assert not yield_from_nodes, \"YieldFrom nodes should be removed after transformation\"\n\ndef test_handle_assignments_replaces_assignment_with_yield_from_body():\n    module = make_module_with_yield_from()\n    transformer = YieldFromTransformer()\n    # Capture original body length\n    original_len = len(module.body)\n    # Apply assignment handling\n    transformed = transformer._handle_assignments(module)\n    # After handling, the original assignment should be removed\n    assert len(transformed.body) == original_len, \"Body length should remain the same after replacement\"\n    # The first element should no longer be an Assign node\n    assert not isinstance(transformed.body[0], ast.Assign), \"Assign node should be replaced\"\n    # There should be no YieldFrom nodes in the transformed body\n    yield_from_nodes = [node for node in ast.walk(transformed) if isinstance(node, ast.YieldFrom)]\n    assert not yield_from_nodes, \"YieldFrom nodes should be replaced by other statements\"\n```",
+        "reasoning": "We need to test YieldFromTransformer. We need to parse code to AST using typed_ast? We can use ast.parse from typed_ast? Use typed_ast.ast3.parse. Then apply transformer. We need to check that yield from is replaced. Hard to know output. Maybe test that _get_yield_from_index finds correct index. Use simple node with body list. Create dummy node with body containing Assign with YieldFrom. Use ast.Assign with value ast.YieldFrom. Then call _get_yield_from_index. Also test _emulate_yield_from returns list of ast nodes. Hard to assert content. Maybe test that visit transforms a module containing yield from into something else. But we don't know expected. Could check that no YieldFrom nodes remain. Use ast.walk. So test that after visiting, no ast.YieldFrom nodes. Also test that _handle_assignments modifies node. Use a module with assign yield from. Ensure assignment removed and replaced. We'll just check that no YieldFrom left. Three tests: test_get_yield_from_index finds index; test_visit_removes_yield_from; test_handle_assignments replaces assignment. Use tmp_path to write file? Not needed. Use typed_ast. Let's code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052739694,
+    "prompt_tokens": 908,
+    "prompt_time": 0.020528736,
+    "completion_tokens": 807,
+    "completion_time": 1.048750305,
+    "total_tokens": 1715,
+    "total_time": 1.069279041,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 247
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7serbymef7tx9539fs5zd7v",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport typed_ast.ast3 as ast\nfrom py_backwards.transformers.yield_from import YieldFromTransformer\nfrom py_backwards.utils.tree import insert_at\n\n# Helper to create a simple module with a yield from inside an assignment\ndef make_module_with_yield_from():\n    # a = (yield from iterable)\n    assign = ast.Assign(\n        targets=[ast.Name(id='a', ctx=ast.Store())],\n        value=ast.YieldFrom(value=ast.Name(id='iterable', ctx=ast.Load()))\n    )\n    return ast.Module(body=[assign], type_ignores=[])\n\n# Helper to create a simple module with a yield from inside an expression\ndef make_module_with_yield_from_expr():\n    # yield from iterable\n    expr = ast.Expr(value=ast.YieldFrom(value=ast.Name(id='iterable', ctx=ast.Load())))\n    return ast.Module(body=[expr], type_ignores=[])\n\ndef test_get_yield_from_index_finds_assignment():\n    module = make_module_with_yield_from()\n    transformer = YieldFromTransformer()\n    # _get_yield_from_index should return 0 for the assignment\n    index = transformer._get_yield_from_index(module, ast.Assign)\n    assert index == 0, \"Expected to find YieldFrom in the first body element\"\n\ndef test_visit_removes_yield_from_nodes():\n    module = make_module_with_yield_from()\n    transformer = YieldFromTransformer()\n    transformed = transformer.visit(module)\n    # After transformation, there should be no YieldFrom nodes in the tree\n    yield_from_nodes = [node for node in ast.walk(transformed) if isinstance(node, ast.YieldFrom)]\n    assert not yield_from_nodes, \"YieldFrom nodes should be removed after transformation\"\n\ndef test_handle_assignments_replaces_assignment_with_yield_from_body():\n    module = make_module_with_yield_from()\n    transformer = YieldFromTransformer()\n    # Capture original body length\n    original_len = len(module.body)\n    # Apply assignment handling\n    transformed = transformer._handle_assignments(module)\n    # After handling, the original assignment should be removed\n    assert len(transformed.body) == original_len, \"Body length should remain the same after replacement\"\n    # The first element should no longer be an Assign node\n    assert not isinstance(transformed.body[0], ast.Assign), \"Assign node should be replaced\"\n    # There should be no YieldFrom nodes in the transformed body\n    yield_from_nodes = [node for node in ast.walk(transformed) if isinstance(node, ast.YieldFrom)]\n    assert not yield_from_nodes, \"YieldFrom nodes should be replaced by other statements\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.423835291992873
+}

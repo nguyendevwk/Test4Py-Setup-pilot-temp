@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-27b5f1e6-9fb7-4a24-aa79-d82731ca1542",
+  "object": "chat.completion",
+  "created": 1795077590,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport logging\nimport pytest\nfrom pathlib import Path\nfrom jinja2 import Environment\nfrom cookiecutter.exceptions import NonTemplatedInputDirException\nfrom cookiecutter.find import find_template\n\n# Configure a logger for the test module\nlogging.basicConfig(level=logging.DEBUG)\nlogger = logging.getLogger(__name__)\n\ndef test_find_template_success(tmp_path: Path):\n    \"\"\"When a directory matching the pattern exists, find_template returns its Path.\"\"\"\n    # Arrange: create a fake repo directory with a matching child directory\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    # Use Jinja2's default delimiters\n    env = Environment()\n    template_name = f\"cookiecutter{env.variable_start_string}project{env.variable_end_string}\"\n    (repo_dir / template_name).mkdir()\n    # Act\n    result = find_template(repo_dir, env)\n    # Assert\n    assert result == repo_dir / template_name\n    assert result.is_dir()\n    assert result.name == template_name\n\ndef test_find_template_no_match_raises(tmp_path: Path):\n    \"\"\"If no child directory matches the pattern, find_template raises NonTemplatedInputDirException.\"\"\"\n    # Arrange: create a repo directory with unrelated subdirectories\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    (repo_dir / \"not_a_template\").mkdir()\n    env = Environment()\n    # Act & Assert\n    with pytest.raises(NonTemplatedInputDirException):\n        find_template(repo_dir, env)\n\ndef test_find_template_multiple_matches_returns_first(tmp_path: Path):\n    \"\"\"When multiple matching directories exist, find_template returns the first one found.\"\"\"\n    # Arrange: create two matching directories\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    env = Environment()\n    first_name = f\"cookiecutter{env.variable_start_string}first{env.variable_end_string}\"\n    second_name = f\"cookiecutter{env.variable_start_string}second{env.variable_end_string}\"\n    (repo_dir / first_name).mkdir()\n    (repo_dir / second_name).mkdir()\n    # Act\n    result = find_template(repo_dir, env)\n    # Assert: the first directory in os.listdir order is returned\n    # os.listdir order is arbitrary but deterministic within the same run; we check that result is one of the two\n    assert result in {repo_dir / first_name, repo_dir / second_name}\n    # Additionally, ensure it matches the first in the list\n    first_in_list = Path(repo_dir, os.listdir(repo_dir)[0])\n    assert result == first_in_list\n```",
+        "reasoning": "We need tests for find_template. Need to create temporary directories with files. Use tmp_path. Need Environment from jinja2? cookiecutter uses jinja2.Environment. We'll import Environment. Test normal: create dir with matching name. Test boundary: no matching -> exception. Test error: maybe multiple matches? but function picks first. Could test that it returns correct Path. Use precise assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047904901,
+    "prompt_tokens": 420,
+    "prompt_time": 0.031210598,
+    "completion_tokens": 642,
+    "completion_time": 0.794422197,
+    "total_tokens": 1062,
+    "total_time": 0.825632795,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 81
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfcjzge33tp829kgjdb7w1",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport logging\nimport pytest\nfrom pathlib import Path\nfrom jinja2 import Environment\nfrom cookiecutter.exceptions import NonTemplatedInputDirException\nfrom cookiecutter.find import find_template\n\n# Configure a logger for the test module\nlogging.basicConfig(level=logging.DEBUG)\nlogger = logging.getLogger(__name__)\n\ndef test_find_template_success(tmp_path: Path):\n    \"\"\"When a directory matching the pattern exists, find_template returns its Path.\"\"\"\n    # Arrange: create a fake repo directory with a matching child directory\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    # Use Jinja2's default delimiters\n    env = Environment()\n    template_name = f\"cookiecutter{env.variable_start_string}project{env.variable_end_string}\"\n    (repo_dir / template_name).mkdir()\n    # Act\n    result = find_template(repo_dir, env)\n    # Assert\n    assert result == repo_dir / template_name\n    assert result.is_dir()\n    assert result.name == template_name\n\ndef test_find_template_no_match_raises(tmp_path: Path):\n    \"\"\"If no child directory matches the pattern, find_template raises NonTemplatedInputDirException.\"\"\"\n    # Arrange: create a repo directory with unrelated subdirectories\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    (repo_dir / \"not_a_template\").mkdir()\n    env = Environment()\n    # Act & Assert\n    with pytest.raises(NonTemplatedInputDirException):\n        find_template(repo_dir, env)\n\ndef test_find_template_multiple_matches_returns_first(tmp_path: Path):\n    \"\"\"When multiple matching directories exist, find_template returns the first one found.\"\"\"\n    # Arrange: create two matching directories\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    env = Environment()\n    first_name = f\"cookiecutter{env.variable_start_string}first{env.variable_end_string}\"\n    second_name = f\"cookiecutter{env.variable_start_string}second{env.variable_end_string}\"\n    (repo_dir / first_name).mkdir()\n    (repo_dir / second_name).mkdir()\n    # Act\n    result = find_template(repo_dir, env)\n    # Assert: the first directory in os.listdir order is returned\n    # os.listdir order is arbitrary but deterministic within the same run; we check that result is one of the two\n    assert result in {repo_dir / first_name, repo_dir / second_name}\n    # Additionally, ensure it matches the first in the list\n    first_in_list = Path(repo_dir, os.listdir(repo_dir)[0])\n    assert result == first_in_list\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.231734269997105
+}

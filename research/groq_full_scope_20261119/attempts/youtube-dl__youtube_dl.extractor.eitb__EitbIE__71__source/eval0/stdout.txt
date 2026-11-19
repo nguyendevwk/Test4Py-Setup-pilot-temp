@@ -1,0 +1,202 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_basic_renditions _____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.eitb__EitbIE__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_basic_renditions0')
+
+    def test_basic_renditions(tmp_path):
+        ie = make_eitb_ie()
+        # Sample JSON with two renditions
+        sample_json = {
+            "web_media": [
+                {
+                    "RENDITIONS": [
+                        {"PMD_URL": "http://example.com/low.mp4", "ENCODING_RATE": "500", "FRAME_WIDTH": "640", "FRAME_HEIGHT": "360"},
+                        {"PMD_URL": "http://example.com/high.mp4", "ENCODING_RATE": "1500", "FRAME_WIDTH": "1280", "FRAME_HEIGHT": "720"},
+                    ],
+                    "NAME_ES": "Test Video",
+                    "SHORT_DESC_ES": "A test description",
+                    "STILL_URL": "http://example.com/thumb.jpg",
+                    "LENGTH": "600000",
+                    "BROADCST_DATE": "2023-01-01 12:00:00",
+                    "TAGS": ["test", "video"],
+                }
+            ]
+        }
+        ie._download_json = lambda url, video_id, *args, **kwargs: sample_json
+>       result = ie._real_extract("http://www.eitb.tv/es/video/test/123/123456")
+
+test_generated.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/eitb.py:77: in _real_extract
+    self._sort_formats(formats)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1446: in _sort_formats
+    formats.sort(key=_formats_key)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = {'url': 'http://example.com/low.mp4', 'format_id': 'http-0', 'width': 640, 'height': 360, ...}
+
+    def _formats_key(f):
+        # TODO remove the following workaround
+        from ..utils import determine_ext
+        if not f.get('ext') and 'url' in f:
+            f['ext'] = determine_ext(f['url'])
+    
+        if isinstance(field_preference, (list, tuple)):
+            return tuple(
+                f.get(field)
+                if f.get(field) is not None
+                else ('' if field == 'format_id' else -1)
+                for field in field_preference)
+    
+        preference = f.get('preference')
+        if preference is None:
+            preference = 0
+            if f.get('ext') in ['f4f', 'f4m']:  # Not yet supported
+                preference -= 0.5
+    
+        protocol = f.get('protocol') or determine_protocol(f)
+        proto_preference = 0 if protocol in ['http', 'https'] else (-0.5 if protocol == 'rtsp' else -0.1)
+    
+        if f.get('vcodec') == 'none':  # audio only
+            preference -= 50
+            if self._downloader.params.get('prefer_free_formats'):
+                ORDER = ['aac', 'mp3', 'm4a', 'webm', 'ogg', 'opus']
+            else:
+                ORDER = ['webm', 'opus', 'ogg', 'mp3', 'aac', 'm4a']
+            ext_preference = 0
+            try:
+                audio_ext_preference = ORDER.index(f['ext'])
+            except ValueError:
+                audio_ext_preference = -1
+        else:
+            if f.get('acodec') == 'none':  # video only
+                preference -= 40
+>           if self._downloader.params.get('prefer_free_formats'):
+E           AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1418: AttributeError
+__________________________ test_hls_token_and_formats __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.eitb__EitbIE__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_hls_token_and_formats0')
+
+    def test_hls_token_and_formats(tmp_path):
+        ie = make_eitb_ie()
+        sample_json = {
+            "web_media": [
+                {
+                    "RENDITIONS": [],
+                    "HLS_SURL": "http://example.com/stream.m3u8",
+                    "NAME_ES": "HLS Video",
+                    "SHORT_DESC_ES": "HLS test",
+                    "STILL_URL": "http://example.com/thumb2.jpg",
+                    "LENGTH": "300000",
+                    "BROADCST_DATE": "2023-02-02 10:00:00",
+                    "TAGS": ["hls"],
+                }
+            ]
+        }
+        # Return token data
+        token_json = {"token": "abc123"}
+        def download_json(url, video_id, *args, **kwargs):
+            if "TokenAuth" in url:
+                return token_json
+            return sample_json
+        ie._download_json = download_json
+        # Simulate extraction of m3u8 formats
+        ie._extract_m3u8_formats = lambda url, vid, **kw: [{"url": url, "format_id": "hls"}]
+>       result = ie._real_extract("http://www.eitb.tv/es/video/hls/456/456789")
+
+test_generated.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/eitb.py:63: in _real_extract
+    token_data = self._download_json(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = <urllib.request.Request object at 0x7f96ea7c39d0>, video_id = '456789'
+args = ('Downloading auth token',), kwargs = {'fatal': False}
+
+    def download_json(url, video_id, *args, **kwargs):
+>       if "TokenAuth" in url:
+E       TypeError: argument of type 'Request' is not iterable
+
+test_generated.py:71: TypeError
+__________________________ test_hds_and_no_renditions __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.eitb__EitbIE__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_hds_and_no_renditions0')
+
+    def test_hds_and_no_renditions(tmp_path):
+        ie = make_eitb_ie()
+        sample_json = {
+            "web_media": [
+                {
+                    "RENDITIONS": [],
+                    "HDS_SURL": "http://example.com/stream.f4m",
+                    "NAME_ES": "HDS Video",
+                    "SHORT_DESC_ES": "HDS test",
+                    "STILL_URL": "http://example.com/thumb3.jpg",
+                    "LENGTH": "120000",
+                    "BROADCST_DATE": "2023-03-03 08:00:00",
+                    "TAGS": ["hds"],
+                }
+            ]
+        }
+        ie._download_json = lambda url, video_id, *args, **kwargs: sample_json
+        ie._extract_f4m_formats = lambda url, vid, **kw: [{"url": url, "format_id": "hds"}]
+>       result = ie._real_extract("http://www.eitb.tv/es/video/hds/789/789012")
+
+test_generated.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/eitb.py:77: in _real_extract
+    self._sort_formats(formats)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1446: in _sort_formats
+    formats.sort(key=_formats_key)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = {'url': 'http://example.com/stream.f4m?hdcore=3.7.0', 'format_id': 'hds', 'ext': 'f4m'}
+
+    def _formats_key(f):
+        # TODO remove the following workaround
+        from ..utils import determine_ext
+        if not f.get('ext') and 'url' in f:
+            f['ext'] = determine_ext(f['url'])
+    
+        if isinstance(field_preference, (list, tuple)):
+            return tuple(
+                f.get(field)
+                if f.get(field) is not None
+                else ('' if field == 'format_id' else -1)
+                for field in field_preference)
+    
+        preference = f.get('preference')
+        if preference is None:
+            preference = 0
+            if f.get('ext') in ['f4f', 'f4m']:  # Not yet supported
+                preference -= 0.5
+    
+        protocol = f.get('protocol') or determine_protocol(f)
+        proto_preference = 0 if protocol in ['http', 'https'] else (-0.5 if protocol == 'rtsp' else -0.1)
+    
+        if f.get('vcodec') == 'none':  # audio only
+            preference -= 50
+            if self._downloader.params.get('prefer_free_formats'):
+                ORDER = ['aac', 'mp3', 'm4a', 'webm', 'ogg', 'opus']
+            else:
+                ORDER = ['webm', 'opus', 'ogg', 'mp3', 'aac', 'm4a']
+            ext_preference = 0
+            try:
+                audio_ext_preference = ORDER.index(f['ext'])
+            except ValueError:
+                audio_ext_preference = -1
+        else:
+            if f.get('acodec') == 'none':  # video only
+                preference -= 40
+>           if self._downloader.params.get('prefer_free_formats'):
+E           AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1418: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_basic_renditions - AttributeError: 'NoneType' ...
+FAILED test_generated.py::test_hls_token_and_formats - TypeError: argument of...
+FAILED test_generated.py::test_hds_and_no_renditions - AttributeError: 'NoneT...
+3 failed in 0.93s

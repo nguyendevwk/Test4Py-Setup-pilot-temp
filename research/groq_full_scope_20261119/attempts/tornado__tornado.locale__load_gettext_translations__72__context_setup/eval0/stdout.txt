@@ -1,0 +1,59 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_load_gettext_translations_success ____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_gettext_translations__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_gettext_translations0')
+
+    def test_load_gettext_translations_success(tmp_path):
+        """Verify that valid .mo files are loaded and locales are registered."""
+        domain = "testdomain"
+        # Create two locale directories with valid .mo files
+        for lang in ("en_US", "pt_BR"):
+            lc_dir = tmp_path / lang / "LC_MESSAGES"
+            lc_dir.mkdir(parents=True)
+            mo_path = lc_dir / f"{domain}.mo"
+>           _create_mo_file(mo_path, {"hello": "hello" if lang == "en_US" else "olá"})
+
+test_generated.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__lo...72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_gettext_translations0/en_US/LC_MESSAGES/testdomain.mo')
+translations = {'hello': 'hello'}
+
+    def _create_mo_file(path, translations):
+        """Create a minimal .mo file with the given translations dict."""
+        # Build the binary .mo format
+        # Header: magic, version, nstrings, orig_table, trans_table, hash, size
+        # For simplicity, use 0 for hash and size
+        nstrings = len(translations)
+        # Offsets start after header (28 bytes)
+        orig_offset = 28 + nstrings * 8
+        trans_offset = orig_offset + sum(len(k.encode()) for k in translations) + nstrings * 4
+        # Build tables
+        orig_table = b""
+        trans_table = b""
+        orig_data = b""
+        trans_data = b""
+        for i, (msgid, msgstr) in enumerate(translations.items()):
+            orig_len = len(msgid.encode())
+            trans_len = len(msgstr.encode())
+            orig_table += struct.pack("<II", orig_len, orig_offset + i * 4)
+            trans_table += struct.pack("<II", trans_len, trans_offset + i * 4)
+            orig_data += msgid.encode() + b"\0"
+            trans_data += msgstr.encode() + b"\0"
+>       mo = struct.pack(
+            "<IIIIIIII",
+            0x950412de,  # magic
+            0,          # version
+            nstrings,
+            28,         # orig_table offset
+            28 + nstrings * 8,  # trans_table offset
+            0,          # hash offset
+            0,          # size offset
+        )
+E       struct.error: pack expected 8 items for packing (got 7)
+
+test_generated.py:29: error
+=========================== short test summary info ============================
+FAILED test_generated.py::test_load_gettext_translations_success - struct.err...
+1 failed, 2 passed in 0.17s

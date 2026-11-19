@@ -1,0 +1,135 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_enable_pretty_logging_stream_and_level __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.log__enable_pretty_logging__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_enable_pretty_logging_str0')
+
+    def test_enable_pretty_logging_stream_and_level(tmp_path):
+        # Configure options to log to stderr with level INFO
+        opts = make_options(
+            logging="info",
+            log_file_prefix=None,
+            log_file_rotate_mode=None,
+            log_file_max_size=None,
+            log_file_num_backups=None,
+            log_file_rotate_when=None,
+            log_file_rotate_interval=None,
+            log_to_stderr=True,
+        )
+        logger = logging.getLogger("test_stream")
+        logger.handlers = []  # clear any existing handlers
+        enable_pretty_logging(opts, logger)
+    
+        # Assert level set to INFO
+        assert logger.level == logging.INFO
+    
+        # Assert a StreamHandler was added
+        stream_handlers = [h for h in logger.handlers if isinstance(h, logging.StreamHandler)]
+        assert len(stream_handlers) == 1
+        handler = stream_handlers[0]
+        # Formatter should be LogFormatter with color enabled
+        assert isinstance(handler.formatter, LogFormatter)
+>       assert handler.formatter.color is True
+E       AttributeError: 'LogFormatter' object has no attribute 'color'. Did you mean: '_colors'?
+
+test_generated.py:42: AttributeError
+_________________ test_enable_pretty_logging_file_rotate_size __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.log__enable_pretty_logging__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_enable_pretty_logging_fil0')
+
+    def test_enable_pretty_logging_file_rotate_size(tmp_path):
+        # Prepare a temporary file prefix
+        prefix = tmp_path / "logfile.log"
+        opts = make_options(
+            logging="debug",
+            log_file_prefix=str(prefix),
+            log_file_rotate_mode="size",
+            log_file_max_size=10,  # very small to trigger rotation
+            log_file_num_backups=1,
+            log_file_rotate_when=None,
+            log_file_rotate_interval=None,
+            log_to_stderr=False,
+        )
+        logger = logging.getLogger("test_file")
+        logger.handlers = []
+>       enable_pretty_logging(opts, logger)
+
+test_generated.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+options = namespace(logging='debug', log_file_prefix='/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/att...ile_max_size=10, log_file_num_backups=1, log_file_rotate_when=None, log_file_rotate_interval=None, log_to_stderr=False)
+logger = <Logger test_file (DEBUG)>
+
+    def enable_pretty_logging(
+        options: Any = None, logger: Optional[logging.Logger] = None
+    ) -> None:
+        """Turns on formatted logging output as configured.
+    
+        This is called automatically by `tornado.options.parse_command_line`
+        and `tornado.options.parse_config_file`.
+        """
+        if options is None:
+            import tornado.options
+    
+            options = tornado.options.options
+        if options.logging is None or options.logging.lower() == "none":
+            return
+        if logger is None:
+            logger = logging.getLogger()
+        logger.setLevel(getattr(logging, options.logging.upper()))
+        if options.log_file_prefix:
+>           rotate_mode = options.log_rotate_mode
+E           AttributeError: 'types.SimpleNamespace' object has no attribute 'log_rotate_mode'. Did you mean: 'log_file_rotate_mode'?
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/log.py:233: AttributeError
+____________ test_enable_pretty_logging_invalid_rotate_mode_raises _____________
+
+    def test_enable_pretty_logging_invalid_rotate_mode_raises():
+        opts = make_options(
+            logging="warning",
+            log_file_prefix="dummy.log",
+            log_file_rotate_mode="invalid_mode",
+            log_file_max_size=100,
+            log_file_num_backups=2,
+            log_file_rotate_when=None,
+            log_file_rotate_interval=None,
+            log_to_stderr=False,
+        )
+        logger = logging.getLogger("test_invalid")
+        logger.handlers = []
+        with pytest.raises(ValueError) as exc:
+>           enable_pretty_logging(opts, logger)
+
+test_generated.py:99: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+options = namespace(logging='warning', log_file_prefix='dummy.log', log_file_rotate_mode='invalid_mode', log_file_max_size=100, log_file_num_backups=2, log_file_rotate_when=None, log_file_rotate_interval=None, log_to_stderr=False)
+logger = <Logger test_invalid (WARNING)>
+
+    def enable_pretty_logging(
+        options: Any = None, logger: Optional[logging.Logger] = None
+    ) -> None:
+        """Turns on formatted logging output as configured.
+    
+        This is called automatically by `tornado.options.parse_command_line`
+        and `tornado.options.parse_config_file`.
+        """
+        if options is None:
+            import tornado.options
+    
+            options = tornado.options.options
+        if options.logging is None or options.logging.lower() == "none":
+            return
+        if logger is None:
+            logger = logging.getLogger()
+        logger.setLevel(getattr(logging, options.logging.upper()))
+        if options.log_file_prefix:
+>           rotate_mode = options.log_rotate_mode
+E           AttributeError: 'types.SimpleNamespace' object has no attribute 'log_rotate_mode'. Did you mean: 'log_file_rotate_mode'?
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/log.py:233: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_enable_pretty_logging_stream_and_level - Attri...
+FAILED test_generated.py::test_enable_pretty_logging_file_rotate_size - Attri...
+FAILED test_generated.py::test_enable_pretty_logging_invalid_rotate_mode_raises
+3 failed in 0.23s

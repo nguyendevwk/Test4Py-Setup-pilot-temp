@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-723640f5-fc90-4109-aee0-2f62eb2ca221",
+  "object": "chat.completion",
+  "created": 1795077517,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom py_backwards.transformers.six_moves import SixMovesTransformer\nfrom py_backwards.utils.helpers import eager\n\n# Test 1: Normal rewrite of a moved module\ndef test_six_moves_rewrite_simple():\n    code = \"import urllib2\\nprint(urllib2.urlopen('http://example.com'))\"\n    transformed = eager(code, SixMovesTransformer)\n    assert \"import six.moves.urllib2\" in transformed\n    assert \"urllib2\" not in transformed.splitlines()[0]\n    assert \"six.moves.urllib2\" in transformed\n    # Ensure the rest of the code remains unchanged\n    assert \"print(urllib2.urlopen('http://example.com'))\" in transformed\n\n# Test 2: Rewrite with alias preservation\ndef test_six_moves_rewrite_alias():\n    code = \"import urllib2 as u2\\nprint(u2.urlopen('http://example.com'))\"\n    transformed = eager(code, SixMovesTransformer)\n    # The alias should be preserved after rewriting\n    assert \"import six.moves.urllib2 as u2\" in transformed\n    assert \"u2.urlopen\" in transformed\n    # Ensure no duplicate import\n    assert transformed.count(\"import six.moves.urllib2\") == 1\n\n# Test 3: No rewrite for modules that are not moved\ndef test_six_moves_no_rewrite_nonexistent():\n    code = \"import math\\nprint(math.sqrt(4))\"\n    transformed = eager(code, SixMovesTransformer)\n    # The import should remain unchanged\n    assert \"import math\" in transformed\n    # No six.moves import should appear\n    assert \"six.moves\" not in transformed\n    # The rest of the code should be unchanged\n    assert \"print(math.sqrt(4))\" in transformed\n```",
+        "reasoning": "We need to test SixMovesTransformer. Need to inspect its behavior. Let's open source.We don't have source. But we can guess: BaseImportRewrite likely rewrites imports. SixMovesTransformer rewrites imports of modules that moved between Python 2 and 3 to six.moves equivalents. We need to test that it rewrites correctly. We need to import it. Let's write tests that create a sample code string with imports that should be rewritten, run transformer, and check output. Use eager helper? Probably eager returns transformed code. Let's inspect eager.We need to import eager from py_backwards.utils.helpers. Let's assume eager takes code string and transformer, returns transformed code. We'll write tests accordingly. Use tmp_path to write file? Maybe easier to use eager. We'll test normal: import urllib2 -> six.moves.urllib2. Boundary: import urllib2 as u2 -> six.moves.urllib2 as u2. Error: import nonexistent module -> should raise? Maybe no rewrite. We'll assert unchanged. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053875096,
+    "prompt_tokens": 282,
+    "prompt_time": 0.011079064,
+    "completion_tokens": 596,
+    "completion_time": 0.652515075,
+    "total_tokens": 878,
+    "total_time": 0.663594139,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 209
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfabvfey58g5sq19d1aarn",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom py_backwards.transformers.six_moves import SixMovesTransformer\nfrom py_backwards.utils.helpers import eager\n\n# Test 1: Normal rewrite of a moved module\ndef test_six_moves_rewrite_simple():\n    code = \"import urllib2\\nprint(urllib2.urlopen('http://example.com'))\"\n    transformed = eager(code, SixMovesTransformer)\n    assert \"import six.moves.urllib2\" in transformed\n    assert \"urllib2\" not in transformed.splitlines()[0]\n    assert \"six.moves.urllib2\" in transformed\n    # Ensure the rest of the code remains unchanged\n    assert \"print(urllib2.urlopen('http://example.com'))\" in transformed\n\n# Test 2: Rewrite with alias preservation\ndef test_six_moves_rewrite_alias():\n    code = \"import urllib2 as u2\\nprint(u2.urlopen('http://example.com'))\"\n    transformed = eager(code, SixMovesTransformer)\n    # The alias should be preserved after rewriting\n    assert \"import six.moves.urllib2 as u2\" in transformed\n    assert \"u2.urlopen\" in transformed\n    # Ensure no duplicate import\n    assert transformed.count(\"import six.moves.urllib2\") == 1\n\n# Test 3: No rewrite for modules that are not moved\ndef test_six_moves_no_rewrite_nonexistent():\n    code = \"import math\\nprint(math.sqrt(4))\"\n    transformed = eager(code, SixMovesTransformer)\n    # The import should remain unchanged\n    assert \"import math\" in transformed\n    # No six.moves import should appear\n    assert \"six.moves\" not in transformed\n    # The rest of the code should be unchanged\n    assert \"print(math.sqrt(4))\" in transformed\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0562055369955488
+}

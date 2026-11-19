@@ -1,0 +1,32 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_waiting_task_replacement_and_cancellation ________________
+
+    def test_waiting_task_replacement_and_cancellation():
+        """Submitting a second task should replace the waiting one and cancel it."""
+        worker = MonoWorker()
+        executed = []
+    
+        def long_task():
+            time.sleep(0.2)
+            executed.append("long")
+    
+        def short_task():
+            executed.append("short")
+    
+        # Submit long task first; it becomes waiting because no running task yet
+        future1 = worker.submit(long_task)
+        assert future1 is not None
+        # Submit short task; it should replace the waiting long task
+        future2 = worker.submit(short_task)
+        assert future2 is not None
+        # The long task should have been cancelled
+>       assert future1.cancelled()
+E       assert False
+E        +  where False = cancelled()
+E        +    where cancelled = <Future at 0x7fc5e1f97490 state=running>.cancelled
+
+../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__44__atomic_source/eval0/test_generated.py:43: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__44__atomic_source/eval0/test_generated.py::test_waiting_task_replacement_and_cancellation
+1 failed, 2 passed in 0.42s

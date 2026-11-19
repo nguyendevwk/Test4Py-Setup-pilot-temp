@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-d850f915-0171-4bd3-bcf4-608e60d54860",
+  "object": "chat.completion",
+  "created": 1795078016,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.base import BaseError, Message\n\ndef test_single_message_initialization_and_str():\n    # Instantiate with a single message\n    err = BaseError(text=\"Invalid input\", code=\"invalid\", key=\"field\")\n    # The internal message list should contain one Message instance\n    assert len(err._messages) == 1\n    msg = err._messages[0]\n    assert msg.text == \"Invalid input\"\n    assert msg.code == \"invalid\"\n    assert msg.key == \"field\"\n    # __str__ should return the message text when no index\n    assert str(err) == \"Invalid input\"\n    # __repr__ should include text and code\n    assert repr(err) == \"BaseError(text='Invalid input', code='invalid')\"\n\ndef test_multiple_messages_and_dict_access():\n    msgs = [\n        Message(text=\"Missing field\", code=\"required\", key=\"username\"),\n        Message(text=\"Too short\", code=\"min_length\", key=\"password\", index=[\"user\", \"password\"]),\n    ]\n    err = BaseError(messages=msgs)\n    # __len__ should count top-level keys in message dict\n    assert len(err) == 2\n    # __iter__ should iterate over top-level keys\n    assert set(iter(err)) == {\"username\", \"user\"}\n    # Accessing a key returns either a string or nested dict\n    assert err[\"username\"] == \"Missing field\"\n    assert isinstance(err[\"user\"], dict)\n    assert err[\"user\"][\"password\"] == \"Too short\"\n    # messages() should return the original list\n    assert err.messages() == msgs\n\ndef test_messages_with_prefix_and_equality():\n    msgs = [\n        Message(text=\"Invalid email\", code=\"email\", index=[\"contact\", \"email\"]),\n        Message(text=\"Missing phone\", code=\"required\", index=[\"contact\", \"phone\"]),\n    ]\n    err = BaseError(messages=msgs)\n    prefixed = err.messages(add_prefix=\"user\")\n    # Each prefixed message should have the new prefix added to its index\n    assert all(msg.index[0] == \"user\" for msg in prefixed)\n    assert prefixed[0].index == [\"user\", \"contact\", \"email\"]\n    assert prefixed[1].index == [\"user\", \"contact\", \"phone\"]\n    # Equality should compare message lists\n    err_copy = BaseError(messages=msgs)\n    assert err == err_copy\n    # Different messages should not be equal\n    different_err = BaseError(messages=[Message(text=\"Different\", code=\"diff\")])\n    assert err != different_err\n```",
+        "reasoning": "Need Message class? Not provided. Assume exists. We'll test BaseError behavior. Use simple Message with attributes text, code, index. We'll create minimal stub? But cannot modify product. Assume Message defined elsewhere. We'll import BaseError. Use tmp_path not needed. Write three tests: single message init, multiple messages, messages with add_prefix, dict-like access. Use assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053481593,
+    "prompt_tokens": 1074,
+    "prompt_time": 0.006561725,
+    "completion_tokens": 623,
+    "completion_time": 1.2499970089999999,
+    "total_tokens": 1697,
+    "total_time": 1.256558734,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 77
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfshzxe5btf2170x32x52s",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.base import BaseError, Message\n\ndef test_single_message_initialization_and_str():\n    # Instantiate with a single message\n    err = BaseError(text=\"Invalid input\", code=\"invalid\", key=\"field\")\n    # The internal message list should contain one Message instance\n    assert len(err._messages) == 1\n    msg = err._messages[0]\n    assert msg.text == \"Invalid input\"\n    assert msg.code == \"invalid\"\n    assert msg.key == \"field\"\n    # __str__ should return the message text when no index\n    assert str(err) == \"Invalid input\"\n    # __repr__ should include text and code\n    assert repr(err) == \"BaseError(text='Invalid input', code='invalid')\"\n\ndef test_multiple_messages_and_dict_access():\n    msgs = [\n        Message(text=\"Missing field\", code=\"required\", key=\"username\"),\n        Message(text=\"Too short\", code=\"min_length\", key=\"password\", index=[\"user\", \"password\"]),\n    ]\n    err = BaseError(messages=msgs)\n    # __len__ should count top-level keys in message dict\n    assert len(err) == 2\n    # __iter__ should iterate over top-level keys\n    assert set(iter(err)) == {\"username\", \"user\"}\n    # Accessing a key returns either a string or nested dict\n    assert err[\"username\"] == \"Missing field\"\n    assert isinstance(err[\"user\"], dict)\n    assert err[\"user\"][\"password\"] == \"Too short\"\n    # messages() should return the original list\n    assert err.messages() == msgs\n\ndef test_messages_with_prefix_and_equality():\n    msgs = [\n        Message(text=\"Invalid email\", code=\"email\", index=[\"contact\", \"email\"]),\n        Message(text=\"Missing phone\", code=\"required\", index=[\"contact\", \"phone\"]),\n    ]\n    err = BaseError(messages=msgs)\n    prefixed = err.messages(add_prefix=\"user\")\n    # Each prefixed message should have the new prefix added to its index\n    assert all(msg.index[0] == \"user\" for msg in prefixed)\n    assert prefixed[0].index == [\"user\", \"contact\", \"email\"]\n    assert prefixed[1].index == [\"user\", \"contact\", \"phone\"]\n    # Equality should compare message lists\n    err_copy = BaseError(messages=msgs)\n    assert err == err_copy\n    # Different messages should not be equal\n    different_err = BaseError(messages=[Message(text=\"Different\", code=\"diff\")])\n    assert err != different_err\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.630199298961088
+}

@@ -1,0 +1,42 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________________________ test_parse_behavior ______________________________
+
+    def test_parse_behavior():
+        text = """Summary line.
+    
+    :param name: param desc
+    :type name: str
+    :returns: return desc
+    """
+        # Dummy parser that returns a Docstring with a known style
+        class DummyParser(BaseParser):
+            def parse(self, txt: str) -> Docstring:
+                return Docstring(style=DocstringStyle.GOOGLE)
+    
+        dummy = DummyParser()
+    
+        # 1. Passing a parser instance returns its result
+        result = parse(text, style=dummy)
+        assert isinstance(result, Docstring)
+        assert result.style == DocstringStyle.GOOGLE
+    
+        # 2. Passing sections with a parser instance raises ValueError
+        with pytest.raises(ValueError):
+            parse(text, style=dummy, sections=[("param", "name")])
+    
+        # 3. Passing a style name string is converted to DocstringStyle
+        result_str = parse(text, style="google")
+        assert isinstance(result_str, Docstring)
+        assert result_str.style == DocstringStyle.GOOGLE
+        assert result_str.short_description == "Summary line."
+>       assert len(result_str.params) == 1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = len([])
+E        +    where [] = Docstring(style=DocstringStyle.GOOGLE, short_description='Summary line.', long_description=':param name: param desc\n:type name: str\n:returns: return desc', blank_after_short_description=True, meta=[]).params
+
+../../scientific_n5_results/docstring_parser_parse/council_enhanced/seed_43/v2_exec/test_run.py:34: AssertionError
+=========================== short test summary info ============================
+FAILED ../../scientific_n5_results/docstring_parser_parse/council_enhanced/seed_43/v2_exec/test_run.py::test_parse_behavior
+1 failed in 0.36s
+

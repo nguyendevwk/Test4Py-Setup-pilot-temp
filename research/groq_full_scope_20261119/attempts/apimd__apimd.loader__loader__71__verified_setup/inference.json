@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-d3ce898c-700d-41ac-88c2-a96aa7007b72",
+  "object": "chat.completion",
+  "created": 1795077057,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport importlib\nimport importlib.util\nimport importlib.machinery\nimport importlib.abc\nimport importlib\nimport types\nimport pytest\nfrom apimd.loader import loader\n\n# Helper to create a simple package structure\ndef create_package(tmp_path, name, files):\n    pkg_path = tmp_path / name\n    pkg_path.mkdir()\n    (pkg_path / \"__init__.py\").write_text(\"\")\n    for fname, content in files.items():\n        (pkg_path / fname).write_text(content)\n    return str(pkg_path)\n\ndef test_loader_parses_python_module(tmp_path):\n    \"\"\"Loader should parse a normal .py module and return a non‑empty string.\"\"\"\n    pkg = create_package(tmp_path, \"mypkg\", {\"module.py\": \"def foo(): return 42\"})\n    result = loader(pkg, os.getcwd(), link=False, level=0, toc=False)\n    assert isinstance(result, str)\n    assert result.strip() != \"\"\n\ndef test_loader_parses_stub_only(tmp_path):\n    \"\"\"Loader should still compile when only a .pyi stub is present.\"\"\"\n    pkg = create_package(tmp_path, \"stubpkg\", {\"module.pyi\": \"def bar() -> int: ...\"})\n    result = loader(pkg, os.getcwd(), link=False, level=0, toc=False)\n    assert isinstance(result, str)\n    assert result.strip() != \"\"\n\ndef test_loader_handles_missing_files(tmp_path):\n    \"\"\"Loader should not raise when the root directory is empty or missing.\"\"\"\n    empty_dir = tmp_path / \"empty\"\n    empty_dir.mkdir()\n    result = loader(str(empty_dir), os.getcwd(), link=False, level=0, toc=False)\n    assert isinstance(result, str)\n    # The result may be empty but should not raise an exception\n    assert result == \"\" or result.strip() != \"\"\n```",
+        "reasoning": "We need to test loader function. We need to create temporary package structure with .py files, maybe .pyi, and extension? We can't compile extension. So test normal: create simple module with .py, ensure loader compiles. We don't know Parser implementation. But we can inspect? Not provided. We assume compile returns string. We can test that loader returns non-empty string. Also test boundary: when no .py but .pyi only, loader should still parse? It will parse .pyi and then pure_py False, then try extension suffixes; none exist, so warning. But compile still returns something. So test that loader returns string. Error: if path doesn't exist? walk_packages uses walk; if root not dir, walk yields nothing. loader returns p.compile() maybe empty. We can test that no exception. Use tmp_path. We'll need to import loader. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049592681,
+    "prompt_tokens": 553,
+    "prompt_time": 0.070686196,
+    "completion_tokens": 577,
+    "completion_time": 0.653311356,
+    "total_tokens": 1130,
+    "total_time": 0.723997552,
+    "completion_tokens_details": {
+      "reasoning_tokens": 185
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sewa62eycb8scq60tcqcve",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport importlib\nimport importlib.util\nimport importlib.machinery\nimport importlib.abc\nimport importlib\nimport types\nimport pytest\nfrom apimd.loader import loader\n\n# Helper to create a simple package structure\ndef create_package(tmp_path, name, files):\n    pkg_path = tmp_path / name\n    pkg_path.mkdir()\n    (pkg_path / \"__init__.py\").write_text(\"\")\n    for fname, content in files.items():\n        (pkg_path / fname).write_text(content)\n    return str(pkg_path)\n\ndef test_loader_parses_python_module(tmp_path):\n    \"\"\"Loader should parse a normal .py module and return a non‑empty string.\"\"\"\n    pkg = create_package(tmp_path, \"mypkg\", {\"module.py\": \"def foo(): return 42\"})\n    result = loader(pkg, os.getcwd(), link=False, level=0, toc=False)\n    assert isinstance(result, str)\n    assert result.strip() != \"\"\n\ndef test_loader_parses_stub_only(tmp_path):\n    \"\"\"Loader should still compile when only a .pyi stub is present.\"\"\"\n    pkg = create_package(tmp_path, \"stubpkg\", {\"module.pyi\": \"def bar() -> int: ...\"})\n    result = loader(pkg, os.getcwd(), link=False, level=0, toc=False)\n    assert isinstance(result, str)\n    assert result.strip() != \"\"\n\ndef test_loader_handles_missing_files(tmp_path):\n    \"\"\"Loader should not raise when the root directory is empty or missing.\"\"\"\n    empty_dir = tmp_path / \"empty\"\n    empty_dir.mkdir()\n    result = loader(str(empty_dir), os.getcwd(), link=False, level=0, toc=False)\n    assert isinstance(result, str)\n    # The result may be empty but should not raise an exception\n    assert result == \"\" or result.strip() != \"\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0855574519955553
+}

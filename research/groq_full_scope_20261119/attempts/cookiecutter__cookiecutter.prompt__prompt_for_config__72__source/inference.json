@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-3633e42a-31ad-45f5-8f24-d5962edf3aec",
+  "object": "chat.completion",
+  "created": 1795077201,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport pytest\nfrom collections import OrderedDict\n\nfrom cookiecutter.prompt import prompt_for_config, UndefinedVariableInTemplate\n\n\ndef test_prompt_for_config_no_input_renders_all_values(tmp_path):\n    \"\"\"\n    When no_input=True, prompt_for_config should return an OrderedDict\n    with all values rendered from the context without any user interaction.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"TestProject\",\n            \"author_name\": \"Alice\",\n            \"use_feature_x\": True,\n            \"license\": [\"MIT\", \"Apache-2.0\", \"GPL-3.0\"],\n            \"_private_key\": \"secret\",\n            \"__rendered\": \"{{ project_name }}_{{ author_name }}\",\n            \"nested_dict\": {\"inner\": \"{{ project_name }}\"},\n        }\n    }\n\n    result = prompt_for_config(context, no_input=True)\n\n    # The result should be an OrderedDict preserving insertion order\n    assert isinstance(result, OrderedDict)\n\n    # All keys from the original context should be present\n    expected_keys = [\n        \"project_name\",\n        \"author_name\",\n        \"use_feature_x\",\n        \"license\",\n        \"_private_key\",\n        \"__rendered\",\n        \"nested_dict\",\n    ]\n    assert list(result.keys()) == expected_keys\n\n    # Values should be rendered correctly\n    assert result[\"project_name\"] == \"TestProject\"\n    assert result[\"author_name\"] == \"Alice\"\n    assert result[\"use_feature_x\"] is True\n    # For list choices, the default is the first element when no_input=True\n    assert result[\"license\"] == \"MIT\"\n    assert result[\"_private_key\"] == \"secret\"\n    assert result[\"__rendered\"] == \"TestProject_Alice\"\n    assert result[\"nested_dict\"] == {\"inner\": \"TestProject\"}\n\n\ndef test_prompt_for_config_preserves_private_keys(tmp_path):\n    \"\"\"\n    Keys starting with a single underscore should be preserved as-is\n    and not be prompted for.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"_config_path\": \"/etc/config\",\n            \"project_name\": \"Demo\",\n            \"__prompt\": \"{{ project_name }}\",\n        }\n    }\n\n    result = prompt_for_config(context, no_input=True)\n\n    assert \"_config_path\" in result\n    assert result[\"_config_path\"] == \"/etc/config\"\n    assert result[\"project_name\"] == \"Demo\"\n    assert result[\"__prompt\"] == \"Demo\"\n\n\ndef test_prompt_for_config_raises_on_undefined_variable():\n    \"\"\"\n    If a template variable cannot be rendered because it references an\n    undefined variable, UndefinedVariableInTemplate should be raised.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"{{ undefined_var }}\",\n        }\n    }\n\n    with pytest.raises(UndefinedVariableInTemplate) as excinfo:\n        prompt_for_config(context, no_input=True)\n\n    # The exception message should mention the problematic key\n    assert \"project_name\" in str(excinfo.value)\n    # The original context should be available in the exception\n    assert excinfo.value.context == context\n```",
+        "reasoning": "Need tests for prompt_for_config. But it requires user input via rich.prompt. We cannot mock. But we can test no_input=True to avoid prompts. Provide context with various types. Also test error when variable undefined. Use a template that references missing variable. That will raise UndefinedError. We can test that UndefinedVariableInTemplate is raised. Third test maybe boundary: list choices with no_input True returns first? Actually prompt_choice_for_config uses rich.prompt. But with no_input True, it will still call prompt_choice_for_config which may prompt. But we can test that when no_input True, it uses default? Let's inspect prompt_choice_for_config. Not provided. Might prompt. Hard. Instead test that when no_input True, all values are rendered without prompting. So we can assert that returned dict matches expected rendered values. Also test that private keys starting with '_' are preserved. Third test: error when variable references undefined variable. Provide context with cookiecutter dict containing a key with value \"{{ undefined_var }}\". Should raise. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046448805,
+    "prompt_tokens": 1014,
+    "prompt_time": 0.026583883,
+    "completion_tokens": 869,
+    "completion_time": 1.157716461,
+    "total_tokens": 1883,
+    "total_time": 1.184300344,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 212
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sf0pgrerz8r4b3z47pqg61",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport pytest\nfrom collections import OrderedDict\n\nfrom cookiecutter.prompt import prompt_for_config, UndefinedVariableInTemplate\n\n\ndef test_prompt_for_config_no_input_renders_all_values(tmp_path):\n    \"\"\"\n    When no_input=True, prompt_for_config should return an OrderedDict\n    with all values rendered from the context without any user interaction.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"TestProject\",\n            \"author_name\": \"Alice\",\n            \"use_feature_x\": True,\n            \"license\": [\"MIT\", \"Apache-2.0\", \"GPL-3.0\"],\n            \"_private_key\": \"secret\",\n            \"__rendered\": \"{{ project_name }}_{{ author_name }}\",\n            \"nested_dict\": {\"inner\": \"{{ project_name }}\"},\n        }\n    }\n\n    result = prompt_for_config(context, no_input=True)\n\n    # The result should be an OrderedDict preserving insertion order\n    assert isinstance(result, OrderedDict)\n\n    # All keys from the original context should be present\n    expected_keys = [\n        \"project_name\",\n        \"author_name\",\n        \"use_feature_x\",\n        \"license\",\n        \"_private_key\",\n        \"__rendered\",\n        \"nested_dict\",\n    ]\n    assert list(result.keys()) == expected_keys\n\n    # Values should be rendered correctly\n    assert result[\"project_name\"] == \"TestProject\"\n    assert result[\"author_name\"] == \"Alice\"\n    assert result[\"use_feature_x\"] is True\n    # For list choices, the default is the first element when no_input=True\n    assert result[\"license\"] == \"MIT\"\n    assert result[\"_private_key\"] == \"secret\"\n    assert result[\"__rendered\"] == \"TestProject_Alice\"\n    assert result[\"nested_dict\"] == {\"inner\": \"TestProject\"}\n\n\ndef test_prompt_for_config_preserves_private_keys(tmp_path):\n    \"\"\"\n    Keys starting with a single underscore should be preserved as-is\n    and not be prompted for.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"_config_path\": \"/etc/config\",\n            \"project_name\": \"Demo\",\n            \"__prompt\": \"{{ project_name }}\",\n        }\n    }\n\n    result = prompt_for_config(context, no_input=True)\n\n    assert \"_config_path\" in result\n    assert result[\"_config_path\"] == \"/etc/config\"\n    assert result[\"project_name\"] == \"Demo\"\n    assert result[\"__prompt\"] == \"Demo\"\n\n\ndef test_prompt_for_config_raises_on_undefined_variable():\n    \"\"\"\n    If a template variable cannot be rendered because it references an\n    undefined variable, UndefinedVariableInTemplate should be raised.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"{{ undefined_var }}\",\n        }\n    }\n\n    with pytest.raises(UndefinedVariableInTemplate) as excinfo:\n        prompt_for_config(context, no_input=True)\n\n    # The exception message should mention the problematic key\n    assert \"project_name\" in str(excinfo.value)\n    # The original context should be available in the exception\n    assert excinfo.value.context == context\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5527037649881095
+}

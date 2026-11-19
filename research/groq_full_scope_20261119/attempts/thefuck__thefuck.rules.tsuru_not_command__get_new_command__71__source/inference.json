@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-cac2134f-5020-4790-9461-c22a7ff84238",
+  "object": "chat.completion",
+  "created": 1795076681,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules.tsuru_not_command import get_new_command\nfrom thefuck.utils import get_all_matched_commands, replace_command\n\n\nclass DummyCommand:\n    def __init__(self, output, command=\"\"):\n        self.output = output\n        self.command = command\n\n\ndef test_get_new_command_replaces_with_suggestions(monkeypatch):\n    # Arrange: mock the helper functions\n    broken_cmd = \"deploy\"\n    suggestions = [\"tsuru deploy\", \"tsuru push\"]\n    monkeypatch.setattr(\n        \"thefuck.utils.get_all_matched_commands\",\n        lambda output: suggestions,\n    )\n    monkeypatch.setattr(\n        \"thefuck.utils.replace_command\",\n        lambda cmd, broken, sugg: f\"replaced:{broken}:{sugg}\",\n    )\n    output = 'tsuru: \"deploy\" is not a tsuru command\\nsome other text'\n    cmd = DummyCommand(output=output)\n\n    # Act\n    result = get_new_command(cmd)\n\n    # Assert\n    assert result == f\"replaced:{broken_cmd}:{suggestions}\"\n\n\ndef test_get_new_command_raises_when_pattern_missing():\n    # Arrange: output without the expected pattern\n    output = \"some unrelated error message\"\n    cmd = DummyCommand(output=output)\n\n    # Act & Assert\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n\n\ndef test_get_new_command_with_empty_suggestions(monkeypatch):\n    # Arrange: mock get_all_matched_commands to return empty list\n    monkeypatch.setattr(\n        \"thefuck.utils.get_all_matched_commands\",\n        lambda output: [],\n    )\n    # Mock replace_command to simply return the broken command\n    monkeypatch.setattr(\n        \"thefuck.utils.replace_command\",\n        lambda cmd, broken, sugg: f\"no-suggestions:{broken}\",\n    )\n    output = 'tsuru: \"status\" is not a tsuru command'\n    cmd = DummyCommand(output=output)\n\n    # Act\n    result = get_new_command(cmd)\n\n    # Assert\n    assert result == \"no-suggestions:status\"\n```",
+        "reasoning": "We need to test get_new_command. We need to create a command object with output containing pattern. Use a simple object with attributes output and maybe command string. get_all_matched_commands likely returns list of suggestions. We can mock? But cannot mock target. But we can import get_all_matched_commands from thefuck.utils. But that function may rely on external. We can just test that replace_command is called correctly? But replace_command is from utils too. We can import and use. But we need to simulate command object. The command likely has attributes: command, output. replace_command expects command and broken_cmd and suggestions. We can create a simple class with those attributes. Let's inspect utils? Not possible. But we can assume replace_command returns a string? We can test that get_new_command returns the result of replace_command. We can monkeypatch get_all_matched_commands to return known list. But cannot modify product code. But we can monkeypatch via monkeypatch fixture. That's allowed. So test normal: output contains pattern, suggestions list returned. Ensure replace_command called with correct args. We can patch replace_command to capture args. Use monkeypatch to replace utils.replace_command. Similarly patch get_all_matched_commands. Then assert that get_new_command returns expected. Also test boundary: if output missing pattern should raise IndexError. Use pytest.raises. Third test error: if get_all_matched_commands returns empty list? maybe replace_command handles. Just test that it returns something. We'll patch replace_command to return \"fixed\". Ensure get_new_command returns \"fixed\". Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046348215,
+    "prompt_tokens": 292,
+    "prompt_time": 0.014512173,
+    "completion_tokens": 765,
+    "completion_time": 0.884844276,
+    "total_tokens": 1057,
+    "total_time": 0.899356449,
+    "completion_tokens_details": {
+      "reasoning_tokens": 320
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7segv7tecvtdxxneh65qwhj",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules.tsuru_not_command import get_new_command\nfrom thefuck.utils import get_all_matched_commands, replace_command\n\n\nclass DummyCommand:\n    def __init__(self, output, command=\"\"):\n        self.output = output\n        self.command = command\n\n\ndef test_get_new_command_replaces_with_suggestions(monkeypatch):\n    # Arrange: mock the helper functions\n    broken_cmd = \"deploy\"\n    suggestions = [\"tsuru deploy\", \"tsuru push\"]\n    monkeypatch.setattr(\n        \"thefuck.utils.get_all_matched_commands\",\n        lambda output: suggestions,\n    )\n    monkeypatch.setattr(\n        \"thefuck.utils.replace_command\",\n        lambda cmd, broken, sugg: f\"replaced:{broken}:{sugg}\",\n    )\n    output = 'tsuru: \"deploy\" is not a tsuru command\\nsome other text'\n    cmd = DummyCommand(output=output)\n\n    # Act\n    result = get_new_command(cmd)\n\n    # Assert\n    assert result == f\"replaced:{broken_cmd}:{suggestions}\"\n\n\ndef test_get_new_command_raises_when_pattern_missing():\n    # Arrange: output without the expected pattern\n    output = \"some unrelated error message\"\n    cmd = DummyCommand(output=output)\n\n    # Act & Assert\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n\n\ndef test_get_new_command_with_empty_suggestions(monkeypatch):\n    # Arrange: mock get_all_matched_commands to return empty list\n    monkeypatch.setattr(\n        \"thefuck.utils.get_all_matched_commands\",\n        lambda output: [],\n    )\n    # Mock replace_command to simply return the broken command\n    monkeypatch.setattr(\n        \"thefuck.utils.replace_command\",\n        lambda cmd, broken, sugg: f\"no-suggestions:{broken}\",\n    )\n    output = 'tsuru: \"status\" is not a tsuru command'\n    cmd = DummyCommand(output=output)\n\n    # Act\n    result = get_new_command(cmd)\n\n    # Assert\n    assert result == \"no-suggestions:status\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3271111969952472
+}

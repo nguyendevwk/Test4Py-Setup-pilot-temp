@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-25bfa74d-b4b3-4db7-9309-e466c1ec4163",
+  "object": "chat.completion",
+  "created": 1795077101,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport pytest\nfrom httpie.core import main\nfrom httpie.status import ExitStatus\n\n\ndef test_help_exit_success(capsys):\n    \"\"\"Calling main with --help should exit successfully and print usage.\"\"\"\n    # The first argument is the program name; subsequent args are parsed.\n    exit_status = main(['httpie', '--help'])\n    captured = capsys.readouterr()\n    # The help text should contain the program name and a usage line.\n    assert \"Usage:\" in captured.out\n    assert exit_status == ExitStatus.SUCCESS\n\n\ndef test_version_output(capsys):\n    \"\"\"Calling main with --version should print the version and exit successfully.\"\"\"\n    exit_status = main(['httpie', '--version'])\n    captured = capsys.readouterr()\n    # The output should contain the httpie version string.\n    assert \"httpie\" in captured.out.lower()\n    assert exit_status == ExitStatus.SUCCESS\n\n\ndef test_invalid_option_raises_system_exit():\n    \"\"\"Providing an unknown option should raise SystemExit with code 2.\"\"\"\n    with pytest.raises(SystemExit) as excinfo:\n        main(['httpie', '--unknown-option'])\n    # SystemExit code 2 indicates a usage error.\n    assert excinfo.value.code == 2\n```",
+        "reasoning": "We need to test main function. We can call main with args that produce known behavior. For example, passing '-h' should exit with ExitStatus.SUCCESS? Actually main returns ExitStatus. We can inspect ExitStatus enum. Let's import. We'll write tests calling main with args that trigger help or error. Use tmp_path for output file. We'll test that passing '--version' returns SUCCESS and prints version. But main prints to stdout. We can capture stdout via capsys. Also test error: passing invalid URL returns EXIT_STATUS. Let's inspect ExitStatus.We need to import httpie.core.main and ExitStatus. We'll write three tests: test_help_exit_success, test_version_output, test_invalid_url_error. Use capsys. Ensure no network. For invalid URL, maybe use 'http://invalid.url' but that might try network. Instead use '--help' for help. For error, maybe pass '--method' without URL? That might error. Let's just call main(['httpie', '--help'])? Actually parser expects program name first. main uses parser from .cli.definition. We can pass ['httpie', '--help']. It should exit with ExitStatus.SUCCESS. For error, pass ['httpie', 'http://example.com', '--invalid-option'] expecting ExitStatus. But unknown option triggers SystemExit? Might raise SystemExit. We can catch. Use pytest.raises(SystemExit). But we need ExitStatus? Let's just test that SystemExit is raised. Use capsys to capture. We'll assert exit code 2. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052458891,
+    "prompt_tokens": 1127,
+    "prompt_time": 0.062209308,
+    "completion_tokens": 588,
+    "completion_time": 0.640250329,
+    "total_tokens": 1715,
+    "total_time": 0.702459637,
+    "completion_tokens_details": {
+      "reasoning_tokens": 313
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sexmx4ef797hq1zz6vxpv2",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport pytest\nfrom httpie.core import main\nfrom httpie.status import ExitStatus\n\n\ndef test_help_exit_success(capsys):\n    \"\"\"Calling main with --help should exit successfully and print usage.\"\"\"\n    # The first argument is the program name; subsequent args are parsed.\n    exit_status = main(['httpie', '--help'])\n    captured = capsys.readouterr()\n    # The help text should contain the program name and a usage line.\n    assert \"Usage:\" in captured.out\n    assert exit_status == ExitStatus.SUCCESS\n\n\ndef test_version_output(capsys):\n    \"\"\"Calling main with --version should print the version and exit successfully.\"\"\"\n    exit_status = main(['httpie', '--version'])\n    captured = capsys.readouterr()\n    # The output should contain the httpie version string.\n    assert \"httpie\" in captured.out.lower()\n    assert exit_status == ExitStatus.SUCCESS\n\n\ndef test_invalid_option_raises_system_exit():\n    \"\"\"Providing an unknown option should raise SystemExit with code 2.\"\"\"\n    with pytest.raises(SystemExit) as excinfo:\n        main(['httpie', '--unknown-option'])\n    # SystemExit code 2 indicates a usage error.\n    assert excinfo.value.code == 2\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0498562669963576
+}

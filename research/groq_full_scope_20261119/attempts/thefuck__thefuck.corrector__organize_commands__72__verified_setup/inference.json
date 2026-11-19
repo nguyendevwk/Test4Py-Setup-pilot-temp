@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-804a0539-21b9-4b30-9c62-c79e52429bf9",
+  "object": "chat.completion",
+  "created": 1795077549,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom collections import namedtuple\n\n# Import the target function\nfrom thefuck.corrector import organize_commands\n\n# Define a minimal CorrectedCommand mock with priority and equality\nCorrectedCommand = namedtuple('CorrectedCommand', ['command', 'priority'])\n\ndef test_organize_commands_normal_and_sorted():\n    \"\"\"Test that commands are yielded sorted by priority and duplicates are removed.\"\"\"\n    cmds = [\n        CorrectedCommand('cmd1', 10),\n        CorrectedCommand('cmd2', 5),\n        CorrectedCommand('cmd3', 20),\n    ]\n    # Duplicate with same priority as first\n    cmds.append(CorrectedCommand('cmd1', 10))\n\n    result = list(organize_commands(iter(cmds)))\n    # First command should be the first yielded\n    assert result[0] == CorrectedCommand('cmd1', 10)\n    # Remaining should be sorted by priority and unique\n    assert result[1:] == [CorrectedCommand('cmd2', 5), CorrectedCommand('cmd3', 20)]\n\ndef test_organize_commands_empty_iterator():\n    \"\"\"Test that an empty iterator returns no commands.\"\"\"\n    empty_iter = iter([])\n    result = list(organize_commands(empty_iter))\n    assert result == []\n\ndef test_organize_commands_duplicate_removal():\n    \"\"\"Test that duplicate commands are removed based on equality.\"\"\"\n    cmds = [\n        CorrectedCommand('cmdA', 1),\n        CorrectedCommand('cmdB', 2),\n        CorrectedCommand('cmdA', 1),  # duplicate\n        CorrectedCommand('cmdC', 3),\n        CorrectedCommand('cmdB', 2),  # duplicate\n    ]\n    result = list(organize_commands(iter(cmds)))\n    # Should contain each unique command once, sorted by priority\n    expected = [\n        CorrectedCommand('cmdA', 1),\n        CorrectedCommand('cmdB', 2),\n        CorrectedCommand('cmdC', 3),\n    ]\n    assert result == expected\n```",
+        "reasoning": "We need to test organize_commands. We need a CorrectedCommand type with priority and equality. Use simple dataclass. Test normal: multiple commands with priorities, duplicates. Boundary: empty iterator. Error: maybe non-iterable? But function expects iterable. We can test that StopIteration handled. Third test: duplicate detection. Use tmp_path? Not needed. Just create list. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052151054,
+    "prompt_tokens": 455,
+    "prompt_time": 0.020850175,
+    "completion_tokens": 516,
+    "completion_time": 0.761037871,
+    "total_tokens": 971,
+    "total_time": 0.781888046,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 81
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfbae8eehvevqvfj3r65cw",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom collections import namedtuple\n\n# Import the target function\nfrom thefuck.corrector import organize_commands\n\n# Define a minimal CorrectedCommand mock with priority and equality\nCorrectedCommand = namedtuple('CorrectedCommand', ['command', 'priority'])\n\ndef test_organize_commands_normal_and_sorted():\n    \"\"\"Test that commands are yielded sorted by priority and duplicates are removed.\"\"\"\n    cmds = [\n        CorrectedCommand('cmd1', 10),\n        CorrectedCommand('cmd2', 5),\n        CorrectedCommand('cmd3', 20),\n    ]\n    # Duplicate with same priority as first\n    cmds.append(CorrectedCommand('cmd1', 10))\n\n    result = list(organize_commands(iter(cmds)))\n    # First command should be the first yielded\n    assert result[0] == CorrectedCommand('cmd1', 10)\n    # Remaining should be sorted by priority and unique\n    assert result[1:] == [CorrectedCommand('cmd2', 5), CorrectedCommand('cmd3', 20)]\n\ndef test_organize_commands_empty_iterator():\n    \"\"\"Test that an empty iterator returns no commands.\"\"\"\n    empty_iter = iter([])\n    result = list(organize_commands(empty_iter))\n    assert result == []\n\ndef test_organize_commands_duplicate_removal():\n    \"\"\"Test that duplicate commands are removed based on equality.\"\"\"\n    cmds = [\n        CorrectedCommand('cmdA', 1),\n        CorrectedCommand('cmdB', 2),\n        CorrectedCommand('cmdA', 1),  # duplicate\n        CorrectedCommand('cmdC', 3),\n        CorrectedCommand('cmdB', 2),  # duplicate\n    ]\n    result = list(organize_commands(iter(cmds)))\n    # Should contain each unique command once, sorted by priority\n    expected = [\n        CorrectedCommand('cmdA', 1),\n        CorrectedCommand('cmdB', 2),\n        CorrectedCommand('cmdC', 3),\n    ]\n    assert result == expected\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1483275800128467
+}

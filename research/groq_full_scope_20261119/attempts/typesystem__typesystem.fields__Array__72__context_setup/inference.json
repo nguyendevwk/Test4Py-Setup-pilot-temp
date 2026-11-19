@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-bcc86d4e-c5b7-497b-b958-f47ba7b202bb",
+  "object": "chat.completion",
+  "created": 1795077309,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.fields import Array, Field\nfrom typesystem.base import ValidationError\n\n\nclass IntField(Field):\n    \"\"\"Simple field that validates integers.\"\"\"\n\n    def validate(self, value):\n        if not isinstance(value, int):\n            raise ValidationError(text=\"Must be an integer.\", code=\"type\")\n        return value\n\n\ndef test_array_normal_validation_and_serialization():\n    \"\"\"Array with a single item type and min_items constraint.\"\"\"\n    arr_field = Array(items=IntField(), min_items=2)\n    # Valid input: list of two integers\n    result = arr_field.validate([1, 2])\n    assert result == [1, 2]\n    # Serialization should preserve the values\n    serialized = arr_field.serialize(result)\n    assert serialized == [1, 2]\n    # Invalid input: too few items\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([1])\n    assert \"exact_items\" not in excinfo.value.text\n    assert \"min_items\" in excinfo.value.text\n\n\ndef test_array_exact_items_constraint():\n    \"\"\"Array with exact_items should enforce exact length.\"\"\"\n    arr_field = Array(items=IntField(), exact_items=3)\n    # Valid input: list of three integers\n    assert arr_field.validate([10, 20, 30]) == [10, 20, 30]\n    # Invalid input: list of two integers\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([10, 20])\n    assert \"exact_items\" in excinfo.value.text\n    # Invalid input: list of four integers\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([10, 20, 30, 40])\n    assert \"exact_items\" in excinfo.value.text\n\n\ndef test_array_unique_items_error():\n    \"\"\"Array with unique_items should reject duplicate elements.\"\"\"\n    arr_field = Array(items=IntField(), unique_items=True)\n    # Valid input: unique integers\n    assert arr_field.validate([1, 2, 3]) == [1, 2, 3]\n    # Invalid input: duplicate integer\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([1, 2, 1])\n    # The error message should indicate a duplicate at the duplicate position\n    messages = excinfo.value.messages()\n    assert any(msg.code == \"unique_items\" for msg in messages)\n    # Ensure the duplicate position is reported correctly\n    duplicate_positions = [msg.key for msg in messages if msg.code == \"unique_items\"]\n    assert duplicate_positions == [2]\n```",
+        "reasoning": "Need tests for Array. Use simple Field like Integer? Not available. Use custom simple Field that accepts int. We'll create subclass. Test normal: array of ints, min_items=2. Test boundary: exact_items. Test error: unique_items duplicate."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.055363817,
+    "prompt_tokens": 1975,
+    "prompt_time": 0.075694553,
+    "completion_tokens": 612,
+    "completion_time": 0.676755037,
+    "total_tokens": 2587,
+    "total_time": 0.75244959,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 52
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sf40mven58c2ckk8ks1kd8",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.fields import Array, Field\nfrom typesystem.base import ValidationError\n\n\nclass IntField(Field):\n    \"\"\"Simple field that validates integers.\"\"\"\n\n    def validate(self, value):\n        if not isinstance(value, int):\n            raise ValidationError(text=\"Must be an integer.\", code=\"type\")\n        return value\n\n\ndef test_array_normal_validation_and_serialization():\n    \"\"\"Array with a single item type and min_items constraint.\"\"\"\n    arr_field = Array(items=IntField(), min_items=2)\n    # Valid input: list of two integers\n    result = arr_field.validate([1, 2])\n    assert result == [1, 2]\n    # Serialization should preserve the values\n    serialized = arr_field.serialize(result)\n    assert serialized == [1, 2]\n    # Invalid input: too few items\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([1])\n    assert \"exact_items\" not in excinfo.value.text\n    assert \"min_items\" in excinfo.value.text\n\n\ndef test_array_exact_items_constraint():\n    \"\"\"Array with exact_items should enforce exact length.\"\"\"\n    arr_field = Array(items=IntField(), exact_items=3)\n    # Valid input: list of three integers\n    assert arr_field.validate([10, 20, 30]) == [10, 20, 30]\n    # Invalid input: list of two integers\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([10, 20])\n    assert \"exact_items\" in excinfo.value.text\n    # Invalid input: list of four integers\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([10, 20, 30, 40])\n    assert \"exact_items\" in excinfo.value.text\n\n\ndef test_array_unique_items_error():\n    \"\"\"Array with unique_items should reject duplicate elements.\"\"\"\n    arr_field = Array(items=IntField(), unique_items=True)\n    # Valid input: unique integers\n    assert arr_field.validate([1, 2, 3]) == [1, 2, 3]\n    # Invalid input: duplicate integer\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([1, 2, 1])\n    # The error message should indicate a duplicate at the duplicate position\n    messages = excinfo.value.messages()\n    assert any(msg.code == \"unique_items\" for msg in messages)\n    # Ensure the duplicate position is reported correctly\n    duplicate_positions = [msg.key for msg in messages if msg.code == \"unique_items\"]\n    assert duplicate_positions == [2]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1600781659944914
+}

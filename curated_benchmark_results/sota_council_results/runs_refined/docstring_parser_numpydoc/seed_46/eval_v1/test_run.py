@@ -1,0 +1,38 @@
+from docstring_parser.numpydoc import parse
+
+def test_parse_numpydoc_sections():
+    docstring = (
+        "Summary.\n\n"
+        "Parameters\n"
+        "----------\n"
+        "x : int\n"
+        "    Param x.\n\n"
+        "Returns\n"
+        "-------\n"
+        "int\n"
+        "    Return value.\n\n"
+        "Raises\n"
+        "------\n"
+        "ValueError\n"
+        "    If something goes wrong.\n"
+    )
+    doc = parse(docstring)
+
+    assert doc.short_description == "Summary."
+    assert "Param x." in doc.long_description
+
+    assert len(doc.params) == 1
+    param = doc.params[0]
+    assert param.arg_name == "x"
+    assert param.type_name == "int"
+    assert param.description == "Param x."
+
+    assert len(doc.returns) == 1
+    ret = doc.returns[0]
+    assert ret.type_name == "int"
+    assert ret.description == "Return value."
+
+    assert len(doc.raises) == 1
+    exc = doc.raises[0]
+    assert exc.type_name == "ValueError"
+    assert exc.description == "If something goes wrong."

@@ -1,0 +1,35 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_finalize_headers_skippable_header_none __________________
+
+    def test_finalize_headers_skippable_header_none():
+        # Header that is skippable and set to None should be replaced with SKIP_HEADER
+        headers = HTTPHeadersDict({"Connection": None})
+        final = finalize_headers(headers)
+>       assert final["Connection"] == SKIP_HEADER
+E       AssertionError: assert None == '@@@SKIP_HEADER@@@'
+
+test_generated.py:17: AssertionError
+_______________ test_finalize_headers_multiple_headers_and_order _______________
+
+    def test_finalize_headers_multiple_headers_and_order():
+        # Mixed headers: some normal, some skippable, some None
+        headers = HTTPHeadersDict({
+            "Accept": " application/json ",
+            "Keep-Alive": None,
+            "X-Token": " token ",
+            "Transfer-Encoding": None
+        })
+        final = finalize_headers(headers)
+        # Normal headers are stripped and encoded
+        assert final["Accept"] == b"application/json"
+        assert final["X-Token"] == b"token"
+        # Skippable headers are replaced with SKIP_HEADER
+>       assert final["Keep-Alive"] == SKIP_HEADER
+E       AssertionError: assert None == '@@@SKIP_HEADER@@@'
+
+test_generated.py:36: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_finalize_headers_skippable_header_none - Asser...
+FAILED test_generated.py::test_finalize_headers_multiple_headers_and_order - ...
+2 failed, 1 passed in 0.71s

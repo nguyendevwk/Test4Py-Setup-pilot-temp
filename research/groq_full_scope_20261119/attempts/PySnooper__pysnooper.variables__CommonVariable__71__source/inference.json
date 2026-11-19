@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-93a489e3-cfd0-4ab1-b87d-90e853d3f492",
+  "object": "chat.completion",
+  "created": 1795076292,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom pysnooper.variables import CommonVariable\nfrom pysnooper import utils\n\nclass DummyVariable(CommonVariable):\n    \"\"\"Concrete implementation for testing.\"\"\"\n    def __init__(self, source, unambiguous_source, exclude=None):\n        super().__init__(source, unambiguous_source, exclude or set())\n\n    def _keys(self, main_value):\n        # Return all keys of a dict; raise if main_value is not a dict\n        if not isinstance(main_value, dict):\n            raise TypeError(\"Expected dict\")\n        return main_value.keys()\n\n    def _format_key(self, key):\n        return f\"[{key}]\"\n\n    def _get_value(self, main_value, key):\n        # Simulate a value retrieval that may raise for a specific key\n        if key == \"bad\":\n            raise ValueError(\"bad key\")\n        return main_value[key]\n\ndef test_normal_behavior():\n    \"\"\"Test that _items returns correct representations for a normal dict.\"\"\"\n    var = DummyVariable(\"src\", \"unsrc\")\n    data = {\"a\": 1, \"b\": \"text\"}\n    items = var._items(data)\n    # First item is the source representation\n    assert items[0] == (\"src\", utils.get_shortish_repr(data))\n    # Subsequent items correspond to each key/value pair\n    expected = [\n        (\"unsrc[a]\", utils.get_shortish_repr(1)),\n        (\"unsrc[b]\", utils.get_shortish_repr(\"text\")),\n    ]\n    assert items[1:] == expected\n\ndef test_exclude_and_error_in_get_value():\n    \"\"\"Test that excluded keys are skipped and errors in _get_value are ignored.\"\"\"\n    var = DummyVariable(\"src\", \"unsrc\", exclude={\"b\"})\n    data = {\"a\": 1, \"b\": 2, \"bad\": 3}\n    items = var._items(data)\n    # 'b' should be excluded; 'bad' should be skipped due to ValueError\n    assert (\"unsrc[a]\", utils.get_shortish_repr(1)) in items\n    assert (\"unsrc[b]\", utils.get_shortish_repr(2)) not in items\n    assert (\"unsrc[bad]\", utils.get_shortish_repr(3)) not in items\n    # Ensure source representation is present\n    assert items[0] == (\"src\", utils.get_shortish_repr(data))\n\ndef test_keys_raises_exception():\n    \"\"\"Test that if _keys raises an exception, _items returns only the source.\"\"\"\n    class FaultyVariable(DummyVariable):\n        def _keys(self, main_value):\n            raise RuntimeError(\"cannot get keys\")\n\n    var = FaultyVariable(\"src\", \"unsrc\")\n    data = {\"a\": 1}\n    items = var._items(data)\n    # Only the source representation should be present\n    assert items == [(\"src\", utils.get_shortish_repr(data))]\n```",
+        "reasoning": "We need to test CommonVariable. But it's abstract; need subclass implementing _keys, _format_key, _get_value. We'll create dummy subclass in test. Test normal behavior: dict with keys, exclude. Test boundary: key raises exception in _get_value. Test error: _keys raises exception. Use tmp_path? not needed. Provide three test functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048076143,
+    "prompt_tokens": 431,
+    "prompt_time": 0.037546967,
+    "completion_tokens": 683,
+    "completion_time": 0.864272611,
+    "total_tokens": 1114,
+    "total_time": 0.901819578,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 74
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se4za3ewfb8xdzn8r79rqh",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom pysnooper.variables import CommonVariable\nfrom pysnooper import utils\n\nclass DummyVariable(CommonVariable):\n    \"\"\"Concrete implementation for testing.\"\"\"\n    def __init__(self, source, unambiguous_source, exclude=None):\n        super().__init__(source, unambiguous_source, exclude or set())\n\n    def _keys(self, main_value):\n        # Return all keys of a dict; raise if main_value is not a dict\n        if not isinstance(main_value, dict):\n            raise TypeError(\"Expected dict\")\n        return main_value.keys()\n\n    def _format_key(self, key):\n        return f\"[{key}]\"\n\n    def _get_value(self, main_value, key):\n        # Simulate a value retrieval that may raise for a specific key\n        if key == \"bad\":\n            raise ValueError(\"bad key\")\n        return main_value[key]\n\ndef test_normal_behavior():\n    \"\"\"Test that _items returns correct representations for a normal dict.\"\"\"\n    var = DummyVariable(\"src\", \"unsrc\")\n    data = {\"a\": 1, \"b\": \"text\"}\n    items = var._items(data)\n    # First item is the source representation\n    assert items[0] == (\"src\", utils.get_shortish_repr(data))\n    # Subsequent items correspond to each key/value pair\n    expected = [\n        (\"unsrc[a]\", utils.get_shortish_repr(1)),\n        (\"unsrc[b]\", utils.get_shortish_repr(\"text\")),\n    ]\n    assert items[1:] == expected\n\ndef test_exclude_and_error_in_get_value():\n    \"\"\"Test that excluded keys are skipped and errors in _get_value are ignored.\"\"\"\n    var = DummyVariable(\"src\", \"unsrc\", exclude={\"b\"})\n    data = {\"a\": 1, \"b\": 2, \"bad\": 3}\n    items = var._items(data)\n    # 'b' should be excluded; 'bad' should be skipped due to ValueError\n    assert (\"unsrc[a]\", utils.get_shortish_repr(1)) in items\n    assert (\"unsrc[b]\", utils.get_shortish_repr(2)) not in items\n    assert (\"unsrc[bad]\", utils.get_shortish_repr(3)) not in items\n    # Ensure source representation is present\n    assert items[0] == (\"src\", utils.get_shortish_repr(data))\n\ndef test_keys_raises_exception():\n    \"\"\"Test that if _keys raises an exception, _items returns only the source.\"\"\"\n    class FaultyVariable(DummyVariable):\n        def _keys(self, main_value):\n            raise RuntimeError(\"cannot get keys\")\n\n    var = FaultyVariable(\"src\", \"unsrc\")\n    data = {\"a\": 1}\n    items = var._items(data)\n    # Only the source representation should be present\n    assert items == [(\"src\", utils.get_shortish_repr(data))]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2371709260041825
+}

@@ -1,0 +1,64 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_default_initialization __________________________
+
+    def test_default_initialization():
+        """URLBuildError with no arguments should have status_code 500 and no message."""
+        err = URLBuildError()
+        assert isinstance(err, URLBuildError)
+        assert err.status_code == 500
+        # The default message is None, which should be represented as None in the instance
+>       assert err.message is None
+E       AssertionError: assert 'Internal Server Error' is None
+E        +  where 'Internal Server Error' = URLBuildError('Internal Server Error').message
+
+test_generated.py:11: AssertionError
+_______________________ test_message_and_bytes_handling ________________________
+
+    def test_message_and_bytes_handling():
+        """URLBuildError should store string and bytes messages correctly."""
+        msg_str = "A string message"
+        msg_bytes = b"Binary message"
+        err_str = URLBuildError(msg_str)
+        err_bytes = URLBuildError(msg_bytes)
+        # String message is stored as is
+        assert err_str.message == msg_str
+        # Bytes message is stored as is
+>       assert err_bytes.message == msg_bytes
+E       AssertionError: assert 'Binary message' == b'Binary message'
+E        +  where 'Binary message' = URLBuildError('Binary message').message
+
+test_generated.py:28: AssertionError
+________________________ test_context_extra_and_headers ________________________
+
+    def test_context_extra_and_headers():
+        """URLBuildError should correctly store context, extra, and headers."""
+        context = {"key1": "value1"}
+        extra = {"debug": True}
+        headers = {"X-Custom": "Test"}
+        err = URLBuildError(
+            "Error with context",
+            context=context,
+            extra=extra,
+            headers=headers,
+        )
+        assert err.message == "Error with context"
+        assert err.context == context
+        assert err.extra == extra
+        assert err.headers == headers
+        # Ensure that modifying the original dicts does not affect the stored ones
+        context["key1"] = "changed"
+        extra["debug"] = False
+        headers["X-Custom"] = "Modified"
+>       assert err.context["key1"] == "value1"
+E       AssertionError: assert 'changed' == 'value1'
+E         
+E         - value1
+E         + changed
+
+test_generated.py:53: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_default_initialization - AssertionError: asser...
+FAILED test_generated.py::test_message_and_bytes_handling - AssertionError: a...
+FAILED test_generated.py::test_context_extra_and_headers - AssertionError: as...
+3 failed in 0.35s

@@ -1,0 +1,28 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_extract_formats_cdn_replacement _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fd2f9b1e740>
+
+    def test_extract_formats_cdn_replacement(monkeypatch):
+        """When no formats are found and the URL matches the CDN regex,
+        a replacement URL is generated and formats are extracted."""
+        ie = DummyNRKIE()
+        # URL that matches the CDN regex but is not an Akamai URL
+        asset_url = 'https://nrkod1-httpcache0-47115-cacheod0.dna.ip-only.net/47115-cacheod0/some/path.m3u8'
+        # Patch random.randint to return a fixed value for deterministic test
+        monkeypatch.setattr(random, 'randint', lambda a, b: 42)
+        # Patch _extract_m3u8_formats to return a predictable format list
+        def fake_extract_m3u8(asset_url, video_id, ext, parser, fatal):
+            return [{'format_id': 'cdn', 'url': asset_url}]
+        monkeypatch.setattr(ie, '_extract_m3u8_formats', fake_extract_m3u8)
+        formats = ie._extract_nrk_formats(asset_url, 'vid123')
+        # The replacement URL should contain the generated host
+>       assert any('nrk-od-42.akamaized.net' in f['url'] for f in formats)
+E       assert False
+E        +  where False = any(<generator object test_extract_formats_cdn_replacement.<locals>.<genexpr> at 0x7fd2f853f530>)
+
+test_generated.py:62: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extract_formats_cdn_replacement - assert False
+1 failed, 2 passed in 0.98s

@@ -1,0 +1,42 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+__________ test_password_shorter_than_key_size_is_padded_and_decrypts __________
+
+    def test_password_shorter_than_key_size_is_padded_and_decrypts():
+        # Use a password shorter than the key size; the function pads with zeros.
+        # Encrypt a known plaintext using the same algorithm to produce a ciphertext.
+        # Here we simply encrypt and then decrypt to verify round‑trip.
+        from youtube_dl.aes import aes_encrypt, key_expansion, xor, BLOCK_SIZE_BYTES
+        from youtube_dl.compat import compat_b64decode
+        from youtube_dl.utils import bytes_to_intlist, intlist_to_bytes
+    
+        plaintext = b"Hello, AES!"
+        # Pad plaintext to block size
+        padded = plaintext + b"\x00" * (BLOCK_SIZE_BYTES - len(plaintext) % BLOCK_SIZE_BYTES)
+        # Prepare key
+        password = "short"
+        key_size_bytes = 16
+        key = bytes_to_intlist(password.encode("utf-8"))[:key_size_bytes] + [0] * (key_size_bytes - len(password))
+        key = aes_encrypt(key[:BLOCK_SIZE_BYTES], key_expansion(key)) * (key_size_bytes // BLOCK_SIZE_BYTES)
+    
+        # Encrypt using counter mode
+        from youtube_dl.aes import aes_ctr_decrypt
+        class Counter:
+            __value = [0] * BLOCK_SIZE_BYTES
+            def next_value(self):
+                return Counter.__value
+        cipher = aes_ctr_decrypt(bytes_to_intlist(padded), key, Counter())
+        # Encode to base64 for decryption function
+        b64_cipher = base64.b64encode(intlist_to_bytes(cipher)).decode()
+        # Decrypt
+        decrypted = aes_decrypt_text(b64_cipher, password, key_size_bytes)
+>       assert decrypted == plaintext
+E       AssertionError: assert b'\x8c\xc1[hB\xc3T\xf0' == b'Hello, AES!'
+E         
+E         At index 0 diff: b'\x8c' != b'H'
+E         Use -v to get more diff
+
+test_generated.py:43: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_password_shorter_than_key_size_is_padded_and_decrypts
+1 failed, 2 passed in 0.72s

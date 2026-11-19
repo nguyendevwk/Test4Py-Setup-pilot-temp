@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-193cb0b3-faf2-40ee-bdc9-2bdafee143f5",
+  "object": "chat.completion",
+  "created": 1795079404,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado.locks import BoundedSemaphore\nfrom tornado import gen, ioloop\n\n@pytest.mark.asyncio\nasync def test_normal_acquire_release():\n    \"\"\"Acquire and release within bounds should succeed.\"\"\"\n    sem = BoundedSemaphore(value=2)\n    # Acquire twice, should succeed\n    await sem.acquire()\n    await sem.acquire()\n    # Now value should be 0\n    assert sem._value == 0\n    # Release twice, should return to initial value\n    sem.release()\n    sem.release()\n    assert sem._value == 2\n    # Further acquire should block until a release\n    async def delayed_release():\n        await gen.sleep(0.01)\n        sem.release()\n    ioloop.IOLoop.current().add_callback(delayed_release)\n    await sem.acquire()  # should succeed after delayed release\n    assert sem._value == 1\n\n@pytest.mark.asyncio\nasync def test_release_too_many_times_raises():\n    \"\"\"Releasing more times than initial value raises ValueError.\"\"\"\n    sem = BoundedSemaphore(value=1)\n    await sem.acquire()\n    # Value is 0 now\n    sem.release()  # back to 1\n    with pytest.raises(ValueError, match=\"Semaphore released too many times\"):\n        sem.release()  # would exceed initial value\n\n@pytest.mark.asyncio\nasync def test_acquire_blocks_until_release():\n    \"\"\"Acquire should block until a release is called.\"\"\"\n    sem = BoundedSemaphore(value=1)\n    await sem.acquire()  # consume the only permit\n    # Start a coroutine that will acquire after a release\n    async def waiter():\n        await sem.acquire()\n        return \"acquired\"\n    future = ioloop.IOLoop.current().run_in_executor(None, lambda: None)  # dummy to get a Future\n    # Schedule waiter\n    ioloop.IOLoop.current().add_callback(lambda: waiter())\n    # Ensure waiter is pending\n    await gen.sleep(0.01)\n    # Release to unblock waiter\n    sem.release()\n    # Wait a bit for waiter to finish\n    await gen.sleep(0.01)\n    # The semaphore should now have value 0 again\n    assert sem._value == 0\n```",
+        "reasoning": "We need to write tests for BoundedSemaphore. Need to import from tornado.locks. Write three test functions: normal acquire/release, boundary error when release too many times, and maybe test that initial value limits. Use tmp_path? Not needed. Use pytest. Ensure independent. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054287109,
+    "prompt_tokens": 467,
+    "prompt_time": 0.01960323,
+    "completion_tokens": 537,
+    "completion_time": 0.789266267,
+    "total_tokens": 1004,
+    "total_time": 0.808869497,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 61
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sh3xs5emes8n48haqa2tqb",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado.locks import BoundedSemaphore\nfrom tornado import gen, ioloop\n\n@pytest.mark.asyncio\nasync def test_normal_acquire_release():\n    \"\"\"Acquire and release within bounds should succeed.\"\"\"\n    sem = BoundedSemaphore(value=2)\n    # Acquire twice, should succeed\n    await sem.acquire()\n    await sem.acquire()\n    # Now value should be 0\n    assert sem._value == 0\n    # Release twice, should return to initial value\n    sem.release()\n    sem.release()\n    assert sem._value == 2\n    # Further acquire should block until a release\n    async def delayed_release():\n        await gen.sleep(0.01)\n        sem.release()\n    ioloop.IOLoop.current().add_callback(delayed_release)\n    await sem.acquire()  # should succeed after delayed release\n    assert sem._value == 1\n\n@pytest.mark.asyncio\nasync def test_release_too_many_times_raises():\n    \"\"\"Releasing more times than initial value raises ValueError.\"\"\"\n    sem = BoundedSemaphore(value=1)\n    await sem.acquire()\n    # Value is 0 now\n    sem.release()  # back to 1\n    with pytest.raises(ValueError, match=\"Semaphore released too many times\"):\n        sem.release()  # would exceed initial value\n\n@pytest.mark.asyncio\nasync def test_acquire_blocks_until_release():\n    \"\"\"Acquire should block until a release is called.\"\"\"\n    sem = BoundedSemaphore(value=1)\n    await sem.acquire()  # consume the only permit\n    # Start a coroutine that will acquire after a release\n    async def waiter():\n        await sem.acquire()\n        return \"acquired\"\n    future = ioloop.IOLoop.current().run_in_executor(None, lambda: None)  # dummy to get a Future\n    # Schedule waiter\n    ioloop.IOLoop.current().add_callback(lambda: waiter())\n    # Ensure waiter is pending\n    await gen.sleep(0.01)\n    # Release to unblock waiter\n    sem.release()\n    # Wait a bit for waiter to finish\n    await gen.sleep(0.01)\n    # The semaphore should now have value 0 again\n    assert sem._value == 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "d6f1b3c81d9a4691951996b312b2b426",
+  "_api_plus_pacing_seconds": 1.6843317379825749
+}

@@ -1,0 +1,84 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_parse_full_docstring ___________________________
+
+    def test_parse_full_docstring():
+        doc = """
+        Short summary.
+    
+        Parameters
+        ----------
+        x : int
+            The first parameter.
+        y : str, optional
+            The second parameter.
+    
+        Returns
+        -------
+        bool
+            True if successful.
+    
+        Raises
+        ------
+        ValueError
+            If an error occurs.
+        """
+        parsed = parse(doc)
+        assert isinstance(parsed, Docstring)
+    
+        # Parameters
+        assert len(parsed.params) == 2
+        param_names = {p.arg_name for p in parsed.params}
+        assert param_names == {"x", "y"}
+        x_param = next(p for p in parsed.params if p.arg_name == "x")
+        assert isinstance(x_param, DocstringParam)
+        assert x_param.type_name == "int"
+        assert x_param.description.strip() == "The first parameter."
+    
+        # Returns
+>       assert len(parsed.returns) == 1
+E       TypeError: object of type 'DocstringReturns' has no len()
+
+test_generated.py:39: TypeError
+__________________________ test_parse_empty_and_none ___________________________
+
+    def test_parse_empty_and_none():
+        # Empty string should produce an empty Docstring
+        empty = parse("")
+        assert isinstance(empty, Docstring)
+        assert empty.params == []
+>       assert empty.returns == []
+E       assert None == []
+E        +  where None = <docstring_parser.common.Docstring object at 0x7fa4688df220>.returns
+
+test_generated.py:57: AssertionError
+_________________________ test_parse_missing_sections __________________________
+
+    def test_parse_missing_sections():
+        doc = """
+        Short summary.
+    
+        Parameters
+        ----------
+        a : float
+            A float value.
+        """
+        parsed = parse(doc)
+        assert isinstance(parsed, Docstring)
+    
+        # Only params present
+        assert len(parsed.params) == 1
+        assert parsed.params[0].arg_name == "a"
+        assert parsed.params[0].type_name == "float"
+    
+        # No returns or raises
+>       assert parsed.returns == []
+E       assert None == []
+E        +  where None = <docstring_parser.common.Docstring object at 0x7fa46886a980>.returns
+
+test_generated.py:85: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_full_docstring - TypeError: object of ty...
+FAILED test_generated.py::test_parse_empty_and_none - assert None == []
+FAILED test_generated.py::test_parse_missing_sections - assert None == []
+3 failed in 0.15s

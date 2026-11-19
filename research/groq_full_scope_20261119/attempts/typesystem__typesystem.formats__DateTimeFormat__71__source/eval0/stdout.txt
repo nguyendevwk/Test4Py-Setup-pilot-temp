@@ -1,0 +1,38 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_datetime_format_microseconds_and_utc ___________________
+
+    def test_datetime_format_microseconds_and_utc():
+        fmt = DateTimeFormat()
+        input_str = "2021-01-01T00:00:00.123+00:00"
+        result = fmt.validate(input_str)
+        assert result == datetime.datetime(2021, 1, 1, 0, 0, 0, 123000, tzinfo=datetime.timezone.utc)
+    
+        # Serialize back to string and check that UTC is represented with 'Z'
+        serialized = fmt.serialize(result)
+>       assert serialized == "2021-01-01T00:00:00.123Z"
+E       AssertionError: assert '2021-01-01T00:00:00.123000Z' == '2021-01-01T00:00:00.123Z'
+E         
+E         - 2021-01-01T00:00:00.123Z
+E         + 2021-01-01T00:00:00.123000Z
+E         ?                        +++
+
+test_generated.py:29: AssertionError
+_____________________ test_datetime_format_invalid_format ______________________
+
+    def test_datetime_format_invalid_format():
+        fmt = DateTimeFormat()
+        invalid_str = "not-a-datetime"
+        with pytest.raises(Exception) as excinfo:
+            fmt.validate(invalid_str)
+        # The exception should be a ValidationError with the 'format' error message
+>       assert hasattr(excinfo.value, "message")
+E       AssertionError: assert False
+E        +  where False = hasattr(ValidationError(text='Must be a valid datetime format.', code='format'), 'message')
+E        +    where ValidationError(text='Must be a valid datetime format.', code='format') = <ExceptionInfo ValidationError(text='Must be a valid datetime format.', code='format') tblen=2>.value
+
+test_generated.py:38: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_datetime_format_microseconds_and_utc - Asserti...
+FAILED test_generated.py::test_datetime_format_invalid_format - AssertionErro...
+2 failed, 1 passed in 0.14s

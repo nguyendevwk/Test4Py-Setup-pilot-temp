@@ -23,6 +23,21 @@ class PairedTests(unittest.TestCase):
         self.settings=dict(model=paired_study.MODEL,model_revision='a'*40,quantization='nf4',
                            max_input_tokens=4096,max_new_tokens=1024,max_sequence_tokens=5120)
 
+    def test_opt_in_output_contract_is_frozen_by_plan_and_drift_is_rejected(self):
+        output=self.root/'compact-plan'
+        proc=subprocess.run([sys.executable,str(paired_study.BASE/'paired_study.py'),
+            '--action','plan','--output',str(output),'--max-input-tokens','4096',
+            '--max-new-tokens','512','--test-output-contract','single-test-v1'],
+            capture_output=True,text=True,timeout=30)
+        self.assertEqual(proc.returncode,0,proc.stdout+proc.stderr)
+        saved=json.loads((output/'plan.json').read_text())
+        self.assertEqual(saved['settings']['test_output_contract'],'single-test-v1')
+        self.assertTrue(saved['protocol'].endswith('+single-test-v1'))
+        paired_study.validate_plan(output,paired_study.build_plan(4096,512,'single-test-v1'))
+        with self.assertRaisesRegex(ValueError,'Plan/source changed'):
+            paired_study.validate_plan(output,paired_study.build_plan(4096,512))
+        self.assertNotIn('test_output_contract',paired_study.build_plan()['settings'])
+
     def test_project_dependency_commands_are_accepted_by_real_pip_offline(self):
         # Real metadata/resolution, without modifying this environment or network access.
         package=self.root/'package';package.mkdir()
@@ -122,6 +137,46 @@ class PairedTests(unittest.TestCase):
         for revision,slots in [('b'*40,['0']),('a'*40,['1'])]:
             with self.assertRaises(ValueError):
                 paired_study.validate_stress(evidence,plan,dict(model=revision),slots)
+
+    def test_parallel_stress_shares_one_screen_deadline(self):
+        import threading
+        from pilot.common import write_json
+        plan=paired_study.build_plan()
+        write_json(self.root/'preflight.json',{p:dict(status='prepared') for p in plan['frame']})
+        write_json(self.root/'resolved_models.json',dict(model='a'*40))
+        barrier=threading.Barrier(2)
+        def run(args,**kwargs):
+            barrier.wait(timeout=5)  # Serial execution would break this engineering check.
+            folder=Path(args[args.index('--output')+1]);folder.mkdir()
+            write_json(folder/'probe.json',dict(status='passed'))
+            self.assertGreater(kwargs['timeout'],0);self.assertLessEqual(kwargs['timeout'],1800)
+            return dict(returncode=0,timeout=False)
+        with patch.object(paired_study,'gpu_slots',return_value=['0','1']),patch.object(paired_study,'command',side_effect=run):
+            self.assertTrue(paired_study.stress(self.root,plan,2))
+        clock=json.loads((self.root/'screen-clock.json').read_text())
+        self.assertEqual(clock['deadline_epoch']-clock['started_epoch'],3600)
+        with patch.object(paired_study.time,'time',return_value=clock['deadline_epoch']+1):
+            self.assertEqual(paired_study.screen_remaining(self.root),0)
+        with self.assertRaises(ValueError):
+            paired_study.stress(self.root,plan,2)
+
+    def test_expired_screen_retains_every_trial_without_download_or_worker(self):
+        from pilot.common import write_json
+        plan=paired_study.build_plan()
+        write_json(self.root/'preflight.json',{p:dict(status='prepared') for p in plan['frame']})
+        write_json(self.root/'resolved_models.json',dict(model='a'*40,embedding='b'*40))
+        write_json(self.root/'stress.json',{})
+        with patch.object(paired_study,'gpu_slots',return_value=['0','1']), \
+             patch.object(paired_study,'validate_stress'), \
+             patch.object(paired_study,'screen_remaining',return_value=0), \
+             patch.object(paired_study,'command') as command:
+            self.assertFalse(paired_study.execute(self.root,plan,'small',2))
+        command.assert_not_called()
+        report=json.loads((self.root/'small-summary.json').read_text())
+        self.assertEqual(report['planned_module_trials'],4)
+        self.assertEqual(len(report['rows']),4)
+        self.assertFalse(report['larger_ready'])
+        self.assertTrue(all(r['line_pct'] is None for r in report['rows']))
 
     def test_greedy_prefix_cache_reuses_exact_prompt_without_a_second_decode(self):
         import asyncio
@@ -282,6 +337,15 @@ def find_topK_message(name, messages, query_vector, k=1):
                              (record,dict(returncode=1,timeout=True))]:
             self.assertNotEqual(verdict(proc,dict(tests=[altered]),eligible),'killed')
 
+    def test_fault_pool_distinguishes_nested_operators_with_same_start(self):
+        mutants=pool('def product(a,b,c):\n return a*b*c\n',4)['mutants']
+        self.assertEqual(len(mutants),2)
+        outputs=[]
+        for mutant in mutants:
+            namespace={};exec(mutant['source'],namespace)
+            outputs.append(namespace['product'](2,3,4))
+        self.assertEqual(outputs,[10,20])
+
     def test_plan_small_and_larger_are_same_model_and_upstream(self):
         plan=paired_study.build_plan()
         self.assertEqual(plan['settings']['model'],'Qwen/Qwen2.5-Coder-14B-Instruct')
@@ -298,9 +362,31 @@ def find_topK_message(name, messages, query_vector, k=1):
         plan=paired_study.build_plan();queue=paired_study.tasks(plan,'small')
         self.assertFalse(paired_study.collect(self.root,plan,'small',queue))
         report=json.loads((self.root/'small-summary.json').read_text())
-        self.assertEqual(len(report['rows']),2)
+        self.assertEqual(len(report['rows']),4)
         self.assertTrue(all(r['line_pct'] is None for r in report['rows']))
-        self.assertEqual(len(json.loads((self.root/'small-paired-differences.json').read_text())),1)
+        self.assertEqual(len(json.loads((self.root/'small-paired-differences.json').read_text())),2)
+        measures=json.loads((self.root/'small-measurement-summary.json').read_text())['arms']
+        for arm in plan['arms']:
+            self.assertEqual(measures[arm]['planned_module_trials'],2)
+            self.assertEqual(measures[arm]['retained_suite_unmeasured_trials'],2)
+            self.assertIsNone(measures[arm]['retained_all_pass_rate'])
+            self.assertEqual(measures[arm]['observed_successes_per_planned'],0)
+            self.assertIsNone(measures[arm]['line']['macro_mean_pct'])
+            self.assertIsNone(measures[arm]['semantic_assertion_accuracy'])
+
+    def test_timeout_is_terminal_and_unmeasured_rate_is_not_zero_accuracy(self):
+        plan=paired_study.build_plan();queue=paired_study.tasks(plan,'small')
+        for t in queue:
+            d=self.root/'small'/f"{t['project']}-{t['seed']}-{t['arm']}";d.mkdir(parents=True)
+            (d/'report.json').write_text(json.dumps(dict(status='running',modules=[])))
+            (d/'process.json').write_text(json.dumps(dict(returncode=-9,timeout=True,seconds=3587)))
+        self.assertFalse(paired_study.collect(self.root,plan,'small',queue))
+        report=json.loads((self.root/'small-summary.json').read_text())
+        self.assertEqual(report['finished_module_rows'],0)
+        self.assertEqual(report['reported_module_rows'],4)
+        self.assertTrue(all(r['worker_status']=='timeout' and r['worker_seconds']==3587 for r in report['rows']))
+        rates=json.loads((self.root/'small-measurement-summary.json').read_text())['arms']
+        self.assertTrue(all(r['retained_all_pass_rate'] is None for r in rates.values()))
 
     def test_mutant_pool_mismatch_blocks_paired_fault_delta(self):
         plan=paired_study.build_plan();queue=paired_study.tasks(plan,'small')
@@ -311,3 +397,5 @@ def find_topK_message(name, messages, query_vector, k=1):
         self.assertTrue(paired_study.collect(self.root,plan,'small',queue))
         row=json.loads((self.root/'small-paired-differences.json').read_text())[0]
         self.assertFalse(row['mutant_pool_match']);self.assertIsNone(row['mutation_delta'])
+        measures=json.loads((self.root/'small-measurement-summary.json').read_text())['arms']
+        self.assertTrue(all(m['branch']['macro_mean_pct']==0 for m in measures.values()))

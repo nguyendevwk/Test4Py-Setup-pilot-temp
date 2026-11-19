@@ -1,0 +1,35 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_const_type_constant_and_collections ___________________
+
+    def test_const_type_constant_and_collections():
+        # Constant node
+        const_node = ast.parse("42").body[0].value
+        assert const_type(const_node) == "int"
+    
+        # Tuple node
+        tuple_node = ast.parse("(1, 2)").body[0].value
+>       assert const_type(tuple_node) == "tuple[int, int]"
+E       AssertionError: assert 'tuple[int]' == 'tuple[int, int]'
+E         
+E         - tuple[int, int]
+E         ?          -----
+E         + tuple[int]
+
+test_generated.py:13: AssertionError
+____________________ test_const_type_call_known_and_unknown ____________________
+
+    def test_const_type_call_known_and_unknown():
+        # Call to a known builtin
+        call_node = ast.parse("int(5)").body[0].value
+        assert const_type(call_node) == "int"
+    
+        # Call to a known PEP585 type
+>       call_node_pep = ast.parse("list[int]")(ast.parse("list[int]")).body[0].value  # type: ignore
+E       TypeError: 'Module' object is not callable
+
+test_generated.py:50: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_const_type_constant_and_collections - Assertio...
+FAILED test_generated.py::test_const_type_call_known_and_unknown - TypeError:...
+2 failed, 1 passed in 0.12s

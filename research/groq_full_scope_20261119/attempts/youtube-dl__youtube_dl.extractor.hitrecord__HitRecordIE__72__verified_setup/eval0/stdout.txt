@@ -1,0 +1,32 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_missing_tags_and_html_cleaning ______________________
+
+    def test_missing_tags_and_html_cleaning():
+        """Test extraction when tags are missing and body contains HTML."""
+        payload = {
+            'title': 'No Tags',
+            'source_url': {'mp4_url': 'https://example.com/no_tags.mp4'},
+            'body': '<div>Line1<br>Line2</div>',
+            'duration': 5000,
+            'created_at_i': 1610000000,
+            'user': {'username': 'no_tags_user', 'id': 99},
+            'total_views_count': None,
+            'hearts_count': None,
+            'comments_count': None,
+            # tags key absent
+        }
+        ie = DummyHitRecordIE(payload)
+        result = ie._real_extract('https://hitrecord.org/records/67890')
+        assert result['tags'] is None
+>       assert result['description'] == 'Line1Line2'
+E       AssertionError: assert 'Line1\nLine2' == 'Line1Line2'
+E         
+E         - Line1Line2
+E         + Line1
+E         + Line2
+
+test_generated.py:63: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_missing_tags_and_html_cleaning - AssertionErro...
+1 failed, 2 passed in 0.74s

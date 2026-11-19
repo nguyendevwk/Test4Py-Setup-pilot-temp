@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-83085ca4-682a-4fd5-8445-eb6cdf4e06a4",
+  "object": "chat.completion",
+  "created": 1795078701,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport requests\nfrom httpie.context import Environment\nfrom httpie.models import OutputOptions, RequestsMessageKind\nfrom httpie.output.models import ProcessingOptions\nfrom httpie.output.writer import build_output_stream_for_message, get_stream_type_and_kwargs\nfrom httpie.output.streams import RawStream, EncodedStream, PrettyStream, BufferedPrettyStream\n\n# Helper to create a minimal Environment\ndef make_env(stdout_isatty=True):\n    env = Environment()\n    env.stdout_isatty = stdout_isatty\n    return env\n\n# Helper to create a minimal OutputOptions\ndef make_output_options(kind, body=True, meta=False):\n    return OutputOptions(kind=kind, body=body, meta=meta)\n\n# Helper to create a minimal ProcessingOptions\ndef make_processing_options(stream=False, prettify_groups=None):\n    po = ProcessingOptions()\n    po.stream = stream\n    po.get_prettify = lambda env: prettify_groups or []\n    po.response_mime = None\n    po.response_charset = None\n    po.style = None\n    po.json = False\n    po.format_options = {}\n    return po\n\n# Test that a request message yields an EncodedStream and no separator\ndef test_build_output_stream_for_request():\n    env = make_env(stdout_isatty=True)\n    req = requests.Request('GET', 'http://example.com').prepare()\n    output_options = make_output_options(RequestsMessageKind.REQUEST)\n    processing_options = make_processing_options()\n    stream_gen = build_output_stream_for_message(env, req, output_options, processing_options)\n    streams = list(stream_gen)\n    # Should yield exactly one stream object\n    assert len(streams) == 1\n    assert isinstance(streams[0], EncodedStream)\n    # No separator should be appended for requests\n    assert all(isinstance(s, EncodedStream) for s in streams)\n\n# Test that a response message with a text/event-stream header yields a BufferedPrettyStream and separator\ndef test_build_output_stream_for_streaming_response():\n    env = make_env(stdout_isatty=True)\n    resp = requests.Response()\n    resp.status_code = 200\n    resp._content = b'event: message\\n'\n    resp.headers['Content-Type'] = 'text/event-stream'\n    output_options = make_output_options(RequestsMessageKind.RESPONSE, body=True, meta=False)\n    processing_options = make_processing_options()\n    stream_gen = build_output_stream_for_message(env, resp, output_options, processing_options)\n    streams = list(stream_gen)\n    # Should yield a stream and then a separator\n    assert len(streams) == 2\n    assert isinstance(streams[0], BufferedPrettyStream)\n    assert streams[1] == b'\\n\\n'\n\n# Test that an invalid kind raises a KeyError\ndef test_build_output_stream_invalid_kind():\n    env = make_env()\n    req = requests.Request('GET', 'http://example.com').prepare()\n    output_options = OutputOptions(kind='INVALID', body=True, meta=False)\n    processing_options = make_processing_options()\n    with pytest.raises(KeyError):\n        list(build_output_stream_for_message(env, req, output_options, processing_options))\n```",
+        "reasoning": "We need three test functions. We can create dummy Environment, OutputOptions, ProcessingOptions, RequestsMessage. Use simple objects. Probably use httpie classes? But cannot import? We can create minimal stubs? But need real imported target. We can import from httpie.output.writer. Use real classes. We'll construct minimal environment: Environment with stdout_isatty True. OutputOptions with kind REQUEST or RESPONSE, body True meta False. ProcessingOptions with stream False, get_prettify returns empty. Use a simple RequestsMessage: can use requests.models.Response with minimal attributes. For request, use requests.models.PreparedRequest. We'll test that generator yields stream objects and separator. Use tmp_path for any file? Not needed. Just test that yield count. Third test error: passing invalid kind raises KeyError. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047091658,
+    "prompt_tokens": 1089,
+    "prompt_time": 0.075294301,
+    "completion_tokens": 833,
+    "completion_time": 0.931472412,
+    "total_tokens": 1922,
+    "total_time": 1.006766713,
+    "completion_tokens_details": {
+      "reasoning_tokens": 165
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgeez5e4vr917ys1atf5r1",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport requests\nfrom httpie.context import Environment\nfrom httpie.models import OutputOptions, RequestsMessageKind\nfrom httpie.output.models import ProcessingOptions\nfrom httpie.output.writer import build_output_stream_for_message, get_stream_type_and_kwargs\nfrom httpie.output.streams import RawStream, EncodedStream, PrettyStream, BufferedPrettyStream\n\n# Helper to create a minimal Environment\ndef make_env(stdout_isatty=True):\n    env = Environment()\n    env.stdout_isatty = stdout_isatty\n    return env\n\n# Helper to create a minimal OutputOptions\ndef make_output_options(kind, body=True, meta=False):\n    return OutputOptions(kind=kind, body=body, meta=meta)\n\n# Helper to create a minimal ProcessingOptions\ndef make_processing_options(stream=False, prettify_groups=None):\n    po = ProcessingOptions()\n    po.stream = stream\n    po.get_prettify = lambda env: prettify_groups or []\n    po.response_mime = None\n    po.response_charset = None\n    po.style = None\n    po.json = False\n    po.format_options = {}\n    return po\n\n# Test that a request message yields an EncodedStream and no separator\ndef test_build_output_stream_for_request():\n    env = make_env(stdout_isatty=True)\n    req = requests.Request('GET', 'http://example.com').prepare()\n    output_options = make_output_options(RequestsMessageKind.REQUEST)\n    processing_options = make_processing_options()\n    stream_gen = build_output_stream_for_message(env, req, output_options, processing_options)\n    streams = list(stream_gen)\n    # Should yield exactly one stream object\n    assert len(streams) == 1\n    assert isinstance(streams[0], EncodedStream)\n    # No separator should be appended for requests\n    assert all(isinstance(s, EncodedStream) for s in streams)\n\n# Test that a response message with a text/event-stream header yields a BufferedPrettyStream and separator\ndef test_build_output_stream_for_streaming_response():\n    env = make_env(stdout_isatty=True)\n    resp = requests.Response()\n    resp.status_code = 200\n    resp._content = b'event: message\\n'\n    resp.headers['Content-Type'] = 'text/event-stream'\n    output_options = make_output_options(RequestsMessageKind.RESPONSE, body=True, meta=False)\n    processing_options = make_processing_options()\n    stream_gen = build_output_stream_for_message(env, resp, output_options, processing_options)\n    streams = list(stream_gen)\n    # Should yield a stream and then a separator\n    assert len(streams) == 2\n    assert isinstance(streams[0], BufferedPrettyStream)\n    assert streams[1] == b'\\n\\n'\n\n# Test that an invalid kind raises a KeyError\ndef test_build_output_stream_invalid_kind():\n    env = make_env()\n    req = requests.Request('GET', 'http://example.com').prepare()\n    output_options = OutputOptions(kind='INVALID', body=True, meta=False)\n    processing_options = make_processing_options()\n    with pytest.raises(KeyError):\n        list(build_output_stream_for_message(env, req, output_options, processing_options))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3946908060461283
+}

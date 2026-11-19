@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-a21214e8-8227-4097-8cb5-4829df7a28c1",
+  "object": "chat.completion",
+  "created": 1795079412,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport types\nimport importlib\nimport pathlib\nimport pytest\n\n# Import the target function after ensuring the package is importable\nfrom thefuck.corrector import get_rules_import_paths\nfrom thefuck import conf\n\n@pytest.fixture\ndef monkeypatch_settings(monkeypatch, tmp_path):\n    \"\"\"Monkeypatch settings.user_dir to a temporary directory.\"\"\"\n    monkeypatch.setattr(conf.settings, \"user_dir\", tmp_path)\n    return tmp_path\n\ndef test_bundled_and_user_paths(monkeypatch_settings):\n    \"\"\"Ensure the bundled rules directory and the user rules directory are yielded.\"\"\"\n    # The bundled rules path is relative to this module's file\n    bundled = pathlib.Path(__file__).parent.parent.joinpath(\"rules\")\n    user_dir = monkeypatch_settings.joinpath(\"rules\")\n    # Create the user rules directory to avoid errors\n    user_dir.mkdir(parents=True, exist_ok=True)\n\n    paths = list(get_rules_import_paths())\n    # The first two yielded paths should match bundled and user_dir\n    assert paths[0] == bundled\n    assert paths[1] == user_dir\n\ndef test_third_party_rules(monkeypatch, tmp_path):\n    \"\"\"Verify that third‑party contrib modules are discovered.\"\"\"\n    # Create a fake third‑party module directory in a temporary sys.path entry\n    contrib_dir = tmp_path / \"thefuck_contrib_example\"\n    contrib_dir.mkdir()\n    rules_dir = contrib_dir / \"rules\"\n    rules_dir.mkdir()\n    # Add the temporary directory to sys.path\n    monkeypatch.setitem(sys.modules, \"__path__\", [str(tmp_path)])\n    original_sys_path = sys.path[:]\n    sys.path.insert(0, str(tmp_path))\n    try:\n        paths = list(get_rules_import_paths())\n        # The third yielded path should be the rules directory of the contrib module\n        assert rules_dir in paths\n    finally:\n        sys.path[:] = original_sys_path\n\ndef test_no_contrib(monkeypatch):\n    \"\"\"When no contrib modules exist, only bundled and user paths are yielded.\"\"\"\n    # Ensure sys.path has no contrib modules\n    original_sys_path = sys.path[:]\n    sys.path[:] = [\"/nonexistent/path\"]\n    try:\n        paths = list(get_rules_import_paths())\n        # Only two paths should be yielded\n        assert len(paths) == 2\n        # They should be the bundled and user directories\n        bundled = pathlib.Path(__file__).parent.parent.joinpath(\"rules\")\n        user_dir = conf.settings.user_dir.joinpath(\"rules\")\n        assert paths[0] == bundled\n        assert paths[1] == user_dir\n    finally:\n        sys.path[:] = original_sys_path\n```",
+        "reasoning": "We need to test get_rules_import_paths. It yields Path objects. We can test that it includes bundled rules path, user_dir path, and third-party. We can mock sys.path and settings.user_dir. But cannot modify product code. We can monkeypatch settings.user_dir and sys.path in test. Use tmp_path to create directories. Use monkeypatch fixture. Write three test functions: test_bundled_and_user_paths, test_third_party_rules, test_no_contrib. Use precise assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054621469,
+    "prompt_tokens": 394,
+    "prompt_time": 0.010694119,
+    "completion_tokens": 665,
+    "completion_time": 0.77970285,
+    "total_tokens": 1059,
+    "total_time": 0.790396969,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 102
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh45tdebs9bwjqbja6h4r8",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport types\nimport importlib\nimport pathlib\nimport pytest\n\n# Import the target function after ensuring the package is importable\nfrom thefuck.corrector import get_rules_import_paths\nfrom thefuck import conf\n\n@pytest.fixture\ndef monkeypatch_settings(monkeypatch, tmp_path):\n    \"\"\"Monkeypatch settings.user_dir to a temporary directory.\"\"\"\n    monkeypatch.setattr(conf.settings, \"user_dir\", tmp_path)\n    return tmp_path\n\ndef test_bundled_and_user_paths(monkeypatch_settings):\n    \"\"\"Ensure the bundled rules directory and the user rules directory are yielded.\"\"\"\n    # The bundled rules path is relative to this module's file\n    bundled = pathlib.Path(__file__).parent.parent.joinpath(\"rules\")\n    user_dir = monkeypatch_settings.joinpath(\"rules\")\n    # Create the user rules directory to avoid errors\n    user_dir.mkdir(parents=True, exist_ok=True)\n\n    paths = list(get_rules_import_paths())\n    # The first two yielded paths should match bundled and user_dir\n    assert paths[0] == bundled\n    assert paths[1] == user_dir\n\ndef test_third_party_rules(monkeypatch, tmp_path):\n    \"\"\"Verify that third‑party contrib modules are discovered.\"\"\"\n    # Create a fake third‑party module directory in a temporary sys.path entry\n    contrib_dir = tmp_path / \"thefuck_contrib_example\"\n    contrib_dir.mkdir()\n    rules_dir = contrib_dir / \"rules\"\n    rules_dir.mkdir()\n    # Add the temporary directory to sys.path\n    monkeypatch.setitem(sys.modules, \"__path__\", [str(tmp_path)])\n    original_sys_path = sys.path[:]\n    sys.path.insert(0, str(tmp_path))\n    try:\n        paths = list(get_rules_import_paths())\n        # The third yielded path should be the rules directory of the contrib module\n        assert rules_dir in paths\n    finally:\n        sys.path[:] = original_sys_path\n\ndef test_no_contrib(monkeypatch):\n    \"\"\"When no contrib modules exist, only bundled and user paths are yielded.\"\"\"\n    # Ensure sys.path has no contrib modules\n    original_sys_path = sys.path[:]\n    sys.path[:] = [\"/nonexistent/path\"]\n    try:\n        paths = list(get_rules_import_paths())\n        # Only two paths should be yielded\n        assert len(paths) == 2\n        # They should be the bundled and user directories\n        bundled = pathlib.Path(__file__).parent.parent.joinpath(\"rules\")\n        user_dir = conf.settings.user_dir.joinpath(\"rules\")\n        assert paths[0] == bundled\n        assert paths[1] == user_dir\n    finally:\n        sys.path[:] = original_sys_path\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "a73dc44834584be4a469da23723b1f56",
+  "_api_plus_pacing_seconds": 3.2344763790024444
+}

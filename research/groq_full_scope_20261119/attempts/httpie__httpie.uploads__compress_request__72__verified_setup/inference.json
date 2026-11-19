@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-fb80f11e-01b4-4ab5-b209-7de8147e4c10",
+  "object": "chat.completion",
+  "created": 1795079463,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport zlib\nimport requests\nimport pytest\nfrom httpie.uploads import compress_request\n\n\ndef test_compress_string_body_economical(tmp_path):\n    # Create a small string that compresses well\n    body = \"a\" * 1000  # repeated char compresses significantly\n    req = requests.Request(\"POST\", \"http://example.com\", data=body).prepare()\n    compress_request(req, always=False)\n    # Body should be compressed\n    assert req.body is not None\n    assert isinstance(req.body, bytes)\n    # Content-Encoding header should be set\n    assert req.headers.get(\"Content-Encoding\") == \"deflate\"\n    # Length header should match compressed body length\n    assert int(req.headers[\"Content-Length\"]) == len(req.body)\n    # Verify that decompression yields original body\n    decompressed = zlib.decompress(req.body)\n    assert decompressed.decode() == body\n\n\ndef test_compress_file_like_body_non_economical_always(tmp_path):\n    # Create a file-like object with data that does not compress well\n    data = b\"\".join([bytes([i % 256]) for i in range(1000)])  # random-ish data\n    file_obj = io.BytesIO(data)\n    req = requests.Request(\"POST\", \"http://example.com\", data=file_obj).prepare()\n    # Ensure body is read from file-like object\n    assert isinstance(req.body, bytes)\n    # Compress with always=True to force compression even if not economical\n    compress_request(req, always=True)\n    # Body should still be compressed\n    assert isinstance(req.body, bytes)\n    assert req.headers.get(\"Content-Encoding\") == \"deflate\"\n    # Length header should match compressed body length\n    assert int(req.headers[\"Content-Length\"]) == len(req.body)\n    # Decompress to verify integrity\n    decompressed = zlib.decompress(req.body)\n    assert decompressed == data\n\n\ndef test_compress_none_body_no_change(tmp_path):\n    # Prepare a request with no body\n    req = requests.Request(\"GET\", \"http://example.com\").prepare()\n    # Body is None\n    assert req.body is None\n    # Compress should leave body unchanged\n    compress_request(req, always=False)\n    assert req.body is None\n    # No Content-Encoding header should be added\n    assert \"Content-Encoding\" not in req.headers\n    assert \"Content-Length\" not in req.headers\n```",
+        "reasoning": "We need three tests for compress_request. Use tmp_path for any file. Test normal string body, file-like, bytes. Check header changes. Also boundary: large body not economical but always True. Error: body None? maybe raise? but function doesn't handle None. We'll test that if body is None, no change. Use requests.PreparedRequest. Let's craft."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004992588,
+    "prompt_tokens": 445,
+    "prompt_time": 0.082995455,
+    "completion_tokens": 592,
+    "completion_time": 0.67306146,
+    "total_tokens": 1037,
+    "total_time": 0.756056915,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 74
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh5qgqe288w60f5zbawatq",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport zlib\nimport requests\nimport pytest\nfrom httpie.uploads import compress_request\n\n\ndef test_compress_string_body_economical(tmp_path):\n    # Create a small string that compresses well\n    body = \"a\" * 1000  # repeated char compresses significantly\n    req = requests.Request(\"POST\", \"http://example.com\", data=body).prepare()\n    compress_request(req, always=False)\n    # Body should be compressed\n    assert req.body is not None\n    assert isinstance(req.body, bytes)\n    # Content-Encoding header should be set\n    assert req.headers.get(\"Content-Encoding\") == \"deflate\"\n    # Length header should match compressed body length\n    assert int(req.headers[\"Content-Length\"]) == len(req.body)\n    # Verify that decompression yields original body\n    decompressed = zlib.decompress(req.body)\n    assert decompressed.decode() == body\n\n\ndef test_compress_file_like_body_non_economical_always(tmp_path):\n    # Create a file-like object with data that does not compress well\n    data = b\"\".join([bytes([i % 256]) for i in range(1000)])  # random-ish data\n    file_obj = io.BytesIO(data)\n    req = requests.Request(\"POST\", \"http://example.com\", data=file_obj).prepare()\n    # Ensure body is read from file-like object\n    assert isinstance(req.body, bytes)\n    # Compress with always=True to force compression even if not economical\n    compress_request(req, always=True)\n    # Body should still be compressed\n    assert isinstance(req.body, bytes)\n    assert req.headers.get(\"Content-Encoding\") == \"deflate\"\n    # Length header should match compressed body length\n    assert int(req.headers[\"Content-Length\"]) == len(req.body)\n    # Decompress to verify integrity\n    decompressed = zlib.decompress(req.body)\n    assert decompressed == data\n\n\ndef test_compress_none_body_no_change(tmp_path):\n    # Prepare a request with no body\n    req = requests.Request(\"GET\", \"http://example.com\").prepare()\n    # Body is None\n    assert req.body is None\n    # Compress should leave body unchanged\n    compress_request(req, always=False)\n    assert req.body is None\n    # No Content-Encoding header should be added\n    assert \"Content-Encoding\" not in req.headers\n    assert \"Content-Length\" not in req.headers\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "b958aeb224254c4586ad0c1e7aeb8911",
+  "_api_plus_pacing_seconds": 1.7895890400395729
+}

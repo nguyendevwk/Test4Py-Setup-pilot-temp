@@ -1,0 +1,62 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_parse_google_style_returns_docstring ___________________
+
+    def test_parse_google_style_returns_docstring():
+        """Parsing a Google‑style docstring should return a Docstring instance."""
+        google_doc = """
+        Short description.
+    
+        Args:
+            x (int): The first number.
+            y (int): The second number.
+    
+        Returns:
+            int: The sum of x and y.
+        """
+        result = parse(google_doc, style=DocstringStyle.GOOGLE)
+        assert isinstance(result, Docstring)
+        assert result.short_description == "Short description."
+        assert len(result.params) == 2
+        assert result.params[0].arg_name == "x"
+        assert result.params[0].type_name == "int"
+        assert result.params[0].description == "The first number."
+>       assert result.returns[0].type_name == "int"
+E       TypeError: 'DocstringReturns' object is not subscriptable
+
+test_generated.py:25: TypeError
+_________________ test_parse_auto_prefers_style_with_more_meta _________________
+
+    def test_parse_auto_prefers_style_with_more_meta():
+        """AUTO should return the parse result with the most meta information."""
+        mixed_doc = """
+        Short description.
+    
+        Args:
+            a (int): First argument.
+    
+        Returns:
+            int: Result.
+        """
+        # Explicit Google style parsing
+        google_result = parse(mixed_doc, style=DocstringStyle.GOOGLE)
+        # AUTO parsing should yield the same result because Google has the most meta
+        auto_result = parse(mixed_doc, style=DocstringStyle.AUTO)
+>       assert google_result == auto_result
+E       assert <docstring_parser.common.Docstring object at 0x7f79f4f91ea0> == <docstring_parser.common.Docstring object at 0x7f79f4f91db0>
+
+test_generated.py:44: AssertionError
+_______________ test_parse_invalid_docstring_raises_parse_error ________________
+
+    def test_parse_invalid_docstring_raises_parse_error():
+        """If no style matches, parse should raise the first ParseError encountered."""
+        invalid_doc = "Just some random text that does not conform to any style."
+>       with pytest.raises(ParseError):
+E       Failed: DID NOT RAISE ParseError
+
+test_generated.py:52: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_google_style_returns_docstring - TypeErr...
+FAILED test_generated.py::test_parse_auto_prefers_style_with_more_meta - asse...
+FAILED test_generated.py::test_parse_invalid_docstring_raises_parse_error - F...
+3 failed in 0.14s

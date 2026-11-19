@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-c017965d-5dcf-42e9-bd5c-d4449f801e7b",
+  "object": "chat.completion",
+  "created": 1795079407,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport pytest\nfrom httpie.uploads import prepare_request_body, ChunkedUploadStream\nfrom httpie.context import Environment\nfrom httpie.cli.dicts import RequestDataDict\n\n# Helper callback that records the number of bytes read\nclass ReadCounter:\n    def __init__(self):\n        self.total = 0\n    def __call__(self, chunk: bytes) -> bytes:\n        self.total += len(chunk)\n        return chunk\n\n@pytest.fixture\ndef env():\n    # Minimal Environment instance; attributes are not used in prepare_request_body\n    return Environment()\n\ndef test_prepare_request_body_with_string(env):\n    \"\"\"Body is a plain string; should be returned as bytes.\"\"\"\n    counter = ReadCounter()\n    result = prepare_request_body(\n        env=env,\n        raw_body=\"hello world\",\n        body_read_callback=counter,\n        offline=False,\n        chunked=False\n    )\n    assert isinstance(result, bytes)\n    assert result == b\"hello world\"\n    # No reading should have happened for non-file-like bodies\n    assert counter.total == 0\n\ndef test_prepare_request_body_chunked_bytes(env):\n    \"\"\"Body is bytes and chunked=True; should return a ChunkedUploadStream.\"\"\"\n    counter = ReadCounter()\n    body = b\"chunked data\"\n    result = prepare_request_body(\n        env=env,\n        raw_body=body,\n        body_read_callback=counter,\n        offline=False,\n        chunked=True\n    )\n    assert isinstance(result, ChunkedUploadStream)\n    # Reading from the stream should trigger the callback\n    data = result.read()\n    assert data == body\n    assert counter.total == len(body)\n\ndef test_prepare_request_body_file_like_offline(tmp_path, env):\n    \"\"\"File-like body with offline=True should return the file contents as bytes.\"\"\"\n    counter = ReadCounter()\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"file content\")\n    with open(file_path, \"rb\") as f:\n        result = prepare_request_body(\n            env=env,\n            raw_body=f,\n            body_read_callback=counter,\n            offline=True,\n            chunked=False\n        )\n    assert isinstance(result, bytes)\n    assert result == b\"file content\"\n    # The callback should not be invoked for offline file reads\n    assert counter.total == 0\n```",
+        "reasoning": "We need to write tests for prepare_request_body. We need to import it. Use tmp_path for file. Test normal: string body. Test chunked: bytes. Test file-like offline. Use dummy env. Use simple lambda."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.058619045,
+    "prompt_tokens": 692,
+    "prompt_time": 0.053672564,
+    "completion_tokens": 545,
+    "completion_time": 0.61283767,
+    "total_tokens": 1237,
+    "total_time": 0.666510234,
+    "completion_tokens_details": {
+      "reasoning_tokens": 48
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sh40qxee5t0jwmktkc128p",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport pytest\nfrom httpie.uploads import prepare_request_body, ChunkedUploadStream\nfrom httpie.context import Environment\nfrom httpie.cli.dicts import RequestDataDict\n\n# Helper callback that records the number of bytes read\nclass ReadCounter:\n    def __init__(self):\n        self.total = 0\n    def __call__(self, chunk: bytes) -> bytes:\n        self.total += len(chunk)\n        return chunk\n\n@pytest.fixture\ndef env():\n    # Minimal Environment instance; attributes are not used in prepare_request_body\n    return Environment()\n\ndef test_prepare_request_body_with_string(env):\n    \"\"\"Body is a plain string; should be returned as bytes.\"\"\"\n    counter = ReadCounter()\n    result = prepare_request_body(\n        env=env,\n        raw_body=\"hello world\",\n        body_read_callback=counter,\n        offline=False,\n        chunked=False\n    )\n    assert isinstance(result, bytes)\n    assert result == b\"hello world\"\n    # No reading should have happened for non-file-like bodies\n    assert counter.total == 0\n\ndef test_prepare_request_body_chunked_bytes(env):\n    \"\"\"Body is bytes and chunked=True; should return a ChunkedUploadStream.\"\"\"\n    counter = ReadCounter()\n    body = b\"chunked data\"\n    result = prepare_request_body(\n        env=env,\n        raw_body=body,\n        body_read_callback=counter,\n        offline=False,\n        chunked=True\n    )\n    assert isinstance(result, ChunkedUploadStream)\n    # Reading from the stream should trigger the callback\n    data = result.read()\n    assert data == body\n    assert counter.total == len(body)\n\ndef test_prepare_request_body_file_like_offline(tmp_path, env):\n    \"\"\"File-like body with offline=True should return the file contents as bytes.\"\"\"\n    counter = ReadCounter()\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"file content\")\n    with open(file_path, \"rb\") as f:\n        result = prepare_request_body(\n            env=env,\n            raw_body=f,\n            body_read_callback=counter,\n            offline=True,\n            chunked=False\n        )\n    assert isinstance(result, bytes)\n    assert result == b\"file content\"\n    # The callback should not be invoked for offline file reads\n    assert counter.total == 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "f97fd1078a254ee0ad592548b0860cd9",
+  "_api_plus_pacing_seconds": 1.5331003660103306
+}

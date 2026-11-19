@@ -1,0 +1,26 @@
+```python
+import pytest
+from codetiming._timer import Timer, TimerError
+
+def test_timer_initial_text_and_running_error():
+    logs = []
+
+    def logger(msg: str) -> None:
+        logs.append(msg)
+
+    timer = Timer(name="test", initial_text="Starting {name}", logger=logger)
+
+    # Start the timer: should log the initial text
+    timer.start()
+    assert logs[0] == "Starting test"
+
+    # Starting again while running should raise TimerError
+    with pytest.raises(TimerError, match="Timer is running"):
+        timer.start()
+
+    # Stop the timer: should log elapsed time and reset _start_time
+    timer.stop()
+    assert timer._start_time is None
+    assert len(logs) == 2
+    assert logs[1].startswith("Elapsed time")
+```

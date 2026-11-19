@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-4c560b96-c02a-46a5-850a-a2e2e9e84835",
+  "object": "chat.completion",
+  "created": 1795079502,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKTVSerieBaseIE, NRKIE\n\n\nclass DummyIE(NRKTVSerieBaseIE):\n    \"\"\"A minimal stub of NRKTVSerieBaseIE for testing.\"\"\"\n\n    def url_result(self, url, ie=None, video_id=None):\n        # Return a tuple that mimics the real url_result output\n        return (url, ie, video_id)\n\n    def _call_api(self, *args, **kwargs):\n        # Return None to stop pagination in _entries\n        return None\n\n\ndef test_extract_entries_filters_and_formats():\n    dummy = DummyIE()\n    # Valid entries: correct type and string id\n    entry_list = [\n        {\"prfId\": \"12345\"},\n        {\"episodeId\": \"abcde\"},\n        {\"prfId\": 67890},          # invalid type\n        {\"episodeId\": None},       # missing id\n        {\"otherKey\": \"value\"}      # no id key\n    ]\n    result = dummy._extract_entries(entry_list)\n    # Should contain two entries with correct URLs and video_ids\n    assert len(result) == 2\n    assert result[0] == (\"nrk:12345\", NRKIE.ie_key(), \"12345\")\n    assert result[1] == (\"nrk:abcde\", NRKIE.ie_key(), \"abcde\")\n\n\ndef test_extract_assets_key_returns_first_match():\n    dummy = DummyIE()\n    # _ASSETS_KEYS = ('episodes', 'instalments',)\n    data = {\"instalments\": [], \"episodes\": []}\n    # Should return 'episodes' because it appears first in the tuple\n    assert dummy._extract_assets_key(data) == \"episodes\"\n\n    data = {\"instalments\": []}\n    assert dummy._extract_assets_key(data) == \"instalments\"\n\n    data = {\"other\": []}\n    assert dummy._extract_assets_key(data) is None\n\n\ndef test_entries_yields_all_episodes_and_stops_on_no_next():\n    dummy = DummyIE()\n    # Prepare a data structure that mimics the API response\n    data = {\n        \"_embedded\": {\n            \"episodes\": {\n                \"_embedded\": {\n                    \"episodes\": [\n                        {\"prfId\": \"e1\"},\n                        {\"prfId\": \"e2\"},\n                    ]\n                },\n                \"_links\": {\n                    \"next\": {\"href\": \"next_page\"}\n                }\n            }\n        }\n    }\n    # Override _call_api to return None so pagination stops after first page\n    dummy._call_api = lambda *_, **__: None\n\n    entries = list(dummy._entries(data, display_id=\"test\"))\n    # Should yield two entries corresponding to the two episodes\n    assert len(entries) == 2\n    assert entries[0] == (\"nrk:e1\", NRKIE.ie_key(), \"e1\")\n    assert entries[1] == (\"nrk:e2\", NRKIE.ie_key(), \"e2\")\n```",
+        "reasoning": "We need three test functions for NRKTVSerieBaseIE._extract_entries, _extract_assets_key, and _entries maybe. Use tmp_path? Not needed. Just test logic. Use dummy instance? NRKTVSerieBaseIE inherits NRKBaseIE which inherits InfoExtractor. We can instantiate with minimal. Use dummy subclass? We can create a dummy class inheriting NRKTVSerieBaseIE with minimal methods: url_result returns tuple. Also _call_api returns None. For _entries, we need to mock _call_api to return None to stop loop. Also need to mock NRKIE.ie_key? Actually url_result uses NRKIE.ie_key() but we can monkeypatch NRKIE.ie_key to return 'mock'. But easier: subclass override url_result to return (url, ie, video_id). Let's create DummyIE(NRKTVSerieBaseIE) with url_result returning tuple. Also override _call_api to return None. Then test _extract_entries with list of dicts. Test _extract_assets_key with dict containing 'episodes'. Test _entries yields correct entries from first page and stops when next_url missing. Use data with _embedded containing 'episodes' key. Provide entries list. Ensure yield count."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00475941,
+    "prompt_tokens": 1396,
+    "prompt_time": 0.055914803,
+    "completion_tokens": 884,
+    "completion_time": 0.912753361,
+    "total_tokens": 2280,
+    "total_time": 0.968668164,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 251
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh6xmgeptbhgnvek0w2khj",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKTVSerieBaseIE, NRKIE\n\n\nclass DummyIE(NRKTVSerieBaseIE):\n    \"\"\"A minimal stub of NRKTVSerieBaseIE for testing.\"\"\"\n\n    def url_result(self, url, ie=None, video_id=None):\n        # Return a tuple that mimics the real url_result output\n        return (url, ie, video_id)\n\n    def _call_api(self, *args, **kwargs):\n        # Return None to stop pagination in _entries\n        return None\n\n\ndef test_extract_entries_filters_and_formats():\n    dummy = DummyIE()\n    # Valid entries: correct type and string id\n    entry_list = [\n        {\"prfId\": \"12345\"},\n        {\"episodeId\": \"abcde\"},\n        {\"prfId\": 67890},          # invalid type\n        {\"episodeId\": None},       # missing id\n        {\"otherKey\": \"value\"}      # no id key\n    ]\n    result = dummy._extract_entries(entry_list)\n    # Should contain two entries with correct URLs and video_ids\n    assert len(result) == 2\n    assert result[0] == (\"nrk:12345\", NRKIE.ie_key(), \"12345\")\n    assert result[1] == (\"nrk:abcde\", NRKIE.ie_key(), \"abcde\")\n\n\ndef test_extract_assets_key_returns_first_match():\n    dummy = DummyIE()\n    # _ASSETS_KEYS = ('episodes', 'instalments',)\n    data = {\"instalments\": [], \"episodes\": []}\n    # Should return 'episodes' because it appears first in the tuple\n    assert dummy._extract_assets_key(data) == \"episodes\"\n\n    data = {\"instalments\": []}\n    assert dummy._extract_assets_key(data) == \"instalments\"\n\n    data = {\"other\": []}\n    assert dummy._extract_assets_key(data) is None\n\n\ndef test_entries_yields_all_episodes_and_stops_on_no_next():\n    dummy = DummyIE()\n    # Prepare a data structure that mimics the API response\n    data = {\n        \"_embedded\": {\n            \"episodes\": {\n                \"_embedded\": {\n                    \"episodes\": [\n                        {\"prfId\": \"e1\"},\n                        {\"prfId\": \"e2\"},\n                    ]\n                },\n                \"_links\": {\n                    \"next\": {\"href\": \"next_page\"}\n                }\n            }\n        }\n    }\n    # Override _call_api to return None so pagination stops after first page\n    dummy._call_api = lambda *_, **__: None\n\n    entries = list(dummy._entries(data, display_id=\"test\"))\n    # Should yield two entries corresponding to the two episodes\n    assert len(entries) == 2\n    assert entries[0] == (\"nrk:e1\", NRKIE.ie_key(), \"e1\")\n    assert entries[1] == (\"nrk:e2\", NRKIE.ie_key(), \"e2\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "ed4915d1dd804e788d82eaf4e87cf713",
+  "_api_plus_pacing_seconds": 20.130746712035034
+}

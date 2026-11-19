@@ -1,0 +1,113 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_parse_class_attributes __________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-179/test_parse_class_attributes0')
+
+    def test_parse_class_attributes(tmp_path):
+        # Define a class with a docstring and attribute docstrings
+        class Sample:
+            """Sample class docstring."""
+            x: int = 1
+            """Attribute x docstring."""
+            y: str = "hello"
+            """Attribute y docstring."""
+    
+        # Parse the class
+        result: Docstring = parse_from_object(Sample, style=DocstringStyle.AUTO)
+    
+        # The class docstring should be parsed
+        assert result.short_description == "Sample class docstring."
+    
+        # Attribute docstrings should be present
+>       attrs = {a.name: a for a in result.params}
+
+../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__43__atomic_verified_setup/eval0/test_generated.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x7fd171e01600>
+
+>   attrs = {a.name: a for a in result.params}
+E   AttributeError: 'DocstringParam' object has no attribute 'name'
+
+../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__43__atomic_verified_setup/eval0/test_generated.py:27: AttributeError
+_________________________ test_parse_module_attributes _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-179/test_parse_module_attributes0')
+
+    def test_parse_module_attributes(tmp_path):
+        # Create a temporary module file with attribute docstrings
+        module_code = '''
+        """Module docstring."""
+        a = 10
+        """Attribute a docstring."""
+        b = "world"
+        """Attribute b docstring."""
+        '''
+        module_path = tmp_path / "mymodule.py"
+        module_path.write_text(module_code)
+    
+        # Import the module dynamically
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("mymodule", str(module_path))
+        mymodule = importlib.util.module_from_spec(spec)
+>       spec.loader.exec_module(mymodule)
+
+../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__43__atomic_verified_setup/eval0/test_generated.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:879: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1017: in get_code
+    ???
+<frozen importlib._bootstrap_external>:947: in source_to_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = <built-in function compile>
+args = (b'\n    """Module docstring."""\n    a = 10\n    """Attribute a docstring."""\n    b = "world"\n    """Attribute b docstring."""\n    ', '/tmp/pytest-of-heurix/pytest-179/test_parse_module_attributes0/mymodule.py', 'exec')
+kwds = {'dont_inherit': True, 'optimize': -1}
+
+>   ???
+E     File "/tmp/pytest-of-heurix/pytest-179/test_parse_module_attributes0/mymodule.py", line 2
+E       """Module docstring."""
+E   IndentationError: unexpected indent
+
+<frozen importlib._bootstrap>:241: IndentationError
+______________________ test_parse_error_on_non_string_doc ______________________
+
+    def test_parse_error_on_non_string_doc():
+        # Create an object with __doc__ set to an integer
+        class BadDoc:
+            __doc__ = 42  # non-string docstring
+    
+        # Parsing should raise a ParseError because the docstring is invalid
+        with pytest.raises(ParseError):
+>           parse_from_object(BadDoc, style=DocstringStyle.AUTO)
+
+../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__43__atomic_verified_setup/eval0/test_generated.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docstring_parser/parser.py:74: in parse_from_object
+    docstring = parse(obj.__doc__, style=style)
+docstring_parser/parser.py:39: in parse
+    ret = module.parse(text)
+docstring_parser/rest.py:111: in parse
+    text = inspect.cleandoc(text)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+doc = 42
+
+    def cleandoc(doc):
+        """Clean up indentation from docstrings.
+    
+        Any whitespace that can be uniformly removed from the second line
+        onwards is removed."""
+        try:
+>           lines = doc.expandtabs().split('\n')
+E           AttributeError: 'int' object has no attribute 'expandtabs'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:750: AttributeError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__43__atomic_verified_setup/eval0/test_generated.py::test_parse_class_attributes
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__43__atomic_verified_setup/eval0/test_generated.py::test_parse_module_attributes
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__43__atomic_verified_setup/eval0/test_generated.py::test_parse_error_on_non_string_doc
+3 failed in 0.32s

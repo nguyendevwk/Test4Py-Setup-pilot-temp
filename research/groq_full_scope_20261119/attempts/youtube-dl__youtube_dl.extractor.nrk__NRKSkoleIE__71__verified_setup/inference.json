@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-a9572841-ea42-4099-ae67-da173eda7c3c",
+  "object": "chat.completion",
+  "created": 1795079590,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKSkoleIE\nfrom youtube_dl.utils import ExtractorError\n\n@pytest.fixture\ndef ie():\n    return NRKSkoleIE()\n\ndef test_real_extract_success(monkeypatch, ie):\n    # Mock _download_json to return a dict with psId\n    def mock_download_json(url, video_id):\n        assert url == f'https://nrkno-skole-prod.kube.nrk.no/skole/api/media/{video_id}'\n        assert video_id == '14099'\n        return {'psId': '6021'}\n    monkeypatch.setattr(ie, '_download_json', mock_download_json)\n\n    result = ie._real_extract('https://www.nrk.no/skole/?page=search&q=&mediaId=14099')\n    assert result.url == 'nrk:6021'\n    assert result._type == 'url'\n\ndef test_real_extract_missing_psid(monkeypatch, ie):\n    # Mock _download_json to return dict without psId\n    def mock_download_json(url, video_id):\n        return {}\n    monkeypatch.setattr(ie, '_download_json', mock_download_json)\n\n    with pytest.raises(ExtractorError) as excinfo:\n        ie._real_extract('https://www.nrk.no/skole/?page=search&q=&mediaId=14099')\n    assert 'psId' in str(excinfo.value)\n\ndef test_real_extract_invalid_url(ie):\n    # URL that does not match the pattern should raise ExtractorError\n    with pytest.raises(ExtractorError):\n        ie._real_extract('https://www.nrk.no/skole/?page=search&q=&mediaId=abc')\n```",
+        "reasoning": "We need to write tests for NRKSkoleIE._real_extract. It downloads JSON from API. We cannot access network. But we can patch _download_json to return dict. Use monkeypatch fixture. Three tests: normal extraction, missing psId raises ExtractorError, invalid URL raises ExtractorError. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004785779,
+    "prompt_tokens": 651,
+    "prompt_time": 0.017432264,
+    "completion_tokens": 427,
+    "completion_time": 0.493599053,
+    "total_tokens": 1078,
+    "total_time": 0.511031317,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 67
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh9m8he1q81sw1atpa38g0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKSkoleIE\nfrom youtube_dl.utils import ExtractorError\n\n@pytest.fixture\ndef ie():\n    return NRKSkoleIE()\n\ndef test_real_extract_success(monkeypatch, ie):\n    # Mock _download_json to return a dict with psId\n    def mock_download_json(url, video_id):\n        assert url == f'https://nrkno-skole-prod.kube.nrk.no/skole/api/media/{video_id}'\n        assert video_id == '14099'\n        return {'psId': '6021'}\n    monkeypatch.setattr(ie, '_download_json', mock_download_json)\n\n    result = ie._real_extract('https://www.nrk.no/skole/?page=search&q=&mediaId=14099')\n    assert result.url == 'nrk:6021'\n    assert result._type == 'url'\n\ndef test_real_extract_missing_psid(monkeypatch, ie):\n    # Mock _download_json to return dict without psId\n    def mock_download_json(url, video_id):\n        return {}\n    monkeypatch.setattr(ie, '_download_json', mock_download_json)\n\n    with pytest.raises(ExtractorError) as excinfo:\n        ie._real_extract('https://www.nrk.no/skole/?page=search&q=&mediaId=14099')\n    assert 'psId' in str(excinfo.value)\n\ndef test_real_extract_invalid_url(ie):\n    # URL that does not match the pattern should raise ExtractorError\n    with pytest.raises(ExtractorError):\n        ie._real_extract('https://www.nrk.no/skole/?page=search&q=&mediaId=abc')\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "3ff8ebb6a49042e4b42e6e33d699e8a0",
+  "_api_plus_pacing_seconds": 2.5893827989930287
+}

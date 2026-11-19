@@ -1,0 +1,24 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_______ test_format_auth_help_includes_all_plugins_and_wraps_description _______
+
+auth_mapping = {'dummy': <class 'test_generated.DummyAuthPlugin'>, 'another': <class 'test_generated.AnotherAuthPlugin'>, 'builtin': <class 'test_generated.BuiltinDummyAuthPlugin'>}
+
+    def test_format_auth_help_includes_all_plugins_and_wraps_description(auth_mapping):
+        help_text = format_auth_help(auth_mapping, isolation_mode=False)
+        # Default auth type should be the first plugin in the mapping
+        assert "Defaults to \"dummy\"" in help_text
+        # All plugin types should appear
+        assert '"dummy": Dummy Auth' in help_text
+        assert '"another": Another Auth' in help_text
+        assert '"builtin": Builtin Auth' in help_text
+        # Description of another plugin should be wrapped to a maximum width of 80
+        wrapped = textwrap.wrap(AnotherAuthPlugin.description, width=80)
+        for line in wrapped:
+>           assert line in help_text
+E           assert 'Another plugin with a longer description that should wrap properly when' in '\n    The authentication mechanism to be used. Defaults to "dummy".\n\n    "dummy": Dummy Auth (provided by dummy_pkg...rly\n      when displayed in the help text.\n\n    "builtin": Builtin Auth\n      Builtin authentication plugin.\n    '
+
+test_generated.py:43: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_format_auth_help_includes_all_plugins_and_wraps_description
+1 failed, 2 passed in 0.65s

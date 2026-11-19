@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a6248032-66b9-44fd-b67b-0da3a9a7aa44",
+  "object": "chat.completion",
+  "created": 1795077892,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport itertools\nimport math\nimport pytest\n\nfrom tqdm.contrib.itertools import product as tqdm_product\n\n\nclass DummyTqdm:\n    \"\"\"A minimal stand‑in for tqdm that records the total argument and yields the iterable.\"\"\"\n    def __init__(self, iterable, total=None, **kwargs):\n        self.total = total\n        self.iterable = iterable\n\n    def __iter__(self):\n        return iter(self.iterable)\n\n\ndef test_product_normal_iterables(tmp_path):\n    \"\"\"Test normal behaviour with two small iterables and a custom tqdm_class.\"\"\"\n    a = [1, 2]\n    b = ['x', 'y']\n    # Use DummyTqdm to capture the total argument\n    result = list(tqdm_product(a, b, tqdm_class=DummyTqdm))\n    # Expected product\n    expected = list(itertools.product(a, b))\n    assert result == expected\n    # Total should be len(a) * len(b) = 4\n    assert DummyTqdm.total == 4\n\n\ndef test_product_repeat_zero(tmp_path):\n    \"\"\"When repeat=0, itertools.product yields a single empty tuple.\"\"\"\n    result = list(tqdm_product([1, 2, 3], repeat=0, tqdm_class=DummyTqdm))\n    assert result == [()]\n    # Total should be 1 (since product of zero lengths is 1)\n    assert DummyTqdm.total == 1\n\n\ndef test_product_generator_no_len(tmp_path):\n    \"\"\"If an iterable has no len, total should remain None and iteration should succeed.\"\"\"\n    gen = (i for i in range(3))\n    result = list(tqdm_product(gen, [10, 20], tqdm_class=DummyTqdm))\n    expected = list(itertools.product(gen, [10, 20]))\n    assert result == expected\n    # Since gen has no len, total should be None\n    assert DummyTqdm.total is None\n```",
+        "reasoning": "We need to write pytest module testing tqdm.contrib.itertools.product. We cannot modify product. We need three independent test functions: normal, boundary, error. Use tmp_path for any files. But product doesn't use files. We can test normal: product of two lists, check output and that tqdm_class is used? We can pass a custom tqdm_class that records iteration. Use a simple dummy class that mimics tqdm but records items. For boundary: repeat=0? product with repeat=0 should yield empty? Actually itertools.product with repeat=0 yields one empty tuple. test that. Error: passing non-iterable that has no len? e.g., generator. Should not compute total, but still yield. We can test that total is None and no exception. Use dummy tqdm_class that accepts total and yields. We'll create dummy that just returns iterable. Use simple class. Ensure no mocks of target. We'll test that product returns correct tuples. Use list(product(...)). Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05313459,
+    "prompt_tokens": 397,
+    "prompt_time": 0.025316377,
+    "completion_tokens": 618,
+    "completion_time": 0.672977514,
+    "total_tokens": 1015,
+    "total_time": 0.698293891,
+    "completion_tokens_details": {
+      "reasoning_tokens": 200
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfnsdke2q9ba6t4132946w",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport itertools\nimport math\nimport pytest\n\nfrom tqdm.contrib.itertools import product as tqdm_product\n\n\nclass DummyTqdm:\n    \"\"\"A minimal stand‑in for tqdm that records the total argument and yields the iterable.\"\"\"\n    def __init__(self, iterable, total=None, **kwargs):\n        self.total = total\n        self.iterable = iterable\n\n    def __iter__(self):\n        return iter(self.iterable)\n\n\ndef test_product_normal_iterables(tmp_path):\n    \"\"\"Test normal behaviour with two small iterables and a custom tqdm_class.\"\"\"\n    a = [1, 2]\n    b = ['x', 'y']\n    # Use DummyTqdm to capture the total argument\n    result = list(tqdm_product(a, b, tqdm_class=DummyTqdm))\n    # Expected product\n    expected = list(itertools.product(a, b))\n    assert result == expected\n    # Total should be len(a) * len(b) = 4\n    assert DummyTqdm.total == 4\n\n\ndef test_product_repeat_zero(tmp_path):\n    \"\"\"When repeat=0, itertools.product yields a single empty tuple.\"\"\"\n    result = list(tqdm_product([1, 2, 3], repeat=0, tqdm_class=DummyTqdm))\n    assert result == [()]\n    # Total should be 1 (since product of zero lengths is 1)\n    assert DummyTqdm.total == 1\n\n\ndef test_product_generator_no_len(tmp_path):\n    \"\"\"If an iterable has no len, total should remain None and iteration should succeed.\"\"\"\n    gen = (i for i in range(3))\n    result = list(tqdm_product(gen, [10, 20], tqdm_class=DummyTqdm))\n    expected = list(itertools.product(gen, [10, 20]))\n    assert result == expected\n    # Since gen has no len, total should be None\n    assert DummyTqdm.total is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.095757142000366
+}

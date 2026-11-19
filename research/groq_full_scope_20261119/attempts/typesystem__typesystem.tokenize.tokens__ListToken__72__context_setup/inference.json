@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-f11db31b-1e22-419e-98f4-d2443b0cf519",
+  "object": "chat.completion",
+  "created": 1795079433,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokens import ListToken\nfrom typesystem.base import Position\n\n# A minimal concrete Token implementation for testing\nclass DummyToken:\n    def __init__(self, value, start, end, content=\"\"):\n        self._value = value\n        self._start_index = start\n        self._end_index = end\n        self._content = content\n\n    def _get_value(self):\n        return self._value\n\n    def _get_child_token(self, key):\n        raise NotImplementedError\n\n    def _get_key_token(self, key):\n        raise NotImplementedError\n\n    def _get_position(self, index):\n        return Position(1, index + 1, index)\n\n    def __repr__(self):\n        return f\"DummyToken({self._value!r})\"\n\n    def __eq__(self, other):\n        return isinstance(other, DummyToken) and self._value == other._value\n\n\ndef test_list_token_value_and_string():\n    \"\"\"ListToken should expose the list of child values via its value property.\"\"\"\n    children = [\n        DummyToken(1, 0, 0),\n        DummyToken(2, 1, 1),\n        DummyToken(3, 2, 2),\n    ]\n    lt = ListToken(children, 0, 2, content=\"123\")\n    # value property should return a list of the underlying values\n    assert lt.value == [1, 2, 3]\n    # string property should reflect the content slice\n    assert lt.string == \"123\"\n    # start and end positions should be derived correctly\n    assert lt.start == Position(1, 1, 0)\n    assert lt.end == Position(1, 3, 2)\n\n\ndef test_list_token_lookup_and_equality():\n    \"\"\"Lookup should navigate to the correct child token and equality should compare values.\"\"\"\n    children = [\n        DummyToken(\"a\", 0, 0),\n        DummyToken(\"b\", 1, 1),\n        DummyToken(\"c\", 2, 2),\n    ]\n    lt = ListToken(children, 0, 2, content=\"abc\")\n    # lookup by index should return the corresponding child token\n    assert lt.lookup([1]) == DummyToken(\"b\", 1, 1)\n    # equality compares underlying values and indices\n    same_lt = ListToken(children, 0, 2, content=\"abc\")\n    assert lt == same_lt\n    # different indices should not be equal\n    different_lt = ListToken(children, 0, 1, content=\"ab\")\n    assert lt != different_lt\n\n\ndef test_list_token_out_of_range_lookup():\n    \"\"\"Accessing an out-of-range index should raise an IndexError.\"\"\"\n    children = [DummyToken(42, 0, 0)]\n    lt = ListToken(children, 0, 0, content=\"42\")\n    with pytest.raises(IndexError):\n        lt.lookup([1])  # no second element\n```",
+        "reasoning": "We need to test ListToken. Need to import it. We'll create simple tokens for children: maybe use Token base? But ListToken expects children tokens. We can create a simple subclass of Token that returns value. For test, create DummyToken that returns its value. Then ListToken with list of DummyTokens. Test value property returns list of values. Test lookup works. Also test error when accessing out of range? ListToken._get_child_token uses self._value[key] so IndexError. Use pytest.raises. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004874469,
+    "prompt_tokens": 891,
+    "prompt_time": 0.059120401,
+    "completion_tokens": 742,
+    "completion_time": 0.795711579,
+    "total_tokens": 1633,
+    "total_time": 0.85483198,
+    "completion_tokens_details": {
+      "reasoning_tokens": 109
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh4t1ce8n9ykrk53jtfvmx",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokens import ListToken\nfrom typesystem.base import Position\n\n# A minimal concrete Token implementation for testing\nclass DummyToken:\n    def __init__(self, value, start, end, content=\"\"):\n        self._value = value\n        self._start_index = start\n        self._end_index = end\n        self._content = content\n\n    def _get_value(self):\n        return self._value\n\n    def _get_child_token(self, key):\n        raise NotImplementedError\n\n    def _get_key_token(self, key):\n        raise NotImplementedError\n\n    def _get_position(self, index):\n        return Position(1, index + 1, index)\n\n    def __repr__(self):\n        return f\"DummyToken({self._value!r})\"\n\n    def __eq__(self, other):\n        return isinstance(other, DummyToken) and self._value == other._value\n\n\ndef test_list_token_value_and_string():\n    \"\"\"ListToken should expose the list of child values via its value property.\"\"\"\n    children = [\n        DummyToken(1, 0, 0),\n        DummyToken(2, 1, 1),\n        DummyToken(3, 2, 2),\n    ]\n    lt = ListToken(children, 0, 2, content=\"123\")\n    # value property should return a list of the underlying values\n    assert lt.value == [1, 2, 3]\n    # string property should reflect the content slice\n    assert lt.string == \"123\"\n    # start and end positions should be derived correctly\n    assert lt.start == Position(1, 1, 0)\n    assert lt.end == Position(1, 3, 2)\n\n\ndef test_list_token_lookup_and_equality():\n    \"\"\"Lookup should navigate to the correct child token and equality should compare values.\"\"\"\n    children = [\n        DummyToken(\"a\", 0, 0),\n        DummyToken(\"b\", 1, 1),\n        DummyToken(\"c\", 2, 2),\n    ]\n    lt = ListToken(children, 0, 2, content=\"abc\")\n    # lookup by index should return the corresponding child token\n    assert lt.lookup([1]) == DummyToken(\"b\", 1, 1)\n    # equality compares underlying values and indices\n    same_lt = ListToken(children, 0, 2, content=\"abc\")\n    assert lt == same_lt\n    # different indices should not be equal\n    different_lt = ListToken(children, 0, 1, content=\"ab\")\n    assert lt != different_lt\n\n\ndef test_list_token_out_of_range_lookup():\n    \"\"\"Accessing an out-of-range index should raise an IndexError.\"\"\"\n    children = [DummyToken(42, 0, 0)]\n    lt = ListToken(children, 0, 0, content=\"42\")\n    with pytest.raises(IndexError):\n        lt.lookup([1])  # no second element\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "3ef5df7cc2804b09a0d6d4c35ac312bb",
+  "_api_plus_pacing_seconds": 20.50329015101306
+}

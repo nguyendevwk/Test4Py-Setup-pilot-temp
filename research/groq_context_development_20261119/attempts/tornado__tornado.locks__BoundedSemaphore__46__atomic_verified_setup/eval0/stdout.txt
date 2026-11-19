@@ -1,0 +1,99 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_bounded_semaphore_basic_acquire_release _________________
+
+    def test_bounded_semaphore_basic_acquire_release():
+        sem = BoundedSemaphore(value=2)
+        # Acquire twice should succeed
+        sem.acquire()
+        sem.acquire()
+        # Now the semaphore is exhausted; a third acquire would block
+        # We use a timeout to ensure it does not acquire immediately
+        with pytest.raises(TimeoutError):
+            # Attempt to acquire with a timeout of 0.1 seconds
+            @gen.coroutine
+            def try_acquire():
+                yield gen.with_timeout(0.1, sem.acquire())
+>           ioloop.IOLoop.current().run_sync(try_acquire)
+
+../../../../../../../groq_context_development_20261119/attempts/tornado__tornado.locks__BoundedSemaphore__46__atomic_verified_setup/eval0/test_generated.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tornado/ioloop.py:547: in run_sync
+    return future_cell["future"].result()
+tornado/gen.py:796: in run
+    yielded = self.gen.throw(exc)
+../../../../../../../groq_context_development_20261119/attempts/tornado__tornado.locks__BoundedSemaphore__46__atomic_verified_setup/eval0/test_generated.py:17: in try_acquire
+    yield gen.with_timeout(0.1, sem.acquire())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tornado.gen.Runner object at 0x7f14f8bb31f0>
+
+    def run(self) -> None:
+        """Starts or resumes the generator, running until it reaches a
+        yield point that is not ready.
+        """
+        if self.running or self.finished:
+            return
+        try:
+            self.running = True
+            while True:
+                future = self.future
+                if future is None:
+                    raise Exception("No pending future")
+                if not future.done():
+                    return
+                self.future = None
+                try:
+                    try:
+>                       value = future.result()
+E                       asyncio.exceptions.TimeoutError: Timeout
+
+tornado/gen.py:783: TimeoutError
+__________________ test_bounded_semaphore_zero_initial_value ___________________
+
+    def test_bounded_semaphore_zero_initial_value():
+        sem = BoundedSemaphore(value=0)
+        # Acquire should block indefinitely; we test that it does not acquire immediately
+        with pytest.raises(TimeoutError):
+            @gen.coroutine
+            def try_acquire():
+                yield gen.with_timeout(0.1, sem.acquire())
+>           ioloop.IOLoop.current().run_sync(try_acquire)
+
+../../../../../../../groq_context_development_20261119/attempts/tornado__tornado.locks__BoundedSemaphore__46__atomic_verified_setup/eval0/test_generated.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tornado/ioloop.py:547: in run_sync
+    return future_cell["future"].result()
+tornado/gen.py:796: in run
+    yielded = self.gen.throw(exc)
+../../../../../../../groq_context_development_20261119/attempts/tornado__tornado.locks__BoundedSemaphore__46__atomic_verified_setup/eval0/test_generated.py:44: in try_acquire
+    yield gen.with_timeout(0.1, sem.acquire())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tornado.gen.Runner object at 0x7f14f8bf0370>
+
+    def run(self) -> None:
+        """Starts or resumes the generator, running until it reaches a
+        yield point that is not ready.
+        """
+        if self.running or self.finished:
+            return
+        try:
+            self.running = True
+            while True:
+                future = self.future
+                if future is None:
+                    raise Exception("No pending future")
+                if not future.done():
+                    return
+                self.future = None
+                try:
+                    try:
+>                       value = future.result()
+E                       asyncio.exceptions.TimeoutError: Timeout
+
+tornado/gen.py:783: TimeoutError
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_context_development_20261119/attempts/tornado__tornado.locks__BoundedSemaphore__46__atomic_verified_setup/eval0/test_generated.py::test_bounded_semaphore_basic_acquire_release
+FAILED ../../../../../../../groq_context_development_20261119/attempts/tornado__tornado.locks__BoundedSemaphore__46__atomic_verified_setup/eval0/test_generated.py::test_bounded_semaphore_zero_initial_value
+2 failed, 1 passed in 0.28s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-90034d6f-842d-4e61-b40b-85bffd6789ec",
+  "object": "chat.completion",
+  "created": 1795076899,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport stat\nimport tempfile\nimport pytest\nfrom pathlib import Path\n\nfrom flutils.pathutils import directory_present, exists_as\n\n\ndef test_directory_present_creates_missing_dirs(tmp_path):\n    # Create a nested path that does not exist yet\n    nested = tmp_path / \"a\" / \"b\" / \"c\"\n    # Ensure the parent directories are removed\n    assert not nested.exists()\n    # Call directory_present to create the whole tree\n    result = directory_present(nested, mode=0o755)\n    # The returned Path should be absolute and equal to the nested path\n    assert result.is_absolute()\n    assert result == nested\n    # All directories should now exist\n    assert nested.is_dir()\n    assert (nested.parent).is_dir()\n    assert (nested.parent.parent).is_dir()\n    # Mode should be applied to the deepest directory\n    assert stat.S_IMODE(nested.stat().st_mode) == 0o755\n\n\ndef test_directory_present_raises_on_glob_pattern(tmp_path):\n    # Use a glob pattern in the path\n    glob_path = tmp_path / \"foo*\"\n    # directory_present should raise ValueError because of '*'\n    with pytest.raises(ValueError) as excinfo:\n        directory_present(glob_path)\n    assert \"glob patterns\" in str(excinfo.value)\n\n\ndef test_directory_present_raises_on_existing_file(tmp_path):\n    # Create a file at the target path\n    file_path = tmp_path / \"existing_file.txt\"\n    file_path.write_text(\"content\")\n    # directory_present should raise FileExistsError because path is a file\n    with pytest.raises(FileExistsError) as excinfo:\n        directory_present(file_path)\n    assert \"already exists as a file\" in str(excinfo.value)\n```",
+        "reasoning": "Need tests: normal create dir, boundary: path with glob error, error: existing file. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049840327,
+    "prompt_tokens": 3087,
+    "prompt_time": 0.170683372,
+    "completion_tokens": 402,
+    "completion_time": 0.446576313,
+    "total_tokens": 3489,
+    "total_time": 0.617259685,
+    "completion_tokens_details": {
+      "reasoning_tokens": 24
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7seqg0ye8qtv4navj3z72ej",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport stat\nimport tempfile\nimport pytest\nfrom pathlib import Path\n\nfrom flutils.pathutils import directory_present, exists_as\n\n\ndef test_directory_present_creates_missing_dirs(tmp_path):\n    # Create a nested path that does not exist yet\n    nested = tmp_path / \"a\" / \"b\" / \"c\"\n    # Ensure the parent directories are removed\n    assert not nested.exists()\n    # Call directory_present to create the whole tree\n    result = directory_present(nested, mode=0o755)\n    # The returned Path should be absolute and equal to the nested path\n    assert result.is_absolute()\n    assert result == nested\n    # All directories should now exist\n    assert nested.is_dir()\n    assert (nested.parent).is_dir()\n    assert (nested.parent.parent).is_dir()\n    # Mode should be applied to the deepest directory\n    assert stat.S_IMODE(nested.stat().st_mode) == 0o755\n\n\ndef test_directory_present_raises_on_glob_pattern(tmp_path):\n    # Use a glob pattern in the path\n    glob_path = tmp_path / \"foo*\"\n    # directory_present should raise ValueError because of '*'\n    with pytest.raises(ValueError) as excinfo:\n        directory_present(glob_path)\n    assert \"glob patterns\" in str(excinfo.value)\n\n\ndef test_directory_present_raises_on_existing_file(tmp_path):\n    # Create a file at the target path\n    file_path = tmp_path / \"existing_file.txt\"\n    file_path.write_text(\"content\")\n    # directory_present should raise FileExistsError because path is a file\n    with pytest.raises(FileExistsError) as excinfo:\n        directory_present(file_path)\n    assert \"already exists as a file\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0151350240339525
+}

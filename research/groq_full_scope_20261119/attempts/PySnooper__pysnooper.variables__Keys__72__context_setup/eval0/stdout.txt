@@ -1,0 +1,82 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________________ test_keys_basic_dict _____________________________
+
+    def test_keys_basic_dict():
+        """Keys should return all keys and values for a normal dictionary."""
+        kv = Keys("d")
+        d = {"a": 1, "b": 2}
+        frame = type("Frame", (), {"f_globals": {}, "f_locals": {"d": d}})
+        items = kv.items(frame)
+        # Expect one entry for the dict itself and one per key
+        assert len(items) == 3
+        # First item is the dict representation
+        assert items[0][0] == "d"
+        assert items[0][1] == utils.get_shortish_repr(d)
+        # Subsequent items contain formatted keys
+        keys = {item[0] for item in items[1:]}
+>       assert keys == {"[a]", "[b]"}
+E       assert {"d['a']", "d['b']"} == {'[a]', '[b]'}
+E         
+E         Extra items in the left set:
+E         "d['b']"
+E         "d['a']"
+E         Extra items in the right set:
+E         '[a]'
+E         '[b]'
+E         Use -v to get more diff
+
+test_generated.py:18: AssertionError
+_________________________ test_keys_exclude_parameter __________________________
+
+    def test_keys_exclude_parameter():
+        """Keys should skip keys listed in the exclude tuple."""
+        kv = Keys("d", exclude=("b",))
+        d = {"a": 1, "b": 2, "c": 3}
+        frame = type("Frame", (), {"f_globals": {}, "f_locals": {"d": d}})
+        items = kv.items(frame)
+        # Should contain entries for 'a' and 'c' only
+        keys = {item[0] for item in items[1:]}
+>       assert keys == {"[a]", "[c]"}
+E       assert {"d['a']", "d['c']"} == {'[a]', '[c]'}
+E         
+E         Extra items in the left set:
+E         "d['a']"
+E         "d['c']"
+E         Extra items in the right set:
+E         '[a]'
+E         '[c]'
+E         Use -v to get more diff
+
+test_generated.py:30: AssertionError
+___________________ test_keys_error_handling_on_value_access ___________________
+
+    def test_keys_error_handling_on_value_access():
+        """Keys should skip keys whose value access raises an exception."""
+        class BadDict(dict):
+            def __getitem__(self, key):
+                if key == "bad":
+                    raise KeyError("bad key")
+                return super().__getitem__(key)
+    
+        kv = Keys("d")
+        d = BadDict({"good": 42, "bad": None})
+        frame = type("Frame", (), {"f_globals": {}, "f_locals": {"d": d}})
+        items = kv.items(frame)
+        # Should contain only the good key
+        keys = {item[0] for item in items[1:]}
+>       assert keys == {"[good]"}
+E       assert {"d['good']"} == {'[good]'}
+E         
+E         Extra items in the left set:
+E         "d['good']"
+E         Extra items in the right set:
+E         '[good]'
+E         Use -v to get more diff
+
+test_generated.py:48: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_keys_basic_dict - assert {"d['a']", "d['b']"} ...
+FAILED test_generated.py::test_keys_exclude_parameter - assert {"d['a']", "d[...
+FAILED test_generated.py::test_keys_error_handling_on_value_access - assert {...
+3 failed in 0.13s

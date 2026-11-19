@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-f66bad9b-484e-4cd3-a4d0-a862bec0b31d",
+  "object": "chat.completion",
+  "created": 1795079457,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport sys\nimport tty\nimport termios\nimport pytest\nfrom thefuck.system.unix import getch\n\n# Helper to create a temporary file with a single character and reset its position\ndef _temp_file_with_char(char: str):\n    f = os.open(os.devnull, os.O_RDWR)\n    tmp = os.fdopen(f, 'w+')\n    tmp.write(char)\n    tmp.flush()\n    tmp.seek(0)\n    return tmp\n\ndef test_getch_returns_single_character(monkeypatch, tmp_path):\n    # Prepare a temporary file that behaves like stdin\n    tmp_file = _temp_file_with_char('x')\n    monkeypatch.setattr(sys, 'stdin', tmp_file)\n\n    # Patch tty and termios functions to avoid affecting the real terminal\n    monkeypatch.setattr(tty, 'setraw', lambda fd: None)\n    monkeypatch.setattr(termios, 'tcgetattr', lambda fd: [])\n    monkeypatch.setattr(termios, 'tcsetattr', lambda fd, when, attrs: None)\n\n    # Call getch and verify it returns the expected character\n    result = getch()\n    assert result == 'x', \"getch should return the first character from stdin\"\n\ndef test_getch_returns_empty_on_eof(monkeypatch):\n    # Use an empty StringIO that provides a fileno via a temporary file\n    tmp_file = _temp_file_with_char('')\n    monkeypatch.setattr(sys, 'stdin', tmp_file)\n\n    # Patch tty and termios functions\n    monkeypatch.setattr(tty, 'setraw', lambda fd: None)\n    monkeypatch.setattr(termios, 'tcgetattr', lambda fd: [])\n    monkeypatch.setattr(termios, 'tcsetattr', lambda fd, when, attrs: None)\n\n    # getch should return an empty string when EOF is reached\n    result = getch()\n    assert result == '', \"getch should return an empty string on EOF\"\n\ndef test_getch_raises_on_invalid_fileno(monkeypatch):\n    # Create a dummy object that raises OSError on fileno()\n    class BadStdin:\n        def fileno(self):\n            raise OSError(\"bad fileno\")\n        def read(self, n):\n            return ''\n\n    monkeypatch.setattr(sys, 'stdin', BadStdin())\n\n    # Patch tty and termios to avoid side effects\n    monkeypatch.setattr(tty, 'setraw', lambda fd: None)\n    monkeypatch.setattr(termios, 'tcgetattr', lambda fd: [])\n    monkeypatch.setattr(termios, 'tcsetattr', lambda fd, when, attrs: None)\n\n    # getch should propagate the OSError from fileno()\n    with pytest.raises(OSError, match=\"bad fileno\"):\n        getch()\n```",
+        "reasoning": "We need to test getch. It reads from stdin. We can simulate by patching sys.stdin to a StringIO. But getch uses fileno, so need a file-like with fileno. Use io.BytesIO? But read(1) expects str. Use io.StringIO but no fileno. Use tempfile.TemporaryFile. Write a char, seek. Then call getch. Need to patch termios and tty? They affect terminal. We can patch tty.setraw and termios.tcgetattr/ tcsetattr to no-ops. Use monkeypatch. Test that it returns the char. Also test that it restores attributes. Hard to check. Just test return. Third test maybe error when stdin not a tty? But getch will still read. We can test that if read returns empty? Not needed. Provide three tests: normal char, multiple chars? getch reads one. Boundary: reading when stdin empty returns ''? test that. Error: if fileno raises? maybe test that exception propagates. Use monkeypatch to make sys.stdin.fileno raise OSError and ensure getch raises. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005074318,
+    "prompt_tokens": 307,
+    "prompt_time": 0.019005938,
+    "completion_tokens": 826,
+    "completion_time": 0.879201609,
+    "total_tokens": 1133,
+    "total_time": 0.898207547,
+    "completion_tokens_details": {
+      "reasoning_tokens": 231
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh5j7xed9byhta4bwmtdp7",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport sys\nimport tty\nimport termios\nimport pytest\nfrom thefuck.system.unix import getch\n\n# Helper to create a temporary file with a single character and reset its position\ndef _temp_file_with_char(char: str):\n    f = os.open(os.devnull, os.O_RDWR)\n    tmp = os.fdopen(f, 'w+')\n    tmp.write(char)\n    tmp.flush()\n    tmp.seek(0)\n    return tmp\n\ndef test_getch_returns_single_character(monkeypatch, tmp_path):\n    # Prepare a temporary file that behaves like stdin\n    tmp_file = _temp_file_with_char('x')\n    monkeypatch.setattr(sys, 'stdin', tmp_file)\n\n    # Patch tty and termios functions to avoid affecting the real terminal\n    monkeypatch.setattr(tty, 'setraw', lambda fd: None)\n    monkeypatch.setattr(termios, 'tcgetattr', lambda fd: [])\n    monkeypatch.setattr(termios, 'tcsetattr', lambda fd, when, attrs: None)\n\n    # Call getch and verify it returns the expected character\n    result = getch()\n    assert result == 'x', \"getch should return the first character from stdin\"\n\ndef test_getch_returns_empty_on_eof(monkeypatch):\n    # Use an empty StringIO that provides a fileno via a temporary file\n    tmp_file = _temp_file_with_char('')\n    monkeypatch.setattr(sys, 'stdin', tmp_file)\n\n    # Patch tty and termios functions\n    monkeypatch.setattr(tty, 'setraw', lambda fd: None)\n    monkeypatch.setattr(termios, 'tcgetattr', lambda fd: [])\n    monkeypatch.setattr(termios, 'tcsetattr', lambda fd, when, attrs: None)\n\n    # getch should return an empty string when EOF is reached\n    result = getch()\n    assert result == '', \"getch should return an empty string on EOF\"\n\ndef test_getch_raises_on_invalid_fileno(monkeypatch):\n    # Create a dummy object that raises OSError on fileno()\n    class BadStdin:\n        def fileno(self):\n            raise OSError(\"bad fileno\")\n        def read(self, n):\n            return ''\n\n    monkeypatch.setattr(sys, 'stdin', BadStdin())\n\n    # Patch tty and termios to avoid side effects\n    monkeypatch.setattr(tty, 'setraw', lambda fd: None)\n    monkeypatch.setattr(termios, 'tcgetattr', lambda fd: [])\n    monkeypatch.setattr(termios, 'tcsetattr', lambda fd, when, attrs: None)\n\n    # getch should propagate the OSError from fileno()\n    with pytest.raises(OSError, match=\"bad fileno\"):\n        getch()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "be4652aeffc44dbf9ce391231b7664a0",
+  "_api_plus_pacing_seconds": 1.6388675789930858
+}

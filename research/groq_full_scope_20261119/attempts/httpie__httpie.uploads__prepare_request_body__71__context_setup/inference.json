@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-917b6ad0-8dfc-473e-958b-00987e9fd6a9",
+  "object": "chat.completion",
+  "created": 1795079406,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport sys\nimport threading\nimport types\nimport pytest\nfrom httpie.uploads import (\n    prepare_request_body,\n    ChunkedUploadStream,\n    _prepare_file_for_upload,\n    as_bytes,\n)\nfrom httpie.cli.dicts import RequestDataDict\nfrom httpie.context import Environment\n\n\nclass DummyEnv(Environment):\n    def __init__(self):\n        super().__init__()\n        self.stderr = io.StringIO()\n\n\ndef test_prepare_request_body_with_file_and_callback(tmp_path: pytest.TempPathFactory):\n    env = DummyEnv()\n    # Create a temporary file with known content\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"hello world\")\n    file_obj = open(file_path, \"rb\")\n\n    callback_calls = []\n\n    def callback(chunk):\n        callback_calls.append(chunk)\n\n    # Prepare body with a file-like object\n    result = prepare_request_body(\n        env=env,\n        raw_body=file_obj,\n        body_read_callback=callback,\n        offline=False,\n        chunked=False,\n    )\n\n    # The result should be the same file object with its read method wrapped\n    assert result is file_obj\n    # Read the file to trigger callback\n    data = result.read()\n    assert data == b\"hello world\"\n    # Callback should have been called once with the read chunk\n    assert callback_calls == [b\"hello world\"]\n    file_obj.close()\n\n\ndef test_prepare_request_body_chunked_stream_and_callback():\n    env = DummyEnv()\n    data = b\"chunked data test\"\n    callback_calls = []\n\n    def callback(chunk):\n        callback_calls.append(chunk)\n\n    # Prepare body as a string with chunked=True\n    result = prepare_request_body(\n        env=env,\n        raw_body=data,\n        body_read_callback=callback,\n        offline=False,\n        chunked=True,\n    )\n\n    # Result should be a ChunkedUploadStream\n    assert isinstance(result, ChunkedUploadStream)\n\n    # Iterate over the stream and collect chunks\n    collected = list(result)\n    assert collected == [data]\n    # Callback should have been called once with the chunk\n    assert callback_calls == [data]\n\n\ndef test_prepare_request_body_offline_and_requestdatadict():\n    env = DummyEnv()\n    # Create a RequestDataDict\n    rdd = RequestDataDict({\"a\": \"1\", \"b\": [\"2\", \"3\"]})\n    # Prepare body with offline=True\n    result = prepare_request_body(\n        env=env,\n        raw_body=rdd,\n        body_read_callback=lambda x: x,\n        offline=True,\n        chunked=False,\n    )\n    # In offline mode, the body should be returned as bytes\n    assert isinstance(result, bytes)\n    # The bytes should be the URL-encoded representation\n    assert result == b\"a=1&b=2&b=3\"\n```",
+        "reasoning": "Need tests for prepare_request_body. Use tmp_path for file. Test normal bytes, string, RequestDataDict, file-like, chunked. Use simple callback that records. Also test offline. Use Environment stub minimal. Use dummy env with stderr write. Let's create simple Environment with stderr as io.StringIO. Test that file-like returns wrapped with callback. Use BytesIO. Ensure callback called. Also test chunked returns ChunkedUploadStream. Ensure iteration yields chunk and callback called. Provide callback that appends to list. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053756636,
+    "prompt_tokens": 1778,
+    "prompt_time": 0.144736472,
+    "completion_tokens": 713,
+    "completion_time": 0.821568392,
+    "total_tokens": 2491,
+    "total_time": 0.966304864,
+    "completion_tokens_details": {
+      "reasoning_tokens": 110
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh408xe9mvr0dkszn6fmps",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport sys\nimport threading\nimport types\nimport pytest\nfrom httpie.uploads import (\n    prepare_request_body,\n    ChunkedUploadStream,\n    _prepare_file_for_upload,\n    as_bytes,\n)\nfrom httpie.cli.dicts import RequestDataDict\nfrom httpie.context import Environment\n\n\nclass DummyEnv(Environment):\n    def __init__(self):\n        super().__init__()\n        self.stderr = io.StringIO()\n\n\ndef test_prepare_request_body_with_file_and_callback(tmp_path: pytest.TempPathFactory):\n    env = DummyEnv()\n    # Create a temporary file with known content\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"hello world\")\n    file_obj = open(file_path, \"rb\")\n\n    callback_calls = []\n\n    def callback(chunk):\n        callback_calls.append(chunk)\n\n    # Prepare body with a file-like object\n    result = prepare_request_body(\n        env=env,\n        raw_body=file_obj,\n        body_read_callback=callback,\n        offline=False,\n        chunked=False,\n    )\n\n    # The result should be the same file object with its read method wrapped\n    assert result is file_obj\n    # Read the file to trigger callback\n    data = result.read()\n    assert data == b\"hello world\"\n    # Callback should have been called once with the read chunk\n    assert callback_calls == [b\"hello world\"]\n    file_obj.close()\n\n\ndef test_prepare_request_body_chunked_stream_and_callback():\n    env = DummyEnv()\n    data = b\"chunked data test\"\n    callback_calls = []\n\n    def callback(chunk):\n        callback_calls.append(chunk)\n\n    # Prepare body as a string with chunked=True\n    result = prepare_request_body(\n        env=env,\n        raw_body=data,\n        body_read_callback=callback,\n        offline=False,\n        chunked=True,\n    )\n\n    # Result should be a ChunkedUploadStream\n    assert isinstance(result, ChunkedUploadStream)\n\n    # Iterate over the stream and collect chunks\n    collected = list(result)\n    assert collected == [data]\n    # Callback should have been called once with the chunk\n    assert callback_calls == [data]\n\n\ndef test_prepare_request_body_offline_and_requestdatadict():\n    env = DummyEnv()\n    # Create a RequestDataDict\n    rdd = RequestDataDict({\"a\": \"1\", \"b\": [\"2\", \"3\"]})\n    # Prepare body with offline=True\n    result = prepare_request_body(\n        env=env,\n        raw_body=rdd,\n        body_read_callback=lambda x: x,\n        offline=True,\n        chunked=False,\n    )\n    # In offline mode, the body should be returned as bytes\n    assert isinstance(result, bytes)\n    # The bytes should be the URL-encoded representation\n    assert result == b\"a=1&b=2&b=3\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "0ace43028f0340abb60f4a8c29263740",
+  "_api_plus_pacing_seconds": 1.739340614003595
+}

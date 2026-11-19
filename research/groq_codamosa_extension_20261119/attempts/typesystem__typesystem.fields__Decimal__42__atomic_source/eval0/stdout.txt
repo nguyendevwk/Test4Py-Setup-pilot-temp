@@ -1,0 +1,79 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_decimal_valid_input_and_serialization __________________
+
+    def test_decimal_valid_input_and_serialization():
+        field = Decimal()
+        # Valid decimal string
+        result = field.validate("123.45")
+>       assert isinstance(result, ValidationResult)
+E       AssertionError: assert False
+E        +  where False = isinstance(Decimal('123.45'), ValidationResult)
+
+../../../../../../attempts/typesystem__typesystem.fields__Decimal__42__atomic_source/eval0/test_generated.py:10: AssertionError
+______________________ test_decimal_boundary_large_value _______________________
+
+    def test_decimal_boundary_large_value():
+        field = Decimal()
+        # Very large decimal that is not finite
+        large_value = decimal.Decimal("1e1000")
+>       result = field.validate(large_value)
+
+../../../../../../attempts/typesystem__typesystem.fields__Decimal__42__atomic_source/eval0/test_generated.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.fields.Decimal object at 0x7f275f41be80>
+value = Decimal('1E+1000')
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        if value is None and self.allow_null:
+            return None
+        elif value == "" and self.allow_null and self.coerce_types:
+            return None
+        elif value is None:
+            raise self.validation_error("null")
+        elif isinstance(value, bool):
+            raise self.validation_error("type")
+        elif (
+            self.numeric_type is int
+            and isinstance(value, float)
+            and not value.is_integer()
+        ):
+            raise self.validation_error("integer")
+        elif not isinstance(value, (int, float)) and not self.coerce_types:
+            raise self.validation_error("type")
+    
+        try:
+            if isinstance(value, str):
+                # Casting to a decimal first gives more lenient parsing.
+                value = decimal.Decimal(value)
+            if self.numeric_type is not None:
+                value = self.numeric_type(value)
+        except (TypeError, ValueError, decimal.InvalidOperation):
+            raise self.validation_error("type")
+    
+        if not isfinite(value):
+            # inf, -inf, nan, are all invalid.
+>           raise self.validation_error("finite")
+E           typesystem.base.ValidationError: Must be finite.
+
+typesystem/fields.py:268: ValidationError
+___________________ test_decimal_invalid_input_raises_error ____________________
+
+    def test_decimal_invalid_input_raises_error():
+        field = Decimal()
+        # Invalid string that cannot be converted to Decimal
+        with pytest.raises(ValidationError) as excinfo:
+            field.validate("not_a_number")
+        # The exception message should reference the invalid input
+>       assert "not_a_number" in str(excinfo.value)
+E       AssertionError: assert 'not_a_number' in 'Must be a number.'
+E        +  where 'Must be a number.' = str(ValidationError(text='Must be a number.', code='type'))
+E        +    where ValidationError(text='Must be a number.', code='type') = <ExceptionInfo ValidationError(text='Must be a number.', code='type') tblen=2>.value
+
+../../../../../../attempts/typesystem__typesystem.fields__Decimal__42__atomic_source/eval0/test_generated.py:36: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/typesystem__typesystem.fields__Decimal__42__atomic_source/eval0/test_generated.py::test_decimal_valid_input_and_serialization
+FAILED ../../../../../../attempts/typesystem__typesystem.fields__Decimal__42__atomic_source/eval0/test_generated.py::test_decimal_boundary_large_value
+FAILED ../../../../../../attempts/typesystem__typesystem.fields__Decimal__42__atomic_source/eval0/test_generated.py::test_decimal_invalid_input_raises_error
+3 failed in 0.21s

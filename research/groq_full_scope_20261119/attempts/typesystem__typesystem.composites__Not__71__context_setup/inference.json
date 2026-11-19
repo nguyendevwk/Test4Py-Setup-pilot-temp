@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-16f8a8d4-153d-4aa2-82e8-5fa8f1b170a2",
+  "object": "chat.completion",
+  "created": 1795078336,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.composites import Not\nfrom typesystem.fields import Int\n\ndef test_not_accepts_matching_value():\n    \"\"\"Not should raise a validation error when the value matches the negated field.\"\"\"\n    not_int = Not(Int())\n    with pytest.raises(Exception) as excinfo:\n        not_int.validate(42)\n    # The error message should contain the custom negated error text\n    assert \"Must not match.\" in str(excinfo.value)\n\ndef test_not_accepts_non_matching_value():\n    \"\"\"Not should accept values that do not match the negated field.\"\"\"\n    not_int = Not(Int())\n    # A string does not match Int, so validation should succeed\n    result = not_int.validate(\"hello\")\n    assert result == \"hello\"\n\ndef test_not_rejects_null_value():\n    \"\"\"Not should reject None values because allow_null is not permitted.\"\"\"\n    not_int = Not(Int())\n    with pytest.raises(Exception) as excinfo:\n        not_int.validate(None)\n    assert \"Must not match.\" in str(excinfo.value)\n```",
+        "reasoning": "We need to write tests for Not field. We need to import typesystem.composites.Not. Let's inspect behavior: Not takes a Field, and validate returns value if negated.validate_or_error(value) returns error (i.e., value does not match negated). If negated matches, raise validation_error. We need to test normal: value that doesn't match negated passes. Boundary: maybe null? But allow_null not allowed. Error: value that matches negated raises error. Use simple fields: e.g., typesystem.fields.Int? Let's inspect typesystem.fields.Any, Field. We can use typesystem.fields.Int. Let's import typesystem.fields.Int. We'll create Not(Int()) and test. Also test that passing None raises? Since allow_null not allowed, but None might be considered null. Let's test that None raises validation_error. Also test that passing a value that matches Int passes? Actually Int matches int. So Not(Int()) should reject int. So test that passing 5 raises. Also test that passing \"hello\" passes. Also test that passing None raises? Probably validate_or_error will treat None as null? Let's just test that None raises. Use pytest.raises. Also test that passing a value that doesn't match Int passes. Use assert. Also test that passing a value that matches Int raises. That's two tests. Need third test maybe for error message. Use assert exc.value.args[0] contains \"Must not match.\".\n\nImplement three tests. Use tmp_path not needed. Ensure independence."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049812897,
+    "prompt_tokens": 413,
+    "prompt_time": 0.213108225,
+    "completion_tokens": 534,
+    "completion_time": 0.721111745,
+    "total_tokens": 947,
+    "total_time": 0.93421997,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 306
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg3axnenqtr345v1psma4f",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.composites import Not\nfrom typesystem.fields import Int\n\ndef test_not_accepts_matching_value():\n    \"\"\"Not should raise a validation error when the value matches the negated field.\"\"\"\n    not_int = Not(Int())\n    with pytest.raises(Exception) as excinfo:\n        not_int.validate(42)\n    # The error message should contain the custom negated error text\n    assert \"Must not match.\" in str(excinfo.value)\n\ndef test_not_accepts_non_matching_value():\n    \"\"\"Not should accept values that do not match the negated field.\"\"\"\n    not_int = Not(Int())\n    # A string does not match Int, so validation should succeed\n    result = not_int.validate(\"hello\")\n    assert result == \"hello\"\n\ndef test_not_rejects_null_value():\n    \"\"\"Not should reject None values because allow_null is not permitted.\"\"\"\n    not_int = Not(Int())\n    with pytest.raises(Exception) as excinfo:\n        not_int.validate(None)\n    assert \"Must not match.\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3053043049876578
+}

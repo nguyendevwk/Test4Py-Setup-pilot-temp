@@ -1,0 +1,85 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_fieldset_custom_iterations_and_kwargs __________________
+
+    def test_fieldset_custom_iterations_and_kwargs():
+        """Fieldset should respect custom iteration count and pass kwargs to provider."""
+        fs = Fieldset()
+        # request 3 iterations
+        result = fs("username", i=3)
+        assert len(result) == 3
+        # ensure that provider receives kwargs (e.g., length)
+>       result_with_length = fs("username", i=2, length=5)
+
+../../../../../../attempts/mimesis__mimesis.schema__Fieldset__44__atomic_source/eval0/test_generated.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+mimesis/schema.py:403: in __call__
+    return [self.perform(name, key=key, **kwargs) for _ in range(iterations)]
+mimesis/schema.py:403: in <listcomp>
+    return [self.perform(name, key=key, **kwargs) for _ in range(iterations)]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <mimesis.schema.Fieldset object at 0x7feafe6c9ea0>, name = 'username'
+key = None, kwargs = {'length': 5}
+
+    def perform(
+        self,
+        name: str | None = None,
+        key: Key = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Returns the value of the field by its name.
+    
+        It takes any string that represents the name of any method of
+        any supported data provider and the ``**kwargs`` of this method.
+    
+        .. note:: Some data providers have methods with the same names,
+            and in such cases, you can explicitly define that the method
+            belongs to data-provider ``field(name='provider.name')`` otherwise
+            it will return the data from the first provider which
+            has a method ``name``.
+    
+            Allowed delimiters: ``.``, ``:``, ``/`` and space:
+    
+            - ``provider.name``
+            - ``provider:name``
+            - ``provider/name``
+            - ``provider name``
+    
+        You can apply a *key function* to the result returned by
+        the method, by passing a parameter **key** with a callable
+        object which returns the final result.
+    
+        The key function has the option to accept two parameters: **result**
+        and **random**. In case you require access to a random instance within
+        the key function, you must modify the function to accept both of them,
+        where the first corresponds to the method result and the second
+        corresponds to the instance of random.
+    
+        :param name: Name of the method.
+        :param key: A key function (any callable object)
+            which will be applied to the result.
+        :param kwargs: Keyword arguments of the method.
+        :return: The result of the method.
+        :raises FieldError: If the field is missing or invalid.
+        :raises AliasesTypeError: If ``aliases`` is not a flat dictionary.
+        """
+        # Validate aliases before lookup
+        self._validate_aliases()
+    
+        if name is None:
+            raise FieldError
+    
+        random = self.get_random_instance()
+    
+        # First, try to find a custom field handler.
+        if name in self._handlers:
+            result = self._handlers[name](random, **kwargs)
+        else:
+>           result = self._lookup_method(name)(**kwargs)
+E           TypeError: Person.username() got an unexpected keyword argument 'length'
+
+mimesis/schema.py:209: TypeError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/mimesis__mimesis.schema__Fieldset__44__atomic_source/eval0/test_generated.py::test_fieldset_custom_iterations_and_kwargs
+1 failed, 2 passed in 0.41s

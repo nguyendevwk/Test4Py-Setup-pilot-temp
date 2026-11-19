@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-5739e588-7710-4d33-9d2a-ea5359a7862c",
+  "object": "chat.completion",
+  "created": 1795076134,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom flutils.objutils import has_any_callables\n\n\ndef test_has_any_callables_with_callable_attrs():\n    \"\"\"Object has at least one callable attribute among the given names.\"\"\"\n    class Dummy:\n        def method(self):  # callable\n            pass\n\n        attr = 42  # non-callable\n\n    dummy = Dummy()\n    # 'method' is callable, 'attr' is not; function should return True\n    assert has_any_callables(dummy, \"method\", \"attr\") is True\n    # If we ask for a non-existent attribute, still True because 'method' exists\n    assert has_any_callables(dummy, \"nonexistent\", \"method\") is True\n    # If we ask for only non-callable attributes, should be False\n    assert has_any_callables(dummy, \"attr\") is False\n\n\ndef test_has_any_callables_no_attrs():\n    \"\"\"Calling with no attribute names should return False.\"\"\"\n    obj = object()\n    # No attrs provided; function should return False\n    assert has_any_callables(obj) is False\n    # Even if the object has callable attributes, no attrs specified means no check\n    class WithMethod:\n        def foo(self): pass\n    assert has_any_callables(WithMethod(),) is False\n\n\ndef test_has_any_callables_non_callable_attrs():\n    \"\"\"Attributes exist but are not callable; function should return False.\"\"\"\n    class NonCallable:\n        value = 123  # not callable\n        list_attr = [1, 2, 3]  # not callable\n\n    nc = NonCallable()\n    # All provided attributes are non-callable\n    assert has_any_callables(nc, \"value\", \"list_attr\") is False\n    # Mixed case: one callable, one non-callable\n    class Mixed:\n        def method(self): pass\n        data = \"text\"\n    mixed = Mixed()\n    assert has_any_callables(mixed, \"data\", \"method\") is True\n    # Attribute that exists but is not callable should not trigger True\n    assert has_any_callables(mixed, \"data\") is False\n```",
+        "reasoning": "We need to write tests for has_any_callables. Need to import from flutils.objutils. We need three independent test functions. Test normal behavior: object with some callable attrs. Boundary: no attrs passed? maybe returns False. Error: passing non-callable attribute? Actually function returns False if none callable. Also test that if attrs not exist returns False. Use tmp_path? not needed. Just simple. Ensure no mocks. Use pytest.raises? maybe test that passing non-object? but any object works. Maybe test that passing a string and attr 'upper' returns True. Also test that passing a dict with 'get' returns True. Third test: passing attrs that exist but not callable e.g., 'items' is callable? items is method. Maybe use a list and attr 'append' is callable. For non-callable attr: use a custom object with attribute that is not callable. Ensure returns False. Let's write three tests: test_has_any_callables_with_callable_attrs, test_has_any_callables_no_attrs, test_has_any_callables_non_callable_attrs. Use assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053563281,
+    "prompt_tokens": 514,
+    "prompt_time": 7.4759e-05,
+    "completion_tokens": 671,
+    "completion_time": 0.875174178,
+    "total_tokens": 1185,
+    "total_time": 0.875248937,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 221
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se04j3est83f80w9hmq1pc",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom flutils.objutils import has_any_callables\n\n\ndef test_has_any_callables_with_callable_attrs():\n    \"\"\"Object has at least one callable attribute among the given names.\"\"\"\n    class Dummy:\n        def method(self):  # callable\n            pass\n\n        attr = 42  # non-callable\n\n    dummy = Dummy()\n    # 'method' is callable, 'attr' is not; function should return True\n    assert has_any_callables(dummy, \"method\", \"attr\") is True\n    # If we ask for a non-existent attribute, still True because 'method' exists\n    assert has_any_callables(dummy, \"nonexistent\", \"method\") is True\n    # If we ask for only non-callable attributes, should be False\n    assert has_any_callables(dummy, \"attr\") is False\n\n\ndef test_has_any_callables_no_attrs():\n    \"\"\"Calling with no attribute names should return False.\"\"\"\n    obj = object()\n    # No attrs provided; function should return False\n    assert has_any_callables(obj) is False\n    # Even if the object has callable attributes, no attrs specified means no check\n    class WithMethod:\n        def foo(self): pass\n    assert has_any_callables(WithMethod(),) is False\n\n\ndef test_has_any_callables_non_callable_attrs():\n    \"\"\"Attributes exist but are not callable; function should return False.\"\"\"\n    class NonCallable:\n        value = 123  # not callable\n        list_attr = [1, 2, 3]  # not callable\n\n    nc = NonCallable()\n    # All provided attributes are non-callable\n    assert has_any_callables(nc, \"value\", \"list_attr\") is False\n    # Mixed case: one callable, one non-callable\n    class Mixed:\n        def method(self): pass\n        data = \"text\"\n    mixed = Mixed()\n    assert has_any_callables(mixed, \"data\", \"method\") is True\n    # Attribute that exists but is not callable should not trigger True\n    assert has_any_callables(mixed, \"data\") is False\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.211590229999274
+}

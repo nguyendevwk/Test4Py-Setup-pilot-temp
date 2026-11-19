@@ -1,0 +1,121 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_read_repo_password_returns_input _____________________
+
+prompt = '', stream = None
+
+    def unix_getpass(prompt='Password: ', stream=None):
+        """Prompt for a password, with echo turned off.
+    
+        Args:
+          prompt: Written on stream to ask for the input.  Default: 'Password: '
+          stream: A writable file object to display the prompt.  Defaults to
+                  the tty.  If no tty is available defaults to sys.stderr.
+        Returns:
+          The seKr3t input.
+        Raises:
+          EOFError: If our input tty or stdin was closed.
+          GetPassWarning: When we were unable to turn echo off on the input.
+    
+        Always restores terminal settings before returning.
+        """
+        passwd = None
+        with contextlib.ExitStack() as stack:
+            try:
+                # Always try reading and writing directly on the tty first.
+>               fd = os.open('/dev/tty', os.O_RDWR|os.O_NOCTTY)
+E               OSError: [Errno 6] No such device or address: '/dev/tty'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/getpass.py:48: OSError
+
+During handling of the above exception, another exception occurred:
+
+prompt = '', stream = None
+
+    def unix_getpass(prompt='Password: ', stream=None):
+        """Prompt for a password, with echo turned off.
+    
+        Args:
+          prompt: Written on stream to ask for the input.  Default: 'Password: '
+          stream: A writable file object to display the prompt.  Defaults to
+                  the tty.  If no tty is available defaults to sys.stderr.
+        Returns:
+          The seKr3t input.
+        Raises:
+          EOFError: If our input tty or stdin was closed.
+          GetPassWarning: When we were unable to turn echo off on the input.
+    
+        Always restores terminal settings before returning.
+        """
+        passwd = None
+        with contextlib.ExitStack() as stack:
+            try:
+                # Always try reading and writing directly on the tty first.
+                fd = os.open('/dev/tty', os.O_RDWR|os.O_NOCTTY)
+                tty = io.FileIO(fd, 'w+')
+                stack.enter_context(tty)
+                input = io.TextIOWrapper(tty)
+                stack.enter_context(input)
+                if not stream:
+                    stream = input
+            except OSError:
+                # If that fails, see if stdin can be controlled.
+                stack.close()
+                try:
+>                   fd = sys.stdin.fileno()
+E                   io.UnsupportedOperation: redirected stdin is pseudofile, has no fileno()
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/getpass.py:59: UnsupportedOperation
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6019bdd690>
+
+    def test_read_repo_password_returns_input(monkeypatch):
+        """When the user provides input, the function returns that string."""
+        # Simulate user entering 's3cr3t' as the password
+        monkeypatch.setattr(builtins, "input", lambda *args, **kwargs: "s3cr3t")
+>       result = read_repo_password("Enter password:")
+
+test_generated.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/cookiecutter/prompt.py:88: in read_repo_password
+    return Prompt.ask(question, password=True)
+../../../../groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/rich/prompt.py:149: in ask
+    return _prompt(default=default, stream=stream)
+../../../../groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/rich/prompt.py:292: in __call__
+    value = self.get_input(self.console, prompt, self.password, stream=stream)
+../../../../groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/rich/prompt.py:211: in get_input
+    return console.input(prompt, password=password, stream=stream)
+../../../../groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/rich/console.py:2184: in input
+    result = _getpass_mod.getpass("", stream=stream)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/getpass.py:62: in unix_getpass
+    passwd = fallback_getpass(prompt, stream)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/getpass.py:126: in fallback_getpass
+    return _raw_input(prompt, stream)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/getpass.py:146: in _raw_input
+    line = input.readline()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_pytest.capture.DontReadFromInput object at 0x7f601a71f9a0>, size = -1
+
+    def read(self, size: int = -1) -> str:
+>       raise OSError(
+            "pytest: reading from stdin while output is captured!  Consider using `-s`."
+        )
+E       OSError: pytest: reading from stdin while output is captured!  Consider using `-s`.
+
+../../../../groq_codamosa_extension_20261119/environments/cookiecutter/venv/lib/python3.10/site-packages/_pytest/capture.py:229: OSError
+----------------------------- Captured stdout call -----------------------------
+Enter password:: 
+----------------------------- Captured stderr call -----------------------------
+Warning: Password input may be echoed.
+=============================== warnings summary ===============================
+research/groq_full_scope_20261119/attempts/cookiecutter__cookiecutter.prompt__read_repo_password__71__context_setup/eval0/test_generated.py::test_read_repo_password_returns_input
+  /home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/getpass.py:62: GetPassWarning: Can not control echo on the terminal.
+    passwd = fallback_getpass(prompt, stream)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_read_repo_password_returns_input - OSError: py...
+1 failed, 2 passed, 1 warning in 0.36s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-75e5b308-0ab7-4f02-ab41-b9c8d1e9d169",
+  "object": "chat.completion",
+  "created": 1795076828,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport builtins\nimport sys\nimport types\nimport pytest\nfrom datetime import datetime, timedelta\n\n# Import the target module\nimport thefuck.logs as logs\n\n# Helper to patch datetime.now in the logs module\nclass DummyDateTime:\n    def __init__(self, start, end):\n        self._start = start\n        self._end = end\n        self._called = 0\n\n    def now(self):\n        if self._called == 0:\n            self._called += 1\n            return self._start\n        else:\n            return self._end\n\ndef test_debug_time_debug_enabled(monkeypatch, capsys):\n    \"\"\"When settings.debug is True, debug_time should write a debug message to stderr.\"\"\"\n    # Enable debug\n    monkeypatch.setattr(logs.settings, \"debug\", True)\n    # Capture stderr\n    with logs.debug_time(\"test_msg\"):\n        pass\n    out, err = capsys.readouterr()\n    assert \"DEBUG:\" in err\n    assert \"test_msg took:\" in err\n\ndef test_debug_time_debug_disabled(monkeypatch, capsys):\n    \"\"\"When settings.debug is False, debug_time should not write anything to stderr.\"\"\"\n    # Disable debug\n    monkeypatch.setattr(logs.settings, \"debug\", False)\n    with logs.debug_time(\"no_output\"):\n        pass\n    out, err = capsys.readouterr()\n    assert err == \"\"\n\ndef test_debug_time_duration(monkeypatch, capsys):\n    \"\"\"debug_time should report the correct duration between start and end times.\"\"\"\n    # Enable debug\n    monkeypatch.setattr(logs.settings, \"debug\", True)\n    # Set fixed start and end times\n    start = datetime(2023, 1, 1, 12, 0, 0)\n    end = start + timedelta(seconds=2, milliseconds=500)\n    dummy = DummyDateTime(start, end)\n    monkeypatch.setattr(logs, \"datetime\", dummy)\n    with logs.debug_time(\"duration_test\"):\n        pass\n    out, err = capsys.readouterr()\n    # The duration should be approximately 2.5 seconds\n    assert \"2.5\" in err or \"2.500\" in err or \"2.50\" in err\n```",
+        "reasoning": "We need to test debug_time contextmanager. It yields, then finally calls debug. We can test that debug writes to stderr when settings.debug True. We need to manipulate settings. settings is from .conf. We can patch settings.debug. Use capsys to capture stderr. Also test that duration is computed. Use tmp_path? Not needed. Third test maybe boundary: zero duration? Use time.sleep? But deterministic: we can monkeypatch datetime.now to return fixed times. Use monkeypatch to patch datetime.now. But datetime is imported from datetime module. We can patch the module's datetime.now. Use monkeypatch.setattr(module, 'datetime', ...)? Actually datetime is class. We can patch datetime.now. Use monkeypatch.setattr(module, 'datetime', Dummy). But easier: use freezegun? Not allowed. We'll patch module's datetime.now to return predetermined times. Use contextmanager. We'll test that debug called with correct message. Use capsys to capture. Also test that debug not called when settings.debug False. Third test maybe error: if debug raises? But debug writes to stderr. We'll test that debug_time yields value? It doesn't yield value. So just test that contextmanager works. Provide three tests: normal with debug True, debug False, and test that duration is correct using patched datetime. Use monkeypatch."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005401394,
+    "prompt_tokens": 438,
+    "prompt_time": 0.031464662,
+    "completion_tokens": 752,
+    "completion_time": 0.859754604,
+    "total_tokens": 1190,
+    "total_time": 0.891219266,
+    "completion_tokens_details": {
+      "reasoning_tokens": 270
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sena6jeswvj4vbwfm96v8h",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport builtins\nimport sys\nimport types\nimport pytest\nfrom datetime import datetime, timedelta\n\n# Import the target module\nimport thefuck.logs as logs\n\n# Helper to patch datetime.now in the logs module\nclass DummyDateTime:\n    def __init__(self, start, end):\n        self._start = start\n        self._end = end\n        self._called = 0\n\n    def now(self):\n        if self._called == 0:\n            self._called += 1\n            return self._start\n        else:\n            return self._end\n\ndef test_debug_time_debug_enabled(monkeypatch, capsys):\n    \"\"\"When settings.debug is True, debug_time should write a debug message to stderr.\"\"\"\n    # Enable debug\n    monkeypatch.setattr(logs.settings, \"debug\", True)\n    # Capture stderr\n    with logs.debug_time(\"test_msg\"):\n        pass\n    out, err = capsys.readouterr()\n    assert \"DEBUG:\" in err\n    assert \"test_msg took:\" in err\n\ndef test_debug_time_debug_disabled(monkeypatch, capsys):\n    \"\"\"When settings.debug is False, debug_time should not write anything to stderr.\"\"\"\n    # Disable debug\n    monkeypatch.setattr(logs.settings, \"debug\", False)\n    with logs.debug_time(\"no_output\"):\n        pass\n    out, err = capsys.readouterr()\n    assert err == \"\"\n\ndef test_debug_time_duration(monkeypatch, capsys):\n    \"\"\"debug_time should report the correct duration between start and end times.\"\"\"\n    # Enable debug\n    monkeypatch.setattr(logs.settings, \"debug\", True)\n    # Set fixed start and end times\n    start = datetime(2023, 1, 1, 12, 0, 0)\n    end = start + timedelta(seconds=2, milliseconds=500)\n    dummy = DummyDateTime(start, end)\n    monkeypatch.setattr(logs, \"datetime\", dummy)\n    with logs.debug_time(\"duration_test\"):\n        pass\n    out, err = capsys.readouterr()\n    # The duration should be approximately 2.5 seconds\n    assert \"2.5\" in err or \"2.500\" in err or \"2.50\" in err\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.261513195000589
+}

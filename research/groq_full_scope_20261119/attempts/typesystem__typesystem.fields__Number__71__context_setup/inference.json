@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-fedd1c2b-774e-4523-a77b-5b436d4fcd0e",
+  "object": "chat.completion",
+  "created": 1795077678,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport decimal\nimport pytest\nfrom typesystem.fields import Number\nfrom typesystem.base import ValidationError\n\ndef test_number_coerce_and_precision(tmp_path):\n    # Create a Number field that coerces strings to int and rounds to 2 decimal places\n    field = Number(\n        numeric_type=int,\n        precision=\"0.01\",\n        coerce_types=True,\n    )\n    # Valid integer string should be coerced to int\n    assert field.validate(\"42\") == 42\n    # Valid float string should be coerced to int (truncated)\n    assert field.validate(\"42.7\") == 42\n    # Value with more precision should be rounded before conversion\n    assert field.validate(\"42.123\") == 42\n    # Negative number with precision\n    assert field.validate(\"-1.234\") == -1\n\ndef test_number_boundary_and_multiple_of():\n    # Field with minimum, maximum, exclusive bounds and multiple_of\n    field = Number(\n        minimum=0,\n        maximum=10,\n        exclusive_minimum=0,\n        exclusive_maximum=10,\n        multiple_of=2,\n        coerce_types=True,\n    )\n    # 2 is valid (>= exclusive_minimum and <= exclusive_maximum)\n    assert field.validate(2) == 2\n    # 10 is invalid because it equals exclusive_maximum\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(10)\n    assert \"exclusive_maximum\" in excinfo.value.text\n    # 1 is invalid because not a multiple of 2\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(1)\n    assert \"multiple_of\" in excinfo.value.text\n\ndef test_number_error_cases():\n    # Field that does not allow null and does not coerce types\n    field = Number(\n        coerce_types=False,\n        allow_null=False,\n    )\n    # None should raise null error\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(None)\n    assert \"null\" in excinfo.value.text\n    # Boolean should raise type error\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(True)\n    assert \"type\" in excinfo.value.text\n    # String that cannot be parsed to number should raise type error\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"not a number\")\n    assert \"type\" in excinfo.value.text\n```",
+        "reasoning": "Need three tests: normal, boundary, error. Use Number field. Test coercion, precision, multiple_of."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053530705,
+    "prompt_tokens": 2023,
+    "prompt_time": 0.11214056,
+    "completion_tokens": 546,
+    "completion_time": 0.585317412,
+    "total_tokens": 2569,
+    "total_time": 0.697457972,
+    "completion_tokens_details": {
+      "reasoning_tokens": 24
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sff8vceebav5bdw1544zex",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport decimal\nimport pytest\nfrom typesystem.fields import Number\nfrom typesystem.base import ValidationError\n\ndef test_number_coerce_and_precision(tmp_path):\n    # Create a Number field that coerces strings to int and rounds to 2 decimal places\n    field = Number(\n        numeric_type=int,\n        precision=\"0.01\",\n        coerce_types=True,\n    )\n    # Valid integer string should be coerced to int\n    assert field.validate(\"42\") == 42\n    # Valid float string should be coerced to int (truncated)\n    assert field.validate(\"42.7\") == 42\n    # Value with more precision should be rounded before conversion\n    assert field.validate(\"42.123\") == 42\n    # Negative number with precision\n    assert field.validate(\"-1.234\") == -1\n\ndef test_number_boundary_and_multiple_of():\n    # Field with minimum, maximum, exclusive bounds and multiple_of\n    field = Number(\n        minimum=0,\n        maximum=10,\n        exclusive_minimum=0,\n        exclusive_maximum=10,\n        multiple_of=2,\n        coerce_types=True,\n    )\n    # 2 is valid (>= exclusive_minimum and <= exclusive_maximum)\n    assert field.validate(2) == 2\n    # 10 is invalid because it equals exclusive_maximum\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(10)\n    assert \"exclusive_maximum\" in excinfo.value.text\n    # 1 is invalid because not a multiple of 2\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(1)\n    assert \"multiple_of\" in excinfo.value.text\n\ndef test_number_error_cases():\n    # Field that does not allow null and does not coerce types\n    field = Number(\n        coerce_types=False,\n        allow_null=False,\n    )\n    # None should raise null error\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(None)\n    assert \"null\" in excinfo.value.text\n    # Boolean should raise type error\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(True)\n    assert \"type\" in excinfo.value.text\n    # String that cannot be parsed to number should raise type error\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"not a number\")\n    assert \"type\" in excinfo.value.text\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.116783207980916
+}

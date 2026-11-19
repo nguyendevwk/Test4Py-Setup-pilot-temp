@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-6961816e-4040-40f2-9f57-e41f40071680",
+  "object": "chat.completion",
+  "created": 1795079606,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom tornado import gen, ioloop\nfrom tornado.locks import Condition\nfrom tornado.concurrent import Future\n\n@pytest.mark.asyncio\nasync def test_condition_notify_wakes_waiter():\n    cond = Condition()\n    # Waiter coroutine\n    async def waiter():\n        result = await cond.wait()\n        return result\n\n    # Notifier coroutine\n    async def notifier():\n        # Give the waiter a moment to register\n        await gen.sleep(0.01)\n        cond.notify()\n\n    # Run both coroutines concurrently\n    results = await gen.multi([waiter(), notifier()])\n    # The waiter should receive True because it was notified\n    assert results[0] is True\n    # No pending waiters after notification\n    assert len(cond._waiters) == 0\n\n@pytest.mark.asyncio\nasync def test_condition_wait_timeout():\n    cond = Condition()\n    # Waiter with a short timeout\n    async def waiter():\n        # timeout as absolute timestamp\n        timeout_ts = ioloop.IOLoop.current().time() + 0.05\n        result = await cond.wait(timeout=timeout_ts)\n        return result\n\n    # Run waiter\n    result = await waiter()\n    # The waiter should time out and return False\n    assert result is False\n    # No pending waiters after timeout\n    assert len(cond._waiters) == 0\n\n@pytest.mark.asyncio\nasync def test_condition_notify_all_wakes_all_waiters():\n    cond = Condition()\n    # Create multiple waiters\n    async def waiter():\n        return await cond.wait()\n\n    waiters = [waiter() for _ in range(3)]\n    # Run all waiters concurrently\n    async def run_waiters():\n        return await gen.multi(waiters)\n\n    # Notify all after a short delay\n    async def notifier():\n        await gen.sleep(0.01)\n        cond.notify_all()\n\n    # Run waiters and notifier concurrently\n    results = await gen.multi([run_waiters(), notifier()])\n    # All waiters should receive True\n    assert all(r is True for r in results[0])\n    # No pending waiters after notify_all\n    assert len(cond._waiters) == 0\n```",
+        "reasoning": "Need tests for Condition: normal wait/notify, timeout, notify_all. Use asyncio event loop? tornado uses its own IOLoop. Use tornado.ioloop.IOLoop.current(). Use gen.coroutine? Use async/await. Use tornado.gen. We'll run in pytest with tornado's IOLoop. Use tornado.testing.AsyncTestCase? But simpler: use tornado.ioloop.IOLoop.current().run_sync to run async functions. Write async tests using pytest.mark.asyncio? But tornado uses its own loop; we can use asyncio loop with tornado integration? Use tornado.ioloop.IOLoop.current().run_sync. In test, create Condition, schedule waiter and notifier via gen.multi? Use tornado.gen.multi. Let's write async functions. Use tornado.gen.multi to run concurrently. Use IOLoop.current().run_sync to run the async runner. Test 1: normal notify wakes waiter. Test 2: timeout returns False. Test 3: notify_all wakes all. Use tmp_path? Not needed. Ensure deterministic. Use assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005317403,
+    "prompt_tokens": 967,
+    "prompt_time": 0.014704664,
+    "completion_tokens": 687,
+    "completion_time": 0.742969305,
+    "total_tokens": 1654,
+    "total_time": 0.757673969,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 214
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sha3rke7gsk0ekrhptygxf",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom tornado import gen, ioloop\nfrom tornado.locks import Condition\nfrom tornado.concurrent import Future\n\n@pytest.mark.asyncio\nasync def test_condition_notify_wakes_waiter():\n    cond = Condition()\n    # Waiter coroutine\n    async def waiter():\n        result = await cond.wait()\n        return result\n\n    # Notifier coroutine\n    async def notifier():\n        # Give the waiter a moment to register\n        await gen.sleep(0.01)\n        cond.notify()\n\n    # Run both coroutines concurrently\n    results = await gen.multi([waiter(), notifier()])\n    # The waiter should receive True because it was notified\n    assert results[0] is True\n    # No pending waiters after notification\n    assert len(cond._waiters) == 0\n\n@pytest.mark.asyncio\nasync def test_condition_wait_timeout():\n    cond = Condition()\n    # Waiter with a short timeout\n    async def waiter():\n        # timeout as absolute timestamp\n        timeout_ts = ioloop.IOLoop.current().time() + 0.05\n        result = await cond.wait(timeout=timeout_ts)\n        return result\n\n    # Run waiter\n    result = await waiter()\n    # The waiter should time out and return False\n    assert result is False\n    # No pending waiters after timeout\n    assert len(cond._waiters) == 0\n\n@pytest.mark.asyncio\nasync def test_condition_notify_all_wakes_all_waiters():\n    cond = Condition()\n    # Create multiple waiters\n    async def waiter():\n        return await cond.wait()\n\n    waiters = [waiter() for _ in range(3)]\n    # Run all waiters concurrently\n    async def run_waiters():\n        return await gen.multi(waiters)\n\n    # Notify all after a short delay\n    async def notifier():\n        await gen.sleep(0.01)\n        cond.notify_all()\n\n    # Run waiters and notifier concurrently\n    results = await gen.multi([run_waiters(), notifier()])\n    # All waiters should receive True\n    assert all(r is True for r in results[0])\n    # No pending waiters after notify_all\n    assert len(cond._waiters) == 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "448b61a4b3054d81a0f19ab2564dfe21",
+  "_api_plus_pacing_seconds": 1.7943789649871178
+}

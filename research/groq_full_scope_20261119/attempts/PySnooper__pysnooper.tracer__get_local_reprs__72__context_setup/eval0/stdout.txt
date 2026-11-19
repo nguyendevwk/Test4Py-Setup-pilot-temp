@@ -1,0 +1,65 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_get_local_reprs_order_and_repr ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_local_reprs_order_and0')
+
+    def test_get_local_reprs_order_and_repr(tmp_path):
+        # Define a function with local variables
+        def inner():
+            a = 1
+            b = "text"
+            c = [1, 2, 3]
+            return locals()
+    
+        # Capture the frame of the inner function
+        frame = inspect.currentframe()
+        try:
+            # Call inner to populate its locals
+            inner()
+            # Get the frame of the inner function
+            inner_frame = frame.f_back
+            # Call get_local_reprs on that frame
+            result = get_local_reprs(inner_frame, max_length=10, normalize=True)
+            # Ensure the result is an OrderedDict
+            assert isinstance(result, collections.OrderedDict)
+            # Check that keys are in the order of co_varnames
+            expected_keys = ("a", "b", "c")
+>           assert list(result.keys()) == list(expected_keys)
+E           AssertionError: assert ['pyfuncitem'...', 'funcargs'] == ['a', 'b', 'c']
+E             
+E             At index 0 diff: 'pyfuncitem' != 'a'
+E             Left contains one more item: 'funcargs'
+E             Use -v to get more diff
+
+test_generated.py:36: AssertionError
+_______________________ test_get_local_reprs_with_watch ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_local_reprs_with_watc0')
+
+    def test_get_local_reprs_with_watch(tmp_path):
+        # Define a function with local variables
+        def inner():
+            x = 42
+            y = "hello"
+            return locals()
+    
+        frame = inspect.currentframe()
+        try:
+            inner()
+            inner_frame = frame.f_back
+            # Create a watch variable that adds a new key
+            watch = DummyWatch({"z": "watched"})
+            result = get_local_reprs(inner_frame, watch=[watch])
+            # Ensure watch key is present
+            assert "z" in result
+            assert result["z"] == "watched"
+            # Ensure original locals are still present
+>           assert result["x"] == "42"
+E           KeyError: 'x'
+
+test_generated.py:62: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_local_reprs_order_and_repr - AssertionErro...
+FAILED test_generated.py::test_get_local_reprs_with_watch - KeyError: 'x'
+2 failed, 1 passed in 0.11s

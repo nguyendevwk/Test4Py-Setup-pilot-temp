@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-4c5ab63e-e79b-4683-b5f9-39e994d6a563",
+  "object": "chat.completion",
+  "created": 1795079666,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.streams import BufferedPrettyStream, BinarySuppressedError\nfrom httpie.encoding import UTF8\nfrom httpie.models import HTTPMessage, OutputOptions\nfrom httpie.processing import Conversion, Formatting\nfrom httpie.context import Environment\n\n\nclass DummyMessage(HTTPMessage):\n    \"\"\"A minimal HTTPMessage that yields predefined body chunks.\"\"\"\n    def __init__(self, body_chunks, content_type=\"text/plain\"):\n        self._body_chunks = body_chunks\n        self.content_type = content_type\n        self.headers = {}\n        self.metadata = {}\n        self.encoding = \"utf-8\"\n\n    def iter_body(self, chunk_size):\n        for chunk in self._body_chunks:\n            yield chunk\n\n\nclass DummyConverter:\n    \"\"\"A converter that turns bytes into a string and changes mime.\"\"\"\n    def convert(self, body_bytes):\n        return \"text/plain\", body_bytes.decode(\"utf-8\")\n\n\nclass DummyFormatting(Formatting):\n    \"\"\"Formatting that returns the body unchanged.\"\"\"\n    def format_body(self, content, mime):\n        return content\n\n    def format_headers(self, headers):\n        return \"\"\n\n    def format_metadata(self, metadata):\n        return \"\"\n\n\nclass DummyConversion(Conversion):\n    \"\"\"Conversion that returns a DummyConverter for a specific mime.\"\"\"\n    def get_converter(self, mime):\n        return DummyConverter() if mime == \"application/octet-stream\" else None\n\n\ndef test_buffered_pretty_stream_normal_body(tmp_path):\n    \"\"\"Body without null bytes should be processed normally.\"\"\"\n    body = b\"Hello, world!\"\n    msg = DummyMessage([body])\n    stream = BufferedPrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n    )\n    chunks = list(stream.iter_body())\n    assert chunks == [b\"Hello, world!\"]\n\n\ndef test_buffered_pretty_stream_binary_body_raises():\n    \"\"\"Body containing a null byte should raise BinarySuppressedError.\"\"\"\n    body = b\"binary\\x00data\"\n    msg = DummyMessage([body])\n    stream = BufferedPrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n    )\n    with pytest.raises(BinarySuppressedError):\n        list(stream.iter_body())\n\n\ndef test_buffered_pretty_stream_conversion(tmp_path):\n    \"\"\"Body with a null byte triggers conversion and returns converted text.\"\"\"\n    body = b\"binary\\x00data\"\n    msg = DummyMessage([body], content_type=\"application/octet-stream\")\n    stream = BufferedPrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n    )\n    chunks = list(stream.iter_body())\n    assert chunks == [b\"binarydata\"]  # converter removes null and decodes\n```",
+        "reasoning": "Need tests for BufferedPrettyStream iter_body normal, binary, conversion. Use dummy HTTPMessage with iter_body returning chunks. Create minimal Conversion with get_converter returning None or a converter that converts bytes to str. Use Formatting that returns same. Use PrettyStream? Just test BufferedPrettyStream."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005329713,
+    "prompt_tokens": 1438,
+    "prompt_time": 0.076944001,
+    "completion_tokens": 658,
+    "completion_time": 0.688549194,
+    "total_tokens": 2096,
+    "total_time": 0.765493195,
+    "completion_tokens_details": {
+      "reasoning_tokens": 58
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7shbycweje9pkhc9d685j6a",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.streams import BufferedPrettyStream, BinarySuppressedError\nfrom httpie.encoding import UTF8\nfrom httpie.models import HTTPMessage, OutputOptions\nfrom httpie.processing import Conversion, Formatting\nfrom httpie.context import Environment\n\n\nclass DummyMessage(HTTPMessage):\n    \"\"\"A minimal HTTPMessage that yields predefined body chunks.\"\"\"\n    def __init__(self, body_chunks, content_type=\"text/plain\"):\n        self._body_chunks = body_chunks\n        self.content_type = content_type\n        self.headers = {}\n        self.metadata = {}\n        self.encoding = \"utf-8\"\n\n    def iter_body(self, chunk_size):\n        for chunk in self._body_chunks:\n            yield chunk\n\n\nclass DummyConverter:\n    \"\"\"A converter that turns bytes into a string and changes mime.\"\"\"\n    def convert(self, body_bytes):\n        return \"text/plain\", body_bytes.decode(\"utf-8\")\n\n\nclass DummyFormatting(Formatting):\n    \"\"\"Formatting that returns the body unchanged.\"\"\"\n    def format_body(self, content, mime):\n        return content\n\n    def format_headers(self, headers):\n        return \"\"\n\n    def format_metadata(self, metadata):\n        return \"\"\n\n\nclass DummyConversion(Conversion):\n    \"\"\"Conversion that returns a DummyConverter for a specific mime.\"\"\"\n    def get_converter(self, mime):\n        return DummyConverter() if mime == \"application/octet-stream\" else None\n\n\ndef test_buffered_pretty_stream_normal_body(tmp_path):\n    \"\"\"Body without null bytes should be processed normally.\"\"\"\n    body = b\"Hello, world!\"\n    msg = DummyMessage([body])\n    stream = BufferedPrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n    )\n    chunks = list(stream.iter_body())\n    assert chunks == [b\"Hello, world!\"]\n\n\ndef test_buffered_pretty_stream_binary_body_raises():\n    \"\"\"Body containing a null byte should raise BinarySuppressedError.\"\"\"\n    body = b\"binary\\x00data\"\n    msg = DummyMessage([body])\n    stream = BufferedPrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n    )\n    with pytest.raises(BinarySuppressedError):\n        list(stream.iter_body())\n\n\ndef test_buffered_pretty_stream_conversion(tmp_path):\n    \"\"\"Body with a null byte triggers conversion and returns converted text.\"\"\"\n    body = b\"binary\\x00data\"\n    msg = DummyMessage([body], content_type=\"application/octet-stream\")\n    stream = BufferedPrettyStream(\n        conversion=DummyConversion(),\n        formatting=DummyFormatting(),\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n    )\n    chunks = list(stream.iter_body())\n    assert chunks == [b\"binarydata\"]  # converter removes null and decodes\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "f85e0338b1fb49bea22d99276fce7f68",
+  "_api_plus_pacing_seconds": 1.9212872029747814
+}

@@ -1,0 +1,204 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_roundtrip_basic_string __________________________
+
+    def test_roundtrip_basic_string():
+        """Encode a normal string and decode it back, expecting identity."""
+        original = "Hello, 世界! \x01\x02"
+        # Encode the string to escaped UTF‑8 bytes
+        encoded_bytes, encoded_len = encode(original)
+        assert isinstance(encoded_bytes, bytes)
+        assert encoded_len == len(original)
+    
+        # Decode the bytes back to a string
+>       decoded_str, decoded_len = decode(encoded_bytes)
+
+test_generated.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = b'Hello, \\xe4\\xb8\\x96\\xe7\\x95\\x8c! \\x1\\x2', errors = 'strict'
+
+    def decode(
+            data: _ByteString,
+            errors: _Str = 'strict'
+    ) -> Tuple[str, int]:
+        """Convert a bytes type of escaped utf8 hexadecimal to a string.
+    
+        Args:
+            data (bytes or bytearray or memoryview): The escaped utf8
+                hexadecimal bytes.
+            errors (str or :obj:`~UserString`): The error checking level.
+    
+        Returns:
+            str: The given ``data`` (of escaped utf8 hexadecimal bytes)
+                converted into a :obj:`str`.
+            int: The number of the given ``data`` bytes consumed.
+    
+        Raises:
+             UnicodeDecodeError: if the given ``data`` contains escaped
+                utf8 hexadecimal that references invalid utf8 bytes.
+    
+    
+        """
+        # Convert memoryview and bytearray objects to bytes.
+        data_bytes = bytes(data)
+    
+        # Convert the given 'errors', that are of type UserString into a str.
+        errors_input = str(errors)
+    
+        # Convert the utf8 bytes into a string of latin-1 characters.
+        # This basically maps the exact utf8 bytes to the string. Also,
+        # this converts any escaped hexadecimal sequences \\xHH into
+        # \xHH bytes.
+>       text_str_latin1 = data_bytes.decode('unicode_escape')
+E       UnicodeDecodeError: 'unicodeescape' codec can't decode bytes in position 33-35: truncated \xXX escape
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/raw_utf8_escape.py:123: UnicodeDecodeError
+______________________ test_escape_sequences_and_boundary ______________________
+
+text = 'Line1\\nLine2\\x7F\\x80\\xFF', errors = 'strict'
+
+    def encode(
+            text: _Str,
+            errors: _Str = 'strict'
+    ) -> Tuple[bytes, int]:
+        """Convert a :obj:`str`, that may contain escaped utf8 hexadecimal, to
+        bytes of escaped utf8 hexadecimal.
+    
+        Args:
+            text (str or :obj:`~UserString`): The string input.
+            errors (str or :obj:`~UserString`): The error checking level.
+    
+        Returns:
+            bytes: The given ``text`` converted into escaped utf8 bytes.
+            int: The number of given ``text`` characters consumed
+    
+        Raises:
+             UnicodeEncodeError: if the given ``text`` contains escaped
+                utf8 hexadecimal that references invalid utf8 bytes.
+        """
+    
+        # Convert the given 'text', that are of type UserString into a str.
+        # if isinstance(text, UserString):
+        #     text_input = str(text)
+        # else:
+    
+        text_input = str(text)
+    
+        # Convert the given 'errors', that are of type UserString into a str.
+        errors_input = str(errors)
+    
+        # Convert the string into utf-8 bytes
+        text_bytes_utf8 = text_input.encode('utf-8')
+        text_bytes_utf8 = cast(bytes, text_bytes_utf8)
+    
+        # Convert the utf8 bytes into a string of latin-1 characters.
+        # This basically maps the exact utf8 bytes to the string. Also,
+        # this converts any escaped hexadecimal sequences \\xHH into
+        # \xHH bytes.
+        text_str_latin1 = text_bytes_utf8.decode('unicode_escape')
+    
+        # Convert the string of latin-1 characters (which are actually
+        # utf8 characters) into bytes.
+        text_bytes_utf8 = text_str_latin1.encode('latin1')
+    
+        # Convert the utf8 bytes into a string.
+        try:
+>           text_str = text_bytes_utf8.decode('utf-8', errors=errors_input)
+E           UnicodeDecodeError: 'utf-8' codec can't decode byte 0x80 in position 12: invalid start byte
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/raw_utf8_escape.py:73: UnicodeDecodeError
+
+During handling of the above exception, another exception occurred:
+
+    def test_escape_sequences_and_boundary():
+        """Test handling of explicit escaped hex sequences and boundary values."""
+        # The string contains literal backslashes and hex escapes
+        original = r"Line1\nLine2\x7F\x80\xFF"
+        # Encode: the literal \xHH should become actual bytes
+>       encoded_bytes, _ = encode(original)
+
+test_generated.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = 'Line1\\nLine2\\x7F\\x80\\xFF', errors = 'strict'
+
+    def encode(
+            text: _Str,
+            errors: _Str = 'strict'
+    ) -> Tuple[bytes, int]:
+        """Convert a :obj:`str`, that may contain escaped utf8 hexadecimal, to
+        bytes of escaped utf8 hexadecimal.
+    
+        Args:
+            text (str or :obj:`~UserString`): The string input.
+            errors (str or :obj:`~UserString`): The error checking level.
+    
+        Returns:
+            bytes: The given ``text`` converted into escaped utf8 bytes.
+            int: The number of given ``text`` characters consumed
+    
+        Raises:
+             UnicodeEncodeError: if the given ``text`` contains escaped
+                utf8 hexadecimal that references invalid utf8 bytes.
+        """
+    
+        # Convert the given 'text', that are of type UserString into a str.
+        # if isinstance(text, UserString):
+        #     text_input = str(text)
+        # else:
+    
+        text_input = str(text)
+    
+        # Convert the given 'errors', that are of type UserString into a str.
+        errors_input = str(errors)
+    
+        # Convert the string into utf-8 bytes
+        text_bytes_utf8 = text_input.encode('utf-8')
+        text_bytes_utf8 = cast(bytes, text_bytes_utf8)
+    
+        # Convert the utf8 bytes into a string of latin-1 characters.
+        # This basically maps the exact utf8 bytes to the string. Also,
+        # this converts any escaped hexadecimal sequences \\xHH into
+        # \xHH bytes.
+        text_str_latin1 = text_bytes_utf8.decode('unicode_escape')
+    
+        # Convert the string of latin-1 characters (which are actually
+        # utf8 characters) into bytes.
+        text_bytes_utf8 = text_str_latin1.encode('latin1')
+    
+        # Convert the utf8 bytes into a string.
+        try:
+            text_str = text_bytes_utf8.decode('utf-8', errors=errors_input)
+        except UnicodeDecodeError as e:
+>           raise UnicodeEncodeError(
+                'eutf8h',
+                str(text_input),
+                e.start,
+                e.end,
+                e.reason,
+            )
+E           UnicodeEncodeError: 'eutf8h' codec can't encode character '\x5c' in position 12: invalid start byte
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/raw_utf8_escape.py:75: UnicodeEncodeError
+____________________ test_invalid_utf8_raises_encode_error _____________________
+
+    def test_invalid_utf8_raises_encode_error():
+        """Encoding a string that contains an invalid UTF‑8 sequence should raise."""
+        # Construct a string that contains a lone surrogate (invalid in UTF‑8)
+        invalid_str = "Invalid \uDC00"
+        with pytest.raises(UnicodeEncodeError) as excinfo:
+            encode(invalid_str)
+        # The exception should be raised by our custom codec
+>       assert excinfo.value.args[0] == 'eutf8h'
+E       AssertionError: assert 'utf-8' == 'eutf8h'
+E         
+E         - eutf8h
+E         + utf-8
+
+test_generated.py:49: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_roundtrip_basic_string - UnicodeDecodeError: '...
+FAILED test_generated.py::test_escape_sequences_and_boundary - UnicodeEncodeE...
+FAILED test_generated.py::test_invalid_utf8_raises_encode_error - AssertionEr...
+3 failed in 0.14s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-49434766-4b56-4ee8-8ddc-d6e640cde9f1",
+  "object": "chat.completion",
+  "created": 1795076307,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport builtins\nimport importlib\nimport types\nimport pytest\nfrom pathlib import Path\n\n# Import the target module\nimport cookiecutter.prompt as prompt_module\n\ndef test_prompt_and_delete_no_input_file(tmp_path):\n    \"\"\"When no_input=True and path is a file, the file is removed and True is returned.\"\"\"\n    # Create a temporary file\n    temp_file = tmp_path / \"temp.zip\"\n    temp_file.write_text(\"dummy\")\n    assert temp_file.exists()\n\n    # Call the function with no_input=True\n    result = prompt_module.prompt_and_delete(temp_file, no_input=True)\n\n    # Verify the file was deleted and the return value is True\n    assert result is True\n    assert not temp_file.exists()\n\n\ndef test_prompt_and_delete_no_input_dir(tmp_path):\n    \"\"\"When no_input=True and path is a directory, the directory is removed and True is returned.\"\"\"\n    # Create a temporary directory with a file inside\n    temp_dir = tmp_path / \"temp_dir\"\n    temp_dir.mkdir()\n    (temp_dir / \"file.txt\").write_text(\"content\")\n    assert temp_dir.exists()\n    assert (temp_dir / \"file.txt\").exists()\n\n    # Call the function with no_input=True\n    result = prompt_module.prompt_and_delete(temp_dir, no_input=True)\n\n    # Verify the directory was removed and the return value is True\n    assert result is True\n    assert not temp_dir.exists()\n\n\ndef test_prompt_and_delete_exit_on_user_decline(monkeypatch):\n    \"\"\"When the user declines both prompts, the function exits the process.\"\"\"\n    # Monkeypatch read_user_yes_no to simulate user declining both prompts\n    def fake_read_user_yes_no(var_name, default_value, prompts=None, prefix: str = \"\"):\n        return False\n\n    monkeypatch.setattr(prompt_module, \"read_user_yes_no\", fake_read_user_yes_no)\n\n    # Create a temporary file to pass as path\n    temp_file = Path(\"dummy_path\")\n    # Ensure the file does not exist to avoid actual deletion\n    if temp_file.exists():\n        temp_file.unlink()\n\n    # Expect SystemExit when both prompts return False\n    with pytest.raises(SystemExit):\n        prompt_module.prompt_and_delete(temp_file, no_input=False)\n```",
+        "reasoning": "We need tests for prompt_and_delete. We can simulate no_input True, and path existing file or dir. Use tmp_path. Also test when no_input False but we need to simulate user input. But cannot mock; but we can patch read_user_yes_no? Not allowed to mock target. But we can test behavior when no_input True. Also test when path is file and dir. Third test: when no_input False but path not exist? It will call read_user_yes_no which will prompt; can't simulate. So maybe test that sys.exit is called when both prompts no. We can patch read_user_yes_no by temporarily replacing function in module? That's modifying target? It's allowed to modify imported target? Not allowed to modify product code. But we can monkeypatch attribute in module for test. That's allowed. So third test: monkeypatch read_user_yes_no to return False for both prompts, expect SystemExit. Use pytest.raises. Good."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054049371,
+    "prompt_tokens": 914,
+    "prompt_time": 0.065442945,
+    "completion_tokens": 668,
+    "completion_time": 0.741858062,
+    "total_tokens": 1582,
+    "total_time": 0.807301007,
+    "completion_tokens_details": {
+      "reasoning_tokens": 191
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7se5dtkedz83fb7aqhbedcy",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport builtins\nimport importlib\nimport types\nimport pytest\nfrom pathlib import Path\n\n# Import the target module\nimport cookiecutter.prompt as prompt_module\n\ndef test_prompt_and_delete_no_input_file(tmp_path):\n    \"\"\"When no_input=True and path is a file, the file is removed and True is returned.\"\"\"\n    # Create a temporary file\n    temp_file = tmp_path / \"temp.zip\"\n    temp_file.write_text(\"dummy\")\n    assert temp_file.exists()\n\n    # Call the function with no_input=True\n    result = prompt_module.prompt_and_delete(temp_file, no_input=True)\n\n    # Verify the file was deleted and the return value is True\n    assert result is True\n    assert not temp_file.exists()\n\n\ndef test_prompt_and_delete_no_input_dir(tmp_path):\n    \"\"\"When no_input=True and path is a directory, the directory is removed and True is returned.\"\"\"\n    # Create a temporary directory with a file inside\n    temp_dir = tmp_path / \"temp_dir\"\n    temp_dir.mkdir()\n    (temp_dir / \"file.txt\").write_text(\"content\")\n    assert temp_dir.exists()\n    assert (temp_dir / \"file.txt\").exists()\n\n    # Call the function with no_input=True\n    result = prompt_module.prompt_and_delete(temp_dir, no_input=True)\n\n    # Verify the directory was removed and the return value is True\n    assert result is True\n    assert not temp_dir.exists()\n\n\ndef test_prompt_and_delete_exit_on_user_decline(monkeypatch):\n    \"\"\"When the user declines both prompts, the function exits the process.\"\"\"\n    # Monkeypatch read_user_yes_no to simulate user declining both prompts\n    def fake_read_user_yes_no(var_name, default_value, prompts=None, prefix: str = \"\"):\n        return False\n\n    monkeypatch.setattr(prompt_module, \"read_user_yes_no\", fake_read_user_yes_no)\n\n    # Create a temporary file to pass as path\n    temp_file = Path(\"dummy_path\")\n    # Ensure the file does not exist to avoid actual deletion\n    if temp_file.exists():\n        temp_file.unlink()\n\n    # Expect SystemExit when both prompts return False\n    with pytest.raises(SystemExit):\n        prompt_module.prompt_and_delete(temp_file, no_input=False)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1475541580002755
+}

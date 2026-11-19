@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-804812b5-2cc2-47ba-b83b-cf2d7d5bc422",
+  "object": "chat.completion",
+  "created": 1795076144,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport pytest\nfrom httpie.output.writer import write_stream\nfrom httpie.output.streams import BaseStream\n\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields the provided chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def __iter__(self):\n        return iter(self._chunks)\n\n\ndef test_write_stream_to_file(tmp_path):\n    \"\"\"Normal case: write bytes to a binary file and verify content.\"\"\"\n    file_path = tmp_path / \"output.bin\"\n    stream = DummyStream([b\"hello \", b\"world\"])\n    with open(file_path, \"wb\") as f:\n        write_stream(stream, f, flush=True)\n    assert file_path.read_bytes() == b\"hello world\"\n\n\ndef test_write_stream_to_textio():\n    \"\"\"Boundary case: writing to a TextIO that has no buffer attribute.\"\"\"\n    stream = DummyStream([b\"foo\", b\"bar\"])\n    text_io = io.StringIO()\n    # The function should fall back to using the TextIO directly.\n    # Writing bytes to a StringIO will raise a TypeError.\n    with pytest.raises(TypeError):\n        write_stream(stream, text_io, flush=False)\n\n\ndef test_write_stream_with_invalid_chunk():\n    \"\"\"Error case: stream yields a non-bytes chunk causing a write error.\"\"\"\n    stream = DummyStream([b\"valid\", \"invalid_chunk\"])\n    buf = io.BytesIO()\n    with pytest.raises(TypeError):\n        write_stream(stream, buf, flush=False)\n```",
+        "reasoning": "We need tests for write_stream. It writes chunks from stream to outfile buffer. We can create a dummy BaseStream that yields bytes. Use tmp_path to create file. Test normal: write bytes, flush True. Check file content. Boundary: empty stream. Error: outfile without buffer? Actually code handles. We can test that if outfile is text file, it uses buffer? Actually if no buffer, uses outfile. So test writing to a TextIO that has no buffer? StringIO has no buffer. So test that it writes to StringIO. Use io.StringIO. But it expects bytes? It writes bytes to buffer. StringIO expects str. That would error. But code writes bytes to buf. If StringIO, buf is StringIO, writing bytes will error. So maybe test that it raises TypeError. Use BytesIO. For error scenario, maybe simulate stream raising exception. But we can't mock. Instead test that if stream yields non-bytes, it raises TypeError. Use stream yielding string. That will cause write error. So test that."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.426718726,
+    "prompt_tokens": 419,
+    "prompt_time": 0.037061922,
+    "completion_tokens": 544,
+    "completion_time": 0.643114147,
+    "total_tokens": 963,
+    "total_time": 0.680176069,
+    "completion_tokens_details": {
+      "reasoning_tokens": 216
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se0dz8e2jshda4245b7yv2",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport pytest\nfrom httpie.output.writer import write_stream\nfrom httpie.output.streams import BaseStream\n\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields the provided chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def __iter__(self):\n        return iter(self._chunks)\n\n\ndef test_write_stream_to_file(tmp_path):\n    \"\"\"Normal case: write bytes to a binary file and verify content.\"\"\"\n    file_path = tmp_path / \"output.bin\"\n    stream = DummyStream([b\"hello \", b\"world\"])\n    with open(file_path, \"wb\") as f:\n        write_stream(stream, f, flush=True)\n    assert file_path.read_bytes() == b\"hello world\"\n\n\ndef test_write_stream_to_textio():\n    \"\"\"Boundary case: writing to a TextIO that has no buffer attribute.\"\"\"\n    stream = DummyStream([b\"foo\", b\"bar\"])\n    text_io = io.StringIO()\n    # The function should fall back to using the TextIO directly.\n    # Writing bytes to a StringIO will raise a TypeError.\n    with pytest.raises(TypeError):\n        write_stream(stream, text_io, flush=False)\n\n\ndef test_write_stream_with_invalid_chunk():\n    \"\"\"Error case: stream yields a non-bytes chunk causing a write error.\"\"\"\n    stream = DummyStream([b\"valid\", \"invalid_chunk\"])\n    buf = io.BytesIO()\n    with pytest.raises(TypeError):\n        write_stream(stream, buf, flush=False)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3838922959985211
+}

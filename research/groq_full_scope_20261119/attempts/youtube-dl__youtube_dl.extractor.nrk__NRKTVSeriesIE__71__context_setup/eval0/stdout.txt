@@ -1,0 +1,54 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________________ test_suitable_precedence ___________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f776c7e3fd0>
+
+    def test_suitable_precedence(monkeypatch):
+        """NRKTVSeriesIE.suitable should return False if any higher‑priority IE is suitable."""
+        url = "https://tv.nrk.no/serie/groenn-glede"
+    
+        # Ensure other IE classes report suitable
+        monkeypatch.setattr(NRKTVIE, "suitable", lambda cls, u: u == url)
+        monkeypatch.setattr(NRKTVEpisodeIE, "suitable", lambda cls, u: False)
+        monkeypatch.setattr(NRKRadioPodkastIE, "suitable", lambda cls, u: False)
+        monkeypatch.setattr(NRKTVSeasonIE, "suitable", lambda cls, u: False)
+    
+>       assert NRKTVSeriesIE.suitable(url) is False, "Should defer to higher‑priority IE"
+
+test_generated.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/nrk.py:690: in suitable
+    False if any(ie.suitable(url)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x7f776b3d4f10>
+
+>   False if any(ie.suitable(url)
+                 for ie in (NRKTVIE, NRKTVEpisodeIE, NRKRadioPodkastIE, NRKTVSeasonIE))
+    else super(NRKTVSeriesIE, cls).suitable(url))
+E   TypeError: test_suitable_precedence.<locals>.<lambda>() missing 1 required positional argument: 'u'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/nrk.py:690: TypeError
+__________________________ test_invalid_url_rejection __________________________
+
+    def test_invalid_url_rejection():
+        """NRKTVSeriesIE.suitable should reject URLs that do not match the pattern."""
+        invalid_urls = [
+            "https://example.com/serie/groenn-glede",
+            "https://tv.nrk.no/episode/123",
+            "http://tv.nrk.no/serie/",
+            "https://tv.nrk.no/serie/groenn-glede/extra",
+        ]
+        for url in invalid_urls:
+>           assert NRKTVSeriesIE.suitable(url) is False, f"URL {url} should not be suitable"
+E           AssertionError: URL https://tv.nrk.no/serie/groenn-glede/extra should not be suitable
+E           assert True is False
+E            +  where True = suitable('https://tv.nrk.no/serie/groenn-glede/extra')
+E            +    where suitable = NRKTVSeriesIE.suitable
+
+test_generated.py:43: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_suitable_precedence - TypeError: test_suitable...
+FAILED test_generated.py::test_invalid_url_rejection - AssertionError: URL ht...
+2 failed, 1 passed in 0.74s

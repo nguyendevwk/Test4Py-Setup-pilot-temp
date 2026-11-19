@@ -1,0 +1,74 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_scanr_no_initial_empty_iterable _____________________
+
+func = <function test_scanr_no_initial_empty_iterable.<locals>.<lambda> at 0x7fb0c74d1870>
+iterable = <list_reverseiterator object at 0x7fb0c73ab5b0>, args = ()
+
+    def scanl(func, iterable, *args):
+        r"""Computes the intermediate results of :py:func:`~functools.reduce`. Equivalent to Haskell's ``scanl``. For
+        example:
+    
+        .. code:: python
+    
+            >>> list(scanl(operator.add, [1, 2, 3, 4], 0))
+            [0, 1, 3, 6, 10]
+            >>> list(scanl(lambda s, x: x + s, ['a', 'b', 'c', 'd']))
+            ['a', 'ba', 'cba', 'dcba']
+    
+        Learn more at `Learn You a Haskell: Higher Order Functions <http://learnyouahaskell.com/higher-order-functions>`_.
+    
+        :param func: The function to apply. This should be a binary function where the arguments are: the accumulator,
+            and the current element.
+        :param iterable: The list of elements to iteratively apply the function to.
+        :param initial: The initial value for the accumulator. If not supplied, the first element in the list is used.
+        :return: The intermediate results at each step.
+        """
+        iterable = iter(iterable)
+        if len(args) == 1:
+            acc = args[0]
+        elif len(args) == 0:
+>           acc = next(iterable)
+E           StopIteration
+
+../../../../groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py:191: StopIteration
+
+The above exception was the direct cause of the following exception:
+
+    def test_scanr_no_initial_empty_iterable():
+        # Boundary case: empty iterable without an initial value should raise TypeError
+        with pytest.raises(TypeError):
+>           scanr(lambda acc, x: acc + x, [])
+
+test_generated.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+func = <function test_scanr_no_initial_empty_iterable.<locals>.<lambda> at 0x7fb0c74d1870>
+iterable = [], args = ()
+
+    def scanr(func, iterable, *args):
+        r"""Computes the intermediate results of :py:func:`~functools.reduce` applied in reverse. Equivalent to Haskell's
+        ``scanr``. For example:
+    
+        .. code:: python
+    
+            >>> scanr(operator.add, [1, 2, 3, 4], 0)
+            [10, 9, 7, 4, 0]
+            >>> scanr(lambda s, x: x + s, ['a', 'b', 'c', 'd'])
+            ['abcd', 'bcd', 'cd', 'd']
+    
+        Learn more at `Learn You a Haskell: Higher Order Functions <http://learnyouahaskell.com/higher-order-functions>`_.
+    
+        :param func: The function to apply. This should be a binary function where the arguments are: the accumulator,
+            and the current element.
+        :param iterable: The list of elements to iteratively apply the function to.
+        :param initial: The initial value for the accumulator. If not supplied, the first element in the list is used.
+        :return: The intermediate results at each step, starting from the end.
+        """
+>       return list(scanl(func, reversed(iterable), *args))[::-1]
+E       RuntimeError: generator raised StopIteration
+
+../../../../groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py:227: RuntimeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_scanr_no_initial_empty_iterable - RuntimeError...
+1 failed, 2 passed in 0.13s

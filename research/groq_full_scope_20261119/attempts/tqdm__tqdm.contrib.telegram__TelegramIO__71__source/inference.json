@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-e4fd37c3-adcb-4830-8310-e7f1519164ef",
+  "object": "chat.completion",
+  "created": 1795076071,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tqdm.contrib.telegram import TelegramIO\n\n\nclass DummyTelegramIO(TelegramIO):\n    \"\"\"Subclass that records the arguments passed to submit instead of executing them.\"\"\"\n    def __init__(self, token, chat_id):\n        super().__init__(token, chat_id)\n        self.submitted = []\n\n    def submit(self, func, url, data=None):\n        # Record the call and return a dummy future-like object\n        self.submitted.append((func, url, data))\n        class DummyFuture:\n            def result(self):\n                return \"dummy\"\n        return DummyFuture()\n\n\ndef test_write_same_text_returns_none(tmp_path):\n    \"\"\"write should return None when the new text is identical to the current text.\"\"\"\n    io = DummyTelegramIO(\"dummy_token\", \"dummy_chat\")\n    io.text = \"same_text\"\n    # The write method should detect the duplicate and return immediately\n    result = io.write(\"same_text\")\n    assert result is None\n    # No submit call should have been made\n    assert io.submitted == []\n\n\ndef test_write_calls_submit_with_correct_url_and_data(tmp_path):\n    \"\"\"write should submit a POST to the editMessageText endpoint with proper data.\"\"\"\n    io = DummyTelegramIO(\"dummy_token\", \"dummy_chat\")\n    # Force a message_id to avoid network call\n    io._message_id = 123\n    io.text = \"old_text\"\n    io.write(\"new_text\")\n    # One submit call should have been recorded\n    assert len(io.submitted) == 1\n    func, url, data = io.submitted[0]\n    # Verify the URL uses the correct endpoint\n    assert url == f\"{io.API}{io.token}/editMessageText\"\n    # Verify the data payload contains the expected fields\n    assert data[\"chat_id\"] == io.chat_id\n    assert data[\"message_id\"] == 123\n    assert data[\"text\"] == \"`new_text`\"\n    assert data[\"parse_mode\"] == \"MarkdownV2\"\n\n\ndef test_delete_uses_incorrect_url(tmp_path):\n    \"\"\"delete should submit to a malformed URL due to missing f-string formatting.\"\"\"\n    io = DummyTelegramIO(\"dummy_token\", \"dummy_chat\")\n    # Force a message_id to avoid network call\n    io._message_id = 456\n    io.delete()\n    # One submit call should have been recorded\n    assert len(io.submitted) == 1\n    func, url, data = io.submitted[0]\n    # The URL should incorrectly contain the literal '{self.API}' string\n    assert url == '{self.API}{self.token}/deleteMessage'\n    # The data payload should still contain the correct chat_id and message_id\n    assert data[\"chat_id\"] == io.chat_id\n    assert data[\"message_id\"] == 456\n```",
+        "reasoning": "We need tests without network. But TelegramIO uses requests.Session to post. We cannot mock. But we can test that message_id property handles missing attribute? But it will attempt network. We cannot. Maybe we can test that write with empty string sets to \"...\". But it will call message_id which triggers network. We can instantiate with dummy token and chat_id but avoid calling message_id by not accessing. But write calls message_id. So cannot. Maybe test that delete uses correct URL string formatting? It has bug: '{self.API}' not f. So delete will send wrong URL. We can test that delete returns future? But network. We can test that write returns None when s equals text. That path doesn't call message_id. So we can set self.text to something and call write with same. Should return None. Also test that write with empty string sets s to \"...\". But still calls message_id. So skip. We'll test that write with same text returns None. Also test that message_id property raises AttributeError? Actually if no _message_id, it will try network. Can't. Maybe test that delete uses wrong URL string? We can inspect the URL passed to submit by overriding submit to capture args. Since MonoWorker's submit likely uses ThreadPool? We can monkeypatch submit to capture. But we cannot modify product. But we can subclass TelegramIO to override submit. Create subclass in test. Then call delete and check that URL is wrong. That tests bug. Also test that write with same text returns None. Third test: test that write with different text calls submit with correct URL. We can override submit to capture. So three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05167772,
+    "prompt_tokens": 782,
+    "prompt_time": 0.04679458,
+    "completion_tokens": 928,
+    "completion_time": 1.121668411,
+    "total_tokens": 1710,
+    "total_time": 1.168462991,
+    "completion_tokens_details": {
+      "reasoning_tokens": 335
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdy6x0e3hsfjw0mxm0c3kn",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tqdm.contrib.telegram import TelegramIO\n\n\nclass DummyTelegramIO(TelegramIO):\n    \"\"\"Subclass that records the arguments passed to submit instead of executing them.\"\"\"\n    def __init__(self, token, chat_id):\n        super().__init__(token, chat_id)\n        self.submitted = []\n\n    def submit(self, func, url, data=None):\n        # Record the call and return a dummy future-like object\n        self.submitted.append((func, url, data))\n        class DummyFuture:\n            def result(self):\n                return \"dummy\"\n        return DummyFuture()\n\n\ndef test_write_same_text_returns_none(tmp_path):\n    \"\"\"write should return None when the new text is identical to the current text.\"\"\"\n    io = DummyTelegramIO(\"dummy_token\", \"dummy_chat\")\n    io.text = \"same_text\"\n    # The write method should detect the duplicate and return immediately\n    result = io.write(\"same_text\")\n    assert result is None\n    # No submit call should have been made\n    assert io.submitted == []\n\n\ndef test_write_calls_submit_with_correct_url_and_data(tmp_path):\n    \"\"\"write should submit a POST to the editMessageText endpoint with proper data.\"\"\"\n    io = DummyTelegramIO(\"dummy_token\", \"dummy_chat\")\n    # Force a message_id to avoid network call\n    io._message_id = 123\n    io.text = \"old_text\"\n    io.write(\"new_text\")\n    # One submit call should have been recorded\n    assert len(io.submitted) == 1\n    func, url, data = io.submitted[0]\n    # Verify the URL uses the correct endpoint\n    assert url == f\"{io.API}{io.token}/editMessageText\"\n    # Verify the data payload contains the expected fields\n    assert data[\"chat_id\"] == io.chat_id\n    assert data[\"message_id\"] == 123\n    assert data[\"text\"] == \"`new_text`\"\n    assert data[\"parse_mode\"] == \"MarkdownV2\"\n\n\ndef test_delete_uses_incorrect_url(tmp_path):\n    \"\"\"delete should submit to a malformed URL due to missing f-string formatting.\"\"\"\n    io = DummyTelegramIO(\"dummy_token\", \"dummy_chat\")\n    # Force a message_id to avoid network call\n    io._message_id = 456\n    io.delete()\n    # One submit call should have been recorded\n    assert len(io.submitted) == 1\n    func, url, data = io.submitted[0]\n    # The URL should incorrectly contain the literal '{self.API}' string\n    assert url == '{self.API}{self.token}/deleteMessage'\n    # The data payload should still contain the correct chat_id and message_id\n    assert data[\"chat_id\"] == io.chat_id\n    assert data[\"message_id\"] == 456\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4926189639954828
+}

@@ -1,0 +1,48 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_does_not_set_result_on_cancelled_asyncio_future _____________
+
+    def test_does_not_set_result_on_cancelled_asyncio_future():
+        loop = asyncio.new_event_loop()
+        future = loop.create_future()
+        future.cancel()
+        future_set_result_unless_cancelled(future, 99)
+        assert future.cancelled()
+        with pytest.raises(asyncio.InvalidStateError):
+>           future.result()
+E           asyncio.exceptions.CancelledError
+
+../../../../../../attempts/tornado__tornado.concurrent__future_set_result_unless_cancelled__44__atomic_source/eval0/test_generated.py:23: CancelledError
+__________________ test_works_with_concurrent_futures_future ___________________
+
+    def test_works_with_concurrent_futures_future():
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        future = executor.submit(lambda: None)  # create a Future that is already done
+        # Cancel the future to simulate a cancelled state
+        future.cancel()
+>       future_set_result_unless_cancelled(future, "hello")
+
+../../../../../../attempts/tornado__tornado.concurrent__future_set_result_unless_cancelled__44__atomic_source/eval0/test_generated.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tornado/concurrent.py:196: in future_set_result_unless_cancelled
+    future.set_result(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Future at 0x7f70e739ba60 state=finished returned NoneType>
+result = 'hello'
+
+    def set_result(self, result):
+        """Sets the return value of work associated with the future.
+    
+        Should only be used by Executor implementations and unit tests.
+        """
+        with self._condition:
+            if self._state in {CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED}:
+>               raise InvalidStateError('{}: {!r}'.format(self._state, self))
+E               concurrent.futures._base.InvalidStateError: FINISHED: <Future at 0x7f70e739ba60 state=finished returned NoneType>
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/concurrent/futures/_base.py:546: InvalidStateError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/tornado__tornado.concurrent__future_set_result_unless_cancelled__44__atomic_source/eval0/test_generated.py::test_does_not_set_result_on_cancelled_asyncio_future
+FAILED ../../../../../../attempts/tornado__tornado.concurrent__future_set_result_unless_cancelled__44__atomic_source/eval0/test_generated.py::test_works_with_concurrent_futures_future
+2 failed, 1 passed in 0.17s

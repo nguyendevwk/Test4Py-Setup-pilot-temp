@@ -1,0 +1,31 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_pgettext_context_fallback ________________________
+
+    def test_pgettext_context_fallback():
+        """Test that pgettext falls back to message when context translation missing."""
+        translations = DummyTranslations()
+        locale = GettextLocale("en", translations)
+    
+        # Context translation missing: result should be original message
+        result = locale.pgettext("law", "right")
+        assert result == "right"
+    
+        # Context translation present: simulate by overriding gettext
+        def gettext_with_context(msg):
+            if msg.startswith("law"):
+                return "law:right"
+            return f"translated:{msg}"
+        translations.gettext = gettext_with_context
+    
+        result_with_context = locale.pgettext("law", "right")
+>       assert result_with_context == "law:right"
+E       AssertionError: assert 'right' == 'law:right'
+E         
+E         - law:right
+E         + right
+
+test_generated.py:52: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_pgettext_context_fallback - AssertionError: as...
+1 failed, 2 passed in 0.15s

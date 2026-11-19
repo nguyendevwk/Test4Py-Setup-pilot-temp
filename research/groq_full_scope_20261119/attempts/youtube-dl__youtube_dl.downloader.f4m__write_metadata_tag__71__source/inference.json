@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-220364e8-1a6a-4f27-aee4-45eced5e2f15",
+  "object": "chat.completion",
+  "created": 1795078343,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport pytest\nfrom youtube_dl.downloader.f4m import write_metadata_tag\n\ndef test_write_metadata_tag_empty():\n    \"\"\"When metadata is falsy, nothing is written to the stream.\"\"\"\n    stream = io.BytesIO()\n    write_metadata_tag(stream, None)\n    assert stream.getvalue() == b\"\"\n\ndef test_write_metadata_tag_small():\n    \"\"\"Small metadata writes the correct FLV script tag header and payload.\"\"\"\n    stream = io.BytesIO()\n    metadata = b\"hello\"\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n    # SCRIPT_TAG byte\n    assert data[0:1] == b'\\x12'\n    # 3‑byte length of metadata\n    length_bytes = data[1:4]\n    assert int.from_bytes(length_bytes, \"big\") == len(metadata)\n    # 7 zero bytes\n    assert data[4:11] == b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00'\n    # metadata payload\n    assert data[11:11+len(metadata)] == metadata\n    # final unsigned int: FLV_TAG_HEADER_LEN (11) + metadata length\n    final_len = int.from_bytes(data[11+len(metadata):11+len(metadata)+4], \"big\")\n    assert final_len == 11 + len(metadata)\n\ndef test_write_metadata_tag_large():\n    \"\"\"Large metadata correctly encodes a 24‑bit length and final unsigned int.\"\"\"\n    stream = io.BytesIO()\n    # 300 bytes of metadata to exceed 255 (max 8‑bit)\n    metadata = b'a' * 300\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n    # 3‑byte length should be 300\n    length_bytes = data[1:4]\n    assert int.from_bytes(length_bytes, \"big\") == 300\n    # final unsigned int should be 11 + 300 = 311\n    final_len = int.from_bytes(data[11+len(metadata):11+len(metadata)+4], \"big\")\n    assert final_len == 311\n```",
+        "reasoning": "We need to test write_metadata_tag. It writes to stream. We can create BytesIO, call function with metadata bytes. Check content. Also test when metadata empty: nothing written. Also test boundary: large metadata? maybe length > 255? but write_unsigned_int_24 writes 3 bytes. We can test that length encoded correctly. Let's inspect write_unsigned_int_24 and write_unsigned_int? Not in snippet. But we can assume they exist in same module? Not imported. Might be defined elsewhere. But we can test by reading stream after call. For empty metadata, stream should be empty. For small metadata, check header. For large metadata, ensure length encoded correctly. We'll need to import function. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.102580496,
+    "prompt_tokens": 409,
+    "prompt_time": 0.057760829,
+    "completion_tokens": 599,
+    "completion_time": 0.6565544,
+    "total_tokens": 1008,
+    "total_time": 0.714315229,
+    "completion_tokens_details": {
+      "reasoning_tokens": 149
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg3janepzvt9xx6zfs7za2",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport pytest\nfrom youtube_dl.downloader.f4m import write_metadata_tag\n\ndef test_write_metadata_tag_empty():\n    \"\"\"When metadata is falsy, nothing is written to the stream.\"\"\"\n    stream = io.BytesIO()\n    write_metadata_tag(stream, None)\n    assert stream.getvalue() == b\"\"\n\ndef test_write_metadata_tag_small():\n    \"\"\"Small metadata writes the correct FLV script tag header and payload.\"\"\"\n    stream = io.BytesIO()\n    metadata = b\"hello\"\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n    # SCRIPT_TAG byte\n    assert data[0:1] == b'\\x12'\n    # 3‑byte length of metadata\n    length_bytes = data[1:4]\n    assert int.from_bytes(length_bytes, \"big\") == len(metadata)\n    # 7 zero bytes\n    assert data[4:11] == b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00'\n    # metadata payload\n    assert data[11:11+len(metadata)] == metadata\n    # final unsigned int: FLV_TAG_HEADER_LEN (11) + metadata length\n    final_len = int.from_bytes(data[11+len(metadata):11+len(metadata)+4], \"big\")\n    assert final_len == 11 + len(metadata)\n\ndef test_write_metadata_tag_large():\n    \"\"\"Large metadata correctly encodes a 24‑bit length and final unsigned int.\"\"\"\n    stream = io.BytesIO()\n    # 300 bytes of metadata to exceed 255 (max 8‑bit)\n    metadata = b'a' * 300\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n    # 3‑byte length should be 300\n    length_bytes = data[1:4]\n    assert int.from_bytes(length_bytes, \"big\") == 300\n    # final unsigned int should be 11 + 300 = 311\n    final_len = int.from_bytes(data[11+len(metadata):11+len(metadata)+4], \"big\")\n    assert final_len == 311\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1716957740136422
+}

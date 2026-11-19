@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-1ead017d-ad85-4d94-82c1-da70fffed68c",
+  "object": "chat.completion",
+  "created": 1795079339,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import fwd_normalize\n\ndef test_fwd_normalize_basic_types():\n    \"\"\"Test normal conversion of host, proto, port, and path.\"\"\"\n    input_data = [\n        (\"host\", \"Example.COM\"),\n        (\"proto\", \"HTTPS\"),\n        (\"port\", \"443\"),\n        (\"path\", \"/some%20path/\"),\n        (\"custom\", \"value\"),\n    ]\n    result = fwd_normalize(input_data)\n    assert result == {\n        \"host\": \"example.com\",\n        \"proto\": \"https\",\n        \"port\": 443,\n        \"path\": \"/some path/\",\n        \"custom\": \"value\",\n    }\n\ndef test_fwd_normalize_none_and_invalid_int():\n    \"\"\"Test that None values are ignored and invalid integers are skipped.\"\"\"\n    input_data = [\n        (\"host\", None),          # should be ignored\n        (\"port\", \"not_a_number\"),  # ValueError, should be ignored\n        (\"by\", \"192.168.1.1\"),   # fwd_normalize_address will be called; result depends on implementation\n    ]\n    result = fwd_normalize(input_data)\n    # 'by' key should be present if fwd_normalize_address returns a value; otherwise it may be omitted.\n    # We only assert that host and port are absent.\n    assert \"host\" not in result\n    assert \"port\" not in result\n    # The 'by' key should be present and be a string (implementation dependent)\n    assert \"by\" in result\n    assert isinstance(result[\"by\"], str)\n\ndef test_fwd_normalize_unquote_and_lowercase():\n    \"\"\"Test that percent-encoded paths are unquoted and host/proto are lowercased.\"\"\"\n    input_data = [\n        (\"path\", \"%2Ffoo%2Fbar%20baz\"),\n        (\"host\", \"LOCALHOST\"),\n        (\"proto\", \"HTTP\"),\n    ]\n    result = fwd_normalize(input_data)\n    assert result[\"path\"] == \"/foo/bar baz\"\n    assert result[\"host\"] == \"localhost\"\n    assert result[\"proto\"] == \"http\"\n```",
+        "reasoning": "We need to test fwd_normalize. Need to import from sanic.headers. Write three tests: normal behavior, boundary (e.g., invalid int, None), error (e.g., ValueError). Use tmp_path? not needed. Just test. Use pytest.raises? maybe test that invalid int is ignored. Also test that fwd_normalize_address? Not defined here; assume exists. We'll just test that for key 'by' uses that function. We can mock? cannot mock. But we can provide a value that fwd_normalize_address will process. But we don't know its behavior. Maybe skip that key. Instead test host lower, proto lower, port int, path unquote. Also test that None value is ignored. Also test that invalid int causes skip. Use assert dict equality. Write three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005210454,
+    "prompt_tokens": 443,
+    "prompt_time": 0.01019454,
+    "completion_tokens": 622,
+    "completion_time": 0.763698996,
+    "total_tokens": 1065,
+    "total_time": 0.773893536,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 168
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh1yfkeym85rdyn75hyjna",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import fwd_normalize\n\ndef test_fwd_normalize_basic_types():\n    \"\"\"Test normal conversion of host, proto, port, and path.\"\"\"\n    input_data = [\n        (\"host\", \"Example.COM\"),\n        (\"proto\", \"HTTPS\"),\n        (\"port\", \"443\"),\n        (\"path\", \"/some%20path/\"),\n        (\"custom\", \"value\"),\n    ]\n    result = fwd_normalize(input_data)\n    assert result == {\n        \"host\": \"example.com\",\n        \"proto\": \"https\",\n        \"port\": 443,\n        \"path\": \"/some path/\",\n        \"custom\": \"value\",\n    }\n\ndef test_fwd_normalize_none_and_invalid_int():\n    \"\"\"Test that None values are ignored and invalid integers are skipped.\"\"\"\n    input_data = [\n        (\"host\", None),          # should be ignored\n        (\"port\", \"not_a_number\"),  # ValueError, should be ignored\n        (\"by\", \"192.168.1.1\"),   # fwd_normalize_address will be called; result depends on implementation\n    ]\n    result = fwd_normalize(input_data)\n    # 'by' key should be present if fwd_normalize_address returns a value; otherwise it may be omitted.\n    # We only assert that host and port are absent.\n    assert \"host\" not in result\n    assert \"port\" not in result\n    # The 'by' key should be present and be a string (implementation dependent)\n    assert \"by\" in result\n    assert isinstance(result[\"by\"], str)\n\ndef test_fwd_normalize_unquote_and_lowercase():\n    \"\"\"Test that percent-encoded paths are unquoted and host/proto are lowercased.\"\"\"\n    input_data = [\n        (\"path\", \"%2Ffoo%2Fbar%20baz\"),\n        (\"host\", \"LOCALHOST\"),\n        (\"proto\", \"HTTP\"),\n    ]\n    result = fwd_normalize(input_data)\n    assert result[\"path\"] == \"/foo/bar baz\"\n    assert result[\"host\"] == \"localhost\"\n    assert result[\"proto\"] == \"http\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2132732649915852
+}

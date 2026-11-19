@@ -1,0 +1,126 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_parse_basic_and_meta ___________________________
+
+text = 'Short description.\n\nLong description spanning\nmultiple lines.\n\n:param int x: The first parameter.\n:param y: The... defaults to 10.\n:type z: str\n:rtype: bool\n:raises ValueError: If invalid.\n:deprecated 1.2.3 This will be removed.'
+
+    def parse(text: T.Optional[str]) -> Docstring:
+        """Parse the ReST-style docstring into its components.
+    
+        :returns: parsed docstring
+        """
+        ret = Docstring(style=DocstringStyle.REST)
+        if not text:
+            return ret
+    
+        text = inspect.cleandoc(text)
+        match = re.search("^:", text, flags=re.M)
+        if match:
+            desc_chunk = text[: match.start()]
+            meta_chunk = text[match.start() :]
+        else:
+            desc_chunk = text
+            meta_chunk = ""
+    
+        parts = desc_chunk.split("\n", 1)
+        ret.short_description = parts[0] or None
+        if len(parts) > 1:
+            long_desc_chunk = parts[1] or ""
+            ret.blank_after_short_description = long_desc_chunk.startswith("\n")
+            ret.blank_after_long_description = long_desc_chunk.endswith("\n\n")
+            ret.long_description = long_desc_chunk.strip() or None
+    
+        types = {}
+        rtypes = {}
+        for match in re.finditer(
+            r"(^:.*?)(?=^:|\Z)", meta_chunk, flags=re.S | re.M
+        ):
+            chunk = match.group(0)
+            if not chunk:
+                continue
+            try:
+>               args_chunk, desc_chunk = chunk.lstrip(":").split(":", 1)
+E               ValueError: not enough values to unpack (expected 2, got 1)
+
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/rest.py:137: ValueError
+
+The above exception was the direct cause of the following exception:
+
+    def test_parse_basic_and_meta():
+        doc = """
+        Short description.
+    
+        Long description spanning
+        multiple lines.
+    
+        :param int x: The first parameter.
+        :param y: The second parameter, defaults to 10.
+        :type z: str
+        :rtype: bool
+        :raises ValueError: If invalid.
+        :deprecated 1.2.3 This will be removed.
+        """
+>       result = parse(doc)
+
+test_generated.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = 'Short description.\n\nLong description spanning\nmultiple lines.\n\n:param int x: The first parameter.\n:param y: The... defaults to 10.\n:type z: str\n:rtype: bool\n:raises ValueError: If invalid.\n:deprecated 1.2.3 This will be removed.'
+
+    def parse(text: T.Optional[str]) -> Docstring:
+        """Parse the ReST-style docstring into its components.
+    
+        :returns: parsed docstring
+        """
+        ret = Docstring(style=DocstringStyle.REST)
+        if not text:
+            return ret
+    
+        text = inspect.cleandoc(text)
+        match = re.search("^:", text, flags=re.M)
+        if match:
+            desc_chunk = text[: match.start()]
+            meta_chunk = text[match.start() :]
+        else:
+            desc_chunk = text
+            meta_chunk = ""
+    
+        parts = desc_chunk.split("\n", 1)
+        ret.short_description = parts[0] or None
+        if len(parts) > 1:
+            long_desc_chunk = parts[1] or ""
+            ret.blank_after_short_description = long_desc_chunk.startswith("\n")
+            ret.blank_after_long_description = long_desc_chunk.endswith("\n\n")
+            ret.long_description = long_desc_chunk.strip() or None
+    
+        types = {}
+        rtypes = {}
+        for match in re.finditer(
+            r"(^:.*?)(?=^:|\Z)", meta_chunk, flags=re.S | re.M
+        ):
+            chunk = match.group(0)
+            if not chunk:
+                continue
+            try:
+                args_chunk, desc_chunk = chunk.lstrip(":").split(":", 1)
+            except ValueError as ex:
+>               raise ParseError(
+                    f'Error parsing meta information near "{chunk}".'
+                ) from ex
+E               docstring_parser.common.ParseError: Error parsing meta information near ":deprecated 1.2.3 This will be removed.".
+
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/rest.py:139: ParseError
+__________________ test_parse_boundary_empty_and_missing_meta __________________
+
+    def test_parse_boundary_empty_and_missing_meta():
+        # Empty docstring
+>       assert parse("") == parse(None)
+E       AssertionError: assert <docstring_parser.common.Docstring object at 0x7f21231a1b10> == <docstring_parser.common.Docstring object at 0x7f21231a1bd0>
+E        +  where <docstring_parser.common.Docstring object at 0x7f21231a1b10> = parse('')
+E        +  and   <docstring_parser.common.Docstring object at 0x7f21231a1bd0> = parse(None)
+
+test_generated.py:58: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_basic_and_meta - docstring_parser.common...
+FAILED test_generated.py::test_parse_boundary_empty_and_missing_meta - Assert...
+2 failed, 1 passed in 0.15s

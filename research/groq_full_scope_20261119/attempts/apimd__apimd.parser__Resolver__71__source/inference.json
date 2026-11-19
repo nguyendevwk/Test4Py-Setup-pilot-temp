@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-9a9d93e1-b9e2-4f3d-aee5-76b820369067",
+  "object": "chat.completion",
+  "created": 1795075957,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import Resolver\n\ndef _transform(code: str, root: str = \"\", alias: dict = None, self_ty: str = \"\") -> ast.AST:\n    \"\"\"Parse code, apply Resolver, and return the transformed AST.\"\"\"\n    alias = alias or {}\n    tree = ast.parse(code)\n    resolver = Resolver(root=root, alias=alias, self_ty=self_ty)\n    return resolver.visit(tree)\n\ndef test_visit_constant_resolves_name(tmp_path):\n    # Create a constant string that is a valid name and should be resolved\n    code = \"x = 'y'\"\n    # Alias 'y' to 'z' so that the constant should resolve to Name('z')\n    alias = {\"y\": \"z\"}\n    transformed = _transform(code, alias=alias)\n    # Find the assignment target and value\n    assign = transformed.body[0]\n    assert isinstance(assign, ast.Assign)\n    assert isinstance(assign.value, ast.Name)\n    assert assign.value.id == \"z\"\n\ndef test_visit_name_alias_and_self(tmp_path):\n    # Test that a name matching self_ty is replaced with 'Self'\n    code = \"x = a\"\n    alias = {\"a\": \"b\"}\n    transformed = _transform(code, alias=alias, self_ty=\"a\")\n    assign = transformed.body[0]\n    # Since 'a' is self_ty, it should become Name('Self')\n    assert isinstance(assign.value, ast.Name)\n    assert assign.value.id == \"Self\"\n\n    # Test that a name not in alias remains unchanged\n    code2 = \"x = c\"\n    transformed2 = _transform(code2, alias=alias)\n    assign2 = transformed2.body[0]\n    assert isinstance(assign2.value, ast.Name)\n    assert assign2.value.id == \"c\"\n\ndef test_visit_subscript_union_and_optional(tmp_path):\n    # Test Union conversion: Union[int, str] -> int | str\n    code = \"x: Union[int, str] = None\"\n    alias = {\"Union\": \"typing.Union\"}\n    transformed = _transform(code, alias=alias)\n    ann = transformed.body[0].annotation\n    # Should be a BinOp with BitOr between int and str\n    assert isinstance(ann, ast.BinOp)\n    assert isinstance(ann.op, ast.BitOr)\n    assert isinstance(ann.left, ast.Name) and ann.left.id == \"int\"\n    assert isinstance(ann.right, ast.Name) and ann.right.id == \"str\"\n\n    # Test Optional conversion: Optional[int] -> int | None\n    code_opt = \"y: Optional[int] = None\"\n    alias_opt = {\"Optional\": \"typing.Optional\"}\n    transformed_opt = _transform(code_opt, alias=alias_opt)\n    ann_opt = transformed_opt.body[0].annotation\n    assert isinstance(ann_opt, ast.BinOp)\n    assert isinstance(ann_opt.op, ast.BitOr)\n    assert isinstance(ann_opt.left, ast.Name) and ann_opt.left.id == \"int\"\n    assert isinstance(ann_opt.right, ast.Constant) and ann_opt.right.value is None\n```",
+        "reasoning": "Need tests for Resolver. Use tmp_path to create a module? We can instantiate Resolver and apply to AST of code string. Test visit_Constant with string that is valid name. Test visit_Name alias replacement. Test visit_Subscript for Union. Use ast.parse and transformer."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051700004,
+    "prompt_tokens": 953,
+    "prompt_time": 0.073329512,
+    "completion_tokens": 717,
+    "completion_time": 0.792318012,
+    "total_tokens": 1670,
+    "total_time": 0.865647524,
+    "completion_tokens_details": {
+      "reasoning_tokens": 56
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sdtqfyeeer7sssfc8ss7h0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import Resolver\n\ndef _transform(code: str, root: str = \"\", alias: dict = None, self_ty: str = \"\") -> ast.AST:\n    \"\"\"Parse code, apply Resolver, and return the transformed AST.\"\"\"\n    alias = alias or {}\n    tree = ast.parse(code)\n    resolver = Resolver(root=root, alias=alias, self_ty=self_ty)\n    return resolver.visit(tree)\n\ndef test_visit_constant_resolves_name(tmp_path):\n    # Create a constant string that is a valid name and should be resolved\n    code = \"x = 'y'\"\n    # Alias 'y' to 'z' so that the constant should resolve to Name('z')\n    alias = {\"y\": \"z\"}\n    transformed = _transform(code, alias=alias)\n    # Find the assignment target and value\n    assign = transformed.body[0]\n    assert isinstance(assign, ast.Assign)\n    assert isinstance(assign.value, ast.Name)\n    assert assign.value.id == \"z\"\n\ndef test_visit_name_alias_and_self(tmp_path):\n    # Test that a name matching self_ty is replaced with 'Self'\n    code = \"x = a\"\n    alias = {\"a\": \"b\"}\n    transformed = _transform(code, alias=alias, self_ty=\"a\")\n    assign = transformed.body[0]\n    # Since 'a' is self_ty, it should become Name('Self')\n    assert isinstance(assign.value, ast.Name)\n    assert assign.value.id == \"Self\"\n\n    # Test that a name not in alias remains unchanged\n    code2 = \"x = c\"\n    transformed2 = _transform(code2, alias=alias)\n    assign2 = transformed2.body[0]\n    assert isinstance(assign2.value, ast.Name)\n    assert assign2.value.id == \"c\"\n\ndef test_visit_subscript_union_and_optional(tmp_path):\n    # Test Union conversion: Union[int, str] -> int | str\n    code = \"x: Union[int, str] = None\"\n    alias = {\"Union\": \"typing.Union\"}\n    transformed = _transform(code, alias=alias)\n    ann = transformed.body[0].annotation\n    # Should be a BinOp with BitOr between int and str\n    assert isinstance(ann, ast.BinOp)\n    assert isinstance(ann.op, ast.BitOr)\n    assert isinstance(ann.left, ast.Name) and ann.left.id == \"int\"\n    assert isinstance(ann.right, ast.Name) and ann.right.id == \"str\"\n\n    # Test Optional conversion: Optional[int] -> int | None\n    code_opt = \"y: Optional[int] = None\"\n    alias_opt = {\"Optional\": \"typing.Optional\"}\n    transformed_opt = _transform(code_opt, alias=alias_opt)\n    ann_opt = transformed_opt.body[0].annotation\n    assert isinstance(ann_opt, ast.BinOp)\n    assert isinstance(ann_opt.op, ast.BitOr)\n    assert isinstance(ann_opt.left, ast.Name) and ann_opt.left.id == \"int\"\n    assert isinstance(ann_opt.right, ast.Constant) and ann_opt.right.value is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2015981079894118
+}

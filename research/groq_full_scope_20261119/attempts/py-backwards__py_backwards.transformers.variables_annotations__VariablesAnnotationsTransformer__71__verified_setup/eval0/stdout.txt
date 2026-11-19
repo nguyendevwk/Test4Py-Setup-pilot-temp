@@ -1,0 +1,30 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_transform_with_value_and_type_comment __________________
+
+    def test_transform_with_value_and_type_comment():
+        source = "a: int = 10\nb: int\n"
+        tree = typed_ast.parse(source)
+        result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)
+    
+        # The tree should have changed
+        assert result.tree_changed is True
+    
+        # After transformation, only the assignment for `a` should remain
+        assert len(result.tree.body) == 1
+        node = result.tree.body[0]
+        assert isinstance(node, typed_ast.Assign)
+        # The target should be the name `a`
+        assert isinstance(node.targets[0], typed_ast.Name)
+        assert node.targets[0].id == "a"
+        # The value should be the constant 10
+>       assert isinstance(node.value, typed_ast.Constant)
+E       AssertionError: assert False
+E        +  where False = isinstance(<typed_ast._ast3.Num object at 0x7ff6d2bdd0f0>, <class 'typed_ast._ast3.Constant'>)
+E        +    where <typed_ast._ast3.Num object at 0x7ff6d2bdd0f0> = <typed_ast._ast3.Assign object at 0x7ff6d2bdd540>.value
+E        +    and   <class 'typed_ast._ast3.Constant'> = typed_ast.Constant
+
+test_generated.py:25: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_transform_with_value_and_type_comment - Assert...
+1 failed, 2 passed in 0.15s

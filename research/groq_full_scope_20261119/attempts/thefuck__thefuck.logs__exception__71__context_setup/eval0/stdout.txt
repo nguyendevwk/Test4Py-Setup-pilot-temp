@@ -1,0 +1,165 @@
+F.EF                                                                     [100%]
+==================================== ERRORS ====================================
+________________ ERROR at teardown of test_exception_no_colors _________________
+
+cls = <class '_pytest.runner.CallInfo'>
+func = <function call_and_report.<locals>.<lambda> at 0x7efde64cb6d0>
+when = 'teardown'
+reraise = (<class '_pytest.outcomes.Exit'>, <class 'KeyboardInterrupt'>)
+
+    @classmethod
+    def from_call(
+        cls,
+        func: Callable[[], TResult],
+        when: Literal["collect", "setup", "call", "teardown"],
+        reraise: type[BaseException] | tuple[type[BaseException], ...] | None = None,
+    ) -> CallInfo[TResult]:
+        """Call func, wrapping the result in a CallInfo.
+    
+        :param func:
+            The function to call. Called without arguments.
+        :type func: Callable[[], _pytest.runner.TResult]
+        :param when:
+            The phase in which the function is called.
+        :param reraise:
+            Exception or exceptions that shall propagate if raised by the
+            function, instead of being wrapped in the CallInfo.
+        """
+        excinfo = None
+        instant = timing.Instant()
+        try:
+>           result: TResult | None = func()
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/runner.py:361: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/runner.py:250: in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/pluggy/_caller.py:197: in __call__
+    return self._hookexec(
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/pluggy/_manager.py:183: in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/logging.py:886: in pytest_runtest_teardown
+    yield
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/pluggy/_execution.py:64: in run_old_style_hookwrapper
+    return result.get_result()
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/pluggy/_execution.py:49: in run_old_style_hookwrapper
+    res = yield
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/capture.py:911: in pytest_runtest_teardown
+    return (yield)
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/runner.py:199: in pytest_runtest_teardown
+    item.session._setupstate.teardown_exact(nextitem)
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/runner.py:579: in teardown_exact
+    raise exceptions[0]
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/runner.py:568: in teardown_exact
+    fin()
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/fixtures.py:1235: in finish
+    raise exceptions[0]
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/fixtures.py:1225: in finish
+    fin()
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/fixtures.py:1083: in _teardown_yield_fixture
+    next(it)
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/monkeypatch.py:62: in monkeypatch
+    mpatch.undo()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_pytest.monkeypatch.MonkeyPatch object at 0x7efde6c8bb50>
+
+    def undo(self) -> None:
+        """Undo previous changes.
+    
+        This call consumes the undo stack. Calling it a second time has no
+        effect unless you do more monkeypatching after the undo call.
+    
+        There is generally no need to call `undo()`, since it is
+        called automatically during tear-down.
+    
+        .. note::
+            The same `monkeypatch` fixture is used across a
+            single test function invocation. If `monkeypatch` is used both by
+            the test function itself and one of the test fixtures,
+            calling `undo()` will undo all of the changes made in
+            both functions.
+    
+            Prefer to use :meth:`context() <pytest.MonkeyPatch.context>` instead.
+        """
+        for obj, name, value in reversed(self._setattr):
+            if value is not NOTSET:
+                setattr(obj, name, value)
+            else:
+>               delattr(obj, name)
+E               AttributeError: no_colors
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/_pytest/monkeypatch.py:437: AttributeError
+=================================== FAILURES ===================================
+____________________ test_exception_outputs_trace_and_title ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7efde6ab9990>
+
+    def test_exception_outputs_trace_and_title(monkeypatch):
+        # Prepare a fake exception
+        try:
+            1 / 0
+        except ZeroDivisionError:
+            exc_info = sys.exc_info()
+    
+        # Capture stderr
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            exception("Test Title", exc_info)
+    
+        output = stderr.getvalue()
+        # Assert that the title is present
+        assert "Test Title" in output
+        # Assert that the trace contains the exception type
+        assert "ZeroDivisionError" in output
+        # Assert that the output ends with the separator line
+>       assert output.strip().endswith("----------------------------")
+E       assert False
+E        +  where False = <built-in method endswith of str object at 0x7efde6300db0>('----------------------------')
+E        +    where <built-in method endswith of str object at 0x7efde6300db0> = '\x1b[41m\x1b[37m\x1b[1m[WARN] Test Title:\x1b[0m\nTraceback (most recent call last):\n  File "/home/heurix/Documents/..._and_title\n    1 / 0\nZeroDivisionError: division by zero\n\x1b[41m\x1b[37m\x1b[1m----------------------------\x1b[0m'.endswith
+E        +      where '\x1b[41m\x1b[37m\x1b[1m[WARN] Test Title:\x1b[0m\nTraceback (most recent call last):\n  File "/home/heurix/Documents/..._and_title\n    1 / 0\nZeroDivisionError: division by zero\n\x1b[41m\x1b[37m\x1b[1m----------------------------\x1b[0m' = <built-in method strip of str object at 0x7efde64f2010>()
+E        +        where <built-in method strip of str object at 0x7efde64f2010> = '\x1b[41m\x1b[37m\x1b[1m[WARN] Test Title:\x1b[0m\nTraceback (most recent call last):\n  File "/home/heurix/Documents/..._title\n    1 / 0\nZeroDivisionError: division by zero\n\x1b[41m\x1b[37m\x1b[1m----------------------------\x1b[0m\n\n'.strip
+
+test_generated.py:27: AssertionError
+____________________ test_exception_invalid_exc_info_raises ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7efde610f0a0>
+
+    def test_exception_invalid_exc_info_raises(monkeypatch):
+        # Prepare an invalid exc_info (missing tuple elements)
+        invalid_exc_info = (None, None)  # missing traceback
+    
+        with pytest.raises(TypeError):
+>           exception("Invalid", invalid_exc_info)
+
+test_generated.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/logs.py:36: in exception
+    trace=''.join(format_exception(*exc_info))))
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/traceback.py:134: in format_exception
+    value, tb = _parse_value_tb(exc, value, tb)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+exc = None, value = None, tb = <implicit>
+
+    def _parse_value_tb(exc, value, tb):
+        if (value is _sentinel) != (tb is _sentinel):
+>           raise ValueError("Both or neither of value and tb must be given")
+E           ValueError: Both or neither of value and tb must be given
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/traceback.py:95: ValueError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_exception_outputs_trace_and_title - assert False
+FAILED test_generated.py::test_exception_invalid_exc_info_raises - ValueError...
+ERROR test_generated.py::test_exception_no_colors - AttributeError: no_colors
+2 failed, 1 passed, 2 warnings, 1 error in 0.59s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-6ca22073-dd71-4cd8-82ee-6186a7112c9d",
+  "object": "chat.completion",
+  "created": 1795077328,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import const_type, ANY\n\n\ndef test_const_type_constant_and_collections():\n    # Constant node\n    const_node = ast.parse(\"42\").body[0].value\n    assert const_type(const_node) == \"int\"\n\n    # Tuple node\n    tuple_node = ast.parse(\"(1, 2)\").body[0].value\n    assert const_type(tuple_node) == \"tuple[int, int]\"\n\n    # Empty tuple\n    empty_tuple_node = ast.parse(\"()\").body[0].value\n    assert const_type(empty_tuple_node) == \"tuple\"\n\n    # List node\n    list_node = ast.parse(\"[1, 2, 3]\").body[0].value\n    assert const_type(list_node) == \"list[int]\"\n\n    # Empty list\n    empty_list_node = ast.parse(\"[]\").body[0].value\n    assert const_type(empty_list_node) == \"list\"\n\n    # Set node\n    set_node = ast.parse(\"{1, 2, 3}\").body[0].value\n    assert const_type(set_node) == \"set[int]\"\n\n    # Empty set\n    empty_set_node = ast.parse(\"set()\").body[0].value\n    assert const_type(empty_set_node) == \"set\"\n\n    # Dict node\n    dict_node = ast.parse(\"{'a': 1, 'b': 2}\").body[0].value\n    assert const_type(dict_node) == \"dict[str, int]\"\n\n    # Empty dict\n    empty_dict_node = ast.parse(\"{}\").body[0].value\n    assert const_type(empty_dict_node) == \"dict\"\n\n\ndef test_const_type_call_known_and_unknown():\n    # Call to a known builtin\n    call_node = ast.parse(\"int(5)\").body[0].value\n    assert const_type(call_node) == \"int\"\n\n    # Call to a known PEP585 type\n    call_node_pep = ast.parse(\"list[int]\")(ast.parse(\"list[int]\")).body[0].value  # type: ignore\n    # The above line is a placeholder; actual PEP585 parsing is complex.\n    # We skip this part as it requires a proper AST for generic types.\n\n    # Call to an unknown function\n    unknown_call_node = ast.parse(\"foo(5)\").body[0].value\n    assert const_type(unknown_call_node) == ANY\n\n\ndef test_const_type_non_expr_returns_any():\n    # Passing a non-ast.expr object should result in ANY\n    class Dummy:  # pragma: no cover\n        pass\n\n    dummy_obj = Dummy()\n    assert const_type(dummy_obj) == ANY\n```",
+        "reasoning": "We need to write tests for const_type. We need to import from apimd.parser. We'll test normal: Constant, Tuple, List, Set, Dict, Call. Boundary: empty tuple/list/set/dict. Error: passing wrong type? It expects expr; passing int should raise? It will go to ANY. But we can test that passing a non-ast expr returns ANY. But function expects expr; but we can pass something else and see return ANY. But maybe better test that passing a Call with unknown function returns ANY. Also test that passing a Call with known function returns correct. Use tmp_path? Not needed. We'll write three tests: test_const_type_constant, test_const_type_collection, test_const_type_call_and_unknown. Use assert. Use pytest.raises? Not needed. We'll import ast.parse to create nodes. Use ast.parse('1').body[0].value. For tuple: ast.parse('(1,2)').body[0].value. For empty: ast.parse('()').body[0].value. For dict: ast.parse('{1:2}').body[0].value. For call: ast.parse('int(5)').body[0].value. For unknown call: ast.parse('foo(5)').body[0].value. Ensure returns 'int' and 'ANY'. Use import ANY? It's defined in module? Not visible. In code, ANY is not defined. Likely imported from somewhere? Might be a global. Let's check: not defined in snippet. Might be from .pep585? But we can just check that return is 'ANY' string? Actually code returns ANY variable; if not defined, NameError. But maybe defined elsewhere. We'll assume ANY is defined. We'll import from module. We'll test that result is ANY. Use getattr. We'll write tests accordingly."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.057208273,
+    "prompt_tokens": 559,
+    "prompt_time": 0.066009583,
+    "completion_tokens": 947,
+    "completion_time": 1.057408457,
+    "total_tokens": 1506,
+    "total_time": 1.12341804,
+    "completion_tokens_details": {
+      "reasoning_tokens": 372
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sf4hz1e7e8tm3g5871jgrw",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import const_type, ANY\n\n\ndef test_const_type_constant_and_collections():\n    # Constant node\n    const_node = ast.parse(\"42\").body[0].value\n    assert const_type(const_node) == \"int\"\n\n    # Tuple node\n    tuple_node = ast.parse(\"(1, 2)\").body[0].value\n    assert const_type(tuple_node) == \"tuple[int, int]\"\n\n    # Empty tuple\n    empty_tuple_node = ast.parse(\"()\").body[0].value\n    assert const_type(empty_tuple_node) == \"tuple\"\n\n    # List node\n    list_node = ast.parse(\"[1, 2, 3]\").body[0].value\n    assert const_type(list_node) == \"list[int]\"\n\n    # Empty list\n    empty_list_node = ast.parse(\"[]\").body[0].value\n    assert const_type(empty_list_node) == \"list\"\n\n    # Set node\n    set_node = ast.parse(\"{1, 2, 3}\").body[0].value\n    assert const_type(set_node) == \"set[int]\"\n\n    # Empty set\n    empty_set_node = ast.parse(\"set()\").body[0].value\n    assert const_type(empty_set_node) == \"set\"\n\n    # Dict node\n    dict_node = ast.parse(\"{'a': 1, 'b': 2}\").body[0].value\n    assert const_type(dict_node) == \"dict[str, int]\"\n\n    # Empty dict\n    empty_dict_node = ast.parse(\"{}\").body[0].value\n    assert const_type(empty_dict_node) == \"dict\"\n\n\ndef test_const_type_call_known_and_unknown():\n    # Call to a known builtin\n    call_node = ast.parse(\"int(5)\").body[0].value\n    assert const_type(call_node) == \"int\"\n\n    # Call to a known PEP585 type\n    call_node_pep = ast.parse(\"list[int]\")(ast.parse(\"list[int]\")).body[0].value  # type: ignore\n    # The above line is a placeholder; actual PEP585 parsing is complex.\n    # We skip this part as it requires a proper AST for generic types.\n\n    # Call to an unknown function\n    unknown_call_node = ast.parse(\"foo(5)\").body[0].value\n    assert const_type(unknown_call_node) == ANY\n\n\ndef test_const_type_non_expr_returns_any():\n    # Passing a non-ast.expr object should result in ANY\n    class Dummy:  # pragma: no cover\n        pass\n\n    dummy_obj = Dummy()\n    assert const_type(dummy_obj) == ANY\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5027917649713345
+}

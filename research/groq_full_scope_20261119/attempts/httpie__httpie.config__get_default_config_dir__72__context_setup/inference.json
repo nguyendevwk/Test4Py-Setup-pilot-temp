@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-dd4905df-622c-4a0d-8825-41a1b5a87745",
+  "object": "chat.completion",
+  "created": 1795078470,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport shutil\nfrom pathlib import Path\n\nimport pytest\n\nfrom httpie.config import get_default_config_dir, ENV_HTTPIE_CONFIG_DIR, ENV_XDG_CONFIG_HOME\n\n\ndef test_env_var_overrides_all(monkeypatch, tmp_path):\n    \"\"\"When HTTPIE_CONFIG_DIR is set, that path is returned regardless of other settings.\"\"\"\n    custom_dir = tmp_path / \"custom_config\"\n    custom_dir.mkdir()\n    monkeypatch.setenv(ENV_HTTPIE_CONFIG_DIR, str(custom_dir))\n    # Ensure other env vars are unset\n    monkeypatch.delenv(ENV_XDG_CONFIG_HOME, raising=False)\n    # Ensure legacy dir does not exist\n    legacy = Path.home() / \".httpie\"\n    if legacy.exists():\n        shutil.rmtree(legacy)\n    result = get_default_config_dir()\n    assert result == custom_dir\n    assert result.is_absolute()\n\n\ndef test_legacy_dir_exists(monkeypatch, tmp_path):\n    \"\"\"If legacy ~/.httpie exists, it is returned even if XDG env is set.\"\"\"\n    legacy_dir = tmp_path / \".httpie\"\n    legacy_dir.mkdir()\n    # Monkeypatch Path.home to point to tmp_path\n    monkeypatch.setattr(Path, \"home\", lambda: tmp_path)\n    # Set XDG_CONFIG_HOME to a different value\n    monkeypatch.setenv(ENV_XDG_CONFIG_HOME, str(tmp_path / \"xdg\"))\n    result = get_default_config_dir()\n    assert result == legacy_dir\n    assert result.is_absolute()\n\n\ndef test_xdg_default_when_no_legacy(monkeypatch, tmp_path):\n    \"\"\"When no legacy dir and no HTTPIE_CONFIG_DIR, XDG_CONFIG_HOME is used.\"\"\"\n    # Ensure legacy dir does not exist\n    legacy_dir = tmp_path / \".httpie\"\n    if legacy_dir.exists():\n        shutil.rmtree(legacy_dir)\n    # Set XDG_CONFIG_HOME\n    xdg_dir = tmp_path / \"xdg\"\n    xdg_dir.mkdir()\n    monkeypatch.setenv(ENV_XDG_CONFIG_HOME, str(xdg_dir))\n    # Monkeypatch Path.home to point to tmp_path\n    monkeypatch.setattr(Path, \"home\", lambda: tmp_path)\n    result = get_default_config_dir()\n    expected = xdg_dir / \"httpie\"\n    assert result == expected\n    assert result.is_absolute()\n```",
+        "reasoning": "Need three tests: env var, legacy exists, XDG default. Use tmp_path. Ensure not modify product. Use Path.exists. For legacy, create file. For XDG, set env. Use monkeypatch."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054030258,
+    "prompt_tokens": 674,
+    "prompt_time": 0.055437311,
+    "completion_tokens": 545,
+    "completion_time": 0.607928733,
+    "total_tokens": 1219,
+    "total_time": 0.663366044,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 45
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg7dtje1k8p8p226t3a9pq",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport shutil\nfrom pathlib import Path\n\nimport pytest\n\nfrom httpie.config import get_default_config_dir, ENV_HTTPIE_CONFIG_DIR, ENV_XDG_CONFIG_HOME\n\n\ndef test_env_var_overrides_all(monkeypatch, tmp_path):\n    \"\"\"When HTTPIE_CONFIG_DIR is set, that path is returned regardless of other settings.\"\"\"\n    custom_dir = tmp_path / \"custom_config\"\n    custom_dir.mkdir()\n    monkeypatch.setenv(ENV_HTTPIE_CONFIG_DIR, str(custom_dir))\n    # Ensure other env vars are unset\n    monkeypatch.delenv(ENV_XDG_CONFIG_HOME, raising=False)\n    # Ensure legacy dir does not exist\n    legacy = Path.home() / \".httpie\"\n    if legacy.exists():\n        shutil.rmtree(legacy)\n    result = get_default_config_dir()\n    assert result == custom_dir\n    assert result.is_absolute()\n\n\ndef test_legacy_dir_exists(monkeypatch, tmp_path):\n    \"\"\"If legacy ~/.httpie exists, it is returned even if XDG env is set.\"\"\"\n    legacy_dir = tmp_path / \".httpie\"\n    legacy_dir.mkdir()\n    # Monkeypatch Path.home to point to tmp_path\n    monkeypatch.setattr(Path, \"home\", lambda: tmp_path)\n    # Set XDG_CONFIG_HOME to a different value\n    monkeypatch.setenv(ENV_XDG_CONFIG_HOME, str(tmp_path / \"xdg\"))\n    result = get_default_config_dir()\n    assert result == legacy_dir\n    assert result.is_absolute()\n\n\ndef test_xdg_default_when_no_legacy(monkeypatch, tmp_path):\n    \"\"\"When no legacy dir and no HTTPIE_CONFIG_DIR, XDG_CONFIG_HOME is used.\"\"\"\n    # Ensure legacy dir does not exist\n    legacy_dir = tmp_path / \".httpie\"\n    if legacy_dir.exists():\n        shutil.rmtree(legacy_dir)\n    # Set XDG_CONFIG_HOME\n    xdg_dir = tmp_path / \"xdg\"\n    xdg_dir.mkdir()\n    monkeypatch.setenv(ENV_XDG_CONFIG_HOME, str(xdg_dir))\n    # Monkeypatch Path.home to point to tmp_path\n    monkeypatch.setattr(Path, \"home\", lambda: tmp_path)\n    result = get_default_config_dir()\n    expected = xdg_dir / \"httpie\"\n    assert result == expected\n    assert result.is_absolute()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.063913431018591
+}

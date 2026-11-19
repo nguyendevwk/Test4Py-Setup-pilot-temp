@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-f3c71e78-215b-48fc-8118-34f5f10475c2",
+  "object": "chat.completion",
+  "created": 1795079652,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport sys\nimport time\nimport threading\nimport types\nimport pytest\n\n# Import the target function and the module to patch globals\nfrom httpie.uploads import observe_stdin_for_data_thread, is_windows\n\n# Helper to capture stderr output\nclass StderrCapture(io.StringIO):\n    def __enter__(self):\n        self._stdout = sys.stderr\n        sys.stderr = self\n        return self\n\n    def __exit__(self, exc_type, exc_val, exc_tb):\n        sys.stderr = self._stdout\n\n@pytest.fixture\ndef env():\n    \"\"\"Simple mock Environment with a stderr attribute.\"\"\"\n    class MockEnv:\n        def __init__(self):\n            self.stderr = io.StringIO()\n    return MockEnv()\n\ndef test_warning_emitted_after_timeout(monkeypatch, env, tmp_path):\n    \"\"\"When no data is read within READ_THRESHOLD, a warning is written.\"\"\"\n    # Ensure we are not on Windows\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    # Set a small threshold for quick test\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0.1)\n    # Create a dummy file object (not used by the function)\n    dummy_file = tmp_path / \"dummy.txt\"\n    dummy_file.write_text(\"test\")\n    file_obj = dummy_file.open()\n    read_event = threading.Event()\n\n    observe_stdin_for_data_thread(env, file_obj, read_event)\n\n    # Wait longer than threshold to allow thread to run\n    time.sleep(0.2)\n    # The warning should be present in env.stderr\n    output = env.stderr.getvalue()\n    assert \"> warning: no stdin data read in 0.1s\" in output\n    assert \"httpie.io/docs/cli/best-practices\" in output\n\ndef test_no_warning_when_event_set(monkeypatch, env, tmp_path):\n    \"\"\"If the read_event is set before the timeout, no warning is emitted.\"\"\"\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0.1)\n    dummy_file = tmp_path / \"dummy.txt\"\n    dummy_file.write_text(\"test\")\n    file_obj = dummy_file.open()\n    read_event = threading.Event()\n    read_event.set()  # Simulate data already read\n\n    observe_stdin_for_data_thread(env, file_obj, read_event)\n\n    time.sleep(0.2)\n    output = env.stderr.getvalue()\n    assert output == \"\"\n\ndef test_no_thread_when_threshold_zero(monkeypatch, env, tmp_path):\n    \"\"\"When READ_THRESHOLD is 0, the function returns immediately without starting a thread.\"\"\"\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0)\n    dummy_file = tmp_path / \"dummy.txt\"\n    dummy_file.write_text(\"test\")\n    file_obj = dummy_file.open()\n    read_event = threading.Event()\n\n    observe_stdin_for_data_thread(env, file_obj, read_event)\n\n    # No thread should be running; we can check by ensuring no warning after a delay\n    time.sleep(0.2)\n    output = env.stderr.getvalue()\n    assert output == \"\"\n```",
+        "reasoning": "Need tests for observe_stdin_for_data_thread. We can simulate non-windows by patching is_windows to False. Also need READ_THRESHOLD variable defined somewhere? It's not imported; likely global in module. We can patch it. Use tmp_path for file? file param not used. We test that thread writes warning after timeout. Use threading.Event not set. Use small threshold. Capture stderr via StringIO. Ensure warning printed. Also test that if event set before timeout, no warning. Third test: if READ_THRESHOLD==0, no thread. Use monkeypatch."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004852134,
+    "prompt_tokens": 552,
+    "prompt_time": 0.00370441,
+    "completion_tokens": 808,
+    "completion_time": 0.878884567,
+    "total_tokens": 1360,
+    "total_time": 0.882588977,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 115
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7shbg4fe73rw4h8mveb82j8",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport sys\nimport time\nimport threading\nimport types\nimport pytest\n\n# Import the target function and the module to patch globals\nfrom httpie.uploads import observe_stdin_for_data_thread, is_windows\n\n# Helper to capture stderr output\nclass StderrCapture(io.StringIO):\n    def __enter__(self):\n        self._stdout = sys.stderr\n        sys.stderr = self\n        return self\n\n    def __exit__(self, exc_type, exc_val, exc_tb):\n        sys.stderr = self._stdout\n\n@pytest.fixture\ndef env():\n    \"\"\"Simple mock Environment with a stderr attribute.\"\"\"\n    class MockEnv:\n        def __init__(self):\n            self.stderr = io.StringIO()\n    return MockEnv()\n\ndef test_warning_emitted_after_timeout(monkeypatch, env, tmp_path):\n    \"\"\"When no data is read within READ_THRESHOLD, a warning is written.\"\"\"\n    # Ensure we are not on Windows\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    # Set a small threshold for quick test\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0.1)\n    # Create a dummy file object (not used by the function)\n    dummy_file = tmp_path / \"dummy.txt\"\n    dummy_file.write_text(\"test\")\n    file_obj = dummy_file.open()\n    read_event = threading.Event()\n\n    observe_stdin_for_data_thread(env, file_obj, read_event)\n\n    # Wait longer than threshold to allow thread to run\n    time.sleep(0.2)\n    # The warning should be present in env.stderr\n    output = env.stderr.getvalue()\n    assert \"> warning: no stdin data read in 0.1s\" in output\n    assert \"httpie.io/docs/cli/best-practices\" in output\n\ndef test_no_warning_when_event_set(monkeypatch, env, tmp_path):\n    \"\"\"If the read_event is set before the timeout, no warning is emitted.\"\"\"\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0.1)\n    dummy_file = tmp_path / \"dummy.txt\"\n    dummy_file.write_text(\"test\")\n    file_obj = dummy_file.open()\n    read_event = threading.Event()\n    read_event.set()  # Simulate data already read\n\n    observe_stdin_for_data_thread(env, file_obj, read_event)\n\n    time.sleep(0.2)\n    output = env.stderr.getvalue()\n    assert output == \"\"\n\ndef test_no_thread_when_threshold_zero(monkeypatch, env, tmp_path):\n    \"\"\"When READ_THRESHOLD is 0, the function returns immediately without starting a thread.\"\"\"\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0)\n    dummy_file = tmp_path / \"dummy.txt\"\n    dummy_file.write_text(\"test\")\n    file_obj = dummy_file.open()\n    read_event = threading.Event()\n\n    observe_stdin_for_data_thread(env, file_obj, read_event)\n\n    # No thread should be running; we can check by ensuring no warning after a delay\n    time.sleep(0.2)\n    output = env.stderr.getvalue()\n    assert output == \"\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "0f4ade7bef2445828d0bd6834d46b9c7",
+  "_api_plus_pacing_seconds": 1.8615106110228226
+}

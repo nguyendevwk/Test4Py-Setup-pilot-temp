@@ -1,0 +1,54 @@
+{
+  "policy": "production-dependencies-v1",
+  "max_chars": 10000,
+  "max_nodes": 10,
+  "chars": 7777,
+  "snippets": [
+    {
+      "file": "typesystem/fields.py",
+      "line": 23,
+      "symbol": "Field",
+      "source": "class Field:\n    errors: typing.Dict[str, str] = {}\n\n    def __init__(\n        self,\n        *,\n        title: str = \"\",\n        description: str = \"\",\n        default: typing.Any = NO_DEFAULT,\n        allow_null: bool = False,\n        read_only: bool = False,\n    ):\n        assert isinstance(title, str)\n        assert isinstance(description, str)\n\n        if allow_null and default is NO_DEFAULT:\n            default = None\n\n        if default is not NO_DEFAULT:\n            self.default = default\n\n        self.title = title\n        self.description = description\n        self.allow_null = allow_null\n        self.read_only = read_only\n\n    def validate(self, value: typing.Any) -> typing.Any:\n        raise NotImplementedError()  # pragma: no cover\n\n    def validate_or_error(self, value: typing.Any) -> ValidationResult:\n        try:\n            value = self.validate(value)\n        except ValidationError as error:\n            return ValidationResult(value=None, error=error)\n        return ValidationResult(value=value, error=None)\n\n    def serialize(self, obj: typing.Any) -> typing.Any:\n        return obj\n\n    def has_default(self) -> bool:\n        return hasattr(self, \"default\")\n\n    def get_default_value(self) -> typing.Any:\n        default = getattr(self, \"default\", None)\n        if callable(default):\n            return default()\n        return default\n\n    def validation_error(self, code: str) -> ValidationError:\n        text = self.get_error_text(code)\n        return ValidationError(text=text, code=code)\n\n    def get_error_text(self, code: str) -> str:\n        return self.errors[code].format(**self.__dict__)\n\n    def __or__(self, other: \"Field\") -> \"Union\":\n        if isinstance(self, Union):\n            any_of = self.any_of\n        else:\n            any_of = [self]\n\n        if isinstance(other, Union):\n            any_of += other.any_of\n        else:\n            any_of += [other]\n\n        return Union(any_of=any_of)"
+    },
+    {
+      "file": "typesystem/base.py",
+      "line": 224,
+      "symbol": "ValidationError",
+      "source": "class ValidationError(BaseError):\n    \"\"\"\n    Raised by `.validate()` or returned by `.validate_or_error()`.\n    \"\"\""
+    },
+    {
+      "file": "typesystem/base.py",
+      "line": 27,
+      "symbol": "Message",
+      "source": "class Message:\n    \"\"\"\n    An individual error message, within a ValidationError.\n    \"\"\"\n\n    def __init__(\n        self,\n        *,\n        text: str,\n        code: str = None,\n        key: typing.Union[int, str] = None,\n        index: typing.List[typing.Union[int, str]] = None,\n        position: Position = None,\n        start_position: Position = None,\n        end_position: Position = None,\n    ):\n        \"\"\"\n        text - The error message. 'May not have more than 100 characters'\n        code - An optional error code, eg. 'max_length'\n        key - An optional key of the message within a single parent. eg. 'username'\n        index - The index of the message\n            within a nested object. eg. ['users', 3, 'username']\n\n        Optionally either:\n\n        position - The start and end position of the error message\n            within the raw content.\n\n        Or:\n\n        start_position - The start position of the error message within the raw content.\n        end_position - The end position of the error message within the raw content.\n        \"\"\"\n        self.text = text\n        self.code = \"custom\" if code is None else code\n        if key is not None:\n            assert index is None\n            self.index = [key]\n        else:\n            self.index = [] if index is None else index\n\n        if position is None:\n            self.start_position = start_position\n            self.end_position = end_position\n        else:\n            assert start_position is None\n            assert end_position is None\n            self.start_position = position\n            self.end_position = position\n\n    def __eq__(self, other: typing.Any) -> bool:\n        return isinstance(other, Message) and (\n            self.text == other.text\n            and self.code == other.code\n            and self.index == other.index\n            and self.start_position == other.start_position\n            and self.end_position == other.end_position\n        )\n\n    def __hash__(self) -> int:\n        ident = (self.code, tuple(self.index))\n        return hash(ident)\n\n    def __repr__(self) -> str:\n        class_name = self.__class__.__name__\n        index_str = f\", index={self.index!r}\" if self.index else \"\"\n        if self.start_position is None:\n            position_str = \"\"\n        elif self.start_position == self.end_position:\n            position_str = f\", position={self.start_position!r}\"\n        else:\n            position_str = (\n                f\", start_position={self.start_position!r},\"\n                f\" end_position={self.end_position!r}\"\n            )\n        return (\n            f\"{class_name}(text={self.text!r},\"\n            f\" code={self.code!r}{index_str}{position_str})\"\n        )"
+    },
+    {
+      "file": "typesystem/base.py",
+      "line": 230,
+      "symbol": "ValidationResult",
+      "source": "class ValidationResult:\n    \"\"\"\n    A pair providing the validated data or validation error.\n    Typically unpacked like so:\n\n    value, error = MySchema.validate_or_error(data)\n    \"\"\"\n\n    def __init__(\n        self, *, value: typing.Any = None, error: ValidationError = None\n    ) -> None:\n        \"\"\"\n        Either:\n\n        value - The validated data.\n\n        Or:\n\n        error - The validation error.\n        \"\"\"\n        assert value is None or error is None\n        self.value = value\n        self.error = error\n\n    def __iter__(self) -> typing.Iterator:\n        yield self.value\n        yield self.error\n\n    def __bool__(self) -> bool:\n        return self.error is None\n\n    def __repr__(self) -> str:\n        class_name = self.__class__.__name__\n        if self.error is not None:\n            return f\"{class_name}(error={self.error!r})\"\n        return f\"{class_name}(value={self.value!r})\""
+    },
+    {
+      "file": "typesystem/fields.py",
+      "line": 10,
+      "symbol": "NO_DEFAULT",
+      "source": "NO_DEFAULT = object()"
+    },
+    {
+      "file": "typesystem/fields.py",
+      "line": 702,
+      "symbol": "Union",
+      "source": "class Union(Field):\n    errors = {\"null\": \"May not be null.\", \"union\": \"Did not match any valid type.\"}\n\n    def __init__(self, any_of: typing.List[Field], **kwargs: typing.Any):\n        super().__init__(**kwargs)\n\n        self.any_of = any_of\n        if any([child.allow_null for child in any_of]):\n            self.allow_null = True\n\n    def validate(self, value: typing.Any) -> typing.Any:\n        if value is None and self.allow_null:\n            return None\n        elif value is None:\n            raise self.validation_error(\"null\")\n\n        candidate_errors = []\n        for child in self.any_of:\n            validated, error = child.validate_or_error(value)\n            if error is None:\n                return validated\n            else:\n                # If a child returned anything other than a type error, then\n                # it is a candidate for returning as the primary error.\n                messages = error.messages()\n                if (\n                    len(messages) != 1\n                    or messages[0].code != \"type\"\n                    or messages[0].index\n                ):\n                    candidate_errors.append(error)\n\n        if len(candidate_errors) == 1:\n            # If exactly one child was of the correct type, then we can use\n            # the error from the child.\n            raise candidate_errors[0]\n        raise self.validation_error(\"union\")"
+    },
+    {
+      "file": "typesystem/base.py",
+      "line": 5,
+      "symbol": "Position",
+      "source": "class Position:\n    def __init__(self, line_no: int, column_no: int, char_index: int):\n        self.line_no = line_no\n        self.column_no = column_no\n        self.char_index = char_index\n\n    def __eq__(self, other: typing.Any) -> bool:\n        return (\n            isinstance(other, Position)\n            and self.line_no == other.line_no\n            and self.column_no == other.column_no\n            and self.char_index == other.char_index\n        )\n\n    def __repr__(self) -> str:\n        class_name = self.__class__.__name__\n        return (\n            f\"{class_name}(line_no={self.line_no}, column_no={self.column_no},\"\n            f\" char_index={self.char_index})\"\n        )"
+    }
+  ],
+  "omitted": [
+    "typesystem/base.py:108 BaseError"
+  ],
+  "scope": "static source excerpts only; no inferred expected values"
+}

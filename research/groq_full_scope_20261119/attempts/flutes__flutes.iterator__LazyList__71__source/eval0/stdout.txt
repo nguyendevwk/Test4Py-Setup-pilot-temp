@@ -1,0 +1,30 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_lazy_list_len_before_exhaustion _____________________
+
+    def test_lazy_list_len_before_exhaustion():
+        """Calling __len__ before the iterable is exhausted raises TypeError."""
+        source = iter(range(3))
+        ll = LazyList(source)
+        with pytest.raises(TypeError, match="__len__ is not available before the iterable is depleted"):
+            len(ll)
+        # After exhausting the iterable, len should work
+        _ = ll[2]  # triggers exhaustion
+>       assert len(ll) == 3
+
+test_generated.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <flutes.iterator.LazyList object at 0x7fa064d6fc70>
+
+    def __len__(self):
+        if self.exhausted:
+            return len(self.list)
+        else:
+>           raise TypeError("__len__ is not available before the iterable is depleted")
+E           TypeError: __len__ is not available before the iterable is depleted
+
+../../../../groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py:292: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_lazy_list_len_before_exhaustion - TypeError: _...
+1 failed, 2 passed in 0.16s

@@ -1,0 +1,41 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_load_config_with_env_var _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/sanic__sanic.utils__load_module_from_file_location__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_load_config_with_env_var0')
+
+    def test_load_config_with_env_var(tmp_path):
+        # Set an environment variable
+        os.environ["TEST_ENV"] = "value_from_env"
+        # Create a config file that uses the env var
+        cfg_file = tmp_path / "config.cfg"
+        cfg_file.write_text("data = '${TEST_ENV}'\n")
+        # Load the config
+        mod = load_module_from_file_location(str(cfg_file))
+        # The environment variable should be substituted
+        assert hasattr(mod, "data")
+>       assert mod.data == "value_from_env"
+E       AssertionError: assert '${TEST_ENV}' == 'value_from_env'
+E         
+E         - value_from_env
+E         + ${TEST_ENV}
+
+test_generated.py:31: AssertionError
+___________________ test_load_module_missing_env_var_raises ____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/sanic__sanic.utils__load_module_from_file_location__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_load_module_missing_env_v0')
+
+    def test_load_module_missing_env_var_raises(tmp_path):
+        # Ensure the env var is not set
+        os.environ.pop("MISSING_ENV", None)
+        cfg_file = tmp_path / "bad.cfg"
+        cfg_file.write_text("value = '${MISSING_ENV}'\n")
+        # Loading should raise LoadFileException
+>       with pytest.raises(LoadFileException) as excinfo:
+E       Failed: DID NOT RAISE LoadFileException
+
+test_generated.py:42: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_load_config_with_env_var - AssertionError: ass...
+FAILED test_generated.py::test_load_module_missing_env_var_raises - Failed: D...
+2 failed, 1 passed in 0.33s

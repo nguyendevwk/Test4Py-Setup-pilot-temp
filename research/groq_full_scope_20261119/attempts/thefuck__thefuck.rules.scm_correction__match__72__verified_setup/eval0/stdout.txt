@@ -1,0 +1,54 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_match_returns_true_when_pattern_and_actual_scm ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f2d70478700>
+
+    def test_match_returns_true_when_pattern_and_actual_scm(monkeypatch):
+        """
+        Normal case: the command output contains the wrong SCM pattern and
+        _get_actual_scm returns True. The match function should return True.
+        """
+        # Prepare a command with a known SCM and output containing its pattern
+        command = SimpleNamespace(
+            script_parts=["git"],
+            output="fatal: not a git repository (or any of the parent directories): .git"
+        )
+    
+        # Ensure the pattern for 'git' is present in the output
+        pattern = scm_correction.wrong_scm_patterns["git"]
+>       assert pattern in command.output
+E       AssertionError: assert 'fatal: Not a git repository' in 'fatal: not a git repository (or any of the parent directories): .git'
+E        +  where 'fatal: not a git repository (or any of the parent directories): .git' = namespace(script_parts=['git'], output='fatal: not a git repository (or any of the parent directories): .git').output
+
+test_generated.py:23: AssertionError
+_________________ test_match_raises_key_error_for_unknown_scm __________________
+
+    def test_match_raises_key_error_for_unknown_scm():
+        """
+        Error case: the first script part is not a known SCM key in wrong_scm_patterns.
+        Accessing the dictionary should raise a KeyError.
+        """
+        command = SimpleNamespace(
+            script_parts=["unknown_scm"],
+            output="some error message"
+        )
+    
+>       with pytest.raises(KeyError):
+E       Failed: DID NOT RAISE KeyError
+
+test_generated.py:57: Failed
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_match_returns_true_when_pattern_and_actual_scm
+FAILED test_generated.py::test_match_raises_key_error_for_unknown_scm - Faile...
+2 failed, 1 passed, 2 warnings in 0.20s

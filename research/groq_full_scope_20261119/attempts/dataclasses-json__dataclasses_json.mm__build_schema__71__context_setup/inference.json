@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-fbf37d6c-c18a-40a7-81cb-e0fb49169221",
+  "object": "chat.completion",
+  "created": 1795076743,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom dataclasses import dataclass, field\nfrom typing import Optional, List\nfrom uuid import UUID\nfrom dataclasses_json.mm import build_schema\nfrom marshmallow import ValidationError\n\n# Helper dataclass for testing\n@dataclass\nclass Person:\n    name: str\n    age: int\n    email: Optional[str] = None\n    tags: List[str] = field(default_factory=list)\n    uid: UUID = field(default_factory=UUID)\n\n# 1. Test normal serialization and deserialization\ndef test_person_schema_roundtrip():\n    PersonSchema = build_schema(Person, mixin=None, infer_missing=True, partial=False)\n    person = Person(name=\"Alice\", age=30, email=\"alice@example.com\", tags=[\"admin\"], uid=UUID(\"12345678-1234-5678-1234-567812345678\"))\n    # Serialize\n    dumped = PersonSchema().dump(person)\n    assert isinstance(dumped, dict)\n    assert dumped[\"name\"] == \"Alice\"\n    assert dumped[\"age\"] == 30\n    assert dumped[\"email\"] == \"alice@example.com\"\n    assert dumped[\"tags\"] == [\"admin\"]\n    # Deserialize\n    loaded = PersonSchema().load(dumped)\n    assert isinstance(loaded, Person)\n    assert loaded.name == \"Alice\"\n    assert loaded.age == 30\n    assert loaded.email == \"alice@example.com\"\n    assert loaded.tags == [\"admin\"]\n    assert loaded.uid == UUID(\"12345678-1234-5678-1234-567812345678\")\n\n# 2. Test optional field handling and allow_none\ndef test_optional_field_allow_none():\n    PersonSchema = build_schema(Person, mixin=None, infer_missing=True, partial=False)\n    # Omit optional email\n    data_missing_email = {\"name\": \"Bob\", \"age\": 25, \"tags\": [], \"uid\": \"12345678-1234-5678-1234-567812345678\"}\n    loaded = PersonSchema().load(data_missing_email)\n    assert loaded.email is None\n    # Explicitly set email to None\n    data_none_email = {\"name\": \"Bob\", \"age\": 25, \"email\": None, \"tags\": [], \"uid\": \"12345678-1234-5678-1234-567812345678\"}\n    loaded_none = PersonSchema().load(data_none_email)\n    assert loaded_none.email is None\n\n# 3. Test error when required field missing\ndef test_missing_required_field_raises():\n    PersonSchema = build_schema(Person, mixin=None, infer_missing=False, partial=False)\n    # Omit required name field\n    data_missing_name = {\"age\": 40, \"tags\": [], \"uid\": \"12345678-1234-5678-1234-567812345678\"}\n    with pytest.raises(ValidationError) as excinfo:\n        PersonSchema().load(data_missing_name)\n    assert \"name\" in str(excinfo.value)\n```",
+        "reasoning": "We need tests for build_schema. Use a simple dataclass. Test normal serialization, boundary optional, error? maybe missing required. Use tmp_path? not needed. Just test behavior."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.050122988,
+    "prompt_tokens": 1847,
+    "prompt_time": 0.137326182,
+    "completion_tokens": 669,
+    "completion_time": 0.766998187,
+    "total_tokens": 2516,
+    "total_time": 0.904324369,
+    "completion_tokens_details": {
+      "reasoning_tokens": 38
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sejqpne4qrcm5wagzbg2b3",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom dataclasses import dataclass, field\nfrom typing import Optional, List\nfrom uuid import UUID\nfrom dataclasses_json.mm import build_schema\nfrom marshmallow import ValidationError\n\n# Helper dataclass for testing\n@dataclass\nclass Person:\n    name: str\n    age: int\n    email: Optional[str] = None\n    tags: List[str] = field(default_factory=list)\n    uid: UUID = field(default_factory=UUID)\n\n# 1. Test normal serialization and deserialization\ndef test_person_schema_roundtrip():\n    PersonSchema = build_schema(Person, mixin=None, infer_missing=True, partial=False)\n    person = Person(name=\"Alice\", age=30, email=\"alice@example.com\", tags=[\"admin\"], uid=UUID(\"12345678-1234-5678-1234-567812345678\"))\n    # Serialize\n    dumped = PersonSchema().dump(person)\n    assert isinstance(dumped, dict)\n    assert dumped[\"name\"] == \"Alice\"\n    assert dumped[\"age\"] == 30\n    assert dumped[\"email\"] == \"alice@example.com\"\n    assert dumped[\"tags\"] == [\"admin\"]\n    # Deserialize\n    loaded = PersonSchema().load(dumped)\n    assert isinstance(loaded, Person)\n    assert loaded.name == \"Alice\"\n    assert loaded.age == 30\n    assert loaded.email == \"alice@example.com\"\n    assert loaded.tags == [\"admin\"]\n    assert loaded.uid == UUID(\"12345678-1234-5678-1234-567812345678\")\n\n# 2. Test optional field handling and allow_none\ndef test_optional_field_allow_none():\n    PersonSchema = build_schema(Person, mixin=None, infer_missing=True, partial=False)\n    # Omit optional email\n    data_missing_email = {\"name\": \"Bob\", \"age\": 25, \"tags\": [], \"uid\": \"12345678-1234-5678-1234-567812345678\"}\n    loaded = PersonSchema().load(data_missing_email)\n    assert loaded.email is None\n    # Explicitly set email to None\n    data_none_email = {\"name\": \"Bob\", \"age\": 25, \"email\": None, \"tags\": [], \"uid\": \"12345678-1234-5678-1234-567812345678\"}\n    loaded_none = PersonSchema().load(data_none_email)\n    assert loaded_none.email is None\n\n# 3. Test error when required field missing\ndef test_missing_required_field_raises():\n    PersonSchema = build_schema(Person, mixin=None, infer_missing=False, partial=False)\n    # Omit required name field\n    data_missing_name = {\"age\": 40, \"tags\": [], \"uid\": \"12345678-1234-5678-1234-567812345678\"}\n    with pytest.raises(ValidationError) as excinfo:\n        PersonSchema().load(data_missing_name)\n    assert \"name\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.271103031001985
+}

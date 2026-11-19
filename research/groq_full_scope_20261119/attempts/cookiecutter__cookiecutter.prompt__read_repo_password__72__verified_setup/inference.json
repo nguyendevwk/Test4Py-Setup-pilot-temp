@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-3753bfd5-3d93-4140-8164-8f01195dcdd1",
+  "object": "chat.completion",
+  "created": 1795076451,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom cookiecutter.prompt import read_repo_password\nfrom rich.prompt import Prompt, InvalidResponse\n\ndef test_read_repo_password_normal(monkeypatch):\n    # Simulate a normal password entry\n    def fake_ask(question, password=False):\n        assert question == \"Enter password:\"\n        assert password is True\n        return \"s3cr3t\"\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n    result = read_repo_password(\"Enter password:\")\n    assert result == \"s3cr3t\"\n\ndef test_read_repo_password_empty(monkeypatch):\n    # Simulate the user entering an empty password\n    def fake_ask(question, password=False):\n        assert question == \"Password?\"\n        assert password is True\n        return \"\"\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n    result = read_repo_password(\"Password?\")\n    assert result == \"\"\n\ndef test_read_repo_password_invalid_response(monkeypatch):\n    # Simulate Prompt.ask raising an InvalidResponse exception\n    def fake_ask(question, password=False):\n        raise InvalidResponse(\"User aborted\")\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n    with pytest.raises(InvalidResponse, match=\"User aborted\"):\n        read_repo_password(\"Any question\")\n```",
+        "reasoning": "We need tests for read_repo_password. It uses Prompt.ask from rich.prompt. We cannot mock; must test real behavior. But Prompt.ask requires interactive input. We cannot. So maybe test that function returns string? But can't provide input. We could patch Prompt.ask? But instruction says no mocks of target. But we can patch Prompt.ask? It's part of target? It's imported from rich.prompt. We cannot modify product code. But we can monkeypatch Prompt.ask in test? That's mocking target? It's mocking imported function, not target. Allowed? Probably yes. But instruction: \"Do not mock of the target.\" But Prompt.ask is not target. So okay.\n\nWe need three tests: normal input, boundary (empty string), error (invalid response?). Prompt.ask can raise InvalidResponse. We can simulate by patching Prompt.ask to raise.\n\nImplement tests using monkeypatch fixture. Use tmp_path? Not needed.\n\nWrite three test functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.269532182,
+    "prompt_tokens": 363,
+    "prompt_time": 0.018801437,
+    "completion_tokens": 466,
+    "completion_time": 0.513503217,
+    "total_tokens": 829,
+    "total_time": 0.532304654,
+    "completion_tokens_details": {
+      "reasoning_tokens": 190
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se9t38eh1928ep2032vhsq",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom cookiecutter.prompt import read_repo_password\nfrom rich.prompt import Prompt, InvalidResponse\n\ndef test_read_repo_password_normal(monkeypatch):\n    # Simulate a normal password entry\n    def fake_ask(question, password=False):\n        assert question == \"Enter password:\"\n        assert password is True\n        return \"s3cr3t\"\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n    result = read_repo_password(\"Enter password:\")\n    assert result == \"s3cr3t\"\n\ndef test_read_repo_password_empty(monkeypatch):\n    # Simulate the user entering an empty password\n    def fake_ask(question, password=False):\n        assert question == \"Password?\"\n        assert password is True\n        return \"\"\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n    result = read_repo_password(\"Password?\")\n    assert result == \"\"\n\ndef test_read_repo_password_invalid_response(monkeypatch):\n    # Simulate Prompt.ask raising an InvalidResponse exception\n    def fake_ask(question, password=False):\n        raise InvalidResponse(\"User aborted\")\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n    with pytest.raises(InvalidResponse, match=\"User aborted\"):\n        read_repo_password(\"Any question\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0952716749743558
+}

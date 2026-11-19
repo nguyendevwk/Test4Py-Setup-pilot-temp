@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-6365ac5c-f152-4fc3-9c33-cf9ddf309d7c",
+  "object": "chat.completion",
+  "created": 1795076497,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport pytest\nfrom typed_ast import ast3 as typed_ast\nfrom py_backwards.utils.snippet import extend_tree, find, get_non_exp_parent_and_index, replace_at\n\ndef build_tree(source: str) -> typed_ast.AST:\n    \"\"\"Parse source code into a typed_ast AST.\"\"\"\n    return typed_ast.parse(source)\n\ndef test_extend_tree_replaces_call_with_variable():\n    # Source contains a call to extend that should be replaced by a variable.\n    src = \"\"\"\ndef foo():\n    x = extend(y)\n\"\"\"\n    tree = build_tree(src)\n    # Prepare variables mapping: 'y' should be replaced by a string literal.\n    variables = {'y': typed_ast.Str(s='replaced')}\n    extend_tree(tree, variables)\n\n    # After transformation, the call should be replaced by the string literal.\n    # Find the assignment target and value.\n    assign = find(tree, typed_ast.Assign)[0]\n    assert isinstance(assign.value, typed_ast.Str)\n    assert assign.value.s == 'replaced'\n\ndef test_extend_tree_no_effect_when_no_extend_call():\n    # Source without any extend calls should remain unchanged.\n    src = \"\"\"\ndef bar():\n    a = 1\n    b = 2\n\"\"\"\n    tree = build_tree(src)\n    variables = {'x': typed_ast.Str(s='unused')}\n    extend_tree(tree, variables)\n\n    # The tree should still contain the original assignments.\n    assigns = find(tree, typed_ast.Assign)\n    assert len(assigns) == 2\n    assert isinstance(assigns[0].value, typed_ast.Num)\n    assert assigns[0].value.n == 1\n\ndef test_extend_tree_raises_key_error_for_missing_variable():\n    # Source contains an extend call with an argument not present in variables.\n    src = \"\"\"\ndef baz():\n    z = extend(missing)\n\"\"\"\n    tree = build_tree(src)\n    variables = {}  # empty mapping\n\n    with pytest.raises(KeyError):\n        extend_tree(tree, variables)\n```",
+        "reasoning": "We need to write tests for extend_tree. We need to import the module. We need to construct an AST tree with a call to extend. Use typed_ast ast3. We need to create a tree, variables dict mapping name to Variable. Then call extend_tree and check that the tree is modified appropriately. Also test boundary: no extend calls, or extend with wrong func. Also error: missing variable key? But code will KeyError. So test that. Use tmp_path? Not needed. Just AST. Use ast.parse? typed_ast ast3 parse? Use typed_ast.ast3.parse. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047632958,
+    "prompt_tokens": 380,
+    "prompt_time": 0.062381871,
+    "completion_tokens": 547,
+    "completion_time": 0.588076026,
+    "total_tokens": 927,
+    "total_time": 0.650457897,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 125
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7seb7kwebftx5bvygpe58e7",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport pytest\nfrom typed_ast import ast3 as typed_ast\nfrom py_backwards.utils.snippet import extend_tree, find, get_non_exp_parent_and_index, replace_at\n\ndef build_tree(source: str) -> typed_ast.AST:\n    \"\"\"Parse source code into a typed_ast AST.\"\"\"\n    return typed_ast.parse(source)\n\ndef test_extend_tree_replaces_call_with_variable():\n    # Source contains a call to extend that should be replaced by a variable.\n    src = \"\"\"\ndef foo():\n    x = extend(y)\n\"\"\"\n    tree = build_tree(src)\n    # Prepare variables mapping: 'y' should be replaced by a string literal.\n    variables = {'y': typed_ast.Str(s='replaced')}\n    extend_tree(tree, variables)\n\n    # After transformation, the call should be replaced by the string literal.\n    # Find the assignment target and value.\n    assign = find(tree, typed_ast.Assign)[0]\n    assert isinstance(assign.value, typed_ast.Str)\n    assert assign.value.s == 'replaced'\n\ndef test_extend_tree_no_effect_when_no_extend_call():\n    # Source without any extend calls should remain unchanged.\n    src = \"\"\"\ndef bar():\n    a = 1\n    b = 2\n\"\"\"\n    tree = build_tree(src)\n    variables = {'x': typed_ast.Str(s='unused')}\n    extend_tree(tree, variables)\n\n    # The tree should still contain the original assignments.\n    assigns = find(tree, typed_ast.Assign)\n    assert len(assigns) == 2\n    assert isinstance(assigns[0].value, typed_ast.Num)\n    assert assigns[0].value.n == 1\n\ndef test_extend_tree_raises_key_error_for_missing_variable():\n    # Source contains an extend call with an argument not present in variables.\n    src = \"\"\"\ndef baz():\n    z = extend(missing)\n\"\"\"\n    tree = build_tree(src)\n    variables = {}  # empty mapping\n\n    with pytest.raises(KeyError):\n        extend_tree(tree, variables)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9848568040179089
+}

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-df8a8d6c-3098-4ab3-8517-ab0aea18ea6e",
+  "object": "chat.completion",
+  "created": 1795078424,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport gettext\nimport tempfile\nimport shutil\nimport logging\nimport io\nimport sys\nimport importlib\nimport pytest\nfrom pathlib import Path\n\n# Import the target module\nimport tornado.locale as locale_module\n\n# Helper to create a minimal .mo file for a given language\ndef create_mo_file(lang: str, domain: str, translations: dict, directory: Path):\n    po_content = \"\"\n    for msgid, msgstr in translations.items():\n        po_content += f'msgid \"{msgid}\"\\nmsgstr \"{msgstr}\"\\n\\n'\n    po_path = directory / f\"{lang}.po\"\n    po_path.write_text(po_content, encoding=\"utf-8\")\n    # Compile .po to .mo\n    mo_path = directory / f\"{lang}.mo\"\n    gettext.GNUTranslations.from_file(po_path.open(\"rb\")).write(mo_path.open(\"wb\"))\n    return mo_path\n\n@pytest.fixture\ndef locale_dir(tmp_path):\n    \"\"\"Create a temporary locale directory structure with a valid .mo file.\"\"\"\n    base = tmp_path / \"locale\"\n    base.mkdir()\n    lang_dir = base / \"es\" / \"LC_MESSAGES\"\n    lang_dir.mkdir(parents=True)\n    create_mo_file(\"es\", \"testdomain\", {\"hello\": \"hola\"}, lang_dir)\n    return base\n\ndef test_load_gettext_translations_success(locale_dir, caplog):\n    \"\"\"Verify that a valid .mo file is loaded and translations are available.\"\"\"\n    caplog.set_level(logging.DEBUG)\n    locale_module.load_gettext_translations(str(locale_dir), \"testdomain\")\n    # The global _translations should contain the 'es' entry\n    assert hasattr(locale_module, \"_translations\")\n    assert \"es\" in locale_module._translations\n    # The translation should return the expected string\n    trans = locale_module._translations[\"es\"]\n    assert trans.gettext(\"hello\") == \"hola\"\n    # Supported locales should include the default locale\n    assert hasattr(locale_module, \"_supported_locales\")\n    assert locale_module._default_locale in locale_module._supported_locales\n    # Log should contain debug message about supported locales\n    assert any(\"Supported locales\" in rec.message for rec in caplog.records)\n\ndef test_load_gettext_translations_missing_file(tmp_path, caplog):\n    \"\"\"If no .mo files exist, no translations are loaded but function completes.\"\"\"\n    caplog.set_level(logging.DEBUG)\n    locale_module.load_gettext_translations(str(tmp_path), \"nonexistent\")\n    # No translations should be loaded\n    assert hasattr(locale_module, \"_translations\")\n    assert locale_module._translations == {}\n    # Supported locales should only contain the default locale\n    assert locale_module._supported_locales == frozenset([locale_module._default_locale])\n    # No error logs should be present\n    assert all(rec.levelno != logging.ERROR for rec in caplog.records)\n\ndef test_load_gettext_translations_invalid_file(tmp_path, caplog):\n    \"\"\"An invalid .mo file should be skipped with an error log.\"\"\"\n    # Create an invalid .mo file\n    bad_dir = tmp_path / \"bad\" / \"LC_MESSAGES\"\n    bad_dir.mkdir(parents=True)\n    bad_file = bad_dir / \"bad.mo\"\n    bad_file.write_bytes(b\"not a valid mo file\")\n    caplog.set_level(logging.ERROR)\n    locale_module.load_gettext_translations(str(tmp_path), \"bad\")\n    # The invalid file should not be in translations\n    assert \"bad\" not in locale_module._translations\n    # An error log should be emitted\n    assert any(\"Cannot load translation\" in rec.message for rec in caplog.records)\n```",
+        "reasoning": "We need tests for load_gettext_translations. We can create temporary locale directories with .mo files. Use gettext to compile a simple .po to .mo. Use tmp_path. Test that translations loaded and _translations contains entries. Also test that unsupported locale not loaded. Also test error handling: if .mo file invalid, it logs error and continues. We can capture logs. Use pytest. Need to import module. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05151667,
+    "prompt_tokens": 591,
+    "prompt_time": 0.00737413,
+    "completion_tokens": 860,
+    "completion_time": 0.974942646,
+    "total_tokens": 1451,
+    "total_time": 0.982316776,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 90
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg60ejeeyr4dr8bdey91s2",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport gettext\nimport tempfile\nimport shutil\nimport logging\nimport io\nimport sys\nimport importlib\nimport pytest\nfrom pathlib import Path\n\n# Import the target module\nimport tornado.locale as locale_module\n\n# Helper to create a minimal .mo file for a given language\ndef create_mo_file(lang: str, domain: str, translations: dict, directory: Path):\n    po_content = \"\"\n    for msgid, msgstr in translations.items():\n        po_content += f'msgid \"{msgid}\"\\nmsgstr \"{msgstr}\"\\n\\n'\n    po_path = directory / f\"{lang}.po\"\n    po_path.write_text(po_content, encoding=\"utf-8\")\n    # Compile .po to .mo\n    mo_path = directory / f\"{lang}.mo\"\n    gettext.GNUTranslations.from_file(po_path.open(\"rb\")).write(mo_path.open(\"wb\"))\n    return mo_path\n\n@pytest.fixture\ndef locale_dir(tmp_path):\n    \"\"\"Create a temporary locale directory structure with a valid .mo file.\"\"\"\n    base = tmp_path / \"locale\"\n    base.mkdir()\n    lang_dir = base / \"es\" / \"LC_MESSAGES\"\n    lang_dir.mkdir(parents=True)\n    create_mo_file(\"es\", \"testdomain\", {\"hello\": \"hola\"}, lang_dir)\n    return base\n\ndef test_load_gettext_translations_success(locale_dir, caplog):\n    \"\"\"Verify that a valid .mo file is loaded and translations are available.\"\"\"\n    caplog.set_level(logging.DEBUG)\n    locale_module.load_gettext_translations(str(locale_dir), \"testdomain\")\n    # The global _translations should contain the 'es' entry\n    assert hasattr(locale_module, \"_translations\")\n    assert \"es\" in locale_module._translations\n    # The translation should return the expected string\n    trans = locale_module._translations[\"es\"]\n    assert trans.gettext(\"hello\") == \"hola\"\n    # Supported locales should include the default locale\n    assert hasattr(locale_module, \"_supported_locales\")\n    assert locale_module._default_locale in locale_module._supported_locales\n    # Log should contain debug message about supported locales\n    assert any(\"Supported locales\" in rec.message for rec in caplog.records)\n\ndef test_load_gettext_translations_missing_file(tmp_path, caplog):\n    \"\"\"If no .mo files exist, no translations are loaded but function completes.\"\"\"\n    caplog.set_level(logging.DEBUG)\n    locale_module.load_gettext_translations(str(tmp_path), \"nonexistent\")\n    # No translations should be loaded\n    assert hasattr(locale_module, \"_translations\")\n    assert locale_module._translations == {}\n    # Supported locales should only contain the default locale\n    assert locale_module._supported_locales == frozenset([locale_module._default_locale])\n    # No error logs should be present\n    assert all(rec.levelno != logging.ERROR for rec in caplog.records)\n\ndef test_load_gettext_translations_invalid_file(tmp_path, caplog):\n    \"\"\"An invalid .mo file should be skipped with an error log.\"\"\"\n    # Create an invalid .mo file\n    bad_dir = tmp_path / \"bad\" / \"LC_MESSAGES\"\n    bad_dir.mkdir(parents=True)\n    bad_file = bad_dir / \"bad.mo\"\n    bad_file.write_bytes(b\"not a valid mo file\")\n    caplog.set_level(logging.ERROR)\n    locale_module.load_gettext_translations(str(tmp_path), \"bad\")\n    # The invalid file should not be in translations\n    assert \"bad\" not in locale_module._translations\n    # An error log should be emitted\n    assert any(\"Cannot load translation\" in rec.message for rec in caplog.records)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3917465069680475
+}

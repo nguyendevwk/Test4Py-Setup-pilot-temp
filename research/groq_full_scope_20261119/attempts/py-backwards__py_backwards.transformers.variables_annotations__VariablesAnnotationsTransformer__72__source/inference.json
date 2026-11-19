@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-a03027d7-b25c-4aad-bcc4-52d13c2cc9bb",
+  "object": "chat.completion",
+  "created": 1795079119,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typed_ast import ast3 as ast\nfrom py_backwards.transformers.variables_annotations import VariablesAnnotationsTransformer\nfrom py_backwards.types import TransformationResult\n\ndef test_annotation_with_value_replaced_by_assign():\n    code = \"a: int = 10\\n\"\n    tree = ast.parse(code, mode=\"exec\")\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # Tree should have changed\n    assert result.tree_changed is True\n\n    # Only one statement in the module body\n    assert len(result.tree.body) == 1\n    stmt = result.tree.body[0]\n    assert isinstance(stmt, ast.Assign)\n\n    # Target should be the name 'a'\n    assert isinstance(stmt.targets[0], ast.Name)\n    assert stmt.targets[0].id == \"a\"\n\n    # Value should be the constant 10\n    assert isinstance(stmt.value, ast.Constant)\n    assert stmt.value.value == 10\n\n    # Type comment should be preserved\n    assert stmt.type_comment == \"int\"\n\ndef test_annotation_without_value_is_removed():\n    code = \"b: int\\n\"\n    tree = ast.parse(code, mode=\"exec\")\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # Tree should have changed\n    assert result.tree_changed is True\n\n    # Body should be empty after removal\n    assert len(result.tree.body) == 0\n\ndef test_annotation_inside_function_body():\n    code = \"\"\"\\\ndef f():\n    x: str = 'hi'\n\"\"\"\n    tree = ast.parse(code, mode=\"exec\")\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # Tree should have changed\n    assert result.tree_changed is True\n\n    # Function definition should be present\n    assert len(result.tree.body) == 1\n    func = result.tree.body[0]\n    assert isinstance(func, ast.FunctionDef)\n\n    # Function body should contain one Assign statement\n    assert len(func.body) == 1\n    stmt = func.body[0]\n    assert isinstance(stmt, ast.Assign)\n\n    # Target should be the name 'x'\n    assert isinstance(stmt.targets[0], ast.Name)\n    assert stmt.targets[0].id == \"x\"\n\n    # Value should be the constant 'hi'\n    assert isinstance(stmt.value, ast.Constant)\n    assert stmt.value.value == \"hi\"\n\n    # Type comment should be preserved\n    assert stmt.type_comment == \"str\"\n```",
+        "reasoning": "We need to test this transformer. We'll create small ASTs using typed_ast ast3. Use ast.parse? typed_ast provides parse? We can use ast.parse from typed_ast? Let's import typed_ast.ast3 as ast. Use ast.parse. Then apply transformer.transform. Check resulting tree. Use ast.unparse? typed_ast may not have unparse. We can use astor or ast.unparse from standard ast? But typed_ast's AST nodes are similar. We can use ast.unparse from standard ast on the tree? Might not work. Instead, we can inspect the tree manually: after transform, the AnnAssign nodes should be replaced by Assign nodes. Test normal: a: int = 10 -> a = 10. Also test variable without value: b: int -> removed. Boundary: assignment inside function body. Error: assignment outside body? But transformer warns and continues. We can test that warning is issued? Use caplog? warn function likely prints. We can capture warnings via caplog. But warn likely prints to stderr. We can patch warn? But no mocks allowed. We can just test that tree_changed is True and that AnnAssign removed. For error scenario, maybe node without parent? Hard to create. Maybe a top-level AnnAssign? That is body of module, parent is module, not expression. get_non_exp_parent_and_index likely finds parent. NodeNotFound maybe if node is not in body? Hard.\n\nWe can test that when AnnAssign has no value, it's removed. Also test that type_comment preserved. Use ast.Assign's type_comment attribute. Check that after transform, the Assign node has type_comment equal to original annotation. Use ast.unparse? We can use ast.unparse from standard ast on the node? Might not work. Instead, inspect node.type_comment.\n\nImplement tests:\n\n1. test_simple_annotation_with_value: create code \"a: int = 10\\n\". Parse, transform, check that tree.body[0] is ast.Assign, target id 'a', value 10, type_comment 'int'.\n\n2. test_annotation_without_value: code \"b: int\\n\". After transform, tree.body should be empty.\n\n3. test_assignment_inside_function: code \"def f():\\n    x: str = 'hi'\\n\". After transform, inside function body, Assign node with target x, value 'hi', type_comment 'str'.\n\nImplement using typed_ast.ast3. Use ast.parse. Use ast.dump to inspect. Use ast.unparse? We'll use ast.dump. Use ast.parse from typed_ast? typed_ast.ast3.parse? Let's check. We'll assume ast.parse works. Use ast.parse(code, mode='exec'). Then transform. Then inspect tree.body. Use isinstance. Use ast.Assign. Use ast.Name. Use ast.Constant. Use node.type_comment. Use ast.unparse? Might not exist. We'll use ast.dump. Use assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052965007,
+    "prompt_tokens": 461,
+    "prompt_time": 0.029478812,
+    "completion_tokens": 1101,
+    "completion_time": 1.437006384,
+    "total_tokens": 1562,
+    "total_time": 1.466485196,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 590
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgv75qe3cvb5xsn72h22sf",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typed_ast import ast3 as ast\nfrom py_backwards.transformers.variables_annotations import VariablesAnnotationsTransformer\nfrom py_backwards.types import TransformationResult\n\ndef test_annotation_with_value_replaced_by_assign():\n    code = \"a: int = 10\\n\"\n    tree = ast.parse(code, mode=\"exec\")\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # Tree should have changed\n    assert result.tree_changed is True\n\n    # Only one statement in the module body\n    assert len(result.tree.body) == 1\n    stmt = result.tree.body[0]\n    assert isinstance(stmt, ast.Assign)\n\n    # Target should be the name 'a'\n    assert isinstance(stmt.targets[0], ast.Name)\n    assert stmt.targets[0].id == \"a\"\n\n    # Value should be the constant 10\n    assert isinstance(stmt.value, ast.Constant)\n    assert stmt.value.value == 10\n\n    # Type comment should be preserved\n    assert stmt.type_comment == \"int\"\n\ndef test_annotation_without_value_is_removed():\n    code = \"b: int\\n\"\n    tree = ast.parse(code, mode=\"exec\")\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # Tree should have changed\n    assert result.tree_changed is True\n\n    # Body should be empty after removal\n    assert len(result.tree.body) == 0\n\ndef test_annotation_inside_function_body():\n    code = \"\"\"\\\ndef f():\n    x: str = 'hi'\n\"\"\"\n    tree = ast.parse(code, mode=\"exec\")\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # Tree should have changed\n    assert result.tree_changed is True\n\n    # Function definition should be present\n    assert len(result.tree.body) == 1\n    func = result.tree.body[0]\n    assert isinstance(func, ast.FunctionDef)\n\n    # Function body should contain one Assign statement\n    assert len(func.body) == 1\n    stmt = func.body[0]\n    assert isinstance(stmt, ast.Assign)\n\n    # Target should be the name 'x'\n    assert isinstance(stmt.targets[0], ast.Name)\n    assert stmt.targets[0].id == \"x\"\n\n    # Value should be the constant 'hi'\n    assert isinstance(stmt.value, ast.Constant)\n    assert stmt.value.value == \"hi\"\n\n    # Type comment should be preserved\n    assert stmt.type_comment == \"str\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.8629420769866556
+}

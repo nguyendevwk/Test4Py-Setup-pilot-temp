@@ -1,0 +1,112 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_parse_function_docstring _________________________
+
+    def test_parse_function_docstring():
+        """Verify that a simple function's docstring is parsed correctly."""
+        def sample_func(a, b):
+            """Adds two numbers.
+    
+            Parameters
+            ----------
+            a : int
+                First number.
+            b : int
+                Second number.
+    
+            Returns
+            -------
+            int
+                Sum of a and b.
+            """
+            return a + b
+    
+        doc = parse_from_object(sample_func, style=DocstringStyle.GOOGLE)
+        assert doc.short_description == "Adds two numbers."
+>       assert len(doc.params) == 2
+E       assert 0 == 2
+E        +  where 0 = len([])
+E        +    where [] = <docstring_parser.common.Docstring object at 0x7fd5f4203400>.params
+
+test_generated.py:29: AssertionError
+____________________ test_parse_class_attribute_docstrings _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_class_attribute_doc0')
+
+    def test_parse_class_attribute_docstrings(tmp_path):
+        """Verify that attribute docstrings defined in a module are parsed."""
+        module_code = '''
+        """Module docstring."""
+    
+        class MyClass:
+            """Class docstring."""
+            attr1 = 1
+            """Attribute 1 description."""
+            attr2 = "two"
+            """Attribute 2 description."""
+        '''
+        module_file = tmp_path / "temp_module.py"
+        module_file.write_text(module_code)
+        spec = importlib.util.spec_from_file_location("temp_module", module_file)
+        temp_module = importlib.util.module_from_spec(spec)
+        sys.modules["temp_module"] = temp_module
+>       spec.loader.exec_module(temp_module)
+
+test_generated.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:879: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1017: in get_code
+    ???
+<frozen importlib._bootstrap_external>:947: in source_to_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = <built-in function compile>
+args = (b'\n    """Module docstring."""\n\n    class MyClass:\n        """Class docstring."""\n        attr1 = 1\n        """...se_from_object__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_class_attribute_doc0/temp_module.py', 'exec')
+kwds = {'dont_inherit': True, 'optimize': -1}
+
+>   ???
+E     File "/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_class_attribute_doc0/temp_module.py", line 2
+E       """Module docstring."""
+E   IndentationError: unexpected indent
+
+<frozen importlib._bootstrap>:241: IndentationError
+__________________________ test_invalid_style_raises ___________________________
+
+    def test_invalid_style_raises():
+        """Verify that passing an invalid style raises ParseError."""
+        def dummy():
+            """Dummy docstring."""
+            pass
+    
+        with pytest.raises(ParseError):
+>           parse_from_object(dummy, style="not_a_style")
+
+test_generated.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/parser.py:74: in parse_from_object
+    docstring = parse(obj.__doc__, style=style)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = 'Dummy docstring.', style = 'not_a_style'
+
+    def parse(
+        text: T.Optional[str], style: DocstringStyle = DocstringStyle.AUTO
+    ) -> Docstring:
+        """Parse the docstring into its components.
+    
+        :param text: docstring text to parse
+        :param style: docstring style
+        :returns: parsed docstring representation
+        """
+        if style != DocstringStyle.AUTO:
+>           return _STYLE_MAP[style].parse(text)
+E           KeyError: 'not_a_style'
+
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/parser.py:33: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_function_docstring - assert 0 == 2
+FAILED test_generated.py::test_parse_class_attribute_docstrings -   File "/ho...
+FAILED test_generated.py::test_invalid_style_raises - KeyError: 'not_a_style'
+3 failed in 0.15s

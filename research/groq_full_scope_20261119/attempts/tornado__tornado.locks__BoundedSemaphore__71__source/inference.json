@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-07e0cb5c-b0e0-43a8-b27e-50c7af36461a",
+  "object": "chat.completion",
+  "created": 1795079403,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado.locks import BoundedSemaphore\nfrom tornado import gen, ioloop\n\n@pytest.mark.asyncio\nasync def test_semaphore_normal_acquire_release():\n    sem = BoundedSemaphore(value=2)\n    # Acquire twice successfully\n    await sem.acquire()\n    await sem.acquire()\n    # Value should be 0 now\n    assert sem._value == 0\n    # Release twice\n    sem.release()\n    sem.release()\n    # Value should return to initial\n    assert sem._value == 2\n\n@pytest.mark.asyncio\nasync def test_semaphore_release_too_many_times():\n    sem = BoundedSemaphore(value=1)\n    await sem.acquire()\n    # Release once back to 1\n    sem.release()\n    # Now releasing again should raise ValueError\n    with pytest.raises(ValueError, match=\"Semaphore released too many times\"):\n        sem.release()\n\n@pytest.mark.asyncio\nasync def test_semaphore_acquire_blocks_and_wakes():\n    sem = BoundedSemaphore(value=1)\n    await sem.acquire()  # acquire the only permit\n    # Start a coroutine that will wait for the semaphore\n    async def waiter():\n        await sem.acquire()\n        return \"acquired\"\n    future = gen.convert_yielded(waiter())\n    # Ensure the future is not done yet (blocked)\n    assert not future.done()\n    # Release the semaphore to wake the waiter\n    sem.release()\n    # Now the future should complete\n    result = await future\n    assert result == \"acquired\"\n    # The semaphore value should be back to 1\n    assert sem._value == 1\n```",
+        "reasoning": "We need to test BoundedSemaphore. Need import from tornado.locks. Write three tests: normal acquire/release, boundary error when releasing too many, and maybe test that initial value limits. Use tmp_path? Not needed. Use pytest. Ensure independent. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047818964,
+    "prompt_tokens": 422,
+    "prompt_time": 0.023964735,
+    "completion_tokens": 405,
+    "completion_time": 0.462602223,
+    "total_tokens": 827,
+    "total_time": 0.486566958,
+    "completion_tokens_details": {
+      "reasoning_tokens": 56
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh3x17evwv5zf9bqddkwv3",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado.locks import BoundedSemaphore\nfrom tornado import gen, ioloop\n\n@pytest.mark.asyncio\nasync def test_semaphore_normal_acquire_release():\n    sem = BoundedSemaphore(value=2)\n    # Acquire twice successfully\n    await sem.acquire()\n    await sem.acquire()\n    # Value should be 0 now\n    assert sem._value == 0\n    # Release twice\n    sem.release()\n    sem.release()\n    # Value should return to initial\n    assert sem._value == 2\n\n@pytest.mark.asyncio\nasync def test_semaphore_release_too_many_times():\n    sem = BoundedSemaphore(value=1)\n    await sem.acquire()\n    # Release once back to 1\n    sem.release()\n    # Now releasing again should raise ValueError\n    with pytest.raises(ValueError, match=\"Semaphore released too many times\"):\n        sem.release()\n\n@pytest.mark.asyncio\nasync def test_semaphore_acquire_blocks_and_wakes():\n    sem = BoundedSemaphore(value=1)\n    await sem.acquire()  # acquire the only permit\n    # Start a coroutine that will wait for the semaphore\n    async def waiter():\n        await sem.acquire()\n        return \"acquired\"\n    future = gen.convert_yielded(waiter())\n    # Ensure the future is not done yet (blocked)\n    assert not future.done()\n    # Release the semaphore to wake the waiter\n    sem.release()\n    # Now the future should complete\n    result = await future\n    assert result == \"acquired\"\n    # The semaphore value should be back to 1\n    assert sem._value == 1\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "ada4ed31898f4a1e9b229c9faf99f08c",
+  "_api_plus_pacing_seconds": 1.159743906056974
+}

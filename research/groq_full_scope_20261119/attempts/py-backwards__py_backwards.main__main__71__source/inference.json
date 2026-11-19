@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-dc46023b-68a0-4ef8-9308-77d46a03af12",
+  "object": "chat.completion",
+  "created": 1795077852,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport stat\nimport pytest\nfrom py_backwards import main as py_backwards_main\nfrom py_backwards import compiler, const, exceptions, messages\n\n@pytest.fixture\ndef simple_py(tmp_path):\n    \"\"\"Create a minimal Python file that can be compiled.\"\"\"\n    file_path = tmp_path / \"hello.py\"\n    file_path.write_text(\"print('hello world')\\n\")\n    return file_path\n\ndef test_main_success(tmp_path, simple_py, monkeypatch, capsys):\n    \"\"\"Normal execution: compile a single file and verify success.\"\"\"\n    output_dir = tmp_path / \"out\"\n    output_dir.mkdir()\n    # Prepare command line arguments\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(simple_py),\n        \"-o\", str(output_dir),\n        \"-t\", \"py36\",\n    ])\n    # Run main\n    exit_code = py_backwards_main.main()\n    # Capture output\n    out, err = capsys.readouterr()\n    # Assertions\n    assert exit_code == 0\n    assert err == \"\"\n    # The output directory should contain a compiled file\n    compiled_files = list(output_dir.glob(\"*.py\"))\n    assert len(compiled_files) == 1\n    # The compilation result message should mention the file\n    assert simple_py.name in out\n    assert \"compiled\" in out.lower()\n\ndef test_main_input_doesnt_exist(tmp_path, monkeypatch, capsys):\n    \"\"\"Error when input file does not exist.\"\"\"\n    non_existent = tmp_path / \"does_not_exist.py\"\n    output_dir = tmp_path / \"out\"\n    output_dir.mkdir()\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(non_existent),\n        \"-o\", str(output_dir),\n        \"-t\", \"py36\",\n    ])\n    exit_code = py_backwards_main.main()\n    out, err = capsys.readouterr()\n    assert exit_code == 1\n    assert err == messages.input_doesnt_exists([str(non_existent)]) + \"\\n\"\n    assert out == \"\"\n\ndef test_main_permission_error(tmp_path, simple_py, monkeypatch, capsys):\n    \"\"\"Error when output path is not writable (PermissionError).\"\"\"\n    # Create a file and make it read-only\n    output_file = tmp_path / \"readonly.py\"\n    output_file.write_text(\"\")\n    os.chmod(output_file, stat.S_IREAD)\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(simple_py),\n        \"-o\", str(output_file),\n        \"-t\", \"py36\",\n    ])\n    exit_code = py_backwards_main.main()\n    out, err = capsys.readouterr()\n    assert exit_code == 1\n    assert err == messages.permission_error(str(output_file)) + \"\\n\"\n    assert out == \"\"\n```",
+        "reasoning": "We need three test functions for main. We can simulate command line args via monkeypatch sys.argv. Use tmp_path for files. Need to test normal, boundary, error. Normal: create a simple python file, run main, expect exit 0 and output message. Error: input file missing triggers InputDoesntExists. Boundary: maybe invalid output path? Use PermissionError by making output dir read-only? But can't change permissions? Use tmp_path and create file and set to read-only. Use os.chmod. Let's write tests. Use capsys to capture stdout/stderr. Use pytest.raises SystemExit? main returns int, not exit. So just call main. Use monkeypatch to set sys.argv. Ensure compile_files works; it will compile file. We'll need to create a simple file. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052252631,
+    "prompt_tokens": 614,
+    "prompt_time": 0.039338106,
+    "completion_tokens": 788,
+    "completion_time": 0.863258876,
+    "total_tokens": 1402,
+    "total_time": 0.902596982,
+    "completion_tokens_details": {
+      "reasoning_tokens": 165
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfmjmwe5hbcqxr6jkyy0yw",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport stat\nimport pytest\nfrom py_backwards import main as py_backwards_main\nfrom py_backwards import compiler, const, exceptions, messages\n\n@pytest.fixture\ndef simple_py(tmp_path):\n    \"\"\"Create a minimal Python file that can be compiled.\"\"\"\n    file_path = tmp_path / \"hello.py\"\n    file_path.write_text(\"print('hello world')\\n\")\n    return file_path\n\ndef test_main_success(tmp_path, simple_py, monkeypatch, capsys):\n    \"\"\"Normal execution: compile a single file and verify success.\"\"\"\n    output_dir = tmp_path / \"out\"\n    output_dir.mkdir()\n    # Prepare command line arguments\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(simple_py),\n        \"-o\", str(output_dir),\n        \"-t\", \"py36\",\n    ])\n    # Run main\n    exit_code = py_backwards_main.main()\n    # Capture output\n    out, err = capsys.readouterr()\n    # Assertions\n    assert exit_code == 0\n    assert err == \"\"\n    # The output directory should contain a compiled file\n    compiled_files = list(output_dir.glob(\"*.py\"))\n    assert len(compiled_files) == 1\n    # The compilation result message should mention the file\n    assert simple_py.name in out\n    assert \"compiled\" in out.lower()\n\ndef test_main_input_doesnt_exist(tmp_path, monkeypatch, capsys):\n    \"\"\"Error when input file does not exist.\"\"\"\n    non_existent = tmp_path / \"does_not_exist.py\"\n    output_dir = tmp_path / \"out\"\n    output_dir.mkdir()\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(non_existent),\n        \"-o\", str(output_dir),\n        \"-t\", \"py36\",\n    ])\n    exit_code = py_backwards_main.main()\n    out, err = capsys.readouterr()\n    assert exit_code == 1\n    assert err == messages.input_doesnt_exists([str(non_existent)]) + \"\\n\"\n    assert out == \"\"\n\ndef test_main_permission_error(tmp_path, simple_py, monkeypatch, capsys):\n    \"\"\"Error when output path is not writable (PermissionError).\"\"\"\n    # Create a file and make it read-only\n    output_file = tmp_path / \"readonly.py\"\n    output_file.write_text(\"\")\n    os.chmod(output_file, stat.S_IREAD)\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(simple_py),\n        \"-o\", str(output_file),\n        \"-t\", \"py36\",\n    ])\n    exit_code = py_backwards_main.main()\n    out, err = capsys.readouterr()\n    assert exit_code == 1\n    assert err == messages.permission_error(str(output_file)) + \"\\n\"\n    assert out == \"\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2467523810337298
+}

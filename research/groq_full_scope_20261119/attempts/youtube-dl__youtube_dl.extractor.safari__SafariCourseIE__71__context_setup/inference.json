@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-587f8115-dc66-4c42-bd7b-eae97c7effa8",
+  "object": "chat.completion",
+  "created": 1795079602,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.safari import SafariCourseIE, SafariIE, SafariApiIE\nfrom youtube_dl.utils import ExtractorError\n\n\ndef test_safari_course_suitable_excludes_other_ie():\n    \"\"\"SafariCourseIE.suitable should return False for URLs that match SafariIE or SafariApiIE.\"\"\"\n    url = \"https://www.safaribooksonline.com/library/view/hadoop-fundamentals-livelessons/9780133392838/part00.html\"\n    assert SafariIE.suitable(url) is True\n    assert SafariApiIE.suitable(url) is False\n    assert SafariCourseIE.suitable(url) is False\n\n\ndef test_safari_course_suitable_matches_course_url():\n    \"\"\"SafariCourseIE.suitable should return True for a course URL that does not match other IEs.\"\"\"\n    url = \"https://www.safaribooksonline.com/library/view/hadoop-fundamentals-livelessons/9780133392838/\"\n    assert SafariCourseIE.suitable(url) is True\n    assert SafariIE.suitable(url) is False\n    assert SafariApiIE.suitable(url) is False\n\n\ndef test_safari_course_extract_raises_on_missing_chapters(monkeypatch):\n    \"\"\"_real_extract should raise ExtractorError when the JSON lacks 'chapters'.\"\"\"\n    ie = SafariCourseIE()\n    # monkeypatch the download_json method to return a dict without 'chapters'\n    def fake_download_json(url, video_id, note=None, errnote=None, headers=None, data=None, timeout=None, fatal=True):\n        return {\"title\": \"Fake Course\"}  # no 'chapters' key\n    monkeypatch.setattr(ie, \"_download_json\", fake_download_json)\n\n    url = \"https://www.safaribooksonline.com/library/view/fake-course/1234567890/\"\n    with pytest.raises(ExtractorError) as excinfo:\n        ie._real_extract(url)\n    assert \"No chapters found for course 1234567890\" in str(excinfo.value)\n```",
+        "reasoning": "Need tests for SafariCourseIE. We can instantiate IE and call suitable and _real_extract with mock download_json returning dict. But cannot mock. We can test suitable regex. Use regex matching. Also test that suitable returns False when SafariIE suitable. Use dummy URL. Also test that _real_extract raises ExtractorError when chapters missing. We can monkeypatch _download_json to return dict without chapters. Use pytest monkeypatch. Provide dummy IE instance. Use IE._real_extract. Need to import class. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004881194,
+    "prompt_tokens": 2727,
+    "prompt_time": 0.170419492,
+    "completion_tokens": 546,
+    "completion_time": 0.569548596,
+    "total_tokens": 3273,
+    "total_time": 0.739968088,
+    "completion_tokens_details": {
+      "reasoning_tokens": 107
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh9z6ve4y9gf2b3kv5hxm5",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.safari import SafariCourseIE, SafariIE, SafariApiIE\nfrom youtube_dl.utils import ExtractorError\n\n\ndef test_safari_course_suitable_excludes_other_ie():\n    \"\"\"SafariCourseIE.suitable should return False for URLs that match SafariIE or SafariApiIE.\"\"\"\n    url = \"https://www.safaribooksonline.com/library/view/hadoop-fundamentals-livelessons/9780133392838/part00.html\"\n    assert SafariIE.suitable(url) is True\n    assert SafariApiIE.suitable(url) is False\n    assert SafariCourseIE.suitable(url) is False\n\n\ndef test_safari_course_suitable_matches_course_url():\n    \"\"\"SafariCourseIE.suitable should return True for a course URL that does not match other IEs.\"\"\"\n    url = \"https://www.safaribooksonline.com/library/view/hadoop-fundamentals-livelessons/9780133392838/\"\n    assert SafariCourseIE.suitable(url) is True\n    assert SafariIE.suitable(url) is False\n    assert SafariApiIE.suitable(url) is False\n\n\ndef test_safari_course_extract_raises_on_missing_chapters(monkeypatch):\n    \"\"\"_real_extract should raise ExtractorError when the JSON lacks 'chapters'.\"\"\"\n    ie = SafariCourseIE()\n    # monkeypatch the download_json method to return a dict without 'chapters'\n    def fake_download_json(url, video_id, note=None, errnote=None, headers=None, data=None, timeout=None, fatal=True):\n        return {\"title\": \"Fake Course\"}  # no 'chapters' key\n    monkeypatch.setattr(ie, \"_download_json\", fake_download_json)\n\n    url = \"https://www.safaribooksonline.com/library/view/fake-course/1234567890/\"\n    with pytest.raises(ExtractorError) as excinfo:\n        ie._real_extract(url)\n    assert \"No chapters found for course 1234567890\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "fd49c39f287e4763a717ceb8ffe10bce",
+  "_api_plus_pacing_seconds": 6.664407207048498
+}

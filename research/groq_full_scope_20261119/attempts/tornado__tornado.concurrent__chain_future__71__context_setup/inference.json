@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-e5351a30-2e89-4e5b-a41c-6da3cc4f202d",
+  "object": "chat.completion",
+  "created": 1795079385,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import chain_future, Future, future_set_exc_info\n\n# Test 1: Successful chaining of two asyncio.Future objects\n@pytest.mark.asyncio\nasync def test_chain_future_success():\n    a = Future()\n    b = Future()\n    chain_future(a, b)\n\n    # Resolve a and check that b receives the same result\n    a.set_result(42)\n    await asyncio.sleep(0)  # allow callbacks to run\n    assert b.done()\n    assert not b.cancelled()\n    assert b.result() == 42\n\n# Test 2: Failure propagation from a to b using concurrent.futures.Future\ndef test_chain_future_failure():\n    loop = asyncio.get_event_loop()\n    a = concurrent.futures.Future()\n    b = Future()\n\n    chain_future(a, b)\n\n    # Resolve a with an exception\n    a.set_exception(ValueError(\"boom\"))\n    loop.run_until_complete(asyncio.sleep(0))  # allow callbacks to run\n\n    assert b.done()\n    assert not b.cancelled()\n    exc = b.exception()\n    assert isinstance(exc, ValueError)\n    assert str(exc) == \"boom\"\n\n# Test 3: b already completed before a finishes – b should remain unchanged\n@pytest.mark.asyncio\nasync def test_chain_future_b_already_done():\n    a = Future()\n    b = Future()\n    b.set_result(\"already\")\n    chain_future(a, b)\n\n    # Resolve a with a different result\n    a.set_result(99)\n    await asyncio.sleep(0)  # allow callbacks to run\n\n    # b should keep its original result\n    assert b.done()\n    assert b.result() == \"already\"\n```",
+        "reasoning": "Need three tests: normal chaining success, failure propagation, and when b already done. Use asyncio event loop."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053467493,
+    "prompt_tokens": 1052,
+    "prompt_time": 0.064118226,
+    "completion_tokens": 388,
+    "completion_time": 0.434004539,
+    "total_tokens": 1440,
+    "total_time": 0.498122765,
+    "completion_tokens_details": {
+      "reasoning_tokens": 23
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh3bnze7k8q5a72b37wtrh",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import chain_future, Future, future_set_exc_info\n\n# Test 1: Successful chaining of two asyncio.Future objects\n@pytest.mark.asyncio\nasync def test_chain_future_success():\n    a = Future()\n    b = Future()\n    chain_future(a, b)\n\n    # Resolve a and check that b receives the same result\n    a.set_result(42)\n    await asyncio.sleep(0)  # allow callbacks to run\n    assert b.done()\n    assert not b.cancelled()\n    assert b.result() == 42\n\n# Test 2: Failure propagation from a to b using concurrent.futures.Future\ndef test_chain_future_failure():\n    loop = asyncio.get_event_loop()\n    a = concurrent.futures.Future()\n    b = Future()\n\n    chain_future(a, b)\n\n    # Resolve a with an exception\n    a.set_exception(ValueError(\"boom\"))\n    loop.run_until_complete(asyncio.sleep(0))  # allow callbacks to run\n\n    assert b.done()\n    assert not b.cancelled()\n    exc = b.exception()\n    assert isinstance(exc, ValueError)\n    assert str(exc) == \"boom\"\n\n# Test 3: b already completed before a finishes – b should remain unchanged\n@pytest.mark.asyncio\nasync def test_chain_future_b_already_done():\n    a = Future()\n    b = Future()\n    b.set_result(\"already\")\n    chain_future(a, b)\n\n    # Resolve a with a different result\n    a.set_result(99)\n    await asyncio.sleep(0)  # allow callbacks to run\n\n    # b should keep its original result\n    assert b.done()\n    assert b.result() == \"already\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "d4dbefcec494466ead15856ec9b63f9f",
+  "_api_plus_pacing_seconds": 0.939507675007917
+}

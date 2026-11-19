@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-aa96b272-7867-465f-897b-42f7426b3246",
+  "object": "chat.completion",
+  "created": 1795079461,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.downloader.f4m import build_fragments_list\n\ndef test_normal_non_live_segments():\n    boot_info = {\n        'segments': [\n            {\n                'segment_run': [\n                    ('seg1', 2),\n                    ('seg2', 1),\n                ]\n            }\n        ],\n        'fragments': [\n            {\n                'fragments': [\n                    {'first': 0}\n                ]\n            }\n        ],\n        'live': False\n    }\n    result = build_fragments_list(boot_info)\n    # Expected: seg1 with frag 0 and 1, seg2 with frag 2\n    assert result == [('seg1', 0), ('seg1', 1), ('seg2', 2)]\n\ndef test_live_truncation_and_abnormal_count():\n    boot_info = {\n        'segments': [\n            {\n                'segment_run': [\n                    ('segA', 4294967295),  # abnormal count\n                    ('segB', 3),\n                ]\n            }\n        ],\n        'fragments': [\n            {\n                'fragments': [\n                    {'first': 10}\n                ]\n            }\n        ],\n        'live': True\n    }\n    result = build_fragments_list(boot_info)\n    # For live, only last two fragments should be kept\n    # Normal count is replaced by 2 for abnormal value\n    # Fragment numbers: 10,11,12,13,14,15 -> last two are 14,15\n    assert result == [('segB', 14), ('segB', 15)]\n\ndef test_fragment_counter_start_and_multiple_segments():\n    boot_info = {\n        'segments': [\n            {\n                'segment_run': [\n                    ('segX', 1),\n                    ('segY', 2),\n                ]\n            }\n        ],\n        'fragments': [\n            {\n                'fragments': [\n                    {'first': 5}\n                ]\n            }\n        ],\n        'live': False\n    }\n    result = build_fragments_list(boot_info)\n    # Fragment numbers should start at 5 and increment\n    assert result == [('segX', 5), ('segY', 6), ('segY', 7)]\n```",
+        "reasoning": "We need tests for build_fragments_list. Use tmp_path? Not needed. Just call function with crafted boot_info. Three tests: normal, boundary (live with abnormal count), error? maybe missing keys? but function expects dict. Could test that live truncates to last two. Also test that abnormal count replaced. Third test normal non-live. Provide assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005422051,
+    "prompt_tokens": 522,
+    "prompt_time": 0.002767467,
+    "completion_tokens": 550,
+    "completion_time": 0.640052906,
+    "total_tokens": 1072,
+    "total_time": 0.642820373,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 74
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh5p1qe82txbvemzqp0jaw",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.downloader.f4m import build_fragments_list\n\ndef test_normal_non_live_segments():\n    boot_info = {\n        'segments': [\n            {\n                'segment_run': [\n                    ('seg1', 2),\n                    ('seg2', 1),\n                ]\n            }\n        ],\n        'fragments': [\n            {\n                'fragments': [\n                    {'first': 0}\n                ]\n            }\n        ],\n        'live': False\n    }\n    result = build_fragments_list(boot_info)\n    # Expected: seg1 with frag 0 and 1, seg2 with frag 2\n    assert result == [('seg1', 0), ('seg1', 1), ('seg2', 2)]\n\ndef test_live_truncation_and_abnormal_count():\n    boot_info = {\n        'segments': [\n            {\n                'segment_run': [\n                    ('segA', 4294967295),  # abnormal count\n                    ('segB', 3),\n                ]\n            }\n        ],\n        'fragments': [\n            {\n                'fragments': [\n                    {'first': 10}\n                ]\n            }\n        ],\n        'live': True\n    }\n    result = build_fragments_list(boot_info)\n    # For live, only last two fragments should be kept\n    # Normal count is replaced by 2 for abnormal value\n    # Fragment numbers: 10,11,12,13,14,15 -> last two are 14,15\n    assert result == [('segB', 14), ('segB', 15)]\n\ndef test_fragment_counter_start_and_multiple_segments():\n    boot_info = {\n        'segments': [\n            {\n                'segment_run': [\n                    ('segX', 1),\n                    ('segY', 2),\n                ]\n            }\n        ],\n        'fragments': [\n            {\n                'fragments': [\n                    {'first': 5}\n                ]\n            }\n        ],\n        'live': False\n    }\n    result = build_fragments_list(boot_info)\n    # Fragment numbers should start at 5 and increment\n    assert result == [('segX', 5), ('segY', 6), ('segY', 7)]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "69a015bb7a064962b432ec72ab0a73fb",
+  "_api_plus_pacing_seconds": 1.3327070900122635
+}

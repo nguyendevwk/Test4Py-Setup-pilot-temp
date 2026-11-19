@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-6489e8da-2083-41b1-b612-75303223c53a",
+  "object": "chat.completion",
+  "created": 1795079390,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport sys\nimport platform\nimport pytest\nfrom httpie.core import print_debug_info\nfrom httpie.context import Environment\nfrom httpie.plugins.registry import plugin_manager\n\ndef test_print_debug_info_writes_expected_sections(tmp_path):\n    \"\"\"Verify that print_debug_info writes all expected sections to stderr.\"\"\"\n    # Create a temporary file to capture stderr output\n    stderr_file = tmp_path / \"stderr.txt\"\n    env = Environment(stderr=stderr_file.open(\"w\"))\n    try:\n        print_debug_info(env)\n    finally:\n        stderr_file.close()\n\n    content = stderr_file.read_text()\n    # Check HTTPie, Requests, Pygments, Python, and platform info\n    assert f\"HTTPie {__import__('httpie').__version__}\" in content\n    assert f\"Requests {__import__('requests').__version__}\" in content\n    assert f\"Pygments {__import__('pygments').__version__}\" in content\n    assert f\"Python {sys.version}\" in content\n    assert sys.executable in content\n    assert f\"{platform.system()} {platform.release()}\" in content\n\n    # Environment repr should be present\n    assert repr(env) in content\n\n    # Plugin manager repr should be present\n    assert repr(plugin_manager) in content\n\ndef test_print_debug_info_with_stringio_stderr():\n    \"\"\"Ensure the function works when stderr is a StringIO object.\"\"\"\n    stderr_io = io.StringIO()\n    env = Environment(stderr=stderr_io)\n    print_debug_info(env)\n    output = stderr_io.getvalue()\n    # Basic sanity checks\n    assert \"HTTPie\" in output\n    assert \"Requests\" in output\n    assert \"Pygments\" in output\n    assert \"Python\" in output\n    assert repr(env) in output\n    assert repr(plugin_manager) in output\n\ndef test_print_debug_info_raises_on_missing_stderr():\n    \"\"\"Passing an Environment without a stderr attribute should raise AttributeError.\"\"\"\n    class DummyEnv:\n        pass  # No stderr attribute\n\n    dummy_env = DummyEnv()\n    with pytest.raises(AttributeError):\n        print_debug_info(dummy_env)\n```",
+        "reasoning": "Need tests for print_debug_info. Use tmp_path to capture stderr. Environment likely from httpie.context. Let's inspect Environment.We can't import product code? We can import httpie.context.Environment. Let's inspect.We need to import Environment. Use a temporary file as stderr. Create Environment with stderr=tmpfile. Then call print_debug_info. Assert content contains expected substrings. Also test that plugin_manager repr present. Also test that no exception. Third test maybe boundary: env with custom attributes? But Environment likely has default. We'll just test normal. Three tests: normal, boundary where env has no stderr? But function expects env.stderr. Could test that if env.stderr is a StringIO. Use io.StringIO. Third test error: passing None should raise AttributeError. Use pytest.raises. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.065743422,
+    "prompt_tokens": 537,
+    "prompt_time": 0.584244472,
+    "completion_tokens": 630,
+    "completion_time": 0.836586002,
+    "total_tokens": 1167,
+    "total_time": 1.420830474,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 166
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh3g33eb7vk9qq3esewkd1",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport sys\nimport platform\nimport pytest\nfrom httpie.core import print_debug_info\nfrom httpie.context import Environment\nfrom httpie.plugins.registry import plugin_manager\n\ndef test_print_debug_info_writes_expected_sections(tmp_path):\n    \"\"\"Verify that print_debug_info writes all expected sections to stderr.\"\"\"\n    # Create a temporary file to capture stderr output\n    stderr_file = tmp_path / \"stderr.txt\"\n    env = Environment(stderr=stderr_file.open(\"w\"))\n    try:\n        print_debug_info(env)\n    finally:\n        stderr_file.close()\n\n    content = stderr_file.read_text()\n    # Check HTTPie, Requests, Pygments, Python, and platform info\n    assert f\"HTTPie {__import__('httpie').__version__}\" in content\n    assert f\"Requests {__import__('requests').__version__}\" in content\n    assert f\"Pygments {__import__('pygments').__version__}\" in content\n    assert f\"Python {sys.version}\" in content\n    assert sys.executable in content\n    assert f\"{platform.system()} {platform.release()}\" in content\n\n    # Environment repr should be present\n    assert repr(env) in content\n\n    # Plugin manager repr should be present\n    assert repr(plugin_manager) in content\n\ndef test_print_debug_info_with_stringio_stderr():\n    \"\"\"Ensure the function works when stderr is a StringIO object.\"\"\"\n    stderr_io = io.StringIO()\n    env = Environment(stderr=stderr_io)\n    print_debug_info(env)\n    output = stderr_io.getvalue()\n    # Basic sanity checks\n    assert \"HTTPie\" in output\n    assert \"Requests\" in output\n    assert \"Pygments\" in output\n    assert \"Python\" in output\n    assert repr(env) in output\n    assert repr(plugin_manager) in output\n\ndef test_print_debug_info_raises_on_missing_stderr():\n    \"\"\"Passing an Environment without a stderr attribute should raise AttributeError.\"\"\"\n    class DummyEnv:\n        pass  # No stderr attribute\n\n    dummy_env = DummyEnv()\n    with pytest.raises(AttributeError):\n        print_debug_info(dummy_env)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "b3f38c9bcef041b7a4eea54bfb349b79",
+  "_api_plus_pacing_seconds": 2.1205437420285307
+}

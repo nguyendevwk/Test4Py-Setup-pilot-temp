@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-1fb30d68-31e0-4aba-b4d0-7bb4a6f96953",
+  "object": "chat.completion",
+  "created": 1795076088,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.soundgasm import SoundgasmIE\n\n\nclass DummySoundgasmIE(SoundgasmIE):\n    \"\"\"Subclass that overrides network calls to return a controlled HTML page.\"\"\"\n\n    def __init__(self, html):\n        super().__init__()\n        self._html = html\n\n    def _download_webpage(self, url, display_id, note=None, errnote=None, *, fatal=True):\n        # Return the predefined HTML regardless of the URL\n        return self._html\n\n\ndef test_soundgasm_extraction_success():\n    # Construct a minimal HTML page that satisfies all regexes\n    html = \"\"\"\n    <html>\n      <body>\n        <div class=\"jp-title\">Piano sample</div>\n        <div class=\"jp-description\">Royalty Free Sample Music</div>\n        <script>\n          var audio = { m4a: \"https://cdn.soundgasm.net/audio/88abd86ea000cafe98f96321b23cc1206cbcbcc9.m4a\" };\n        </script>\n      </body>\n    </html>\n    \"\"\"\n    extractor = DummySoundgasmIE(html)\n    url = \"http://soundgasm.net/u/ytdl/Piano-sample\"\n    result = extractor._real_extract(url)\n\n    assert result[\"id\"] == \"88abd86ea000cafe98f96321b23cc1206cbcbcc9\"\n    assert result[\"display_id\"] == \"Piano-sample\"\n    assert result[\"url\"] == \"https://cdn.soundgasm.net/audio/88abd86ea000cafe98f96321b23cc1206cbcbcc9.m4a\"\n    assert result[\"vcodec\"] == \"none\"\n    assert result[\"title\"] == \"Piano sample\"\n    assert result[\"description\"] == \"Royalty Free Sample Music\"\n    assert result[\"uploader\"] == \"ytdl\"\n\n\ndef test_soundgasm_extraction_missing_description():\n    # HTML without a description div; description should be None\n    html = \"\"\"\n    <html>\n      <body>\n        <div class=\"jp-title\">Piano sample</div>\n        <script>\n          var audio = { m4a: \"https://cdn.soundgasm.net/audio/88abd86ea000cafe98f96321b23cc1206cbcbcc9.m4a\" };\n        </script>\n      </body>\n    </html>\n    \"\"\"\n    extractor = DummySoundgasmIE(html)\n    url = \"http://soundgasm.net/u/ytdl/Piano-sample\"\n    result = extractor._real_extract(url)\n\n    assert result[\"description\"] is None\n    assert result[\"title\"] == \"Piano sample\"\n    assert result[\"uploader\"] == \"ytdl\"\n\n\ndef test_soundgasm_extraction_invalid_url():\n    # URL that does not match the VALID_URL pattern should raise a ValueError\n    extractor = DummySoundgasmIE(\"\")\n    url = \"http://example.com/not-a-soundgasm-url\"\n    with pytest.raises(ValueError):\n        extractor._real_extract(url)\n```",
+        "reasoning": "We need to write tests for SoundgasmIE. We cannot modify code. We need to simulate extraction. But we need to provide a webpage content. The extractor uses _download_webpage, _html_search_regex, _search_regex. These are methods from InfoExtractor. We can instantiate SoundgasmIE and override methods? But cannot mock target. But we can subclass? We can create a dummy subclass that overrides _download_webpage to return a crafted HTML. But that would be mocking target? It's allowed to use private APIs? We can use the class itself but override methods. That's acceptable. We'll create a subclass for test. Use tmp_path? Not needed. We'll test normal extraction, boundary (missing description), error (invalid URL). Use pytest.raises for error. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054047284,
+    "prompt_tokens": 761,
+    "prompt_time": 0.045494133,
+    "completion_tokens": 830,
+    "completion_time": 0.940220899,
+    "total_tokens": 1591,
+    "total_time": 0.985715032,
+    "completion_tokens_details": {
+      "reasoning_tokens": 162
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdyqn4e9b9w0saxbdfsxgz",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.soundgasm import SoundgasmIE\n\n\nclass DummySoundgasmIE(SoundgasmIE):\n    \"\"\"Subclass that overrides network calls to return a controlled HTML page.\"\"\"\n\n    def __init__(self, html):\n        super().__init__()\n        self._html = html\n\n    def _download_webpage(self, url, display_id, note=None, errnote=None, *, fatal=True):\n        # Return the predefined HTML regardless of the URL\n        return self._html\n\n\ndef test_soundgasm_extraction_success():\n    # Construct a minimal HTML page that satisfies all regexes\n    html = \"\"\"\n    <html>\n      <body>\n        <div class=\"jp-title\">Piano sample</div>\n        <div class=\"jp-description\">Royalty Free Sample Music</div>\n        <script>\n          var audio = { m4a: \"https://cdn.soundgasm.net/audio/88abd86ea000cafe98f96321b23cc1206cbcbcc9.m4a\" };\n        </script>\n      </body>\n    </html>\n    \"\"\"\n    extractor = DummySoundgasmIE(html)\n    url = \"http://soundgasm.net/u/ytdl/Piano-sample\"\n    result = extractor._real_extract(url)\n\n    assert result[\"id\"] == \"88abd86ea000cafe98f96321b23cc1206cbcbcc9\"\n    assert result[\"display_id\"] == \"Piano-sample\"\n    assert result[\"url\"] == \"https://cdn.soundgasm.net/audio/88abd86ea000cafe98f96321b23cc1206cbcbcc9.m4a\"\n    assert result[\"vcodec\"] == \"none\"\n    assert result[\"title\"] == \"Piano sample\"\n    assert result[\"description\"] == \"Royalty Free Sample Music\"\n    assert result[\"uploader\"] == \"ytdl\"\n\n\ndef test_soundgasm_extraction_missing_description():\n    # HTML without a description div; description should be None\n    html = \"\"\"\n    <html>\n      <body>\n        <div class=\"jp-title\">Piano sample</div>\n        <script>\n          var audio = { m4a: \"https://cdn.soundgasm.net/audio/88abd86ea000cafe98f96321b23cc1206cbcbcc9.m4a\" };\n        </script>\n      </body>\n    </html>\n    \"\"\"\n    extractor = DummySoundgasmIE(html)\n    url = \"http://soundgasm.net/u/ytdl/Piano-sample\"\n    result = extractor._real_extract(url)\n\n    assert result[\"description\"] is None\n    assert result[\"title\"] == \"Piano sample\"\n    assert result[\"uploader\"] == \"ytdl\"\n\n\ndef test_soundgasm_extraction_invalid_url():\n    # URL that does not match the VALID_URL pattern should raise a ValueError\n    extractor = DummySoundgasmIE(\"\")\n    url = \"http://example.com/not-a-soundgasm-url\"\n    with pytest.raises(ValueError):\n        extractor._real_extract(url)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3266435400000773
+}

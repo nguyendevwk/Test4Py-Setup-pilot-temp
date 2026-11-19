@@ -1,0 +1,83 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_replaces_str_with_unicode ________________________
+
+    def test_replaces_str_with_unicode():
+        source = "def f():\n    x = str\n    y = 'hello'\n"
+        tree = parse_code(source)
+        result: TransformationResult = StringTypesTransformer.transform(tree)
+    
+        # The transformer should report a change
+>       assert result.changed is True
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:25: AttributeError
+__________________________ test_no_change_when_no_str __________________________
+
+    def test_no_change_when_no_str():
+        source = "def f():\n    x = 42\n    y = 'str'\n"
+        tree = parse_code(source)
+        result: TransformationResult = StringTypesTransformer.transform(tree)
+    
+        # No nodes should have been modified
+>       assert result.changed is False
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:41: AttributeError
+__________________ test_only_replaces_name_str_not_attribute ___________________
+
+    def test_only_replaces_name_str_not_attribute():
+        source = "class str:\n    pass\n\ndef f():\n    x = str\n"
+        tree = parse_code(source)
+        result: TransformationResult = StringTypesTransformer.transform(tree)
+    
+        # The class name 'str' should stay unchanged
+>       new_source = ast_to_code(result.tree)
+
+test_generated.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_generated.py:16: in ast_to_code
+    return pyast.unparse(tree)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:1681: in unparse
+    return unparser.visit(ast_obj)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:815: in visit
+    self.traverse(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:806: in traverse
+    super().visit(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:418: in visit
+    return visitor(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:830: in visit_Module
+    self._write_docstring_and_traverse_body(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:823: in _write_docstring_and_traverse_body
+    self.traverse(node.body)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:804: in traverse
+    self.traverse(item)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:806: in traverse
+    super().visit(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:418: in visit
+    return visitor(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:1012: in visit_FunctionDef
+    self._function_helper(node, "def")
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:1025: in _function_helper
+    self.traverse(node.args)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:806: in traverse
+    super().visit(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:418: in visit
+    return visitor(node)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ast._Unparser object at 0x7fd1194aba60>
+node = <typed_ast._ast3.arguments object at 0x7fd1194ab940>
+
+    def visit_arguments(self, node):
+        first = True
+        # normal arguments
+>       all_args = node.posonlyargs + node.args
+E       AttributeError: 'arguments' object has no attribute 'posonlyargs'. Did you mean: 'kwonlyargs'?
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:1516: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_replaces_str_with_unicode - AttributeError: 'T...
+FAILED test_generated.py::test_no_change_when_no_str - AttributeError: 'Trans...
+FAILED test_generated.py::test_only_replaces_name_str_not_attribute - Attribu...
+3 failed in 0.22s

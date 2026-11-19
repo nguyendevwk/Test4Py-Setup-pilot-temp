@@ -1,0 +1,42 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_valid_time_string_parses_correctly ____________________
+
+    def test_valid_time_string_parses_correctly():
+        fmt = TimeFormat()
+        result = fmt.validate("12:34:56.789")
+        assert isinstance(result, datetime.time)
+        assert result.hour == 12
+        assert result.minute == 34
+        assert result.second == 56
+        assert result.microsecond == 789000
+        # serialization should round-trip
+>       assert fmt.serialize(result) == "12:34:56.789"
+E       AssertionError: assert '12:34:56.789000' == '12:34:56.789'
+E         
+E         - 12:34:56.789
+E         + 12:34:56.789000
+E         ?             +++
+
+test_generated.py:14: AssertionError
+__________________ test_invalid_time_raises_validation_error ___________________
+
+    def test_invalid_time_raises_validation_error():
+        fmt = TimeFormat()
+        # invalid format (missing colon)
+        with pytest.raises(Exception) as excinfo:
+            fmt.validate("123456")
+        assert "format" in str(excinfo.value)
+        # invalid time value (hour out of range)
+        with pytest.raises(Exception) as excinfo2:
+            fmt.validate("24:00")
+>       assert "invalid" in str(excinfo2.value)
+E       AssertionError: assert 'invalid' in 'Must be a real time.'
+E        +  where 'Must be a real time.' = str(ValidationError(text='Must be a real time.', code='invalid'))
+E        +    where ValidationError(text='Must be a real time.', code='invalid') = <ExceptionInfo ValidationError(text='Must be a real time.', code='invalid') tblen=2>.value
+
+test_generated.py:35: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_valid_time_string_parses_correctly - Assertion...
+FAILED test_generated.py::test_invalid_time_raises_validation_error - Asserti...
+2 failed, 1 passed in 0.13s

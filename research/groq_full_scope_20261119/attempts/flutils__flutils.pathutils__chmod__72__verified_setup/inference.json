@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-d29aaadb-bc63-4224-9387-f54592e7d2d9",
+  "object": "chat.completion",
+  "created": 1795078876,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport stat\nimport pytest\nfrom flutils.pathutils import chmod, normalize_path\n\ndef test_chmod_file_and_directory(tmp_path):\n    # Create a file and a directory\n    file_path = tmp_path / \"test_file.txt\"\n    dir_path = tmp_path / \"test_dir\"\n    file_path.write_text(\"content\")\n    dir_path.mkdir()\n\n    # Apply chmod with custom modes\n    chmod(file_path, mode_file=0o644, mode_dir=0o700)\n    chmod(dir_path, mode_file=0o644, mode_dir=0o700)\n\n    # Verify file mode\n    file_mode = stat.S_IMODE(os.lstat(file_path).st_mode)\n    assert file_mode == 0o644, f\"Expected file mode 0o644, got {oct(file_mode)}\"\n\n    # Verify directory mode\n    dir_mode = stat.S_IMODE(os.lstat(dir_path).st_mode)\n    assert dir_mode == 0o700, f\"Expected dir mode 0o700, got {oct(dir_mode)}\"\n\ndef test_chmod_glob_and_include_parent(tmp_path):\n    # Setup nested structure\n    (tmp_path / \"sub1\").mkdir()\n    (tmp_path / \"sub1\" / \"file1.txt\").write_text(\"a\")\n    (tmp_path / \"sub2\").mkdir()\n    (tmp_path / \"sub2\" / \"file2.txt\").write_text(\"b\")\n\n    # Glob pattern to change all files and dirs inside tmp_path\n    glob_pattern = normalize_path(tmp_path / \"**\")\n    chmod(glob_pattern, mode_file=0o600, mode_dir=0o700, include_parent=True)\n\n    # Check each file and directory mode\n    for path in [tmp_path / \"sub1\", tmp_path / \"sub1\" / \"file1.txt\",\n                 tmp_path / \"sub2\", tmp_path / \"sub2\" / \"file2.txt\"]:\n        mode = stat.S_IMODE(os.lstat(path).st_mode)\n        expected = 0o700 if path.is_dir() else 0o600\n        assert mode == expected, f\"{path} mode {oct(mode)} != {oct(expected)}\"\n\n    # Parent directory should also be changed due to include_parent\n    parent_mode = stat.S_IMODE(os.lstat(tmp_path).st_mode)\n    assert parent_mode == 0o700, f\"Parent mode {oct(parent_mode)} != 0o700\"\n\ndef test_chmod_nonexistent_path(tmp_path):\n    # Path that does not exist\n    nonexistent = tmp_path / \"does_not_exist.txt\"\n\n    # Capture current mode of parent directory\n    parent_mode_before = stat.S_IMODE(os.lstat(tmp_path).st_mode)\n\n    # Call chmod on nonexistent path\n    chmod(nonexistent, mode_file=0o644, mode_dir=0o700)\n\n    # Ensure no exception and parent mode unchanged\n    parent_mode_after = stat.S_IMODE(os.lstat(tmp_path).st_mode)\n    assert parent_mode_before == parent_mode_after, \"Parent mode changed unexpectedly\"\n```",
+        "reasoning": "We need three tests. Use tmp_path. Test normal file chmod, directory, glob, include_parent. Also error? maybe non-existent path. Use pytest.raises? No exception expected. Just check no change. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.616323392,
+    "prompt_tokens": 923,
+    "prompt_time": 1.033205071,
+    "completion_tokens": 701,
+    "completion_time": 0.810431643,
+    "total_tokens": 1624,
+    "total_time": 1.843636714,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 46
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgkrt0ebyacrner8z2w49d",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport stat\nimport pytest\nfrom flutils.pathutils import chmod, normalize_path\n\ndef test_chmod_file_and_directory(tmp_path):\n    # Create a file and a directory\n    file_path = tmp_path / \"test_file.txt\"\n    dir_path = tmp_path / \"test_dir\"\n    file_path.write_text(\"content\")\n    dir_path.mkdir()\n\n    # Apply chmod with custom modes\n    chmod(file_path, mode_file=0o644, mode_dir=0o700)\n    chmod(dir_path, mode_file=0o644, mode_dir=0o700)\n\n    # Verify file mode\n    file_mode = stat.S_IMODE(os.lstat(file_path).st_mode)\n    assert file_mode == 0o644, f\"Expected file mode 0o644, got {oct(file_mode)}\"\n\n    # Verify directory mode\n    dir_mode = stat.S_IMODE(os.lstat(dir_path).st_mode)\n    assert dir_mode == 0o700, f\"Expected dir mode 0o700, got {oct(dir_mode)}\"\n\ndef test_chmod_glob_and_include_parent(tmp_path):\n    # Setup nested structure\n    (tmp_path / \"sub1\").mkdir()\n    (tmp_path / \"sub1\" / \"file1.txt\").write_text(\"a\")\n    (tmp_path / \"sub2\").mkdir()\n    (tmp_path / \"sub2\" / \"file2.txt\").write_text(\"b\")\n\n    # Glob pattern to change all files and dirs inside tmp_path\n    glob_pattern = normalize_path(tmp_path / \"**\")\n    chmod(glob_pattern, mode_file=0o600, mode_dir=0o700, include_parent=True)\n\n    # Check each file and directory mode\n    for path in [tmp_path / \"sub1\", tmp_path / \"sub1\" / \"file1.txt\",\n                 tmp_path / \"sub2\", tmp_path / \"sub2\" / \"file2.txt\"]:\n        mode = stat.S_IMODE(os.lstat(path).st_mode)\n        expected = 0o700 if path.is_dir() else 0o600\n        assert mode == expected, f\"{path} mode {oct(mode)} != {oct(expected)}\"\n\n    # Parent directory should also be changed due to include_parent\n    parent_mode = stat.S_IMODE(os.lstat(tmp_path).st_mode)\n    assert parent_mode == 0o700, f\"Parent mode {oct(parent_mode)} != 0o700\"\n\ndef test_chmod_nonexistent_path(tmp_path):\n    # Path that does not exist\n    nonexistent = tmp_path / \"does_not_exist.txt\"\n\n    # Capture current mode of parent directory\n    parent_mode_before = stat.S_IMODE(os.lstat(tmp_path).st_mode)\n\n    # Call chmod on nonexistent path\n    chmod(nonexistent, mode_file=0o644, mode_dir=0o700)\n\n    # Ensure no exception and parent mode unchanged\n    parent_mode_after = stat.S_IMODE(os.lstat(tmp_path).st_mode)\n    assert parent_mode_before == parent_mode_after, \"Parent mode changed unexpectedly\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 2.8082712320028804
+}

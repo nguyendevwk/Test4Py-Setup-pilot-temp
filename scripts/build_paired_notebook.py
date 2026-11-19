@@ -10,7 +10,8 @@ BASE=Path(__file__).resolve().parents[1]
 import subprocess
 BASE_COMMIT=subprocess.check_output(['git','rev-parse','HEAD'],cwd=BASE,text=True).strip()
 patterns=['*.py','pilot/*.py','council/*.py','tests/test*.py','requirements*.txt','pytest.ini','pilot.json',
-          'research/benchmark/*.json','notebooks/kaggle_multitarget_smoke_v4.ipynb','scripts/check_upstream_fixture.py','scripts/check_upstream_initialization.py']
+          'scripts/api_contract_probe.py','scripts/kaggle_fresh_compact.py',
+          'research/benchmark/*.json','notebooks/kaggle_multitarget_smoke_v4.ipynb','scripts/check_upstream_fixture.py','scripts/check_upstream_initialization.py','scripts/kaggle_quick_oom_check.py']
 files=sorted({p for pattern in patterns for p in BASE.glob(pattern) if p.is_file()})
 hashes={str(p.relative_to(BASE)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
 buffer=io.BytesIO()
@@ -38,6 +39,9 @@ Order: source tests → prepare → CPU fixture through real upstream → forced
 VRAM stress on each GPU → small A/B run. It stops after small for artifact review.
 Larger run is an explicit optional cell and refuses incomplete small/stress evidence.
 Runtime is measured, not promised. All failed outcomes are retained.
+The GPU screen (stress + small) has a shared 60-minute deadline, including model
+download/load. CPU installation/preparation is timed separately. Deadline failure
+retains artifacts and blocks the larger run; it is not reported as a successful screen.
 ''')
 cell('code','''from pathlib import Path
 from datetime import datetime, timezone
@@ -71,12 +75,21 @@ cell('code','''# Hardware detection precedes downloads. GPU count alone does not
 import torch
 assert torch.cuda.is_available() and torch.cuda.device_count()==2, 'Enable T4 x2 in Kaggle Settings'
 print([(torch.cuda.get_device_name(i), round(torch.cuda.get_device_properties(i).total_memory/1024**3,2)) for i in range(2)])
-subprocess.run([sys.executable,'-m','pip','install','uv==0.6.17'],check=True)
+# Install tooling into its own venv; do not install into Kaggle's system Python.
+TOOLS=Path('/tmp')/('test4py-tools-'+STAMP)
+subprocess.run([sys.executable,'-m','venv','--without-pip',str(TOOLS)],check=True)
+subprocess.run([sys.executable,'-m','pip','--python',str(TOOLS/'bin/python'),
+                'install','uv==0.6.17'],check=True)
+os.environ['PATH']=str(TOOLS/'bin')+os.pathsep+os.environ['PATH']
 subprocess.run([sys.executable,'bootstrap_modern.py'],check=True,cwd=WORKDIR)
 PYTHON='/tmp/test4py-modern/bin/python'
 subprocess.run([PYTHON,'-m','pip','install','-r','requirements-paired.txt'],check=True,cwd=WORKDIR)
 LOG=Path('/kaggle/working')/('UPSTREAM_LAUNCHER_'+STAMP+'.log')
+FAILED_STEP=None
 def run_step(arguments, env=None):
+    global FAILED_STEP
+    if FAILED_STEP is not None:
+        raise RuntimeError('Previous step failed; later steps are blocked. Inspect: '+str(FAILED_STEP))
     with LOG.open('a') as log:
         proc=subprocess.Popen([PYTHON,*arguments],cwd=WORKDIR,env=env,stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT,text=True,bufsize=1)
@@ -86,7 +99,14 @@ def run_step(arguments, env=None):
     if ROOT.exists():
         shutil.copy2(LOG,ROOT/'notebook-launcher.log')
     if code:
+        FAILED_STEP=dict(arguments=arguments,exit_code=code)
         if ROOT.exists():
+            (ROOT/'notebook-failure.json').write_text(json.dumps(FAILED_STEP,indent=2))
+            for path in sorted(ROOT.glob('stress-gpu-*/probe.json')):
+                evidence=json.loads(path.read_text())
+                print(path, 'status:',evidence.get('status'),'error:',evidence.get('error'))
+                for test in evidence.get('tests',[]):
+                    print('Stress measurement:',test)
             from paired_study import make_bundle
             bundle=make_bundle(ROOT)
             from IPython.display import display,FileLink
@@ -120,12 +140,17 @@ cell('code','''# Synthetic prefill + FORCED full-length decode at 2K/4K + 512 ou
 # This tests more than model loading; real upstream prompts remain budget-checked.
 run_step(['paired_study.py','--action','stress','--output',str(ROOT),'--jobs','2'])
 ''')
-cell('code','''# Small: genty.genty_repeat, one seed, one round, both arms; full package analyzed.
+cell('code','''# Small: genty repeat + args, one seed, one round, both arms (4 module trials).
+# Full package is analyzed; woa has CPU initialization/import checks before this.
 run_step(['paired_study.py','--action','small','--output',str(ROOT),'--jobs','2'])
 from IPython.display import display,Markdown,FileLink
 summary=json.loads((ROOT/'small-summary.json').read_text())
 display(Markdown((ROOT/'small-report.md').read_text()))
 print('Execution ready:',summary['execution_ready'],'Semantic review required:',summary['semantic_review_required'])
+print('Larger ready:',summary['larger_ready'])
+clock=json.loads((ROOT/'screen-clock.json').read_text())
+import time
+print('GPU screen elapsed minutes:',round((time.time()-clock['started_epoch'])/60,2))
 from paired_study import make_bundle
 shutil.copy2(LOG,ROOT/'notebook-launcher.log')
 display(FileLink(str(make_bundle(ROOT))))
@@ -135,14 +160,14 @@ cell('markdown','''## Optional larger paired pilot — not started by Run All
 The locked larger plan has 3 modules in 2 projects (genty repeat/args and woa
 whale_optimization), 2 seeds, 3 rounds, 2 arms: **12 module trials**. It is a
 purpose-selected pilot, not representative of the 183-module paper benchmark.
-The small module is development data. No significance/generalization claim.
+The small modules are development data. No significance/generalization claim.
 Baseline failures are valid outcomes; engineering readiness is not all-suite pass.
 Set the flag in the following cell only after reviewing the small archive.
 ''')
-cell('code','''RUN_LARGER=True
+cell('code','''RUN_LARGER=False  # Enable only AFTER reviewing the small archive.
 if RUN_LARGER:
     small=json.loads((ROOT/'small-summary.json').read_text())
-    assert small['execution_ready'], 'Small worker/hardware check incomplete'
+    assert small['larger_ready'], 'Small worker/hardware/measurement check incomplete'
     run_step(['paired_study.py','--action','run','--output',str(ROOT),'--jobs','2'])
     display(Markdown((ROOT/'main-report.md').read_text()))
     display(FileLink(str(make_bundle(ROOT))))

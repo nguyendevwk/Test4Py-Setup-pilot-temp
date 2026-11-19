@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-69a1fe3e-63ad-4428-b8e8-abafb3062e8e",
+  "object": "chat.completion",
+  "created": 1795079255,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport decimal\nimport pytest\nfrom pypara.dcc import DCC\nfrom pypara.commons.zeitgeist import Date\nfrom pypara.monetary import Money\nfrom pypara.currencies import Currency\n\n# Helper calculate_fraction_method that returns a simple fraction:\ndef simple_fraction(start: Date, asof: Date, end: Date, freq: decimal.Decimal | None = None) -> decimal.Decimal:\n    # Return number of days between asof and end divided by 365\n    days = (end - asof).days\n    return decimal.Decimal(days) / decimal.Decimal(365)\n\n# Create a dummy currency for testing\ndummy_currency = Currency(\"USD\", \"US Dollar\", 2)\n\n# Instantiate a DCC with the simple method\ndcc = DCC(\n    name=\"Simple\",\n    altnames=set(),\n    currencies={dummy_currency},\n    calculate_fraction_method=simple_fraction,\n)\n\ndef test_calculate_fraction_normal():\n    \"\"\"Test normal calculation where dates are in correct order.\"\"\"\n    start = Date(2023, 1, 1)\n    asof = Date(2023, 6, 1)\n    end = Date(2023, 12, 31)\n    frac = dcc.calculate_fraction(start, asof, end)\n    expected_days = (end - asof).days\n    assert frac == decimal.Decimal(expected_days) / decimal.Decimal(365)\n\ndef test_calculate_fraction_boundary_and_error():\n    \"\"\"Test boundary: asof outside range returns ZERO; asof equal to start or end works.\"\"\"\n    start = Date(2023, 1, 1)\n    end = Date(2023, 12, 31)\n\n    # asof before start\n    asof_before = Date(2022, 12, 31)\n    assert dcc.calculate_fraction(start, asof_before, end) == decimal.Decimal(0)\n\n    # asof after end\n    asof_after = Date(2024, 1, 1)\n    assert dcc.calculate_fraction(start, asof_after, end) == decimal.Decimal(0)\n\n    # asof equal to start\n    asof_start = start\n    frac_start = dcc.calculate_fraction(start, asof_start, end)\n    assert frac_start == decimal.Decimal((end - asof_start).days) / decimal.Decimal(365)\n\n    # asof equal to end\n    asof_end = end\n    frac_end = dcc.calculate_fraction(start, asof_end, end)\n    assert frac_end == decimal.Decimal(0)\n\ndef test_interest_and_coupon():\n    \"\"\"Test interest and coupon calculations with a simple principal and rate.\"\"\"\n    principal = Money(1000, dummy_currency)\n    rate = decimal.Decimal(\"0.05\")  # 5% annual\n    start = Date(2023, 1, 1)\n    asof = Date(2023, 7, 1)\n    end = Date(2023, 12, 31)\n\n    # Interest should be principal * rate * fraction\n    interest = dcc.interest(principal, rate, start, asof, end)\n    expected_frac = dcc.calculate_fraction(start, asof, end)\n    assert interest == principal * rate * expected_frac\n\n    # Coupon calculation: assume semi‑annual payments (freq=2)\n    coupon = dcc.coupon(principal, rate, start, asof, end, freq=2)\n    # The coupon should equal the interest calculated above because the period\n    # from the previous payment date to asof is the same as the interest period.\n    assert coupon == interest\n```",
+        "reasoning": "We need to test DCC.calculate_fraction, calculate_daily_fraction, interest, coupon. Use simple custom calculate_fraction_method that returns something predictable. Use Date from .commons.zeitgeist. Assume Date is datetime.date? We'll import Date. Use simple DCC instance. Test normal, boundary, error. Three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053706093,
+    "prompt_tokens": 1030,
+    "prompt_time": 0.057516777,
+    "completion_tokens": 828,
+    "completion_time": 0.922802694,
+    "total_tokens": 1858,
+    "total_time": 0.980319471,
+    "completion_tokens_details": {
+      "reasoning_tokens": 64
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgzcawe1mb7p5dpmkv61rz",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport decimal\nimport pytest\nfrom pypara.dcc import DCC\nfrom pypara.commons.zeitgeist import Date\nfrom pypara.monetary import Money\nfrom pypara.currencies import Currency\n\n# Helper calculate_fraction_method that returns a simple fraction:\ndef simple_fraction(start: Date, asof: Date, end: Date, freq: decimal.Decimal | None = None) -> decimal.Decimal:\n    # Return number of days between asof and end divided by 365\n    days = (end - asof).days\n    return decimal.Decimal(days) / decimal.Decimal(365)\n\n# Create a dummy currency for testing\ndummy_currency = Currency(\"USD\", \"US Dollar\", 2)\n\n# Instantiate a DCC with the simple method\ndcc = DCC(\n    name=\"Simple\",\n    altnames=set(),\n    currencies={dummy_currency},\n    calculate_fraction_method=simple_fraction,\n)\n\ndef test_calculate_fraction_normal():\n    \"\"\"Test normal calculation where dates are in correct order.\"\"\"\n    start = Date(2023, 1, 1)\n    asof = Date(2023, 6, 1)\n    end = Date(2023, 12, 31)\n    frac = dcc.calculate_fraction(start, asof, end)\n    expected_days = (end - asof).days\n    assert frac == decimal.Decimal(expected_days) / decimal.Decimal(365)\n\ndef test_calculate_fraction_boundary_and_error():\n    \"\"\"Test boundary: asof outside range returns ZERO; asof equal to start or end works.\"\"\"\n    start = Date(2023, 1, 1)\n    end = Date(2023, 12, 31)\n\n    # asof before start\n    asof_before = Date(2022, 12, 31)\n    assert dcc.calculate_fraction(start, asof_before, end) == decimal.Decimal(0)\n\n    # asof after end\n    asof_after = Date(2024, 1, 1)\n    assert dcc.calculate_fraction(start, asof_after, end) == decimal.Decimal(0)\n\n    # asof equal to start\n    asof_start = start\n    frac_start = dcc.calculate_fraction(start, asof_start, end)\n    assert frac_start == decimal.Decimal((end - asof_start).days) / decimal.Decimal(365)\n\n    # asof equal to end\n    asof_end = end\n    frac_end = dcc.calculate_fraction(start, asof_end, end)\n    assert frac_end == decimal.Decimal(0)\n\ndef test_interest_and_coupon():\n    \"\"\"Test interest and coupon calculations with a simple principal and rate.\"\"\"\n    principal = Money(1000, dummy_currency)\n    rate = decimal.Decimal(\"0.05\")  # 5% annual\n    start = Date(2023, 1, 1)\n    asof = Date(2023, 7, 1)\n    end = Date(2023, 12, 31)\n\n    # Interest should be principal * rate * fraction\n    interest = dcc.interest(principal, rate, start, asof, end)\n    expected_frac = dcc.calculate_fraction(start, asof, end)\n    assert interest == principal * rate * expected_frac\n\n    # Coupon calculation: assume semi‑annual payments (freq=2)\n    coupon = dcc.coupon(principal, rate, start, asof, end, freq=2)\n    # The coupon should equal the interest calculated above because the period\n    # from the previous payment date to asof is the same as the interest period.\n    assert coupon == interest\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4170716520166025
+}

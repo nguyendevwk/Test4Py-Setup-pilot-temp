@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-3f4de310-fb7f-4a6e-84d1-a9b88e20efaf",
+  "object": "chat.completion",
+  "created": 1795079403,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom thefuck.rules.choco_install import get_new_command\n\n\nclass DummyCommand:\n    def __init__(self, script, script_parts):\n        self.script = script\n        self.script_parts = script_parts\n\n\ndef test_get_new_command_replaces_package_name(tmp_path):\n    # Normal case: package name is present and should be replaced with .install\n    cmd = DummyCommand(\n        script=\"choco install git\",\n        script_parts=[\"choco\", \"install\", \"git\"]\n    )\n    new_cmd = get_new_command(cmd)\n    assert new_cmd == \"choco install git.install\"\n    # Ensure only the first occurrence is replaced\n    cmd2 = DummyCommand(\n        script=\"choco install git --version 2.0\",\n        script_parts=[\"choco\", \"install\", \"git\", \"--version\", \"2.0\"]\n    )\n    assert get_new_command(cmd2) == \"choco install git.install --version 2.0\"\n\n\ndef test_get_new_command_no_package_name_returns_empty_list(tmp_path):\n    # Boundary case: no package name, only options\n    cmd = DummyCommand(\n        script=\"choco install --no-progress\",\n        script_parts=[\"choco\", \"install\", \"--no-progress\"]\n    )\n    assert get_new_command(cmd) == []\n\n\ndef test_get_new_command_package_name_with_special_chars(tmp_path):\n    # Package name containing hyphen should still be considered a package\n    cmd = DummyCommand(\n        script=\"choco install azure-cli\",\n        script_parts=[\"choco\", \"install\", \"azure-cli\"]\n    )\n    assert get_new_command(cmd) == \"choco install azure-cli.install\"\n\n    # Package name containing '=' or '/' should not be treated as a package\n    cmd_eq = DummyCommand(\n        script=\"choco install foo=bar\",\n        script_parts=[\"choco\", \"install\", \"foo=bar\"]\n    )\n    assert get_new_command(cmd_eq) == []\n\n    cmd_slash = DummyCommand(\n        script=\"choco install foo/bar\",\n        script_parts=[\"choco\", \"install\", \"foo/bar\"]\n    )\n    assert get_new_command(cmd_slash) == []\n```",
+        "reasoning": "We need to test get_new_command. It returns new command string or [].\n\nTest normal: command.script_parts includes package name. Use a mock Command object? We can create simple object with script and script_parts. No need to import actual. Just create simple class.\n\nTest boundary: no package name returns [].\n\nTest error: maybe script_parts contains only parameters? same as boundary.\n\nImplement three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046209101,
+    "prompt_tokens": 350,
+    "prompt_time": 0.012374647,
+    "completion_tokens": 541,
+    "completion_time": 0.836140644,
+    "total_tokens": 891,
+    "total_time": 0.848515291,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 82
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh3wmfe7arcwx4y5vmq25w",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom thefuck.rules.choco_install import get_new_command\n\n\nclass DummyCommand:\n    def __init__(self, script, script_parts):\n        self.script = script\n        self.script_parts = script_parts\n\n\ndef test_get_new_command_replaces_package_name(tmp_path):\n    # Normal case: package name is present and should be replaced with .install\n    cmd = DummyCommand(\n        script=\"choco install git\",\n        script_parts=[\"choco\", \"install\", \"git\"]\n    )\n    new_cmd = get_new_command(cmd)\n    assert new_cmd == \"choco install git.install\"\n    # Ensure only the first occurrence is replaced\n    cmd2 = DummyCommand(\n        script=\"choco install git --version 2.0\",\n        script_parts=[\"choco\", \"install\", \"git\", \"--version\", \"2.0\"]\n    )\n    assert get_new_command(cmd2) == \"choco install git.install --version 2.0\"\n\n\ndef test_get_new_command_no_package_name_returns_empty_list(tmp_path):\n    # Boundary case: no package name, only options\n    cmd = DummyCommand(\n        script=\"choco install --no-progress\",\n        script_parts=[\"choco\", \"install\", \"--no-progress\"]\n    )\n    assert get_new_command(cmd) == []\n\n\ndef test_get_new_command_package_name_with_special_chars(tmp_path):\n    # Package name containing hyphen should still be considered a package\n    cmd = DummyCommand(\n        script=\"choco install azure-cli\",\n        script_parts=[\"choco\", \"install\", \"azure-cli\"]\n    )\n    assert get_new_command(cmd) == \"choco install azure-cli.install\"\n\n    # Package name containing '=' or '/' should not be treated as a package\n    cmd_eq = DummyCommand(\n        script=\"choco install foo=bar\",\n        script_parts=[\"choco\", \"install\", \"foo=bar\"]\n    )\n    assert get_new_command(cmd_eq) == []\n\n    cmd_slash = DummyCommand(\n        script=\"choco install foo/bar\",\n        script_parts=[\"choco\", \"install\", \"foo/bar\"]\n    )\n    assert get_new_command(cmd_slash) == []\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "9cb08492cbc44a72bee26b996865d5a1",
+  "_api_plus_pacing_seconds": 1.5053212769562379
+}

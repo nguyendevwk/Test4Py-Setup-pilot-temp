@@ -1,0 +1,49 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_content_length_removal __________________________
+
+    def test_content_length_removal():
+        """When a GET request has a misplaced Content-Length of 0, it should be removed."""
+        req = requests.Request(
+            method="GET",
+            url="http://example.com",
+            headers={"Content-Length": "123"},
+        )
+        prepared = _prepare(req)
+        # Simulate requests inserting a 0 Content-Length for GET
+        prepared.headers["Content-Length"] = "0"
+        transform_headers(req, prepared)
+>       assert "Content-Length" not in prepared.headers
+E       AssertionError: assert 'Content-Length' not in <HTTPHeadersDict('User-Agent': 'python-requests/2.34.2', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '0')>
+E        +  where <HTTPHeadersDict('User-Agent': 'python-requests/2.34.2', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '0')> = <PreparedRequest [GET]>.headers
+
+test_generated.py:23: AssertionError
+_______________ test_missing_repeated_headers_preserve_original ________________
+
+    def test_missing_repeated_headers_preserve_original():
+        """Headers that appear multiple times should keep all original values."""
+        original = HTTPHeadersDict(
+            [
+                ("X-Token", "first"),
+                ("X-Token", "second"),
+                ("X-Other", "value"),
+            ]
+        )
+        req = requests.Request(
+            method="POST",
+            url="http://example.com",
+            headers=original,
+        )
+        prepared = _prepare(req)
+        # Simulate a header override by requests
+        prepared.headers["X-Token"] = "override"
+        apply_missing_repeated_headers(original, prepared)
+        # All original X-Token values should be present
+>       assert prepared.headers.get_all("X-Token") == ["first", "second"]
+E       AttributeError: 'HTTPHeadersDict' object has no attribute 'get_all'. Did you mean: 'getall'?
+
+test_generated.py:44: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_content_length_removal - AssertionError: asser...
+FAILED test_generated.py::test_missing_repeated_headers_preserve_original - A...
+2 failed, 1 passed in 0.65s

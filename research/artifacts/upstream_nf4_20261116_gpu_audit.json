@@ -1,0 +1,95 @@
+{
+  "archive": "UPSTREAM_NF4_20261116T170358791891Z.zip",
+  "archive_sha256": "42ad154ef195f05fa5c32b54ac27865a294a90a1172931f50403c8aed4793be5",
+  "notebook": "notebook1aa30d2af4.ipynb",
+  "notebook_sha256": "0ac67c1967f6cc9643dbf6b9d50fa95c26356bcac54d9a64e9d54c47a99386da",
+  "conclusion": "Both GPUs passed 2048 input + 512 output; failed 4096 input with CUDA OOM in SDPA. No root permission rejection in supplied evidence.",
+  "probes": {
+    "stress-gpu-0/probe.json": {
+      "kind": "synthetic_memory_stress_not_efficacy",
+      "status": "failed",
+      "tests": [
+        {
+          "input_tokens": 2048,
+          "output_tokens": 512,
+          "allocated_gib": 9.295485973358154,
+          "peak_allocated_gib": 11.344419479370117,
+          "peak_reserved_gib": 11.53515625,
+          "free_gib": 2.89532470703125,
+          "conservative_headroom_gib": 2.89532470703125,
+          "seconds": 85.0718421659999,
+          "passed": true
+        }
+      ],
+      "settings": {
+        "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
+        "quantization": "nf4",
+        "max_input_tokens": 4096,
+        "max_new_tokens": 512,
+        "max_sequence_tokens": 4608,
+        "embedding": "BAAI/bge-large-en-v1.5",
+        "embedding_device": "cpu",
+        "cpu_threads": 1,
+        "score_timeout": 60,
+        "prompt_policy": "upstream-original",
+        "code_extraction": "single-complete-block-v2",
+        "paired_protocol": true,
+        "initialization_greedy": true,
+        "generation": {
+          "do_sample": true,
+          "temperature": 0.7,
+          "top_p": 0.95
+        },
+        "model_revision": "aedcc2d42b622764e023cf882b6652e646b95671",
+        "seed": 42
+      },
+      "margin_gib": 1.5,
+      "policy": "forced full-length decode; no context-fit inference from load alone",
+      "error": "OutOfMemoryError('CUDA out of memory. Tried to allocate 2.50 GiB. GPU 0 has a total capacity of 14.56 GiB of which 1.65 GiB is free. Including non-PyTorch memory, this process has 12.91 GiB memory in use. Of the allocated memory 12.34 GiB is allocated by PyTorch, and 459.31 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)')",
+      "traceback": "Traceback (most recent call last):\n  File \"/kaggle/working/Test4Py_upstream_20261116T170358791891Z/gpu_context_probe.py\", line 43, in main\n    out = backend.model.generate(input_ids=ids, attention_mask=mask, do_sample=False,\n           min_new_tokens=args.output_tokens, max_new_tokens=args.output_tokens,\n           pad_token_id=backend.tokenizer.eos_token_id)\n  File \"/usr/local/lib/python3.13/dist-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\n    return func(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/generation/utils.py\", line 2566, in generate\n    result = decoding_method(\n        self,\n    ...<5 lines>...\n        **model_kwargs,\n    )\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/generation/utils.py\", line 2786, in _sample\n    outputs = self(**model_inputs, return_dict=True)\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/utils/generic.py\", line 918, in wrapper\n    output = func(self, *args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/models/qwen2/modeling_qwen2.py\", line 449, in forward\n    outputs: BaseModelOutputWithPast = self.model(\n                                       ~~~~~~~~~~^\n        input_ids=input_ids,\n        ^^^^^^^^^^^^^^^^^^^^\n    ...<6 lines>...\n        **kwargs,\n        ^^^^^^^^^\n    )\n    ^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/utils/generic.py\", line 1072, in wrapper\n    outputs = func(self, *args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/models/qwen2/modeling_qwen2.py\", line 384, in forward\n    hidden_states = decoder_layer(\n        hidden_states,\n    ...<6 lines>...\n        **kwargs,\n    )\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/modeling_layers.py\", line 94, in __call__\n    return super().__call__(*args, **kwargs)\n           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/utils/deprecation.py\", line 172, in wrapped_func\n    return func(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/models/qwen2/modeling_qwen2.py\", line 234, in forward\n    hidden_states, _ = self.self_attn(\n                       ~~~~~~~~~~~~~~^\n        hidden_states=hidden_states,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<6 lines>...\n        **kwargs,\n        ^^^^^^^^^\n    )\n    ^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/utils/deprecation.py\", line 172, in wrapped_func\n    return func(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/models/qwen2/modeling_qwen2.py\", line 169, in forward\n    attn_output, attn_weights = attention_interface(\n                                ~~~~~~~~~~~~~~~~~~~^\n        self,\n        ^^^^^\n    ...<7 lines>...\n        **kwargs,\n        ^^^^^^^^^\n    )\n    ^\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/integrations/sdpa_attention.py\", line 96, in sdpa_attention_forward\n    attn_output = torch.nn.functional.scaled_dot_product_attention(\n        query,\n    ...<6 lines>...\n        **sdpa_kwargs,\n    )\ntorch.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.50 GiB. GPU 0 has a total capacity of 14.56 GiB of which 1.65 GiB is free. Including non-PyTorch memory, this process has 12.91 GiB memory in use. Of the allocated memory 12.34 GiB is allocated by PyTorch, and 459.31 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)\n"
+    },
+    "stress-gpu-1/probe.json": {
+      "kind": "synthetic_memory_stress_not_efficacy",
+      "status": "failed",
+      "tests": [
+        {
+          "input_tokens": 2048,
+          "output_tokens": 512,
+          "allocated_gib": 9.295485973358154,
+          "peak_allocated_gib": 11.344419479370117,
+          "peak_reserved_gib": 11.53515625,
+          "free_gib": 2.89532470703125,
+          "conservative_headroom_gib": 2.89532470703125,
+          "seconds": 87.75651422300007,
+          "passed": true
+        }
+      ],
+      "settings": {
+        "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
+        "quantization": "nf4",
+        "max_input_tokens": 4096,
+        "max_new_tokens": 512,
+        "max_sequence_tokens": 4608,
+        "embedding": "BAAI/bge-large-en-v1.5",
+        "embedding_device": "cpu",
+        "cpu_threads": 1,
+        "score_timeout": 60,
+        "prompt_policy": "upstream-original",
+        "code_extraction": "single-complete-block-v2",
+        "paired_protocol": true,
+        "initialization_greedy": true,
+        "generation": {
+          "do_sample": true,
+          "temperature": 0.7,
+          "top_p": 0.95
+        },
+        "model_revision": "aedcc2d42b622764e023cf882b6652e646b95671",
+        "seed": 42
+      },
+      "margin_gib": 1.5,
+      "policy": "forced full-length decode; no context-fit inference from load alone",
+      "error": "OutOfMemoryError('CUDA out of memory. Tried to allocate 2.50 GiB. GPU 0 has a total capacity of 14.56 GiB of which 1.65 GiB is free. Including non-PyTorch memory, this process has 12.91 GiB memory in use. Of the allocated memory 12.34 GiB is allocated by PyTorch, and 459.31 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)')",
+      "traceback": "Traceback (most recent call last):\n  File \"/kaggle/working/Test4Py_upstream_20261116T170358791891Z/gpu_context_probe.py\", line 43, in main\n    out = backend.model.generate(input_ids=ids, attention_mask=mask, do_sample=False,\n           min_new_tokens=args.output_tokens, max_new_tokens=args.output_tokens,\n           pad_token_id=backend.tokenizer.eos_token_id)\n  File \"/usr/local/lib/python3.13/dist-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\n    return func(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/generation/utils.py\", line 2566, in generate\n    result = decoding_method(\n        self,\n    ...<5 lines>...\n        **model_kwargs,\n    )\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/generation/utils.py\", line 2786, in _sample\n    outputs = self(**model_inputs, return_dict=True)\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/utils/generic.py\", line 918, in wrapper\n    output = func(self, *args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/models/qwen2/modeling_qwen2.py\", line 449, in forward\n    outputs: BaseModelOutputWithPast = self.model(\n                                       ~~~~~~~~~~^\n        input_ids=input_ids,\n        ^^^^^^^^^^^^^^^^^^^^\n    ...<6 lines>...\n        **kwargs,\n        ^^^^^^^^^\n    )\n    ^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/utils/generic.py\", line 1072, in wrapper\n    outputs = func(self, *args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/models/qwen2/modeling_qwen2.py\", line 384, in forward\n    hidden_states = decoder_layer(\n        hidden_states,\n    ...<6 lines>...\n        **kwargs,\n    )\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/modeling_layers.py\", line 94, in __call__\n    return super().__call__(*args, **kwargs)\n           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/utils/deprecation.py\", line 172, in wrapped_func\n    return func(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/models/qwen2/modeling_qwen2.py\", line 234, in forward\n    hidden_states, _ = self.self_attn(\n                       ~~~~~~~~~~~~~~^\n        hidden_states=hidden_states,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<6 lines>...\n        **kwargs,\n        ^^^^^^^^^\n    )\n    ^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/utils/deprecation.py\", line 172, in wrapped_func\n    return func(*args, **kwargs)\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/models/qwen2/modeling_qwen2.py\", line 169, in forward\n    attn_output, attn_weights = attention_interface(\n                                ~~~~~~~~~~~~~~~~~~~^\n        self,\n        ^^^^^\n    ...<7 lines>...\n        **kwargs,\n        ^^^^^^^^^\n    )\n    ^\n  File \"/tmp/test4py-modern/lib/python3.13/site-packages/transformers/integrations/sdpa_attention.py\", line 96, in sdpa_attention_forward\n    attn_output = torch.nn.functional.scaled_dot_product_attention(\n        query,\n    ...<6 lines>...\n        **sdpa_kwargs,\n    )\ntorch.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.50 GiB. GPU 0 has a total capacity of 14.56 GiB of which 1.65 GiB is free. Including non-PyTorch memory, this process has 12.91 GiB memory in use. Of the allocated memory 12.34 GiB is allocated by PyTorch, and 459.31 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)\n"
+    }
+  }
+}

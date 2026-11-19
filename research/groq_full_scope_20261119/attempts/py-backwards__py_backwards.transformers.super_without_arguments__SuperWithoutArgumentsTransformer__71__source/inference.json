@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-32262e6a-1f0f-4d31-a4d9-e88665b42aec",
+  "object": "chat.completion",
+  "created": 1795076169,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport inspect\nimport sys\nimport io\n\nfrom py_backwards.transformers.super_without_arguments import SuperWithoutArgumentsTransformer\nfrom py_backwards.exceptions import NodeNotFound\n\ndef parse_and_transform(code: str) -> typed_ast.Module:\n    \"\"\"Parse code with typed_ast and apply the transformer.\"\"\"\n    tree = typed_ast.parse(code)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n    return tree\n\ndef get_call_node(tree: typed_ast.Module) -> typed_ast.Call:\n    \"\"\"Return the first Call node found in the tree.\"\"\"\n    for node in ast.walk(tree):\n        if isinstance(node, typed_ast.Call):\n            return node\n    raise AssertionError(\"No Call node found\")\n\ndef test_super_replaced_inside_method(tmp_path):\n    code = \"\"\"\nclass MyClass:\n    def method(self):\n        super()\n\"\"\"\n    tree = parse_and_transform(code)\n    call_node = get_call_node(tree)\n    # After transformation, args should be [Name('MyClass'), Name('self')]\n    assert isinstance(call_node.args[0], typed_ast.Name)\n    assert call_node.args[0].id == \"MyClass\"\n    assert isinstance(call_node.args[1], typed_ast.Name)\n    assert call_node.args[1].id == \"self\"\n\ndef test_super_outside_function_warns_and_unchanged(tmp_path, capsys):\n    code = \"\"\"\nclass MyClass:\n    super()\n\"\"\"\n    tree = parse_and_transform(code)\n    call_node = get_call_node(tree)\n    # The call should remain unchanged (no args)\n    assert call_node.args == []\n    # Capture warning output\n    captured = capsys.readouterr()\n    assert \"super() outside of function\" in captured.out\n\ndef test_super_outside_class_warns_and_unchanged(tmp_path, capsys):\n    code = \"\"\"\ndef func():\n    super()\n\"\"\"\n    tree = parse_and_transform(code)\n    call_node = get_call_node(tree)\n    # The call should remain unchanged (no args)\n    assert call_node.args == []\n    # Capture warning output\n    captured = capsys.readouterr()\n    assert \"super() outside of class\" in captured.out\n```",
+        "reasoning": "We need to write tests for this transformer. We need to import it. Use typed_ast ast3. We'll create code strings, parse to AST, apply transformer, then unparse? typed_ast doesn't have unparse. We can inspect AST nodes. We'll test that super() inside method of class gets replaced with super(Cls, self). Also test boundary: super() outside function -> warning. We need to capture warn output? warn likely prints. We can patch warn to capture. But no mocks allowed. But we can capture stdout. Use capsys. For error: super() outside class -> warning. Also test normal: inside class but outside function? That case triggers both warnings? Actually if outside function, first warn and return. So node unchanged. We'll test that.\n\nImplement three tests: 1) normal replacement. 2) super outside function. 3) super outside class.\n\nUse tmp_path to write file? Not needed. Just parse string.\n\nLet's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048737045,
+    "prompt_tokens": 490,
+    "prompt_time": 0.024980584,
+    "completion_tokens": 665,
+    "completion_time": 0.73588766,
+    "total_tokens": 1155,
+    "total_time": 0.760868244,
+    "completion_tokens_details": {
+      "reasoning_tokens": 198
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se16t7erk8z83bd0wpym89",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport inspect\nimport sys\nimport io\n\nfrom py_backwards.transformers.super_without_arguments import SuperWithoutArgumentsTransformer\nfrom py_backwards.exceptions import NodeNotFound\n\ndef parse_and_transform(code: str) -> typed_ast.Module:\n    \"\"\"Parse code with typed_ast and apply the transformer.\"\"\"\n    tree = typed_ast.parse(code)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n    return tree\n\ndef get_call_node(tree: typed_ast.Module) -> typed_ast.Call:\n    \"\"\"Return the first Call node found in the tree.\"\"\"\n    for node in ast.walk(tree):\n        if isinstance(node, typed_ast.Call):\n            return node\n    raise AssertionError(\"No Call node found\")\n\ndef test_super_replaced_inside_method(tmp_path):\n    code = \"\"\"\nclass MyClass:\n    def method(self):\n        super()\n\"\"\"\n    tree = parse_and_transform(code)\n    call_node = get_call_node(tree)\n    # After transformation, args should be [Name('MyClass'), Name('self')]\n    assert isinstance(call_node.args[0], typed_ast.Name)\n    assert call_node.args[0].id == \"MyClass\"\n    assert isinstance(call_node.args[1], typed_ast.Name)\n    assert call_node.args[1].id == \"self\"\n\ndef test_super_outside_function_warns_and_unchanged(tmp_path, capsys):\n    code = \"\"\"\nclass MyClass:\n    super()\n\"\"\"\n    tree = parse_and_transform(code)\n    call_node = get_call_node(tree)\n    # The call should remain unchanged (no args)\n    assert call_node.args == []\n    # Capture warning output\n    captured = capsys.readouterr()\n    assert \"super() outside of function\" in captured.out\n\ndef test_super_outside_class_warns_and_unchanged(tmp_path, capsys):\n    code = \"\"\"\ndef func():\n    super()\n\"\"\"\n    tree = parse_and_transform(code)\n    call_node = get_call_node(tree)\n    # The call should remain unchanged (no args)\n    assert call_node.args == []\n    # Capture warning output\n    captured = capsys.readouterr()\n    assert \"super() outside of class\" in captured.out\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.300355073006358
+}

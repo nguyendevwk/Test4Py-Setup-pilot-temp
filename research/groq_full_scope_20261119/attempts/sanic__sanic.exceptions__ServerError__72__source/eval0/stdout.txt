@@ -1,0 +1,48 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_default_server_error_initialization ___________________
+
+    def test_default_server_error_initialization():
+        """ServerError without arguments should default to status 500 and no message."""
+        err = ServerError()
+        assert err.status_code == 500
+>       assert err.message is None
+E       AssertionError: assert 'Internal Server Error' is None
+E        +  where 'Internal Server Error' = ServerError('Internal Server Error').message
+
+test_generated.py:10: AssertionError
+______________ test_server_error_with_custom_message_and_headers _______________
+
+    def test_server_error_with_custom_message_and_headers():
+        """ServerError should store custom message and headers correctly."""
+        custom_msg = "Something went wrong"
+        custom_headers = {"X-Custom": "value", "Content-Type": "text/plain"}
+        err = ServerError(message=custom_msg, headers=custom_headers)
+        assert err.status_code == 500
+        assert err.message == custom_msg
+        assert err.headers == custom_headers
+        # The description should still be the default status description
+>       assert err.description == STATUS_CODES[500]
+E       AttributeError: 'ServerError' object has no attribute 'description'
+
+test_generated.py:25: AttributeError
+_________________ test_server_error_quiet_and_context_behavior _________________
+
+    def test_server_error_quiet_and_context_behavior():
+        """ServerError should preserve quiet flag and context mapping."""
+        context = {"user_id": 42, "action": "test"}
+        err = ServerError(message="Error", quiet=True, context=context)
+        assert err.quiet is True
+        assert err.context == context
+        # Ensure that the context is not part of the headers
+        assert "user_id" not in err.headers
+        # The description remains the default
+>       assert err.description == STATUS_CODES[500]
+E       AttributeError: 'ServerError' object has no attribute 'description'
+
+test_generated.py:37: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_default_server_error_initialization - Assertio...
+FAILED test_generated.py::test_server_error_with_custom_message_and_headers
+FAILED test_generated.py::test_server_error_quiet_and_context_behavior - Attr...
+3 failed in 0.32s

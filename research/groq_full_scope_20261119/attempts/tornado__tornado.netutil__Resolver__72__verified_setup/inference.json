@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-9affd409-4f9a-4db1-b3dd-8f8bd63f3e47",
+  "object": "chat.completion",
+  "created": 1795076069,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport socket\nimport pytest\nfrom tornado.netutil import Resolver, DefaultLoopResolver\n\n# Test 1: Normal resolution of a known hostname\n@pytest.mark.asyncio\nasync def test_resolve_localhost_success():\n    resolver = DefaultLoopResolver()\n    result = await resolver.resolve(\"localhost\", 80)\n    # Expect at least one IPv4 or IPv6 address\n    assert isinstance(result, list) and len(result) > 0\n    for family, addr in result:\n        assert family in (socket.AF_INET, socket.AF_INET6)\n        # addr should be a tuple (host, port) or (host, port, flowinfo, scopeid)\n        assert isinstance(addr, tuple)\n        assert addr[1] == 80\n    resolver.close()\n\n# Test 2: Resolve with explicit IPv4 family\n@pytest.mark.asyncio\nasync def test_resolve_ipv4_family():\n    resolver = DefaultLoopResolver()\n    result = await resolver.resolve(\"localhost\", 80, family=socket.AF_INET)\n    # All returned families should be AF_INET\n    assert all(family == socket.AF_INET for family, _ in result)\n    resolver.close()\n\n# Test 3: Resolve an invalid hostname should raise IOError\n@pytest.mark.asyncio\nasync def test_resolve_invalid_host_error():\n    resolver = DefaultLoopResolver()\n    with pytest.raises(IOError):\n        await resolver.resolve(\"nonexistent.invalid.host\", 80)\n    resolver.close()\n```",
+        "reasoning": "We need tests for Resolver.resolve behavior. But actual implementation is in DefaultLoopResolver etc. We can import Resolver and call resolve on known host like 'localhost'. Use asyncio to await. Three tests: normal resolution, error on invalid host, boundary family AF_INET6 maybe. Use tmp_path not needed. Write async tests. Use pytest.mark.asyncio."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052812057,
+    "prompt_tokens": 869,
+    "prompt_time": 0.327217462,
+    "completion_tokens": 384,
+    "completion_time": 0.444295801,
+    "total_tokens": 1253,
+    "total_time": 0.771513263,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 72
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sdy4wsesp9dg7vk06nsxrz",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport socket\nimport pytest\nfrom tornado.netutil import Resolver, DefaultLoopResolver\n\n# Test 1: Normal resolution of a known hostname\n@pytest.mark.asyncio\nasync def test_resolve_localhost_success():\n    resolver = DefaultLoopResolver()\n    result = await resolver.resolve(\"localhost\", 80)\n    # Expect at least one IPv4 or IPv6 address\n    assert isinstance(result, list) and len(result) > 0\n    for family, addr in result:\n        assert family in (socket.AF_INET, socket.AF_INET6)\n        # addr should be a tuple (host, port) or (host, port, flowinfo, scopeid)\n        assert isinstance(addr, tuple)\n        assert addr[1] == 80\n    resolver.close()\n\n# Test 2: Resolve with explicit IPv4 family\n@pytest.mark.asyncio\nasync def test_resolve_ipv4_family():\n    resolver = DefaultLoopResolver()\n    result = await resolver.resolve(\"localhost\", 80, family=socket.AF_INET)\n    # All returned families should be AF_INET\n    assert all(family == socket.AF_INET for family, _ in result)\n    resolver.close()\n\n# Test 3: Resolve an invalid hostname should raise IOError\n@pytest.mark.asyncio\nasync def test_resolve_invalid_host_error():\n    resolver = DefaultLoopResolver()\n    with pytest.raises(IOError):\n        await resolver.resolve(\"nonexistent.invalid.host\", 80)\n    resolver.close()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0971611620043404
+}

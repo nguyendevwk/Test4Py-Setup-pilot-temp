@@ -1,0 +1,48 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_non_callable_attribute_returns_false ___________________
+
+    def test_non_callable_attribute_returns_false():
+        """If the object has the attribute but it is not callable, the function
+        should return False even if other attributes are callable."""
+        class Dummy:
+            value = 10  # non-callable attribute
+    
+        # 'value' exists but is not callable; 'method' does not exist
+>       assert has_any_callables(Dummy(), "value", "method") is False
+
+test_generated.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+obj = <test_generated.test_non_callable_attribute_returns_false.<locals>.Dummy object at 0x7f9415dc2440>
+attrs = ('value', 'method')
+
+    def has_any_callables(obj: _Any, *attrs: str) -> bool:
+        """Check if the given ``obj`` has **ANY** of the given ``attrs`` and are
+        callable.
+    
+        Args:
+            obj (:obj:`Any <typing.Any>`): The object to check.
+            *attrs (:obj:`str`): The names of the attributes to check.
+    
+        :rtype:
+            :obj:`bool`
+    
+            * :obj:`True` if ANY of the given ``*attrs`` exist on the given ``obj``
+              and ANY are callable;
+            * :obj:`False` otherwise.
+    
+        Example:
+            >>> from flutils.objutils import has_any_callables
+            >>> has_any_callables(dict(),'get','keys','items','values','foo')
+            True
+        """
+        if has_any_attrs(obj, *attrs) is True:
+            for attr in attrs:
+>               if callable(getattr(obj, attr)) is True:
+E               AttributeError: 'Dummy' object has no attribute 'method'
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/objutils.py:83: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_non_callable_attribute_returns_false - Attribu...
+1 failed, 2 passed in 0.11s

@@ -1,0 +1,43 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_parse_header_with_multiple_params_and_unescaping _____________
+
+    def test_parse_header_with_multiple_params_and_unescaping():
+        """Header with several parameters, including percent-encoded quotes and newlines."""
+        header = 'form-data; name=upload; filename="%22file%22.txt"; description="%0D%0ANew%20Line"'
+        value, options = parse_content_header(header)
+        assert value == "form-data"
+        # Expected unescaped values
+>       assert options == {
+            "name": "upload",
+            "filename": '"file".txt',
+            "description": "\nNew Line",
+        }
+E       AssertionError: assert {'name': 'upl...\nNew%20Line'} == {'name': 'upl... '\nNew Line'}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'description': '\nNew%20Line'} != {'description': '\nNew Line'}
+E         Use -v to get more diff
+
+test_generated.py:17: AssertionError
+_______________ test_parse_header_with_mixed_case_and_whitespace _______________
+
+    def test_parse_header_with_mixed_case_and_whitespace():
+        """Header should be case-insensitive and strip surrounding whitespace."""
+        header = '  TEXT/HTML ;  CHARSET= "UTF-8" ;  boundary=abc123  '
+        value, options = parse_content_header(header)
+        assert value == "text/html"
+>       assert options == {"charset": "UTF-8", "boundary": "abc123"}
+E       AssertionError: assert {'boundary': 'abc123'} == {'charset': '...ry': 'abc123'}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Right contains 1 more item:
+E         {'charset': 'UTF-8'}
+E         Use -v to get more diff
+
+test_generated.py:28: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_header_with_multiple_params_and_unescaping
+FAILED test_generated.py::test_parse_header_with_mixed_case_and_whitespace - ...
+2 failed, 1 passed in 0.31s

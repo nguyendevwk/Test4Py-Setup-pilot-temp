@@ -1,0 +1,29 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_prepare_request_body_chunked_bytes ____________________
+
+env = <Environment {'apply_warnings_filter': <function Environment.apply_warnings_filter at 0x7f212cf225f0>,
+ 'args': Namesp...IO name=6 mode='rb+' closefd=True>" mode='r+' encoding='utf-8'>,
+ 'stdout_encoding': 'utf-8',
+ 'stdout_isatty': False}>
+
+    def test_prepare_request_body_chunked_bytes(env):
+        """Body is bytes and chunked=True; should return a ChunkedUploadStream."""
+        counter = ReadCounter()
+        body = b"chunked data"
+        result = prepare_request_body(
+            env=env,
+            raw_body=body,
+            body_read_callback=counter,
+            offline=False,
+            chunked=True
+        )
+        assert isinstance(result, ChunkedUploadStream)
+        # Reading from the stream should trigger the callback
+>       data = result.read()
+E       AttributeError: 'ChunkedUploadStream' object has no attribute 'read'
+
+test_generated.py:49: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_prepare_request_body_chunked_bytes - Attribute...
+1 failed, 2 passed in 0.53s

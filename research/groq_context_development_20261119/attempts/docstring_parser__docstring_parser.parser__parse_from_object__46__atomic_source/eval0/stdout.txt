@@ -1,0 +1,67 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_parse_class_attribute_docstrings _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-258/test_parse_class_attribute_doc0')
+
+    def test_parse_class_attribute_docstrings(tmp_path):
+        """Verify that attribute docstrings defined in a class are parsed."""
+        module_code = textwrap.dedent(
+            """
+            class MyClass:
+                """ + '"""Class docstring."""' + """
+                attr1 = 1
+                """ + '"""Attribute 1 description."""' + """
+                attr2 = "foo"
+                """ + '"""Attribute 2 description."""'
+        )
+        module_file = tmp_path / "mymodule.py"
+        module_file.write_text(module_code)
+    
+        spec = importlib.util.spec_from_file_location("mymodule", module_file)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules["mymodule"] = mod
+        spec.loader.exec_module(mod)
+    
+        cls = mod.MyClass
+        doc = parse_from_object(cls, style=DocstringStyle.AUTO)
+        assert doc.short_description == "Class docstring."
+        # Attribute docstrings are added as attributes in the Docstring object
+>       assert hasattr(doc, "attributes")
+E       AssertionError: assert False
+E        +  where False = hasattr(<docstring_parser.common.Docstring object at 0x7f6c6861b010>, 'attributes')
+
+../../../../../../../groq_context_development_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__46__atomic_source/eval0/test_generated.py:65: AssertionError
+____________________ test_parse_module_attribute_docstrings ____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-258/test_parse_module_attribute_do0')
+
+    def test_parse_module_attribute_docstrings(tmp_path):
+        """Verify that attribute docstrings defined at module level are parsed."""
+        module_code = textwrap.dedent(
+            """
+            """ + '"""Module docstring."""' + """
+            var1 = 42
+            """ + '"""Variable 1 description."""' + """
+            var2 = "bar"
+            """ + '"""Variable 2 description."""'
+        )
+        module_file = tmp_path / "mymodule2.py"
+        module_file.write_text(module_code)
+    
+        spec = importlib.util.spec_from_file_location("mymodule2", module_file)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules["mymodule2"] = mod
+        spec.loader.exec_module(mod)
+    
+        doc = parse_from_object(mod, style=DocstringStyle.AUTO)
+        assert doc.short_description == "Module docstring."
+>       assert hasattr(doc, "attributes")
+E       AssertionError: assert False
+E        +  where False = hasattr(<docstring_parser.common.Docstring object at 0x7f6c68581ab0>, 'attributes')
+
+../../../../../../../groq_context_development_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__46__atomic_source/eval0/test_generated.py:93: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_context_development_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__46__atomic_source/eval0/test_generated.py::test_parse_class_attribute_docstrings
+FAILED ../../../../../../../groq_context_development_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__46__atomic_source/eval0/test_generated.py::test_parse_module_attribute_docstrings
+2 failed, 1 passed in 0.18s

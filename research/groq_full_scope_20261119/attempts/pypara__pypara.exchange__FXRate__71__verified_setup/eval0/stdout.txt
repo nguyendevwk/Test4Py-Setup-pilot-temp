@@ -1,0 +1,27 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_fxrate_of_invalid_inputs_raises_value_error _______________
+
+    def test_fxrate_of_invalid_inputs_raises_value_error():
+        """Test that FXRate.of raises ValueError for invalid arguments."""
+        today = datetime.date.today()
+        # Value <= zero
+        with pytest.raises(ValueError, match="FX rate value can not be equal to or less than `zero`"):
+            FXRate.of(Currencies["EUR"], Currencies["USD"], today, Decimal("-1"))
+        # Same currency but value != one
+        with pytest.raises(ValueError, match="FX rate to the same currency must be `one`"):
+            FXRate.of(Currencies["EUR"], Currencies["EUR"], today, Decimal("1.5"))
+        # Wrong type for ccy1
+        with pytest.raises(ValueError, match="CCY/1 must be of type `Currency`"):
+            FXRate.of("EUR", Currencies["USD"], today, Decimal("2"))
+        # Wrong type for ccy2
+        with pytest.raises(ValueError, match="CCY/2 must be of type `Currency`"):
+            FXRate.of(Currencies["EUR"], "USD", today, Decimal("2"))
+        # Wrong type for date
+>       with pytest.raises(ValueError, match="FX rate date must be of type `date`"):
+E       Failed: DID NOT RAISE ValueError
+
+test_generated.py:57: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_fxrate_of_invalid_inputs_raises_value_error - ...
+1 failed, 2 passed in 0.15s

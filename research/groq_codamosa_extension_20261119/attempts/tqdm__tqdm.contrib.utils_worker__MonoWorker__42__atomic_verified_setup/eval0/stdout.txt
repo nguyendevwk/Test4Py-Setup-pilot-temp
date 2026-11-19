@@ -1,0 +1,59 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_waiting_task_replacement _________________________
+
+    def test_waiting_task_replacement():
+        """Submitting a second task should replace the waiting one when the queue is full."""
+        worker = MonoWorker()
+        order = []
+    
+        def first():
+            # Sleep to keep it running
+            time.sleep(0.2)
+            order.append("first")
+    
+        def second():
+            order.append("second")
+    
+        # Submit first task (running)
+        f1 = worker.submit(first)
+        # Submit second task (waiting)
+        f2 = worker.submit(second)
+        # Submit third task (should replace second)
+        f3 = worker.submit(lambda: order.append("third"))
+    
+        # Wait for all to finish
+        f1.result(timeout=1)
+>       f2.result(timeout=1)
+
+../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__42__atomic_verified_setup/eval0/test_generated.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = None, timeout = 1
+
+    def result(self, timeout=None):
+        """Return the result of the call that the future represents.
+    
+        Args:
+            timeout: The number of seconds to wait for the result if the future
+                isn't done. If None, then there is no limit on the wait time.
+    
+        Returns:
+            The result of the call that the future represents.
+    
+        Raises:
+            CancelledError: If the future was cancelled.
+            TimeoutError: If the future didn't finish executing before the given
+                timeout.
+            Exception: If the call raised then that exception will be raised.
+        """
+        try:
+            with self._condition:
+                if self._state in [CANCELLED, CANCELLED_AND_NOTIFIED]:
+>                   raise CancelledError()
+E                   concurrent.futures._base.CancelledError
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/concurrent/futures/_base.py:449: CancelledError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__42__atomic_verified_setup/eval0/test_generated.py::test_waiting_task_replacement
+1 failed, 2 passed in 0.41s

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-8a96c1e8-48a4-4e52-a551-f8047e591923",
+  "object": "chat.completion",
+  "created": 1795078962,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport inspect\nimport textwrap\nimport pytest\nfrom py_backwards.utils.helpers import get_source\n\n\ndef test_get_source_removes_common_padding():\n    \"\"\"get_source should strip the common indentation from the function source.\"\"\"\n    def sample_function():\n        \"\"\"A simple function.\"\"\"\n        x = 1\n        return x\n\n    source = get_source(sample_function)\n    # The returned source should start at column 0 and preserve internal indentation\n    assert source.startswith(\"def sample_function():\")\n    assert \"\\n    x = 1\" in source\n    assert \"\\n    return x\" in source\n    # Ensure no leading spaces on the first line\n    assert source.splitlines()[0].startswith(\"def\")\n\n\ndef test_get_source_handles_nested_functions():\n    \"\"\"Nested functions should have their indentation correctly adjusted.\"\"\"\n    def outer():\n        def inner():\n            return \"inner\"\n        return inner()\n\n    source = get_source(outer)\n    # The outer function definition should start at column 0\n    assert source.splitlines()[0].startswith(\"def outer():\")\n    # The inner function should be indented relative to outer\n    assert \"\\n    def inner():\" in source\n    assert \"\\n        return \\\"inner\\\"\" in source\n\n\ndef test_get_source_raises_on_non_callable():\n    \"\"\"Passing a non-callable to get_source should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        get_source(42)\n```",
+        "reasoning": "We need to test get_source. Write three tests: normal function, lambda? but getsource works only for functions defined in file. Test that padding removed. Also test error when passing non-function? getsource will raise TypeError. So test that. Also test that for nested function indentation removed correctly. Use tmp_path? Not needed. Just functions defined in test. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048637322,
+    "prompt_tokens": 327,
+    "prompt_time": 0.006155666,
+    "completion_tokens": 384,
+    "completion_time": 0.502496271,
+    "total_tokens": 711,
+    "total_time": 0.508651937,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 79
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgpevge79bndjgzmpdmx5z",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport inspect\nimport textwrap\nimport pytest\nfrom py_backwards.utils.helpers import get_source\n\n\ndef test_get_source_removes_common_padding():\n    \"\"\"get_source should strip the common indentation from the function source.\"\"\"\n    def sample_function():\n        \"\"\"A simple function.\"\"\"\n        x = 1\n        return x\n\n    source = get_source(sample_function)\n    # The returned source should start at column 0 and preserve internal indentation\n    assert source.startswith(\"def sample_function():\")\n    assert \"\\n    x = 1\" in source\n    assert \"\\n    return x\" in source\n    # Ensure no leading spaces on the first line\n    assert source.splitlines()[0].startswith(\"def\")\n\n\ndef test_get_source_handles_nested_functions():\n    \"\"\"Nested functions should have their indentation correctly adjusted.\"\"\"\n    def outer():\n        def inner():\n            return \"inner\"\n        return inner()\n\n    source = get_source(outer)\n    # The outer function definition should start at column 0\n    assert source.splitlines()[0].startswith(\"def outer():\")\n    # The inner function should be indented relative to outer\n    assert \"\\n    def inner():\" in source\n    assert \"\\n        return \\\"inner\\\"\" in source\n\n\ndef test_get_source_raises_on_non_callable():\n    \"\"\"Passing a non-callable to get_source should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        get_source(42)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.947583282017149
+}

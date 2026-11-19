@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-a38bf57c-c648-4155-a666-f7d6d05edc4d",
+  "object": "chat.completion",
+  "created": 1795079445,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ssl\nimport tempfile\nimport os\nimport pytest\nfrom tornado.netutil import ssl_options_to_context\n\ndef test_ssl_options_to_context_with_dict(tmp_path):\n    # Create a temporary self‑signed cert file for testing\n    cert_file = tmp_path / \"cert.pem\"\n    key_file = tmp_path / \"key.pem\"\n    # Use openssl via subprocess to generate a simple cert\n    # (Python's ssl module can load a self‑signed cert without a CA)\n    os.system(\n        f\"openssl req -x509 -newkey rsa:2048 -keyout {key_file} \"\n        f\"-out {cert_file} -days 1 -nodes -subj '/CN=localhost'\"\n    )\n    options = {\n        \"ssl_version\": ssl.PROTOCOL_TLS_CLIENT,\n        \"certfile\": str(cert_file),\n        \"keyfile\": str(key_file),\n        \"cert_reqs\": ssl.CERT_NONE,\n        \"ciphers\": \"ECDHE-RSA-AES128-GCM-SHA256\",\n    }\n    ctx = ssl_options_to_context(options)\n    assert isinstance(ctx, ssl.SSLContext)\n    # Verify that the context was configured as expected\n    assert ctx.verify_mode == ssl.CERT_NONE\n    assert ctx.check_hostname is False\n    # The context should have the cipher we requested\n    assert \"ECDHE-RSA-AES128-GCM-SHA256\" in ctx.get_ciphers()[0][\"name\"]\n\ndef test_ssl_options_to_context_server_side_flag(tmp_path):\n    # Generate a cert for server side\n    cert_file = tmp_path / \"server_cert.pem\"\n    key_file = tmp_path / \"server_key.pem\"\n    os.system(\n        f\"openssl req -x509 -newkey rsa:2048 -keyout {key_file} \"\n        f\"-out {cert_file} -days 1 -nodes -subj '/CN=server'\"\n    )\n    options = {\n        \"ssl_version\": ssl.PROTOCOL_TLS,\n        \"certfile\": str(cert_file),\n        \"keyfile\": str(key_file),\n    }\n    ctx = ssl_options_to_context(options, server_side=True)\n    assert isinstance(ctx, ssl.SSLContext)\n    # Server side should use PROTOCOL_TLS_SERVER by default\n    assert ctx.protocol == ssl.PROTOCOL_TLS_SERVER\n    # The context should have a certificate loaded\n    assert ctx.get_ca_certs() == []\n\ndef test_ssl_options_to_context_invalid_key():\n    # Pass a dictionary with an unsupported key to trigger assertion\n    bad_options = {\"unsupported_key\": \"value\"}\n    with pytest.raises(AssertionError):\n        ssl_options_to_context(bad_options)\n```",
+        "reasoning": "Need 3 tests: normal dict, server_side True, error on invalid key. Use tmp_path for certfile? but we can use ssl.SSLContext directly. For error, pass dict with invalid key. Use pytest.raises AssertionError."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005359815,
+    "prompt_tokens": 908,
+    "prompt_time": 0.069159661,
+    "completion_tokens": 611,
+    "completion_time": 0.66201429,
+    "total_tokens": 1519,
+    "total_time": 0.731173951,
+    "completion_tokens_details": {
+      "reasoning_tokens": 50
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh56pkem2a5pf372gqsxmk",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ssl\nimport tempfile\nimport os\nimport pytest\nfrom tornado.netutil import ssl_options_to_context\n\ndef test_ssl_options_to_context_with_dict(tmp_path):\n    # Create a temporary self‑signed cert file for testing\n    cert_file = tmp_path / \"cert.pem\"\n    key_file = tmp_path / \"key.pem\"\n    # Use openssl via subprocess to generate a simple cert\n    # (Python's ssl module can load a self‑signed cert without a CA)\n    os.system(\n        f\"openssl req -x509 -newkey rsa:2048 -keyout {key_file} \"\n        f\"-out {cert_file} -days 1 -nodes -subj '/CN=localhost'\"\n    )\n    options = {\n        \"ssl_version\": ssl.PROTOCOL_TLS_CLIENT,\n        \"certfile\": str(cert_file),\n        \"keyfile\": str(key_file),\n        \"cert_reqs\": ssl.CERT_NONE,\n        \"ciphers\": \"ECDHE-RSA-AES128-GCM-SHA256\",\n    }\n    ctx = ssl_options_to_context(options)\n    assert isinstance(ctx, ssl.SSLContext)\n    # Verify that the context was configured as expected\n    assert ctx.verify_mode == ssl.CERT_NONE\n    assert ctx.check_hostname is False\n    # The context should have the cipher we requested\n    assert \"ECDHE-RSA-AES128-GCM-SHA256\" in ctx.get_ciphers()[0][\"name\"]\n\ndef test_ssl_options_to_context_server_side_flag(tmp_path):\n    # Generate a cert for server side\n    cert_file = tmp_path / \"server_cert.pem\"\n    key_file = tmp_path / \"server_key.pem\"\n    os.system(\n        f\"openssl req -x509 -newkey rsa:2048 -keyout {key_file} \"\n        f\"-out {cert_file} -days 1 -nodes -subj '/CN=server'\"\n    )\n    options = {\n        \"ssl_version\": ssl.PROTOCOL_TLS,\n        \"certfile\": str(cert_file),\n        \"keyfile\": str(key_file),\n    }\n    ctx = ssl_options_to_context(options, server_side=True)\n    assert isinstance(ctx, ssl.SSLContext)\n    # Server side should use PROTOCOL_TLS_SERVER by default\n    assert ctx.protocol == ssl.PROTOCOL_TLS_SERVER\n    # The context should have a certificate loaded\n    assert ctx.get_ca_certs() == []\n\ndef test_ssl_options_to_context_invalid_key():\n    # Pass a dictionary with an unsupported key to trigger assertion\n    bad_options = {\"unsupported_key\": \"value\"}\n    with pytest.raises(AssertionError):\n        ssl_options_to_context(bad_options)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "0d041362a0264c6583c72b9d785bc1f7",
+  "_api_plus_pacing_seconds": 1.3876749700284563
+}

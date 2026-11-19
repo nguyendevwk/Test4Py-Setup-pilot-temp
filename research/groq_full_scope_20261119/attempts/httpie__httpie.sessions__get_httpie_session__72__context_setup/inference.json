@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-99547480-cbe2-4b48-8b3c-71a2a71d8698",
+  "object": "chat.completion",
+  "created": 1795079177,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport pytest\nfrom pathlib import Path\nfrom httpie.sessions import get_httpie_session, is_anonymous_session, session_hostname_to_dirname, strip_port\nfrom httpie.context import Environment\n\n# Helper to create a minimal Environment instance\ndef make_env():\n    # Environment is used only for attribute storage; a simple object suffices\n    return Environment()\n\n@pytest.fixture\ndef tmp_config_dir(tmp_path):\n    return tmp_path\n\ndef test_anonymous_session_path_and_id(tmp_config_dir):\n    env = make_env()\n    # Anonymous session name contains a path separator\n    anon_name = os.path.join(\"~\", \"my_session\")\n    url = \"http://example.com/api\"\n    session = get_httpie_session(env, tmp_config_dir, anon_name, None, url)\n    # Path should be expanded user path\n    expected_path = Path(os.path.expanduser(anon_name))\n    assert session.path == expected_path\n    # session_id should be the expanded path\n    assert session.session_id == expected_path\n    # bound_host should be stripped of port (none here)\n    assert session.bound_host == \"example.com\"\n\ndef test_normal_session_path_and_id(tmp_config_dir):\n    env = make_env()\n    session_name = \"my_session\"\n    url = \"https://example.com:8080/api\"\n    session = get_httpie_session(env, tmp_config_dir, session_name, None, url)\n    # hostname derived from URL\n    hostname = \"example.com:8080\"\n    # Path should be under config_dir/sessions/hostname/session_name.json\n    expected_path = tmp_config_dir / session_hostname_to_dirname(hostname, session_name)\n    assert session.path == expected_path\n    # session_id should be the session name\n    assert session.session_id == session_name\n    # bound_host should be stripped of port\n    assert session.bound_host == \"example.com\"\n\ndef test_host_override_and_legacy_warning_flag(tmp_config_dir):\n    env = make_env()\n    session_name = \"override_session\"\n    url = \"http://example.com/api\"\n    # Override host with port\n    host = \"override.com:9090\"\n    session = get_httpie_session(env, tmp_config_dir, session_name, host, url, suppress_legacy_warnings=True)\n    # bound_host should be stripped of port\n    assert session.bound_host == \"override.com\"\n    # suppress_legacy_warnings flag should be set\n    assert session.suppress_legacy_warnings is True\n```",
+        "reasoning": "We need three tests for get_httpie_session. We can create a dummy Environment and Session class? But we cannot modify product code. We need to import get_httpie_session from httpie.sessions. We need to test behavior: anonymous session path, bound host, port stripping, session_id. We need to mock Session? But cannot mock target. But we can inspect returned Session attributes? Session likely defined elsewhere. We can import Session class. Let's inspect? Assume Session has attributes path, env, session_id, bound_host, suppress_legacy_warnings. We can test that. Use tmp_path for config_dir. Use a dummy Environment object? Maybe Environment is simple. We can create a minimal stub? But cannot modify product code. We can import Environment from httpie.context. Use a simple instance? Might require args. Let's inspect Environment signature? Not given. We can create a dummy object with required attributes? But Session likely expects env to have certain methods. But we can pass None? Might break. But we can create a simple object with minimal attributes? Let's assume Session only stores env. So passing None may be fine. We'll test attributes.\n\nTest1: anonymous session: session_name contains os.sep. Path should be expanded user. Use tmp_path for config_dir. Use url with host. Expect session.path equals expanded path. session_id equals path. bound_host stripped port.\n\nTest2: normal session: session_name without sep. Path constructed under config_dir/sessions/hostname/session_name.json. session_id equals session_name. bound_host stripped port.\n\nTest3: host with port: url with port, host param overrides. Ensure bound_host stripped port. Also test suppress_legacy_warnings flag.\n\nImplement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054262313,
+    "prompt_tokens": 692,
+    "prompt_time": 0.060930266,
+    "completion_tokens": 876,
+    "completion_time": 0.956874615,
+    "total_tokens": 1568,
+    "total_time": 1.017804881,
+    "completion_tokens_details": {
+      "reasoning_tokens": 347
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgwzvke50b9h8xzeehmfm6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport pytest\nfrom pathlib import Path\nfrom httpie.sessions import get_httpie_session, is_anonymous_session, session_hostname_to_dirname, strip_port\nfrom httpie.context import Environment\n\n# Helper to create a minimal Environment instance\ndef make_env():\n    # Environment is used only for attribute storage; a simple object suffices\n    return Environment()\n\n@pytest.fixture\ndef tmp_config_dir(tmp_path):\n    return tmp_path\n\ndef test_anonymous_session_path_and_id(tmp_config_dir):\n    env = make_env()\n    # Anonymous session name contains a path separator\n    anon_name = os.path.join(\"~\", \"my_session\")\n    url = \"http://example.com/api\"\n    session = get_httpie_session(env, tmp_config_dir, anon_name, None, url)\n    # Path should be expanded user path\n    expected_path = Path(os.path.expanduser(anon_name))\n    assert session.path == expected_path\n    # session_id should be the expanded path\n    assert session.session_id == expected_path\n    # bound_host should be stripped of port (none here)\n    assert session.bound_host == \"example.com\"\n\ndef test_normal_session_path_and_id(tmp_config_dir):\n    env = make_env()\n    session_name = \"my_session\"\n    url = \"https://example.com:8080/api\"\n    session = get_httpie_session(env, tmp_config_dir, session_name, None, url)\n    # hostname derived from URL\n    hostname = \"example.com:8080\"\n    # Path should be under config_dir/sessions/hostname/session_name.json\n    expected_path = tmp_config_dir / session_hostname_to_dirname(hostname, session_name)\n    assert session.path == expected_path\n    # session_id should be the session name\n    assert session.session_id == session_name\n    # bound_host should be stripped of port\n    assert session.bound_host == \"example.com\"\n\ndef test_host_override_and_legacy_warning_flag(tmp_config_dir):\n    env = make_env()\n    session_name = \"override_session\"\n    url = \"http://example.com/api\"\n    # Override host with port\n    host = \"override.com:9090\"\n    session = get_httpie_session(env, tmp_config_dir, session_name, host, url, suppress_legacy_warnings=True)\n    # bound_host should be stripped of port\n    assert session.bound_host == \"override.com\"\n    # suppress_legacy_warnings flag should be set\n    assert session.suppress_legacy_warnings is True\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4516620830399916
+}

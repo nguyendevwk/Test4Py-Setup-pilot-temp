@@ -1,0 +1,37 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_json_encode_escapes_script_closing_tag __________________
+
+    def test_json_encode_escapes_script_closing_tag():
+        # Normal case: ensure that the string "</script>" is escaped to "<\\/script>"
+        data = {"key": "</script>"}
+        encoded = json_encode(data)
+        # The output should be a JSON string containing the escaped sequence
+>       assert encoded == '{"key":"<\\/script>"}'
+E       assert '{"key": "<\\/script>"}' == '{"key":"<\\/script>"}'
+E         
+E         - {"key":"<\/script>"}
+E         + {"key": "<\/script>"}
+E         ?        +
+
+test_generated.py:10: AssertionError
+____________ test_json_encode_handles_nested_structures_and_unicode ____________
+
+    def test_json_encode_handles_nested_structures_and_unicode():
+        # Boundary case: nested lists and unicode characters
+        data = {
+            "list": [1, 2, {"inner": "value</test>"}],
+            "unicode": "✓"
+        }
+        encoded = json_encode(data)
+        # The escaped sequence should appear only once
+        assert "<\\/test>" in encoded
+        # The unicode character should be preserved
+>       assert "✓" in encoded
+E       assert '✓' in '{"list": [1, 2, {"inner": "value<\\/test>"}], "unicode": "\\u2713"}'
+
+test_generated.py:24: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_json_encode_escapes_script_closing_tag - asser...
+FAILED test_generated.py::test_json_encode_handles_nested_structures_and_unicode
+2 failed, 1 passed in 0.14s

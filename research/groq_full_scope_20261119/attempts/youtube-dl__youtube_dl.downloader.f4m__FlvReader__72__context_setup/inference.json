@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-7cd9f725-25c3-45f9-bd05-71396c1d03b2",
+  "object": "chat.completion",
+  "created": 1795079611,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport struct\nimport pytest\nfrom youtube_dl.downloader.f4m import FlvReader, DataTruncatedError\n\ndef test_read_bytes_truncation():\n    # Create a reader with only 3 bytes\n    r = FlvReader(b'\\x01\\x02\\x03')\n    # Reading 3 bytes succeeds\n    assert r.read_bytes(3) == b'\\x01\\x02\\x03'\n    # Subsequent read of 1 byte should raise DataTruncatedError\n    with pytest.raises(DataTruncatedError) as excinfo:\n        r.read_bytes(1)\n    assert 'need 1 bytes while only 0 bytes got' in str(excinfo.value)\n\ndef test_read_unsigned_int_and_long_long():\n    # Construct bytes: 4-byte int 0x01020304 and 8-byte long long 0x05060708090A0B0C\n    data = struct.pack('!I Q', 0x01020304, 0x05060708090A0B0C)\n    r = FlvReader(data)\n    assert r.read_unsigned_int() == 0x01020304\n    assert r.read_unsigned_long_long() == 0x05060708090A0B0C\n\ndef test_read_box_info_with_extended_size():\n    # Box header: size=1 (extended), type='abcd', extended size=20, data='12345678'\n    header = struct.pack('!I 4s Q', 1, b'abcd', 20)\n    data = header + b'12345678'\n    r = FlvReader(data)\n    size, box_type, box_data = r.read_box_info()\n    # Extended size includes header; data length should be size - header_end (16)\n    assert size == 20\n    assert box_type == b'abcd'\n    assert box_data == b'12345678'\n```",
+        "reasoning": "Need tests for FlvReader reading. Create minimal FLV bootstrap data. Hard. Maybe test read_bytes truncation. Use small bytes. Test DataTruncatedError. Also test read_unsigned_int etc. Use known bytes. Third test read_box_info with size 1 extended. Build bytes."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005543119,
+    "prompt_tokens": 1418,
+    "prompt_time": 0.086423792,
+    "completion_tokens": 470,
+    "completion_time": 0.488242709,
+    "total_tokens": 1888,
+    "total_time": 0.574666501,
+    "completion_tokens_details": {
+      "reasoning_tokens": 60
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sha8zeeeh9j3yndtkf1k5w",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport struct\nimport pytest\nfrom youtube_dl.downloader.f4m import FlvReader, DataTruncatedError\n\ndef test_read_bytes_truncation():\n    # Create a reader with only 3 bytes\n    r = FlvReader(b'\\x01\\x02\\x03')\n    # Reading 3 bytes succeeds\n    assert r.read_bytes(3) == b'\\x01\\x02\\x03'\n    # Subsequent read of 1 byte should raise DataTruncatedError\n    with pytest.raises(DataTruncatedError) as excinfo:\n        r.read_bytes(1)\n    assert 'need 1 bytes while only 0 bytes got' in str(excinfo.value)\n\ndef test_read_unsigned_int_and_long_long():\n    # Construct bytes: 4-byte int 0x01020304 and 8-byte long long 0x05060708090A0B0C\n    data = struct.pack('!I Q', 0x01020304, 0x05060708090A0B0C)\n    r = FlvReader(data)\n    assert r.read_unsigned_int() == 0x01020304\n    assert r.read_unsigned_long_long() == 0x05060708090A0B0C\n\ndef test_read_box_info_with_extended_size():\n    # Box header: size=1 (extended), type='abcd', extended size=20, data='12345678'\n    header = struct.pack('!I 4s Q', 1, b'abcd', 20)\n    data = header + b'12345678'\n    r = FlvReader(data)\n    size, box_type, box_data = r.read_box_info()\n    # Extended size includes header; data length should be size - header_end (16)\n    assert size == 20\n    assert box_type == b'abcd'\n    assert box_data == b'12345678'\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "10cab8160bed4afcacea492b93e35a05",
+  "_api_plus_pacing_seconds": 1.6350492169731297
+}

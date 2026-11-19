@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-9cdacc65-f46e-4ed2-b7d9-a06a7cba3881",
+  "object": "chat.completion",
+  "created": 1795077060,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport importlib.util\nimport importlib.machinery\nimport importlib\nimport types\nimport pytest\nfrom apimd.loader import loader\nfrom apimd.logger import logger\n\n# Helper to create a simple package structure\ndef create_pkg(tmp_path, pkg_name, files):\n    pkg_path = tmp_path / pkg_name\n    pkg_path.mkdir()\n    (pkg_path / \"__init__.py\").write_text(\"\")\n    for fname, content in files.items():\n        (pkg_path / fname).write_text(content)\n    return pkg_path\n\ndef test_loader_parses_python_module(tmp_path):\n    # Create a package with a single .py module\n    create_pkg(tmp_path, \"mypkg\", {\"mod.py\": \"x = 42\\n\"})\n    # Ensure the package is importable\n    sys.path.insert(0, str(tmp_path))\n    try:\n        result = loader(str(tmp_path), str(tmp_path), link=False, level=0, toc=False)\n        # The compiled output should contain the module name\n        assert \"mypkg.mod\" in result\n        # The module should be importable\n        mod = importlib.import_module(\"mypkg.mod\")\n        assert mod.x == 42\n    finally:\n        sys.path.pop(0)\n\ndef test_loader_parses_stub_only(tmp_path, caplog):\n    # Create a package with only a .pyi stub\n    create_pkg(tmp_path, \"stubpkg\", {\"stub.pyi\": \"def foo() -> int: ...\\n\"})\n    sys.path.insert(0, str(tmp_path))\n    try:\n        caplog.set_level(logger.level)\n        result = loader(str(tmp_path), str(tmp_path), link=False, level=0, toc=False)\n        # The compiled output should still contain the module name\n        assert \"stubpkg.stub\" in result\n        # No import should succeed because there's no .py file\n        with pytest.raises(ImportError):\n            importlib.import_module(\"stubpkg.stub\")\n    finally:\n        sys.path.pop(0)\n\ndef test_loader_skips_missing_source(tmp_path, caplog):\n    # Create a package with a .py file that references a missing module\n    create_pkg(tmp_path, \"brokenpkg\", {\"broken.py\": \"import nonexistent\\n\"})\n    sys.path.insert(0, str(tmp_path))\n    try:\n        caplog.set_level(logger.level)\n        result = loader(str(tmp_path), str(tmp_path), link=False, level=0, toc=False)\n        # The compiled output should still contain the module name\n        assert \"brokenpkg.broken\" in result\n        # Importing should raise ImportError due to missing dependency\n        with pytest.raises(ImportError):\n            importlib.import_module(\"brokenpkg.broken\")\n    finally:\n        sys.path.pop(0)\n```",
+        "reasoning": "We need to test loader function. We need to create temporary package structure with .py files, maybe .pyi, and extension? We can't compile extension. So test normal: create simple module with .py, ensure loader compiles. We don't know Parser implementation. But we can inspect? Not provided. We assume it returns string. We can test that loader returns non-empty string. Also test boundary: when no .py files, only .pyi, should still parse. And error: missing file? maybe loader should skip. Use tmp_path. We'll call loader with root=tmp_path, pwd=tmp_path, link=False, level=0, toc=False. Need to create walk_packages function? It's imported from .? Not defined. Probably from importlib.util? Actually walk_packages is from importlib.util. We need to import it. But loader uses walk_packages. We'll rely on that. We'll create package structure: root contains submodule. Ensure __init__.py. Then loader should parse. We'll assert that returned string contains module name. Also test that when no .py files, loader warns but returns string. Use caplog to capture warnings. Third test: when .py file missing but .pyi present, loader still compiles. We'll check that. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051813235,
+    "prompt_tokens": 553,
+    "prompt_time": 0.049318035,
+    "completion_tokens": 855,
+    "completion_time": 0.952393333,
+    "total_tokens": 1408,
+    "total_time": 1.001711368,
+    "completion_tokens_details": {
+      "reasoning_tokens": 263
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sewcgdeqev7ymhgxake7g3",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport importlib.util\nimport importlib.machinery\nimport importlib\nimport types\nimport pytest\nfrom apimd.loader import loader\nfrom apimd.logger import logger\n\n# Helper to create a simple package structure\ndef create_pkg(tmp_path, pkg_name, files):\n    pkg_path = tmp_path / pkg_name\n    pkg_path.mkdir()\n    (pkg_path / \"__init__.py\").write_text(\"\")\n    for fname, content in files.items():\n        (pkg_path / fname).write_text(content)\n    return pkg_path\n\ndef test_loader_parses_python_module(tmp_path):\n    # Create a package with a single .py module\n    create_pkg(tmp_path, \"mypkg\", {\"mod.py\": \"x = 42\\n\"})\n    # Ensure the package is importable\n    sys.path.insert(0, str(tmp_path))\n    try:\n        result = loader(str(tmp_path), str(tmp_path), link=False, level=0, toc=False)\n        # The compiled output should contain the module name\n        assert \"mypkg.mod\" in result\n        # The module should be importable\n        mod = importlib.import_module(\"mypkg.mod\")\n        assert mod.x == 42\n    finally:\n        sys.path.pop(0)\n\ndef test_loader_parses_stub_only(tmp_path, caplog):\n    # Create a package with only a .pyi stub\n    create_pkg(tmp_path, \"stubpkg\", {\"stub.pyi\": \"def foo() -> int: ...\\n\"})\n    sys.path.insert(0, str(tmp_path))\n    try:\n        caplog.set_level(logger.level)\n        result = loader(str(tmp_path), str(tmp_path), link=False, level=0, toc=False)\n        # The compiled output should still contain the module name\n        assert \"stubpkg.stub\" in result\n        # No import should succeed because there's no .py file\n        with pytest.raises(ImportError):\n            importlib.import_module(\"stubpkg.stub\")\n    finally:\n        sys.path.pop(0)\n\ndef test_loader_skips_missing_source(tmp_path, caplog):\n    # Create a package with a .py file that references a missing module\n    create_pkg(tmp_path, \"brokenpkg\", {\"broken.py\": \"import nonexistent\\n\"})\n    sys.path.insert(0, str(tmp_path))\n    try:\n        caplog.set_level(logger.level)\n        result = loader(str(tmp_path), str(tmp_path), link=False, level=0, toc=False)\n        # The compiled output should still contain the module name\n        assert \"brokenpkg.broken\" in result\n        # Importing should raise ImportError due to missing dependency\n        with pytest.raises(ImportError):\n            importlib.import_module(\"brokenpkg.broken\")\n    finally:\n        sys.path.pop(0)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.375721774995327
+}

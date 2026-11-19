@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-860aefee-49be-4eaa-bbb8-3830da27b5f6",
+  "object": "chat.completion",
+  "created": 1795077342,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport inspect\nimport pytest\nfrom docstring_parser.numpydoc import DeprecationSection\nfrom docstring_parser.numpydoc.common import DocstringDeprecated\n\ndef test_parse_normal_deprecation_section():\n    \"\"\"Test that a normal deprecation section is parsed correctly.\"\"\"\n    section = DeprecationSection(title=\"Deprecated\", key=\"deprecated\")\n    raw_text = \"1.0\\n    This function is deprecated and will be removed in future releases.\"\n    # cleandoc removes indentation\n    parsed = list(section.parse(raw_text))\n    assert len(parsed) == 1\n    dep = parsed[0]\n    assert isinstance(dep, DocstringDeprecated)\n    assert dep.args == [\"deprecated\"]\n    assert dep.version == \"1.0\"\n    assert dep.description == \"This function is deprecated and will be removed in future releases.\"\n\ndef test_parse_deprecation_section_without_description():\n    \"\"\"Test that a deprecation section with only a version line yields None description.\"\"\"\n    section = DeprecationSection(title=\"Deprecated\", key=\"deprecated\")\n    raw_text = \"2.5\\n\"\n    parsed = list(section.parse(raw_text))\n    assert len(parsed) == 1\n    dep = parsed[0]\n    assert dep.args == [\"deprecated\"]\n    assert dep.version == \"2.5\"\n    assert dep.description is None\n\ndef test_parse_deprecation_section_with_multiple_lines():\n    \"\"\"Test that only the first line is taken as the version and the rest is cleaned as description.\"\"\"\n    section = DeprecationSection(title=\"Deprecated\", key=\"deprecated\")\n    raw_text = \"3.0\\n    First line of description.\\n    Second line of description.\"\n    parsed = list(section.parse(raw_text))\n    assert len(parsed) == 1\n    dep = parsed[0]\n    assert dep.version == \"3.0\"\n    # inspect.cleandoc removes common indentation and leading/trailing whitespace\n    expected_desc = \"First line of description.\\nSecond line of description.\"\n    assert dep.description == expected_desc\n```",
+        "reasoning": "We need tests for DeprecationSection.parse. Three functions. Use tmp_path? Not needed. Just test normal, boundary, error. Boundary: empty desc. Error: malformed? parse splits. If text has no newline, desc None. Test that desc None yields None. Also test that version cleaned. Third test: multiple lines? But parse only first line. We'll test that."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051562216,
+    "prompt_tokens": 866,
+    "prompt_time": 0.044964854,
+    "completion_tokens": 506,
+    "completion_time": 0.54236362,
+    "total_tokens": 1372,
+    "total_time": 0.587328474,
+    "completion_tokens_details": {
+      "reasoning_tokens": 79
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sf512kec98227kht583qn2",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport inspect\nimport pytest\nfrom docstring_parser.numpydoc import DeprecationSection\nfrom docstring_parser.numpydoc.common import DocstringDeprecated\n\ndef test_parse_normal_deprecation_section():\n    \"\"\"Test that a normal deprecation section is parsed correctly.\"\"\"\n    section = DeprecationSection(title=\"Deprecated\", key=\"deprecated\")\n    raw_text = \"1.0\\n    This function is deprecated and will be removed in future releases.\"\n    # cleandoc removes indentation\n    parsed = list(section.parse(raw_text))\n    assert len(parsed) == 1\n    dep = parsed[0]\n    assert isinstance(dep, DocstringDeprecated)\n    assert dep.args == [\"deprecated\"]\n    assert dep.version == \"1.0\"\n    assert dep.description == \"This function is deprecated and will be removed in future releases.\"\n\ndef test_parse_deprecation_section_without_description():\n    \"\"\"Test that a deprecation section with only a version line yields None description.\"\"\"\n    section = DeprecationSection(title=\"Deprecated\", key=\"deprecated\")\n    raw_text = \"2.5\\n\"\n    parsed = list(section.parse(raw_text))\n    assert len(parsed) == 1\n    dep = parsed[0]\n    assert dep.args == [\"deprecated\"]\n    assert dep.version == \"2.5\"\n    assert dep.description is None\n\ndef test_parse_deprecation_section_with_multiple_lines():\n    \"\"\"Test that only the first line is taken as the version and the rest is cleaned as description.\"\"\"\n    section = DeprecationSection(title=\"Deprecated\", key=\"deprecated\")\n    raw_text = \"3.0\\n    First line of description.\\n    Second line of description.\"\n    parsed = list(section.parse(raw_text))\n    assert len(parsed) == 1\n    dep = parsed[0]\n    assert dep.version == \"3.0\"\n    # inspect.cleandoc removes common indentation and leading/trailing whitespace\n    expected_desc = \"First line of description.\\nSecond line of description.\"\n    assert dep.description == expected_desc\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9824964479776099
+}

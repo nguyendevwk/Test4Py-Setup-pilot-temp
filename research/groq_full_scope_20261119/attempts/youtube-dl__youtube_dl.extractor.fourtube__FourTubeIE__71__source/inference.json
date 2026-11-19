@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-9d6e36dc-1ec4-4934-ba88-09f24eab0494",
+  "object": "chat.completion",
+  "created": 1795077797,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.fourtube import FourTubeIE\n\ndef test_valid_url_matching():\n    \"\"\"FourTubeIE should match known URL patterns and capture the video id.\"\"\"\n    pattern = re.compile(FourTubeIE._VALID_URL)\n    # A typical 4tube URL\n    url = \"http://www.4tube.com/videos/123456/awesome-video\"\n    match = pattern.match(url)\n    assert match is not None, f\"URL {url} should match the pattern\"\n    assert match.group(\"id\") == \"123456\", \"Captured id should be '123456'\"\n    # An embed URL\n    embed_url = \"http://m.4tube.com/embed/987654\"\n    embed_match = pattern.match(embed_url)\n    assert embed_match is not None, f\"Embed URL {embed_url} should match the pattern\"\n    assert embed_match.group(\"id\") == \"987654\", \"Captured id should be '987654'\"\n\ndef test_invalid_url_rejection():\n    \"\"\"FourTubeIE should not match URLs that do not conform to the pattern.\"\"\"\n    pattern = re.compile(FourTubeIE._VALID_URL)\n    # A URL from a different domain\n    bad_url = \"http://example.com/videos/123456\"\n    assert pattern.match(bad_url) is None, \"Non-4tube URL should not match\"\n    # A malformed 4tube URL\n    malformed_url = \"http://www.4tube.com/invalid/123456\"\n    assert pattern.match(malformed_url) is None, \"Malformed 4tube URL should not match\"\n\ndef test_url_template_and_test_entries():\n    \"\"\"The URL template should format correctly and test entries contain required keys.\"\"\"\n    # Test URL template formatting\n    video_id = \"555555\"\n    expected_url = f\"https://www.4tube.com/videos/{video_id}/video\"\n    assert FourTubeIE._URL_TEMPLATE % video_id == expected_url\n\n    # Validate that each test entry in _TESTS has the expected keys\n    required_keys = {\"url\", \"md5\", \"info_dict\"}\n    for test in FourTubeIE._TESTS:\n        if \"only_matching\" in test:\n            # Skip entries that only test matching\n            continue\n        assert required_keys.issubset(test.keys()), f\"Test entry missing required keys: {test}\"\n        # Ensure the md5 is a 32-character hex string\n        assert re.fullmatch(r\"[a-f0-9]{32}\", test[\"md5\"]), f\"Invalid md5 in test: {test['md5']}\"\n        # Ensure the info_dict contains the expected fields\n        info = test[\"info_dict\"]\n        for field in [\"id\", \"ext\", \"title\", \"uploader\", \"uploader_id\", \"upload_date\",\n                      \"timestamp\", \"duration\", \"view_count\", \"like_count\", \"categories\", \"age_limit\"]:\n            assert field in info, f\"Missing field '{field}' in info_dict of test: {test}\"\n```",
+        "reasoning": "We need tests for FourTubeIE. We can instantiate and call .suitable and .extract_info? But extraction requires network. Can't. So test regex matching and URL_TEMPLATE. Use _VALID_URL. Test that valid URLs match and capture id. Also test that invalid doesn't match. Also test that _URL_TEMPLATE formatting. Third test maybe test that _TESTS entries have required keys. Let's write three tests. Use re.match."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054399729,
+    "prompt_tokens": 671,
+    "prompt_time": 0.04057662,
+    "completion_tokens": 729,
+    "completion_time": 0.797059741,
+    "total_tokens": 1400,
+    "total_time": 0.837636361,
+    "completion_tokens_details": {
+      "reasoning_tokens": 88
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfjx4yenq9ehqx8yc5zgvp",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.fourtube import FourTubeIE\n\ndef test_valid_url_matching():\n    \"\"\"FourTubeIE should match known URL patterns and capture the video id.\"\"\"\n    pattern = re.compile(FourTubeIE._VALID_URL)\n    # A typical 4tube URL\n    url = \"http://www.4tube.com/videos/123456/awesome-video\"\n    match = pattern.match(url)\n    assert match is not None, f\"URL {url} should match the pattern\"\n    assert match.group(\"id\") == \"123456\", \"Captured id should be '123456'\"\n    # An embed URL\n    embed_url = \"http://m.4tube.com/embed/987654\"\n    embed_match = pattern.match(embed_url)\n    assert embed_match is not None, f\"Embed URL {embed_url} should match the pattern\"\n    assert embed_match.group(\"id\") == \"987654\", \"Captured id should be '987654'\"\n\ndef test_invalid_url_rejection():\n    \"\"\"FourTubeIE should not match URLs that do not conform to the pattern.\"\"\"\n    pattern = re.compile(FourTubeIE._VALID_URL)\n    # A URL from a different domain\n    bad_url = \"http://example.com/videos/123456\"\n    assert pattern.match(bad_url) is None, \"Non-4tube URL should not match\"\n    # A malformed 4tube URL\n    malformed_url = \"http://www.4tube.com/invalid/123456\"\n    assert pattern.match(malformed_url) is None, \"Malformed 4tube URL should not match\"\n\ndef test_url_template_and_test_entries():\n    \"\"\"The URL template should format correctly and test entries contain required keys.\"\"\"\n    # Test URL template formatting\n    video_id = \"555555\"\n    expected_url = f\"https://www.4tube.com/videos/{video_id}/video\"\n    assert FourTubeIE._URL_TEMPLATE % video_id == expected_url\n\n    # Validate that each test entry in _TESTS has the expected keys\n    required_keys = {\"url\", \"md5\", \"info_dict\"}\n    for test in FourTubeIE._TESTS:\n        if \"only_matching\" in test:\n            # Skip entries that only test matching\n            continue\n        assert required_keys.issubset(test.keys()), f\"Test entry missing required keys: {test}\"\n        # Ensure the md5 is a 32-character hex string\n        assert re.fullmatch(r\"[a-f0-9]{32}\", test[\"md5\"]), f\"Invalid md5 in test: {test['md5']}\"\n        # Ensure the info_dict contains the expected fields\n        info = test[\"info_dict\"]\n        for field in [\"id\", \"ext\", \"title\", \"uploader\", \"uploader_id\", \"upload_date\",\n                      \"timestamp\", \"duration\", \"view_count\", \"like_count\", \"categories\", \"age_limit\"]:\n            assert field in info, f\"Missing field '{field}' in info_dict of test: {test}\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.209659118030686
+}

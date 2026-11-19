@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-f4396a58-1542-483f-bc2d-47ea4029b297",
+  "object": "chat.completion",
+  "created": 1795076130,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport time\nimport builtins\nimport contextlib\nimport pytest\nfrom flutes.timing import work_in_progress\n\ndef test_work_in_progress_with_sleep(capsys, tmp_path):\n    \"\"\"Verify that the context manager prints the description and elapsed time.\"\"\"\n    start = time.time()\n    with work_in_progress(\"Sleeping\"):\n        time.sleep(0.1)\n    end = time.time()\n    captured = capsys.readouterr().out.strip()\n    # The output should contain the description and the elapsed time in seconds.\n    assert captured.startswith(\"Sleeping... done. (\")\n    # Extract the numeric part of the elapsed time.\n    elapsed_str = captured.split(\"(\")[-1].rstrip(\"s)\")\n    elapsed = float(elapsed_str)\n    # The elapsed time should be at least the sleep duration and close to the real elapsed time.\n    assert elapsed >= 0.1\n    assert abs(elapsed - (end - start)) < 0.05\n\ndef test_work_in_progress_zero_sleep(capsys):\n    \"\"\"Test the boundary case where the block executes instantly.\"\"\"\n    with work_in_progress(\"Instant\"):\n        pass\n    captured = capsys.readouterr().out.strip()\n    assert captured.startswith(\"Instant... done. (\")\n    elapsed_str = captured.split(\"(\")[-1].rstrip(\"s)\")\n    elapsed = float(elapsed_str)\n    # The elapsed time should be very small.\n    assert elapsed < 0.01\n\ndef test_work_in_progress_exception_propagates(capsys):\n    \"\"\"Ensure that an exception inside the block propagates and the message is still printed.\"\"\"\n    with pytest.raises(RuntimeError):\n        with work_in_progress(\"Error\"):\n            raise RuntimeError(\"boom\")\n    captured = capsys.readouterr().out.strip()\n    # The message should still be printed even though an exception occurred.\n    assert captured.startswith(\"Error... done. (\")\n    elapsed_str = captured.split(\"(\")[-1].rstrip(\"s)\")\n    elapsed = float(elapsed_str)\n    assert elapsed < 0.01\n```",
+        "reasoning": "Need tests for context manager generator. Use tmp_path to create file. Test that prints correct format and timing. Use capsys. Three tests: 1) normal block with sleep to check timing approx. 0.1s. 2) function decorator? Actually work_in_progress is a context manager generator, not decorator. But can be used as decorator? It yields, so can be used as decorator? It returns generator, but used as decorator? In example they use @work_in_progress. That works because function returns generator? Actually decorator expects function, but work_in_progress returns generator? It prints then yields then prints. When used as decorator, it will replace function with generator? Might not work. But test context manager usage. 3) boundary: zero sleep. 4) error: raise exception inside block, ensure prints done? It will still print after yield? If exception occurs, generator not resumed? Actually context manager: yield inside generator; if exception, __exit__ will still run? But our generator doesn't handle. So test that exception propagates and prints done? Might not. We'll test that exception propagates."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047489974,
+    "prompt_tokens": 427,
+    "prompt_time": 0.034521414,
+    "completion_tokens": 663,
+    "completion_time": 0.753108499,
+    "total_tokens": 1090,
+    "total_time": 0.787629913,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 231
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se00xeetvrtv33d2ygks8a",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport time\nimport builtins\nimport contextlib\nimport pytest\nfrom flutes.timing import work_in_progress\n\ndef test_work_in_progress_with_sleep(capsys, tmp_path):\n    \"\"\"Verify that the context manager prints the description and elapsed time.\"\"\"\n    start = time.time()\n    with work_in_progress(\"Sleeping\"):\n        time.sleep(0.1)\n    end = time.time()\n    captured = capsys.readouterr().out.strip()\n    # The output should contain the description and the elapsed time in seconds.\n    assert captured.startswith(\"Sleeping... done. (\")\n    # Extract the numeric part of the elapsed time.\n    elapsed_str = captured.split(\"(\")[-1].rstrip(\"s)\")\n    elapsed = float(elapsed_str)\n    # The elapsed time should be at least the sleep duration and close to the real elapsed time.\n    assert elapsed >= 0.1\n    assert abs(elapsed - (end - start)) < 0.05\n\ndef test_work_in_progress_zero_sleep(capsys):\n    \"\"\"Test the boundary case where the block executes instantly.\"\"\"\n    with work_in_progress(\"Instant\"):\n        pass\n    captured = capsys.readouterr().out.strip()\n    assert captured.startswith(\"Instant... done. (\")\n    elapsed_str = captured.split(\"(\")[-1].rstrip(\"s)\")\n    elapsed = float(elapsed_str)\n    # The elapsed time should be very small.\n    assert elapsed < 0.01\n\ndef test_work_in_progress_exception_propagates(capsys):\n    \"\"\"Ensure that an exception inside the block propagates and the message is still printed.\"\"\"\n    with pytest.raises(RuntimeError):\n        with work_in_progress(\"Error\"):\n            raise RuntimeError(\"boom\")\n    captured = capsys.readouterr().out.strip()\n    # The message should still be printed even though an exception occurred.\n    assert captured.startswith(\"Error... done. (\")\n    elapsed_str = captured.split(\"(\")[-1].rstrip(\"s)\")\n    elapsed = float(elapsed_str)\n    assert elapsed < 0.01\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.10461664799368
+}

@@ -1,0 +1,59 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_already_configured_prints_expected_message ________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7f39b15af790>
+
+    def test_already_configured_prints_expected_message(capsys):
+        """Verify that the function prints the expected message with the reload command."""
+        config = DummyConfig(reload="thefuck reload")
+        already_configured(config)
+        captured = capsys.readouterr()
+        expected = (
+            "Seems like fuck alias already configured!\n"
+            "For applying changes run thefuck reload or restart your shell."
+        )
+        # The output may contain ANSI color codes; strip them for comparison
+        stripped = "".join(
+            ch for ch in captured.out if ch.isprintable() or ch in "\n\r"
+        )
+>       assert stripped.strip() == expected.strip()
+E       AssertionError: assert 'Seems like [...t your shell.' == 'Seems like f...t your shell.'
+E         
+E         - Seems like fuck alias already configured!
+E         + Seems like [1mfuck[0m alias already configured!
+E         ?            +++    +++
+E         - For applying changes run thefuck reload or restart your shell.
+E         + For applying changes run [1mthefuck reload[0m or restart your shell.
+E         ?                          +++              +++
+
+test_generated.py:24: AssertionError
+__________________ test_already_configured_with_empty_reload ___________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7f39b13fed40>
+
+    def test_already_configured_with_empty_reload(capsys):
+        """When reload is an empty string, the message should still be formatted correctly."""
+        config = DummyConfig(reload="")
+        already_configured(config)
+        captured = capsys.readouterr()
+        # Ensure the reload placeholder is present even if empty
+>       assert "For applying changes run  or restart your shell." in captured.out
+E       AssertionError: assert 'For applying changes run  or restart your shell.' in 'Seems like \x1b[1mfuck\x1b[0m alias already configured!\nFor applying changes run \x1b[1m\x1b[0m or restart your shell.\n'
+E        +  where 'Seems like \x1b[1mfuck\x1b[0m alias already configured!\nFor applying changes run \x1b[1m\x1b[0m or restart your shell.\n' = CaptureResult(out='Seems like \x1b[1mfuck\x1b[0m alias already configured!\nFor applying changes run \x1b[1m\x1b[0m or restart your shell.\n', err='').out
+
+test_generated.py:39: AssertionError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_already_configured_prints_expected_message - A...
+FAILED test_generated.py::test_already_configured_with_empty_reload - Asserti...
+2 failed, 1 passed, 2 warnings in 0.12s

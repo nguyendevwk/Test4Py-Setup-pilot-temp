@@ -1,0 +1,68 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_auto_json_headers_when_data_and_no_form _________________
+
+    def test_auto_json_headers_when_data_and_no_form():
+        """When data is provided without form, JSON headers are set."""
+        args = argparse.Namespace(
+            data="{'key': 'value'}",
+            form=False,
+            json=False,
+            files=None,
+        )
+        headers = make_default_headers(args)
+        assert isinstance(headers, HTTPHeadersDict)
+        assert headers['User-Agent']  # UA is always present
+>       assert headers['Accept'] == 'application/json'
+E       AssertionError: assert 'application/json, */*;q=0.5' == 'application/json'
+E         
+E         - application/json
+E         + application/json, */*;q=0.5
+
+test_generated.py:17: AssertionError
+___________________ test_form_headers_when_form_and_no_files ___________________
+
+    def test_form_headers_when_form_and_no_files():
+        """When form is provided and no files, form content type is set."""
+        args = argparse.Namespace(
+            data=None,
+            form=True,
+            json=False,
+            files=None,
+        )
+        headers = make_default_headers(args)
+        assert isinstance(headers, HTTPHeadersDict)
+        assert headers['User-Agent']
+>       assert headers['Content-Type'] == 'application/x-www-form-urlencoded'
+E       AssertionError: assert 'application/...charset=utf-8' == 'application/...rm-urlencoded'
+E         
+E         - application/x-www-form-urlencoded
+E         + application/x-www-form-urlencoded; charset=utf-8
+E         ?                                  +++++++++++++++
+
+test_generated.py:31: AssertionError
+____________________ test_json_flag_overrides_data_and_form ____________________
+
+    def test_json_flag_overrides_data_and_form():
+        """Explicit json flag sets JSON headers regardless of data or form."""
+        args = argparse.Namespace(
+            data="{'key': 'value'}",
+            form=True,
+            json=True,
+            files=None,
+        )
+        headers = make_default_headers(args)
+        assert isinstance(headers, HTTPHeadersDict)
+        assert headers['User-Agent']
+>       assert headers['Accept'] == 'application/json'
+E       AssertionError: assert 'application/json, */*;q=0.5' == 'application/json'
+E         
+E         - application/json
+E         + application/json, */*;q=0.5
+
+test_generated.py:44: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_auto_json_headers_when_data_and_no_form - Asse...
+FAILED test_generated.py::test_form_headers_when_form_and_no_files - Assertio...
+FAILED test_generated.py::test_json_flag_overrides_data_and_form - AssertionE...
+3 failed in 0.84s

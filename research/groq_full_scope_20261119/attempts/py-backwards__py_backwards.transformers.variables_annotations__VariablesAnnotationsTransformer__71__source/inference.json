@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-c8a33f25-3722-48bb-9076-5ac9a19debf1",
+  "object": "chat.completion",
+  "created": 1795079116,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\n\nfrom py_backwards.transformers.variables_annotations import VariablesAnnotationsTransformer\nfrom py_backwards.types import TransformationResult\n\n\ndef parse_source(src: str) -> ast.AST:\n    \"\"\"Parse source code into a typed_ast AST.\"\"\"\n    return ast.parse(src, mode=\"exec\")\n\n\ndef ast_to_source(node: ast.AST) -> str:\n    \"\"\"Convert a typed_ast AST back to source code.\"\"\"\n    return pyast.unparse(node)  # uses standard ast.unparse\n\n\ndef test_transform_with_value(tmp_path):\n    src = \"a: int = 10\\nb: int = 20\\n\"\n    tree = parse_source(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # The tree should have changed\n    assert result.tree_changed is True\n\n    # The resulting source should contain plain assignments without annotations\n    new_src = ast_to_source(result.tree)\n    assert \"a = 10\" in new_src\n    assert \"b = 20\" in new_src\n    assert \": int\" not in new_src\n\n\ndef test_transform_without_value(tmp_path):\n    src = \"x: str\\n\"\n    tree = parse_source(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # The tree should have changed (the AnnAssign removed)\n    assert result.tree_changed is True\n\n    # The resulting source should not contain the variable declaration\n    new_src = ast_to_source(result.tree)\n    assert \"x:\" not in new_src\n    assert new_src.strip() == \"\"  # only a newline remains\n\n\ndef test_no_annotations_remain_unchanged(tmp_path):\n    src = \"y = 5\\nz = 6\\n\"\n    tree = parse_source(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # No annotations, so tree should not change\n    assert result.tree_changed is False\n\n    # The source should be identical\n    new_src = ast_to_source(result.tree)\n    assert new_src == src\n```",
+        "reasoning": "Need tests for transformer. Use typed_ast ast3. Build small AST via ast.parse? typed_ast ast3 parse? Use ast.parse from typed_ast? Use typed_ast.ast3.parse. Then apply transformer.transform. Check result. Three tests: normal with value, without value, and error when node outside body? Hard to trigger NodeNotFound. Maybe create AnnAssign at module level? That is body of module, parent is module, non_exp_parent? get_non_exp_parent_and_index likely returns module? Might not raise. Hard. Maybe create AnnAssign inside expression? Hard. Maybe skip error test. But need three independent. Could test that tree_changed flag correct. Test that annotation removed. Third test: when no annotations, unchanged. Use simple."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048920855,
+    "prompt_tokens": 461,
+    "prompt_time": 0.272587453,
+    "completion_tokens": 591,
+    "completion_time": 0.799998331,
+    "total_tokens": 1052,
+    "total_time": 1.072585784,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 153
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgv4b5e4kvcyv14tt9v2fr",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\n\nfrom py_backwards.transformers.variables_annotations import VariablesAnnotationsTransformer\nfrom py_backwards.types import TransformationResult\n\n\ndef parse_source(src: str) -> ast.AST:\n    \"\"\"Parse source code into a typed_ast AST.\"\"\"\n    return ast.parse(src, mode=\"exec\")\n\n\ndef ast_to_source(node: ast.AST) -> str:\n    \"\"\"Convert a typed_ast AST back to source code.\"\"\"\n    return pyast.unparse(node)  # uses standard ast.unparse\n\n\ndef test_transform_with_value(tmp_path):\n    src = \"a: int = 10\\nb: int = 20\\n\"\n    tree = parse_source(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # The tree should have changed\n    assert result.tree_changed is True\n\n    # The resulting source should contain plain assignments without annotations\n    new_src = ast_to_source(result.tree)\n    assert \"a = 10\" in new_src\n    assert \"b = 20\" in new_src\n    assert \": int\" not in new_src\n\n\ndef test_transform_without_value(tmp_path):\n    src = \"x: str\\n\"\n    tree = parse_source(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # The tree should have changed (the AnnAssign removed)\n    assert result.tree_changed is True\n\n    # The resulting source should not contain the variable declaration\n    new_src = ast_to_source(result.tree)\n    assert \"x:\" not in new_src\n    assert new_src.strip() == \"\"  # only a newline remains\n\n\ndef test_no_annotations_remain_unchanged(tmp_path):\n    src = \"y = 5\\nz = 6\\n\"\n    tree = parse_source(src)\n    result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)\n\n    # No annotations, so tree should not change\n    assert result.tree_changed is False\n\n    # The source should be identical\n    new_src = ast_to_source(result.tree)\n    assert new_src == src\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.457476020033937
+}

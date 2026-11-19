@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-ecdc4579-075a-4340-97f1-495ef961ee62",
+  "object": "chat.completion",
+  "created": 1795079395,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import future_add_done_callback\n\n\ndef test_callback_invoked_after_future_completion(tmp_path):\n    \"\"\"When the future is not yet done, the callback is called after completion.\"\"\"\n    future = concurrent.futures.Future()\n    called = []\n\n    def callback(fut):\n        called.append(fut)\n\n    future_add_done_callback(future, callback)\n    assert called == []  # not called yet\n\n    future.set_result(\"ok\")\n    assert called == [future]\n    assert called[0].result() == \"ok\"\n\n\ndef test_callback_invoked_immediately_if_future_done(tmp_path):\n    \"\"\"If the future is already done, the callback is invoked immediately.\"\"\"\n    future = concurrent.futures.Future()\n    future.set_result(42)\n    called = []\n\n    def callback(fut):\n        called.append(fut)\n\n    future_add_done_callback(future, callback)\n    assert called == [future]\n    assert called[0].result() == 42\n\n\ndef test_invalid_future_raises_attribute_error(tmp_path):\n    \"\"\"Passing an object without a `done` method raises AttributeError.\"\"\"\n    class Dummy:\n        pass\n\n    dummy = Dummy()\n    with pytest.raises(AttributeError):\n        future_add_done_callback(dummy, lambda f: None)\n```",
+        "reasoning": "We need tests for this function. Import from tornado.concurrent. Write three tests: normal when future not done, callback called after completion; boundary when future already done; error when callback raises? maybe test that callback receives future. Use asyncio.Future? but function accepts concurrent.futures.Future or tornado Future. Use concurrent.futures.Future. Test that callback called once. Use tmp_path? not needed. Use pytest.raises? maybe test that if callback raises exception, it's propagated? Actually add_done_callback doesn't propagate. But we can test that callback receives future. Third test: error behavior: if future is None? maybe TypeError. But function expects future with done method. We can test that passing non-future raises AttributeError. Use pytest.raises(AttributeError). Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047590188,
+    "prompt_tokens": 394,
+    "prompt_time": 0.009043242,
+    "completion_tokens": 432,
+    "completion_time": 0.504416902,
+    "total_tokens": 826,
+    "total_time": 0.513460144,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 155
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh3ngqem494t45tetkdvcj",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import future_add_done_callback\n\n\ndef test_callback_invoked_after_future_completion(tmp_path):\n    \"\"\"When the future is not yet done, the callback is called after completion.\"\"\"\n    future = concurrent.futures.Future()\n    called = []\n\n    def callback(fut):\n        called.append(fut)\n\n    future_add_done_callback(future, callback)\n    assert called == []  # not called yet\n\n    future.set_result(\"ok\")\n    assert called == [future]\n    assert called[0].result() == \"ok\"\n\n\ndef test_callback_invoked_immediately_if_future_done(tmp_path):\n    \"\"\"If the future is already done, the callback is invoked immediately.\"\"\"\n    future = concurrent.futures.Future()\n    future.set_result(42)\n    called = []\n\n    def callback(fut):\n        called.append(fut)\n\n    future_add_done_callback(future, callback)\n    assert called == [future]\n    assert called[0].result() == 42\n\n\ndef test_invalid_future_raises_attribute_error(tmp_path):\n    \"\"\"Passing an object without a `done` method raises AttributeError.\"\"\"\n    class Dummy:\n        pass\n\n    dummy = Dummy()\n    with pytest.raises(AttributeError):\n        future_add_done_callback(dummy, lambda f: None)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "d439574156fc4230a5c9de33167b3b61",
+  "_api_plus_pacing_seconds": 1.1980881649651565
+}

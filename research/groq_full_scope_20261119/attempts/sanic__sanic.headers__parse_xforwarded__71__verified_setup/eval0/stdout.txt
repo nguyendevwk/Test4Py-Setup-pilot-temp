@@ -1,0 +1,50 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_parse_xforwarded_with_real_ip_header ___________________
+
+    def test_parse_xforwarded_with_real_ip_header():
+        """When REAL_IP_HEADER is present, the function returns a dict containing
+        the 'for' key with that address and other optional headers if provided."""
+        headers = DummyHeaders({
+            "X-Real-IP": "192.0.2.1",
+            "X-Forwarded-Proto": "https",
+            "X-Forwarded-Host": "example.com",
+            "X-Forwarded-Port": "443",
+            "X-Forwarded-Path": "/path",
+        })
+        config = DummyConfig(real_ip_header="X-Real-IP",
+                             forwarded_for_header="X-Forwarded-For",
+                             proxies_count=0)
+        result = parse_xforwarded(headers, config)
+        assert isinstance(result, dict)
+        assert result["for"] == "192.0.2.1"
+>       assert result["proto"] == "https"
+E       KeyError: 'proto'
+
+test_generated.py:42: KeyError
+___________________ test_parse_xforwarded_with_proxies_count ___________________
+
+    def test_parse_xforwarded_with_proxies_count():
+        """When no REAL_IP_HEADER but PROXIES_COUNT is set, the function uses the
+        X-Forwarded-For header to determine the client IP."""
+        headers = DummyHeaders({
+            "X-Forwarded-For": "203.0.113.5, 198.51.100.23, 192.0.2.1",
+            "X-Forwarded-Proto": "http",
+        })
+        config = DummyConfig(real_ip_header=None,
+                             forwarded_for_header="X-Forwarded-For",
+                             proxies_count=2)
+        result = parse_xforwarded(headers, config)
+        assert isinstance(result, dict)
+        # proxies_count=2 means take the second from the end: 198.51.100.23
+>       assert result["for"] == "198.51.100.23"
+E       AssertionError: assert '.' == '198.51.100.23'
+E         
+E         - 198.51.100.23
+E         + .
+
+test_generated.py:60: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_xforwarded_with_real_ip_header - KeyErro...
+FAILED test_generated.py::test_parse_xforwarded_with_proxies_count - Assertio...
+2 failed, 1 passed in 0.29s

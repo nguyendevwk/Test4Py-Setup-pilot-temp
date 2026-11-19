@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-749853df-d906-46e9-bb53-9b34c6bca90a",
+  "object": "chat.completion",
+  "created": 1795079031,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.formatters.colors import make_style\nfrom httpie.ui.palette import get_color\nfrom pygments.style import Style\n\ndef test_make_style_formats_values_and_inherits_style():\n    raw = {\"Token.Text\": \"red bold\", \"Token.Keyword\": \"blue\"}\n    # Ensure that get_color returns a string for known colors\n    assert get_color(\"red\", \"auto\") is not None\n    assert get_color(\"blue\", \"auto\") is not None\n    StyleClass = make_style(\"TestStyle\", raw, \"auto\")\n    # The class should inherit from pygments.style.Style\n    assert issubclass(StyleClass, Style)\n    # The styles dict should have the same keys\n    assert set(StyleClass.styles.keys()) == set(raw.keys())\n    # Each value should be formatted by get_color\n    for key, value in raw.items():\n        formatted = StyleClass.styles[key]\n        # The formatted string should contain the color codes\n        assert get_color(value.split()[0], \"auto\") in formatted\n\ndef test_make_style_ignores_unknown_colors():\n    raw = {\"Token.Text\": \"unknowncolor bold\", \"Token.Keyword\": \"anotherunknown\"}\n    StyleClass = make_style(\"UnknownColorStyle\", raw, \"auto\")\n    # get_color should return None for unknown colors\n    assert get_color(\"unknowncolor\", \"auto\") is None\n    assert get_color(\"anotherunknown\", \"auto\") is None\n    # Therefore the formatted values should be unchanged\n    assert StyleClass.styles[\"Token.Text\"] == \"unknowncolor bold\"\n    assert StyleClass.styles[\"Token.Keyword\"] == \"anotherunknown\"\n\ndef test_make_style_handles_empty_and_single_token():\n    raw = {\"Token.Text\": \"\", \"Token.Keyword\": \"red\"}\n    StyleClass = make_style(\"EmptyStyle\", raw, \"auto\")\n    # Empty string should remain empty\n    assert StyleClass.styles[\"Token.Text\"] == \"\"\n    # Single color should be formatted correctly\n    assert get_color(\"red\", \"auto\") in StyleClass.styles[\"Token.Keyword\"]\n```",
+        "reasoning": "Need tests for make_style. Test that returned class has styles dict correctly formatted. Also test that get_color returns None fallback. Use tmp_path? not needed. Use pytest.raises for invalid? maybe passing non-dict? But function expects dict. Could test that style class inherits from pygments.style.Style. Also test that format_value splits. Let's write three tests: 1 normal mapping, 2 when get_color returns None, 3 that class inherits. Use dummy raw_styles. Use get_color from module; but we can patch? Not allowed mocks. But we can use actual get_color; but we don't know its behavior. We can use a key that likely returns None. But to be deterministic, we can monkeypatch get_color? Not allowed. So maybe test that format_value returns original when get_color returns None. We can simulate by using a color string that get_color returns None. Hard. Maybe test that style class has attribute 'styles' with formatted values. Use raw_styles with simple values. Ensure that format_value splits by spaces. For example raw_styles={'Token.Text':'red bold','Token.Keyword':'blue'}; get_color likely returns something like '\\x1b[31m' etc. But we can't rely. Instead we can check that the formatted string contains no spaces? Actually format_value joins parts with space after get_color or part. So if get_color returns None, part stays. So result same as original. So we can test that. Use raw_styles with values that likely not color names? But get_color expects a color string like 'red'. It will return color code. So we can use 'unknowncolor' to get None. So formatted remains 'unknowncolor'. Good. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054486518,
+    "prompt_tokens": 485,
+    "prompt_time": 0.019055191,
+    "completion_tokens": 790,
+    "completion_time": 0.985037651,
+    "total_tokens": 1275,
+    "total_time": 1.004092842,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 350
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgrhmwe29r1s52qhqp34x7",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.formatters.colors import make_style\nfrom httpie.ui.palette import get_color\nfrom pygments.style import Style\n\ndef test_make_style_formats_values_and_inherits_style():\n    raw = {\"Token.Text\": \"red bold\", \"Token.Keyword\": \"blue\"}\n    # Ensure that get_color returns a string for known colors\n    assert get_color(\"red\", \"auto\") is not None\n    assert get_color(\"blue\", \"auto\") is not None\n    StyleClass = make_style(\"TestStyle\", raw, \"auto\")\n    # The class should inherit from pygments.style.Style\n    assert issubclass(StyleClass, Style)\n    # The styles dict should have the same keys\n    assert set(StyleClass.styles.keys()) == set(raw.keys())\n    # Each value should be formatted by get_color\n    for key, value in raw.items():\n        formatted = StyleClass.styles[key]\n        # The formatted string should contain the color codes\n        assert get_color(value.split()[0], \"auto\") in formatted\n\ndef test_make_style_ignores_unknown_colors():\n    raw = {\"Token.Text\": \"unknowncolor bold\", \"Token.Keyword\": \"anotherunknown\"}\n    StyleClass = make_style(\"UnknownColorStyle\", raw, \"auto\")\n    # get_color should return None for unknown colors\n    assert get_color(\"unknowncolor\", \"auto\") is None\n    assert get_color(\"anotherunknown\", \"auto\") is None\n    # Therefore the formatted values should be unchanged\n    assert StyleClass.styles[\"Token.Text\"] == \"unknowncolor bold\"\n    assert StyleClass.styles[\"Token.Keyword\"] == \"anotherunknown\"\n\ndef test_make_style_handles_empty_and_single_token():\n    raw = {\"Token.Text\": \"\", \"Token.Keyword\": \"red\"}\n    StyleClass = make_style(\"EmptyStyle\", raw, \"auto\")\n    # Empty string should remain empty\n    assert StyleClass.styles[\"Token.Text\"] == \"\"\n    # Single color should be formatted correctly\n    assert get_color(\"red\", \"auto\") in StyleClass.styles[\"Token.Keyword\"]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4163479580311105
+}

@@ -1,0 +1,165 @@
+FFFFFF.FF                                                                [100%]
+=================================== FAILURES ===================================
+_______________________ test_ap_with_function_and_value ________________________
+
+    def test_ap_with_function_and_value():
+        # apply function inside Maybe to another Maybe
+        f_maybe = Maybe.just(lambda x: x * 3)
+        v_maybe = Maybe.just(4)
+        result = f_maybe.ap(v_maybe)
+        assert result.is_nothing is False and result.value == 12
+    
+        # apply on nothing returns nothing
+        nothing_f = Maybe.nothing()
+>       result_nothing_f = nothing_f.ap(v_maybe)
+
+test_generated.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../repo/pymonet/maybe.py:85: in ap
+    return applicative.map(self.value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <pymonet.maybe.Maybe object at 0x7fd2695e3310>, mapper = None
+
+    def map(self, mapper: Callable[[T], U]) -> Union['Maybe[U]', 'Maybe[None]']:
+        """
+        If Maybe is empty return new empty Maybe, in other case
+        takes mapper function and returns new instance of Maybe
+        with result of mapper.
+    
+        :param mapper: function to call with Maybe value
+        :type mapper: Function(A) -> B
+        :returns: Maybe[B | None]
+        """
+        if self.is_nothing:
+            return Maybe.nothing()
+        return Maybe.just(
+>           mapper(self.value)
+        )
+E       TypeError: 'NoneType' object is not callable
+
+../repo/pymonet/maybe.py:57: TypeError
+______________________ test_bind_with_success_and_failure ______________________
+
+    def test_bind_with_success_and_failure():
+        # bind that returns a new Maybe
+        m = Maybe.just(3)
+        bound = m.bind(lambda x: Maybe.just(x + 4))
+        assert bound.is_nothing is False and bound.value == 7
+    
+        # bind that returns nothing
+        bound_none = m.bind(lambda x: Maybe.nothing())
+>       assert bound_none.is_nothing is True
+E       assert False is True
+E        +  where False = <pymonet.maybe.Maybe object at 0x7fd269653d30>.is_nothing
+
+test_generated.py:49: AssertionError
+_______________________ test_filter_accepts_and_rejects ________________________
+
+    def test_filter_accepts_and_rejects():
+        m = Maybe.just(8)
+        # filter that passes
+        filtered = m.filter(lambda x: x > 5)
+        assert filtered.is_nothing is False and filtered.value == 8
+    
+        # filter that fails
+        filtered_fail = m.filter(lambda x: x < 5)
+>       assert filtered_fail.is_nothing is True
+E       assert False is True
+E        +  where False = <pymonet.maybe.Maybe object at 0x7fd2696480d0>.is_nothing
+
+test_generated.py:83: AssertionError
+__________________ test_get_or_else_returns_value_or_default ___________________
+
+    def test_get_or_else_returns_value_or_default():
+        m = Maybe.just("hello")
+        assert m.get_or_else("world") == "hello"
+    
+        n = Maybe.nothing()
+>       assert n.get_or_else("world") == "world"
+E       AssertionError: assert None == 'world'
+E        +  where None = get_or_else('world')
+E        +    where get_or_else = <pymonet.maybe.Maybe object at 0x7fd269654280>.get_or_else
+
+test_generated.py:96: AssertionError
+_________________ test_just_and_nothing_equality_and_identity __________________
+
+    def test_just_and_nothing_equality_and_identity():
+        a = Maybe.just(10)
+        b = Maybe.just(10)
+        c = Maybe.nothing()
+        d = Maybe.nothing()
+        assert a == b
+        assert c == d
+        assert a != c
+        assert a.is_nothing is False
+>       assert c.is_nothing is True
+E       assert False is True
+E        +  where False = <pymonet.maybe.Maybe object at 0x7fd2695b35e0>.is_nothing
+
+test_generated.py:19: AssertionError
+________________________ test_map_on_nonempty_and_empty ________________________
+
+    def test_map_on_nonempty_and_empty():
+        # mapping a value
+        m = Maybe.just(5)
+        mapped = m.map(lambda x: x * 2)
+        assert isinstance(mapped, Maybe)
+        assert mapped.is_nothing is False
+        assert mapped.value == 10
+    
+        # mapping on nothing returns nothing
+        n = Maybe.nothing()
+>       mapped_n = n.map(lambda x: x * 2)
+
+test_generated.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../repo/pymonet/maybe.py:57: in map
+    mapper(self.value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+x = None
+
+>   mapped_n = n.map(lambda x: x * 2)
+E   TypeError: unsupported operand type(s) for *: 'NoneType' and 'int'
+
+test_generated.py:35: TypeError
+_____________________ test_to_either_transforms_correctly ______________________
+
+    def test_to_either_transforms_correctly():
+        m = Maybe.just(42)
+        e = m.to_either()
+        assert isinstance(e, Right) and e.value == 42
+    
+        n = Maybe.nothing()
+        e_none = n.to_either()
+>       assert isinstance(e_none, Left) and e_none.value is None
+E       assert (False)
+E        +  where False = isinstance(<pymonet.either.Right object at 0x7fd2694b67d0>, Left)
+
+test_generated.py:106: AssertionError
+_______________________ test_to_try_success_and_failure ________________________
+
+    def test_to_try_success_and_failure():
+        m = Maybe.just("ok")
+        t = m.to_try()
+        assert isinstance(t, Try) and t.is_success is True and t.value == "ok"
+    
+        n = Maybe.nothing()
+        t_none = n.to_try()
+>       assert isinstance(t_none, Try) and t_none.is_success is False and t_none.value is None
+E       assert (True and True is False)
+E        +  where True = isinstance(<pymonet.monad_try.Try object at 0x7fd26964ac50>, Try)
+E        +  and   True = <pymonet.monad_try.Try object at 0x7fd26964ac50>.is_success
+
+test_generated.py:138: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_ap_with_function_and_value - TypeError: 'NoneT...
+FAILED test_generated.py::test_bind_with_success_and_failure - assert False i...
+FAILED test_generated.py::test_filter_accepts_and_rejects - assert False is True
+FAILED test_generated.py::test_get_or_else_returns_value_or_default - Asserti...
+FAILED test_generated.py::test_just_and_nothing_equality_and_identity - asser...
+FAILED test_generated.py::test_map_on_nonempty_and_empty - TypeError: unsuppo...
+FAILED test_generated.py::test_to_either_transforms_correctly - assert (False)
+FAILED test_generated.py::test_to_try_success_and_failure - assert (True and ...
+8 failed, 1 passed in 0.13s

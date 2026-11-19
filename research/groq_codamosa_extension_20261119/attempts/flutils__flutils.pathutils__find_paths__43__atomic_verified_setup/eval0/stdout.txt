@@ -1,0 +1,36 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_find_paths_tilde _____________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-187/test_find_paths_tilde0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0bbe86ea70>
+
+    def test_find_paths_tilde(tmp_path, monkeypatch):
+        # Create a temporary home directory and a file inside
+        home = tmp_path / "home"
+        home.mkdir()
+        user_dir = home / "test_user"
+        user_dir.mkdir()
+        file_path = user_dir / "tmp" / "file_one"
+        file_path.parent.mkdir(parents=True)
+        file_path.write_text("content")
+    
+        # Monkeypatch getpass.getuser to return 'test_user'
+        monkeypatch.setattr("getpass.getuser", lambda: "test_user")
+    
+        # Monkeypatch os.path.expanduser to use our fake home
+        monkeypatch.setattr("os.path.expanduser", lambda p: str(home / p.lstrip("~")))
+    
+        # Use a pattern with ~ expansion
+        pattern = "~/tmp/*"
+        result = list(find_paths(pattern))
+    
+        # The result should contain the file we created
+>       assert len(result) == 1
+E       AssertionError: assert 310 == 1
+E        +  where 310 = len([PosixPath('/tmp/tmpzr2p_ua9'), PosixPath('/tmp/tmpfp47hblh'), PosixPath('/tmp/tmprvvfxuld'), PosixPath('/tmp/tmpueenff2t'), PosixPath('/tmp/tmps7u7rx9o'), PosixPath('/tmp/tmp__2pov6e'), ...])
+
+../../../../../../attempts/flutils__flutils.pathutils__find_paths__43__atomic_verified_setup/eval0/test_generated.py:49: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/flutils__flutils.pathutils__find_paths__43__atomic_verified_setup/eval0/test_generated.py::test_find_paths_tilde
+1 failed, 2 passed in 0.12s

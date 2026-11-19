@@ -1,0 +1,63 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_transform_no_changes ___________________________
+
+    def test_transform_no_changes():
+        """BaseNodeTransformer.transform should return unchanged tree and flag False."""
+        src = "x = 1"
+        tree = parse_source(src)
+        result: TransformationResult = BaseNodeTransformer.transform(tree)
+        # The tree returned should be the same object
+        assert result.tree is tree
+        # No changes should be detected
+>       assert result.changed is False
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:19: AttributeError
+__________________ test_transform_with_subclass_modification ___________________
+
+    def test_transform_with_subclass_modification():
+        """Subclass that modifies the tree should set changed flag True."""
+        class IncrementTransformer(BaseNodeTransformer):
+            def visit_Name(self, node: ast.Name):
+                # Replace any name 'x' with 'y'
+                if node.id == "x":
+                    new_node = ast.Name(id="y", ctx=node.ctx)
+                    self._tree_changed = True
+                    return new_node
+                return node
+    
+        src = "x = 1"
+        tree = parse_source(src)
+        result: TransformationResult = IncrementTransformer.transform(tree)
+        # The tree should be modified
+>       assert result.changed is True
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:38: AttributeError
+_____________ test_transform_with_multiple_nodes_and_dependencies ______________
+
+    def test_transform_with_multiple_nodes_and_dependencies():
+        """Ensure that dependencies are propagated and multiple nodes are processed."""
+        class DummyTransformer(BaseNodeTransformer):
+            dependencies = ["dummy_dep"]
+    
+            def visit_Num(self, node: ast.Num):
+                # Increment all numeric literals
+                new_node = ast.Num(n=node.n + 1)
+                self._tree_changed = True
+                return new_node
+    
+        src = "a = 2\nb = 3"
+        tree = parse_source(src)
+        result: TransformationResult = DummyTransformer.transform(tree)
+        # Changed flag should be True
+>       assert result.changed is True
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:58: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_transform_no_changes - AttributeError: 'Transf...
+FAILED test_generated.py::test_transform_with_subclass_modification - Attribu...
+FAILED test_generated.py::test_transform_with_multiple_nodes_and_dependencies
+3 failed in 0.16s

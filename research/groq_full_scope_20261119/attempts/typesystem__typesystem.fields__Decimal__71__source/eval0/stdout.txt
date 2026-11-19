@@ -1,0 +1,45 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_decimal_validation_success ________________________
+
+    def test_decimal_validation_success():
+        field = Decimal()
+        # Valid Decimal instance
+>       assert field.validate(decimal.Decimal("1.23")).value == decimal.Decimal("1.23")
+E       AttributeError: 'decimal.Decimal' object has no attribute 'value'
+
+test_generated.py:19: AttributeError
+_______________________ test_decimal_validation_failure ________________________
+
+    def test_decimal_validation_failure():
+        field = Decimal()
+        # Invalid type: string that cannot be converted to Decimal
+        with pytest.raises(ValidationError):
+            field.validate("not a number")
+        # Invalid type: list
+        with pytest.raises(ValidationError):
+            field.validate([1, 2, 3])
+        # Invalid type: None is allowed? It should pass through? Check behavior
+        # If None is not allowed, it should raise; otherwise it should return None
+        # Here we assume None is allowed and returns None
+>       assert field.validate(None).value is None
+
+test_generated.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.fields.Decimal object at 0x7f05bd177580>, value = None
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        if value is None and self.allow_null:
+            return None
+        elif value == "" and self.allow_null and self.coerce_types:
+            return None
+        elif value is None:
+>           raise self.validation_error("null")
+E           typesystem.base.ValidationError: May not be null.
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:245: ValidationError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_decimal_validation_success - AttributeError: '...
+FAILED test_generated.py::test_decimal_validation_failure - typesystem.base.V...
+2 failed, 1 passed in 0.15s

@@ -1,0 +1,80 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_transform_with_value ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/py-backwards__py_backwards....notations__VariablesAnnotationsTransformer__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_transform_with_value0')
+
+    def test_transform_with_value(tmp_path):
+        src = "a: int = 10\nb: int = 20\n"
+        tree = parse_source(src)
+        result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)
+    
+        # The tree should have changed
+        assert result.tree_changed is True
+    
+        # The resulting source should contain plain assignments without annotations
+>       new_src = ast_to_source(result.tree)
+
+test_generated.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_generated.py:16: in ast_to_source
+    return pyast.unparse(node)  # uses standard ast.unparse
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:1681: in unparse
+    return unparser.visit(ast_obj)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:815: in visit
+    self.traverse(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:806: in traverse
+    super().visit(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:418: in visit
+    return visitor(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:830: in visit_Module
+    self._write_docstring_and_traverse_body(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:823: in _write_docstring_and_traverse_body
+    self.traverse(node.body)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:804: in traverse
+    self.traverse(item)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:806: in traverse
+    super().visit(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:418: in visit
+    return visitor(node)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:872: in visit_Assign
+    if type_comment := self.get_type_comment(node):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ast._Unparser object at 0x7fc4e9b799c0>
+node = <typed_ast._ast3.Assign object at 0x7fc4e9b79c60>
+
+    def get_type_comment(self, node):
+>       comment = self._type_ignores.get(node.lineno) or node.type_comment
+E       AttributeError: 'Assign' object has no attribute 'lineno'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/ast.py:797: AttributeError
+_____________________ test_no_annotations_remain_unchanged _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/py-backwards__py_backwards....ions__VariablesAnnotationsTransformer__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_no_annotations_remain_unc0')
+
+    def test_no_annotations_remain_unchanged(tmp_path):
+        src = "y = 5\nz = 6\n"
+        tree = parse_source(src)
+        result: TransformationResult = VariablesAnnotationsTransformer.transform(tree)
+    
+        # No annotations, so tree should not change
+        assert result.tree_changed is False
+    
+        # The source should be identical
+        new_src = ast_to_source(result.tree)
+>       assert new_src == src
+E       AssertionError: assert 'y = \nz = ' == 'y = 5\nz = 6\n'
+E         
+E         - y = 5
+E         ?     -
+E         + y = 
+E         - z = 6
+E         ?     --
+E         + z =
+
+test_generated.py:58: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_transform_with_value - AttributeError: 'Assign...
+FAILED test_generated.py::test_no_annotations_remain_unchanged - AssertionErr...
+2 failed, 1 passed in 0.22s

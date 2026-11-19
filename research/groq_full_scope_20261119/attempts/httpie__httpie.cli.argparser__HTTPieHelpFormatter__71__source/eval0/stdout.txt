@@ -1,0 +1,63 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_split_lines_dedents_and_preserves_blank_lines ______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.cli.argparser__HTTPieHelpFormatter__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_split_lines_dedents_and_p0')
+
+    def test_split_lines_dedents_and_preserves_blank_lines(tmp_path):
+        """_split_lines should dedent multiline help and keep blank lines."""
+>       formatter = HTTPieHelpFormatter()
+
+test_generated.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <httpie.cli.argparser.HTTPieHelpFormatter object at 0x7f35842b3be0>
+max_help_position = 6, args = (), kwargs = {'max_help_position': 6}
+
+    def __init__(self, max_help_position=6, *args, **kwargs):
+        # A smaller indent for args help.
+        kwargs['max_help_position'] = max_help_position
+>       super().__init__(*args, **kwargs)
+E       TypeError: HelpFormatter.__init__() missing 1 required positional argument: 'prog'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/cli/argparser.py:45: TypeError
+_______________ test_add_usage_includes_action_on_invalid_option _______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.cli.argparser__HTTPieHelpFormatter__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_add_usage_includes_action0')
+
+    def test_add_usage_includes_action_on_invalid_option(tmp_path):
+        """When an invalid option is passed, add_usage should include the offending action."""
+        parser = argparse.ArgumentParser(
+            prog="testprog",
+            formatter_class=HTTPieHelpFormatter,
+            add_help=False,
+        )
+        parser.add_argument("positional", help="positional argument")
+        parser.add_argument("-f", "--foo", help="foo option")
+        # Simulate parsing with an invalid option to trigger ArgumentError
+        with pytest.raises(SystemExit):
+            parser.parse_args(["--invalid"])
+        # Capture the usage string after the error
+        usage_lines = []
+        def fake_print(*args, **kwargs):
+            usage_lines.append(" ".join(args))
+        original_write = sys.stdout.write
+        sys.stdout.write = fake_print
+        try:
+            parser.print_usage()
+        finally:
+            sys.stdout.write = original_write
+        usage_text = " ".join(usage_lines)
+        # The usage should now include the invalid option action
+>       assert "--invalid" in usage_text
+E       AssertionError: assert '--invalid' in 'usage:\n    testprog positional\n'
+
+test_generated.py:81: AssertionError
+----------------------------- Captured stderr call -----------------------------
+usage:
+    testprog positional
+testprog: error: the following arguments are required: positional
+=========================== short test summary info ============================
+FAILED test_generated.py::test_split_lines_dedents_and_preserves_blank_lines
+FAILED test_generated.py::test_add_usage_includes_action_on_invalid_option - ...
+2 failed, 1 passed in 0.96s

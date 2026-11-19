@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-c220da6b-6699-43d8-9bf0-2a06ddaab30c",
+  "object": "chat.completion",
+  "created": 1795077156,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport pytest\nfrom tornado.options import options, define, parse_config_file\n\n# Ensure a clean state before each test\n@pytest.fixture(autouse=True)\ndef reset_options():\n    options._options = {}\n    options._final = False\n    yield\n    options._options = {}\n    options._final = False\n\ndef test_parse_config_file_sets_option(tmp_path):\n    \"\"\"Normal behavior: option value is updated from config file.\"\"\"\n    # Define an option with a default value\n    define(\"foo\", default=0, type=int, help=\"Test option\")\n    # Create a config file that sets foo to 42\n    cfg_path = tmp_path / \"config.cfg\"\n    cfg_path.write_text(\"foo=42\\n\")\n    # Parse the config file\n    parse_config_file(str(cfg_path))\n    # Assert that the option value has been updated\n    assert options.foo == 42\n\ndef test_parse_config_file_empty_file(tmp_path):\n    \"\"\"Boundary case: empty config file does not alter defaults.\"\"\"\n    define(\"bar\", default=\"baz\", type=str, help=\"Another test option\")\n    cfg_path = tmp_path / \"empty.cfg\"\n    cfg_path.write_text(\"\")  # empty file\n    parse_config_file(str(cfg_path))\n    # The default value should remain unchanged\n    assert options.bar == \"baz\"\n\ndef test_parse_config_file_invalid_syntax(tmp_path):\n    \"\"\"Error case: malformed config file raises ValueError.\"\"\"\n    define(\"spam\", default=True, type=bool, help=\"Bool option\")\n    cfg_path = tmp_path / \"bad.cfg\"\n    # Write an invalid line that cannot be parsed\n    cfg_path.write_text(\"spam = not_a_bool\\n\")\n    with pytest.raises(ValueError):\n        parse_config_file(str(cfg_path))\n```",
+        "reasoning": "We need to test parse_config_file. It delegates to options.parse_config_file. We need to create a config file with options. Use tmp_path. Need to test normal, boundary, error. We can create options with some options defined. But options is global OptionParser instance. We can add options before test. Use options.add_option? Let's inspect OptionParser? Not provided. But we can assume typical tornado.options. We'll just test that parse_config_file reads file and sets options. Use options.add_option. We'll test that missing file raises FileNotFoundError. Also test that final flag prevents further changes? Hard. We'll test that final=True prevents adding new options after parse? Maybe not. We'll just test that parse_config_file returns None and sets option values. Use options.add_option('--foo', default=0). Then create file with \"foo=42\". parse_config_file. assert options.foo == 42. For boundary: test with empty file no effect. For error: file with invalid syntax raises ValueError. We'll use try. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051677642,
+    "prompt_tokens": 370,
+    "prompt_time": 0.018332988,
+    "completion_tokens": 591,
+    "completion_time": 0.68528994,
+    "total_tokens": 961,
+    "total_time": 0.703622928,
+    "completion_tokens_details": {
+      "reasoning_tokens": 214
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sezagrex28pbkcdyvd02p4",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport pytest\nfrom tornado.options import options, define, parse_config_file\n\n# Ensure a clean state before each test\n@pytest.fixture(autouse=True)\ndef reset_options():\n    options._options = {}\n    options._final = False\n    yield\n    options._options = {}\n    options._final = False\n\ndef test_parse_config_file_sets_option(tmp_path):\n    \"\"\"Normal behavior: option value is updated from config file.\"\"\"\n    # Define an option with a default value\n    define(\"foo\", default=0, type=int, help=\"Test option\")\n    # Create a config file that sets foo to 42\n    cfg_path = tmp_path / \"config.cfg\"\n    cfg_path.write_text(\"foo=42\\n\")\n    # Parse the config file\n    parse_config_file(str(cfg_path))\n    # Assert that the option value has been updated\n    assert options.foo == 42\n\ndef test_parse_config_file_empty_file(tmp_path):\n    \"\"\"Boundary case: empty config file does not alter defaults.\"\"\"\n    define(\"bar\", default=\"baz\", type=str, help=\"Another test option\")\n    cfg_path = tmp_path / \"empty.cfg\"\n    cfg_path.write_text(\"\")  # empty file\n    parse_config_file(str(cfg_path))\n    # The default value should remain unchanged\n    assert options.bar == \"baz\"\n\ndef test_parse_config_file_invalid_syntax(tmp_path):\n    \"\"\"Error case: malformed config file raises ValueError.\"\"\"\n    define(\"spam\", default=True, type=bool, help=\"Bool option\")\n    cfg_path = tmp_path / \"bad.cfg\"\n    # Write an invalid line that cannot be parsed\n    cfg_path.write_text(\"spam = not_a_bool\\n\")\n    with pytest.raises(ValueError):\n        parse_config_file(str(cfg_path))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0562959120143205
+}

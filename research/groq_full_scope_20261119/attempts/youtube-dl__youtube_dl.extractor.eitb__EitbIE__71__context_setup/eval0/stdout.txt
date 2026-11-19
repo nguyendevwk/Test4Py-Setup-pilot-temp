@@ -1,0 +1,180 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________________ test_full_extraction _____________________________
+
+eitb_ie = <youtube_dl.extractor.eitb.EitbIE object at 0x7fe5f13db730>
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.eitb__EitbIE__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_full_extraction0')
+
+    def test_full_extraction(eitb_ie, tmp_path):
+        # Prepare fake JSON responses
+        video_id = '123456'
+        video_json = {
+            'web_media': [{
+                'RENDITIONS': [
+                    {
+                        'PMD_URL': 'http://example.com/video1.mp4',
+                        'ENCODING_RATE': '1500',
+                        'FRAME_WIDTH': '1280',
+                        'FRAME_HEIGHT': '720'
+                    },
+                    {
+                        'PMD_URL': 'http://example.com/video2.mp4',
+                        'ENCODING_RATE': '800',
+                        'FRAME_WIDTH': '640',
+                        'FRAME_HEIGHT': '360'
+                    }
+                ],
+                'HLS_SURL': 'http://example.com/playlist.m3u8',
+                'HDS_SURL': 'http://example.com/stream.f4m',
+                'NAME_ES': 'Test Video',
+                'SHORT_DESC_ES': 'A test description',
+                'STILL_URL': 'http://example.com/thumb.jpg',
+                'LENGTH': '120000',
+                'BROADCST_DATE': '2023-01-01 12:00:00',
+                'TAGS': ['tag1', 'tag2']
+            }],
+            'desc_group': 'Group description'
+        }
+    
+        # Mock downloader methods
+        def fake_download_json(url, video_id, *args, **kwargs):
+            if 'ServiceMultiweb/Video' in url:
+                return video_json
+            if 'TokenAuth' in url:
+                return {'token': 'abc123'}
+            return {}
+    
+        def fake_extract_m3u8_formats(url, video_id, *args, **kwargs):
+            return [{'url': url, 'format_id': 'hls'}]
+    
+        def fake_extract_f4m_formats(url, video_id, *args, **kwargs):
+            return [{'url': url, 'format_id': 'hds'}]
+    
+        eitb_ie._download_json = fake_download_json
+        eitb_ie._extract_m3u8_formats = fake_extract_m3u8_formats
+        eitb_ie._extract_f4m_formats = fake_extract_f4m_formats
+    
+        # Run extraction
+>       result = eitb_ie._real_extract(f'http://www.eitb.tv/es/video/test/{video_id}')
+
+test_generated.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/eitb.py:33: in _real_extract
+    video_id = self._match_id(url)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'youtube_dl.extractor.eitb.EitbIE'>
+url = 'http://www.eitb.tv/es/video/test/123456'
+
+    @classmethod
+    def _match_id(cls, url):
+        if '_VALID_URL_RE' not in cls.__dict__:
+            cls._VALID_URL_RE = re.compile(cls._VALID_URL)
+        m = cls._VALID_URL_RE.match(url)
+>       assert m
+E       AssertionError
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:422: AssertionError
+___________________________ test_missing_renditions ____________________________
+
+eitb_ie = <youtube_dl.extractor.eitb.EitbIE object at 0x7fe5f129c310>
+
+    def test_missing_renditions(eitb_ie):
+        video_id = '654321'
+        video_json = {
+            'web_media': [{
+                'RENDITIONS': [
+                    {'PMD_URL': None},
+                    {}
+                ],
+                'NAME_ES': 'No Renditions',
+                'SHORT_DESC_ES': '',
+                'STILL_URL': '',
+                'LENGTH': None,
+                'BROADCST_DATE': None,
+                'TAGS': None
+            }]
+        }
+    
+        def fake_download_json(url, video_id, *args, **kwargs):
+            return video_json
+    
+        eitb_ie._download_json = fake_download_json
+    
+>       result = eitb_ie._real_extract(f'http://www.eitb.tv/es/video/test/{video_id}')
+
+test_generated.py:99: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/eitb.py:33: in _real_extract
+    video_id = self._match_id(url)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'youtube_dl.extractor.eitb.EitbIE'>
+url = 'http://www.eitb.tv/es/video/test/654321'
+
+    @classmethod
+    def _match_id(cls, url):
+        if '_VALID_URL_RE' not in cls.__dict__:
+            cls._VALID_URL_RE = re.compile(cls._VALID_URL)
+        m = cls._VALID_URL_RE.match(url)
+>       assert m
+E       AssertionError
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:422: AssertionError
+____________________________ test_hls_token_missing ____________________________
+
+eitb_ie = <youtube_dl.extractor.eitb.EitbIE object at 0x7fe5f12a0340>
+
+    def test_hls_token_missing(eitb_ie):
+        video_id = '111222'
+        video_json = {
+            'web_media': [{
+                'RENDITIONS': [],
+                'HLS_SURL': 'http://example.com/playlist.m3u8',
+                'NAME_ES': 'HLS Only',
+                'SHORT_DESC_ES': 'Only HLS',
+                'STILL_URL': '',
+                'LENGTH': '60000',
+                'BROADCST_DATE': '2022-12-31 23:59:59',
+                'TAGS': []
+            }]
+        }
+    
+        def fake_download_json(url, video_id, *args, **kwargs):
+            if 'ServiceMultiweb/Video' in url:
+                return video_json
+            if 'TokenAuth' in url:
+                return {}  # No token
+            return {}
+    
+        def fake_extract_m3u8_formats(url, video_id, *args, **kwargs):
+            return [{'url': url, 'format_id': 'hls'}]
+    
+        eitb_ie._download_json = fake_download_json
+        eitb_ie._extract_m3u8_formats = fake_extract_m3u8_formats
+    
+>       result = eitb_ie._real_extract(f'http://www.eitb.tv/es/video/test/{video_id}')
+
+test_generated.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/eitb.py:33: in _real_extract
+    video_id = self._match_id(url)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'youtube_dl.extractor.eitb.EitbIE'>
+url = 'http://www.eitb.tv/es/video/test/111222'
+
+    @classmethod
+    def _match_id(cls, url):
+        if '_VALID_URL_RE' not in cls.__dict__:
+            cls._VALID_URL_RE = re.compile(cls._VALID_URL)
+        m = cls._VALID_URL_RE.match(url)
+>       assert m
+E       AssertionError
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:422: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_full_extraction - AssertionError
+FAILED test_generated.py::test_missing_renditions - AssertionError
+FAILED test_generated.py::test_hls_token_missing - AssertionError
+3 failed in 1.05s

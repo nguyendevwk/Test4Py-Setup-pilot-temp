@@ -1,0 +1,30 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_preserves_duplicate_keys_and_serializes_correctly ____________
+
+    def test_preserves_duplicate_keys_and_serializes_correctly():
+        # Duplicate keys are preserved in the internal list
+        items = [("a", 1), ("b", 2), ("a", 3)]
+        jd = JsonDictPreservingDuplicateKeys(items)
+        # The internal items list should match the original
+        assert list(jd.items()) == items
+        # json.dumps should output the keys in the order they were added,
+        # including duplicates, and the hack key should be present
+        dumped = json.dumps(jd, sort_keys=False)
+        # The hack key is added to satisfy the C implementation
+>       assert "__hack__" in dumped
+E       assert '__hack__' in '{"a": 1, "b": 2, "a": 3}'
+
+test_generated.py:16: AssertionError
+_____________ test_constructor_raises_type_error_on_invalid_items ______________
+
+    def test_constructor_raises_type_error_on_invalid_items():
+        # Passing a non-iterable (e.g., None) should raise a TypeError
+>       with pytest.raises(TypeError):
+E       Failed: DID NOT RAISE TypeError
+
+test_generated.py:35: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_preserves_duplicate_keys_and_serializes_correctly
+FAILED test_generated.py::test_constructor_raises_type_error_on_invalid_items
+2 failed, 1 passed in 0.28s

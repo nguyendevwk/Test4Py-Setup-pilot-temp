@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-ce3905f1-7e19-4f93-bbb9-80c120b573ae",
+  "object": "chat.completion",
+  "created": 1795077617,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport sys\nimport pytest\nfrom httpie.utils import JsonDictPreservingDuplicateKeys\n\n\ndef test_duplicate_keys_preserved_and_dumped():\n    # Create a dict with duplicate keys\n    items = [(\"a\", 1), (\"b\", 2), (\"a\", 3), (\"c\", 4)]\n    jd = JsonDictPreservingDuplicateKeys(items)\n\n    # The internal items should match the input list\n    assert list(jd.items()) == items\n\n    # json.dumps should use the overridden items method and preserve order\n    dumped = json.dumps(jd, separators=(\",\", \":\"))\n    # Expected JSON string with duplicate keys in the same order\n    expected = '{\"a\":1,\"b\":2,\"a\":3,\"c\":4}'\n    assert dumped == expected\n\n\ndef test_supports_sorting_flag_matches_python_version():\n    # The flag should be True for Python 3.8+ and False otherwise\n    expected = sys.version_info >= (3, 8)\n    assert JsonDictPreservingDuplicateKeys.SUPPORTS_SORTING is expected\n\n\ndef test_initialization_with_invalid_items_raises_type_error():\n    # Passing a non-iterable (e.g., None) should raise a TypeError when json.dumps is called\n    jd = JsonDictPreservingDuplicateKeys(None)  # type: ignore[arg-type]\n    with pytest.raises(TypeError):\n        json.dumps(jd)\n```",
+        "reasoning": "We need tests for JsonDictPreservingDuplicateKeys. We can test that items preserved, that sorting behavior flag, that __bool__? Actually __bool__ not defined. We test that json.dumps uses items. Let's create instance with duplicate keys and check json.dumps output. Also test that SUPPORTS_SORTING correct. Third test error: passing non-list? __init__ expects items list of tuples. Passing None should raise TypeError? It will set self._items = None and then _ensure_items_used will error when iterating? Let's test that passing non-iterable raises TypeError. Use pytest.raises(TypeError). Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049812333,
+    "prompt_tokens": 867,
+    "prompt_time": 0.043774377,
+    "completion_tokens": 438,
+    "completion_time": 0.526362097,
+    "total_tokens": 1305,
+    "total_time": 0.570136474,
+    "completion_tokens_details": {
+      "reasoning_tokens": 132
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfddfve4zsq5qfpd5yy3nz",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport sys\nimport pytest\nfrom httpie.utils import JsonDictPreservingDuplicateKeys\n\n\ndef test_duplicate_keys_preserved_and_dumped():\n    # Create a dict with duplicate keys\n    items = [(\"a\", 1), (\"b\", 2), (\"a\", 3), (\"c\", 4)]\n    jd = JsonDictPreservingDuplicateKeys(items)\n\n    # The internal items should match the input list\n    assert list(jd.items()) == items\n\n    # json.dumps should use the overridden items method and preserve order\n    dumped = json.dumps(jd, separators=(\",\", \":\"))\n    # Expected JSON string with duplicate keys in the same order\n    expected = '{\"a\":1,\"b\":2,\"a\":3,\"c\":4}'\n    assert dumped == expected\n\n\ndef test_supports_sorting_flag_matches_python_version():\n    # The flag should be True for Python 3.8+ and False otherwise\n    expected = sys.version_info >= (3, 8)\n    assert JsonDictPreservingDuplicateKeys.SUPPORTS_SORTING is expected\n\n\ndef test_initialization_with_invalid_items_raises_type_error():\n    # Passing a non-iterable (e.g., None) should raise a TypeError when json.dumps is called\n    jd = JsonDictPreservingDuplicateKeys(None)  # type: ignore[arg-type]\n    with pytest.raises(TypeError):\n        json.dumps(jd)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9281349299708381
+}

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-b94efec1-6c34-464d-842c-8b1afcf0cbb1",
+  "object": "chat.completion",
+  "created": 1795077488,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport stat\nimport tempfile\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import exists_as\n\ndef test_exists_as_regular_file_and_directory(tmp_path):\n    # Create a regular file and a directory\n    file_path = tmp_path / \"test_file.txt\"\n    file_path.write_text(\"content\")\n    dir_path = tmp_path / \"test_dir\"\n    dir_path.mkdir()\n\n    assert exists_as(file_path) == \"file\"\n    assert exists_as(dir_path) == \"directory\"\n\ndef test_exists_as_symlinks(tmp_path):\n    # Create a file and a directory, then symlink to them\n    target_file = tmp_path / \"target_file.txt\"\n    target_file.write_text(\"data\")\n    target_dir = tmp_path / \"target_dir\"\n    target_dir.mkdir()\n\n    file_link = tmp_path / \"file_link\"\n    dir_link = tmp_path / \"dir_link\"\n    file_link.symlink_to(target_file)\n    dir_link.symlink_to(target_dir)\n\n    # Symlinks should resolve to the target type\n    assert exists_as(file_link) == \"file\"\n    assert exists_as(dir_link) == \"directory\"\n\ndef test_exists_as_nonexistent_and_broken_symlink(tmp_path):\n    # Non-existent path\n    missing = tmp_path / \"does_not_exist\"\n    assert exists_as(missing) == \"\"\n\n    # Broken symlink (points to a non-existent target)\n    broken_link = tmp_path / \"broken_link\"\n    broken_link.symlink_to(tmp_path / \"nonexistent_target\")\n    assert exists_as(broken_link) == \"\"\n```",
+        "reasoning": "We need tests for exists_as. Use tmp_path to create file, dir, symlink. Also test non-existent. Also test broken symlink? But cannot create broken symlink without root? We can create symlink to non-existent target. That should return ''? According to code, symlink is not checked; is_dir etc follow symlink. For broken symlink, is_dir returns False, is_file False, etc, so returns ''. Good.\n\nTest normal: file, dir. Boundary: symlink to file. Error: permission? Hard to simulate. Maybe test that passing PathLike works. Use Path. Write three tests.\n\nTest1: file and dir detection. Test2: symlink to file and dir. Test3: non-existent and broken symlink."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052353899,
+    "prompt_tokens": 714,
+    "prompt_time": 0.0193225,
+    "completion_tokens": 499,
+    "completion_time": 0.644683054,
+    "total_tokens": 1213,
+    "total_time": 0.664005554,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 158
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sf9esyea2sxexhm20zsen4",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport stat\nimport tempfile\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import exists_as\n\ndef test_exists_as_regular_file_and_directory(tmp_path):\n    # Create a regular file and a directory\n    file_path = tmp_path / \"test_file.txt\"\n    file_path.write_text(\"content\")\n    dir_path = tmp_path / \"test_dir\"\n    dir_path.mkdir()\n\n    assert exists_as(file_path) == \"file\"\n    assert exists_as(dir_path) == \"directory\"\n\ndef test_exists_as_symlinks(tmp_path):\n    # Create a file and a directory, then symlink to them\n    target_file = tmp_path / \"target_file.txt\"\n    target_file.write_text(\"data\")\n    target_dir = tmp_path / \"target_dir\"\n    target_dir.mkdir()\n\n    file_link = tmp_path / \"file_link\"\n    dir_link = tmp_path / \"dir_link\"\n    file_link.symlink_to(target_file)\n    dir_link.symlink_to(target_dir)\n\n    # Symlinks should resolve to the target type\n    assert exists_as(file_link) == \"file\"\n    assert exists_as(dir_link) == \"directory\"\n\ndef test_exists_as_nonexistent_and_broken_symlink(tmp_path):\n    # Non-existent path\n    missing = tmp_path / \"does_not_exist\"\n    assert exists_as(missing) == \"\"\n\n    # Broken symlink (points to a non-existent target)\n    broken_link = tmp_path / \"broken_link\"\n    broken_link.symlink_to(tmp_path / \"nonexistent_target\")\n    assert exists_as(broken_link) == \"\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0236592210130766
+}

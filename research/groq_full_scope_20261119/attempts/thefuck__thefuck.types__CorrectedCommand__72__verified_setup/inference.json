@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-1b1c9e4c-265d-4654-9a68-10fd0a267f27",
+  "object": "chat.completion",
+  "created": 1795077883,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport os\nimport builtins\nimport types\nimport contextlib\n\nimport pytest\n\nfrom thefuck.types import CorrectedCommand\nfrom thefuck import settings\nfrom thefuck import shell\n\n\n@pytest.fixture(autouse=True)\ndef restore_settings():\n    \"\"\"Restore settings after each test.\"\"\"\n    original_repeat = settings.repeat\n    original_debug = settings.debug\n    original_alter_history = settings.alter_history\n    yield\n    settings.repeat = original_repeat\n    settings.debug = original_debug\n    settings.alter_history = original_alter_history\n\n\ndef test_eq_and_hash_and_repr():\n    \"\"\"CorrectedCommand equality ignores priority and hash is consistent.\"\"\"\n    cmd1 = CorrectedCommand(\"ls\", None, 10)\n    cmd2 = CorrectedCommand(\"ls\", None, 5)\n    cmd3 = CorrectedCommand(\"cat\", None, 10)\n\n    # Equality ignores priority\n    assert cmd1 == cmd2\n    assert cmd1 != cmd3\n\n    # Hash is based on script and side_effect\n    assert hash(cmd1) == hash(cmd2)\n    assert hash(cmd1) != hash(cmd3)\n\n    # Representation includes all fields\n    rep = repr(cmd1)\n    assert \"CorrectedCommand\" in rep\n    assert \"ls\" in rep\n    assert \"10\" in rep\n\n\ndef test_get_script_repeat_behavior(tmp_path):\n    \"\"\"_get_script returns correct script depending on settings.repeat.\"\"\"\n    # Ensure repeat is False\n    settings.repeat = False\n    cmd = CorrectedCommand(\"echo hello\", None, 1)\n    assert cmd._get_script() == \"echo hello\"\n\n    # Enable repeat and debug\n    settings.repeat = True\n    settings.debug = True\n    # Use a simple script that contains no spaces\n    cmd = CorrectedCommand(\"echo world\", None, 1)\n    result = cmd._get_script()\n    # The result should contain the original script and the repeat command\n    assert \"echo world\" in result\n    # The repeat command should include the alias and force-command\n    assert \"--force-command\" in result\n    # The debug flag should be present\n    assert \"--debug\" in result\n\n\ndef test_run_writes_stdout_and_side_effect(monkeypatch, capsys):\n    \"\"\"run writes the script to stdout and calls side_effect.\"\"\"\n    # Prepare a side_effect that records its arguments\n    called = {}\n    def side_effect(old_cmd, script):\n        called['old_cmd'] = old_cmd\n        called['script'] = script\n\n    # Disable history alteration to avoid side effects on the real history\n    settings.alter_history = False\n    settings.repeat = False\n\n    cmd = CorrectedCommand(\"printf 'test'\", side_effect, 1)\n\n    # Create a dummy old_cmd object\n    class DummyCommand:\n        pass\n    old_cmd = DummyCommand()\n\n    # Run the command\n    cmd.run(old_cmd)\n\n    # Capture stdout\n    captured = capsys.readouterr()\n    assert captured.out.strip() == \"printf 'test'\"\n\n    # Verify side_effect was called with correct arguments\n    assert called['old_cmd'] is old_cmd\n    assert called['script'] == \"printf 'test'\"\n```",
+        "reasoning": "Need tests for CorrectedCommand. Use tmp_path for history? shell.put_to_history writes to history file? We can monkeypatch shell.put_to_history to capture. But no mocks allowed. But we can patch by temporarily setting settings.alter_history False to avoid writing. We can test __eq__, __hash__, __repr__, _get_script with settings.repeat True/False. Use settings from module. We'll import settings and modify attributes. Ensure revert. Use context manager. Write three tests: test_eq_and_hash, test_get_script_repeat, test_run_writes_stdout. For run, capture stdout via capsys. Ensure side_effect called. Use a simple side_effect that records. No mocks. Use real shell? shell.quote etc. Might need to import shell. Use settings.repeat False. Ensure _get_script returns script. For repeat True, check contains or_ pattern. Use shell.or_? We'll just check that returned string contains original script and repeat_fuck. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049399757,
+    "prompt_tokens": 766,
+    "prompt_time": 0.101052828,
+    "completion_tokens": 876,
+    "completion_time": 1.025548919,
+    "total_tokens": 1642,
+    "total_time": 1.126601747,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 199
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfng1beysbahbsz961n7st",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport os\nimport builtins\nimport types\nimport contextlib\n\nimport pytest\n\nfrom thefuck.types import CorrectedCommand\nfrom thefuck import settings\nfrom thefuck import shell\n\n\n@pytest.fixture(autouse=True)\ndef restore_settings():\n    \"\"\"Restore settings after each test.\"\"\"\n    original_repeat = settings.repeat\n    original_debug = settings.debug\n    original_alter_history = settings.alter_history\n    yield\n    settings.repeat = original_repeat\n    settings.debug = original_debug\n    settings.alter_history = original_alter_history\n\n\ndef test_eq_and_hash_and_repr():\n    \"\"\"CorrectedCommand equality ignores priority and hash is consistent.\"\"\"\n    cmd1 = CorrectedCommand(\"ls\", None, 10)\n    cmd2 = CorrectedCommand(\"ls\", None, 5)\n    cmd3 = CorrectedCommand(\"cat\", None, 10)\n\n    # Equality ignores priority\n    assert cmd1 == cmd2\n    assert cmd1 != cmd3\n\n    # Hash is based on script and side_effect\n    assert hash(cmd1) == hash(cmd2)\n    assert hash(cmd1) != hash(cmd3)\n\n    # Representation includes all fields\n    rep = repr(cmd1)\n    assert \"CorrectedCommand\" in rep\n    assert \"ls\" in rep\n    assert \"10\" in rep\n\n\ndef test_get_script_repeat_behavior(tmp_path):\n    \"\"\"_get_script returns correct script depending on settings.repeat.\"\"\"\n    # Ensure repeat is False\n    settings.repeat = False\n    cmd = CorrectedCommand(\"echo hello\", None, 1)\n    assert cmd._get_script() == \"echo hello\"\n\n    # Enable repeat and debug\n    settings.repeat = True\n    settings.debug = True\n    # Use a simple script that contains no spaces\n    cmd = CorrectedCommand(\"echo world\", None, 1)\n    result = cmd._get_script()\n    # The result should contain the original script and the repeat command\n    assert \"echo world\" in result\n    # The repeat command should include the alias and force-command\n    assert \"--force-command\" in result\n    # The debug flag should be present\n    assert \"--debug\" in result\n\n\ndef test_run_writes_stdout_and_side_effect(monkeypatch, capsys):\n    \"\"\"run writes the script to stdout and calls side_effect.\"\"\"\n    # Prepare a side_effect that records its arguments\n    called = {}\n    def side_effect(old_cmd, script):\n        called['old_cmd'] = old_cmd\n        called['script'] = script\n\n    # Disable history alteration to avoid side effects on the real history\n    settings.alter_history = False\n    settings.repeat = False\n\n    cmd = CorrectedCommand(\"printf 'test'\", side_effect, 1)\n\n    # Create a dummy old_cmd object\n    class DummyCommand:\n        pass\n    old_cmd = DummyCommand()\n\n    # Run the command\n    cmd.run(old_cmd)\n\n    # Capture stdout\n    captured = capsys.readouterr()\n    assert captured.out.strip() == \"printf 'test'\"\n\n    # Verify side_effect was called with correct arguments\n    assert called['old_cmd'] is old_cmd\n    assert called['script'] == \"printf 'test'\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4935753699974157
+}

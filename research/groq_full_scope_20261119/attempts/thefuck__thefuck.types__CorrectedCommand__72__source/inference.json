@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-f4d5942b-5b8e-47d7-a898-0a670b03c8aa",
+  "object": "chat.completion",
+  "created": 1795077884,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport os\nimport io\nimport pytest\nfrom thefuck.types import CorrectedCommand\nfrom thefuck import settings\nfrom thefuck import shell\n\n# Helper to capture stdout\n@pytest.fixture\ndef captured_stdout(monkeypatch):\n    stream = io.StringIO()\n    monkeypatch.setattr(sys, \"stdout\", stream)\n    return stream\n\ndef test_equality_and_hash(monkeypatch):\n    # Create two commands with same script and side_effect but different priority\n    def dummy_side_effect(cmd, script): pass\n    cmd1 = CorrectedCommand(\"ls\", dummy_side_effect, priority=10)\n    cmd2 = CorrectedCommand(\"ls\", dummy_side_effect, priority=20)\n    # Equality ignores priority\n    assert cmd1 == cmd2\n    # Hash also ignores priority\n    assert hash(cmd1) == hash(cmd2)\n    # Representation includes priority\n    assert \"priority=10\" in repr(cmd1)\n    assert \"priority=20\" in repr(cmd2)\n\ndef test_get_script_with_repeat(monkeypatch):\n    # Enable repeat and debug\n    monkeypatch.setattr(settings, \"repeat\", True)\n    monkeypatch.setattr(settings, \"debug\", True)\n    # Dummy side_effect\n    def dummy_side_effect(cmd, script): pass\n    cmd = CorrectedCommand(\"echo hello\", dummy_side_effect, priority=5)\n    # Expected repeat command\n    repeat_cmd = f\"{shell.quote('echo hello')} --repeat --debug {shell.quote('echo hello')}\"\n    expected = shell.or_(\"echo hello\", repeat_cmd)\n    assert cmd._get_script() == expected\n\ndef test_run_writes_script_and_history(monkeypatch, captured_stdout):\n    # Disable repeat and history alteration\n    monkeypatch.setattr(settings, \"repeat\", False)\n    monkeypatch.setattr(settings, \"alter_history\", False)\n    # Track side_effect call\n    called = {\"called\": False}\n    def dummy_side_effect(cmd, script):\n        called[\"called\"] = True\n    cmd = CorrectedCommand(\"pwd\", dummy_side_effect, priority=1)\n    # Dummy old_cmd\n    class DummyCmd: pass\n    old_cmd = DummyCmd()\n    # Run command\n    cmd.run(old_cmd)\n    # Side effect should have been called\n    assert called[\"called\"] is True\n    # Script should be written to stdout\n    assert captured_stdout.getvalue() == \"pwd\"\n    # History should not be modified\n    # (We cannot easily check history, but alter_history flag is False)\n```",
+        "reasoning": "We need three tests for CorrectedCommand. Use tmp_path for any file? Not needed. Test equality ignoring priority, hash, run behavior. We can create dummy side_effect that records. Use settings from module; need to set settings.repeat, debug, alter_history. They are imported from .conf.settings. We can patch attributes. Use monkeypatch fixture. Ensure no network. Use shell.quote etc. Might need to import shell. We'll just test _get_script logic. Use settings.repeat True and False. Also test run writes to stdout. Use capsys. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052116725,
+    "prompt_tokens": 706,
+    "prompt_time": 0.040475454,
+    "completion_tokens": 654,
+    "completion_time": 1.053119631,
+    "total_tokens": 1360,
+    "total_time": 1.093595085,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 117
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfnhgqe0c9cfc54pn3pvhm",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport os\nimport io\nimport pytest\nfrom thefuck.types import CorrectedCommand\nfrom thefuck import settings\nfrom thefuck import shell\n\n# Helper to capture stdout\n@pytest.fixture\ndef captured_stdout(monkeypatch):\n    stream = io.StringIO()\n    monkeypatch.setattr(sys, \"stdout\", stream)\n    return stream\n\ndef test_equality_and_hash(monkeypatch):\n    # Create two commands with same script and side_effect but different priority\n    def dummy_side_effect(cmd, script): pass\n    cmd1 = CorrectedCommand(\"ls\", dummy_side_effect, priority=10)\n    cmd2 = CorrectedCommand(\"ls\", dummy_side_effect, priority=20)\n    # Equality ignores priority\n    assert cmd1 == cmd2\n    # Hash also ignores priority\n    assert hash(cmd1) == hash(cmd2)\n    # Representation includes priority\n    assert \"priority=10\" in repr(cmd1)\n    assert \"priority=20\" in repr(cmd2)\n\ndef test_get_script_with_repeat(monkeypatch):\n    # Enable repeat and debug\n    monkeypatch.setattr(settings, \"repeat\", True)\n    monkeypatch.setattr(settings, \"debug\", True)\n    # Dummy side_effect\n    def dummy_side_effect(cmd, script): pass\n    cmd = CorrectedCommand(\"echo hello\", dummy_side_effect, priority=5)\n    # Expected repeat command\n    repeat_cmd = f\"{shell.quote('echo hello')} --repeat --debug {shell.quote('echo hello')}\"\n    expected = shell.or_(\"echo hello\", repeat_cmd)\n    assert cmd._get_script() == expected\n\ndef test_run_writes_script_and_history(monkeypatch, captured_stdout):\n    # Disable repeat and history alteration\n    monkeypatch.setattr(settings, \"repeat\", False)\n    monkeypatch.setattr(settings, \"alter_history\", False)\n    # Track side_effect call\n    called = {\"called\": False}\n    def dummy_side_effect(cmd, script):\n        called[\"called\"] = True\n    cmd = CorrectedCommand(\"pwd\", dummy_side_effect, priority=1)\n    # Dummy old_cmd\n    class DummyCmd: pass\n    old_cmd = DummyCmd()\n    # Run command\n    cmd.run(old_cmd)\n    # Side effect should have been called\n    assert called[\"called\"] is True\n    # Script should be written to stdout\n    assert captured_stdout.getvalue() == \"pwd\"\n    # History should not be modified\n    # (We cannot easily check history, but alter_history flag is False)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4790865179966204
+}

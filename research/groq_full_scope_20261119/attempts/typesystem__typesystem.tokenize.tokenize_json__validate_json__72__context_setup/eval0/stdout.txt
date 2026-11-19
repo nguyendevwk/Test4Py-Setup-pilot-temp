@@ -1,0 +1,54 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_validate_json_success __________________________
+
+    def test_validate_json_success():
+        """Valid JSON should return parsed value and no errors."""
+        json_str = '{"name": "Alice"}'
+>       value, errors = validate_json(json_str, SimpleSchema)
+
+test_generated.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/tokenize_json.py:197: in validate_json
+    return validate_with_positions(token=token, validator=validator)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+token = DictToken('{"name": "Alice"}')
+validator = <class 'test_generated.SimpleSchema'>
+
+    def validate_with_positions(
+        *, token: Token, validator: typing.Union[Field, Schema]
+    ) -> typing.Any:
+        try:
+>           return validator.validate(token.value)
+E           TypeError: Schema.validate() missing 1 required positional argument: 'value'
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/tokenize/positional_validation.py:13: TypeError
+____________________ test_validate_json_empty_string_error _____________________
+
+    def test_validate_json_empty_string_error():
+        """Empty string should raise ParseError with correct position."""
+        with pytest.raises(ParseError) as excinfo:
+            validate_json("", SimpleSchema)
+        err = excinfo.value
+>       assert err.code == "no_content"
+E       AttributeError: 'ParseError' object has no attribute 'code'
+
+test_generated.py:22: AttributeError
+___________________ test_validate_json_invalid_syntax_error ____________________
+
+    def test_validate_json_invalid_syntax_error():
+        """Malformed JSON should raise ParseError with position from JSONDecodeError."""
+        bad_json = '{"name": "Bob",}'  # trailing comma causes parse error
+        with pytest.raises(ParseError) as excinfo:
+            validate_json(bad_json, SimpleSchema)
+        err = excinfo.value
+>       assert err.code == "parse_error"
+E       AttributeError: 'ParseError' object has no attribute 'code'
+
+test_generated.py:35: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_validate_json_success - TypeError: Schema.vali...
+FAILED test_generated.py::test_validate_json_empty_string_error - AttributeEr...
+FAILED test_generated.py::test_validate_json_invalid_syntax_error - Attribute...
+3 failed in 0.14s

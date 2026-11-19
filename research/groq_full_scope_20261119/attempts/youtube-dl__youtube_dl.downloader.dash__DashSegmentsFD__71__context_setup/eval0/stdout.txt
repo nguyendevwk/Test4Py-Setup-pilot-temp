@@ -1,0 +1,39 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_skip_unavailable_fragment ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.dash__DashSegmentsFD__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_skip_unavailable_fragment0')
+
+    def test_skip_unavailable_fragment(tmp_path):
+        """Test that a missing fragment is skipped when skip_unavailable_fragments is True."""
+        class SkipFD(DummyDashSegmentsFD):
+            def _download_fragment(self, ctx, fragment_url, info_dict):
+                raise DownloadError("network issue")
+    
+        fd = SkipFD(ydl=None, params={'skip_unavailable_fragments': True})
+        filename = tmp_path / "output.mp4"
+        info = {
+            'fragments': [{'url': 'http://example.com/seg1.mp4'}],
+        }
+        # Should return True because fragment is skipped
+>       assert fd.real_download(str(filename), info) is True
+
+test_generated.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/dash.py:48: in real_download
+    success, frag_content = self._download_fragment(ctx, fragment_url, info_dict)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.test_skip_unavailable_fragment.<locals>.SkipFD object at 0x7fa318c3e500>
+ctx = {'filename': '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.d...eval0/tmp/pytest-of-heurix/pytest-0/test_skip_unavailable_fragment0/output.mp4', 'total_frags': 1, 'fragment_index': 0}
+fragment_url = 'http://example.com/seg1.mp4'
+info_dict = {'fragments': [{'url': 'http://example.com/seg1.mp4'}]}
+
+    def _download_fragment(self, ctx, fragment_url, info_dict):
+>       raise DownloadError("network issue")
+E       youtube_dl.utils.DownloadError: network issue
+
+test_generated.py:86: DownloadError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_skip_unavailable_fragment - youtube_dl.utils.D...
+1 failed, 2 passed in 0.74s

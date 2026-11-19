@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a309df83-54fb-4ed0-8747-22edf211ee55",
+  "object": "chat.completion",
+  "created": 1795076846,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem import Schema, fields\nfrom typesystem.tokenize.json import validate_json\n\n\nclass Person(Schema):\n    name = fields.String()\n    age = fields.Integer()\n\n\ndef test_validate_json_success():\n    \"\"\"Valid JSON string should return the parsed value and no errors.\"\"\"\n    json_str = '{\"name\": \"Alice\", \"age\": 30}'\n    value, errors = validate_json(json_str, Person)\n    assert errors == []\n    assert value == {\"name\": \"Alice\", \"age\": 30}\n    # The returned value should be a dict matching the schema\n    assert isinstance(value, dict)\n    assert value[\"name\"] == \"Alice\"\n    assert value[\"age\"] == 30\n\n\ndef test_validate_json_invalid_syntax():\n    \"\"\"Malformed JSON should produce a parse error message.\"\"\"\n    bad_json = '{\"name\": \"Bob\", \"age\": 25'  # missing closing brace\n    value, errors = validate_json(bad_json, Person)\n    # No value should be returned on parse failure\n    assert value is None\n    # There should be at least one error message\n    assert errors\n    # The error message should mention a JSON parsing issue\n    assert any(\"JSON\" in err for err in errors)\n\n\ndef test_validate_json_validation_error():\n    \"\"\"JSON that fails schema validation should return appropriate error.\"\"\"\n    json_str = '{\"name\": \"Charlie\", \"age\": \"not_a_number\"}'\n    value, errors = validate_json(json_str, Person)\n    # Value should be None because validation failed\n    assert value is None\n    # There should be an error about the age field type\n    assert errors\n    assert any(\"age\" in err and \"int\" in err for err in errors)\n```",
+        "reasoning": "We need to test validate_json. Need to import. We need to create simple Field or Schema. Use typesystem library? It's part of product. We'll create a simple schema: from typesystem import Schema, fields? Let's inspect. But we can't import? Assume typesystem is available. We'll create a schema with a field. Use validate_json with correct JSON and incorrect. Also test bytes input. Also test error on invalid JSON. Use tmp_path? Not needed. We'll write three tests: valid JSON, invalid JSON syntax, validation error. Use pytest.raises? validate_json returns (value, errors). For invalid JSON, validate_with_positions likely returns errors. But we need to check. Let's assume it returns (None, [error]). We'll assert errors non-empty. For validation error, e.g., expecting int but got string. We'll create schema with field age: int. Provide {\"age\":\"notint\"}. Expect error. Use assert. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004918324,
+    "prompt_tokens": 406,
+    "prompt_time": 0.03010382,
+    "completion_tokens": 567,
+    "completion_time": 0.615858834,
+    "total_tokens": 973,
+    "total_time": 0.645962654,
+    "completion_tokens_details": {
+      "reasoning_tokens": 194
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7senwmheqv84e9zahc2f6hs",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem import Schema, fields\nfrom typesystem.tokenize.json import validate_json\n\n\nclass Person(Schema):\n    name = fields.String()\n    age = fields.Integer()\n\n\ndef test_validate_json_success():\n    \"\"\"Valid JSON string should return the parsed value and no errors.\"\"\"\n    json_str = '{\"name\": \"Alice\", \"age\": 30}'\n    value, errors = validate_json(json_str, Person)\n    assert errors == []\n    assert value == {\"name\": \"Alice\", \"age\": 30}\n    # The returned value should be a dict matching the schema\n    assert isinstance(value, dict)\n    assert value[\"name\"] == \"Alice\"\n    assert value[\"age\"] == 30\n\n\ndef test_validate_json_invalid_syntax():\n    \"\"\"Malformed JSON should produce a parse error message.\"\"\"\n    bad_json = '{\"name\": \"Bob\", \"age\": 25'  # missing closing brace\n    value, errors = validate_json(bad_json, Person)\n    # No value should be returned on parse failure\n    assert value is None\n    # There should be at least one error message\n    assert errors\n    # The error message should mention a JSON parsing issue\n    assert any(\"JSON\" in err for err in errors)\n\n\ndef test_validate_json_validation_error():\n    \"\"\"JSON that fails schema validation should return appropriate error.\"\"\"\n    json_str = '{\"name\": \"Charlie\", \"age\": \"not_a_number\"}'\n    value, errors = validate_json(json_str, Person)\n    # Value should be None because validation failed\n    assert value is None\n    # There should be an error about the age field type\n    assert errors\n    assert any(\"age\" in err and \"int\" in err for err in errors)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0087849849951454
+}

@@ -1,0 +1,105 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_read_journal_entries_returns_expected_entries ______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/pypara__pypara.accounting.journaling__ReadJournalEntries__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_read_journal_entries_retu0')
+
+    def test_read_journal_entries_returns_expected_entries(tmp_path):
+        """A function matching the ReadJournalEntries protocol should return
+        an iterable of JournalEntry objects with correct postings."""
+        # Create a simple source object
+        class Source:
+            def __init__(self, name):
+                self.name = name
+    
+        source = Source("TestSource")
+    
+        # Define a concrete reader function
+        def reader(period):
+            entry = JournalEntry[Source]()
+            entry.date = period.start
+            entry.description = "Test entry"
+            entry.source = source
+            entry.post(
+                period.start,
+                DummyAccount("Cash", AccountType.ASSET),
+                Quantity(100),
+            ).post(
+                period.start,
+                DummyAccount("Revenue", AccountType.REVENUE),
+                Quantity(-100),
+            )
+            return [entry]
+    
+        # Ensure the reader conforms to the protocol
+>       assert isinstance(reader, ReadJournalEntries)
+
+test_generated.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'pypara.accounting.journaling.ReadJournalEntries'>
+instance = <function test_read_journal_entries_returns_expected_entries.<locals>.reader at 0x7f851e276290>
+
+    def __instancecheck__(cls, instance):
+        # We need this method for situations where attributes are
+        # assigned in __init__.
+        if (
+            getattr(cls, '_is_protocol', False) and
+            not getattr(cls, '_is_runtime_protocol', False) and
+            not _allow_reckless_class_checks(depth=2)
+        ):
+>           raise TypeError("Instance and class checks can only be used with"
+                            " @runtime_checkable protocols")
+E           TypeError: Instance and class checks can only be used with @runtime_checkable protocols
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/typing.py:1498: TypeError
+__________________ test_direction_of_raises_on_zero_quantity ___________________
+
+    def test_direction_of_raises_on_zero_quantity():
+        """Direction.of should raise an AssertionError when quantity is zero."""
+        zero_qty = Quantity(0)
+        with pytest.raises(AssertionError, match="Encountered a `0` quantity"):
+>           Direction.of(zero_qty)
+
+test_generated.py:75: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <enum 'Direction'>, quantity = 0
+
+    @classmethod
+    def of(cls, quantity: Quantity) -> "Direction":
+        """
+        Returns the corresponding direction as per the sign of the quantity.
+    
+        :param quantity: Quantity to find the direction of.
+        :return: Direction for the quantity.
+        :raises AssertionError: If quantity is zero which implies a programming error.
+        """
+>       assert not quantity.is_zero(), "Encountered a `0` quantity. This implies a programming error."
+E       AttributeError: 'int' object has no attribute 'is_zero'
+
+../../../../groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/accounting/journaling.py:49: AttributeError
+________ test_journal_entry_validation_ensures_equal_debits_and_credits ________
+
+    def test_journal_entry_validation_ensures_equal_debits_and_credits():
+        """JournalEntry.validate should raise an AssertionError if debits and credits differ."""
+>       entry = JournalEntry[object]()
+
+test_generated.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = pypara.accounting.journaling.JournalEntry[object], args = (), kwargs = {}
+
+    def __call__(self, *args, **kwargs):
+        if not self._inst:
+            raise TypeError(f"Type {self._name} cannot be instantiated; "
+                            f"use {self.__origin__.__name__}() instead")
+>       result = self.__origin__(*args, **kwargs)
+E       TypeError: JournalEntry.__init__() missing 3 required positional arguments: 'date', 'description', and 'source'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/typing.py:957: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_read_journal_entries_returns_expected_entries
+FAILED test_generated.py::test_direction_of_raises_on_zero_quantity - Attribu...
+FAILED test_generated.py::test_journal_entry_validation_ensures_equal_debits_and_credits
+3 failed in 0.30s

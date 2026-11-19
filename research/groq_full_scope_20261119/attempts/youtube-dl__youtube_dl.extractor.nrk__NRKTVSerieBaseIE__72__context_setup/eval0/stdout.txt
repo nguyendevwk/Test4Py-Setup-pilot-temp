@@ -1,0 +1,99 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_extract_entries_valid_and_invalid ____________________
+
+    def test_extract_entries_valid_and_invalid():
+        ie = NRKTVSerieBaseIE()
+        # Valid list with proper IDs
+        entries = ie._extract_entries([
+            {'prfId': '123'},          # valid
+            {'episodeId': 'abc'},      # valid
+            {'prfId': 456},            # invalid type
+            {'prfId': None},           # invalid value
+            {},                         # no ID
+        ])
+        # Should return two url_results
+        assert len(entries) == 2
+        assert all(isinstance(e, type(ie.url_result('nrk:dummy', ie=NRKIE.ie_key(), video_id='dummy'))) for e in entries)
+>       assert entries[0].url == 'nrk:123'
+E       AttributeError: 'dict' object has no attribute 'url'
+
+test_generated.py:18: AttributeError
+___________________ test_extract_assets_key_and_catalog_name ___________________
+
+    def test_extract_assets_key_and_catalog_name():
+        ie = NRKTVSerieBaseIE()
+        # _extract_assets_key should return first matching key
+>       assert ie._extract_assets_key({'episodes': [], 'instalments': []}) == 'episodes'
+E       AssertionError: assert None == 'episodes'
+E        +  where None = _extract_assets_key({'episodes': [], 'instalments': []})
+E        +    where _extract_assets_key = <youtube_dl.extractor.nrk.NRKTVSerieBaseIE object at 0x7f0938dc3c40>._extract_assets_key
+
+test_generated.py:28: AssertionError
+_____________________ test_entries_pagination_and_next_url _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0938f32b60>
+
+    def test_entries_pagination_and_next_url(monkeypatch):
+        ie = NRKTVSerieBaseIE()
+        # Prepare a sequence of two pages
+        page1 = {
+            '_embedded': {
+                'episodes': {
+                    '_embedded': {
+                        'episodes': [
+                            {'prfId': '1'},
+                            {'prfId': '2'},
+                        ]
+                    },
+                    '_links': {
+                        'next': {'href': 'next_page'}
+                    }
+                }
+            }
+        }
+        page2 = {
+            '_embedded': {
+                'episodes': {
+                    '_embedded': {
+                        'episodes': [
+                            {'prfId': '3'}
+                        ]
+                    },
+                    '_links': {
+                        'next': {'href': 'no_more'}
+                    }
+                }
+            }
+        }
+        # Mock _call_api to return page2 on first call, then None
+        call_order = []
+    
+        def mock_call_api(path, video_id, item=None, note=None, fatal=True, query=None):
+            call_order.append(path)
+            if path == 'next_page':
+                return page2
+            return None
+    
+        monkeypatch.setattr(ie, '_call_api', mock_call_api)
+    
+        # Collect entries
+        entries = list(ie._entries(page1, 'display'))
+        # Should have 3 entries
+        assert len(entries) == 3
+>       assert [e.url for e in entries] == ['nrk:1', 'nrk:2', 'nrk:3']
+
+test_generated.py:86: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x7f0938f32c80>
+
+>   assert [e.url for e in entries] == ['nrk:1', 'nrk:2', 'nrk:3']
+E   AttributeError: 'dict' object has no attribute 'url'
+
+test_generated.py:86: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extract_entries_valid_and_invalid - AttributeE...
+FAILED test_generated.py::test_extract_assets_key_and_catalog_name - Assertio...
+FAILED test_generated.py::test_entries_pagination_and_next_url - AttributeErr...
+3 failed in 1.41s

@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-f7eed190-bbbf-4199-9a4c-c0614b9f7baa",
+  "object": "chat.completion",
+  "created": 1795079374,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import Matched, MediaType\nfrom sanic.exceptions import InvalidHeader\n\ndef test_matched_equality_and_bool(tmp_path):\n    # Create two Matched objects with identical MIME strings and headers\n    m1 = Matched.parse(\"text/plain; charset=utf-8\")\n    m2 = Matched.parse(\"text/plain; charset=utf-8\")\n    # They should be equal and truthy\n    assert m1 == m2\n    assert bool(m1) is True\n    # Changing the MIME string should break equality\n    m3 = Matched.parse(\"text/html; charset=utf-8\")\n    assert m1 != m3\n    # A Matched with no header is falsy\n    m_no_header = Matched(\"application/json\", None)\n    assert bool(m_no_header) is False\n    # Representation includes header when present\n    assert \"<text/plain; charset=utf-8> matched\" in repr(m1)\n    # Representation for no match\n    assert repr(m_no_header) == \"<no match>\"\n\ndef test_matched_match_wildcards(tmp_path):\n    # Header with wildcard subtype\n    header_wild = Matched.parse(\"text/*\")\n    # Header with specific subtype\n    header_specific = Matched.parse(\"text/plain\")\n    # They should match each other\n    assert header_wild.match(header_specific) == header_specific\n    assert header_specific.match(header_wild) == header_wild\n    # Header with wildcard type\n    header_type_wild = Matched.parse(\"*/*\")\n    # Should match any header\n    assert header_type_wild.match(header_specific) == header_specific\n    assert header_specific.match(header_type_wild) == header_type_wild\n    # Non-matching types\n    header_other = Matched.parse(\"image/png\")\n    assert header_specific.match(header_other) is None\n    assert header_other.match(header_specific) is None\n\ndef test_matched_parse_invalid_header(tmp_path):\n    # Invalid MIME string should raise InvalidHeader during parsing\n    with pytest.raises(InvalidHeader):\n        Matched.parse(\"invalid/mime; charset\")\n    # Valid MIME string but with unsupported parameters should still parse\n    m = Matched.parse(\"application/json; q=0.9\")\n    assert isinstance(m.header, MediaType)\n    assert m.header.type == \"application\"\n    assert m.header.subtype == \"json\"\n    # The parsed header should preserve parameters\n    assert m.header.params.get(\"q\") == \"0.9\"\n```",
+        "reasoning": "We need to test Matched class. Need to import from sanic.headers. Let's write tests: 1) equality with same mime and header. 2) match method with wildcard. 3) parse error? maybe invalid header raises? Use InvalidHeader. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048043264,
+    "prompt_tokens": 856,
+    "prompt_time": 0.057905735,
+    "completion_tokens": 592,
+    "completion_time": 0.649224058,
+    "total_tokens": 1448,
+    "total_time": 0.707129793,
+    "completion_tokens_details": {
+      "reasoning_tokens": 57
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh30m7es18y0xystwq68x6",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import Matched, MediaType\nfrom sanic.exceptions import InvalidHeader\n\ndef test_matched_equality_and_bool(tmp_path):\n    # Create two Matched objects with identical MIME strings and headers\n    m1 = Matched.parse(\"text/plain; charset=utf-8\")\n    m2 = Matched.parse(\"text/plain; charset=utf-8\")\n    # They should be equal and truthy\n    assert m1 == m2\n    assert bool(m1) is True\n    # Changing the MIME string should break equality\n    m3 = Matched.parse(\"text/html; charset=utf-8\")\n    assert m1 != m3\n    # A Matched with no header is falsy\n    m_no_header = Matched(\"application/json\", None)\n    assert bool(m_no_header) is False\n    # Representation includes header when present\n    assert \"<text/plain; charset=utf-8> matched\" in repr(m1)\n    # Representation for no match\n    assert repr(m_no_header) == \"<no match>\"\n\ndef test_matched_match_wildcards(tmp_path):\n    # Header with wildcard subtype\n    header_wild = Matched.parse(\"text/*\")\n    # Header with specific subtype\n    header_specific = Matched.parse(\"text/plain\")\n    # They should match each other\n    assert header_wild.match(header_specific) == header_specific\n    assert header_specific.match(header_wild) == header_wild\n    # Header with wildcard type\n    header_type_wild = Matched.parse(\"*/*\")\n    # Should match any header\n    assert header_type_wild.match(header_specific) == header_specific\n    assert header_specific.match(header_type_wild) == header_type_wild\n    # Non-matching types\n    header_other = Matched.parse(\"image/png\")\n    assert header_specific.match(header_other) is None\n    assert header_other.match(header_specific) is None\n\ndef test_matched_parse_invalid_header(tmp_path):\n    # Invalid MIME string should raise InvalidHeader during parsing\n    with pytest.raises(InvalidHeader):\n        Matched.parse(\"invalid/mime; charset\")\n    # Valid MIME string but with unsupported parameters should still parse\n    m = Matched.parse(\"application/json; q=0.9\")\n    assert isinstance(m.header, MediaType)\n    assert m.header.type == \"application\"\n    assert m.header.subtype == \"json\"\n    # The parsed header should preserve parameters\n    assert m.header.params.get(\"q\") == \"0.9\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "862180e22f5342529f3b922b26aac51c",
+  "_api_plus_pacing_seconds": 1.47717950202059
+}

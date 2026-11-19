@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-0bbf487f-8744-42cf-95b2-e913541c3933",
+  "object": "chat.completion",
+  "created": 1795077649,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.exceptions import FileNotFound\nfrom sanic.helpers import STATUS_CODES\nfrom pathlib import Path\n\n\ndef test_file_not_found_default_attributes(tmp_path):\n    \"\"\"FileNotFound should inherit status_code and default quiet from NotFound.\"\"\"\n    exc = FileNotFound()\n    # Status code should be 404 as defined in NotFound\n    assert exc.status_code == 404\n    # Quiet should default to True as set in NotFound\n    assert exc.quiet is True\n    # Message should be None, leading to default status message\n    assert exc.message is None\n    # Path and relative_url should be None by default\n    assert exc.path is None\n    assert exc.relative_url is None\n    # The default response message should match the status code description\n    assert exc.message is None\n    assert STATUS_CODES[exc.status_code] == \"Not Found\"\n\n\ndef test_file_not_found_with_path_and_headers(tmp_path):\n    \"\"\"Providing a path and custom headers should store them correctly.\"\"\"\n    test_file = tmp_path / \"missing.txt\"\n    headers = {\"X-Custom-Header\": \"value\"}\n    exc = FileNotFound(\n        message=\"File not found\",\n        path=test_file,\n        relative_url=\"/missing.txt\",\n        headers=headers,\n    )\n    # Message should be preserved\n    assert exc.message == \"File not found\"\n    # Path should be stored as a PathLike object\n    assert isinstance(exc.path, Path)\n    assert exc.path == test_file\n    # Relative URL should be stored\n    assert exc.relative_url == \"/missing.txt\"\n    # Headers should be stored\n    assert exc.headers == headers\n    # Quiet should be None because we didn't override it\n    assert exc.quiet is None\n\n\ndef test_file_not_found_invalid_message_type():\n    \"\"\"Passing a non-string/non-bytes message should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        FileNotFound(message=123)  # type: ignore[arg-type]\n```",
+        "reasoning": "We need tests for FileNotFound. Three functions. Test init sets attributes, default message, status_code from NotFound. Test passing path and relative_url. Test that quiet default is True? Actually NotFound sets quiet=True. But FileNotFound passes quiet param. Test that headers passed. Use pytest.raises? maybe test that passing non-path raises? But constructor accepts PathLike. Could test that passing bytes message works. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053448625,
+    "prompt_tokens": 1150,
+    "prompt_time": 0.069516171,
+    "completion_tokens": 511,
+    "completion_time": 1.106361941,
+    "total_tokens": 1661,
+    "total_time": 1.175878112,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 89
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfec8dedfa2qhckj3b9pkv",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.exceptions import FileNotFound\nfrom sanic.helpers import STATUS_CODES\nfrom pathlib import Path\n\n\ndef test_file_not_found_default_attributes(tmp_path):\n    \"\"\"FileNotFound should inherit status_code and default quiet from NotFound.\"\"\"\n    exc = FileNotFound()\n    # Status code should be 404 as defined in NotFound\n    assert exc.status_code == 404\n    # Quiet should default to True as set in NotFound\n    assert exc.quiet is True\n    # Message should be None, leading to default status message\n    assert exc.message is None\n    # Path and relative_url should be None by default\n    assert exc.path is None\n    assert exc.relative_url is None\n    # The default response message should match the status code description\n    assert exc.message is None\n    assert STATUS_CODES[exc.status_code] == \"Not Found\"\n\n\ndef test_file_not_found_with_path_and_headers(tmp_path):\n    \"\"\"Providing a path and custom headers should store them correctly.\"\"\"\n    test_file = tmp_path / \"missing.txt\"\n    headers = {\"X-Custom-Header\": \"value\"}\n    exc = FileNotFound(\n        message=\"File not found\",\n        path=test_file,\n        relative_url=\"/missing.txt\",\n        headers=headers,\n    )\n    # Message should be preserved\n    assert exc.message == \"File not found\"\n    # Path should be stored as a PathLike object\n    assert isinstance(exc.path, Path)\n    assert exc.path == test_file\n    # Relative URL should be stored\n    assert exc.relative_url == \"/missing.txt\"\n    # Headers should be stored\n    assert exc.headers == headers\n    # Quiet should be None because we didn't override it\n    assert exc.quiet is None\n\n\ndef test_file_not_found_invalid_message_type():\n    \"\"\"Passing a non-string/non-bytes message should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        FileNotFound(message=123)  # type: ignore[arg-type]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5373921130085364
+}

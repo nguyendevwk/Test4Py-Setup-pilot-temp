@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-8e0d8988-0771-4344-8555-b9535233a8cd",
+  "object": "chat.completion",
+  "created": 1795078232,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado.locale import CSVLocale\nfrom tornado.log import gen_log\n\ndef test_translate_singular_and_plural():\n    translations = {\n        \"singular\": {\"apple\": \"manzana\"},\n        \"plural\": {\"apple\": \"manzanas\"},\n        \"unknown\": {\"banana\": \"plátano\"},\n    }\n    locale = CSVLocale(\"es\", translations)\n\n    # Singular case\n    assert locale.translate(\"apple\") == \"manzana\"\n    # Plural case with count != 1\n    assert locale.translate(\"apple\", plural_message=\"apples\", count=3) == \"manzanas\"\n    # Plural case with count == 1 uses singular\n    assert locale.translate(\"apple\", plural_message=\"apples\", count=1) == \"manzana\"\n    # Unknown message falls back to original\n    assert locale.translate(\"banana\") == \"plátano\"\n    # Unknown message not in translations returns original\n    assert locale.translate(\"orange\") == \"orange\"\n\ndef test_translate_missing_count_raises():\n    translations = {\"singular\": {\"cat\": \"gato\"}}\n    locale = CSVLocale(\"es\", translations)\n    # When plural_message is provided but count is None, an AssertionError should be raised\n    with pytest.raises(AssertionError):\n        locale.translate(\"cat\", plural_message=\"cats\", count=None)\n\ndef test_pgettext_logs_warning_and_falls_back():\n    translations = {\"singular\": {\"dog\": \"perro\"}}\n    locale = CSVLocale(\"es\", translations)\n    with pytest.warns(UserWarning) as record:\n        result = locale.pgettext(\"animal\", \"dog\")\n    # The warning should be logged by gen_log\n    assert any(\"pgettext is not supported by CSVLocale\" in r.message for r in record)\n    # The translation should still work\n    assert result == \"perro\"\n```",
+        "reasoning": "Need tests for CSVLocale. Import from tornado.locale? Let's assume CSVLocale class available. We'll test translate with plural, singular, unknown. Also pgettext logs warning. Use caplog. Use tmp_path to create dummy translations? But translations passed directly. So create dict. Test boundary: count=1 and count!=1. Also test missing plural_message raises assertion? Actually if plural_message not None but count None triggers assert. Use pytest.raises AssertionError. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.083066667,
+    "prompt_tokens": 513,
+    "prompt_time": 0.002863733,
+    "completion_tokens": 497,
+    "completion_time": 0.597892229,
+    "total_tokens": 1010,
+    "total_time": 0.600755962,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 97
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg05m6ehm8zyfx5ezxwnyw",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado.locale import CSVLocale\nfrom tornado.log import gen_log\n\ndef test_translate_singular_and_plural():\n    translations = {\n        \"singular\": {\"apple\": \"manzana\"},\n        \"plural\": {\"apple\": \"manzanas\"},\n        \"unknown\": {\"banana\": \"plátano\"},\n    }\n    locale = CSVLocale(\"es\", translations)\n\n    # Singular case\n    assert locale.translate(\"apple\") == \"manzana\"\n    # Plural case with count != 1\n    assert locale.translate(\"apple\", plural_message=\"apples\", count=3) == \"manzanas\"\n    # Plural case with count == 1 uses singular\n    assert locale.translate(\"apple\", plural_message=\"apples\", count=1) == \"manzana\"\n    # Unknown message falls back to original\n    assert locale.translate(\"banana\") == \"plátano\"\n    # Unknown message not in translations returns original\n    assert locale.translate(\"orange\") == \"orange\"\n\ndef test_translate_missing_count_raises():\n    translations = {\"singular\": {\"cat\": \"gato\"}}\n    locale = CSVLocale(\"es\", translations)\n    # When plural_message is provided but count is None, an AssertionError should be raised\n    with pytest.raises(AssertionError):\n        locale.translate(\"cat\", plural_message=\"cats\", count=None)\n\ndef test_pgettext_logs_warning_and_falls_back():\n    translations = {\"singular\": {\"dog\": \"perro\"}}\n    locale = CSVLocale(\"es\", translations)\n    with pytest.warns(UserWarning) as record:\n        result = locale.pgettext(\"animal\", \"dog\")\n    # The warning should be logged by gen_log\n    assert any(\"pgettext is not supported by CSVLocale\" in r.message for r in record)\n    # The translation should still work\n    assert result == \"perro\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0191998559748754
+}

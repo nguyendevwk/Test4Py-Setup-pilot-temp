@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-f50c41ae-1fca-4e48-802b-6b0a6af98dfe",
+  "object": "chat.completion",
+  "created": 1795078952,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.processing import Formatting\nfrom httpie.plugins.registry import plugin_manager\nfrom httpie.context import Environment\n\n# Helper plugin that records calls and optionally raises\nclass DummyPlugin:\n    def __init__(self, env=Environment(), **kwargs):\n        self.enabled = True\n        self.calls = []\n\n    def format_headers(self, headers: str) -> str:\n        self.calls.append((\"headers\", headers))\n        return f\"hdr:{headers}\"\n\n    def format_body(self, content: str, mime: str) -> str:\n        self.calls.append((\"body\", content, mime))\n        return f\"body:{content}\"\n\n    def format_metadata(self, metadata: str) -> str:\n        self.calls.append((\"metadata\", metadata))\n        return f\"meta:{metadata}\"\n\n\ndef test_formatting_applies_all_plugins(monkeypatch):\n    # Monkeypatch plugin_manager to return our dummy plugin in a group\n    monkeypatch.setattr(\n        plugin_manager,\n        \"get_formatters_grouped\",\n        lambda: {\"default\": [DummyPlugin]},\n    )\n    fmt = Formatting(groups=[\"default\"])\n    # All three formatting methods should be applied\n    hdr = fmt.format_headers(\"Content-Type: application/json\")\n    assert hdr == \"hdr:Content-Type: application/json\"\n    body = fmt.format_body(\"{}\", \"application/json\")\n    assert body == \"body:{}\"\n    meta = fmt.format_metadata(\"some meta\")\n    assert meta == \"meta:some meta\"\n\n\ndef test_formatting_skips_body_when_mime_invalid(monkeypatch):\n    # Dummy plugin that would modify body if called\n    monkeypatch.setattr(\n        plugin_manager,\n        \"get_formatters_grouped\",\n        lambda: {\"default\": [DummyPlugin]},\n    )\n    fmt = Formatting(groups=[\"default\"])\n    # Use an invalid mime type; body should remain unchanged\n    body = fmt.format_body(\"{}\", \"invalid/mime\")\n    assert body == \"{}\"\n\n\ndef test_formatting_raises_when_plugin_fails(monkeypatch):\n    # Plugin that raises an exception during header formatting\n    class FailingPlugin:\n        def __init__(self, env=Environment(), **kwargs):\n            self.enabled = True\n\n        def format_headers(self, headers: str) -> str:\n            raise RuntimeError(\"plugin failure\")\n\n        def format_body(self, content: str, mime: str) -> str:\n            return content\n\n        def format_metadata(self, metadata: str) -> str:\n            return metadata\n\n    monkeypatch.setattr(\n        plugin_manager,\n        \"get_formatters_grouped\",\n        lambda: {\"default\": [FailingPlugin]},\n    )\n    fmt = Formatting(groups=[\"default\"])\n    with pytest.raises(RuntimeError, match=\"plugin failure\"):\n        fmt.format_headers(\"Content-Type: text/plain\")\n```",
+        "reasoning": "We need to test Formatting. Need to know plugin_manager behavior. But we can't modify. We can create dummy plugin classes? plugin_manager.get_formatters_grouped returns dict of group to list of classes. We can monkeypatch plugin_manager to return our own. Use monkeypatch fixture. Write three tests: normal formatting, boundary: mime invalid, error: plugin raises exception? But cannot mock target. But we can create a plugin that raises? We can monkeypatch plugin_manager to return plugin that raises in format_headers. That will propagate. Use pytest.raises. Ensure no suppression. Use tmp_path? Not needed. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.077665861,
+    "prompt_tokens": 482,
+    "prompt_time": 0.044876288,
+    "completion_tokens": 712,
+    "completion_time": 0.794367075,
+    "total_tokens": 1194,
+    "total_time": 0.839243363,
+    "completion_tokens_details": {
+      "reasoning_tokens": 127
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgp4mqe0a8w90jzj9k18bv",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.processing import Formatting\nfrom httpie.plugins.registry import plugin_manager\nfrom httpie.context import Environment\n\n# Helper plugin that records calls and optionally raises\nclass DummyPlugin:\n    def __init__(self, env=Environment(), **kwargs):\n        self.enabled = True\n        self.calls = []\n\n    def format_headers(self, headers: str) -> str:\n        self.calls.append((\"headers\", headers))\n        return f\"hdr:{headers}\"\n\n    def format_body(self, content: str, mime: str) -> str:\n        self.calls.append((\"body\", content, mime))\n        return f\"body:{content}\"\n\n    def format_metadata(self, metadata: str) -> str:\n        self.calls.append((\"metadata\", metadata))\n        return f\"meta:{metadata}\"\n\n\ndef test_formatting_applies_all_plugins(monkeypatch):\n    # Monkeypatch plugin_manager to return our dummy plugin in a group\n    monkeypatch.setattr(\n        plugin_manager,\n        \"get_formatters_grouped\",\n        lambda: {\"default\": [DummyPlugin]},\n    )\n    fmt = Formatting(groups=[\"default\"])\n    # All three formatting methods should be applied\n    hdr = fmt.format_headers(\"Content-Type: application/json\")\n    assert hdr == \"hdr:Content-Type: application/json\"\n    body = fmt.format_body(\"{}\", \"application/json\")\n    assert body == \"body:{}\"\n    meta = fmt.format_metadata(\"some meta\")\n    assert meta == \"meta:some meta\"\n\n\ndef test_formatting_skips_body_when_mime_invalid(monkeypatch):\n    # Dummy plugin that would modify body if called\n    monkeypatch.setattr(\n        plugin_manager,\n        \"get_formatters_grouped\",\n        lambda: {\"default\": [DummyPlugin]},\n    )\n    fmt = Formatting(groups=[\"default\"])\n    # Use an invalid mime type; body should remain unchanged\n    body = fmt.format_body(\"{}\", \"invalid/mime\")\n    assert body == \"{}\"\n\n\ndef test_formatting_raises_when_plugin_fails(monkeypatch):\n    # Plugin that raises an exception during header formatting\n    class FailingPlugin:\n        def __init__(self, env=Environment(), **kwargs):\n            self.enabled = True\n\n        def format_headers(self, headers: str) -> str:\n            raise RuntimeError(\"plugin failure\")\n\n        def format_body(self, content: str, mime: str) -> str:\n            return content\n\n        def format_metadata(self, metadata: str) -> str:\n            return metadata\n\n    monkeypatch.setattr(\n        plugin_manager,\n        \"get_formatters_grouped\",\n        lambda: {\"default\": [FailingPlugin]},\n    )\n    fmt = Formatting(groups=[\"default\"])\n    with pytest.raises(RuntimeError, match=\"plugin failure\"):\n        fmt.format_headers(\"Content-Type: text/plain\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2934752880246378
+}

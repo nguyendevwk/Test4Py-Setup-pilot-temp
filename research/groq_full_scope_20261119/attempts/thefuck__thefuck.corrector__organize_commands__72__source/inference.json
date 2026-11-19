@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-3f86a3e5-a27b-4ce8-8f86-d80cb1e0c59e",
+  "object": "chat.completion",
+  "created": 1795077550,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom thefuck.corrector import organize_commands\nfrom thefuck.types import CorrectedCommand\n\n\nclass DummyCommand(CorrectedCommand):\n    def __init__(self, command, priority):\n        self.command = command\n        self.priority = priority\n\n    def __repr__(self):\n        return f\"<DummyCommand {self.command!r} p={self.priority}>\"\n\n\ndef test_organize_commands_removes_duplicates_and_sorts():\n    cmds = [\n        DummyCommand(\"echo a\", 2),\n        DummyCommand(\"echo b\", 1),\n        DummyCommand(\"echo a\", 2),  # duplicate\n        DummyCommand(\"echo c\", 3),\n    ]\n    result = list(organize_commands(iter(cmds)))\n    # First command should be the first in the original iterable\n    assert result[0].command == \"echo a\"\n    # Remaining commands sorted by priority and without duplicates\n    assert [c.command for c in result[1:]] == [\"echo b\", \"echo c\"]\n    # No duplicate of \"echo a\" after the first\n    assert all(c.command != \"echo a\" for c in result[1:])\n\n\ndef test_organize_commands_empty_iterable_returns_nothing():\n    result = list(organize_commands(iter([])))\n    assert result == []\n\n\ndef test_organize_commands_single_command_yields_it():\n    single = [DummyCommand(\"single\", 5)]\n    result = list(organize_commands(iter(single)))\n    assert result == single\n```",
+        "reasoning": "Need tests for organize_commands. Create dummy CorrectedCommand with priority and equality. Use iterable. Test normal: multiple commands with priorities, duplicates. Boundary: empty iterable. Error: non-iterable? but function expects iterable. Maybe test that StopIteration handled. Use tmp_path? not needed. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05358955,
+    "prompt_tokens": 408,
+    "prompt_time": 0.010008468,
+    "completion_tokens": 391,
+    "completion_time": 0.521868649,
+    "total_tokens": 799,
+    "total_time": 0.531877117,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 65
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfbbj8ehxv9t5a6mg96798",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom thefuck.corrector import organize_commands\nfrom thefuck.types import CorrectedCommand\n\n\nclass DummyCommand(CorrectedCommand):\n    def __init__(self, command, priority):\n        self.command = command\n        self.priority = priority\n\n    def __repr__(self):\n        return f\"<DummyCommand {self.command!r} p={self.priority}>\"\n\n\ndef test_organize_commands_removes_duplicates_and_sorts():\n    cmds = [\n        DummyCommand(\"echo a\", 2),\n        DummyCommand(\"echo b\", 1),\n        DummyCommand(\"echo a\", 2),  # duplicate\n        DummyCommand(\"echo c\", 3),\n    ]\n    result = list(organize_commands(iter(cmds)))\n    # First command should be the first in the original iterable\n    assert result[0].command == \"echo a\"\n    # Remaining commands sorted by priority and without duplicates\n    assert [c.command for c in result[1:]] == [\"echo b\", \"echo c\"]\n    # No duplicate of \"echo a\" after the first\n    assert all(c.command != \"echo a\" for c in result[1:])\n\n\ndef test_organize_commands_empty_iterable_returns_nothing():\n    result = list(organize_commands(iter([])))\n    assert result == []\n\n\ndef test_organize_commands_single_command_yields_it():\n    single = [DummyCommand(\"single\", 5)]\n    result = list(organize_commands(iter(single)))\n    assert result == single\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9099562930059619
+}

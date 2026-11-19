@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-03c646d3-f9ac-4bd3-bc9a-47372a830de6",
+  "object": "chat.completion",
+  "created": 1795078597,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport time\nimport pytest\nfrom youtube_dl.postprocessor.common import PostProcessor\nfrom youtube_dl.utils import PostProcessingError, cli_configuration_args, encodeFilename\n\nclass DummyDownloader:\n    def __init__(self):\n        self.warnings = []\n\n    def report_warning(self, msg):\n        self.warnings.append(msg)\n\n    @property\n    def params(self):\n        return {}\n\ndef test_run_returns_default(tmp_path):\n    pp = PostProcessor()\n    info = {\"filepath\": str(tmp_path / \"file.mp4\")}\n    files_to_delete, updated_info = pp.run(info)\n    assert files_to_delete == []\n    assert updated_info is info\n\ndef test_try_utime_updates_file_times(tmp_path):\n    downloader = DummyDownloader()\n    pp = PostProcessor(downloader)\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"content\")\n    before = os.stat(file_path).st_mtime\n    new_mtime = before + 100\n    pp.try_utime(file_path, before, new_mtime)\n    after = os.stat(file_path).st_mtime\n    assert after == new_mtime\n    assert downloader.warnings == []\n\ndef test_try_utime_raises_warning_on_error(tmp_path):\n    downloader = DummyDownloader()\n    pp = PostProcessor(downloader)\n    file_path = tmp_path / \"readonly.txt\"\n    file_path.write_text(\"content\")\n    file_path.chmod(0o444)  # read-only\n    before = os.stat(file_path).st_mtime\n    new_mtime = before + 100\n    pp.try_utime(file_path, before, new_mtime, errnote=\"Failed to update\")\n    after = os.stat(file_path).st_mtime\n    assert after == before\n    assert downloader.warnings == [\"Failed to update\"]\n```",
+        "reasoning": "We need tests for PostProcessor. Use tmp_path. Test run returns default. Test try_utime updates times. Use a dummy downloader with report_warning. Also test _configuration_args returns correct. Use real utils? We can import. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054331879,
+    "prompt_tokens": 672,
+    "prompt_time": 0.016240168,
+    "completion_tokens": 440,
+    "completion_time": 0.489376712,
+    "total_tokens": 1112,
+    "total_time": 0.50561688,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 51
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgbaqcewaakavwgxxk7yp5",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport time\nimport pytest\nfrom youtube_dl.postprocessor.common import PostProcessor\nfrom youtube_dl.utils import PostProcessingError, cli_configuration_args, encodeFilename\n\nclass DummyDownloader:\n    def __init__(self):\n        self.warnings = []\n\n    def report_warning(self, msg):\n        self.warnings.append(msg)\n\n    @property\n    def params(self):\n        return {}\n\ndef test_run_returns_default(tmp_path):\n    pp = PostProcessor()\n    info = {\"filepath\": str(tmp_path / \"file.mp4\")}\n    files_to_delete, updated_info = pp.run(info)\n    assert files_to_delete == []\n    assert updated_info is info\n\ndef test_try_utime_updates_file_times(tmp_path):\n    downloader = DummyDownloader()\n    pp = PostProcessor(downloader)\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"content\")\n    before = os.stat(file_path).st_mtime\n    new_mtime = before + 100\n    pp.try_utime(file_path, before, new_mtime)\n    after = os.stat(file_path).st_mtime\n    assert after == new_mtime\n    assert downloader.warnings == []\n\ndef test_try_utime_raises_warning_on_error(tmp_path):\n    downloader = DummyDownloader()\n    pp = PostProcessor(downloader)\n    file_path = tmp_path / \"readonly.txt\"\n    file_path.write_text(\"content\")\n    file_path.chmod(0o444)  # read-only\n    before = os.stat(file_path).st_mtime\n    new_mtime = before + 100\n    pp.try_utime(file_path, before, new_mtime, errnote=\"Failed to update\")\n    after = os.stat(file_path).st_mtime\n    assert after == before\n    assert downloader.warnings == [\"Failed to update\"]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9043045269791037
+}

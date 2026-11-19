@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-ea0d59eb-0efa-4f87-8a70-2891452fcd1a",
+  "object": "chat.completion",
+  "created": 1795079535,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport warnings\nimport urllib.parse\nimport json\nimport pytest\nfrom tornado.web import RequestHandler\nfrom tornado.auth import OAuth2Mixin\nfrom tornado import httpclient, escape\nfrom tornado.httputil import url_concat\n\n# Helper handler that mixes in OAuth2Mixin and records redirects\nclass DummyHandler(RequestHandler, OAuth2Mixin):\n    _OAUTH_AUTHORIZE_URL = \"https://example.com/auth\"\n    _OAUTH_ACCESS_TOKEN_URL = \"https://example.com/token\"\n\n    def __init__(self, application, request, **kwargs):\n        super().__init__(application, request, **kwargs)\n        self.redirected_to = None\n\n    def redirect(self, url, *args, **kwargs):\n        self.redirected_to = url\n\n# Test 1: authorize_redirect builds correct URL and calls redirect\ndef test_authorize_redirect_builds_url(tmp_path):\n    handler = DummyHandler(None, None)\n    handler.authorize_redirect(\n        redirect_uri=\"https://myapp.com/callback\",\n        client_id=\"abc123\",\n        scope=[\"email\", \"profile\"],\n        response_type=\"code\",\n    )\n    parsed = urllib.parse.urlparse(handler.redirected_to)\n    query = urllib.parse.parse_qs(parsed.query)\n    assert parsed.scheme == \"https\"\n    assert parsed.netloc == \"example.com\"\n    assert parsed.path == \"/auth\"\n    assert query[\"response_type\"] == [\"code\"]\n    assert query[\"redirect_uri\"] == [\"https://myapp.com/callback\"]\n    assert query[\"client_id\"] == [\"abc123\"]\n    assert query[\"scope\"] == [\"email profile\"]\n\n# Test 2: _oauth_request_token_url constructs token URL with all params\ndef test_oauth_request_token_url_construction():\n    handler = DummyHandler(None, None)\n    url = handler._oauth_request_token_url(\n        redirect_uri=\"https://myapp.com/callback\",\n        client_id=\"abc123\",\n        client_secret=\"secret\",\n        code=\"authcode\",\n        extra_params={\"grant_type\": \"authorization_code\"},\n    )\n    parsed = urllib.parse.urlparse(url)\n    query = urllib.parse.parse_qs(parsed.query)\n    assert parsed.scheme == \"https\"\n    assert parsed.netloc == \"example.com\"\n    assert parsed.path == \"/token\"\n    assert query[\"redirect_uri\"] == [\"https://myapp.com/callback\"]\n    assert query[\"client_id\"] == [\"abc123\"]\n    assert query[\"client_secret\"] == [\"secret\"]\n    assert query[\"code\"] == [\"authcode\"]\n    assert query[\"grant_type\"] == [\"authorization_code\"]\n\n# Test 3: oauth2_request performs HTTP fetch and decodes JSON\n@pytest.mark.asyncio\nasync def test_oauth2_request_fetch_and_decode(monkeypatch):\n    handler = DummyHandler(None, None)\n\n    # Mock AsyncHTTPClient.fetch to return a fake response\n    class DummyResponse:\n        def __init__(self, body):\n            self.body = body\n\n    async def fake_fetch(url, method=None, body=None):\n        # Verify that the URL contains the access_token query param\n        assert \"access_token=XYZ\" in url\n        # Return a JSON body\n        return DummyResponse(json.dumps({\"ok\": True}).encode(\"utf-8\"))\n\n    monkeypatch.setattr(httpclient.AsyncHTTPClient, \"fetch\", fake_fetch)\n\n    result = await handler.oauth2_request(\n        \"https://api.example.com/data\",\n        access_token=\"XYZ\",\n        post_args=None,\n        extra=\"value\",\n    )\n    assert result == {\"ok\": True}\n```",
+        "reasoning": "Need tests for authorize_redirect, _oauth_request_token_url, oauth2_request. Use dummy handler subclass. Use tmp_path for redirect. Use monkeypatch to capture redirect URL. For oauth2_request need mock httpclient. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00519597,
+    "prompt_tokens": 1343,
+    "prompt_time": 0.086506319,
+    "completion_tokens": 792,
+    "completion_time": 0.842305131,
+    "total_tokens": 2135,
+    "total_time": 0.92881145,
+    "completion_tokens_details": {
+      "reasoning_tokens": 48
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh7xsmewjsk766vndnky2p",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport warnings\nimport urllib.parse\nimport json\nimport pytest\nfrom tornado.web import RequestHandler\nfrom tornado.auth import OAuth2Mixin\nfrom tornado import httpclient, escape\nfrom tornado.httputil import url_concat\n\n# Helper handler that mixes in OAuth2Mixin and records redirects\nclass DummyHandler(RequestHandler, OAuth2Mixin):\n    _OAUTH_AUTHORIZE_URL = \"https://example.com/auth\"\n    _OAUTH_ACCESS_TOKEN_URL = \"https://example.com/token\"\n\n    def __init__(self, application, request, **kwargs):\n        super().__init__(application, request, **kwargs)\n        self.redirected_to = None\n\n    def redirect(self, url, *args, **kwargs):\n        self.redirected_to = url\n\n# Test 1: authorize_redirect builds correct URL and calls redirect\ndef test_authorize_redirect_builds_url(tmp_path):\n    handler = DummyHandler(None, None)\n    handler.authorize_redirect(\n        redirect_uri=\"https://myapp.com/callback\",\n        client_id=\"abc123\",\n        scope=[\"email\", \"profile\"],\n        response_type=\"code\",\n    )\n    parsed = urllib.parse.urlparse(handler.redirected_to)\n    query = urllib.parse.parse_qs(parsed.query)\n    assert parsed.scheme == \"https\"\n    assert parsed.netloc == \"example.com\"\n    assert parsed.path == \"/auth\"\n    assert query[\"response_type\"] == [\"code\"]\n    assert query[\"redirect_uri\"] == [\"https://myapp.com/callback\"]\n    assert query[\"client_id\"] == [\"abc123\"]\n    assert query[\"scope\"] == [\"email profile\"]\n\n# Test 2: _oauth_request_token_url constructs token URL with all params\ndef test_oauth_request_token_url_construction():\n    handler = DummyHandler(None, None)\n    url = handler._oauth_request_token_url(\n        redirect_uri=\"https://myapp.com/callback\",\n        client_id=\"abc123\",\n        client_secret=\"secret\",\n        code=\"authcode\",\n        extra_params={\"grant_type\": \"authorization_code\"},\n    )\n    parsed = urllib.parse.urlparse(url)\n    query = urllib.parse.parse_qs(parsed.query)\n    assert parsed.scheme == \"https\"\n    assert parsed.netloc == \"example.com\"\n    assert parsed.path == \"/token\"\n    assert query[\"redirect_uri\"] == [\"https://myapp.com/callback\"]\n    assert query[\"client_id\"] == [\"abc123\"]\n    assert query[\"client_secret\"] == [\"secret\"]\n    assert query[\"code\"] == [\"authcode\"]\n    assert query[\"grant_type\"] == [\"authorization_code\"]\n\n# Test 3: oauth2_request performs HTTP fetch and decodes JSON\n@pytest.mark.asyncio\nasync def test_oauth2_request_fetch_and_decode(monkeypatch):\n    handler = DummyHandler(None, None)\n\n    # Mock AsyncHTTPClient.fetch to return a fake response\n    class DummyResponse:\n        def __init__(self, body):\n            self.body = body\n\n    async def fake_fetch(url, method=None, body=None):\n        # Verify that the URL contains the access_token query param\n        assert \"access_token=XYZ\" in url\n        # Return a JSON body\n        return DummyResponse(json.dumps({\"ok\": True}).encode(\"utf-8\"))\n\n    monkeypatch.setattr(httpclient.AsyncHTTPClient, \"fetch\", fake_fetch)\n\n    result = await handler.oauth2_request(\n        \"https://api.example.com/data\",\n        access_token=\"XYZ\",\n        post_args=None,\n        extra=\"value\",\n    )\n    assert result == {\"ok\": True}\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "6244645372f241c097e19c2d9f08abfd",
+  "_api_plus_pacing_seconds": 2.5848202769993804
+}

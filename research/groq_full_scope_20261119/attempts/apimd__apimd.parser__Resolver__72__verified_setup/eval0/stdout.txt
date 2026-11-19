@@ -1,0 +1,37 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_visit_name_resolves_alias_and_self ____________________
+
+    def test_visit_name_resolves_alias_and_self():
+        # Alias mapping should replace names with the parsed expression.
+        alias = {"mymod.foo": "typing.List[int]"}
+        resolver = Resolver(root="mymod", alias=alias, self_ty="T")
+        name_node = ast.Name(id="foo", ctx=ast.Load())
+        new_node = resolver.visit(name_node)
+        # The alias expression is a Subscript; after visiting it should be a Subscript node.
+        assert isinstance(new_node, ast.Subscript)
+>       assert isinstance(new_node.value, ast.Name)
+E       AssertionError: assert False
+E        +  where False = isinstance(<ast.Attribute object at 0x7f823df29480>, <class 'ast.Name'>)
+E        +    where <ast.Attribute object at 0x7f823df29480> = <ast.Subscript object at 0x7f823df2acb0>.value
+E        +    and   <class 'ast.Name'> = ast.Name
+
+test_generated.py:32: AssertionError
+________________ test_visit_subscript_pep585_and_union_optional ________________
+
+    def test_visit_subscript_pep585_and_union_optional():
+        resolver = Resolver(root="mymod", alias={}, self_ty="")
+    
+        # typing.Union -> BitOr chain
+        union_node = ast.parse("typing.Union[int, str]").body[0].value
+        new_union = resolver.visit(union_node)
+>       assert isinstance(new_union, ast.BinOp)
+E       AssertionError: assert False
+E        +  where False = isinstance(<ast.Subscript object at 0x7f823ddaf9a0>, <class 'ast.BinOp'>)
+E        +    where <class 'ast.BinOp'> = ast.BinOp
+
+test_generated.py:48: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_visit_name_resolves_alias_and_self - Assertion...
+FAILED test_generated.py::test_visit_subscript_pep585_and_union_optional - As...
+2 failed, 1 passed in 0.20s

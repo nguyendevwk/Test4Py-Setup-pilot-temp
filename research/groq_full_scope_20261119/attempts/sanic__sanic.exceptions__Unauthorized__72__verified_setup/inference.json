@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-90793c24-1651-4c45-ba30-aab970eecbb2",
+  "object": "chat.completion",
+  "created": 1795078411,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.exceptions import Unauthorized\n\n\ndef test_unauthorized_with_scheme_and_challenges(tmp_path):\n    \"\"\"When a scheme and challenges are provided, the WWW-Authenticate header\n    should be constructed correctly and merged with any custom headers.\"\"\"\n    exc = Unauthorized(\n        \"Auth required.\",\n        scheme=\"Basic\",\n        realm=\"Restricted Area\",\n        charset=\"UTF-8\",\n        headers={\"X-Custom\": \"value\"},\n    )\n    # The status code should be 401\n    assert exc.status_code == 401\n    # The message should be stored\n    assert exc.message == \"Auth required.\"\n    # The custom header should be present\n    assert exc.headers[\"X-Custom\"] == \"value\"\n    # The WWW-Authenticate header should contain all challenge params\n    expected = 'Basic realm=\"Restricted Area\", charset=\"UTF-8\"'\n    assert exc.headers[\"WWW-Authenticate\"] == expected\n\n\ndef test_unauthorized_without_scheme(tmp_path):\n    \"\"\"When no scheme is provided, no WWW-Authenticate header should be added.\"\"\"\n    exc = Unauthorized(\"No auth needed.\")\n    # No WWW-Authenticate header should exist\n    assert \"WWW-Authenticate\" not in exc.headers\n    # The quiet flag should default to True as defined on the class\n    assert exc.quiet is True\n    # The status code remains 401\n    assert exc.status_code == 401\n    # The message should be stored\n    assert exc.message == \"No auth needed.\"\n\n\ndef test_unauthorized_invalid_challenge_value(tmp_path):\n    \"\"\"Challenge values can be any type; they are converted to string.\"\"\"\n    exc = Unauthorized(\n        \"Invalid challenge\",\n        scheme=\"Bearer\",\n        token_type=123,  # non-string value\n        realm=None,      # None value should be converted to 'None'\n    )\n    # The challenge string should include the string representations\n    # of the values, even if they are not strings.\n    expected = 'Bearer token_type=\"123\", realm=\"None\"'\n    assert exc.headers[\"WWW-Authenticate\"] == expected\n    # Ensure that the exception still has the correct status code\n    assert exc.status_code == 401\n```",
+        "reasoning": "We need to test Unauthorized class. Write three tests: normal init with scheme and challenges, boundary: no scheme, error: passing non-string challenge? But class accepts any. Maybe test that headers include WWW-Authenticate correctly. Also test that quiet default True? Actually class sets quiet=True at class level but __init__ passes quiet param. Test that quiet attribute is set. Also test that passing headers merges. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054063924,
+    "prompt_tokens": 1040,
+    "prompt_time": 0.062191322,
+    "completion_tokens": 552,
+    "completion_time": 0.621828862,
+    "total_tokens": 1592,
+    "total_time": 0.684020184,
+    "completion_tokens_details": {
+      "reasoning_tokens": 87
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg5m1gegnrkmd4xa3b2q2x",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.exceptions import Unauthorized\n\n\ndef test_unauthorized_with_scheme_and_challenges(tmp_path):\n    \"\"\"When a scheme and challenges are provided, the WWW-Authenticate header\n    should be constructed correctly and merged with any custom headers.\"\"\"\n    exc = Unauthorized(\n        \"Auth required.\",\n        scheme=\"Basic\",\n        realm=\"Restricted Area\",\n        charset=\"UTF-8\",\n        headers={\"X-Custom\": \"value\"},\n    )\n    # The status code should be 401\n    assert exc.status_code == 401\n    # The message should be stored\n    assert exc.message == \"Auth required.\"\n    # The custom header should be present\n    assert exc.headers[\"X-Custom\"] == \"value\"\n    # The WWW-Authenticate header should contain all challenge params\n    expected = 'Basic realm=\"Restricted Area\", charset=\"UTF-8\"'\n    assert exc.headers[\"WWW-Authenticate\"] == expected\n\n\ndef test_unauthorized_without_scheme(tmp_path):\n    \"\"\"When no scheme is provided, no WWW-Authenticate header should be added.\"\"\"\n    exc = Unauthorized(\"No auth needed.\")\n    # No WWW-Authenticate header should exist\n    assert \"WWW-Authenticate\" not in exc.headers\n    # The quiet flag should default to True as defined on the class\n    assert exc.quiet is True\n    # The status code remains 401\n    assert exc.status_code == 401\n    # The message should be stored\n    assert exc.message == \"No auth needed.\"\n\n\ndef test_unauthorized_invalid_challenge_value(tmp_path):\n    \"\"\"Challenge values can be any type; they are converted to string.\"\"\"\n    exc = Unauthorized(\n        \"Invalid challenge\",\n        scheme=\"Bearer\",\n        token_type=123,  # non-string value\n        realm=None,      # None value should be converted to 'None'\n    )\n    # The challenge string should include the string representations\n    # of the values, even if they are not strings.\n    expected = 'Bearer token_type=\"123\", realm=\"None\"'\n    assert exc.headers[\"WWW-Authenticate\"] == expected\n    # Ensure that the exception still has the correct status code\n    assert exc.status_code == 401\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0927152750082314
+}

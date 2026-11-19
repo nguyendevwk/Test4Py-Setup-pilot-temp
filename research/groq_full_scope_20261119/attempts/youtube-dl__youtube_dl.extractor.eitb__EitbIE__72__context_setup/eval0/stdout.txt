@@ -1,0 +1,163 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_normal_extraction ____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.eitb__EitbIE__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_normal_extraction0')
+
+    def test_normal_extraction(tmp_path):
+        # Sample JSON mimicking the real API response
+        video_json = {
+            "web_media": [
+                {
+                    "RENDITIONS": [
+                        {
+                            "PMD_URL": "http://example.com/video1.mp4",
+                            "ENCODING_RATE": "1500",
+                            "FRAME_WIDTH": "1280",
+                            "FRAME_HEIGHT": "720"
+                        },
+                        {
+                            "PMD_URL": "http://example.com/video2.mp4",
+                            "ENCODING_RATE": "2500",
+                            "FRAME_WIDTH": "1920",
+                            "FRAME_HEIGHT": "1080"
+                        }
+                    ],
+                    "HLS_SURL": "http://example.com/playlist.m3u8",
+                    "HDS_SURL": "http://example.com/stream.f4m",
+                    "NAME_ES": "Test Video",
+                    "SHORT_DESC_ES": "A test description",
+                    "STILL_URL": "http://example.com/thumb.jpg",
+                    "LENGTH": "600000",
+                    "BROADCST_DATE": "2023-01-01 12:00:00",
+                    "TAGS": ["test", "video"]
+                }
+            ]
+        }
+        token_json = {"token": "dummy_token"}
+        extractor = DummyEitbIE(video_json, token_json)
+>       result = extractor._real_extract(
+            "http://www.eitb.tv/es/video/test/123456/1234567890/"
+        )
+
+test_generated.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/eitb.py:63: in _real_extract
+    token_data = self._download_json(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyEitbIE object at 0x7f1d2310a140>
+url = <urllib.request.Request object at 0x7f1d2310a800>, video_id = '1234567890'
+note = 'Downloading auth token', fatal = False, headers = None
+
+    def _download_json(self, url, video_id, note=None, fatal=True, headers=None):
+        # Return the predefined JSON data for the video request
+>       if 'ServiceMultiweb/Video/MULTIWEBTV' in url:
+E       TypeError: argument of type 'Request' is not iterable
+
+test_generated.py:14: TypeError
+__________________________ test_missing_rendition_url __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.eitb__EitbIE__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_missing_rendition_url0')
+
+    def test_missing_rendition_url(tmp_path):
+        # JSON with a rendition missing PMD_URL should be skipped
+        video_json = {
+            "web_media": [
+                {
+                    "RENDITIONS": [
+                        {"PMD_URL": None, "ENCODING_RATE": "1500"},
+                        {"PMD_URL": "http://example.com/video.mp4", "ENCODING_RATE": "1500"}
+                    ],
+                    "NAME_ES": "Video",
+                    "SHORT_DESC_ES": "Desc",
+                    "STILL_URL": None,
+                    "LENGTH": "300000",
+                    "BROADCST_DATE": "2023-01-01 00:00:00",
+                    "TAGS": []
+                }
+            ]
+        }
+        extractor = DummyEitbIE(video_json)
+>       result = extractor._real_extract(
+            "http://www.eitb.tv/es/video/test/123456/1234567890/"
+        )
+
+test_generated.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/eitb.py:77: in _real_extract
+    self._sort_formats(formats)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1446: in _sort_formats
+    formats.sort(key=_formats_key)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = {'url': 'http://example.com/video.mp4', 'format_id': 'http-1', 'width': None, 'height': None, ...}
+
+    def _formats_key(f):
+        # TODO remove the following workaround
+        from ..utils import determine_ext
+        if not f.get('ext') and 'url' in f:
+            f['ext'] = determine_ext(f['url'])
+    
+        if isinstance(field_preference, (list, tuple)):
+            return tuple(
+                f.get(field)
+                if f.get(field) is not None
+                else ('' if field == 'format_id' else -1)
+                for field in field_preference)
+    
+        preference = f.get('preference')
+        if preference is None:
+            preference = 0
+            if f.get('ext') in ['f4f', 'f4m']:  # Not yet supported
+                preference -= 0.5
+    
+        protocol = f.get('protocol') or determine_protocol(f)
+        proto_preference = 0 if protocol in ['http', 'https'] else (-0.5 if protocol == 'rtsp' else -0.1)
+    
+        if f.get('vcodec') == 'none':  # audio only
+            preference -= 50
+            if self._downloader.params.get('prefer_free_formats'):
+                ORDER = ['aac', 'mp3', 'm4a', 'webm', 'ogg', 'opus']
+            else:
+                ORDER = ['webm', 'opus', 'ogg', 'mp3', 'aac', 'm4a']
+            ext_preference = 0
+            try:
+                audio_ext_preference = ORDER.index(f['ext'])
+            except ValueError:
+                audio_ext_preference = -1
+        else:
+            if f.get('acodec') == 'none':  # video only
+                preference -= 40
+>           if self._downloader.params.get('prefer_free_formats'):
+E           AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1418: AttributeError
+___________________________ test_invalid_url_raises ____________________________
+
+    def test_invalid_url_raises():
+        extractor = EitbIE()
+        # URL that does not match the regex should raise a ValueError
+        with pytest.raises(ValueError):
+>           extractor._match_id("http://invalid.url/notmatching")
+
+test_generated.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'youtube_dl.extractor.eitb.EitbIE'>
+url = 'http://invalid.url/notmatching'
+
+    @classmethod
+    def _match_id(cls, url):
+        if '_VALID_URL_RE' not in cls.__dict__:
+            cls._VALID_URL_RE = re.compile(cls._VALID_URL)
+        m = cls._VALID_URL_RE.match(url)
+>       assert m
+E       AssertionError
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:422: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normal_extraction - TypeError: argument of typ...
+FAILED test_generated.py::test_missing_rendition_url - AttributeError: 'NoneT...
+FAILED test_generated.py::test_invalid_url_raises - AssertionError
+3 failed in 0.92s

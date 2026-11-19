@@ -1,0 +1,48 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+___________ test_object_field_with_properties_and_pattern_properties ___________
+
+    def test_object_field_with_properties_and_pattern_properties():
+        data = {
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string", "minLength": 1},
+            },
+            "patternProperties": {
+                "^S_": {"type": "string"},
+            },
+            "additionalProperties": False,
+            "propertyNames": {"type": "string", "minLength": 1},
+            "minProperties": 1,
+            "maxProperties": 3,
+            "required": ["id"],
+            "default": {"id": 0},
+        }
+        field = from_json_schema_type(data, "object", allow_null=False, definitions=Definitions())
+        assert isinstance(field, Object)
+        assert field.min_properties == 1
+        assert field.max_properties == 3
+        assert field.required == ["id"]
+        assert field.default == {"id": 0}
+        # properties dict
+        assert isinstance(field.properties, dict)
+        assert set(field.properties.keys()) == {"id", "name"}
+        assert isinstance(field.properties["id"], Integer)
+        assert isinstance(field.properties["name"], String)
+        # pattern_properties dict
+        assert isinstance(field.pattern_properties, dict)
+        assert "^S_" in field.pattern_properties
+        assert isinstance(field.pattern_properties["^S_"], String)
+        # additional_properties is False
+        assert field.additional_properties is False
+        # property_names is a String field
+        assert isinstance(field.property_names, String)
+>       assert field.property_names.min_length == 1
+E       assert None == 1
+E        +  where None = <typesystem.fields.String object at 0x7facdcd6a710>.min_length
+E        +    where <typesystem.fields.String object at 0x7facdcd6a710> = <typesystem.fields.Object object at 0x7facdcd6a560>.property_names
+
+test_generated.py:86: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_object_field_with_properties_and_pattern_properties
+1 failed, 2 passed in 0.23s

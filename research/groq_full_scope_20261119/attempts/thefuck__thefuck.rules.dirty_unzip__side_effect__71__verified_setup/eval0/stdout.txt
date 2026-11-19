@@ -1,0 +1,122 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_removal_of_safe_files __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.dirty_unzip__side_effect__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_removal_of_safe_files0')
+
+    def test_removal_of_safe_files(tmp_path):
+        """Files inside the current working directory should be removed."""
+        # Setup: create a file that will be removed
+        target_file = tmp_path / "remove_me.txt"
+        target_file.write_text("to be removed")
+    
+        # Create a zip containing that file
+        zip_path = tmp_path / "archive.zip"
+        create_zip_with_entries(zip_path, {"remove_me.txt": "content"})
+    
+        # Run side_effect
+        old_cmd = f"unzip {zip_path}"
+>       side_effect(old_cmd, None)
+
+test_generated.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/dirty_unzip.py:46: in side_effect
+    with zipfile.ZipFile(_zip_file(old_cmd), 'r') as archive:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+command = 'unzip /home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.dirty_unzip__side_effect__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_removal_of_safe_files0/archive.zip'
+
+    def _zip_file(command):
+        # unzip works that way:
+        # unzip [-flags] file[.zip] [file(s) ...] [-x file(s) ...]
+        #                ^          ^ files to unzip from the archive
+        #                archive to unzip
+>       for c in command.script_parts[1:]:
+E       AttributeError: 'str' object has no attribute 'script_parts'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/dirty_unzip.py:20: AttributeError
+____________________________ test_skip_unsafe_files ____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.dirty_unzip__side_effect__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_skip_unsafe_files0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcb22ce84f0>
+
+    def test_skip_unsafe_files(tmp_path, monkeypatch):
+        """Files outside the current working directory should not be removed."""
+        # Create a file outside cwd
+        outside_file = Path(tmp_path.parent) / "outside.txt"
+        outside_file.write_text("outside content")
+    
+        # Create a zip containing a relative path that points outside
+        zip_path = tmp_path / "archive.zip"
+        create_zip_with_entries(zip_path, {"../outside.txt": "content"})
+    
+        # Run side_effect
+        old_cmd = f"unzip {zip_path}"
+>       side_effect(old_cmd, None)
+
+test_generated.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/dirty_unzip.py:46: in side_effect
+    with zipfile.ZipFile(_zip_file(old_cmd), 'r') as archive:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+command = 'unzip /home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.dirty_unzip__side_effect__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_skip_unsafe_files0/archive.zip'
+
+    def _zip_file(command):
+        # unzip works that way:
+        # unzip [-flags] file[.zip] [file(s) ...] [-x file(s) ...]
+        #                ^          ^ files to unzip from the archive
+        #                archive to unzip
+>       for c in command.script_parts[1:]:
+E       AttributeError: 'str' object has no attribute 'script_parts'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/dirty_unzip.py:20: AttributeError
+_______________________ test_ignore_oserror_on_directory _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.dirty_unzip__side_effect__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_ignore_oserror_on_directo0')
+
+    def test_ignore_oserror_on_directory(tmp_path):
+        """If os.remove raises OSError (e.g., for directories), it should be ignored."""
+        # Create a directory that will be listed in the zip
+        dir_path = tmp_path / "dir_to_keep"
+        dir_path.mkdir()
+        # Create a zip containing a directory entry
+        zip_path = tmp_path / "archive.zip"
+        create_zip_with_entries(zip_path, {"dir_to_keep/": ""})  # empty content for dir
+    
+        # Run side_effect; should not raise
+        old_cmd = f"unzip {zip_path}"
+>       side_effect(old_cmd, None)
+
+test_generated.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/dirty_unzip.py:46: in side_effect
+    with zipfile.ZipFile(_zip_file(old_cmd), 'r') as archive:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+command = 'unzip /home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.dirty_unzip__side_effect__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_ignore_oserror_on_directo0/archive.zip'
+
+    def _zip_file(command):
+        # unzip works that way:
+        # unzip [-flags] file[.zip] [file(s) ...] [-x file(s) ...]
+        #                ^          ^ files to unzip from the archive
+        #                archive to unzip
+>       for c in command.script_parts[1:]:
+E       AttributeError: 'str' object has no attribute 'script_parts'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/dirty_unzip.py:20: AttributeError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_removal_of_safe_files - AttributeError: 'str' ...
+FAILED test_generated.py::test_skip_unsafe_files - AttributeError: 'str' obje...
+FAILED test_generated.py::test_ignore_oserror_on_directory - AttributeError: ...
+3 failed, 2 warnings in 0.22s

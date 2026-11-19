@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-62ad007f-1ddf-47af-a53d-01e86c2e411d",
+  "object": "chat.completion",
+  "created": 1795076309,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport builtins\nimport pytest\nfrom pathlib import Path\nfrom cookiecutter.prompt import prompt_and_delete, read_user_yes_no, YesNoPrompt\n\n# Helper to patch read_user_yes_no\ndef _patch_read_user_yes_no(monkeypatch, return_values):\n    \"\"\"Return values sequentially from the provided list.\"\"\"\n    iterator = iter(return_values)\n\n    def fake_read_user_yes_no(var_name, default_value, prompts=None, prefix: str = \"\"):\n        return next(iterator)\n\n    monkeypatch.setattr(\"cookiecutter.prompt.read_user_yes_no\", fake_read_user_yes_no)\n\ndef test_prompt_and_delete_no_input_deletes_file(tmp_path, monkeypatch):\n    # Create a temporary file\n    file_path = tmp_path / \"temp.txt\"\n    file_path.write_text(\"content\")\n    assert file_path.exists()\n\n    # Ensure no_input forces deletion\n    result = prompt_and_delete(file_path, no_input=True)\n    assert result is True\n    assert not file_path.exists()\n\ndef test_prompt_and_delete_user_declines_and_reuses(tmp_path, monkeypatch):\n    # Create a temporary directory\n    dir_path = tmp_path / \"temp_dir\"\n    dir_path.mkdir()\n    assert dir_path.is_dir()\n\n    # Simulate user answering 'no' to delete, then 'yes' to reuse\n    _patch_read_user_yes_no(monkeypatch, [False, True])\n\n    result = prompt_and_delete(dir_path, no_input=False)\n    assert result is False\n    assert dir_path.is_dir()  # directory still exists\n\ndef test_prompt_and_delete_user_declines_and_exits(tmp_path, monkeypatch):\n    # Create a temporary file\n    file_path = tmp_path / \"temp.txt\"\n    file_path.write_text(\"content\")\n    assert file_path.exists()\n\n    # Simulate user answering 'no' to delete, then 'no' to reuse\n    _patch_read_user_yes_no(monkeypatch, [False, False])\n\n    with pytest.raises(SystemExit):\n        prompt_and_delete(file_path, no_input=False)\n    assert file_path.exists()\n```",
+        "reasoning": "We need 3 test functions for prompt_and_delete. We can simulate file/directory. Use tmp_path. Need to test deletion when no_input True, when user says yes, when user says no and reuse yes, and when no and reuse no leads to sys.exit. But cannot mock input. We can monkeypatch read_user_yes_no to return desired. But cannot mock target? It's allowed to monkeypatch? It's not mocking target, just patching helper. It's okay. Use monkeypatch fixture. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054288063,
+    "prompt_tokens": 914,
+    "prompt_time": 0.053815034,
+    "completion_tokens": 548,
+    "completion_time": 0.592559672,
+    "total_tokens": 1462,
+    "total_time": 0.646374706,
+    "completion_tokens_details": {
+      "reasoning_tokens": 105
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7se5ft9ebvsbdcafymy30kd",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport builtins\nimport pytest\nfrom pathlib import Path\nfrom cookiecutter.prompt import prompt_and_delete, read_user_yes_no, YesNoPrompt\n\n# Helper to patch read_user_yes_no\ndef _patch_read_user_yes_no(monkeypatch, return_values):\n    \"\"\"Return values sequentially from the provided list.\"\"\"\n    iterator = iter(return_values)\n\n    def fake_read_user_yes_no(var_name, default_value, prompts=None, prefix: str = \"\"):\n        return next(iterator)\n\n    monkeypatch.setattr(\"cookiecutter.prompt.read_user_yes_no\", fake_read_user_yes_no)\n\ndef test_prompt_and_delete_no_input_deletes_file(tmp_path, monkeypatch):\n    # Create a temporary file\n    file_path = tmp_path / \"temp.txt\"\n    file_path.write_text(\"content\")\n    assert file_path.exists()\n\n    # Ensure no_input forces deletion\n    result = prompt_and_delete(file_path, no_input=True)\n    assert result is True\n    assert not file_path.exists()\n\ndef test_prompt_and_delete_user_declines_and_reuses(tmp_path, monkeypatch):\n    # Create a temporary directory\n    dir_path = tmp_path / \"temp_dir\"\n    dir_path.mkdir()\n    assert dir_path.is_dir()\n\n    # Simulate user answering 'no' to delete, then 'yes' to reuse\n    _patch_read_user_yes_no(monkeypatch, [False, True])\n\n    result = prompt_and_delete(dir_path, no_input=False)\n    assert result is False\n    assert dir_path.is_dir()  # directory still exists\n\ndef test_prompt_and_delete_user_declines_and_exits(tmp_path, monkeypatch):\n    # Create a temporary file\n    file_path = tmp_path / \"temp.txt\"\n    file_path.write_text(\"content\")\n    assert file_path.exists()\n\n    # Simulate user answering 'no' to delete, then 'no' to reuse\n    _patch_read_user_yes_no(monkeypatch, [False, False])\n\n    with pytest.raises(SystemExit):\n        prompt_and_delete(file_path, no_input=False)\n    assert file_path.exists()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9673624720307998
+}

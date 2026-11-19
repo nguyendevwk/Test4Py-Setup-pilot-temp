@@ -1,0 +1,23 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_union_raises_union_error_with_candidate_errors ______________
+
+    def test_union_raises_union_error_with_candidate_errors():
+        # Child that accepts Decimal but raises a type error for int
+        class DecimalField(fields.Decimal):
+            def validate_or_error(self, value):
+                try:
+                    return super().validate_or_error(value)
+                except ValidationError as e:
+                    # Re-raise to propagate
+                    raise e
+    
+        union_field = fields.Union(any_of=[DecimalField(), fields.String()])
+        # int does not match any child; DecimalField will produce a type error
+>       with pytest.raises(ValidationError) as excinfo:
+E       Failed: DID NOT RAISE ValidationError
+
+test_generated.py:40: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_union_raises_union_error_with_candidate_errors
+1 failed, 2 passed in 0.11s

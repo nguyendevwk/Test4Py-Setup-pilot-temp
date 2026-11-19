@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-05caeb4c-a6e5-4627-8021-6f3d50568142",
+  "object": "chat.completion",
+  "created": 1795078541,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom docstring_parser.rest import compose, RenderingStyle\nfrom docstring_parser.rest.common import (\n    Docstring,\n    DocstringParam,\n    DocstringReturns,\n    DocstringRaises,\n    DocstringMeta,\n)\n\n# Helper to create a minimal Docstring instance\ndef make_docstring(\n    short_description=\"\",\n    blank_after_short_description=False,\n    long_description=\"\",\n    blank_after_long_description=False,\n    meta=None,\n):\n    return Docstring(\n        short_description=short_description,\n        blank_after_short_description=blank_after_short_description,\n        long_description=long_description,\n        blank_after_long_description=blank_after_long_description,\n        meta=meta or [],\n    )\n\ndef test_compose_basic_short_and_long():\n    \"\"\"Test rendering of short and long descriptions with a simple param.\"\"\"\n    doc = make_docstring(\n        short_description=\"Short\",\n        long_description=\"Long description.\",\n        meta=[\n            DocstringParam(\n                arg_name=\"x\",\n                description=\"an integer\",\n                type_name=\"int\",\n                is_optional=False,\n            )\n        ],\n    )\n    result = compose(doc, RenderingStyle.COMPACT)\n    expected = (\n        \"Short\\n\"\n        \"Long description.\\n\"\n        \":param int x: an integer\"\n    )\n    assert result == expected\n\ndef test_compose_boundary_empty_descriptions_and_optional_type():\n    \"\"\"Test rendering when descriptions are empty and the param is optional.\"\"\"\n    doc = make_docstring(\n        short_description=\"\",\n        meta=[\n            DocstringParam(\n                arg_name=\"y\",\n                description=\"\",\n                type_name=\"str\",\n                is_optional=True,\n            ),\n            DocstringReturns(\n                description=\"\",\n                type_name=\"bool\",\n                is_generator=False,\n            ),\n            DocstringRaises(\n                description=\"\",\n                type_name=\"ValueError\",\n            ),\n        ],\n    )\n    result = compose(doc, RenderingStyle.COMPACT)\n    # Empty descriptions should not add trailing spaces\n    expected = (\n        \":param str? y:\\n\"\n        \":returns bool:\\n\"\n        \":raises ValueError :\"\n    )\n    assert result == expected\n\ndef test_compose_expanded_style_with_multiline_description():\n    \"\"\"Test rendering with EXPANDED style and multiline descriptions.\"\"\"\n    long_desc = \"First line\\nSecond line\"\n    param_desc = \"Param line 1\\nParam line 2\"\n    doc = make_docstring(\n        short_description=\"Header\",\n        blank_after_short_description=True,\n        long_description=long_desc,\n        meta=[\n            DocstringParam(\n                arg_name=\"z\",\n                description=param_desc,\n                type_name=\"float\",\n                is_optional=False,\n            )\n        ],\n    )\n    result = compose(doc, RenderingStyle.EXPANDED, indent=\"  \")\n    expected = (\n        \"Header\\n\\n\"\n        \"First line\\n\"\n        \"Second line\\n\\n\"\n        \":param z:\\n\"\n        \"  Param line 1\\n\"\n        \"  Param line 2\\n\"\n        \":type z: float\"\n    )\n    assert result == expected\n```",
+        "reasoning": "We need tests for compose. Use tmp_path? not needed. Just test output strings. Three functions: normal, boundary (empty desc), error? compose doesn't raise. Maybe test rendering_style differences. Use Docstring objects from common? We don't have that code. Can't import. But we can create minimal Docstring with attributes used. We can mock simple class. But must use real imported target; but we can create dummy Docstring with needed attributes. Use namedtuple? We'll create simple class with attributes: short_description, blank_after_short_description, long_description, blank_after_long_description, meta list. Meta items need types: DocstringParam etc. We can import those classes from module. So import compose and classes. Then create instances. Test normal: short, long, param. Test boundary: no desc, optional type. Test rendering_style expanded. Use assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052504937,
+    "prompt_tokens": 949,
+    "prompt_time": 0.05223267,
+    "completion_tokens": 816,
+    "completion_time": 0.880474724,
+    "total_tokens": 1765,
+    "total_time": 0.932707394,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 176
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg9kgwe9rvyqkakj1vm52s",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom docstring_parser.rest import compose, RenderingStyle\nfrom docstring_parser.rest.common import (\n    Docstring,\n    DocstringParam,\n    DocstringReturns,\n    DocstringRaises,\n    DocstringMeta,\n)\n\n# Helper to create a minimal Docstring instance\ndef make_docstring(\n    short_description=\"\",\n    blank_after_short_description=False,\n    long_description=\"\",\n    blank_after_long_description=False,\n    meta=None,\n):\n    return Docstring(\n        short_description=short_description,\n        blank_after_short_description=blank_after_short_description,\n        long_description=long_description,\n        blank_after_long_description=blank_after_long_description,\n        meta=meta or [],\n    )\n\ndef test_compose_basic_short_and_long():\n    \"\"\"Test rendering of short and long descriptions with a simple param.\"\"\"\n    doc = make_docstring(\n        short_description=\"Short\",\n        long_description=\"Long description.\",\n        meta=[\n            DocstringParam(\n                arg_name=\"x\",\n                description=\"an integer\",\n                type_name=\"int\",\n                is_optional=False,\n            )\n        ],\n    )\n    result = compose(doc, RenderingStyle.COMPACT)\n    expected = (\n        \"Short\\n\"\n        \"Long description.\\n\"\n        \":param int x: an integer\"\n    )\n    assert result == expected\n\ndef test_compose_boundary_empty_descriptions_and_optional_type():\n    \"\"\"Test rendering when descriptions are empty and the param is optional.\"\"\"\n    doc = make_docstring(\n        short_description=\"\",\n        meta=[\n            DocstringParam(\n                arg_name=\"y\",\n                description=\"\",\n                type_name=\"str\",\n                is_optional=True,\n            ),\n            DocstringReturns(\n                description=\"\",\n                type_name=\"bool\",\n                is_generator=False,\n            ),\n            DocstringRaises(\n                description=\"\",\n                type_name=\"ValueError\",\n            ),\n        ],\n    )\n    result = compose(doc, RenderingStyle.COMPACT)\n    # Empty descriptions should not add trailing spaces\n    expected = (\n        \":param str? y:\\n\"\n        \":returns bool:\\n\"\n        \":raises ValueError :\"\n    )\n    assert result == expected\n\ndef test_compose_expanded_style_with_multiline_description():\n    \"\"\"Test rendering with EXPANDED style and multiline descriptions.\"\"\"\n    long_desc = \"First line\\nSecond line\"\n    param_desc = \"Param line 1\\nParam line 2\"\n    doc = make_docstring(\n        short_description=\"Header\",\n        blank_after_short_description=True,\n        long_description=long_desc,\n        meta=[\n            DocstringParam(\n                arg_name=\"z\",\n                description=param_desc,\n                type_name=\"float\",\n                is_optional=False,\n            )\n        ],\n    )\n    result = compose(doc, RenderingStyle.EXPANDED, indent=\"  \")\n    expected = (\n        \"Header\\n\\n\"\n        \"First line\\n\"\n        \"Second line\\n\\n\"\n        \":param z:\\n\"\n        \"  Param line 1\\n\"\n        \"  Param line 2\\n\"\n        \":type z: float\"\n    )\n    assert result == expected\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3411772300023586
+}

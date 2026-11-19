@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-fc449489-f55d-4107-980a-f64ab12de4d6",
+  "object": "chat.completion",
+  "created": 1795078463,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport base64\nimport codecs\nimport pytest\n\n# Import the target module\nimport flutils.codecs.b64 as b64_module\n\n\ndef test_register_and_decode():\n    \"\"\"\n    Test that the register function registers the 'b64' codec and that\n    the decoder correctly decodes a base64 string.\n    \"\"\"\n    # Ensure the codec is not registered yet\n    with pytest.raises(LookupError):\n        codecs.getdecoder(\"b64\")\n\n    # Register the codec\n    b64_module.register()\n\n    # After registration, the decoder should be available\n    decoder = codecs.getdecoder(\"b64\")\n    assert decoder is not None\n\n    # Decode a known base64 string\n    original = b\"hello world\"\n    encoded = base64.b64encode(original).decode(\"ascii\")\n    decoded_bytes, _ = decoder(encoded)\n    assert decoded_bytes == original\n\n\ndef test_register_idempotent():\n    \"\"\"\n    Test that calling register multiple times does not raise an exception\n    and the codec remains available.\n    \"\"\"\n    # First registration\n    b64_module.register()\n    # Second registration should be harmless\n    b64_module.register()\n\n    # The decoder should still work\n    decoder = codecs.getdecoder(\"b64\")\n    decoded_bytes, _ = decoder(base64.b64encode(b\"test\").decode(\"ascii\"))\n    assert decoded_bytes == b\"test\"\n\n\ndef test_register_error_on_missing_name():\n    \"\"\"\n    Test that if the module's NAME attribute is missing, register raises a NameError.\n    \"\"\"\n    # Temporarily delete NAME from the module if it exists\n    original_name = getattr(b64_module, \"NAME\", None)\n    if hasattr(b64_module, \"NAME\"):\n        delattr(b64_module, \"NAME\")\n\n    try:\n        with pytest.raises(NameError):\n            b64_module.register()\n    finally:\n        # Restore NAME for other tests\n        if original_name is not None:\n            setattr(b64_module, \"NAME\", original_name)\n```",
+        "reasoning": "We need to test register function. It registers codec named NAME? But NAME not defined. Likely bug. But test should import module and call register, expecting no exception? But NAME missing will raise NameError. So test error behavior. Also test that after register, codecs.getdecoder('b64') works? But NAME missing. So maybe module defines NAME elsewhere. We can't see. We'll assume NAME defined. We'll test that register registers codec and that encoding/decoding works. Use tmp_path? Not needed. We'll write three tests: normal register, boundary: calling register twice doesn't error, error: calling register when NAME missing? But can't. We'll test that after register, codecs.getdecoder('b64') returns a decoder that decodes base64. Use bytes. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046313865,
+    "prompt_tokens": 300,
+    "prompt_time": 0.003135495,
+    "completion_tokens": 579,
+    "completion_time": 0.73372,
+    "total_tokens": 879,
+    "total_time": 0.736855495,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 160
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg77kpe4g8q6x7rpja4ftp",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport base64\nimport codecs\nimport pytest\n\n# Import the target module\nimport flutils.codecs.b64 as b64_module\n\n\ndef test_register_and_decode():\n    \"\"\"\n    Test that the register function registers the 'b64' codec and that\n    the decoder correctly decodes a base64 string.\n    \"\"\"\n    # Ensure the codec is not registered yet\n    with pytest.raises(LookupError):\n        codecs.getdecoder(\"b64\")\n\n    # Register the codec\n    b64_module.register()\n\n    # After registration, the decoder should be available\n    decoder = codecs.getdecoder(\"b64\")\n    assert decoder is not None\n\n    # Decode a known base64 string\n    original = b\"hello world\"\n    encoded = base64.b64encode(original).decode(\"ascii\")\n    decoded_bytes, _ = decoder(encoded)\n    assert decoded_bytes == original\n\n\ndef test_register_idempotent():\n    \"\"\"\n    Test that calling register multiple times does not raise an exception\n    and the codec remains available.\n    \"\"\"\n    # First registration\n    b64_module.register()\n    # Second registration should be harmless\n    b64_module.register()\n\n    # The decoder should still work\n    decoder = codecs.getdecoder(\"b64\")\n    decoded_bytes, _ = decoder(base64.b64encode(b\"test\").decode(\"ascii\"))\n    assert decoded_bytes == b\"test\"\n\n\ndef test_register_error_on_missing_name():\n    \"\"\"\n    Test that if the module's NAME attribute is missing, register raises a NameError.\n    \"\"\"\n    # Temporarily delete NAME from the module if it exists\n    original_name = getattr(b64_module, \"NAME\", None)\n    if hasattr(b64_module, \"NAME\"):\n        delattr(b64_module, \"NAME\")\n\n    try:\n        with pytest.raises(NameError):\n            b64_module.register()\n    finally:\n        # Restore NAME for other tests\n        if original_name is not None:\n            setattr(b64_module, \"NAME\", original_name)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1354834900121205
+}

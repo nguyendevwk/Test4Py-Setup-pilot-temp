@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-d80dab88-0562-4a40-9fb0-e5e5166dad1b",
+  "object": "chat.completion",
+  "created": 1795078406,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.exceptions import Unauthorized\n\n\ndef test_unauthorized_with_scheme_and_challenges(tmp_path):\n    \"\"\"When a scheme and challenges are provided, the WWW-Authenticate header\n    should be constructed correctly and the instance should carry the\n    provided message.\"\"\"\n    exc = Unauthorized(\n        \"Auth required.\",\n        scheme=\"Basic\",\n        realm=\"Restricted Area\",\n        charset=\"UTF-8\",\n    )\n    # status code and quiet default\n    assert exc.status_code == 401\n    assert exc.quiet is True\n    # message stored\n    assert exc.message == \"Auth required.\"\n    # WWW-Authenticate header should contain all key/value pairs\n    header = exc.headers.get(\"WWW-Authenticate\")\n    assert header is not None\n    # order of items is not guaranteed, but all should be present\n    assert 'Basic' in header\n    assert 'realm=\"Restricted Area\"' in header\n    assert 'charset=\"UTF-8\"' in header\n    # No trailing comma or space\n    assert not header.endswith(\",\")\n    assert not header.endswith(\" \")\n\n\ndef test_unauthorized_without_scheme(tmp_path):\n    \"\"\"When no scheme is provided, no WWW-Authenticate header should be added.\"\"\"\n    exc = Unauthorized(\"No auth needed.\")\n    # headers should be empty or not contain WWW-Authenticate\n    assert \"WWW-Authenticate\" not in exc.headers\n    # message stored\n    assert exc.message == \"No auth needed.\"\n    # quiet default\n    assert exc.quiet is True\n\n\ndef test_unauthorized_headers_override_and_extra(tmp_path):\n    \"\"\"Headers passed to the constructor should be merged with the\n    automatically added WWW-Authenticate header, and extra data should\n    not appear in the public headers.\"\"\"\n    exc = Unauthorized(\n        \"Token missing\",\n        scheme=\"Bearer\",\n        headers={\"X-Custom\": \"value\"},\n        extra={\"internal\": \"secret\"},\n    )\n    # Custom header preserved\n    assert exc.headers[\"X-Custom\"] == \"value\"\n    # WWW-Authenticate header present\n    assert exc.headers[\"WWW-Authenticate\"] == \"Bearer\"\n    # Extra data should not be in headers\n    assert \"internal\" not in exc.headers\n    # The internal extra dict should be stored separately\n    assert exc.extra == {\"internal\": \"secret\"}\n```",
+        "reasoning": "We need to test Unauthorized class. Write three tests: normal init with scheme and challenges, boundary: no scheme, error: passing non-dict headers? maybe passing invalid challenge? But class just builds header string. Test that headers updated correctly. Also test that quiet default True. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052784003,
+    "prompt_tokens": 1040,
+    "prompt_time": 0.066357017,
+    "completion_tokens": 550,
+    "completion_time": 0.605238248,
+    "total_tokens": 1590,
+    "total_time": 0.671595265,
+    "completion_tokens_details": {
+      "reasoning_tokens": 61
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg5fy7exdvrwy49jgx5hbe",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.exceptions import Unauthorized\n\n\ndef test_unauthorized_with_scheme_and_challenges(tmp_path):\n    \"\"\"When a scheme and challenges are provided, the WWW-Authenticate header\n    should be constructed correctly and the instance should carry the\n    provided message.\"\"\"\n    exc = Unauthorized(\n        \"Auth required.\",\n        scheme=\"Basic\",\n        realm=\"Restricted Area\",\n        charset=\"UTF-8\",\n    )\n    # status code and quiet default\n    assert exc.status_code == 401\n    assert exc.quiet is True\n    # message stored\n    assert exc.message == \"Auth required.\"\n    # WWW-Authenticate header should contain all key/value pairs\n    header = exc.headers.get(\"WWW-Authenticate\")\n    assert header is not None\n    # order of items is not guaranteed, but all should be present\n    assert 'Basic' in header\n    assert 'realm=\"Restricted Area\"' in header\n    assert 'charset=\"UTF-8\"' in header\n    # No trailing comma or space\n    assert not header.endswith(\",\")\n    assert not header.endswith(\" \")\n\n\ndef test_unauthorized_without_scheme(tmp_path):\n    \"\"\"When no scheme is provided, no WWW-Authenticate header should be added.\"\"\"\n    exc = Unauthorized(\"No auth needed.\")\n    # headers should be empty or not contain WWW-Authenticate\n    assert \"WWW-Authenticate\" not in exc.headers\n    # message stored\n    assert exc.message == \"No auth needed.\"\n    # quiet default\n    assert exc.quiet is True\n\n\ndef test_unauthorized_headers_override_and_extra(tmp_path):\n    \"\"\"Headers passed to the constructor should be merged with the\n    automatically added WWW-Authenticate header, and extra data should\n    not appear in the public headers.\"\"\"\n    exc = Unauthorized(\n        \"Token missing\",\n        scheme=\"Bearer\",\n        headers={\"X-Custom\": \"value\"},\n        extra={\"internal\": \"secret\"},\n    )\n    # Custom header preserved\n    assert exc.headers[\"X-Custom\"] == \"value\"\n    # WWW-Authenticate header present\n    assert exc.headers[\"WWW-Authenticate\"] == \"Bearer\"\n    # Extra data should not be in headers\n    assert \"internal\" not in exc.headers\n    # The internal extra dict should be stored separately\n    assert exc.extra == {\"internal\": \"secret\"}\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0709040539804846
+}

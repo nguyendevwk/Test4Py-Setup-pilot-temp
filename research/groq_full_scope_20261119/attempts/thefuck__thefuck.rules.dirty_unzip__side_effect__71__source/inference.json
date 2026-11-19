@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-de35bdb2-c6a9-4620-81cc-e4e82a9e740c",
+  "object": "chat.completion",
+  "created": 1795076540,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport zipfile\nimport pytest\nfrom thefuck.rules.dirty_unzip import side_effect\n\n@pytest.fixture\ndef zip_path(tmp_path):\n    \"\"\"Create a zip file containing one safe and one unsafe file.\"\"\"\n    safe_file = tmp_path / \"safe.txt\"\n    safe_file.write_text(\"safe\")\n    unsafe_file = tmp_path.parent / \"outside.txt\"\n    unsafe_file.write_text(\"outside\")\n    zpath = tmp_path / \"archive.zip\"\n    with zipfile.ZipFile(zpath, \"w\") as z:\n        z.write(safe_file, arcname=\"safe.txt\")\n        z.write(unsafe_file, arcname=\"../outside.txt\")\n    return zpath\n\ndef test_removal_of_safe_files(tmp_path, zip_path, monkeypatch):\n    \"\"\"Files inside the current directory are removed.\"\"\"\n    # Ensure the safe file exists before the call\n    safe_file = tmp_path / \"safe.txt\"\n    assert safe_file.exists()\n    # Monkeypatch _zip_file to return our test zip\n    monkeypatch.setattr(\"thefuck.rules.dirty_unzip._zip_file\", lambda old_cmd: str(zip_path))\n    # Call side_effect with a dummy command\n    side_effect(\"unzip archive.zip\", None)\n    # The safe file should be removed\n    assert not safe_file.exists()\n\ndef test_skipping_unsafe_files(tmp_path, zip_path, monkeypatch):\n    \"\"\"Files outside the current directory are not removed.\"\"\"\n    unsafe_file = tmp_path.parent / \"outside.txt\"\n    assert unsafe_file.exists()\n    monkeypatch.setattr(\"thefuck.rules.dirty_unzip._zip_file\", lambda old_cmd: str(zip_path))\n    side_effect(\"unzip archive.zip\", None)\n    # The unsafe file should still exist\n    assert unsafe_file.exists()\n\ndef test_handling_oserror(tmp_path, zip_path, monkeypatch):\n    \"\"\"OSError during removal is ignored and does not propagate.\"\"\"\n    safe_file = tmp_path / \"safe.txt\"\n    assert safe_file.exists()\n    # Monkeypatch os.remove to raise OSError for the safe file\n    def fake_remove(path):\n        if os.path.abspath(path) == os.path.abspath(safe_file):\n            raise OSError(\"simulated error\")\n        os.remove(path)\n    monkeypatch.setattr(\"thefuck.rules.dirty_unzip.os.remove\", fake_remove)\n    monkeypatch.setattr(\"thefuck.rules.dirty_unzip._zip_file\", lambda old_cmd: str(zip_path))\n    # side_effect should not raise\n    side_effect(\"unzip archive.zip\", None)\n    # The safe file should still exist because removal failed\n    assert safe_file.exists()\n```",
+        "reasoning": "We need to write tests for side_effect. It opens zip file, iterates, removes files if safe. We need to create a zip file with files inside and outside cwd. Use tmp_path. Test that files inside are removed. Also test that files outside are not removed. Also test that if file removal raises OSError, it's ignored. But side_effect doesn't return anything. We can check that after calling side_effect, the files are removed. Use a dummy command string? old_cmd contains path to zip? _zip_file is not defined here; likely from module. But we can import side_effect from that module. We need to know _zip_file function. Let's inspect module? Not available. But we can assume _zip_file extracts zip path from old_cmd. For test, we can construct old_cmd that includes zip file path. Maybe old_cmd is like \"unzip file.zip\". So _zip_file probably splits. But we don't know. We can monkeypatch _zip_file to return our zip path. But cannot modify product code. But we can patch via monkeypatch fixture to set module._zip_file. That is allowed? It's not private? It's internal. But we can patch. Use monkeypatch.setattr(module, \"_zip_file\", lambda old_cmd: zip_path). That is acceptable. Then call side_effect. Test removal. Also test that if file is outside cwd, it is not removed. For outside, create a file in parent dir. Add to zip with path \"../outside.txt\". But os.path.abspath(file) will be relative to cwd? The file name inside zip is \"../outside.txt\". abspath will resolve to parent. It will not startwith cwd, so skip. So file remains. We can create a file outside and ensure it still exists after. Also test OSError: we can create a file that is read-only? Or we can monkeypatch os.remove to raise OSError for a specific file. But side_effect catches OSError and passes. We can test that no exception propagates. Use monkeypatch to raise OSError for one file. Ensure function completes. Use tmp_path. Let's write three tests: test_removal_of_safe_files, test_skipping_unsafe_files, test_handling_oserror."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052568236,
+    "prompt_tokens": 341,
+    "prompt_time": 0.620330442,
+    "completion_tokens": 1010,
+    "completion_time": 1.15832291,
+    "total_tokens": 1351,
+    "total_time": 1.778653352,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 455
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7secg8rew9bp0tqtdss9754",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport zipfile\nimport pytest\nfrom thefuck.rules.dirty_unzip import side_effect\n\n@pytest.fixture\ndef zip_path(tmp_path):\n    \"\"\"Create a zip file containing one safe and one unsafe file.\"\"\"\n    safe_file = tmp_path / \"safe.txt\"\n    safe_file.write_text(\"safe\")\n    unsafe_file = tmp_path.parent / \"outside.txt\"\n    unsafe_file.write_text(\"outside\")\n    zpath = tmp_path / \"archive.zip\"\n    with zipfile.ZipFile(zpath, \"w\") as z:\n        z.write(safe_file, arcname=\"safe.txt\")\n        z.write(unsafe_file, arcname=\"../outside.txt\")\n    return zpath\n\ndef test_removal_of_safe_files(tmp_path, zip_path, monkeypatch):\n    \"\"\"Files inside the current directory are removed.\"\"\"\n    # Ensure the safe file exists before the call\n    safe_file = tmp_path / \"safe.txt\"\n    assert safe_file.exists()\n    # Monkeypatch _zip_file to return our test zip\n    monkeypatch.setattr(\"thefuck.rules.dirty_unzip._zip_file\", lambda old_cmd: str(zip_path))\n    # Call side_effect with a dummy command\n    side_effect(\"unzip archive.zip\", None)\n    # The safe file should be removed\n    assert not safe_file.exists()\n\ndef test_skipping_unsafe_files(tmp_path, zip_path, monkeypatch):\n    \"\"\"Files outside the current directory are not removed.\"\"\"\n    unsafe_file = tmp_path.parent / \"outside.txt\"\n    assert unsafe_file.exists()\n    monkeypatch.setattr(\"thefuck.rules.dirty_unzip._zip_file\", lambda old_cmd: str(zip_path))\n    side_effect(\"unzip archive.zip\", None)\n    # The unsafe file should still exist\n    assert unsafe_file.exists()\n\ndef test_handling_oserror(tmp_path, zip_path, monkeypatch):\n    \"\"\"OSError during removal is ignored and does not propagate.\"\"\"\n    safe_file = tmp_path / \"safe.txt\"\n    assert safe_file.exists()\n    # Monkeypatch os.remove to raise OSError for the safe file\n    def fake_remove(path):\n        if os.path.abspath(path) == os.path.abspath(safe_file):\n            raise OSError(\"simulated error\")\n        os.remove(path)\n    monkeypatch.setattr(\"thefuck.rules.dirty_unzip.os.remove\", fake_remove)\n    monkeypatch.setattr(\"thefuck.rules.dirty_unzip._zip_file\", lambda old_cmd: str(zip_path))\n    # side_effect should not raise\n    side_effect(\"unzip archive.zip\", None)\n    # The safe file should still exist because removal failed\n    assert safe_file.exists()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 2.147077700996306
+}

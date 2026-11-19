@@ -1,0 +1,20 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_custom_headers_merge_and_overwrite ____________________
+
+    def test_custom_headers_merge_and_overwrite():
+        """Custom headers should merge with the Content-Range header and override if duplicate."""
+        dummy = DummyRange(total=2048)
+        custom = {"Content-Range": "bytes */9999", "X-Custom": "value"}
+        exc = RangeNotSatisfiable(content_range=dummy, headers=custom)
+        # Content-Range should be overridden by the custom value
+>       assert exc.headers["Content-Range"] == "bytes */9999"
+E       AssertionError: assert 'bytes */2048' == 'bytes */9999'
+E         
+E         - bytes */9999
+E         + bytes */2048
+
+test_generated.py:36: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_custom_headers_merge_and_overwrite - Assertion...
+1 failed, 2 passed in 0.34s

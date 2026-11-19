@@ -1,0 +1,74 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+___________ test_ssl_options_to_context_server_side_default_version ____________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__ssl_options_to_context__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_ssl_options_to_context_se0')
+
+    def test_ssl_options_to_context_server_side_default_version(tmp_path):
+        """When server_side=True, the context should use PROTOCOL_TLS_SERVER."""
+        # Create a temporary self‑signed certificate file for load_cert_chain
+        cert_file = tmp_path / "cert.pem"
+        key_file = tmp_path / "key.pem"
+        # Minimal PEM contents that satisfy load_cert_chain (not a real cert)
+        cert_file.write_text("-----BEGIN CERTIFICATE-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArV\\n-----END CERTIFICATE-----")
+        key_file.write_text("-----BEGIN PRIVATE KEY-----\\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC\\n-----END PRIVATE KEY-----")
+    
+        options = {
+            "certfile": str(cert_file),
+            "keyfile": str(key_file),
+            "ssl_version": ssl.PROTOCOL_TLS,  # will be overridden by server_side
+        }
+>       ctx = ssl_options_to_context(options, server_side=True)
+
+test_generated.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ssl_options = {'certfile': '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.netutil...l0/tmp/pytest-of-heurix/pytest-0/test_ssl_options_to_context_se0/key.pem', 'ssl_version': <_SSLMethod.PROTOCOL_TLS: 2>}
+server_side = True
+
+    def ssl_options_to_context(
+        ssl_options: Union[Dict[str, Any], ssl.SSLContext],
+        server_side: Optional[bool] = None,
+    ) -> ssl.SSLContext:
+        """Try to convert an ``ssl_options`` dictionary to an
+        `~ssl.SSLContext` object.
+    
+        The ``ssl_options`` argument may be either an `ssl.SSLContext` object or a dictionary containing
+        keywords to be passed to ``ssl.SSLContext.wrap_socket``.  This function converts the dict form
+        to its `~ssl.SSLContext` equivalent, and may be used when a component which accepts both forms
+        needs to upgrade to the `~ssl.SSLContext` version to use features like SNI or ALPN.
+    
+        .. versionchanged:: 6.2
+    
+           Added server_side argument. Omitting this argument will result in a DeprecationWarning on
+           Python 3.10.
+    
+        """
+        if isinstance(ssl_options, ssl.SSLContext):
+            return ssl_options
+        assert isinstance(ssl_options, dict)
+        assert all(k in _SSL_CONTEXT_KEYWORDS for k in ssl_options), ssl_options
+        # TODO: Now that we have the server_side argument, can we switch to
+        # create_default_context or would that change behavior?
+        default_version = ssl.PROTOCOL_TLS
+        if server_side:
+            default_version = ssl.PROTOCOL_TLS_SERVER
+        elif server_side is not None:
+            default_version = ssl.PROTOCOL_TLS_CLIENT
+        context = ssl.SSLContext(ssl_options.get("ssl_version", default_version))
+        if "certfile" in ssl_options:
+>           context.load_cert_chain(
+                ssl_options["certfile"], ssl_options.get("keyfile", None)
+            )
+E           ssl.SSLError: [SSL] PEM lib (_ssl.c:3913)
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/netutil.py:621: SSLError
+=============================== warnings summary ===============================
+research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__ssl_options_to_context__71__context_setup/eval0/test_generated.py::test_ssl_options_to_context_server_side_default_version
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/netutil.py:619: DeprecationWarning: ssl.PROTOCOL_TLS is deprecated
+    context = ssl.SSLContext(ssl_options.get("ssl_version", default_version))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_ssl_options_to_context_server_side_default_version
+1 failed, 2 passed, 1 warning in 0.35s

@@ -1,0 +1,51 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_get_local_reprs_order_and_repr ______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-243/test_get_local_reprs_order_and0')
+
+    def test_get_local_reprs_order_and_repr(tmp_path):
+        # Define a function with several local variables
+        def sample():
+            a = 1
+            b = "hello world"
+            c = [1, 2, 3]
+            d = {"key": "value"}
+            return locals()
+    
+        # Capture the frame of the sample function
+        frame = inspect.currentframe()
+        # Call get_local_reprs on the frame of sample
+        result = get_local_reprs(frame.f_back)
+    
+        # The result should be an OrderedDict preserving the order of co_varnames
+        expected_keys = list(sample.__code__.co_varnames) + list(sample.__code__.co_cellvars) + list(sample.__code__.co_freevars)
+        # Include any other locals that might appear
+        for key in result.keys():
+>           assert key in expected_keys
+E           AssertionError: assert 'pyfuncitem' in ['a', 'b', 'c', 'd']
+
+../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__46__atomic_source/eval0/test_generated.py:24: AssertionError
+__________________ test_get_local_reprs_max_length_truncation __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-243/test_get_local_reprs_max_lengt0')
+
+    def test_get_local_reprs_max_length_truncation(tmp_path):
+        # Define a function with a long string
+        def long_string():
+            long = "x" * 100
+            return locals()
+    
+        frame = inspect.currentframe()
+        # Use max_length to truncate the representation
+        result = get_local_reprs(frame.f_back, max_length=10)
+    
+        # The long string should be truncated to 10 characters plus ellipsis
+>       assert result["long"].startswith("'xxxxxxxxxx")
+E       KeyError: 'long'
+
+../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__46__atomic_source/eval0/test_generated.py:43: KeyError
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__46__atomic_source/eval0/test_generated.py::test_get_local_reprs_order_and_repr
+FAILED ../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__46__atomic_source/eval0/test_generated.py::test_get_local_reprs_max_length_truncation
+2 failed, 1 passed in 0.13s

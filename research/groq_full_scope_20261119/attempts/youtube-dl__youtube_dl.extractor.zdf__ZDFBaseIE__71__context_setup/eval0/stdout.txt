@@ -1,0 +1,141 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_extract_format_m3u8_and_duplicate ____________________
+
+dummy_ie = <test_generated.DummyZDFIE object at 0x7f690592d2a0>
+
+    def test_extract_format_m3u8_and_duplicate(dummy_ie):
+        """Test that m3u8 URLs are processed and duplicates are ignored."""
+        video_id = "vid123"
+        formats = []
+        format_urls = set()
+        meta = {
+            "url": "http://example.com/stream.m3u8",
+            "mimeType": "application/x-mpegURL",
+            "type": "video",
+            "quality": "high",
+            "language": "deu",
+        }
+        # First extraction should add m3u8 formats
+>       dummy_ie._extract_format(video_id, formats, format_urls, meta)
+
+test_generated.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/zdf.py:60: in _extract_format
+    formats.extend(self._extract_m3u8_formats(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1639: in _extract_m3u8_formats
+    res = self._download_webpage_handle(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:667: in _download_webpage_handle
+    urlh = self._request_webpage(url_or_request, video_id, note, errnote, fatal, data=data, headers=headers, query=query, expected_status=expected_status)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:611: in _request_webpage
+    self.to_screen('%s: %s' % (video_id, note))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyZDFIE object at 0x7f690592d2a0>
+msg = 'vid123: Downloading m3u8 information'
+
+    def to_screen(self, msg):
+        """Print msg to screen, prefixing it with '[ie_name]'"""
+>       self._downloader.to_screen('[%s] %s' % (self.IE_NAME, msg))
+E       AttributeError: 'NoneType' object has no attribute 'to_screen'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:921: AttributeError
+______________________ test_extract_ptmd_with_mocked_api _______________________
+
+dummy_ie = <test_generated.DummyZDFIE object at 0x7f69057ba6b0>
+
+    def test_extract_ptmd_with_mocked_api(dummy_ie):
+        """Test _extract_ptmd processes mocked API response correctly."""
+        # Mock API JSON
+        dummy_ie._mock_json = {
+            "basename": "content456",
+            "priorityList": [
+                {
+                    "formitaeten": [
+                        {
+                            "qualities": [
+                                {
+                                    "audio": {
+                                        "tracks": [
+                                            {"uri": "http://example.com/audio.mp4", "language": "deu"},
+                                            {"uri": "http://example.com/audio2.mp4", "language": "eng"},
+                                        ]
+                                    },
+                                    "quality": "high",
+                                    "type": "video",
+                                    "mimeType": "video/mp4",
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "attributes": {
+                "duration": {"value": 123456}  # milliseconds
+            },
+            "captions": [
+                {"uri": "http://example.com/sub.srt", "language": "eng"}
+            ]
+        }
+    
+>       result = dummy_ie._extract_ptmd(
+            ptmd_url="http://api.example.com/ptmd/content456",
+            video_id="vid123",
+            api_token="dummy_token",
+            referrer="http://referrer.example.com"
+        )
+
+test_generated.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/zdf.py:111: in _extract_ptmd
+    self._sort_formats(formats)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1446: in _sort_formats
+    formats.sort(key=_formats_key)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = {'url': 'http://example.com/audio.mp4', 'format_id': 'http-high', 'format_note': 'high', 'language': 'deu', ...}
+
+    def _formats_key(f):
+        # TODO remove the following workaround
+        from ..utils import determine_ext
+        if not f.get('ext') and 'url' in f:
+            f['ext'] = determine_ext(f['url'])
+    
+        if isinstance(field_preference, (list, tuple)):
+            return tuple(
+                f.get(field)
+                if f.get(field) is not None
+                else ('' if field == 'format_id' else -1)
+                for field in field_preference)
+    
+        preference = f.get('preference')
+        if preference is None:
+            preference = 0
+            if f.get('ext') in ['f4f', 'f4m']:  # Not yet supported
+                preference -= 0.5
+    
+        protocol = f.get('protocol') or determine_protocol(f)
+        proto_preference = 0 if protocol in ['http', 'https'] else (-0.5 if protocol == 'rtsp' else -0.1)
+    
+        if f.get('vcodec') == 'none':  # audio only
+            preference -= 50
+            if self._downloader.params.get('prefer_free_formats'):
+                ORDER = ['aac', 'mp3', 'm4a', 'webm', 'ogg', 'opus']
+            else:
+                ORDER = ['webm', 'opus', 'ogg', 'mp3', 'aac', 'm4a']
+            ext_preference = 0
+            try:
+                audio_ext_preference = ORDER.index(f['ext'])
+            except ValueError:
+                audio_ext_preference = -1
+        else:
+            if f.get('acodec') == 'none':  # video only
+                preference -= 40
+>           if self._downloader.params.get('prefer_free_formats'):
+E           AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1418: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extract_format_m3u8_and_duplicate - AttributeE...
+FAILED test_generated.py::test_extract_ptmd_with_mocked_api - AttributeError:...
+2 failed, 1 passed in 1.00s

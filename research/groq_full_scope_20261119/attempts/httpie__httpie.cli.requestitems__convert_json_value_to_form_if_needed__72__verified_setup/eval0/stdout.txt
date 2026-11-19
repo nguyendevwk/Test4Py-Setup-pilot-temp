@@ -1,0 +1,69 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_in_json_mode_pass_through ________________________
+
+    def test_in_json_mode_pass_through():
+        """When in_json_mode is True, the returned function should be the original processor."""
+        def processor(arg: KeyValueArg):
+            return {"key": "value"}  # complex type
+    
+        wrapped = convert_json_value_to_form_if_needed(True, processor)
+        # The wrapper should be the same callable as processor
+        assert wrapped is processor
+        # Calling it should return the complex dict unchanged
+>       result = wrapped()
+E       TypeError: test_in_json_mode_pass_through.<locals>.processor() missing 1 required positional argument: 'arg'
+
+test_generated.py:16: TypeError
+_________________________ test_form_wrapper_primitive __________________________
+
+    def test_form_wrapper_primitive():
+        """When not in JSON mode, primitive values are converted to strings."""
+        def processor(arg: KeyValueArg):
+            return 42  # primitive int
+    
+        wrapped = convert_json_value_to_form_if_needed(False, processor)
+        # The wrapped function should return the string representation of the int
+>       assert wrapped() == "42"
+
+test_generated.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (), kwargs = {}
+
+    @functools.wraps(processor)
+    def wrapper(*args, **kwargs) -> str:
+        try:
+>           output = processor(*args, **kwargs)
+E           TypeError: test_form_wrapper_primitive.<locals>.processor() missing 1 required positional argument: 'arg'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/cli/requestitems.py:178: TypeError
+_______________ test_form_wrapper_complex_error_and_parse_error ________________
+
+    def test_form_wrapper_complex_error_and_parse_error():
+        """Complex values raise ParseError; processor raising ParseError yields None."""
+        # Complex value case
+        def complex_processor(arg: KeyValueArg):
+            return [1, 2, 3]  # list is a complex type
+    
+        wrapped_complex = convert_json_value_to_form_if_needed(False, complex_processor)
+        with pytest.raises(ParseError, match="Cannot use complex JSON value types"):
+>           wrapped_complex()
+
+test_generated.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (), kwargs = {}
+
+    @functools.wraps(processor)
+    def wrapper(*args, **kwargs) -> str:
+        try:
+>           output = processor(*args, **kwargs)
+E           TypeError: test_form_wrapper_complex_error_and_parse_error.<locals>.complex_processor() missing 1 required positional argument: 'arg'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/cli/requestitems.py:178: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_in_json_mode_pass_through - TypeError: test_in...
+FAILED test_generated.py::test_form_wrapper_primitive - TypeError: test_form_...
+FAILED test_generated.py::test_form_wrapper_complex_error_and_parse_error - T...
+3 failed in 0.74s

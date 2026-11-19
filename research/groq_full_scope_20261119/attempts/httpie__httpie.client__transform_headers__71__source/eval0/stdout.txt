@@ -1,0 +1,54 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_content_length_removal __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.client__transform_headers__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_content_length_removal0')
+
+    def test_content_length_removal(tmp_path):
+        # Create a request with a non‑zero Content-Length header
+        req = requests.Request(
+            method="GET",
+            url="http://example.com",
+            headers={"Content-Length": "123", "Accept": "*/*"}
+        )
+        # Prepare the request; requests will set Content-Length to 0 for GET
+        prepared = req.prepare()
+        # Ensure the prepared request initially has the misplaced header
+>       assert prepared.headers.get("Content-Length") == "0"
+E       AssertionError: assert '123' == '0'
+E         
+E         - 0
+E         + 123
+
+test_generated.py:16: AssertionError
+________________________ test_missing_headers_are_added ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.client__transform_headers__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_missing_headers_are_added0')
+
+    def test_missing_headers_are_added(tmp_path):
+        # Request has a header that the prepared request lacks
+        req = requests.Request(
+            method="GET",
+            url="http://example.com",
+            headers={"X-Custom-Header": "value", "Accept": "application/json"}
+        )
+        prepared = req.prepare()
+        # Remove Accept to simulate missing header
+        prepared.headers.pop("Accept", None)
+        # Ensure Accept is missing before transformation
+        assert "Accept" not in prepared.headers
+        # Apply the transformation
+        transform_headers(req, prepared)
+        # The missing header should now be present
+        assert prepared.headers.get("X-Custom-Header") == "value"
+>       assert prepared.headers.get("Accept") == "application/json"
+E       AssertionError: assert None == 'application/json'
+E        +  where None = <built-in method get of HTTPHeadersDict object at 0x7fb322bb3dc0>('Accept')
+E        +    where <built-in method get of HTTPHeadersDict object at 0x7fb322bb3dc0> = <HTTPHeadersDict('X-Custom-Header': 'value')>.get
+E        +      where <HTTPHeadersDict('X-Custom-Header': 'value')> = <PreparedRequest [GET]>.headers
+
+test_generated.py:56: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_content_length_removal - AssertionError: asser...
+FAILED test_generated.py::test_missing_headers_are_added - AssertionError: as...
+2 failed, 1 passed in 0.55s

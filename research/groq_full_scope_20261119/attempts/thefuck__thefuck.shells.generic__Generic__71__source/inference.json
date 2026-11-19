@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-068ea14c-3710-4cd5-9520-550eeedb354d",
+  "object": "chat.completion",
+  "created": 1795078110,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport io\nimport shlex\nimport pytest\nfrom thefuck.shells.generic import Generic\nfrom thefuck.conf import settings\n\nclass TestGenericShell:\n    def test_alias_expansion_and_split_command(self):\n        shell = Generic()\n        # Define a custom alias mapping\n        def custom_get_aliases():\n            return {\"ls\": \"ls --color=auto\"}\n        shell.get_aliases = custom_get_aliases\n\n        # Alias should be expanded only for the first word\n        expanded = shell._expand_aliases(\"ls -l /tmp\")\n        assert expanded == \"ls --color=auto -l /tmp\"\n\n        # Splitting should preserve quoted spaces\n        cmd = r'echo \"Hello World\"'\n        parts = shell.split_command(cmd)\n        assert parts == ['echo', 'Hello World']\n\n        # Splitting should handle escaped spaces\n        cmd2 = r'echo Hello\\ World'\n        parts2 = shell.split_command(cmd2)\n        assert parts2 == ['echo', 'Hello World']\n\n    def test_info_handles_exception_and_version(self):\n        shell = Generic()\n        # Override _get_version to raise an exception\n        def bad_version():\n            raise RuntimeError(\"no version\")\n        shell._get_version = bad_version\n\n        # info should catch exception and return only friendly_name\n        info = shell.info()\n        assert info == \"Generic Shell\"\n\n        # Now provide a valid version\n        shell._get_version = lambda: \"v1.2.3\"\n        info2 = shell.info()\n        assert info2 == \"Generic Shell v1.2.3\"\n\n    def test_get_history_with_history_limit_and_file(self, tmp_path):\n        shell = Generic()\n        # Create a temporary history file with more lines than the limit\n        hist_file = tmp_path / \"history.txt\"\n        lines = [f\"cmd{i}\\n\" for i in range(10)]\n        hist_file.write_text(\"\".join(lines), encoding=\"utf-8\")\n\n        # Monkeypatch methods to use our temp file\n        shell._get_history_file_name = lambda: str(hist_file)\n        shell._script_from_history = lambda line: line.strip()\n\n        # Set history limit to 5\n        settings.history_limit = 5\n        history = shell.get_history()\n        # Should return the last 5 commands\n        assert history == [f\"cmd{i}\" for i in range(5, 10)]\n        # Reset history_limit to default (None)\n        settings.history_limit = None\n```",
+        "reasoning": "Need tests for Generic. Three functions. Test alias expansion, split_command handling spaces, and info with exception. Use settings.history_limit maybe. Use tmp_path for history file? _get_history_file_name returns ''. So get_history returns empty list. Test that. Also test quote. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005345336,
+    "prompt_tokens": 1270,
+    "prompt_time": 0.066584508,
+    "completion_tokens": 592,
+    "completion_time": 0.610393722,
+    "total_tokens": 1862,
+    "total_time": 0.67697823,
+    "completion_tokens_details": {
+      "reasoning_tokens": 60
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sfwev5er9ttkm6zg83y0a0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport io\nimport shlex\nimport pytest\nfrom thefuck.shells.generic import Generic\nfrom thefuck.conf import settings\n\nclass TestGenericShell:\n    def test_alias_expansion_and_split_command(self):\n        shell = Generic()\n        # Define a custom alias mapping\n        def custom_get_aliases():\n            return {\"ls\": \"ls --color=auto\"}\n        shell.get_aliases = custom_get_aliases\n\n        # Alias should be expanded only for the first word\n        expanded = shell._expand_aliases(\"ls -l /tmp\")\n        assert expanded == \"ls --color=auto -l /tmp\"\n\n        # Splitting should preserve quoted spaces\n        cmd = r'echo \"Hello World\"'\n        parts = shell.split_command(cmd)\n        assert parts == ['echo', 'Hello World']\n\n        # Splitting should handle escaped spaces\n        cmd2 = r'echo Hello\\ World'\n        parts2 = shell.split_command(cmd2)\n        assert parts2 == ['echo', 'Hello World']\n\n    def test_info_handles_exception_and_version(self):\n        shell = Generic()\n        # Override _get_version to raise an exception\n        def bad_version():\n            raise RuntimeError(\"no version\")\n        shell._get_version = bad_version\n\n        # info should catch exception and return only friendly_name\n        info = shell.info()\n        assert info == \"Generic Shell\"\n\n        # Now provide a valid version\n        shell._get_version = lambda: \"v1.2.3\"\n        info2 = shell.info()\n        assert info2 == \"Generic Shell v1.2.3\"\n\n    def test_get_history_with_history_limit_and_file(self, tmp_path):\n        shell = Generic()\n        # Create a temporary history file with more lines than the limit\n        hist_file = tmp_path / \"history.txt\"\n        lines = [f\"cmd{i}\\n\" for i in range(10)]\n        hist_file.write_text(\"\".join(lines), encoding=\"utf-8\")\n\n        # Monkeypatch methods to use our temp file\n        shell._get_history_file_name = lambda: str(hist_file)\n        shell._script_from_history = lambda line: line.strip()\n\n        # Set history limit to 5\n        settings.history_limit = 5\n        history = shell.get_history()\n        # Should return the last 5 commands\n        assert history == [f\"cmd{i}\" for i in range(5, 10)]\n        # Reset history_limit to default (None)\n        settings.history_limit = None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0916484500048682
+}

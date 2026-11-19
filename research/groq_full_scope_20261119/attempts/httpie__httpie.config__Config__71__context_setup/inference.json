@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-54835dee-919b-49f1-872b-9c61b732f123",
+  "object": "chat.completion",
+  "created": 1795079601,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport os\nfrom pathlib import Path\n\nimport pytest\n\nfrom httpie.config import Config, DEFAULT_CONFIG_DIR, get_default_config_dir\n\n\ndef test_default_config_initialization(tmp_path):\n    \"\"\"Config should create a new file with defaults when none exists.\"\"\"\n    cfg_dir = tmp_path / \"httpie\"\n    cfg = Config(directory=cfg_dir)\n    # The config file should be created with defaults\n    assert cfg.path.exists()\n    data = json.loads(cfg.path.read_text(encoding=\"utf-8\"))\n    # Default options list is empty\n    assert data[\"default_options\"] == []\n    # The meta section should contain the current version\n    assert \"__meta__\" in data\n    assert \"httpie\" in data[\"__meta__\"]\n\n\ndef test_custom_config_overrides_and_path_resolution(tmp_path):\n    \"\"\"Custom values in the config file should override defaults and\n    path resolution should work for relative and absolute paths.\"\"\"\n    cfg_dir = tmp_path / \"httpie\"\n    cfg_file = cfg_dir / Config.FILENAME\n    cfg_dir.mkdir()\n    # Write a custom config with relative paths\n    custom = {\n        \"default_options\": [\"--verbose\"],\n        \"plugins_dir\": \"my_plugins\",\n        \"version_info_file\": \"~/my_version.json\",\n        \"developer_mode\": True,\n    }\n    cfg_file.write_text(json.dumps(custom, indent=4), encoding=\"utf-8\")\n\n    cfg = Config(directory=cfg_dir)\n    # Load should read the file\n    assert cfg[\"default_options\"] == [\"--verbose\"]\n    # Path resolution expands user and resolves to absolute path\n    expected_plugins = (cfg_dir / \"my_plugins\").resolve()\n    assert cfg.plugins_dir == expected_plugins\n    expected_version_file = Path.home() / \"my_version.json\"\n    assert cfg.version_info_file == expected_version_file.resolve()\n    # Developer mode flag is preserved\n    assert cfg.developer_mode is True\n\n\ndef test_missing_config_file_uses_default_and_no_error(tmp_path):\n    \"\"\"When the config file is missing, Config should still provide defaults\n    and not raise an exception.\"\"\"\n    cfg_dir = tmp_path / \"httpie\"\n    cfg = Config(directory=cfg_dir)\n    # No file should exist yet\n    assert not cfg.path.exists()\n    # Defaults should be present\n    assert cfg.default_options == []\n    # Plugins dir should resolve to default relative to config dir\n    assert cfg.plugins_dir == (cfg_dir / \"plugins\").resolve()\n    # Version info file should resolve to default relative to config dir\n    assert cfg.version_info_file == (cfg_dir / \"version_info.json\").resolve()\n    # Developer mode should be None (unset)\n    assert cfg.developer_mode is None\n```",
+        "reasoning": "Need tests for Config: default_options, plugins_dir resolution, developer_mode. Use tmp_path. Ensure default values. Also test that if config file missing, defaults applied. Also test that providing custom config file with values overrides. Three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00550536,
+    "prompt_tokens": 1382,
+    "prompt_time": 0.009896145,
+    "completion_tokens": 624,
+    "completion_time": 1.159226597,
+    "total_tokens": 2006,
+    "total_time": 1.1691227419999999,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 49
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh9yf9e7ns031qjcey7hgm",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport os\nfrom pathlib import Path\n\nimport pytest\n\nfrom httpie.config import Config, DEFAULT_CONFIG_DIR, get_default_config_dir\n\n\ndef test_default_config_initialization(tmp_path):\n    \"\"\"Config should create a new file with defaults when none exists.\"\"\"\n    cfg_dir = tmp_path / \"httpie\"\n    cfg = Config(directory=cfg_dir)\n    # The config file should be created with defaults\n    assert cfg.path.exists()\n    data = json.loads(cfg.path.read_text(encoding=\"utf-8\"))\n    # Default options list is empty\n    assert data[\"default_options\"] == []\n    # The meta section should contain the current version\n    assert \"__meta__\" in data\n    assert \"httpie\" in data[\"__meta__\"]\n\n\ndef test_custom_config_overrides_and_path_resolution(tmp_path):\n    \"\"\"Custom values in the config file should override defaults and\n    path resolution should work for relative and absolute paths.\"\"\"\n    cfg_dir = tmp_path / \"httpie\"\n    cfg_file = cfg_dir / Config.FILENAME\n    cfg_dir.mkdir()\n    # Write a custom config with relative paths\n    custom = {\n        \"default_options\": [\"--verbose\"],\n        \"plugins_dir\": \"my_plugins\",\n        \"version_info_file\": \"~/my_version.json\",\n        \"developer_mode\": True,\n    }\n    cfg_file.write_text(json.dumps(custom, indent=4), encoding=\"utf-8\")\n\n    cfg = Config(directory=cfg_dir)\n    # Load should read the file\n    assert cfg[\"default_options\"] == [\"--verbose\"]\n    # Path resolution expands user and resolves to absolute path\n    expected_plugins = (cfg_dir / \"my_plugins\").resolve()\n    assert cfg.plugins_dir == expected_plugins\n    expected_version_file = Path.home() / \"my_version.json\"\n    assert cfg.version_info_file == expected_version_file.resolve()\n    # Developer mode flag is preserved\n    assert cfg.developer_mode is True\n\n\ndef test_missing_config_file_uses_default_and_no_error(tmp_path):\n    \"\"\"When the config file is missing, Config should still provide defaults\n    and not raise an exception.\"\"\"\n    cfg_dir = tmp_path / \"httpie\"\n    cfg = Config(directory=cfg_dir)\n    # No file should exist yet\n    assert not cfg.path.exists()\n    # Defaults should be present\n    assert cfg.default_options == []\n    # Plugins dir should resolve to default relative to config dir\n    assert cfg.plugins_dir == (cfg_dir / \"plugins\").resolve()\n    # Version info file should resolve to default relative to config dir\n    assert cfg.version_info_file == (cfg_dir / \"version_info.json\").resolve()\n    # Developer mode should be None (unset)\n    assert cfg.developer_mode is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "c00d883a04154971985f2644e5cb32b7",
+  "_api_plus_pacing_seconds": 3.6453468250110745
+}

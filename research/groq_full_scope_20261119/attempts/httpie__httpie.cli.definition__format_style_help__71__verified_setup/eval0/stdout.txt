@@ -1,0 +1,39 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_format_style_help_normal _________________________
+
+    def test_format_style_help_normal():
+        # Provide a small list of styles
+        styles = ["monokai", "solarized-dark", "gruvbox"]
+        result = format_style_help(styles)
+        # The default style should be mentioned
+        assert f'Output coloring style (default is "{DEFAULT_STYLE}")' in result
+        # The auto style should be referenced
+        assert f'The "{AUTO_STYLE}" style follows your terminal' in result
+        # All provided styles should appear in the wrapped list
+        for style in styles:
+>           assert f'    {style}' in result
+E           assert '    solarized-dark' in '\n    Output coloring style (default is "auto"). It can be one of:\n\n        monokai, solarized-dark, gruvbox\n    \...ronment variable is set to "xterm-256color" or similar\n(e.g., via `export TERM=xterm-256color\' in your ~/.bashrc).\n'
+
+test_generated.py:15: AssertionError
+____________________ test_format_style_help_isolation_mode _____________________
+
+    def test_format_style_help_isolation_mode():
+        # Use a custom list; isolation_mode should override it with bundled styles
+        custom_styles = ["custom1", "custom2"]
+        result = format_style_help(custom_styles, isolation_mode=True)
+        # The isolation mode header should be present
+        assert 'For finding out all available styles in your system' in result
+        # The custom styles should not appear
+        for style in custom_styles:
+            assert style not in result
+        # All bundled styles should appear, sorted
+        for style in sorted(BUNDLED_STYLES):
+>           assert f'    {style}' in result
+E           assert '    pie' in '\n    Output coloring style (default is "auto"). It can be one of:\n\n        auto, pie, pie-dark, pie-light, solariz...ronment variable is set to "xterm-256color" or similar\n(e.g., via `export TERM=xterm-256color\' in your ~/.bashrc).\n'
+
+test_generated.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_format_style_help_normal - assert '    solariz...
+FAILED test_generated.py::test_format_style_help_isolation_mode - assert '   ...
+2 failed, 1 passed in 0.50s

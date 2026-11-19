@@ -1,0 +1,40 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_get_corrected_commands_organization ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc7cb654a30>
+
+    def test_get_corrected_commands_organization(monkeypatch):
+        # Three rules, two match, produce duplicates and different priorities
+        rule1 = DummyRule(lambda c: c == 'git', ['git status'], priority=5)
+        rule2 = DummyRule(lambda c: c == 'git', ['git status', 'git commit'], priority=3)
+        rule3 = DummyRule(lambda c: False, ['ignored'], priority=1)
+        monkeypatch.setattr(corrector, 'get_rules', lambda: [rule1, rule2, rule3])
+    
+        result = list(corrector.get_corrected_commands('git'))
+        # Expected: first command from rule1 (priority 5), then unique sorted by priority
+        expected = [
+            CorrectedCommand('git status', 5),          # first
+            CorrectedCommand('git status', 3),          # duplicate removed
+            CorrectedCommand('git commit', 3)           # unique
+        ]
+>       assert result == expected
+E       AssertionError: assert [CorrectedCom..., priority=3)] == [CorrectedCom..., priority=3)]
+E         
+E         At index 1 diff: CorrectedCommand(command='git commit', priority=3) != CorrectedCommand(command='git status', priority=3)
+E         Use -v to get more diff
+
+test_generated.py:52: AssertionError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_corrected_commands_organization - Assertio...
+1 failed, 2 passed, 2 warnings in 0.44s

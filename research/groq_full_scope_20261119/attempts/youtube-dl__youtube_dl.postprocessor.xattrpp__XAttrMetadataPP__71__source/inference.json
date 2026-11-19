@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-8fe2fb44-3d0b-4045-9de5-764566d06da5",
+  "object": "chat.completion",
+  "created": 1795077042,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport pytest\nfrom youtube_dl.postprocessor.xattrpp import XAttrMetadataPP\nfrom youtube_dl.utils import XAttrUnavailableError, XAttrMetadataError\n\nclass DummyDownloader:\n    def __init__(self):\n        self.messages = []\n\n    def to_screen(self, msg):\n        self.messages.append(('screen', msg))\n\n    def report_error(self, msg):\n        self.messages.append(('error', msg))\n\n    def report_warning(self, msg):\n        self.messages.append(('warning', msg))\n\n@pytest.fixture\ndef dummy_pp(tmp_path):\n    pp = XAttrMetadataPP()\n    pp._downloader = DummyDownloader()\n    return pp, tmp_path\n\ndef test_run_writes_expected_xattrs(dummy_pp, monkeypatch):\n    pp, tmp_path = dummy_pp\n    file = tmp_path / \"video.mp4\"\n    file.write_text(\"dummy\")\n    info = {\n        'filepath': str(file),\n        'webpage_url': 'https://example.com',\n        'title': 'Test Video',\n        'upload_date': '20240101',\n        'description': 'A test',\n        'uploader': 'Tester',\n        'format': 'mp4',\n    }\n    written = []\n\n    def fake_write_xattr(path, name, value):\n        written.append((name, value.decode()))\n    monkeypatch.setattr(pp, 'write_xattr', fake_write_xattr)\n\n    # monkeypatch the imported write_xattr\n    monkeypatch.setattr('youtube_dl.postprocessor.xattrpp.write_xattr', fake_write_xattr)\n\n    pp.run(info)\n\n    expected = {\n        'user.xdg.referrer.url': 'https://example.com',\n        'user.dublincore.title': 'Test Video',\n        'user.dublincore.date': '2024-01-01',\n        'user.dublincore.description': 'A test',\n        'user.dublincore.contributor': 'Tester',\n        'user.dublincore.format': 'mp4',\n    }\n    assert set(written) == set((k, v) for k, v in expected.items())\n    assert ('error', _) not in pp._downloader.messages\n    assert ('warning', _) not in pp._downloader.messages\n\ndef test_run_unavailable_error(dummy_pp, monkeypatch):\n    pp, tmp_path = dummy_pp\n    file = tmp_path / \"video.mp4\"\n    file.write_text(\"dummy\")\n    info = {'filepath': str(file)}\n\n    def fake_write_xattr(path, name, value):\n        raise XAttrUnavailableError(\"xattr not available\")\n    monkeypatch.setattr('youtube_dl.postprocessor.xattrpp.write_xattr', fake_write_xattr)\n\n    pp.run(info)\n\n    assert any(msg[0] == 'error' and 'xattr not available' in msg[1] for msg in pp._downloader.messages)\n\ndef test_run_no_space_warning(dummy_pp, monkeypatch):\n    pp, tmp_path = dummy_pp\n    file = tmp_path / \"video.mp4\"\n    file.write_text(\"dummy\")\n    info = {\n        'filepath': str(file),\n        'title': 'Test',\n    }\n\n    def fake_write_xattr(path, name, value):\n        raise XAttrMetadataError('NO_SPACE')\n    monkeypatch.setattr('youtube_dl.postprocessor.xattrpp.write_xattr', fake_write_xattr)\n\n    pp.run(info)\n\n    assert any(msg[0] == 'warning' and \"no disk space\" in msg[1] for msg in pp._downloader.messages)\n```",
+        "reasoning": "We need tests for XAttrMetadataPP.run. We cannot mock write_xattr? We must test behavior. But write_xattr is imported from utils; we can monkeypatch it to simulate success or raise errors. Use tmp_path to create file. Use a dummy downloader with to_screen, report_error, report_warning. Test normal: write_xattr called correct times. Use monkeypatch fixture. Three tests: normal, XAttrUnavailableError, XAttrMetadataError with NO_SPACE. Use pytest.raises? No, we expect no exception. Use monkeypatch to raise. Ensure report_error called. Use simple object."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049687457,
+    "prompt_tokens": 842,
+    "prompt_time": 0.058622303,
+    "completion_tokens": 868,
+    "completion_time": 0.977377758,
+    "total_tokens": 1710,
+    "total_time": 1.036000061,
+    "completion_tokens_details": {
+      "reasoning_tokens": 124
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sevvczepsv06fxpf150c8q",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport pytest\nfrom youtube_dl.postprocessor.xattrpp import XAttrMetadataPP\nfrom youtube_dl.utils import XAttrUnavailableError, XAttrMetadataError\n\nclass DummyDownloader:\n    def __init__(self):\n        self.messages = []\n\n    def to_screen(self, msg):\n        self.messages.append(('screen', msg))\n\n    def report_error(self, msg):\n        self.messages.append(('error', msg))\n\n    def report_warning(self, msg):\n        self.messages.append(('warning', msg))\n\n@pytest.fixture\ndef dummy_pp(tmp_path):\n    pp = XAttrMetadataPP()\n    pp._downloader = DummyDownloader()\n    return pp, tmp_path\n\ndef test_run_writes_expected_xattrs(dummy_pp, monkeypatch):\n    pp, tmp_path = dummy_pp\n    file = tmp_path / \"video.mp4\"\n    file.write_text(\"dummy\")\n    info = {\n        'filepath': str(file),\n        'webpage_url': 'https://example.com',\n        'title': 'Test Video',\n        'upload_date': '20240101',\n        'description': 'A test',\n        'uploader': 'Tester',\n        'format': 'mp4',\n    }\n    written = []\n\n    def fake_write_xattr(path, name, value):\n        written.append((name, value.decode()))\n    monkeypatch.setattr(pp, 'write_xattr', fake_write_xattr)\n\n    # monkeypatch the imported write_xattr\n    monkeypatch.setattr('youtube_dl.postprocessor.xattrpp.write_xattr', fake_write_xattr)\n\n    pp.run(info)\n\n    expected = {\n        'user.xdg.referrer.url': 'https://example.com',\n        'user.dublincore.title': 'Test Video',\n        'user.dublincore.date': '2024-01-01',\n        'user.dublincore.description': 'A test',\n        'user.dublincore.contributor': 'Tester',\n        'user.dublincore.format': 'mp4',\n    }\n    assert set(written) == set((k, v) for k, v in expected.items())\n    assert ('error', _) not in pp._downloader.messages\n    assert ('warning', _) not in pp._downloader.messages\n\ndef test_run_unavailable_error(dummy_pp, monkeypatch):\n    pp, tmp_path = dummy_pp\n    file = tmp_path / \"video.mp4\"\n    file.write_text(\"dummy\")\n    info = {'filepath': str(file)}\n\n    def fake_write_xattr(path, name, value):\n        raise XAttrUnavailableError(\"xattr not available\")\n    monkeypatch.setattr('youtube_dl.postprocessor.xattrpp.write_xattr', fake_write_xattr)\n\n    pp.run(info)\n\n    assert any(msg[0] == 'error' and 'xattr not available' in msg[1] for msg in pp._downloader.messages)\n\ndef test_run_no_space_warning(dummy_pp, monkeypatch):\n    pp, tmp_path = dummy_pp\n    file = tmp_path / \"video.mp4\"\n    file.write_text(\"dummy\")\n    info = {\n        'filepath': str(file),\n        'title': 'Test',\n    }\n\n    def fake_write_xattr(path, name, value):\n        raise XAttrMetadataError('NO_SPACE')\n    monkeypatch.setattr('youtube_dl.postprocessor.xattrpp.write_xattr', fake_write_xattr)\n\n    pp.run(info)\n\n    assert any(msg[0] == 'warning' and \"no disk space\" in msg[1] for msg in pp._downloader.messages)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4034621720202267
+}

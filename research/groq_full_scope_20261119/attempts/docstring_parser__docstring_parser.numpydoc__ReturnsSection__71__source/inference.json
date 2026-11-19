@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-cb709125-6477-40d7-b421-f9e919f6e007",
+  "object": "chat.completion",
+  "created": 1795078774,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport inspect\nimport pytest\nfrom docstring_parser.numpydoc import ReturnsSection\nfrom docstring_parser.numpydoc.common import DocstringReturns\n\n# Helper to access the private regex used by ReturnsSection\nRETURN_KEY_REGEX = re.compile(\n    r\"(?P<name>\\w+)\\s*:\\s*(?P<type>.+)\"\n)\n\ndef test_parse_item_with_name_and_type():\n    \"\"\"Normal case: key contains a name and a type.\"\"\"\n    section = ReturnsSection()\n    key = \"value : int\"\n    value = \"  The value returned by the function.  \"\n    result = section._parse_item(key, value)\n\n    assert isinstance(result, DocstringReturns)\n    assert result.return_name == \"value\"\n    assert result.type_name == \"int\"\n    assert result.description == \"The value returned by the function.\"\n    assert result.is_generator is False\n    assert result.args == [\"returns\"]\n\ndef test_parse_item_without_name():\n    \"\"\"Boundary case: key contains only a type, no name.\"\"\"\n    section = ReturnsSection()\n    key = \"float\"\n    value = \"A floating point number.\"\n    result = section._parse_item(key, value)\n\n    assert isinstance(result, DocstringReturns)\n    assert result.return_name is None\n    assert result.type_name == \"float\"\n    assert result.description == \"A floating point number.\"\n    assert result.is_generator is False\n    assert result.args == [\"returns\"]\n\ndef test_parse_item_generator_flag_and_cleaning():\n    \"\"\"Error/edge case: generator flag and description cleaning.\"\"\"\n    section = ReturnsSection()\n    section.is_generator = True\n    key = \"data : list\"\n    value = \"\\n    List of data points.\\n\"\n    result = section._parse_item(key, value)\n\n    assert isinstance(result, DocstringReturns)\n    assert result.is_generator is True\n    assert result.description == \"List of data points.\"\n    assert result.type_name == \"list\"\n    assert result.return_name == \"data\"\n```",
+        "reasoning": "We need to test ReturnsSection._parse_item behavior. Need to import module. Let's write tests. Use tmp_path? Not needed. Just test parsing. Use regex patterns? We need to import RETURN_KEY_REGEX from module. Let's inspect. Probably defined elsewhere. We'll just test that given key matches pattern. Use a key like \"value : int\". Expect return_name \"value\", type_name \"int\". Also test key without name: \"int\". Expect None. Also test that description cleaned. Use _clean_str? It's internal. But we can test that description is stripped. Use a value with leading spaces. Also test is_generator flag. Create instance with is_generator True. Ensure returned DocstringReturns has is_generator True. Use assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.096478081,
+    "prompt_tokens": 465,
+    "prompt_time": 0.030389899,
+    "completion_tokens": 578,
+    "completion_time": 0.644139567,
+    "total_tokens": 1043,
+    "total_time": 0.674529466,
+    "completion_tokens_details": {
+      "reasoning_tokens": 150
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sggpjce558a52g3mc3scjx",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport inspect\nimport pytest\nfrom docstring_parser.numpydoc import ReturnsSection\nfrom docstring_parser.numpydoc.common import DocstringReturns\n\n# Helper to access the private regex used by ReturnsSection\nRETURN_KEY_REGEX = re.compile(\n    r\"(?P<name>\\w+)\\s*:\\s*(?P<type>.+)\"\n)\n\ndef test_parse_item_with_name_and_type():\n    \"\"\"Normal case: key contains a name and a type.\"\"\"\n    section = ReturnsSection()\n    key = \"value : int\"\n    value = \"  The value returned by the function.  \"\n    result = section._parse_item(key, value)\n\n    assert isinstance(result, DocstringReturns)\n    assert result.return_name == \"value\"\n    assert result.type_name == \"int\"\n    assert result.description == \"The value returned by the function.\"\n    assert result.is_generator is False\n    assert result.args == [\"returns\"]\n\ndef test_parse_item_without_name():\n    \"\"\"Boundary case: key contains only a type, no name.\"\"\"\n    section = ReturnsSection()\n    key = \"float\"\n    value = \"A floating point number.\"\n    result = section._parse_item(key, value)\n\n    assert isinstance(result, DocstringReturns)\n    assert result.return_name is None\n    assert result.type_name == \"float\"\n    assert result.description == \"A floating point number.\"\n    assert result.is_generator is False\n    assert result.args == [\"returns\"]\n\ndef test_parse_item_generator_flag_and_cleaning():\n    \"\"\"Error/edge case: generator flag and description cleaning.\"\"\"\n    section = ReturnsSection()\n    section.is_generator = True\n    key = \"data : list\"\n    value = \"\\n    List of data points.\\n\"\n    result = section._parse_item(key, value)\n\n    assert isinstance(result, DocstringReturns)\n    assert result.is_generator is True\n    assert result.description == \"List of data points.\"\n    assert result.type_name == \"list\"\n    assert result.return_name == \"data\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1379430210217834
+}

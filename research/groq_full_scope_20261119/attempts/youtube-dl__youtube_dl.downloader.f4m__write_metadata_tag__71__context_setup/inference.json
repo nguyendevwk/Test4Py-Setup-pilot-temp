@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-fe944cb0-735e-413a-a7b7-7ce06d379b08",
+  "object": "chat.completion",
+  "created": 1795078345,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport struct\nimport pytest\nfrom youtube_dl.downloader.f4m import write_metadata_tag\n\ndef test_write_metadata_tag_with_metadata(tmp_path):\n    \"\"\"When metadata is provided, the function writes the correct FLV script tag.\"\"\"\n    stream = io.BytesIO()\n    metadata = b'{\"title\":\"Test\"}'\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n\n    # The first byte should be the SCRIPT_TAG marker (0x12)\n    assert data[0] == 0x12\n\n    # The next three bytes encode the length of the metadata\n    length_bytes = data[1:4]\n    expected_length = struct.pack('!I', len(metadata))[1:]\n    assert length_bytes == expected_length\n\n    # The following 7 bytes are the timestamp and stream ID (all zeros)\n    assert data[4:11] == b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00'\n\n    # The metadata itself should follow immediately\n    assert data[11:11+len(metadata)] == metadata\n\n    # The final 4 bytes encode the total tag size (header + metadata)\n    total_size = 11 + len(metadata)\n    total_size_bytes = data[-4:]\n    assert total_size_bytes == struct.pack('!I', total_size)\n\ndef test_write_metadata_tag_without_metadata(tmp_path):\n    \"\"\"When metadata is empty or None, nothing should be written to the stream.\"\"\"\n    stream = io.BytesIO()\n    write_metadata_tag(stream, None)\n    assert stream.getvalue() == b''\n\n    stream = io.BytesIO()\n    write_metadata_tag(stream, b'')\n    assert stream.getvalue() == b''\n\ndef test_write_metadata_tag_boundary_length(tmp_path):\n    \"\"\"Test that the length field correctly handles the maximum 24‑bit value.\"\"\"\n    # Create metadata of length 0xFFFFFF (the maximum value that fits in 24 bits)\n    max_len = 0xFFFFFF\n    metadata = b'a' * max_len\n    stream = io.BytesIO()\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n\n    # Length field should be exactly 3 bytes representing 0xFFFFFF\n    length_bytes = data[1:4]\n    assert length_bytes == struct.pack('!I', max_len)[1:]\n\n    # Total size should be header (11) + metadata length\n    total_size = 11 + max_len\n    total_size_bytes = data[-4:]\n    assert total_size_bytes == struct.pack('!I', total_size)\n```",
+        "reasoning": "We need to test write_metadata_tag. Write three tests: normal metadata, empty metadata, boundary large metadata? But function writes only if metadata truthy. So test that with metadata writes correct bytes. Use BytesIO. Check header. Also test that no write when metadata empty. Third test boundary: metadata of length 0xFFFFFF? but too large. Maybe test that length encoded correctly. Use small metadata and check length bytes. Let's craft."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05358566,
+    "prompt_tokens": 471,
+    "prompt_time": 0.500241303,
+    "completion_tokens": 634,
+    "completion_time": 0.730961373,
+    "total_tokens": 1105,
+    "total_time": 1.231202676,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 91
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg3kf8ehxvmjdv7h50ffc9",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport struct\nimport pytest\nfrom youtube_dl.downloader.f4m import write_metadata_tag\n\ndef test_write_metadata_tag_with_metadata(tmp_path):\n    \"\"\"When metadata is provided, the function writes the correct FLV script tag.\"\"\"\n    stream = io.BytesIO()\n    metadata = b'{\"title\":\"Test\"}'\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n\n    # The first byte should be the SCRIPT_TAG marker (0x12)\n    assert data[0] == 0x12\n\n    # The next three bytes encode the length of the metadata\n    length_bytes = data[1:4]\n    expected_length = struct.pack('!I', len(metadata))[1:]\n    assert length_bytes == expected_length\n\n    # The following 7 bytes are the timestamp and stream ID (all zeros)\n    assert data[4:11] == b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00'\n\n    # The metadata itself should follow immediately\n    assert data[11:11+len(metadata)] == metadata\n\n    # The final 4 bytes encode the total tag size (header + metadata)\n    total_size = 11 + len(metadata)\n    total_size_bytes = data[-4:]\n    assert total_size_bytes == struct.pack('!I', total_size)\n\ndef test_write_metadata_tag_without_metadata(tmp_path):\n    \"\"\"When metadata is empty or None, nothing should be written to the stream.\"\"\"\n    stream = io.BytesIO()\n    write_metadata_tag(stream, None)\n    assert stream.getvalue() == b''\n\n    stream = io.BytesIO()\n    write_metadata_tag(stream, b'')\n    assert stream.getvalue() == b''\n\ndef test_write_metadata_tag_boundary_length(tmp_path):\n    \"\"\"Test that the length field correctly handles the maximum 24‑bit value.\"\"\"\n    # Create metadata of length 0xFFFFFF (the maximum value that fits in 24 bits)\n    max_len = 0xFFFFFF\n    metadata = b'a' * max_len\n    stream = io.BytesIO()\n    write_metadata_tag(stream, metadata)\n    data = stream.getvalue()\n\n    # Length field should be exactly 3 bytes representing 0xFFFFFF\n    length_bytes = data[1:4]\n    assert length_bytes == struct.pack('!I', max_len)[1:]\n\n    # Total size should be header (11) + metadata length\n    total_size = 11 + max_len\n    total_size_bytes = data[-4:]\n    assert total_size_bytes == struct.pack('!I', total_size)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.6300116350175813
+}

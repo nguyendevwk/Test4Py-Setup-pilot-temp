@@ -1,0 +1,33 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_decrypt_returns_bytes_type_and_non_empty _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-216/test_decrypt_returns_bytes_typ0')
+
+    def test_decrypt_returns_bytes_type_and_non_empty(tmp_path):
+        # Create a simple plaintext, encrypt it manually using the same algorithm
+        # to produce a valid ciphertext for decryption.
+        # Here we use the fact that the counter mode with a zero key will
+        # produce ciphertext equal to plaintext (since AES encrypt of zero key is identity).
+        # Construct nonce and ciphertext manually.
+        plaintext = b"hello world"
+        nonce = b"\x00" * 8
+        # For zero key, aes_encrypt will produce zero key, so ciphertext == plaintext
+        # We encode nonce + plaintext as base64
+        data_bytes = nonce + plaintext
+        data_b64 = base64.b64encode(data_bytes).decode()
+        password = "0" * 16  # key will be zeros
+        key_size_bytes = 16
+        result = aes_decrypt_text(data_b64, password, key_size_bytes)
+        assert isinstance(result, bytes), "Result should be of type bytes"
+>       assert result == plaintext, "Decrypted plaintext should match original"
+E       AssertionError: Decrypted plaintext should match original
+E       assert b'=\x81\x8dQ\...1e<\xa8H.\xd4' == b'hello world'
+E         
+E         At index 0 diff: b'=' != b'h'
+E         Use -v to get more diff
+
+../../../../../../attempts/youtube-dl__youtube_dl.aes__aes_decrypt_text__43__atomic_source/eval0/test_generated.py:37: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/youtube-dl__youtube_dl.aes__aes_decrypt_text__43__atomic_source/eval0/test_generated.py::test_decrypt_returns_bytes_type_and_non_empty
+1 failed, 2 passed in 1.13s

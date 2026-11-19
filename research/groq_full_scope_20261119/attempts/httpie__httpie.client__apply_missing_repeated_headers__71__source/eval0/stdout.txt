@@ -1,0 +1,43 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______ test_apply_missing_repeated_headers_restores_all_original_values _______
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.client__apply_missing_repeated_headers__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_apply_missing_repeated_he0')
+
+    def test_apply_missing_repeated_headers_restores_all_original_values(tmp_path):
+        # Original headers contain the same header name twice with different values
+        original = HTTPHeadersDict([("X-Test", "value1"), ("X-Test", "value2")])
+        # Prepare a request that will override one of the values
+        req = requests.Request("GET", "http://example.com")
+        prepped = requests.Session().prepare_request(req)
+        # Simulate that the request library has overridden the header to a single value
+        prepped.headers["X-Test"] = "value1"
+        # Apply the function
+        apply_missing_repeated_headers(original, prepped)
+        # After merging, both original values should be present
+>       assert prepped.headers.get_all("X-Test") == ["value1", "value2"]
+E       AttributeError: 'HTTPHeadersDict' object has no attribute 'get_all'. Did you mean: 'getall'?
+
+test_generated.py:18: AttributeError
+________ test_apply_missing_repeated_headers_preserves_overridden_value ________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.client__apply_missing_repeated_headers__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_apply_missing_repeated_he1')
+
+    def test_apply_missing_repeated_headers_preserves_overridden_value(tmp_path):
+        # Original headers contain two values
+        original = HTTPHeadersDict([("X-Override", "original1"), ("X-Override", "original2")])
+        # Prepare a request that overrides the header to a new value
+        req = requests.Request("GET", "http://example.com")
+        prepped = requests.Session().prepare_request(req)
+        prepped.headers["X-Override"] = "newvalue"
+        # Apply the function
+        apply_missing_repeated_headers(original, prepped)
+        # The overridden value should remain, and original values should not be added
+>       assert prepped.headers.get_all("X-Override") == ["newvalue"]
+E       AttributeError: 'HTTPHeadersDict' object has no attribute 'get_all'. Did you mean: 'getall'?
+
+test_generated.py:31: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_apply_missing_repeated_headers_restores_all_original_values
+FAILED test_generated.py::test_apply_missing_repeated_headers_preserves_overridden_value
+2 failed, 1 passed in 0.87s

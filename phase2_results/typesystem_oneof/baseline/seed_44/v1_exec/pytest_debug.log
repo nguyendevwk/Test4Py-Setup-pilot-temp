@@ -1,0 +1,35 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_oneof_multiple_matches_raises ______________________
+
+    def test_oneof_multiple_matches_raises():
+        class DummyField(Field):
+            def __init__(self, validator):
+                super().__init__()
+                self.validator = validator
+    
+            def validate_or_error(self, value):
+                try:
+                    return self.validator(value), None
+                except Exception:
+                    return None, "error"
+    
+        int_field = DummyField(lambda v: v if isinstance(v, int) else (_ for _ in ()).throw(ValueError))
+        any_field = DummyField(lambda v: v)  # always matches
+    
+        oneof = OneOf([int_field, any_field])
+    
+        with pytest.raises(Exception) as excinfo:
+            oneof.validate(5)
+>       assert "multiple_matches" in str(excinfo.value)
+E       AssertionError: assert 'multiple_matches' in 'Matched more than one type.'
+E        +  where 'Matched more than one type.' = str(ValidationError(text='Matched more than one type.', code='multiple_matches'))
+E        +    where ValidationError(text='Matched more than one type.', code='multiple_matches') = <ExceptionInfo ValidationError(text='Matched more than one type.', code='multiple_matches') tblen=2>.value
+
+../../phase2_results/typesystem_oneof/baseline/seed_44/v1_exec/test_run.py:25: AssertionError
+=========================== short test summary info ============================
+FAILED ../../phase2_results/typesystem_oneof/baseline/seed_44/v1_exec/test_run.py::test_oneof_multiple_matches_raises
+1 failed in 0.19s
+
+/home/heurix/.cache/uv/archive-v0/ZMxlGZafGJre2eGL/lib/python3.12/site-packages/coverage/inorout.py:560: CoverageWarning: Module tests was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.17.3/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")

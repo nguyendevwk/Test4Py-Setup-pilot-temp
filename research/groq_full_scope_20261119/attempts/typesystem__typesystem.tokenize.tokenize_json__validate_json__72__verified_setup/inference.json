@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-19ece5bc-fdfe-4442-aeb3-edf7978391cc",
+  "object": "chat.completion",
+  "created": 1795076850,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import validate_json\nfrom typesystem.fields import Field\nfrom typesystem.schemas import Schema\nfrom typesystem.base import ParseError\n\ndef test_validate_json_success():\n    \"\"\"Valid JSON string against a simple Field should return the parsed value and no errors.\"\"\"\n    content = \"123\"\n    validator = Field(int)\n    value, errors = validate_json(content, validator)\n    assert value == 123\n    assert errors == []\n\ndef test_validate_json_syntax_error():\n    \"\"\"Malformed JSON should produce a non‑empty error message list.\"\"\"\n    content = '{\"key\": \"value\"'  # missing closing brace\n    validator = Field(dict)\n    value, errors = validate_json(content, validator)\n    # The value should be None or an empty structure when parsing fails\n    assert value is None or value == {}\n    assert isinstance(errors, list)\n    assert len(errors) > 0\n    # Error message should mention a JSON parsing issue\n    assert any(\"JSON\" in err for err in errors)\n\ndef test_validate_json_type_error():\n    \"\"\"JSON that parses but fails type validation should return errors.\"\"\"\n    content = '\"not an int\"'\n    validator = Field(int)\n    value, errors = validate_json(content, validator)\n    # The parsed value is a string, but validator expects int\n    assert value == \"not an int\"\n    assert isinstance(errors, list)\n    assert len(errors) > 0\n    # Error message should indicate a type mismatch\n    assert any(\"type\" in err.lower() for err in errors)\n```",
+        "reasoning": "We need to test validate_json. Need to import. Use tmp_path for file? content is string. Test normal: valid JSON and validator field. Use simple Field: maybe typesystem.fields.Field? Let's inspect? Assume Field can be instantiated with type. Use Field(int). Validate JSON \"123\". Expect value 123, no errors. Boundary: invalid JSON syntax: e.g., missing quote. Expect error messages non-empty. Error behavior: validation error: JSON valid but fails type: e.g., \"abc\" against Field(int). Expect error messages. Use pytest.raises? validate_with_positions returns tuple, not raising. So assert error_messages. Use precise assertions. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004965078,
+    "prompt_tokens": 406,
+    "prompt_time": 0.010307858,
+    "completion_tokens": 476,
+    "completion_time": 0.503297929,
+    "total_tokens": 882,
+    "total_time": 0.513605787,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 139
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sep05tef1tjn4n64q3sf9s",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import validate_json\nfrom typesystem.fields import Field\nfrom typesystem.schemas import Schema\nfrom typesystem.base import ParseError\n\ndef test_validate_json_success():\n    \"\"\"Valid JSON string against a simple Field should return the parsed value and no errors.\"\"\"\n    content = \"123\"\n    validator = Field(int)\n    value, errors = validate_json(content, validator)\n    assert value == 123\n    assert errors == []\n\ndef test_validate_json_syntax_error():\n    \"\"\"Malformed JSON should produce a non‑empty error message list.\"\"\"\n    content = '{\"key\": \"value\"'  # missing closing brace\n    validator = Field(dict)\n    value, errors = validate_json(content, validator)\n    # The value should be None or an empty structure when parsing fails\n    assert value is None or value == {}\n    assert isinstance(errors, list)\n    assert len(errors) > 0\n    # Error message should mention a JSON parsing issue\n    assert any(\"JSON\" in err for err in errors)\n\ndef test_validate_json_type_error():\n    \"\"\"JSON that parses but fails type validation should return errors.\"\"\"\n    content = '\"not an int\"'\n    validator = Field(int)\n    value, errors = validate_json(content, validator)\n    # The parsed value is a string, but validator expects int\n    assert value == \"not an int\"\n    assert isinstance(errors, list)\n    assert len(errors) > 0\n    # Error message should indicate a type mismatch\n    assert any(\"type\" in err.lower() for err in errors)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.886400017014239
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-14e6ff2c-8c1f-4b6f-ae68-fcf6305c3a66",
+  "object": "chat.completion",
+  "created": 1795076549,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado.options import define, options\n\ndef test_define_basic_option_registration():\n    \"\"\"Defining a simple option registers it in the global options dictionary.\"\"\"\n    option_name = \"test_basic\"\n    default_value = 42\n    define(option_name, default=default_value, type=int, help=\"A test option\")\n    # The option should now be present in the options registry\n    assert option_name in options.options\n    # The stored option should have the correct default value and type\n    opt = options.options[option_name]\n    assert opt.default == default_value\n    assert opt.type is int\n\ndef test_define_multiple_and_callback_invocation(tmp_path):\n    \"\"\"Defining an option with multiple=True and a callback should store a list and invoke the callback.\"\"\"\n    option_name = \"test_multiple\"\n    callback_called = {\"called\": False, \"value\": None}\n\n    def callback(value):\n        callback_called[\"called\"] = True\n        callback_called[\"value\"] = value\n\n    define(\n        option_name,\n        default=[],\n        type=str,\n        multiple=True,\n        callback=callback,\n        help=\"An option that accepts multiple values\",\n    )\n    opt = options.options[option_name]\n    # Initially, the callback should not have been called\n    assert not callback_called[\"called\"]\n    # Simulate setting the option value\n    opt.value = [\"a\", \"b\", \"c\"]\n    # The callback should now have been invoked with the new value\n    assert callback_called[\"called\"]\n    assert callback_called[\"value\"] == [\"a\", \"b\", \"c\"]\n    # The option should store the list correctly\n    assert opt.value == [\"a\", \"b\", \"c\"]\n\ndef test_define_duplicate_option_raises():\n    \"\"\"Defining an option with a name that already exists should raise a ValueError.\"\"\"\n    option_name = \"test_duplicate\"\n    define(option_name, default=1, type=int, help=\"First definition\")\n    with pytest.raises(ValueError):\n        define(option_name, default=2, type=int, help=\"Second definition\")\n```",
+        "reasoning": "We need to write tests for tornado.options.define function. We need to import from module. Let's assume module path is tornado.options. We'll test normal definition, boundary: multiple flag, callback. Error: passing invalid type? maybe define with None type? But define passes to options.define. We can test that option is registered. Use options.options? Let's inspect OptionParser? Not available. But we can test that after define, options.options dict contains key. Use options.options? In tornado.options, OptionParser likely has options dict. We'll assume options.options attribute. We'll test that default value set. Also test callback invoked when setting value. Use tmp_path? Not needed. We'll create a test function that defines option, sets via options.options? Might need to set via options.options[name] = value? Actually OptionParser likely has set method. But we can just check that options.options[name].default equals default. We'll test multiple flag: define with multiple=True, then set list. For error: passing invalid type? maybe type not callable? But define passes type param. We can test that passing non-callable type raises TypeError? Not sure. Maybe define with type=int and value string? But that's runtime. We'll test that define with callback raises if callback not callable? But define accepts Callable. We'll test that passing None callback is fine.\n\nGiven uncertainty, we can test that define returns None, and that options.options contains entry. Use assert isinstance(options.options[name], Option). But Option class? Might not import. We'll just check key exists.\n\nLet's write three tests: test_define_basic, test_define_multiple_and_callback, test_define_invalid_type_raises. For invalid type, we can pass type=\"not_callable\" and expect TypeError? But not sure. Maybe OptionParser will accept any type. Hard.\n\nMaybe test that defining option with default None and type int, then setting value via options.options[name].value? Might not exist.\n\nGiven constraints, we can just test that define returns None and that options.options contains key. For error, we can test that calling define with name already defined raises ValueError. That is typical. We'll test that.\n\nLet's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047649939,
+    "prompt_tokens": 458,
+    "prompt_time": 0.029691509,
+    "completion_tokens": 876,
+    "completion_time": 0.984547235,
+    "total_tokens": 1334,
+    "total_time": 1.014238744,
+    "completion_tokens_details": {
+      "reasoning_tokens": 436
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7secsbpe53bkp9djjw42ma7",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado.options import define, options\n\ndef test_define_basic_option_registration():\n    \"\"\"Defining a simple option registers it in the global options dictionary.\"\"\"\n    option_name = \"test_basic\"\n    default_value = 42\n    define(option_name, default=default_value, type=int, help=\"A test option\")\n    # The option should now be present in the options registry\n    assert option_name in options.options\n    # The stored option should have the correct default value and type\n    opt = options.options[option_name]\n    assert opt.default == default_value\n    assert opt.type is int\n\ndef test_define_multiple_and_callback_invocation(tmp_path):\n    \"\"\"Defining an option with multiple=True and a callback should store a list and invoke the callback.\"\"\"\n    option_name = \"test_multiple\"\n    callback_called = {\"called\": False, \"value\": None}\n\n    def callback(value):\n        callback_called[\"called\"] = True\n        callback_called[\"value\"] = value\n\n    define(\n        option_name,\n        default=[],\n        type=str,\n        multiple=True,\n        callback=callback,\n        help=\"An option that accepts multiple values\",\n    )\n    opt = options.options[option_name]\n    # Initially, the callback should not have been called\n    assert not callback_called[\"called\"]\n    # Simulate setting the option value\n    opt.value = [\"a\", \"b\", \"c\"]\n    # The callback should now have been invoked with the new value\n    assert callback_called[\"called\"]\n    assert callback_called[\"value\"] == [\"a\", \"b\", \"c\"]\n    # The option should store the list correctly\n    assert opt.value == [\"a\", \"b\", \"c\"]\n\ndef test_define_duplicate_option_raises():\n    \"\"\"Defining an option with a name that already exists should raise a ValueError.\"\"\"\n    option_name = \"test_duplicate\"\n    define(option_name, default=1, type=int, help=\"First definition\")\n    with pytest.raises(ValueError):\n        define(option_name, default=2, type=int, help=\"Second definition\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3503455040045083
+}

@@ -1,0 +1,31 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_padding_and_output_length ________________________
+
+    def test_padding_and_output_length():
+        """
+        Verify that the output length is a multiple of BLOCK_SIZE_BYTES and that
+        the padding byte value equals the number of padding bytes added.
+        """
+        data = [1, 2, 3]  # 3 bytes of data
+        key = [0] * 16
+        iv = [0] * 16
+        result = aes_cbc_encrypt(data, key, iv)
+    
+        # Output length must be a multiple of BLOCK_SIZE_BYTES
+        assert len(result) % BLOCK_SIZE_BYTES == 0, "Output length not a multiple of block size"
+    
+        # The last byte of the output corresponds to the padding byte of the last block
+        # Since we used a dummy key and iv, the padding byte will be the same as the
+        # padding length added to the last block.
+        padding_length = BLOCK_SIZE_BYTES - len(data)
+>       assert result[-1] == padding_length, (
+            f"Expected padding byte {padding_length}, got {result[-1]}"
+        )
+E       AssertionError: Expected padding byte 13, got 41
+E       assert 41 == 13
+
+test_generated.py:29: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_padding_and_output_length - AssertionError: Ex...
+1 failed, 2 passed in 1.33s

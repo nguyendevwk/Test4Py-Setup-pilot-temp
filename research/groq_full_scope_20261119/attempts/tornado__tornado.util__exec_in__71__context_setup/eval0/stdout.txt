@@ -1,0 +1,43 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+___________ test_exec_in_executes_string_and_sets_globals_and_locals ___________
+
+    def test_exec_in_executes_string_and_sets_globals_and_locals():
+        # Prepare globals and locals
+        globals_dict = {"x": 1}
+        locals_dict = {"y": 2}
+        # Code string that modifies globals and locals
+        code_str = """
+    x = x + 10
+    y = y * 3
+    z = 42
+    """
+        exec_in(code_str, globals_dict, locals_dict)
+        # Global 'x' should be updated
+>       assert globals_dict["x"] == 11
+E       assert 1 == 11
+
+test_generated.py:18: AssertionError
+_________ test_exec_in_executes_code_object_and_respects_dont_inherit __________
+
+    def test_exec_in_executes_code_object_and_respects_dont_inherit():
+        # Compile a code object that uses a name defined in the caller's globals
+        caller_globals = {"a": 5}
+        code_obj = compile("b = a + 1", "<string>", "exec", dont_inherit=True)
+        # Execute with empty globals to ensure 'a' is not inherited
+>       exec_in(code_obj, {}, None)
+
+test_generated.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/util.py:144: in exec_in
+    exec(code, glob, loc)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   NameError: name 'a' is not defined
+
+<string>:1: NameError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_exec_in_executes_string_and_sets_globals_and_locals
+FAILED test_generated.py::test_exec_in_executes_code_object_and_respects_dont_inherit
+2 failed, 1 passed in 0.26s

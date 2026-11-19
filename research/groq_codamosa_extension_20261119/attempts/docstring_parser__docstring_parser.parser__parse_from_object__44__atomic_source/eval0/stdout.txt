@@ -1,0 +1,103 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_parse_from_object_with_google_style_docstring ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-181/test_parse_from_object_with_go0')
+
+    def test_parse_from_object_with_google_style_docstring(tmp_path):
+        """Verify that a Google‑style docstring is parsed correctly and
+        attribute docstrings are added for a class."""
+        # Create a temporary module with a Google‑style docstring
+        module_code = textwrap.dedent(
+            """
+            \"\"\"Module docstring.
+    
+            Args:
+                x (int): The first argument.
+            \"\"\"
+    
+            class MyClass:
+                \"\"\"Class docstring.
+    
+                Attributes:
+                    attr1 (str): Description of attr1.
+                    attr2 (int): Description of attr2.
+                \"\"\"
+    
+                attr1 = "value1"
+                attr2 = 42
+            """
+        )
+        module_path = tmp_path / "mymodule.py"
+        module_path.write_text(module_code)
+    
+        # Import the module dynamically
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("mymodule", str(module_path))
+        mymodule = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mymodule)
+    
+        # Parse the module docstring
+        module_doc = parse_from_object(mymodule, style=DocstringStyle.GOOGLE)
+        assert module_doc.short_description == "Module docstring."
+        assert len(module_doc.params) == 1
+        assert module_doc.params[0].arg_name == "x"
+    
+        # Parse the class docstring and check that attribute docs are added
+>       class_doc = parse_from_object(mymodule.MyClass, style=DocstringStyle.GOOGLE)
+
+../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__44__atomic_source/eval0/test_generated.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docstring_parser/parser.py:77: in parse_from_object
+    add_attribute_docstrings(obj, docstring)
+docstring_parser/attrdoc.py:115: in add_attribute_docstrings
+    AttributeDocstrings().get_attr_docs(obj).items()
+docstring_parser/attrdoc.py:90: in get_attr_docs
+    source = textwrap.dedent(inspect.getsource(component))
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:1139: in getsource
+    lines, lnum = getsourcelines(object)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:1121: in getsourcelines
+    lines, lnum = findsource(object)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:940: in findsource
+    file = getsourcefile(object)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:817: in getsourcefile
+    filename = getfile(object)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+object = <class 'mymodule.MyClass'>
+
+    def getfile(object):
+        """Work out which source or compiled file an object was defined in."""
+        if ismodule(object):
+            if getattr(object, '__file__', None):
+                return object.__file__
+            raise TypeError('{!r} is a built-in module'.format(object))
+        if isclass(object):
+            if hasattr(object, '__module__'):
+                module = sys.modules.get(object.__module__)
+                if getattr(module, '__file__', None):
+                    return module.__file__
+                if object.__module__ == '__main__':
+                    raise OSError('source code not available')
+>           raise TypeError('{!r} is a built-in class'.format(object))
+E           TypeError: <class 'mymodule.MyClass'> is a built-in class
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:786: TypeError
+_____________ test_parse_from_object_with_missing_docstring_raises _____________
+
+    def test_parse_from_object_with_missing_docstring_raises():
+        """Passing an object without a docstring should raise ParseError."""
+        class NoDoc:
+            pass
+    
+        # Remove the __doc__ attribute to simulate missing docstring
+        NoDoc.__doc__ = None
+    
+>       with pytest.raises(ParseError):
+E       Failed: DID NOT RAISE ParseError
+
+../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__44__atomic_source/eval0/test_generated.py:70: Failed
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__44__atomic_source/eval0/test_generated.py::test_parse_from_object_with_google_style_docstring
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.parser__parse_from_object__44__atomic_source/eval0/test_generated.py::test_parse_from_object_with_missing_docstring_raises
+2 failed, 1 passed in 0.29s

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-be4683d8-a2c9-48f8-895f-0aa0ba445873",
+  "object": "chat.completion",
+  "created": 1795076923,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport pytest\nfrom py_backwards.transformers.yield_from import YieldFromTransformer\nfrom typed_ast import ast3 as typed_ast\n\ndef has_yield_from(node):\n    \"\"\"Return True if the AST contains any ast.YieldFrom nodes.\"\"\"\n    return any(isinstance(n, typed_ast.YieldFrom) for n in typed_ast.walk(node))\n\ndef test_assignment_yield_from_replaced(tmp_path):\n    source = \"\"\"\ndef f():\n    x = yield from iterable\n    return x\n\"\"\"\n    tree = typed_ast.parse(source)\n    transformer = YieldFromTransformer()\n    new_tree = transformer.visit(tree)\n    # The transformed tree should no longer contain any YieldFrom nodes\n    assert not has_yield_from(new_tree)\n    # The assignment target 'x' should still be present\n    assigns = [n for n in typed_ast.walk(new_tree) if isinstance(n, typed_ast.Assign)]\n    assert len(assigns) == 1\n    assert isinstance(assigns[0].targets[0], typed_ast.Name)\n    assert assigns[0].targets[0].id == 'x'\n\ndef test_expression_yield_from_replaced(tmp_path):\n    source = \"\"\"\ndef g():\n    yield from iterable\n\"\"\"\n    tree = typed_ast.parse(source)\n    transformer = YieldFromTransformer()\n    new_tree = transformer.visit(tree)\n    # No YieldFrom nodes should remain\n    assert not has_yield_from(new_tree)\n    # The function body should contain a statement that is not an Expr\n    # (the yield_from transformation replaces the Expr with a while loop)\n    stmts = list(typed_ast.iter_child_nodes(new_tree.body[0]))\n    assert len(stmts) == 1\n    assert isinstance(stmts[0], typed_ast.While)\n\ndef test_no_yield_from_unchanged(tmp_path):\n    source = \"\"\"\ndef h():\n    a = 1\n    b = 2\n    return a + b\n\"\"\"\n    tree = typed_ast.parse(source)\n    transformer = YieldFromTransformer()\n    new_tree = transformer.visit(tree)\n    # The tree should be identical to the original (no changes)\n    assert typed_ast.dump(tree) == typed_ast.dump(new_tree)\n    # Ensure no YieldFrom nodes are present\n    assert not has_yield_from(new_tree)\n```",
+        "reasoning": "We need to test YieldFromTransformer. We need to import it. Use typed_ast ast3. We need to create AST nodes with yield from. Use ast.parse? typed_ast's parse? We can use ast.parse from typed_ast? Let's import typed_ast.ast3 as ast. Use ast.parse to get AST. Then apply transformer. Check that yield from replaced. Hard to inspect yield_from.get_body etc. But we can check that original yield from node is gone and replaced with something else. Maybe check that no YieldFrom nodes remain. Also check that assignments handled. For error scenario maybe invalid node? But transformer expects node with body list. We can test that if no yield from, tree unchanged. Use tmp_path? Not needed. Provide three tests: 1) assignment with yield from. 2) expression with yield from. 3) no yield from. Use ast.parse and then transformer.visit. Then use ast.unparse to get code. Ensure no 'yield from' string. Use typed_ast's unparse? Might not exist. Use astor or ast.unparse from standard ast? typed_ast's ast3 is similar to standard. Use ast.unparse from standard ast? Might not support typed_ast. Instead, we can walk tree and assert no YieldFrom nodes. Use ast.walk. Let's implement helper to check presence."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048549526,
+    "prompt_tokens": 738,
+    "prompt_time": 0.054870904,
+    "completion_tokens": 756,
+    "completion_time": 1.122771622,
+    "total_tokens": 1494,
+    "total_time": 1.177642526,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 272
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7ser6vte9nr45t0cbasrtr5",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport pytest\nfrom py_backwards.transformers.yield_from import YieldFromTransformer\nfrom typed_ast import ast3 as typed_ast\n\ndef has_yield_from(node):\n    \"\"\"Return True if the AST contains any ast.YieldFrom nodes.\"\"\"\n    return any(isinstance(n, typed_ast.YieldFrom) for n in typed_ast.walk(node))\n\ndef test_assignment_yield_from_replaced(tmp_path):\n    source = \"\"\"\ndef f():\n    x = yield from iterable\n    return x\n\"\"\"\n    tree = typed_ast.parse(source)\n    transformer = YieldFromTransformer()\n    new_tree = transformer.visit(tree)\n    # The transformed tree should no longer contain any YieldFrom nodes\n    assert not has_yield_from(new_tree)\n    # The assignment target 'x' should still be present\n    assigns = [n for n in typed_ast.walk(new_tree) if isinstance(n, typed_ast.Assign)]\n    assert len(assigns) == 1\n    assert isinstance(assigns[0].targets[0], typed_ast.Name)\n    assert assigns[0].targets[0].id == 'x'\n\ndef test_expression_yield_from_replaced(tmp_path):\n    source = \"\"\"\ndef g():\n    yield from iterable\n\"\"\"\n    tree = typed_ast.parse(source)\n    transformer = YieldFromTransformer()\n    new_tree = transformer.visit(tree)\n    # No YieldFrom nodes should remain\n    assert not has_yield_from(new_tree)\n    # The function body should contain a statement that is not an Expr\n    # (the yield_from transformation replaces the Expr with a while loop)\n    stmts = list(typed_ast.iter_child_nodes(new_tree.body[0]))\n    assert len(stmts) == 1\n    assert isinstance(stmts[0], typed_ast.While)\n\ndef test_no_yield_from_unchanged(tmp_path):\n    source = \"\"\"\ndef h():\n    a = 1\n    b = 2\n    return a + b\n\"\"\"\n    tree = typed_ast.parse(source)\n    transformer = YieldFromTransformer()\n    new_tree = transformer.visit(tree)\n    # The tree should be identical to the original (no changes)\n    assert typed_ast.dump(tree) == typed_ast.dump(new_tree)\n    # Ensure no YieldFrom nodes are present\n    assert not has_yield_from(new_tree)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5371874780394137
+}

@@ -1,0 +1,22 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_read_box_info_with_extended_size _____________________
+
+    def test_read_box_info_with_extended_size():
+        # Box header: size=1 (extended), type='abcd', extended size=20, data='12345678'
+        header = struct.pack('!I 4s Q', 1, b'abcd', 20)
+        data = header + b'12345678'
+        r = FlvReader(data)
+        size, box_type, box_data = r.read_box_info()
+        # Extended size includes header; data length should be size - header_end (16)
+        assert size == 20
+        assert box_type == b'abcd'
+>       assert box_data == b'12345678'
+E       AssertionError: assert b'1234' == b'12345678'
+E         
+E         Use -v to get more diff
+
+test_generated.py:32: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_read_box_info_with_extended_size - AssertionEr...
+1 failed, 2 passed in 0.84s

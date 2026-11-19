@@ -1,0 +1,121 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_format_extraction_m3u8 __________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff318e9fd90>
+
+    def test_format_extraction_m3u8(monkeypatch):
+        """Test that an m3u8 source URL is correctly parsed into formats."""
+        # Minimal webpage containing the 'e' parameter
+        webpage = (
+            '... <script>var e="abc123";</script> ...'
+        )
+        # JSON returned by the rest endpoint
+        json_data = {
+            "media": {
+                "playerconfig": {
+                    "playlist": [
+                        {
+                            "url": "http://example.com/stream_h264m.mp4",
+                            "fallbackUrl": "http://fallback.com/video_h264m.mp4",
+                            "bitrates": [],
+                            "captionsAvailableLanguages": {}
+                        }
+                    ]
+                }
+            }
+        }
+        ie = make_ie(monkeypatch, webpage=webpage, json_data=json_data)
+>       result = ie._real_extract("http://www.konserthusetplay.se/?m=CKDDnlCY-dhWAAqiMERd-A")
+
+test_generated.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/konserthusetplay.py:36: in _real_extract
+    e = self._search_regex(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.konserthusetplay.KonserthusetPlayIE object at 0x7ff317d3cee0>
+pattern = 'https?://csp\\.picsearch\\.com/rest\\?.*\\be=(.+?)[&"\\\']'
+string = '... <script>var e="abc123";</script> ...', name = 'e'
+default = <object object at 0x7ff31a18a420>, fatal = True, flags = 0
+group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+____________________________ test_subtitles_parsing ____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff317d3fa30>
+
+    def test_subtitles_parsing(monkeypatch):
+        """Verify that subtitles are extracted correctly from the source captions dict."""
+        webpage = '... <script>var e="xyz";</script> ...'
+        json_data = {
+            "media": {
+                "playerconfig": {
+                    "playlist": [
+                        {
+                            "captionsAvailableLanguages": {
+                                "en": "http://captions.com/en.srt",
+                                "none": "http://captions.com/none.srt",
+                                "sv": "http://captions.com/sv.srt"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+        ie = make_ie(monkeypatch, webpage=webpage, json_data=json_data)
+>       result = ie._real_extract("http://rspoplay.se/?m=elWuEH34SMKvaO4wO_cHBw")
+
+test_generated.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/konserthusetplay.py:36: in _real_extract
+    e = self._search_regex(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.konserthusetplay.KonserthusetPlayIE object at 0x7ff317d3fee0>
+pattern = 'https?://csp\\.picsearch\\.com/rest\\?.*\\be=(.+?)[&"\\\']'
+string = '... <script>var e="xyz";</script> ...', name = 'e'
+default = <object object at 0x7ff31a18a420>, fatal = True, flags = 0
+group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_format_extraction_m3u8 - AttributeError: 'None...
+FAILED test_generated.py::test_subtitles_parsing - AttributeError: 'NoneType'...
+2 failed, 1 passed in 1.72s

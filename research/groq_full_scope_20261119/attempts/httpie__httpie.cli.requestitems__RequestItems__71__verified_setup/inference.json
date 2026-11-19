@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-61091d41-b739-4604-8e17-af881b8bc327",
+  "object": "chat.completion",
+  "created": 1795078788,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport tempfile\nimport pytest\nfrom httpie.cli.requestitems import RequestItems\nfrom httpie.cli.argtypes import KeyValueArg\nfrom httpie.cli.constants import (\n    SEPARATOR_HEADER,\n    SEPARATOR_HEADER_EMPTY,\n    SEPARATOR_QUERY_PARAM,\n    SEPARATOR_DATA_STRING,\n    SEPARATOR_FILE_UPLOAD,\n    SEPARATOR_GROUP_NESTED_JSON_ITEMS,\n    SEPARATOR_DATA_RAW_JSON,\n    RequestType,\n)\nfrom httpie.cli.exceptions import ParseError\n\n\ndef test_requestitems_from_args_basic():\n    \"\"\"Verify that headers, query params, data and files are parsed correctly.\"\"\"\n    # Create a temporary file to upload\n    tmp_file = tempfile.NamedTemporaryFile(delete=False)\n    tmp_file.write(b\"hello world\")\n    tmp_file.close()\n\n    args = [\n        KeyValueArg(key=\"X-Test\", value=\"value\", sep=SEPARATOR_HEADER),\n        KeyValueArg(key=\"q\", value=\"search\", sep=SEPARATOR_QUERY_PARAM),\n        KeyValueArg(key=\"name\", value=\"Alice\", sep=SEPARATOR_DATA_STRING),\n        KeyValueArg(key=\"file\", value=tmp_file.name, sep=SEPARATOR_FILE_UPLOAD),\n    ]\n\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n\n    # Header\n    assert items.headers[\"X-Test\"] == [\"value\"]\n    # Query param\n    assert items.params[\"q\"] == [\"search\"]\n    # Data (JSON)\n    assert items.data[\"name\"] == \"Alice\"\n    # File upload\n    assert \"file\" in items.files\n    assert items.files[\"file\"].filename == os.path.basename(tmp_file.name)\n\n    os.unlink(tmp_file.name)\n\n\ndef test_requestitems_from_args_empty_header_and_nested_json():\n    \"\"\"Test handling of empty header and nested JSON group.\"\"\"\n    args = [\n        KeyValueArg(key=\"Empty\", value=\"\", sep=SEPARATOR_HEADER_EMPTY),\n        KeyValueArg(key=\"json\", value=\"{'a':1}\", sep=SEPARATOR_GROUP_NESTED_JSON_ITEMS),\n    ]\n\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n\n    # Empty header should be present with empty string value\n    assert items.headers[\"Empty\"] == [\"\"]\n    # Nested JSON should be parsed into data dict\n    assert items.data[\"json\"] == {\"a\": 1}\n\n\ndef test_requestitems_from_args_invalid_separator_raises():\n    \"\"\"Passing an unknown separator should raise a KeyError.\"\"\"\n    args = [\n        KeyValueArg(key=\"foo\", value=\"bar\", sep=\":\")  # not a defined separator\n    ]\n\n    with pytest.raises(KeyError):\n        RequestItems.from_args(args, request_type=RequestType.JSON)\n```",
+        "reasoning": "We need to write tests for RequestItems.from_args. We need to import RequestItems and related constants. We'll craft KeyValueArg objects. Let's inspect KeyValueArg? It's in argtypes. We'll import. We'll create simple args. Test normal: header, query, data string. Test boundary: empty header. Test error: invalid separator? But from_args will raise? maybe ParseError. We'll test that passing unknown separator raises? But rules only defined for known. If arg.sep not in rules, KeyError. So test that. Use pytest.raises(KeyError). Use tmp_path for file upload? We can create a temp file. Use SEPARATOR_FILE_UPLOAD. We'll need to import constants. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047481231,
+    "prompt_tokens": 1131,
+    "prompt_time": 0.009330098,
+    "completion_tokens": 705,
+    "completion_time": 1.151478207,
+    "total_tokens": 1836,
+    "total_time": 1.160808305,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 144
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgh4e6evdt5zsmr0nsy2a2",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport tempfile\nimport pytest\nfrom httpie.cli.requestitems import RequestItems\nfrom httpie.cli.argtypes import KeyValueArg\nfrom httpie.cli.constants import (\n    SEPARATOR_HEADER,\n    SEPARATOR_HEADER_EMPTY,\n    SEPARATOR_QUERY_PARAM,\n    SEPARATOR_DATA_STRING,\n    SEPARATOR_FILE_UPLOAD,\n    SEPARATOR_GROUP_NESTED_JSON_ITEMS,\n    SEPARATOR_DATA_RAW_JSON,\n    RequestType,\n)\nfrom httpie.cli.exceptions import ParseError\n\n\ndef test_requestitems_from_args_basic():\n    \"\"\"Verify that headers, query params, data and files are parsed correctly.\"\"\"\n    # Create a temporary file to upload\n    tmp_file = tempfile.NamedTemporaryFile(delete=False)\n    tmp_file.write(b\"hello world\")\n    tmp_file.close()\n\n    args = [\n        KeyValueArg(key=\"X-Test\", value=\"value\", sep=SEPARATOR_HEADER),\n        KeyValueArg(key=\"q\", value=\"search\", sep=SEPARATOR_QUERY_PARAM),\n        KeyValueArg(key=\"name\", value=\"Alice\", sep=SEPARATOR_DATA_STRING),\n        KeyValueArg(key=\"file\", value=tmp_file.name, sep=SEPARATOR_FILE_UPLOAD),\n    ]\n\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n\n    # Header\n    assert items.headers[\"X-Test\"] == [\"value\"]\n    # Query param\n    assert items.params[\"q\"] == [\"search\"]\n    # Data (JSON)\n    assert items.data[\"name\"] == \"Alice\"\n    # File upload\n    assert \"file\" in items.files\n    assert items.files[\"file\"].filename == os.path.basename(tmp_file.name)\n\n    os.unlink(tmp_file.name)\n\n\ndef test_requestitems_from_args_empty_header_and_nested_json():\n    \"\"\"Test handling of empty header and nested JSON group.\"\"\"\n    args = [\n        KeyValueArg(key=\"Empty\", value=\"\", sep=SEPARATOR_HEADER_EMPTY),\n        KeyValueArg(key=\"json\", value=\"{'a':1}\", sep=SEPARATOR_GROUP_NESTED_JSON_ITEMS),\n    ]\n\n    items = RequestItems.from_args(args, request_type=RequestType.JSON)\n\n    # Empty header should be present with empty string value\n    assert items.headers[\"Empty\"] == [\"\"]\n    # Nested JSON should be parsed into data dict\n    assert items.data[\"json\"] == {\"a\": 1}\n\n\ndef test_requestitems_from_args_invalid_separator_raises():\n    \"\"\"Passing an unknown separator should raise a KeyError.\"\"\"\n    args = [\n        KeyValueArg(key=\"foo\", value=\"bar\", sep=\":\")  # not a defined separator\n    ]\n\n    with pytest.raises(KeyError):\n        RequestItems.from_args(args, request_type=RequestType.JSON)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5743535830406472
+}

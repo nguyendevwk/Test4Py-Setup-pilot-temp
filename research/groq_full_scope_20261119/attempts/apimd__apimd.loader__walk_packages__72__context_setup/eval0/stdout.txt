@@ -1,0 +1,73 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_walk_packages_normal ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_normal0')
+
+    def test_walk_packages_normal(tmp_path):
+        # Create a package with a module and a stub package
+        pkg_dir = tmp_path / "pkg"
+        pkg_dir.mkdir()
+        (pkg_dir / "__init__.py").write_text("# init")
+        (pkg_dir / "module.py").write_text("x = 1")
+    
+        stub_dir = tmp_path / f"pkg{PEP561_SUFFIX}"
+        stub_dir.mkdir()
+        (stub_dir / "__init__.pyi").write_text("# stub init")
+    
+        # Collect results
+        results = list(walk_packages("pkg", str(tmp_path)))
+        names = {name for name, _ in results}
+        paths = {path for _, path in results}
+    
+        # Expected names and paths
+        expected_names = {"pkg", "pkg.module"}
+        expected_paths = {
+            str(pkg_dir),
+            str(pkg_dir / "module.py"),
+            str(stub_dir),
+        }
+    
+        assert names == expected_names
+>       assert paths == expected_paths
+E       AssertionError: assert {'/home/heuri...0/pkg/module'} == {'/home/heuri...kg/module.py'}
+E         
+E         Extra items in the left set:
+E         '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_normal0/pkg/module'
+E         '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_normal0/pkg-stubs/__init__'
+E         '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__72__c...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+test_generated.py:30: AssertionError
+_____________________ test_walk_packages_excludes_invalid ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_excludes_in0')
+
+    def test_walk_packages_excludes_invalid(tmp_path):
+        # Create a valid package
+        valid_dir = tmp_path / "valid_pkg"
+        valid_dir.mkdir()
+        (valid_dir / "__init__.py").write_text("# init")
+    
+        # Create an unrelated file outside the valid prefix
+        unrelated_file = tmp_path / "unrelated.py"
+        unrelated_file.write_text("print('hello')")
+    
+        results = list(walk_packages("valid_pkg", str(tmp_path)))
+        # Should only contain the valid package, not the unrelated file
+        assert len(results) == 1
+        name, path = results[0]
+        assert name == "valid_pkg"
+>       assert path == str(valid_dir)
+E       AssertionError: assert '/home/heurix..._pkg/__init__' == '/home/heurix...in0/valid_pkg'
+E         
+E         Skipping 200 identical leading characters in diff, use -v to show
+E         - 0/valid_pkg
+E         + 0/valid_pkg/__init__
+
+test_generated.py:61: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_walk_packages_normal - AssertionError: assert ...
+FAILED test_generated.py::test_walk_packages_excludes_invalid - AssertionErro...
+2 failed, 1 passed in 0.13s

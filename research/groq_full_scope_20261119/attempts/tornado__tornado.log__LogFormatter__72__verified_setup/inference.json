@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-6ed69a46-2c8d-444f-8923-ffcb4572c486",
+  "object": "chat.completion",
+  "created": 1795079634,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport sys\nimport types\nimport datetime\nimport pytest\nfrom tornado.log import LogFormatter\n\n# Helper to create a LogRecord with a given level and message\ndef make_record(level, msg, exc_info=None):\n    return logging.LogRecord(\n        name=\"test\",\n        level=level,\n        pathname=__file__,\n        lineno=10,\n        msg=msg,\n        args=(),\n        exc_info=exc_info,\n    )\n\ndef test_basic_formatting_no_color(monkeypatch):\n    # Disable color support by monkeypatching the helper that checks terminal\n    monkeypatch.setattr(\"tornado.log._stderr_supports_color\", lambda: False)\n    fmt = LogFormatter(color=False)\n    record = make_record(logging.INFO, \"Hello world\")\n    formatted = fmt.format(record)\n    # The formatted string should contain the level initial, timestamp, module, line, and message\n    assert \"[I\" in formatted\n    assert \"Hello world\" in formatted\n    # No color escape sequences should be present\n    assert \"\\033[\" not in formatted\n\ndef test_color_mapping_and_timestamp(monkeypatch):\n    # Enable color support by faking a terminal that supports it\n    monkeypatch.setattr(\"tornado.log._stderr_supports_color\", lambda: True)\n    # Fake curses module with minimal interface\n    fake_curses = types.SimpleNamespace()\n    fake_curses.tigetstr = lambda name: b\"\\x1b[2;3%dm\" if name in (\"setaf\", \"setf\") else b\"\\x1b[0m\"\n    fake_curses.tparm = lambda seq, code: seq % code\n    monkeypatch.setitem(sys.modules, \"curses\", fake_curses)\n    fmt = LogFormatter(color=True)\n    record = make_record(logging.ERROR, \"Error occurred\")\n    formatted = fmt.format(record)\n    # The formatted string should start with the ANSI escape code for red\n    assert formatted.startswith(\"\\033[2;31m\")\n    # The reset code should appear after the message\n    assert \"\\033[0m\" in formatted\n    # Timestamp should match the default date format\n    timestamp = datetime.datetime.now().strftime(fmt.datefmt)\n    assert timestamp in formatted\n\ndef test_bad_message_handling():\n    # Create a record with a message that will raise an exception when converted to string\n    class BadStr:\n        def __str__(self):\n            raise ValueError(\"bad conversion\")\n    bad_msg = BadStr()\n    record = make_record(logging.WARNING, bad_msg)\n    fmt = LogFormatter()\n    formatted = fmt.format(record)\n    # The formatter should catch the exception and include a diagnostic message\n    assert \"Bad message\" in formatted\n    assert \"bad conversion\" in formatted\n    # The rest of the record should still be formatted correctly\n    assert \"[W\" in formatted\n    assert \"test\" in formatted\n```",
+        "reasoning": "Need tests for LogFormatter. Use tmp_path? Not needed. Test normal formatting, color disabled, error message handling. Use logging.LogRecord. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004829552,
+    "prompt_tokens": 1678,
+    "prompt_time": 0.014674636,
+    "completion_tokens": 647,
+    "completion_time": 0.69541435,
+    "total_tokens": 2325,
+    "total_time": 0.710088986,
+    "prompt_tokens_details": {
+      "cached_tokens": 1536
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 35
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7shayfve7xt6sp5r146p410",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport sys\nimport types\nimport datetime\nimport pytest\nfrom tornado.log import LogFormatter\n\n# Helper to create a LogRecord with a given level and message\ndef make_record(level, msg, exc_info=None):\n    return logging.LogRecord(\n        name=\"test\",\n        level=level,\n        pathname=__file__,\n        lineno=10,\n        msg=msg,\n        args=(),\n        exc_info=exc_info,\n    )\n\ndef test_basic_formatting_no_color(monkeypatch):\n    # Disable color support by monkeypatching the helper that checks terminal\n    monkeypatch.setattr(\"tornado.log._stderr_supports_color\", lambda: False)\n    fmt = LogFormatter(color=False)\n    record = make_record(logging.INFO, \"Hello world\")\n    formatted = fmt.format(record)\n    # The formatted string should contain the level initial, timestamp, module, line, and message\n    assert \"[I\" in formatted\n    assert \"Hello world\" in formatted\n    # No color escape sequences should be present\n    assert \"\\033[\" not in formatted\n\ndef test_color_mapping_and_timestamp(monkeypatch):\n    # Enable color support by faking a terminal that supports it\n    monkeypatch.setattr(\"tornado.log._stderr_supports_color\", lambda: True)\n    # Fake curses module with minimal interface\n    fake_curses = types.SimpleNamespace()\n    fake_curses.tigetstr = lambda name: b\"\\x1b[2;3%dm\" if name in (\"setaf\", \"setf\") else b\"\\x1b[0m\"\n    fake_curses.tparm = lambda seq, code: seq % code\n    monkeypatch.setitem(sys.modules, \"curses\", fake_curses)\n    fmt = LogFormatter(color=True)\n    record = make_record(logging.ERROR, \"Error occurred\")\n    formatted = fmt.format(record)\n    # The formatted string should start with the ANSI escape code for red\n    assert formatted.startswith(\"\\033[2;31m\")\n    # The reset code should appear after the message\n    assert \"\\033[0m\" in formatted\n    # Timestamp should match the default date format\n    timestamp = datetime.datetime.now().strftime(fmt.datefmt)\n    assert timestamp in formatted\n\ndef test_bad_message_handling():\n    # Create a record with a message that will raise an exception when converted to string\n    class BadStr:\n        def __str__(self):\n            raise ValueError(\"bad conversion\")\n    bad_msg = BadStr()\n    record = make_record(logging.WARNING, bad_msg)\n    fmt = LogFormatter()\n    formatted = fmt.format(record)\n    # The formatter should catch the exception and include a diagnostic message\n    assert \"Bad message\" in formatted\n    assert \"bad conversion\" in formatted\n    # The rest of the record should still be formatted correctly\n    assert \"[W\" in formatted\n    assert \"test\" in formatted\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "42c103df391d432e9c81e38f06095e03",
+  "_api_plus_pacing_seconds": 7.859836583957076
+}

@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-4244da6d-3dd6-4a21-8e31-f14f77501701",
+  "object": "chat.completion",
+  "created": 1795079613,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport io\nimport pytest\nfrom httpie.cli.requestitems import process_file_upload_arg\nfrom httpie.cli.argtypes import KeyValueArg\nfrom httpie.exceptions import ParseError\n\ndef test_process_file_upload_arg_reads_file_and_infers_mime(tmp_path):\n    # Create a temporary file with known content and extension\n    tmp_file = tmp_path / \"test.txt\"\n    tmp_file.write_text(\"hello world\")\n    # Construct KeyValueArg with filename only\n    arg = KeyValueArg(orig=\"file\", value=str(tmp_file))\n    name, file_obj, mime = process_file_upload_arg(arg)\n    # Assertions\n    assert name == \"test.txt\"\n    assert isinstance(file_obj, io.BufferedReader)\n    assert file_obj.read() == b\"hello world\"\n    # MIME type should be inferred from extension\n    assert mime == \"text/plain\"\n\ndef test_process_file_upload_arg_with_explicit_mime(tmp_path):\n    # Create a temporary file with .bin extension\n    tmp_file = tmp_path / \"data.bin\"\n    tmp_file.write_bytes(b\"\\x00\\x01\\x02\")\n    # Provide explicit MIME type after separator\n    arg = KeyValueArg(orig=\"file\", value=f\"{tmp_file}{KeyValueArg.SEPARATOR_FILE_UPLOAD_TYPE}application/octet-stream\")\n    name, file_obj, mime = process_file_upload_arg(arg)\n    assert name == \"data.bin\"\n    assert file_obj.read() == b\"\\x00\\x01\\x02\"\n    # MIME type should be the explicit one\n    assert mime == \"application/octet-stream\"\n\ndef test_process_file_upload_arg_raises_on_missing_file(tmp_path):\n    # Path that does not exist\n    missing_path = tmp_path / \"nonexistent.txt\"\n    arg = KeyValueArg(orig=\"file\", value=str(missing_path))\n    with pytest.raises(ParseError) as excinfo:\n        process_file_upload_arg(arg)\n    # Ensure the error message contains the original argument string\n    assert str(arg.orig) in str(excinfo.value)\n    # Ensure the underlying OSError message is included\n    assert \"No such file or directory\" in str(excinfo.value)\n```",
+        "reasoning": "We need three tests: normal file, missing file error, mime type override. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005010667,
+    "prompt_tokens": 545,
+    "prompt_time": 0.004133893,
+    "completion_tokens": 478,
+    "completion_time": 0.503523058,
+    "total_tokens": 1023,
+    "total_time": 0.507656951,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 21
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7shaan3ek4bz2w2akws699e",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport io\nimport pytest\nfrom httpie.cli.requestitems import process_file_upload_arg\nfrom httpie.cli.argtypes import KeyValueArg\nfrom httpie.exceptions import ParseError\n\ndef test_process_file_upload_arg_reads_file_and_infers_mime(tmp_path):\n    # Create a temporary file with known content and extension\n    tmp_file = tmp_path / \"test.txt\"\n    tmp_file.write_text(\"hello world\")\n    # Construct KeyValueArg with filename only\n    arg = KeyValueArg(orig=\"file\", value=str(tmp_file))\n    name, file_obj, mime = process_file_upload_arg(arg)\n    # Assertions\n    assert name == \"test.txt\"\n    assert isinstance(file_obj, io.BufferedReader)\n    assert file_obj.read() == b\"hello world\"\n    # MIME type should be inferred from extension\n    assert mime == \"text/plain\"\n\ndef test_process_file_upload_arg_with_explicit_mime(tmp_path):\n    # Create a temporary file with .bin extension\n    tmp_file = tmp_path / \"data.bin\"\n    tmp_file.write_bytes(b\"\\x00\\x01\\x02\")\n    # Provide explicit MIME type after separator\n    arg = KeyValueArg(orig=\"file\", value=f\"{tmp_file}{KeyValueArg.SEPARATOR_FILE_UPLOAD_TYPE}application/octet-stream\")\n    name, file_obj, mime = process_file_upload_arg(arg)\n    assert name == \"data.bin\"\n    assert file_obj.read() == b\"\\x00\\x01\\x02\"\n    # MIME type should be the explicit one\n    assert mime == \"application/octet-stream\"\n\ndef test_process_file_upload_arg_raises_on_missing_file(tmp_path):\n    # Path that does not exist\n    missing_path = tmp_path / \"nonexistent.txt\"\n    arg = KeyValueArg(orig=\"file\", value=str(missing_path))\n    with pytest.raises(ParseError) as excinfo:\n        process_file_upload_arg(arg)\n    # Ensure the error message contains the original argument string\n    assert str(arg.orig) in str(excinfo.value)\n    # Ensure the underlying OSError message is included\n    assert \"No such file or directory\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "06ff283be2954d1c8ea13ea8c859788a",
+  "_api_plus_pacing_seconds": 2.0530035940464586
+}

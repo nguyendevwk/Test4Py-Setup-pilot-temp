@@ -1,0 +1,47 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_aes_decrypt_returns_list_of_length_16 __________________
+
+    def test_aes_decrypt_returns_list_of_length_16():
+        # Use a dummy expanded key of 176 zero bytes (128‑bit AES)
+        expanded_key = [0] * 176
+        # Input data: 16 bytes of incremental values
+        data = list(range(16))
+        result = aes_decrypt(data, expanded_key)
+        assert isinstance(result, list)
+        assert len(result) == 16
+        # With zero key and zeroed round keys, the output should equal the input
+>       assert result == data
+E       assert [252, 91, 34,... 132, 69, ...] == [0, 1, 2, 3, 4, 5, ...]
+E         
+E         At index 0 diff: 252 != 0
+E         Use -v to get more diff
+
+test_generated.py:13: AssertionError
+_______________ test_aes_decrypt_with_nonzero_key_changes_output _______________
+
+    def test_aes_decrypt_with_nonzero_key_changes_output():
+        # Expanded key: first 16 bytes are 1, rest zeros
+        expanded_key = [1] * 16 + [0] * (176 - 16)
+        data = [0] * 16
+        result = aes_decrypt(data, expanded_key)
+        # The first round key XOR should change the data
+>       assert result[0] == 1
+E       assert 107 == 1
+
+test_generated.py:21: AssertionError
+________________ test_aes_decrypt_raises_on_invalid_key_length _________________
+
+    def test_aes_decrypt_raises_on_invalid_key_length():
+        # Expanded key too short
+        expanded_key = [0] * 10
+        data = [0] * 16
+>       with pytest.raises(ZeroDivisionError):
+E       Failed: DID NOT RAISE ZeroDivisionError
+
+test_generated.py:29: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_aes_decrypt_returns_list_of_length_16 - assert...
+FAILED test_generated.py::test_aes_decrypt_with_nonzero_key_changes_output - ...
+FAILED test_generated.py::test_aes_decrypt_raises_on_invalid_key_length - Fai...
+3 failed in 1.37s

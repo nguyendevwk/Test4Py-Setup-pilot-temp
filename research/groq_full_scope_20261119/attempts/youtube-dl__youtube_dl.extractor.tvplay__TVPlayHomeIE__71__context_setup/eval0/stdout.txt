@@ -1,0 +1,33 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_full_extraction_with_all_fields _____________________
+
+    def test_full_extraction_with_all_fields():
+        asset = {
+            'movie': {'contentUrl': 'http://example.com/stream.m3u8'},
+            'assetId': '12345',
+            'title': {'title': 'Test Title', 'summaryLong': 'Long summary',
+                      'runTime': 'PT7M30S', 'titleBrief': 'Brief'},
+            'imageUrl': '/images/cover.jpg',
+            'metadata': {'seasonNumber': '2', 'episodeNumber': '5'},
+            'tvSeriesTitle': 'Series Name',
+            'tvSeasonTitle': 'Season 2',
+        }
+        formats = [{'format_id': '720p', 'url': 'http://example.com/720p.mp4'}]
+        ie = DummyTVPlayIE(asset, formats)
+    
+        result = ie._real_extract('https://tvplay.tv3.lt/test/test-12345')
+    
+        assert result['id'] == '12345'
+        assert result['title'] == 'Test Title'
+        assert result['description'] == 'Long summary'
+>       assert result['thumbnails'] == [{'url': 'http://example.com/images/cover.jpg', 'ext': 'jpg'}]
+E       AssertionError: assert [{'url': 'htt...'ext': 'jpg'}] == [{'url': 'htt...'ext': 'jpg'}]
+E         
+E         At index 0 diff: {'url': 'https://tvplay.tv3.lt/images/cover.jpg', 'ext': 'jpg'} != {'url': 'http://example.com/images/cover.jpg', 'ext': 'jpg'}
+E         Use -v to get more diff
+
+test_generated.py:46: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_full_extraction_with_all_fields - AssertionErr...
+1 failed, 2 passed in 1.38s

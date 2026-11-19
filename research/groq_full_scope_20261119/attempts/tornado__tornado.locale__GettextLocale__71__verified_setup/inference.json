@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b62faad6-463b-43e7-9e72-4ae5205a3f92",
+  "object": "chat.completion",
+  "created": 1795077665,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport gettext\nimport pytest\nfrom tornado.locale import GettextLocale, CONTEXT_SEPARATOR\n\nclass DummyTranslations(gettext.NullTranslations):\n    \"\"\"A minimal translation that records calls and returns predictable strings.\"\"\"\n    def gettext(self, message):\n        # Return the message prefixed to indicate translation\n        return f\"translated:{message}\"\n\n    def ngettext(self, singular, plural, n):\n        # Return singular or plural based on n\n        return singular if n == 1 else plural\n\ndef test_basic_translation_returns_translated_message():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Simple message translation\n    result = locale.translate(\"hello\")\n    assert result == \"translated:hello\"\n    # Ensure that plural form is not used when plural_message is None\n    result_no_plural = locale.translate(\"item\")\n    assert result_no_plural == \"translated:item\"\n\ndef test_plural_translation_returns_correct_form():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Singular case\n    singular = locale.translate(\"apple\", plural_message=\"apples\", count=1)\n    assert singular == \"apple\"\n    # Plural case\n    plural = locale.translate(\"apple\", plural_message=\"apples\", count=3)\n    assert plural == \"apples\"\n\ndef test_context_translation_fallback_and_plural_context():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Context with no translation (fallback to original)\n    context_msg = locale.pgettext(\"law\", \"right\")\n    assert context_msg == \"right\"\n    # Context with translation (simulate by overriding gettext to return context)\n    def custom_gettext(msg):\n        if msg == \"law\" + CONTEXT_SEPARATOR + \"right\":\n            return \"law_right\"\n        return f\"translated:{msg}\"\n    translations.gettext = custom_gettext\n    context_msg_translated = locale.pgettext(\"law\", \"right\")\n    assert context_msg_translated == \"law_right\"\n    # Plural context: use custom ngettext to return context-specific plural\n    def custom_ngettext(singular, plural, n):\n        if singular == \"law\" + CONTEXT_SEPARATOR + \"club\":\n            return \"law_club\" if n == 1 else \"law_clubs\"\n        return singular if n == 1 else plural\n    translations.ngettext = custom_ngettext\n    plural_context = locale.pgettext(\"law\", \"club\", \"clubs\", count=2)\n    assert plural_context == \"law_clubs\"\n```",
+        "reasoning": "We need to test GettextLocale. Need to create translations using gettext.NullTranslations? We can create a dummy translation by creating a gettext.GNUTranslations from a .mo file. But easier: use gettext.NullTranslations which returns original string. But we want to test plural and context. We can create a custom NullTranslations subclass that overrides ngettext and gettext to return something predictable. Use a simple class.\n\nTest1: normal translation returns message unchanged.\n\nTest2: plural translation returns plural form based on count.\n\nTest3: context translation returns context-specific.\n\nImplement custom translations. Use simple lambda.\n\nLet's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.596686483,
+    "prompt_tokens": 757,
+    "prompt_time": 0.044905015,
+    "completion_tokens": 661,
+    "completion_time": 0.748242299,
+    "total_tokens": 1418,
+    "total_time": 0.793147314,
+    "completion_tokens_details": {
+      "reasoning_tokens": 124
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfevmgebaakekxt016mxrx",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport gettext\nimport pytest\nfrom tornado.locale import GettextLocale, CONTEXT_SEPARATOR\n\nclass DummyTranslations(gettext.NullTranslations):\n    \"\"\"A minimal translation that records calls and returns predictable strings.\"\"\"\n    def gettext(self, message):\n        # Return the message prefixed to indicate translation\n        return f\"translated:{message}\"\n\n    def ngettext(self, singular, plural, n):\n        # Return singular or plural based on n\n        return singular if n == 1 else plural\n\ndef test_basic_translation_returns_translated_message():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Simple message translation\n    result = locale.translate(\"hello\")\n    assert result == \"translated:hello\"\n    # Ensure that plural form is not used when plural_message is None\n    result_no_plural = locale.translate(\"item\")\n    assert result_no_plural == \"translated:item\"\n\ndef test_plural_translation_returns_correct_form():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Singular case\n    singular = locale.translate(\"apple\", plural_message=\"apples\", count=1)\n    assert singular == \"apple\"\n    # Plural case\n    plural = locale.translate(\"apple\", plural_message=\"apples\", count=3)\n    assert plural == \"apples\"\n\ndef test_context_translation_fallback_and_plural_context():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Context with no translation (fallback to original)\n    context_msg = locale.pgettext(\"law\", \"right\")\n    assert context_msg == \"right\"\n    # Context with translation (simulate by overriding gettext to return context)\n    def custom_gettext(msg):\n        if msg == \"law\" + CONTEXT_SEPARATOR + \"right\":\n            return \"law_right\"\n        return f\"translated:{msg}\"\n    translations.gettext = custom_gettext\n    context_msg_translated = locale.pgettext(\"law\", \"right\")\n    assert context_msg_translated == \"law_right\"\n    # Plural context: use custom ngettext to return context-specific plural\n    def custom_ngettext(singular, plural, n):\n        if singular == \"law\" + CONTEXT_SEPARATOR + \"club\":\n            return \"law_club\" if n == 1 else \"law_clubs\"\n        return singular if n == 1 else plural\n    translations.ngettext = custom_ngettext\n    plural_context = locale.pgettext(\"law\", \"club\", \"clubs\", count=2)\n    assert plural_context == \"law_clubs\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.8150230690371245
+}

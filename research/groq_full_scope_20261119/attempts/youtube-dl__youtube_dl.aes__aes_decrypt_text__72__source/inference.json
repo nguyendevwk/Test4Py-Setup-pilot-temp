@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-2e6aa1c3-54f7-4d64-b239-0f818e9a9f1a",
+  "object": "chat.completion",
+  "created": 1795078770,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport base64\nimport pytest\nfrom youtube_dl.aes import (\n    aes_decrypt_text,\n    aes_encrypt,\n    key_expansion,\n    aes_ctr_encrypt,\n    BLOCK_SIZE_BYTES,\n)\n\n# Helper to create a ciphertext that can be decrypted by aes_decrypt_text\ndef create_ciphertext(plaintext: bytes, password: str, key_size_bytes: int) -> str:\n    # Prepare key\n    key = password.encode(\"utf-8\")\n    key = key[:key_size_bytes] + b\"\\x00\" * (key_size_bytes - len(key))\n    key = aes_encrypt(key[:BLOCK_SIZE_BYTES], key_expansion(key)) * (\n        key_size_bytes // BLOCK_SIZE_BYTES\n    )\n    # Generate nonce\n    nonce = b\"12345678\"  # 8 bytes nonce\n    # Encrypt\n    cipher = aes_ctr_encrypt(plaintext, key, nonce)\n    # Prepend nonce and base64 encode\n    return base64.b64encode(nonce + cipher).decode(\"ascii\")\n\n\ndef test_aes_decrypt_text_roundtrip():\n    plaintext = b\"Hello, world! This is a test.\"\n    password = \"mysecretpassword\"\n    key_size_bytes = 16  # 128‑bit key\n    data = create_ciphertext(plaintext, password, key_size_bytes)\n    result = aes_decrypt_text(data, password, key_size_bytes)\n    assert result == plaintext\n\n\ndef test_aes_decrypt_text_boundary_empty_plaintext():\n    plaintext = b\"\"\n    password = \"edgecase\"\n    key_size_bytes = 24  # 192‑bit key\n    data = create_ciphertext(plaintext, password, key_size_bytes)\n    result = aes_decrypt_text(data, password, key_size_bytes)\n    assert result == plaintext\n\n\ndef test_aes_decrypt_text_invalid_key_size():\n    plaintext = b\"sample data\"\n    password = \"short\"\n    key_size_bytes = 10  # invalid key size\n    data = create_ciphertext(plaintext, password, 16)  # create with valid key size\n    with pytest.raises(ValueError):\n        aes_decrypt_text(data, password, key_size_bytes)\n```",
+        "reasoning": "We need to test aes_decrypt_text. We need to produce data that when decrypted gives known plaintext. We need to know aes_encrypt, key_expansion, aes_ctr_decrypt, inc, BLOCK_SIZE_BYTES. They are in same module? Not imported. Probably from youtube_dl.aes. Let's inspect? Assume functions exist. We can create a simple test: encrypt known plaintext with known password and key_size, then decrypt and assert equal. But we don't have encrypt function? We can use same module's aes_encrypt? It's not imported. But we can import from youtube_dl.aes. Let's write tests that import aes_decrypt_text and other functions to encrypt. Use key_size 16. Use password 'testpass'. Use plaintext b'hello world'. Need to base64 encode ciphertext. We'll use aes_encrypt_text? Not available. We'll use aes_encrypt and aes_ctr_encrypt? Let's inspect module? Not available. But we can assume aes_encrypt and aes_ctr_encrypt exist. We'll import them. Use compat_b64encode? Not needed. We'll produce ciphertext by encrypting plaintext with same algorithm. Then base64 encode. Then decrypt. Third test error: invalid key_size raises? maybe ValueError. We'll test that passing key_size 10 raises. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053090334,
+    "prompt_tokens": 615,
+    "prompt_time": 0.013593775,
+    "completion_tokens": 718,
+    "completion_time": 0.783401913,
+    "total_tokens": 1333,
+    "total_time": 0.796995688,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 256
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sggjmde2xag6ve0w01k6bv",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport base64\nimport pytest\nfrom youtube_dl.aes import (\n    aes_decrypt_text,\n    aes_encrypt,\n    key_expansion,\n    aes_ctr_encrypt,\n    BLOCK_SIZE_BYTES,\n)\n\n# Helper to create a ciphertext that can be decrypted by aes_decrypt_text\ndef create_ciphertext(plaintext: bytes, password: str, key_size_bytes: int) -> str:\n    # Prepare key\n    key = password.encode(\"utf-8\")\n    key = key[:key_size_bytes] + b\"\\x00\" * (key_size_bytes - len(key))\n    key = aes_encrypt(key[:BLOCK_SIZE_BYTES], key_expansion(key)) * (\n        key_size_bytes // BLOCK_SIZE_BYTES\n    )\n    # Generate nonce\n    nonce = b\"12345678\"  # 8 bytes nonce\n    # Encrypt\n    cipher = aes_ctr_encrypt(plaintext, key, nonce)\n    # Prepend nonce and base64 encode\n    return base64.b64encode(nonce + cipher).decode(\"ascii\")\n\n\ndef test_aes_decrypt_text_roundtrip():\n    plaintext = b\"Hello, world! This is a test.\"\n    password = \"mysecretpassword\"\n    key_size_bytes = 16  # 128‑bit key\n    data = create_ciphertext(plaintext, password, key_size_bytes)\n    result = aes_decrypt_text(data, password, key_size_bytes)\n    assert result == plaintext\n\n\ndef test_aes_decrypt_text_boundary_empty_plaintext():\n    plaintext = b\"\"\n    password = \"edgecase\"\n    key_size_bytes = 24  # 192‑bit key\n    data = create_ciphertext(plaintext, password, key_size_bytes)\n    result = aes_decrypt_text(data, password, key_size_bytes)\n    assert result == plaintext\n\n\ndef test_aes_decrypt_text_invalid_key_size():\n    plaintext = b\"sample data\"\n    password = \"short\"\n    key_size_bytes = 10  # invalid key size\n    data = create_ciphertext(plaintext, password, 16)  # create with valid key size\n    with pytest.raises(ValueError):\n        aes_decrypt_text(data, password, key_size_bytes)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2265771210077219
+}

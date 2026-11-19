@@ -1,0 +1,54 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_extract_ptmd_and_player _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.zdf__ZDFBaseIE__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_extract_ptmd_and_player0')
+
+    def test_extract_ptmd_and_player(tmp_path):
+        """Test that _extract_ptmd returns expected structure and _extract_player parses JSON."""
+        ie = DummyZDFIE()
+        # Prepare a fake ptmd JSON with one format
+        ptmd_json = {
+            "basename": "video123",
+            "attributes": {"duration": {"value": 60000}},
+            "priorityList": [
+                {
+                    "formitaeten": [
+                        {
+                            "qualities": [
+                                {
+                                    "audio": {"tracks": [
+                                        {"uri": "http://example.com/audio.mp4", "language": "deu"}
+                                    ]},
+                                    "quality": "high"
+                                }
+                            ],
+                            "type": "video",
+                            "mimeType": "video/mp4"
+                        }
+                    ]
+                }
+            ],
+            "captions": [
+                {"uri": "http://example.com/sub_de.vtt", "language": "deu"}
+            ]
+        }
+        # Mock _call_api to return our ptmd_json
+        def mock_call_api(url, video_id, item, api_token=None, referrer=None):
+            return ptmd_json
+        ie._call_api = mock_call_api
+    
+        result = ie._extract_ptmd("http://example.com/ptmd", "video123", None, None)
+        assert result["id"] == "video123"
+        assert result["duration"] == 60.0  # 60000 ms -> 60 s
+>       assert result["extractor_key"] == "ZDFIE"
+E       AssertionError: assert 'ZDF' == 'ZDFIE'
+E         
+E         - ZDFIE
+E         ?    --
+E         + ZDF
+
+test_generated.py:122: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extract_ptmd_and_player - AssertionError: asse...
+1 failed, 2 passed in 0.80s

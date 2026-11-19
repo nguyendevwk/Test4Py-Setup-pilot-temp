@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-7d275bb3-dab7-424e-ba4e-98491f494496",
+  "object": "chat.completion",
+  "created": 1795078632,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.models import HTTPMessage\nfrom urllib.parse import urlsplit\n\n# Minimal concrete implementation for testing purposes\nclass DummyHTTPMessage(HTTPMessage):\n    def iter_body(self, chunk_size: int):\n        return iter([b\"part1\", b\"part2\"])\n\n    def iter_lines(self, chunk_size: int):\n        return iter([(b\"line1\", b\"\\n\"), (b\"line2\", b\"\\r\\n\")])\n\n    @property\n    def headers(self) -> str:\n        return \"\\r\\n\".join(f\"{k}: {v}\" for k, v in self._orig.headers.items())\n\n    @property\n    def metadata(self) -> str:\n        return f\"URL: {self._orig.url}\"\n\n\ndef test_content_type_string_header():\n    \"\"\"Content-Type header is a string; encoding should be empty.\"\"\"\n    class Orig:\n        headers = {\"Content-Type\": \"application/json\"}\n        url = \"http://example.com\"\n    msg = DummyHTTPMessage(Orig())\n    assert msg.content_type == \"application/json\"\n    assert msg.encoding == \"\"  # no charset specified\n\n\ndef test_content_type_bytes_header_and_encoding():\n    \"\"\"Content-Type header is bytes; encoding should be extracted.\"\"\"\n    class Orig:\n        headers = {\"Content-Type\": b\"text/html; charset=utf-8\"}\n        url = \"http://example.com\"\n    msg = DummyHTTPMessage(Orig())\n    assert msg.content_type == \"text/html; charset=utf-8\"\n    assert msg.encoding == \"utf-8\"\n\n\ndef test_headers_and_metadata_output():\n    \"\"\"Headers property returns correct string; metadata includes URL.\"\"\"\n    class Orig:\n        headers = {\"Host\": \"example.com\", \"Accept\": \"text/plain\"}\n        url = \"https://example.com/path\"\n    msg = DummyHTTPMessage(Orig())\n    expected_headers = \"Host: example.com\\r\\nAccept: text/plain\"\n    assert msg.headers == expected_headers\n    assert msg.metadata == \"URL: https://example.com/path\"\n```",
+        "reasoning": "We need to test HTTPMessage. But it's abstract. Likely there are concrete subclasses? But not provided. We can create a dummy subclass that implements required methods. Test encoding property, content_type handling. Use tmp_path? Not needed. Write three tests: one for content_type string, one for bytes, one for encoding extraction. Use a simple requests.Response mock? We can create a simple object with headers dict. Use a simple class. Let's implement minimal subclass."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046782495,
+    "prompt_tokens": 599,
+    "prompt_time": 0.007634175,
+    "completion_tokens": 523,
+    "completion_time": 0.58670115,
+    "total_tokens": 1122,
+    "total_time": 0.594335325,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 95
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgcc08e3wrbchhbc7jw2fj",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.models import HTTPMessage\nfrom urllib.parse import urlsplit\n\n# Minimal concrete implementation for testing purposes\nclass DummyHTTPMessage(HTTPMessage):\n    def iter_body(self, chunk_size: int):\n        return iter([b\"part1\", b\"part2\"])\n\n    def iter_lines(self, chunk_size: int):\n        return iter([(b\"line1\", b\"\\n\"), (b\"line2\", b\"\\r\\n\")])\n\n    @property\n    def headers(self) -> str:\n        return \"\\r\\n\".join(f\"{k}: {v}\" for k, v in self._orig.headers.items())\n\n    @property\n    def metadata(self) -> str:\n        return f\"URL: {self._orig.url}\"\n\n\ndef test_content_type_string_header():\n    \"\"\"Content-Type header is a string; encoding should be empty.\"\"\"\n    class Orig:\n        headers = {\"Content-Type\": \"application/json\"}\n        url = \"http://example.com\"\n    msg = DummyHTTPMessage(Orig())\n    assert msg.content_type == \"application/json\"\n    assert msg.encoding == \"\"  # no charset specified\n\n\ndef test_content_type_bytes_header_and_encoding():\n    \"\"\"Content-Type header is bytes; encoding should be extracted.\"\"\"\n    class Orig:\n        headers = {\"Content-Type\": b\"text/html; charset=utf-8\"}\n        url = \"http://example.com\"\n    msg = DummyHTTPMessage(Orig())\n    assert msg.content_type == \"text/html; charset=utf-8\"\n    assert msg.encoding == \"utf-8\"\n\n\ndef test_headers_and_metadata_output():\n    \"\"\"Headers property returns correct string; metadata includes URL.\"\"\"\n    class Orig:\n        headers = {\"Host\": \"example.com\", \"Accept\": \"text/plain\"}\n        url = \"https://example.com/path\"\n    msg = DummyHTTPMessage(Orig())\n    expected_headers = \"Host: example.com\\r\\nAccept: text/plain\"\n    assert msg.headers == expected_headers\n    assert msg.metadata == \"URL: https://example.com/path\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9802882770309225
+}

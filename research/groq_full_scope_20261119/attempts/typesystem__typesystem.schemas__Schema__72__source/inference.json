@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-58f4841e-f14c-4eb8-83a8-aed9db45c822",
+  "object": "chat.completion",
+  "created": 1795079301,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.schemas import Schema\nfrom typesystem.fields import IntegerField, StringField\nfrom typesystem.base import ValidationError\n\ndef test_schema_normal_validation_and_serialization():\n    \"\"\"Schema validates a correct dict and serializes it back.\"\"\"\n    schema = Schema(\n        fields={\n            \"age\": IntegerField(),\n            \"name\": StringField(),\n        }\n    )\n    input_data = {\"age\": 30, \"name\": \"Alice\"}\n    validated = schema.validate(input_data)\n    assert validated == {\"age\": 30, \"name\": \"Alice\"}\n    serialized = schema.serialize(validated)\n    assert serialized == {\"age\": 30, \"name\": \"Alice\"}\n\ndef test_schema_missing_required_raises_error():\n    \"\"\"Missing a required key triggers a ValidationError with the correct message.\"\"\"\n    schema = Schema(\n        fields={\n            \"age\": IntegerField(),\n            \"name\": StringField(),\n        }\n    )\n    input_data = {\"age\": 25}\n    with pytest.raises(ValidationError) as excinfo:\n        schema.validate(input_data)\n    errors = excinfo.value.messages\n    # There should be one error about the missing 'name' key\n    assert len(errors) == 1\n    assert errors[0].code == \"required\"\n    assert errors[0].index == [\"name\"]\n    assert \"required\" in errors[0].text\n\ndef test_schema_invalid_key_type_raises_error():\n    \"\"\"A non-string key in the input dict triggers an invalid_key error.\"\"\"\n    schema = Schema(\n        fields={\n            \"age\": IntegerField(),\n            \"name\": StringField(),\n        }\n    )\n    input_data = {1: 40, \"name\": \"Bob\"}  # key 1 is not a string\n    with pytest.raises(ValidationError) as excinfo:\n        schema.validate(input_data)\n    errors = excinfo.value.messages\n    # There should be one error about the invalid key\n    assert len(errors) == 1\n    assert errors[0].code == \"invalid_key\"\n    assert errors[0].index == [1]\n    assert \"invalid_key\" in errors[0].text\n```",
+        "reasoning": "We need three tests for Schema. Use tmp_path? Not needed. Just test validation and serialization. Use simple fields: maybe IntegerField? But not imported. We can create dummy Field subclass? But target uses Field from typesystem.fields. We can import typesystem.fields.IntegerField? Let's inspect. But assume available. We'll use typesystem.fields.IntegerField. Test normal: schema with two fields, one required. Validate dict. Test boundary: missing required raises ValidationError with correct message. Test error: non-string key raises invalid_key. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004542284,
+    "prompt_tokens": 764,
+    "prompt_time": 0.045938816,
+    "completion_tokens": 572,
+    "completion_time": 0.619721802,
+    "total_tokens": 1336,
+    "total_time": 0.665660618,
+    "completion_tokens_details": {
+      "reasoning_tokens": 113
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh0sdyehgshr8skyaq633k",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.schemas import Schema\nfrom typesystem.fields import IntegerField, StringField\nfrom typesystem.base import ValidationError\n\ndef test_schema_normal_validation_and_serialization():\n    \"\"\"Schema validates a correct dict and serializes it back.\"\"\"\n    schema = Schema(\n        fields={\n            \"age\": IntegerField(),\n            \"name\": StringField(),\n        }\n    )\n    input_data = {\"age\": 30, \"name\": \"Alice\"}\n    validated = schema.validate(input_data)\n    assert validated == {\"age\": 30, \"name\": \"Alice\"}\n    serialized = schema.serialize(validated)\n    assert serialized == {\"age\": 30, \"name\": \"Alice\"}\n\ndef test_schema_missing_required_raises_error():\n    \"\"\"Missing a required key triggers a ValidationError with the correct message.\"\"\"\n    schema = Schema(\n        fields={\n            \"age\": IntegerField(),\n            \"name\": StringField(),\n        }\n    )\n    input_data = {\"age\": 25}\n    with pytest.raises(ValidationError) as excinfo:\n        schema.validate(input_data)\n    errors = excinfo.value.messages\n    # There should be one error about the missing 'name' key\n    assert len(errors) == 1\n    assert errors[0].code == \"required\"\n    assert errors[0].index == [\"name\"]\n    assert \"required\" in errors[0].text\n\ndef test_schema_invalid_key_type_raises_error():\n    \"\"\"A non-string key in the input dict triggers an invalid_key error.\"\"\"\n    schema = Schema(\n        fields={\n            \"age\": IntegerField(),\n            \"name\": StringField(),\n        }\n    )\n    input_data = {1: 40, \"name\": \"Bob\"}  # key 1 is not a string\n    with pytest.raises(ValidationError) as excinfo:\n        schema.validate(input_data)\n    errors = excinfo.value.messages\n    # There should be one error about the invalid key\n    assert len(errors) == 1\n    assert errors[0].code == \"invalid_key\"\n    assert errors[0].index == [1]\n    assert \"invalid_key\" in errors[0].text\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0819841619813815
+}

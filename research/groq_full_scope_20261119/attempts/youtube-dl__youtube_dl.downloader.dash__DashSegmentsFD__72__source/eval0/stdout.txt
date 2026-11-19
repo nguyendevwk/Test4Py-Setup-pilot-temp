@@ -1,0 +1,81 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________________ test_successful_download ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.dash__DashSegmentsFD__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_successful_download0')
+
+    def test_successful_download(tmp_path):
+        """Normal download of two fragments succeeds."""
+>       fd = DummyDashSegmentsFD()
+
+test_generated.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyDashSegmentsFD object at 0x7f0e993a0d60>, args = ()
+kwargs = {}
+
+    def __init__(self, *args, **kwargs):
+>       super().__init__(*args, **kwargs)
+E       TypeError: FileDownloader.__init__() missing 2 required positional arguments: 'ydl' and 'params'
+
+test_generated.py:14: TypeError
+___________________________ test_retry_on_http_error ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.dash__DashSegmentsFD__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_retry_on_http_error0')
+
+    def test_retry_on_http_error(tmp_path):
+        """Fragment download retries on HTTPError and succeeds."""
+        class ErroringFD(DummyDashSegmentsFD):
+            def _download_fragment(self, ctx, url, info_dict):
+                self.download_calls.append((url, ctx['filename']))
+                if "retry" in url and not hasattr(self, "retried"):
+                    self.retried = True
+                    raise HTTPError(url, 404, "Not Found", {}, None)
+                return True, b"content_of_" + url.encode()
+    
+>       fd = ErroringFD(params={"fragment_retries": 2})
+
+test_generated.py:85: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.test_retry_on_http_error.<locals>.ErroringFD object at 0x7f0e97c67b50>
+args = (), kwargs = {'params': {'fragment_retries': 2}}
+
+    def __init__(self, *args, **kwargs):
+>       super().__init__(*args, **kwargs)
+E       TypeError: FileDownloader.__init__() missing 1 required positional argument: 'ydl'
+
+test_generated.py:14: TypeError
+________________ test_skip_nonfatal_fragment_on_download_error _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.dash__DashSegmentsFD__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_skip_nonfatal_fragment_on0')
+
+    def test_skip_nonfatal_fragment_on_download_error(tmp_path):
+        """Non‑fatal fragment that fails is skipped after retries."""
+        class SkippingFD(DummyDashSegmentsFD):
+            def _download_fragment(self, ctx, url, info_dict):
+                self.download_calls.append((url, ctx['filename']))
+                # Simulate failure for the second fragment
+                if "bad" in url:
+                    return False, None
+                return True, b"content_of_" + url.encode()
+    
+>       fd = SkippingFD(params={"fragment_retries": 1, "skip_unavailable_fragments": True})
+
+test_generated.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.test_skip_nonfatal_fragment_on_download_error.<locals>.SkippingFD object at 0x7f0e97db74f0>
+args = ()
+kwargs = {'params': {'fragment_retries': 1, 'skip_unavailable_fragments': True}}
+
+    def __init__(self, *args, **kwargs):
+>       super().__init__(*args, **kwargs)
+E       TypeError: FileDownloader.__init__() missing 1 required positional argument: 'ydl'
+
+test_generated.py:14: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_successful_download - TypeError: FileDownloade...
+FAILED test_generated.py::test_retry_on_http_error - TypeError: FileDownloade...
+FAILED test_generated.py::test_skip_nonfatal_fragment_on_download_error - Typ...
+3 failed in 0.67s

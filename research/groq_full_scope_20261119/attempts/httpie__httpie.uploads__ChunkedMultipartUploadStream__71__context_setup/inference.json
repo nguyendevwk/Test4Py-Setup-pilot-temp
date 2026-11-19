@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-abfca2a7-1722-4cb3-8832-e8ed53a6eb6e",
+  "object": "chat.completion",
+  "created": 1795079557,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport threading\nimport pytest\nfrom httpie.uploads import ChunkedMultipartUploadStream\n\nclass DummyEncoder:\n    \"\"\"Simple encoder that returns a fixed byte string in chunks.\"\"\"\n    def __init__(self, data: bytes, chunk_size: int = 10):\n        self._data = data\n        self._pos = 0\n        self.chunk_size = chunk_size\n\n    def read(self, size: int):\n        if self._pos >= len(self._data):\n            return b''\n        chunk = self._data[self._pos : self._pos + size]\n        self._pos += size\n        return chunk\n\ndef test_iteration_yields_chunks():\n    data = b'abcdefghijklmnopqrstuvwxyz'\n    encoder = DummyEncoder(data, chunk_size=5)\n    stream = ChunkedMultipartUploadStream(encoder)\n    chunks = list(stream)\n    # The encoder should split the data into 5-byte chunks\n    assert chunks == [b'abcde', b'fghij', b'klmno', b'pqrst', b'uvwxy', b'z']\n\ndef test_event_set_on_each_chunk():\n    data = b'1234567890'\n    encoder = DummyEncoder(data, chunk_size=3)\n    event = threading.Event()\n    stream = ChunkedMultipartUploadStream(encoder, event=event)\n    # Initially the event should not be set\n    assert not event.is_set()\n    # Consume the first chunk\n    first_chunk = next(iter(stream))\n    # After reading a chunk the event should be set\n    assert event.is_set()\n    # Reset the event for the next chunk\n    event.clear()\n    # Consume the second chunk\n    second_chunk = next(iter(stream))\n    assert event.is_set()\n    # Ensure the chunks are correct\n    assert first_chunk == b'123'\n    assert second_chunk == b'456'\n\ndef test_empty_encoder_yields_no_chunks():\n    encoder = DummyEncoder(b'', chunk_size=10)\n    stream = ChunkedMultipartUploadStream(encoder)\n    # Converting to list should give an empty list\n    assert list(stream) == []\n```",
+        "reasoning": "We need to test ChunkedMultipartUploadStream. Need to import from httpie.uploads. We need a MultipartEncoder mock? Actually real MultipartEncoder exists in httpie? Probably in httpie.uploads? Let's inspect. But we can't. We'll create a simple encoder that has read method returning bytes. Use a simple class. Test normal iteration, boundary when empty, event set. Use tmp_path? Not needed. Just test behavior. Three functions: test_iteration_yields_chunks, test_event_set_on_each_chunk, test_empty_encoder_yields_no_chunks. Use real class."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.006465487,
+    "prompt_tokens": 517,
+    "prompt_time": 0.020180384,
+    "completion_tokens": 561,
+    "completion_time": 0.783999121,
+    "total_tokens": 1078,
+    "total_time": 0.804179505,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 117
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh8m1ke7yr83zt4j2remm3",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport threading\nimport pytest\nfrom httpie.uploads import ChunkedMultipartUploadStream\n\nclass DummyEncoder:\n    \"\"\"Simple encoder that returns a fixed byte string in chunks.\"\"\"\n    def __init__(self, data: bytes, chunk_size: int = 10):\n        self._data = data\n        self._pos = 0\n        self.chunk_size = chunk_size\n\n    def read(self, size: int):\n        if self._pos >= len(self._data):\n            return b''\n        chunk = self._data[self._pos : self._pos + size]\n        self._pos += size\n        return chunk\n\ndef test_iteration_yields_chunks():\n    data = b'abcdefghijklmnopqrstuvwxyz'\n    encoder = DummyEncoder(data, chunk_size=5)\n    stream = ChunkedMultipartUploadStream(encoder)\n    chunks = list(stream)\n    # The encoder should split the data into 5-byte chunks\n    assert chunks == [b'abcde', b'fghij', b'klmno', b'pqrst', b'uvwxy', b'z']\n\ndef test_event_set_on_each_chunk():\n    data = b'1234567890'\n    encoder = DummyEncoder(data, chunk_size=3)\n    event = threading.Event()\n    stream = ChunkedMultipartUploadStream(encoder, event=event)\n    # Initially the event should not be set\n    assert not event.is_set()\n    # Consume the first chunk\n    first_chunk = next(iter(stream))\n    # After reading a chunk the event should be set\n    assert event.is_set()\n    # Reset the event for the next chunk\n    event.clear()\n    # Consume the second chunk\n    second_chunk = next(iter(stream))\n    assert event.is_set()\n    # Ensure the chunks are correct\n    assert first_chunk == b'123'\n    assert second_chunk == b'456'\n\ndef test_empty_encoder_yields_no_chunks():\n    encoder = DummyEncoder(b'', chunk_size=10)\n    stream = ChunkedMultipartUploadStream(encoder)\n    # Converting to list should give an empty list\n    assert list(stream) == []\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "f220e8ee8494432f9473bece503d3006",
+  "_api_plus_pacing_seconds": 1.8588937979657203
+}

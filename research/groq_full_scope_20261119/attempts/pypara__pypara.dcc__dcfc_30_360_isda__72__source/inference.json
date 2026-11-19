@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-2d283b24-2d98-49b6-8d07-b1f118c82724",
+  "object": "chat.completion",
+  "created": 1795079057,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nfrom decimal import Decimal\n\nimport pytest\n\nfrom pypara.dcc import dcfc_30_360_isda\n\n\ndef test_normal_day_count_fraction():\n    \"\"\"Test a typical case where no special day adjustments are needed.\"\"\"\n    start = datetime.date(2023, 1, 15)\n    asof = datetime.date(2023, 4, 15)\n    end = asof  # end is unused in the calculation but required by signature\n    result = dcfc_30_360_isda(start, asof, end)\n    # 30 days per month, 3 months difference → 90 days / 360 = 0.25\n    assert result == Decimal(\"0.25\")\n\n\ndef test_start_day_31_adjustment():\n    \"\"\"Verify that a start date of the 31st is adjusted to the 30th.\"\"\"\n    start = datetime.date(2023, 1, 31)\n    asof = datetime.date(2023, 3, 31)\n    end = asof\n    result = dcfc_30_360_isda(start, asof, end)\n    # Adjusted start: 2023-01-30, asof remains 2023-03-31\n    # nod = (31-30) + 30*(3-1) + 360*(0) = 1 + 60 = 61\n    # fraction = 61/360\n    assert result == Decimal(\"61\") / Decimal(360)\n\n\ndef test_asof_day_31_with_start_day_30_adjustment():\n    \"\"\"Check that when start day is 30 and asof day is 31, asof is adjusted to 30.\"\"\"\n    start = datetime.date(2023, 2, 28)  # not 30, but we set to 30 manually\n    # Force start day to 30 by using 30th of month\n    start = datetime.date(2023, 2, 30) if hasattr(datetime.date, 'replace') else datetime.date(2023, 2, 28)\n    # Since datetime.date cannot have day 30 for February, use March\n    start = datetime.date(2023, 3, 30)\n    asof = datetime.date(2023, 4, 31)\n    end = asof\n    result = dcfc_30_360_isda(start, asof, end)\n    # asof should be adjusted to 2023-04-30\n    # nod = (30-30) + 30*(4-3) + 360*(0) = 30\n    # fraction = 30/360 = 0.083333...\n    assert result == Decimal(\"30\") / Decimal(360)\n```",
+        "reasoning": "We need three tests. Use datetime.date. Test normal, boundary (31 day). Error? maybe negative? but function doesn't error. Could test that start day 31 adjusted. Also test asof day 31 with start day 30. Use Decimal."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052245445,
+    "prompt_tokens": 883,
+    "prompt_time": 0.038170284,
+    "completion_tokens": 643,
+    "completion_time": 4.229993955,
+    "total_tokens": 1526,
+    "total_time": 4.268164239,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 53
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgs7jkerwtby50hkm9j5et",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nfrom decimal import Decimal\n\nimport pytest\n\nfrom pypara.dcc import dcfc_30_360_isda\n\n\ndef test_normal_day_count_fraction():\n    \"\"\"Test a typical case where no special day adjustments are needed.\"\"\"\n    start = datetime.date(2023, 1, 15)\n    asof = datetime.date(2023, 4, 15)\n    end = asof  # end is unused in the calculation but required by signature\n    result = dcfc_30_360_isda(start, asof, end)\n    # 30 days per month, 3 months difference → 90 days / 360 = 0.25\n    assert result == Decimal(\"0.25\")\n\n\ndef test_start_day_31_adjustment():\n    \"\"\"Verify that a start date of the 31st is adjusted to the 30th.\"\"\"\n    start = datetime.date(2023, 1, 31)\n    asof = datetime.date(2023, 3, 31)\n    end = asof\n    result = dcfc_30_360_isda(start, asof, end)\n    # Adjusted start: 2023-01-30, asof remains 2023-03-31\n    # nod = (31-30) + 30*(3-1) + 360*(0) = 1 + 60 = 61\n    # fraction = 61/360\n    assert result == Decimal(\"61\") / Decimal(360)\n\n\ndef test_asof_day_31_with_start_day_30_adjustment():\n    \"\"\"Check that when start day is 30 and asof day is 31, asof is adjusted to 30.\"\"\"\n    start = datetime.date(2023, 2, 28)  # not 30, but we set to 30 manually\n    # Force start day to 30 by using 30th of month\n    start = datetime.date(2023, 2, 30) if hasattr(datetime.date, 'replace') else datetime.date(2023, 2, 28)\n    # Since datetime.date cannot have day 30 for February, use March\n    start = datetime.date(2023, 3, 30)\n    asof = datetime.date(2023, 4, 31)\n    end = asof\n    result = dcfc_30_360_isda(start, asof, end)\n    # asof should be adjusted to 2023-04-30\n    # nod = (30-30) + 30*(4-3) + 360*(0) = 30\n    # fraction = 30/360 = 0.083333...\n    assert result == Decimal(\"30\") / Decimal(360)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 4.678239413013216
+}

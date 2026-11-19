@@ -1,0 +1,27 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_boundary_case_february_end_of_month ___________________
+
+    def test_boundary_case_february_end_of_month():
+        """Test the special handling of February end‑of‑month dates."""
+        # asof is Feb 28, end is Feb 28 -> d2 should stay 28
+        start = datetime.date(2008, 1, 15)
+        asof = datetime.date(2008, 2, 28)
+        end_same = asof
+        result_same = dcfc_30_360_german(start=start, asof=asof, end=end_same)
+        # d2 = 28, d1 = 15 -> nod = (28-15)+30*(2-1)+360*(2008-2008)=13+30=43
+        assert round(result_same, 14) == Decimal('0.11944444444444')
+    
+        # asof is Feb 28, end is Mar 1 -> d2 should be set to 30
+        end_diff = datetime.date(2008, 3, 1)
+        result_diff = dcfc_30_360_german(start=start, asof=asof, end=end_diff)
+        # d2 = 30, d1 = 15 -> nod = (30-15)+30*(2-1)+360*(2008-2008)=15+30=45
+>       assert round(result_diff, 14) == Decimal('0.12500000000000')
+E       AssertionError: assert Decimal('0.11944444444444') == Decimal('0.12500000000000')
+E        +  where Decimal('0.11944444444444') = round(Decimal('0.1194444444444444444444444444'), 14)
+E        +  and   Decimal('0.12500000000000') = Decimal('0.12500000000000')
+
+test_generated.py:33: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_boundary_case_february_end_of_month - Assertio...
+1 failed, 2 passed in 0.13s

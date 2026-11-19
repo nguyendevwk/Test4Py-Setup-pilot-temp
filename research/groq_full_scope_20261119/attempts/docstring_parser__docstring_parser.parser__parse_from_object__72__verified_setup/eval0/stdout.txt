@@ -1,0 +1,87 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_parse_class_with_attribute_docstrings __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring...ser.parser__parse_from_object__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_class_with_attribut0')
+
+    def test_parse_class_with_attribute_docstrings(tmp_path):
+        # Create a class with an attribute and an attribute docstring
+        class Sample:
+            """Sample class docstring."""
+    
+            attr = 42
+            """Attribute docstring for attr."""
+    
+        # Parse the class
+        doc = parse_from_object(Sample)
+    
+        # The class docstring should be parsed correctly
+        assert isinstance(doc, Docstring)
+        assert doc.short_description == "Sample class docstring."
+    
+        # The attribute docstring should be attached
+>       assert "attr" in doc.attributes
+E       AttributeError: 'Docstring' object has no attribute 'attributes'
+
+test_generated.py:23: AttributeError
+____________________ test_parse_function_without_attributes ____________________
+
+    def test_parse_function_without_attributes():
+        def func(x: int) -> int:
+            """Function docstring with a single parameter.
+    
+            :param x: an integer
+            :return: the same integer
+            """
+            return x
+    
+        # Parse the function
+        doc = parse_from_object(func)
+    
+        # No attributes should be present
+        assert isinstance(doc, Docstring)
+        assert doc.short_description == "Function docstring with a single parameter."
+        assert doc.params[0].arg_name == "x"
+        assert doc.params[0].description == "an integer"
+        assert doc.returns.description == "the same integer"
+>       assert not doc.attributes  # empty dict
+E       AttributeError: 'Docstring' object has no attribute 'attributes'
+
+test_generated.py:46: AttributeError
+__________________ test_parse_invalid_style_raises_type_error __________________
+
+    def test_parse_invalid_style_raises_type_error():
+        class Dummy:
+            """Dummy class docstring."""
+    
+        # Passing an invalid style type should raise a TypeError
+        with pytest.raises(TypeError):
+>           parse_from_object(Dummy, style="not_a_style")
+
+test_generated.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/parser.py:74: in parse_from_object
+    docstring = parse(obj.__doc__, style=style)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = 'Dummy class docstring.', style = 'not_a_style'
+
+    def parse(
+        text: T.Optional[str], style: DocstringStyle = DocstringStyle.AUTO
+    ) -> Docstring:
+        """Parse the docstring into its components.
+    
+        :param text: docstring text to parse
+        :param style: docstring style
+        :returns: parsed docstring representation
+        """
+        if style != DocstringStyle.AUTO:
+>           return _STYLE_MAP[style].parse(text)
+E           KeyError: 'not_a_style'
+
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/parser.py:33: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_class_with_attribute_docstrings - Attrib...
+FAILED test_generated.py::test_parse_function_without_attributes - AttributeE...
+FAILED test_generated.py::test_parse_invalid_style_raises_type_error - KeyErr...
+3 failed in 0.16s

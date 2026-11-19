@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-16fe5120-54a6-49f8-b3fa-c217ccb5f106",
+  "object": "chat.completion",
+  "created": 1795079627,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport argparse\nimport pytest\nfrom httpie.client import make_send_kwargs_mergeable_from_env\nfrom httpie.ssl_ import HTTPieCertificate\n\ndef test_make_send_kwargs_normal_and_verify_mapping():\n    # Normal arguments: no cert, simple proxies, verify mapping\n    args = argparse.Namespace(\n        cert=None,\n        cert_key=None,\n        cert_key_pass=None,\n        proxy=[argparse.Namespace(key=\"http\", value=\"http://proxy.example\")],\n        verify=\"yes\",\n    )\n    kwargs = make_send_kwargs_mergeable_from_env(args)\n    assert kwargs[\"proxies\"] == {\"http\": \"http://proxy.example\"}\n    assert kwargs[\"stream\"] is True\n    # verify mapping should resolve to True\n    assert kwargs[\"verify\"] is True\n    # cert should be None\n    assert kwargs[\"cert\"] is None\n\ndef test_make_send_kwargs_verify_case_insensitivity_and_false():\n    # Verify values should be case-insensitive and map to bool\n    for input_value, expected in ((\"TRUE\", True), (\"False\", False), (\"no\", False), (\"YES\", True)):\n        args = argparse.Namespace(\n            cert=None,\n            cert_key=None,\n            cert_key_pass=None,\n            proxy=[],\n            verify=input_value,\n        )\n        kwargs = make_send_kwargs_mergeable_from_env(args)\n        assert kwargs[\"verify\"] is expected\n\ndef test_make_send_kwargs_with_client_cert_and_key():\n    # When cert and cert_key are provided, cert should be an HTTPieCertificate instance\n    args = argparse.Namespace(\n        cert=\"/path/to/cert.pem\",\n        cert_key=\"/path/to/key.pem\",\n        cert_key_pass=argparse.Namespace(value=\"passphrase\"),\n        proxy=[],\n        verify=\"no\",\n    )\n    kwargs = make_send_kwargs_mergeable_from_env(args)\n    cert_obj = kwargs[\"cert\"]\n    assert isinstance(cert_obj, HTTPieCertificate)\n    # The certificate tuple should contain the cert path, key path, and passphrase\n    assert cert_obj.cert == \"/path/to/cert.pem\"\n    assert cert_obj.key == \"/path/to/key.pem\"\n    assert cert_obj.passphrase == \"passphrase\"\n    # verify should be False\n    assert kwargs[\"verify\"] is False\n```",
+        "reasoning": "Need tests for make_send_kwargs_mergeable_from_env. Use argparse.Namespace. Test normal: cert None, proxies, verify mapping. Boundary: verify case-insensitive. Error: maybe missing cert_key when cert provided? But function doesn't error. Maybe test that cert is HTTPieCertificate when cert and key. Use dummy args. Ensure returned dict correct. Use tmp_path? Not needed. Just test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004662122,
+    "prompt_tokens": 625,
+    "prompt_time": 0.020604495,
+    "completion_tokens": 550,
+    "completion_time": 0.633205382,
+    "total_tokens": 1175,
+    "total_time": 0.653809877,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 81
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7shaqsfebwbqe90x7e32jsq",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport argparse\nimport pytest\nfrom httpie.client import make_send_kwargs_mergeable_from_env\nfrom httpie.ssl_ import HTTPieCertificate\n\ndef test_make_send_kwargs_normal_and_verify_mapping():\n    # Normal arguments: no cert, simple proxies, verify mapping\n    args = argparse.Namespace(\n        cert=None,\n        cert_key=None,\n        cert_key_pass=None,\n        proxy=[argparse.Namespace(key=\"http\", value=\"http://proxy.example\")],\n        verify=\"yes\",\n    )\n    kwargs = make_send_kwargs_mergeable_from_env(args)\n    assert kwargs[\"proxies\"] == {\"http\": \"http://proxy.example\"}\n    assert kwargs[\"stream\"] is True\n    # verify mapping should resolve to True\n    assert kwargs[\"verify\"] is True\n    # cert should be None\n    assert kwargs[\"cert\"] is None\n\ndef test_make_send_kwargs_verify_case_insensitivity_and_false():\n    # Verify values should be case-insensitive and map to bool\n    for input_value, expected in ((\"TRUE\", True), (\"False\", False), (\"no\", False), (\"YES\", True)):\n        args = argparse.Namespace(\n            cert=None,\n            cert_key=None,\n            cert_key_pass=None,\n            proxy=[],\n            verify=input_value,\n        )\n        kwargs = make_send_kwargs_mergeable_from_env(args)\n        assert kwargs[\"verify\"] is expected\n\ndef test_make_send_kwargs_with_client_cert_and_key():\n    # When cert and cert_key are provided, cert should be an HTTPieCertificate instance\n    args = argparse.Namespace(\n        cert=\"/path/to/cert.pem\",\n        cert_key=\"/path/to/key.pem\",\n        cert_key_pass=argparse.Namespace(value=\"passphrase\"),\n        proxy=[],\n        verify=\"no\",\n    )\n    kwargs = make_send_kwargs_mergeable_from_env(args)\n    cert_obj = kwargs[\"cert\"]\n    assert isinstance(cert_obj, HTTPieCertificate)\n    # The certificate tuple should contain the cert path, key path, and passphrase\n    assert cert_obj.cert == \"/path/to/cert.pem\"\n    assert cert_obj.key == \"/path/to/key.pem\"\n    assert cert_obj.passphrase == \"passphrase\"\n    # verify should be False\n    assert kwargs[\"verify\"] is False\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "10ed799865934f8a8f5aa61e6c0d189d",
+  "_api_plus_pacing_seconds": 3.3959232950001024
+}

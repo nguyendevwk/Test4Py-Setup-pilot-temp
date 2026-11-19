@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-f73b955c-a325-4ebe-bd33-b79dc6114fa9",
+  "object": "chat.completion",
+  "created": 1795077653,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules import brew_install\nfrom thefuck.utils import replace_argument\n\nclass DummyCommand:\n    def __init__(self, script, output):\n        self.script = script\n        self.output = output\n\ndef test_get_new_command_replaces_formula(monkeypatch):\n    # Arrange\n    dummy = DummyCommand(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    # Patch the helper to return a known replacement\n    monkeypatch.setattr(brew_install, \"_get_similar_formula\", lambda x: \"bar\")\n    # Act\n    new_cmd = brew_install.get_new_command(dummy)\n    # Assert\n    assert new_cmd == \"brew install bar\"\n\ndef test_get_new_command_uses_first_error_in_output(monkeypatch):\n    # Arrange\n    dummy = DummyCommand(\n        script=\"brew install baz\",\n        output=(\"Error: No available formula for qux\\n\"\n                \"Error: No available formula for baz\\n\")\n    )\n    # Patch helper to return a predictable replacement\n    monkeypatch.setattr(brew_install, \"_get_similar_formula\", lambda x: \"quux\")\n    # Act\n    new_cmd = brew_install.get_new_command(dummy)\n    # Assert that the first error term 'qux' was used for replacement\n    assert new_cmd == \"brew install quux\"\n\ndef test_get_new_command_no_replacement_when_formula_same(monkeypatch):\n    # Arrange\n    dummy = DummyCommand(\n        script=\"brew install alpha\",\n        output=\"Error: No available formula for alpha\\n\"\n    )\n    # Patch helper to return the same formula\n    monkeypatch.setattr(brew_install, \"_get_similar_formula\", lambda x: \"alpha\")\n    # Act\n    new_cmd = brew_install.get_new_command(dummy)\n    # Assert that the command remains unchanged\n    assert new_cmd == \"brew install alpha\"\n```",
+        "reasoning": "We need to test get_new_command. Need to simulate command object with script and output. Also need to mock get_brew_path_prefix, brew_available? But we cannot modify product code. We can monkeypatch functions in module. Use import thefuck.rules.brew_install as module. We'll patch _get_similar_formula? It's internal. We can patch get_brew_path_prefix and brew_available to control behavior. But get_new_command uses _get_similar_formula which uses get_brew_path_prefix and brew_available. Let's inspect _get_similar_formula? Not provided. But we can patch it directly. Simpler: monkeypatch module._get_similar_formula to return a known string. Then test replace_argument. Need to import replace_argument from thefuck.utils. We'll create dummy command with script 'brew install foo' and output containing error. Test that new command replaces foo with bar. Also test boundary: if output missing pattern? But function expects match. We can test that it raises IndexError? But not needed. Third test error: maybe when _get_similar_formula returns None? But replace_argument will error. We'll test that if _get_similar_formula returns empty string, replace_argument still works? Actually replace_argument will replace. We'll test that it raises ValueError if script doesn't contain formula? But replace_argument will not replace. We'll test that new command equals original if no match? But function will fail earlier. Maybe test that if command.output has multiple matches, it picks first. We'll create output with two errors. Ensure first used. Let's write three tests: normal, multiple errors, and when _get_similar_formula returns same string (no change). Use tmp_path? Not needed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.160033042,
+    "prompt_tokens": 313,
+    "prompt_time": 0.023121066,
+    "completion_tokens": 754,
+    "completion_time": 0.860776997,
+    "total_tokens": 1067,
+    "total_time": 0.883898063,
+    "completion_tokens_details": {
+      "reasoning_tokens": 344
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfegcwes7bsy7ych0bde08",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules import brew_install\nfrom thefuck.utils import replace_argument\n\nclass DummyCommand:\n    def __init__(self, script, output):\n        self.script = script\n        self.output = output\n\ndef test_get_new_command_replaces_formula(monkeypatch):\n    # Arrange\n    dummy = DummyCommand(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    # Patch the helper to return a known replacement\n    monkeypatch.setattr(brew_install, \"_get_similar_formula\", lambda x: \"bar\")\n    # Act\n    new_cmd = brew_install.get_new_command(dummy)\n    # Assert\n    assert new_cmd == \"brew install bar\"\n\ndef test_get_new_command_uses_first_error_in_output(monkeypatch):\n    # Arrange\n    dummy = DummyCommand(\n        script=\"brew install baz\",\n        output=(\"Error: No available formula for qux\\n\"\n                \"Error: No available formula for baz\\n\")\n    )\n    # Patch helper to return a predictable replacement\n    monkeypatch.setattr(brew_install, \"_get_similar_formula\", lambda x: \"quux\")\n    # Act\n    new_cmd = brew_install.get_new_command(dummy)\n    # Assert that the first error term 'qux' was used for replacement\n    assert new_cmd == \"brew install quux\"\n\ndef test_get_new_command_no_replacement_when_formula_same(monkeypatch):\n    # Arrange\n    dummy = DummyCommand(\n        script=\"brew install alpha\",\n        output=\"Error: No available formula for alpha\\n\"\n    )\n    # Patch helper to return the same formula\n    monkeypatch.setattr(brew_install, \"_get_similar_formula\", lambda x: \"alpha\")\n    # Act\n    new_cmd = brew_install.get_new_command(dummy)\n    # Assert that the command remains unchanged\n    assert new_cmd == \"brew install alpha\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.379283401009161
+}

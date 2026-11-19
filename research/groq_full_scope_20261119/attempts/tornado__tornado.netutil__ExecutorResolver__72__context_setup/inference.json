@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-cefa515c-8633-4e20-bb24-f65fce7ed177",
+  "object": "chat.completion",
+  "created": 1795076268,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport socket\nimport pytest\nfrom tornado.netutil import ExecutorResolver, _resolve_addr\n\n\n@pytest.mark.asyncio\nasync def test_executor_resolver_resolves_localhost():\n    \"\"\"ExecutorResolver should resolve 'localhost' to an IPv4 address.\"\"\"\n    resolver = ExecutorResolver()\n    resolver.initialize(concurrent.futures.ThreadPoolExecutor(max_workers=1))\n    # Resolve using the executor (runs in a thread)\n    result = await resolver.resolve(\"localhost\", 80)\n    # There should be at least one IPv4 address\n    ipv4_addresses = [addr for fam, addr in result if fam == socket.AF_INET]\n    assert ipv4_addresses, \"No IPv4 address found for localhost\"\n    # The returned address should be a tuple (host, port)\n    host, port = ipv4_addresses[0]\n    assert host in (\"127.0.0.1\", \"localhost\")\n    assert port == 80\n    resolver.close()\n    # After close, the executor should be shutdown\n    assert resolver.executor is None\n\n\ndef test_executor_resolver_invalid_host_raises_ioerror():\n    \"\"\"Resolving an invalid hostname should raise IOError.\"\"\"\n    resolver = ExecutorResolver()\n    resolver.initialize(concurrent.futures.ThreadPoolExecutor(max_workers=1))\n    with pytest.raises(IOError):\n        asyncio.get_event_loop().run_until_complete(\n            resolver.resolve(\"nonexistent.host.example\", 80)\n        )\n    resolver.close()\n\n\n@pytest.mark.asyncio\nasync def test_executor_resolver_dummy_executor():\n    \"\"\"When no executor is supplied, dummy_executor is used and not shut down.\"\"\"\n    resolver = ExecutorResolver()\n    resolver.initialize()  # uses dummy_executor\n    result = await resolver.resolve(\"localhost\", 80)\n    # dummy_executor runs in the current thread, so result should be immediate\n    assert isinstance(result, list)\n    resolver.close()\n    # dummy_executor should not be shutdown, executor attribute set to None\n    assert resolver.executor is None\n```",
+        "reasoning": "We need 3 test functions for ExecutorResolver. Test normal resolve, boundary (e.g., invalid host raises), error behavior (executor shutdown). Use tmp_path? not needed. Use real network? can't access network. Use localhost. Use known host like 'localhost'. Test that resolve returns list with IPv4. Also test that close shuts down executor. Use ThreadPoolExecutor. Also test that passing None uses dummy_executor. Use pytest.raises for invalid host."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046780251,
+    "prompt_tokens": 1539,
+    "prompt_time": 0.091485798,
+    "completion_tokens": 512,
+    "completion_time": 0.571253624,
+    "total_tokens": 2051,
+    "total_time": 0.662739422,
+    "completion_tokens_details": {
+      "reasoning_tokens": 93
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7se47mfeyv9v9hpn7bxns78",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport socket\nimport pytest\nfrom tornado.netutil import ExecutorResolver, _resolve_addr\n\n\n@pytest.mark.asyncio\nasync def test_executor_resolver_resolves_localhost():\n    \"\"\"ExecutorResolver should resolve 'localhost' to an IPv4 address.\"\"\"\n    resolver = ExecutorResolver()\n    resolver.initialize(concurrent.futures.ThreadPoolExecutor(max_workers=1))\n    # Resolve using the executor (runs in a thread)\n    result = await resolver.resolve(\"localhost\", 80)\n    # There should be at least one IPv4 address\n    ipv4_addresses = [addr for fam, addr in result if fam == socket.AF_INET]\n    assert ipv4_addresses, \"No IPv4 address found for localhost\"\n    # The returned address should be a tuple (host, port)\n    host, port = ipv4_addresses[0]\n    assert host in (\"127.0.0.1\", \"localhost\")\n    assert port == 80\n    resolver.close()\n    # After close, the executor should be shutdown\n    assert resolver.executor is None\n\n\ndef test_executor_resolver_invalid_host_raises_ioerror():\n    \"\"\"Resolving an invalid hostname should raise IOError.\"\"\"\n    resolver = ExecutorResolver()\n    resolver.initialize(concurrent.futures.ThreadPoolExecutor(max_workers=1))\n    with pytest.raises(IOError):\n        asyncio.get_event_loop().run_until_complete(\n            resolver.resolve(\"nonexistent.host.example\", 80)\n        )\n    resolver.close()\n\n\n@pytest.mark.asyncio\nasync def test_executor_resolver_dummy_executor():\n    \"\"\"When no executor is supplied, dummy_executor is used and not shut down.\"\"\"\n    resolver = ExecutorResolver()\n    resolver.initialize()  # uses dummy_executor\n    result = await resolver.resolve(\"localhost\", 80)\n    # dummy_executor runs in the current thread, so result should be immediate\n    assert isinstance(result, list)\n    resolver.close()\n    # dummy_executor should not be shutdown, executor attribute set to None\n    assert resolver.executor is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0801249869982712
+}

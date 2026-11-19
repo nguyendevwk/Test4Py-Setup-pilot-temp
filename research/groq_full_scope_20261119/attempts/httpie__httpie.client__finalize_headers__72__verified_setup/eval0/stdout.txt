@@ -1,0 +1,75 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_finalize_headers_encodes_and_strips ___________________
+
+    def test_finalize_headers_encodes_and_strips():
+        """Headers with leading/trailing whitespace and string values are stripped and encoded."""
+        raw = HTTPHeadersDict()
+        raw.add("X-Test-Header", "  value with spaces  ")
+        raw.add("X-Another", "simple")
+        raw.add("X-Number", 123)  # non-string, should stay unchanged
+    
+>       final = finalize_headers(raw)
+
+test_generated.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+headers = <HTTPHeadersDict('X-Test-Header': '  value with spaces  ', 'X-Another': 'simple', 'X-Number': 123)>
+
+    def finalize_headers(headers: HTTPHeadersDict) -> HTTPHeadersDict:
+        final_headers = HTTPHeadersDict()
+        for name, value in headers.items():
+            if value is not None:
+                # “leading or trailing LWS MAY be removed without
+                # changing the semantics of the field value”
+                # <https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html>
+                # Also, requests raises `InvalidHeader` for leading spaces.
+>               value = value.strip()
+E               AttributeError: 'int' object has no attribute 'strip'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/client.py:200: AttributeError
+___________________ test_finalize_headers_skippable_headers ____________________
+
+    def test_finalize_headers_skippable_headers():
+        """Headers set to None that are skippable are replaced with SKIP_HEADER."""
+        raw = HTTPHeadersDict()
+        # Use a known skippable header
+        skippable = next(iter(SKIPPABLE_HEADERS))
+        raw.add(skippable, None)
+        # Non-skippable header set to None should be omitted
+        raw.add("Non-Skippable", None)
+    
+        final = finalize_headers(raw)
+    
+        # Skippable header should be present and set to SKIP_HEADER
+        assert final[skippable] == SKIP_HEADER
+        # Non-skippable header should not appear in the final headers
+>       assert "Non-Skippable" not in final
+E       AssertionError: assert 'Non-Skippable' not in <HTTPHeadersDict('host': '@@@SKIP_HEADER@@@', 'Non-Skippable': None)>
+
+test_generated.py:35: AssertionError
+_________________ test_finalize_headers_none_values_and_order __________________
+
+    def test_finalize_headers_none_values_and_order():
+        """Headers with None values that are not skippable are omitted, and order is preserved."""
+        raw = HTTPHeadersDict()
+        raw.add("Header-One", "value1")
+        raw.add("Header-Two", None)          # non-skippable, should be omitted
+        raw.add("Header-Three", "value3")
+    
+        final = finalize_headers(raw)
+    
+        # Only the non-None headers should be present
+>       assert list(final.keys()) == ["Header-One", "Header-Three"]
+E       AssertionError: assert ['Header-One'...Header-Three'] == ['Header-One', 'Header-Three']
+E         
+E         At index 1 diff: 'Header-Two' != 'Header-Three'
+E         Left contains one more item: 'Header-Three'
+E         Use -v to get more diff
+
+test_generated.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_finalize_headers_encodes_and_strips - Attribut...
+FAILED test_generated.py::test_finalize_headers_skippable_headers - Assertion...
+FAILED test_generated.py::test_finalize_headers_none_values_and_order - Asser...
+3 failed in 0.75s

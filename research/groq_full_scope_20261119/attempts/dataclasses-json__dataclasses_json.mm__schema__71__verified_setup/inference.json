@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-554cb637-9b5e-41ba-a448-de198e643d81",
+  "object": "chat.completion",
+  "created": 1795076111,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport typing\nimport dataclasses\nimport pytest\nfrom dataclasses import dataclass, field\nfrom dataclasses_json import mm\nfrom dataclasses_json.mm import schema as mm_schema\nfrom marshmallow import fields\n\n# Helper dataclass for testing\n@dataclass\nclass TestData:\n    # required field\n    required_int: int\n    # field with default\n    default_str: str = \"default\"\n    # field with default_factory\n    default_list: typing.List[int] = dataclasses.field(default_factory=lambda: [1, 2, 3])\n    # optional field\n    optional_float: typing.Optional[float] = None\n    # field with custom mm_field\n    custom_field: int = dataclasses.field(metadata={\"mm_field\": fields.String()})\n    # field with letter_case transformation\n    camel_case: int = dataclasses.field(metadata={\"letter_case\": lambda name: name.replace(\"_\", \"\")})\n    # field with custom decoder\n    decoded_field: int = dataclasses.field(metadata={\"decoder\": lambda x: x * 2})\n\n\ndef test_mm_schema_basic_fields(tmp_path):\n    \"\"\"Test that required, default, default_factory, and optional fields are handled correctly.\"\"\"\n    result = mm_schema(TestData, mixin=None, infer_missing=True)\n    # required_int should be present and required\n    assert \"required_int\" in result\n    assert isinstance(result[\"required_int\"], fields.Integer)\n    assert result[\"required_int\"].required is True\n    # default_str should have default value\n    assert result[\"default_str\"].default == \"default\"\n    # default_list should use default_factory value\n    assert result[\"default_list\"].default == [1, 2, 3]\n    # optional_float should allow None and be optional\n    assert result[\"optional_float\"].allow_none is True\n    assert result[\"optional_float\"].required is False\n\n\ndef test_mm_schema_custom_mm_field_and_letter_case(tmp_path):\n    \"\"\"Test that custom mm_field and letter_case metadata are respected.\"\"\"\n    result = mm_schema(TestData, mixin=None, infer_missing=True)\n    # custom_field should use the provided String field\n    assert isinstance(result[\"custom_field\"], fields.String)\n    # camel_case should have data_key transformed\n    assert result[\"camel_case\"].data_key == \"camelCase\"\n\n\ndef test_mm_schema_custom_decoder(tmp_path):\n    \"\"\"Test that a custom decoder replaces the field's _deserialize method.\"\"\"\n    result = mm_schema(TestData, mixin=None, infer_missing=True)\n    # decoded_field should have a custom _deserialize that doubles the value\n    # We test by calling the method directly\n    original_value = 5\n    deserialized = result[\"decoded_field\"]._deserialize(original_value, None, None)\n    assert deserialized == original_value * 2\n```",
+        "reasoning": "We need to test this function. We'll create a dataclass with various fields: default, default_factory, required, optional, custom mm_field, letter_case, custom decoder. Use tmp_path? Not needed. Just test schema dict. Use assert keys and field types."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047159274,
+    "prompt_tokens": 889,
+    "prompt_time": 0.063740736,
+    "completion_tokens": 642,
+    "completion_time": 0.701999737,
+    "total_tokens": 1531,
+    "total_time": 0.765740473,
+    "completion_tokens_details": {
+      "reasoning_tokens": 55
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdzdy6e2j975c84jv1jgc3",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport typing\nimport dataclasses\nimport pytest\nfrom dataclasses import dataclass, field\nfrom dataclasses_json import mm\nfrom dataclasses_json.mm import schema as mm_schema\nfrom marshmallow import fields\n\n# Helper dataclass for testing\n@dataclass\nclass TestData:\n    # required field\n    required_int: int\n    # field with default\n    default_str: str = \"default\"\n    # field with default_factory\n    default_list: typing.List[int] = dataclasses.field(default_factory=lambda: [1, 2, 3])\n    # optional field\n    optional_float: typing.Optional[float] = None\n    # field with custom mm_field\n    custom_field: int = dataclasses.field(metadata={\"mm_field\": fields.String()})\n    # field with letter_case transformation\n    camel_case: int = dataclasses.field(metadata={\"letter_case\": lambda name: name.replace(\"_\", \"\")})\n    # field with custom decoder\n    decoded_field: int = dataclasses.field(metadata={\"decoder\": lambda x: x * 2})\n\n\ndef test_mm_schema_basic_fields(tmp_path):\n    \"\"\"Test that required, default, default_factory, and optional fields are handled correctly.\"\"\"\n    result = mm_schema(TestData, mixin=None, infer_missing=True)\n    # required_int should be present and required\n    assert \"required_int\" in result\n    assert isinstance(result[\"required_int\"], fields.Integer)\n    assert result[\"required_int\"].required is True\n    # default_str should have default value\n    assert result[\"default_str\"].default == \"default\"\n    # default_list should use default_factory value\n    assert result[\"default_list\"].default == [1, 2, 3]\n    # optional_float should allow None and be optional\n    assert result[\"optional_float\"].allow_none is True\n    assert result[\"optional_float\"].required is False\n\n\ndef test_mm_schema_custom_mm_field_and_letter_case(tmp_path):\n    \"\"\"Test that custom mm_field and letter_case metadata are respected.\"\"\"\n    result = mm_schema(TestData, mixin=None, infer_missing=True)\n    # custom_field should use the provided String field\n    assert isinstance(result[\"custom_field\"], fields.String)\n    # camel_case should have data_key transformed\n    assert result[\"camel_case\"].data_key == \"camelCase\"\n\n\ndef test_mm_schema_custom_decoder(tmp_path):\n    \"\"\"Test that a custom decoder replaces the field's _deserialize method.\"\"\"\n    result = mm_schema(TestData, mixin=None, infer_missing=True)\n    # decoded_field should have a custom _deserialize that doubles the value\n    # We test by calling the method directly\n    original_value = 5\n    deserialized = result[\"decoded_field\"]._deserialize(original_value, None, None)\n    assert deserialized == original_value * 2\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.124026308010798
+}

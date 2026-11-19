@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b254cc59-cdbb-4b90-87a8-c202a9214873",
+  "object": "chat.completion",
+  "created": 1795076042,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport types\nimport pytest\nfrom semantic_release.helpers import logged_function, format_arg\n\n\nclass DummyLogger:\n    \"\"\"Simple logger that records debug calls.\"\"\"\n    def __init__(self):\n        self.messages = []\n\n    def debug(self, msg, *args):\n        # emulate logging formatting\n        self.messages.append(msg % args)\n\n\ndef test_logged_function_logs_args_and_return_value():\n    logger = DummyLogger()\n\n    @logged_function(logger)\n    def add(a, b):\n        return a + b\n\n    result = add(2, 3)\n\n    # The function should return the correct result\n    assert result == 5\n\n    # Two debug calls should have been made: one for arguments, one for result\n    assert len(logger.messages) == 2\n\n    # First message logs the function name and arguments\n    expected_args = \", \".join([format_arg(x) for x in (2, 3)])\n    assert logger.messages[0] == f\"add({expected_args}, )\"\n\n    # Second message logs the return value\n    assert logger.messages[1] == f\"add -> 5\"\n\n\ndef test_logged_function_handles_kwargs_and_order():\n    logger = DummyLogger()\n\n    @logged_function(logger)\n    def greet(greeting, name=\"world\"):\n        return f\"{greeting}, {name}!\"\n\n    result = greet(\"Hello\", name=\"Alice\")\n\n    assert result == \"Hello, Alice!\"\n\n    # Check that kwargs are logged in the order they were passed\n    assert len(logger.messages) == 2\n    # Arguments message should include both positional and keyword arguments\n    expected_args = \", \".join([format_arg(\"Hello\")]) + \", \" + \", \".join([f\"name={format_arg('Alice')}\"])\n    assert logger.messages[0] == f\"greet({expected_args})\"\n\n    # Return value message\n    assert logger.messages[1] == \"greet -> Hello, Alice!\"\n\n\ndef test_logged_function_passes_through_exceptions():\n    logger = DummyLogger()\n\n    @logged_function(logger)\n    def divide(a, b):\n        return a / b\n\n    # Division by zero should raise ZeroDivisionError\n    with pytest.raises(ZeroDivisionError):\n        divide(1, 0)\n\n    # Even though an exception was raised, the first debug call should still have been logged\n    assert len(logger.messages) == 1\n    assert logger.messages[0] == \"divide(1, 0, )\"\n```",
+        "reasoning": "We need three tests for logged_function. We can create a dummy logger that records debug calls. Use tmp_path? not needed. Just test that debug called with correct format. Also test that return value passed through. Also test that kwargs order preserved. Use a simple function."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051607263,
+    "prompt_tokens": 682,
+    "prompt_time": 0.034792845,
+    "completion_tokens": 578,
+    "completion_time": 0.613363958,
+    "total_tokens": 1260,
+    "total_time": 0.648156803,
+    "completion_tokens_details": {
+      "reasoning_tokens": 56
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdxasae64rwtx9sxcp8xm6",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport types\nimport pytest\nfrom semantic_release.helpers import logged_function, format_arg\n\n\nclass DummyLogger:\n    \"\"\"Simple logger that records debug calls.\"\"\"\n    def __init__(self):\n        self.messages = []\n\n    def debug(self, msg, *args):\n        # emulate logging formatting\n        self.messages.append(msg % args)\n\n\ndef test_logged_function_logs_args_and_return_value():\n    logger = DummyLogger()\n\n    @logged_function(logger)\n    def add(a, b):\n        return a + b\n\n    result = add(2, 3)\n\n    # The function should return the correct result\n    assert result == 5\n\n    # Two debug calls should have been made: one for arguments, one for result\n    assert len(logger.messages) == 2\n\n    # First message logs the function name and arguments\n    expected_args = \", \".join([format_arg(x) for x in (2, 3)])\n    assert logger.messages[0] == f\"add({expected_args}, )\"\n\n    # Second message logs the return value\n    assert logger.messages[1] == f\"add -> 5\"\n\n\ndef test_logged_function_handles_kwargs_and_order():\n    logger = DummyLogger()\n\n    @logged_function(logger)\n    def greet(greeting, name=\"world\"):\n        return f\"{greeting}, {name}!\"\n\n    result = greet(\"Hello\", name=\"Alice\")\n\n    assert result == \"Hello, Alice!\"\n\n    # Check that kwargs are logged in the order they were passed\n    assert len(logger.messages) == 2\n    # Arguments message should include both positional and keyword arguments\n    expected_args = \", \".join([format_arg(\"Hello\")]) + \", \" + \", \".join([f\"name={format_arg('Alice')}\"])\n    assert logger.messages[0] == f\"greet({expected_args})\"\n\n    # Return value message\n    assert logger.messages[1] == \"greet -> Hello, Alice!\"\n\n\ndef test_logged_function_passes_through_exceptions():\n    logger = DummyLogger()\n\n    @logged_function(logger)\n    def divide(a, b):\n        return a / b\n\n    # Division by zero should raise ZeroDivisionError\n    with pytest.raises(ZeroDivisionError):\n        divide(1, 0)\n\n    # Even though an exception was raised, the first debug call should still have been logged\n    assert len(logger.messages) == 1\n    assert logger.messages[0] == \"divide(1, 0, )\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9738725879578851
+}

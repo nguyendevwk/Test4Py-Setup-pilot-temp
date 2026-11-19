@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-e60f4371-b077-4302-bde1-405161c2f9b7",
+  "object": "chat.completion",
+  "created": 1795076471,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom flutils.codecs.raw_utf8_escape import encode\n\n\ndef test_encode_ascii_returns_escaped_bytes_and_length():\n    # Input: simple ASCII string\n    text = \"Hello, World!\"\n    out_bytes, consumed = encode(text)\n    # The output should be the same string encoded as UTF-8 bytes\n    assert out_bytes == b\"Hello, World!\"\n    # The number of consumed characters should equal the length of the input\n    assert consumed == len(text)\n\n\ndef test_encode_escaped_hex_sequences():\n    # Input contains literal escaped hex sequences that represent UTF‑8 bytes\n    # The string \"é\" in UTF‑8 is b'\\xc3\\xa9', which can be written as \"\\\\xC3\\\\xA9\"\n    text = \"A\\\\xC3\\\\xA9B\"\n    out_bytes, consumed = encode(text)\n    # The output should be the bytes for \"AéB\" with each byte escaped\n    # \"A\" -> 0x41, \"é\" -> 0xC3 0xA9, \"B\" -> 0x42\n    expected_bytes = b\"\\\\x41\\\\xC3\\\\xA9\\\\x42\"\n    assert out_bytes == expected_bytes\n    assert consumed == len(text)\n\n\ndef test_encode_invalid_utf8_raises_unicode_encode_error():\n    # Input contains an invalid UTF‑8 byte sequence: 0xFF is not a valid start byte\n    text = \"\\\\xFF\"\n    with pytest.raises(UnicodeEncodeError) as excinfo:\n        encode(text)\n    # The exception should mention the original text and the error reason\n    assert \"eutf8h\" in str(excinfo.value)\n    assert \"invalid start byte\" in str(excinfo.value)\n```",
+        "reasoning": "We need three tests. Test normal: simple ascii. Test boundary: include escaped hex like \\xC3\\xA9? Actually encode handles escape sequences. Provide string with literal backslash x. Test error: invalid utf8 sequence. Provide string with \\xFF which is invalid. Ensure UnicodeEncodeError."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047919276,
+    "prompt_tokens": 767,
+    "prompt_time": 0.046623523,
+    "completion_tokens": 447,
+    "completion_time": 0.490475298,
+    "total_tokens": 1214,
+    "total_time": 0.537098821,
+    "completion_tokens_details": {
+      "reasoning_tokens": 64
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7seae92e3sb8nvsmgrmx259",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom flutils.codecs.raw_utf8_escape import encode\n\n\ndef test_encode_ascii_returns_escaped_bytes_and_length():\n    # Input: simple ASCII string\n    text = \"Hello, World!\"\n    out_bytes, consumed = encode(text)\n    # The output should be the same string encoded as UTF-8 bytes\n    assert out_bytes == b\"Hello, World!\"\n    # The number of consumed characters should equal the length of the input\n    assert consumed == len(text)\n\n\ndef test_encode_escaped_hex_sequences():\n    # Input contains literal escaped hex sequences that represent UTF‑8 bytes\n    # The string \"é\" in UTF‑8 is b'\\xc3\\xa9', which can be written as \"\\\\xC3\\\\xA9\"\n    text = \"A\\\\xC3\\\\xA9B\"\n    out_bytes, consumed = encode(text)\n    # The output should be the bytes for \"AéB\" with each byte escaped\n    # \"A\" -> 0x41, \"é\" -> 0xC3 0xA9, \"B\" -> 0x42\n    expected_bytes = b\"\\\\x41\\\\xC3\\\\xA9\\\\x42\"\n    assert out_bytes == expected_bytes\n    assert consumed == len(text)\n\n\ndef test_encode_invalid_utf8_raises_unicode_encode_error():\n    # Input contains an invalid UTF‑8 byte sequence: 0xFF is not a valid start byte\n    text = \"\\\\xFF\"\n    with pytest.raises(UnicodeEncodeError) as excinfo:\n        encode(text)\n    # The exception should mention the original text and the error reason\n    assert \"eutf8h\" in str(excinfo.value)\n    assert \"invalid start byte\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.850960875977762
+}

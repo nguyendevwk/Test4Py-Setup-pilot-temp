@@ -1,0 +1,45 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_normal_fraction_calculation _______________________
+
+    def test_normal_fraction_calculation():
+        """
+        Verify that the function returns the expected day count fraction for a
+        typical period where the asof date is before the end date.
+        """
+        start = datetime.date(2020, 1, 1)
+        asof = datetime.date(2020, 7, 1)   # 182 days from start
+        end = datetime.date(2021, 1, 1)
+    
+        result = dcfc_act_365_f(start, asof, end)
+        # 182 / 365 = 0.498630137
+        assert isinstance(result, Decimal)
+>       assert round(result, 12) == Decimal('0.498630137')  # 182/365 rounded to 12 places
+E       AssertionError: assert Decimal('0.498630136986') == Decimal('0.498630137')
+E        +  where Decimal('0.498630136986') = round(Decimal('0.4986301369863013698630136986'), 12)
+E        +  and   Decimal('0.498630137') = Decimal('0.498630137')
+
+test_generated.py:20: AssertionError
+______________________ test_boundary_case_asof_equals_end ______________________
+
+    def test_boundary_case_asof_equals_end():
+        """
+        When the asof date equals the end date, the fraction should be the full
+        period length divided by 365.
+        """
+        start = datetime.date(2019, 3, 15)
+        asof = datetime.date(2020, 3, 15)
+        end = datetime.date(2020, 3, 15)
+    
+        result = dcfc_act_365_f(start, asof, end)
+        # 366 days in 2019-2020 leap year period
+>       assert round(result, 12) == Decimal('1.002739726')  # 366/365 rounded to 12 places
+E       AssertionError: assert Decimal('1.002739726027') == Decimal('1.002739726')
+E        +  where Decimal('1.002739726027') = round(Decimal('1.002739726027397260273972603'), 12)
+E        +  and   Decimal('1.002739726') = Decimal('1.002739726')
+
+test_generated.py:34: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normal_fraction_calculation - AssertionError: ...
+FAILED test_generated.py::test_boundary_case_asof_equals_end - AssertionError...
+2 failed, 1 passed in 0.12s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-86bfc8e0-a35a-4200-8158-da16f8bdaeac",
+  "object": "chat.completion",
+  "created": 1795077420,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport io\nimport pytest\nfrom contextlib import redirect_stderr\n\n# Import the target function and related modules\nfrom thefuck.logs import confirm_text\nfrom thefuck.conf import settings\nfrom thefuck import const\n\n# Helper class to simulate a corrected command object\nclass DummyCommand:\n    def __init__(self, script, side_effect=False):\n        self.script = script\n        self.side_effect = side_effect\n\ndef test_confirm_text_no_side_effect(monkeypatch):\n    # Disable colors for deterministic output\n    monkeypatch.setattr(settings, \"no_colors\", True)\n\n    cmd = DummyCommand(\"echo hello\")\n    buf = io.StringIO()\n    with redirect_stderr(buf):\n        confirm_text(cmd)\n    output = buf.getvalue()\n\n    # Expected prefix and command\n    expected_prefix = const.USER_COMMAND_MARK\n    assert expected_prefix in output\n    assert \"echo hello\" in output\n    # No side effect marker\n    assert \"(+side effect)\" not in output\n    # Ensure the prompt markers are present\n    assert \"[enter/↑/↓/ctrl+c]\" in output\n\ndef test_confirm_text_with_side_effect(monkeypatch):\n    # Disable colors for deterministic output\n    monkeypatch.setattr(settings, \"no_colors\", True)\n\n    cmd = DummyCommand(\"rm -rf /\", side_effect=True)\n    buf = io.StringIO()\n    with redirect_stderr(buf):\n        confirm_text(cmd)\n    output = buf.getvalue()\n\n    # Expected prefix and command\n    expected_prefix = const.USER_COMMAND_MARK\n    assert expected_prefix in output\n    assert \"rm -rf /\" in output\n    # Side effect marker should be present\n    assert \"(+side effect)\" in output\n    # Ensure the prompt markers are present\n    assert \"[enter/↑/↓/ctrl+c]\" in output\n\ndef test_confirm_text_invalid_command():\n    # Pass an object missing required attributes to trigger AttributeError\n    class BadCommand:\n        pass\n\n    bad_cmd = BadCommand()\n    with pytest.raises(AttributeError):\n        confirm_text(bad_cmd)\n```",
+        "reasoning": "We need to test confirm_text. It writes to stderr. We can capture stderr. Test normal: side_effect False. Test boundary: side_effect True. Also error: maybe corrected_command missing attributes? But target is simple. We'll create dummy object with script and side_effect. Use tmp_path? Not needed. Use pytest. Three functions: test_confirm_text_no_side_effect, test_confirm_text_with_side_effect, test_confirm_text_invalid_command. For invalid, maybe missing script attribute raises AttributeError. Use pytest.raises. Ensure no network. Use colorama init? Might need to init colorama. But color function uses settings.no_colors. settings from .conf. We don't modify. We'll import confirm_text. We'll set settings.no_colors to True to avoid color codes. But settings is imported from .conf; we can set attribute. Use monkeypatch. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.0535323,
+    "prompt_tokens": 446,
+    "prompt_time": 0.031897379,
+    "completion_tokens": 615,
+    "completion_time": 0.712678481,
+    "total_tokens": 1061,
+    "total_time": 0.74457586,
+    "completion_tokens_details": {
+      "reasoning_tokens": 174
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sf7d1xex5sr5xazmkddjyv",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport io\nimport pytest\nfrom contextlib import redirect_stderr\n\n# Import the target function and related modules\nfrom thefuck.logs import confirm_text\nfrom thefuck.conf import settings\nfrom thefuck import const\n\n# Helper class to simulate a corrected command object\nclass DummyCommand:\n    def __init__(self, script, side_effect=False):\n        self.script = script\n        self.side_effect = side_effect\n\ndef test_confirm_text_no_side_effect(monkeypatch):\n    # Disable colors for deterministic output\n    monkeypatch.setattr(settings, \"no_colors\", True)\n\n    cmd = DummyCommand(\"echo hello\")\n    buf = io.StringIO()\n    with redirect_stderr(buf):\n        confirm_text(cmd)\n    output = buf.getvalue()\n\n    # Expected prefix and command\n    expected_prefix = const.USER_COMMAND_MARK\n    assert expected_prefix in output\n    assert \"echo hello\" in output\n    # No side effect marker\n    assert \"(+side effect)\" not in output\n    # Ensure the prompt markers are present\n    assert \"[enter/↑/↓/ctrl+c]\" in output\n\ndef test_confirm_text_with_side_effect(monkeypatch):\n    # Disable colors for deterministic output\n    monkeypatch.setattr(settings, \"no_colors\", True)\n\n    cmd = DummyCommand(\"rm -rf /\", side_effect=True)\n    buf = io.StringIO()\n    with redirect_stderr(buf):\n        confirm_text(cmd)\n    output = buf.getvalue()\n\n    # Expected prefix and command\n    expected_prefix = const.USER_COMMAND_MARK\n    assert expected_prefix in output\n    assert \"rm -rf /\" in output\n    # Side effect marker should be present\n    assert \"(+side effect)\" in output\n    # Ensure the prompt markers are present\n    assert \"[enter/↑/↓/ctrl+c]\" in output\n\ndef test_confirm_text_invalid_command():\n    # Pass an object missing required attributes to trigger AttributeError\n    class BadCommand:\n        pass\n\n    bad_cmd = BadCommand()\n    with pytest.raises(AttributeError):\n        confirm_text(bad_cmd)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.143224627012387
+}

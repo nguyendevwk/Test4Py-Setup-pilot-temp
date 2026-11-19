@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-f94bcdd6-bb50-48ce-a9a4-6730985ea7d4",
+  "object": "chat.completion",
+  "created": 1795076372,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom pypara.dcc import DCCRegistryMachinery\n\n# Simple stand‑in for the DCC type used by the registry\nclass DummyDCC:\n    def __init__(self, name: str, altnames: list[str] | None = None):\n        self.name = name\n        self.altnames = altnames or []\n\ndef test_register_and_find_basic():\n    \"\"\"Register a convention and verify it can be found by name and alias.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc = DummyDCC(\"Act/Act\", altnames=[\"ACT/ACT\", \"act/act\"])\n    registry.register(dcc)\n\n    # Direct lookup\n    assert registry.find(\"Act/Act\") is dcc\n    # Alias lookup\n    assert registry.find(\"ACT/ACT\") is dcc\n    # Case‑insensitive lookup\n    assert registry.find(\"act/act\") is dcc\n    # Stripped and uppercased fallback\n    assert registry.find(\"  act/act  \") is dcc\n\n    # Registry table contains both main and alias entries\n    table = registry.table\n    assert \"Act/Act\" in table and table[\"Act/Act\"] is dcc\n    assert \"ACT/ACT\" in table and table[\"ACT/ACT\"] is dcc\n    assert \"act/act\" not in table  # aliases are stored in the alternate buffer only\n\ndef test_register_duplicate_name_raises():\n    \"\"\"Attempting to register a convention with a duplicate main name raises TypeError.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc1 = DummyDCC(\"30/360\")\n    dcc2 = DummyDCC(\"30/360\")\n    registry.register(dcc1)\n    with pytest.raises(TypeError, match=\"already registered\"):\n        registry.register(dcc2)\n\ndef test_register_conflict_with_alternate_name_raises():\n    \"\"\"Registering a convention whose alternate name conflicts with an existing main name raises TypeError.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc1 = DummyDCC(\"Act/360\")\n    dcc2 = DummyDCC(\"Act/365\", altnames=[\"Act/360\"])\n    registry.register(dcc1)\n    with pytest.raises(TypeError, match=\"already registered\"):\n        registry.register(dcc2)\n```",
+        "reasoning": "We need tests for DCCRegistryMachinery. But DCC class not defined here. Likely in same package. We can import DCCRegistryMachinery and use DCCRegistry? Actually DCCRegistryMachinery is class. We need to test register, find, table. We need a dummy DCC object with name and altnames. We can create a simple namedtuple or class. Use DCCRegistryMachinery. Test normal registration, duplicate error, alternative name conflict, find behavior, table includes both. Use tmp_path? Not needed. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052319144,
+    "prompt_tokens": 1263,
+    "prompt_time": 0.091279942,
+    "completion_tokens": 615,
+    "completion_time": 0.688000893,
+    "total_tokens": 1878,
+    "total_time": 0.779280835,
+    "completion_tokens_details": {
+      "reasoning_tokens": 118
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se7cy5ea0t0r6v3byes0bn",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom pypara.dcc import DCCRegistryMachinery\n\n# Simple stand‑in for the DCC type used by the registry\nclass DummyDCC:\n    def __init__(self, name: str, altnames: list[str] | None = None):\n        self.name = name\n        self.altnames = altnames or []\n\ndef test_register_and_find_basic():\n    \"\"\"Register a convention and verify it can be found by name and alias.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc = DummyDCC(\"Act/Act\", altnames=[\"ACT/ACT\", \"act/act\"])\n    registry.register(dcc)\n\n    # Direct lookup\n    assert registry.find(\"Act/Act\") is dcc\n    # Alias lookup\n    assert registry.find(\"ACT/ACT\") is dcc\n    # Case‑insensitive lookup\n    assert registry.find(\"act/act\") is dcc\n    # Stripped and uppercased fallback\n    assert registry.find(\"  act/act  \") is dcc\n\n    # Registry table contains both main and alias entries\n    table = registry.table\n    assert \"Act/Act\" in table and table[\"Act/Act\"] is dcc\n    assert \"ACT/ACT\" in table and table[\"ACT/ACT\"] is dcc\n    assert \"act/act\" not in table  # aliases are stored in the alternate buffer only\n\ndef test_register_duplicate_name_raises():\n    \"\"\"Attempting to register a convention with a duplicate main name raises TypeError.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc1 = DummyDCC(\"30/360\")\n    dcc2 = DummyDCC(\"30/360\")\n    registry.register(dcc1)\n    with pytest.raises(TypeError, match=\"already registered\"):\n        registry.register(dcc2)\n\ndef test_register_conflict_with_alternate_name_raises():\n    \"\"\"Registering a convention whose alternate name conflicts with an existing main name raises TypeError.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc1 = DummyDCC(\"Act/360\")\n    dcc2 = DummyDCC(\"Act/365\", altnames=[\"Act/360\"])\n    registry.register(dcc1)\n    with pytest.raises(TypeError, match=\"already registered\"):\n        registry.register(dcc2)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1282253749668598
+}

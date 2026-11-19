@@ -1,0 +1,63 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_get_shortish_repr_with_custom_repr_and_truncate _____________
+
+    def test_get_shortish_repr_with_custom_repr_and_truncate():
+        # Custom representation should be used
+        obj = CustomRepr()
+>       r = get_shortish_repr(obj, custom_repr=(CustomRepr,))
+
+../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__42__atomic_verified_setup/eval0/test_generated.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+pysnooper/utils.py:68: in get_shortish_repr
+    repr_function = get_repr_function(item, custom_repr)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = CustomReprObject, custom_repr = (<class 'test_generated.CustomRepr'>,)
+
+    def get_repr_function(item, custom_repr):
+>       for condition, action in custom_repr:
+E       TypeError: cannot unpack non-iterable type object
+
+pysnooper/utils.py:51: TypeError
+________________ test_get_shortish_repr_normalize_and_newlines _________________
+
+    def test_get_shortish_repr_normalize_and_newlines():
+        # Representation with newlines and carriage returns should be cleaned
+        class MultiLine:
+            def __repr__(self):
+                return "Line1\nLine2\rLine3"
+        obj = MultiLine()
+        r = get_shortish_repr(obj, normalize=True)
+        # normalize_repr removes newlines and carriage returns
+        expected = normalize_repr("Line1\nLine2\rLine3")
+>       assert r == expected
+E       AssertionError: assert 'Line1Line2Line3' == 'Line1\nLine2\rLine3'
+E         
+E         + Line1Line2Line3
+E         - Line1
+E         - Line2
+E         - Line3
+
+../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__42__atomic_verified_setup/eval0/test_generated.py:35: AssertionError
+________________ test_get_shortish_repr_handles_repr_exception _________________
+
+    def test_get_shortish_repr_handles_repr_exception():
+        # When __repr__ raises, the function should return 'REPR FAILED'
+        bad = BadRepr()
+        r = get_shortish_repr(bad)
+        assert r == "REPR FAILED"
+        # Even with max_length, it should still return the failure string
+        r2 = get_shortish_repr(bad, max_length=5)
+>       assert r2 == "REPR FAILED"
+E       AssertionError: assert 'R...D' == 'REPR FAILED'
+E         
+E         - REPR FAILED
+E         + R...D
+
+../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__42__atomic_verified_setup/eval0/test_generated.py:46: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__42__atomic_verified_setup/eval0/test_generated.py::test_get_shortish_repr_with_custom_repr_and_truncate
+FAILED ../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__42__atomic_verified_setup/eval0/test_generated.py::test_get_shortish_repr_normalize_and_newlines
+FAILED ../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__42__atomic_verified_setup/eval0/test_generated.py::test_get_shortish_repr_handles_repr_exception
+3 failed in 0.16s

@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-e05dc3d7-2bb6-44f5-a4e4-27cde43d79c0",
+  "object": "chat.completion",
+  "created": 1795079471,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom thefuck.rules.scm_correction import match, wrong_scm_patterns, _get_actual_scm\n\n\nclass DummyCommand:\n    def __init__(self, script_parts, output):\n        self.script_parts = script_parts\n        self.output = output\n\n\ndef test_match_success(monkeypatch):\n    \"\"\"When the output contains the expected pattern and _get_actual_scm returns True,\n    match should return True.\"\"\"\n    # Arrange\n    dummy_output = \"error: unknown revision 'HEAD' for 'git'\"\n    dummy_command = DummyCommand(script_parts=[\"git\"], output=dummy_output)\n\n    # Monkeypatch _get_actual_scm to avoid external dependency\n    monkeypatch.setattr(\"thefuck.rules.scm_correction._get_actual_scm\", lambda: True)\n\n    # Act\n    result = match(dummy_command)\n\n    # Assert\n    assert result is True\n    assert \"unknown revision\" in dummy_command.output\n    assert dummy_command.script_parts[0] in wrong_scm_patterns\n\n\ndef test_match_no_pattern(monkeypatch):\n    \"\"\"If the output does not contain the expected pattern, match should return False.\"\"\"\n    # Arrange\n    dummy_output = \"some unrelated error message\"\n    dummy_command = DummyCommand(script_parts=[\"git\"], output=dummy_output)\n\n    # Monkeypatch _get_actual_scm to avoid external dependency\n    monkeypatch.setattr(\"thefuck.rules.scm_correction._get_actual_scm\", lambda: True)\n\n    # Act\n    result = match(dummy_command)\n\n    # Assert\n    assert result is False\n    assert dummy_command.script_parts[0] in wrong_scm_patterns\n    assert \"unknown revision\" not in dummy_command.output\n\n\ndef test_match_missing_scm(monkeypatch):\n    \"\"\"If the script_parts[0] is not a known SCM, match should raise a KeyError.\"\"\"\n    # Arrange\n    dummy_output = \"error: unknown revision 'HEAD' for 'git'\"\n    dummy_command = DummyCommand(script_parts=[\"unknown_scm\"], output=dummy_output)\n\n    # Monkeypatch _get_actual_scm to avoid external dependency\n    monkeypatch.setattr(\"thefuck.rules.scm_correction._get_actual_scm\", lambda: True)\n\n    # Act & Assert\n    with pytest.raises(KeyError):\n        match(dummy_command)\n```",
+        "reasoning": "We need to write tests for match function in that module. We need to import the module. We need to create a command object with script_parts and output. Also need to mock _get_actual_scm? But cannot mock target. We can set environment to have actual scm? _get_actual_scm likely checks git, svn etc. We can simulate by creating a dummy command where script_parts[0] is 'git' and output contains pattern. But _get_actual_scm will call system commands. We can't rely. Maybe we can monkeypatch Path? But cannot modify product code. But we can monkeypatch _get_actual_scm by temporarily replacing it in module. That's allowed? It's modifying target? It's monkeypatching attribute, not modifying code. It's allowed. Use monkeypatch fixture. We'll write three tests: normal match, no match due to pattern not in output, and error when wrong_scm_patterns missing key. Use monkeypatch to set _get_actual_scm to return True. Also need wrong_scm_patterns defined? It's in module. We'll import module. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005889848,
+    "prompt_tokens": 273,
+    "prompt_time": 0.013435624,
+    "completion_tokens": 708,
+    "completion_time": 0.756631082,
+    "total_tokens": 981,
+    "total_time": 0.770066706,
+    "completion_tokens_details": {
+      "reasoning_tokens": 222
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh5zw9emttgp9v2f2nv73h",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom thefuck.rules.scm_correction import match, wrong_scm_patterns, _get_actual_scm\n\n\nclass DummyCommand:\n    def __init__(self, script_parts, output):\n        self.script_parts = script_parts\n        self.output = output\n\n\ndef test_match_success(monkeypatch):\n    \"\"\"When the output contains the expected pattern and _get_actual_scm returns True,\n    match should return True.\"\"\"\n    # Arrange\n    dummy_output = \"error: unknown revision 'HEAD' for 'git'\"\n    dummy_command = DummyCommand(script_parts=[\"git\"], output=dummy_output)\n\n    # Monkeypatch _get_actual_scm to avoid external dependency\n    monkeypatch.setattr(\"thefuck.rules.scm_correction._get_actual_scm\", lambda: True)\n\n    # Act\n    result = match(dummy_command)\n\n    # Assert\n    assert result is True\n    assert \"unknown revision\" in dummy_command.output\n    assert dummy_command.script_parts[0] in wrong_scm_patterns\n\n\ndef test_match_no_pattern(monkeypatch):\n    \"\"\"If the output does not contain the expected pattern, match should return False.\"\"\"\n    # Arrange\n    dummy_output = \"some unrelated error message\"\n    dummy_command = DummyCommand(script_parts=[\"git\"], output=dummy_output)\n\n    # Monkeypatch _get_actual_scm to avoid external dependency\n    monkeypatch.setattr(\"thefuck.rules.scm_correction._get_actual_scm\", lambda: True)\n\n    # Act\n    result = match(dummy_command)\n\n    # Assert\n    assert result is False\n    assert dummy_command.script_parts[0] in wrong_scm_patterns\n    assert \"unknown revision\" not in dummy_command.output\n\n\ndef test_match_missing_scm(monkeypatch):\n    \"\"\"If the script_parts[0] is not a known SCM, match should raise a KeyError.\"\"\"\n    # Arrange\n    dummy_output = \"error: unknown revision 'HEAD' for 'git'\"\n    dummy_command = DummyCommand(script_parts=[\"unknown_scm\"], output=dummy_output)\n\n    # Monkeypatch _get_actual_scm to avoid external dependency\n    monkeypatch.setattr(\"thefuck.rules.scm_correction._get_actual_scm\", lambda: True)\n\n    # Act & Assert\n    with pytest.raises(KeyError):\n        match(dummy_command)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "aacd7cccd39b42dd8e60c18b08e783c2",
+  "_api_plus_pacing_seconds": 1.8423234660294838
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-3d3f4094-d706-447c-8a6d-858685b3ecc3",
+  "object": "chat.completion",
+  "created": 1795077682,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport decimal\nimport pytest\nfrom typesystem.fields import Number\nfrom typesystem.base import ValidationError\n\ndef test_number_coercion_and_precision(tmp_path):\n    # Create a Number field that coerces strings to int and rounds to 2 decimal places\n    field = Number(coerce_types=True, precision=\"0.01\")\n    # Valid integer string should be coerced to int\n    assert field.validate(\"42\") == 42\n    # Valid float string should be coerced to Decimal then rounded\n    assert field.validate(\"3.14159\") == 3.14\n    # Valid Decimal input should be rounded\n    assert field.validate(decimal.Decimal(\"2.71828\")) == 2.72\n    # Empty string with allow_null should return None\n    field_null = Number(allow_null=True, coerce_types=True)\n    assert field_null.validate(\"\") is None\n\ndef test_number_boundary_conditions():\n    # Minimum and maximum boundaries\n    field = Number(minimum=0, maximum=10)\n    assert field.validate(0) == 0\n    assert field.validate(10) == 10\n    # Exclusive boundaries\n    field_excl = Number(exclusive_minimum=0, exclusive_maximum=10)\n    assert field_excl.validate(1) == 1\n    assert field_excl.validate(9) == 9\n    # Multiple of constraint\n    field_multi = Number(multiple_of=5)\n    assert field_multi.validate(15) == 15\n    # Multiple of with float\n    field_multi_float = Number(multiple_of=0.5)\n    assert field_multi_float.validate(1.5) == 1.5\n\ndef test_number_error_messages():\n    field = Number(minimum=5, maximum=10, multiple_of=2)\n    # Below minimum\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(4)\n    assert \"minimum\" in excinfo.value.text\n    # Above maximum\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(11)\n    assert \"maximum\" in excinfo.value.text\n    # Not a multiple of 2\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(7)\n    assert \"multiple_of\" in excinfo.value.text\n    # Non-numeric type\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"not a number\")\n    assert \"type\" in excinfo.value.text\n```",
+        "reasoning": "Need 3 tests: normal, boundary, error. Use Number field. Test coercion, precision, multiple_of."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052640692,
+    "prompt_tokens": 2023,
+    "prompt_time": 0.108610317,
+    "completion_tokens": 554,
+    "completion_time": 0.615073302,
+    "total_tokens": 2577,
+    "total_time": 0.723683619,
+    "completion_tokens_details": {
+      "reasoning_tokens": 25
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sffd19ekf8zj6qmx75cds5",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport decimal\nimport pytest\nfrom typesystem.fields import Number\nfrom typesystem.base import ValidationError\n\ndef test_number_coercion_and_precision(tmp_path):\n    # Create a Number field that coerces strings to int and rounds to 2 decimal places\n    field = Number(coerce_types=True, precision=\"0.01\")\n    # Valid integer string should be coerced to int\n    assert field.validate(\"42\") == 42\n    # Valid float string should be coerced to Decimal then rounded\n    assert field.validate(\"3.14159\") == 3.14\n    # Valid Decimal input should be rounded\n    assert field.validate(decimal.Decimal(\"2.71828\")) == 2.72\n    # Empty string with allow_null should return None\n    field_null = Number(allow_null=True, coerce_types=True)\n    assert field_null.validate(\"\") is None\n\ndef test_number_boundary_conditions():\n    # Minimum and maximum boundaries\n    field = Number(minimum=0, maximum=10)\n    assert field.validate(0) == 0\n    assert field.validate(10) == 10\n    # Exclusive boundaries\n    field_excl = Number(exclusive_minimum=0, exclusive_maximum=10)\n    assert field_excl.validate(1) == 1\n    assert field_excl.validate(9) == 9\n    # Multiple of constraint\n    field_multi = Number(multiple_of=5)\n    assert field_multi.validate(15) == 15\n    # Multiple of with float\n    field_multi_float = Number(multiple_of=0.5)\n    assert field_multi_float.validate(1.5) == 1.5\n\ndef test_number_error_messages():\n    field = Number(minimum=5, maximum=10, multiple_of=2)\n    # Below minimum\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(4)\n    assert \"minimum\" in excinfo.value.text\n    # Above maximum\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(11)\n    assert \"maximum\" in excinfo.value.text\n    # Not a multiple of 2\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(7)\n    assert \"multiple_of\" in excinfo.value.text\n    # Non-numeric type\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"not a number\")\n    assert \"type\" in excinfo.value.text\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1187356910086237
+}

@@ -1,0 +1,38 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_default_payload_too_large_attributes ___________________
+
+    def test_default_payload_too_large_attributes():
+        """PayloadTooLarge should have default status_code and quiet flag."""
+        exc = PayloadTooLarge()
+        # status_code is defined on the class
+        assert exc.status_code == 413
+        # quiet flag is defined on the class
+        assert exc.quiet is True
+        # message defaults to None
+>       assert exc.message is None
+E       AssertionError: assert 'Request Entity Too Large' is None
+E        +  where 'Request Entity Too Large' = PayloadTooLarge('Request Entity Too Large').message
+
+test_generated.py:13: AssertionError
+__________________ test_payload_too_large_str_representation ___________________
+
+    def test_payload_too_large_str_representation():
+        """The string representation of the exception should include the message if provided."""
+        exc = PayloadTooLarge(message="Too big")
+        # The base HTTPException likely implements __str__ to return the message
+        assert str(exc) == "Too big"
+        # Without a message, __str__ should return the default status description
+        exc_no_msg = PayloadTooLarge()
+        # STATUS_CODES is imported in the module; use it to get the default description
+        from sanic.helpers import STATUS_CODES
+        expected_default = STATUS_CODES.get(exc_no_msg.status_code, "")
+>       assert str(exc_no_msg) == expected_default
+E       AssertionError: assert 'Request Entity Too Large' == b'Request Entity Too Large'
+E        +  where 'Request Entity Too Large' = str(PayloadTooLarge('Request Entity Too Large'))
+
+test_generated.py:43: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_default_payload_too_large_attributes - Asserti...
+FAILED test_generated.py::test_payload_too_large_str_representation - Asserti...
+2 failed, 1 passed in 0.33s

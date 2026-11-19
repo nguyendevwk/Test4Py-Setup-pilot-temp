@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-a0efc5ba-2788-43c2-94fc-8bf92ea54fa9",
+  "object": "chat.completion",
+  "created": 1795077480,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom docstring_parser.numpydoc import Section\nfrom docstring_parser.numpydoc.common import DocstringMeta\n\ndef test_title_pattern_matches_and_non_matches():\n    \"\"\"Verify that the title_pattern correctly matches the header and rejects wrong forms.\"\"\"\n    sec = Section(\"Parameters\", \"parameters\")\n    pattern = sec.title_pattern\n    # Correct header: title followed by underline of same length\n    assert pattern == r\"^(Parameters)\\s*?\\n----------\\s*$\"\n    # The regex should match the exact header\n    assert re.match(pattern, \"Parameters\\n----------\") is not None\n    # It should not match if the underline length differs\n    assert re.match(pattern, \"Parameters\\n-----\") is None\n    # It should not match if the title is different\n    assert re.match(pattern, \"Returns\\n-------\") is None\n\ndef test_parse_returns_docstringmeta_with_cleaned_description():\n    \"\"\"Ensure parse yields a DocstringMeta with cleaned description.\"\"\"\n    sec = Section(\"Returns\", \"returns\")\n    raw_text = \"   This function returns a value.\\n   It may be None.\\n\"\n    # The parse method expects cleaned text; we simulate that by passing raw_text directly\n    result = list(sec.parse(raw_text))\n    assert len(result) == 1\n    meta = result[0]\n    assert isinstance(meta, DocstringMeta)\n    # The description should be stripped of leading/trailing whitespace\n    assert meta.args == [\"returns\"]\n    assert meta.description == \"This function returns a value.\\nIt may be None.\"\n\ndef test_parse_empty_text_returns_none_description():\n    \"\"\"When the section body is empty or whitespace, description should be None.\"\"\"\n    sec = Section(\"Notes\", \"notes\")\n    empty_text = \"   \\n   \"\n    result = list(sec.parse(empty_text))\n    assert len(result) == 1\n    meta = result[0]\n    assert meta.description is None\n```",
+        "reasoning": "We need to write tests for Section class. Three independent test functions. Test title_pattern, parse returns correct DocstringMeta, and boundary: empty text returns None description. Use tmp_path? Not needed. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05212012,
+    "prompt_tokens": 670,
+    "prompt_time": 0.014046418,
+    "completion_tokens": 460,
+    "completion_time": 0.598155774,
+    "total_tokens": 1130,
+    "total_time": 0.612202192,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 45
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sf97bre6a8a9jpgzpcg5c6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom docstring_parser.numpydoc import Section\nfrom docstring_parser.numpydoc.common import DocstringMeta\n\ndef test_title_pattern_matches_and_non_matches():\n    \"\"\"Verify that the title_pattern correctly matches the header and rejects wrong forms.\"\"\"\n    sec = Section(\"Parameters\", \"parameters\")\n    pattern = sec.title_pattern\n    # Correct header: title followed by underline of same length\n    assert pattern == r\"^(Parameters)\\s*?\\n----------\\s*$\"\n    # The regex should match the exact header\n    assert re.match(pattern, \"Parameters\\n----------\") is not None\n    # It should not match if the underline length differs\n    assert re.match(pattern, \"Parameters\\n-----\") is None\n    # It should not match if the title is different\n    assert re.match(pattern, \"Returns\\n-------\") is None\n\ndef test_parse_returns_docstringmeta_with_cleaned_description():\n    \"\"\"Ensure parse yields a DocstringMeta with cleaned description.\"\"\"\n    sec = Section(\"Returns\", \"returns\")\n    raw_text = \"   This function returns a value.\\n   It may be None.\\n\"\n    # The parse method expects cleaned text; we simulate that by passing raw_text directly\n    result = list(sec.parse(raw_text))\n    assert len(result) == 1\n    meta = result[0]\n    assert isinstance(meta, DocstringMeta)\n    # The description should be stripped of leading/trailing whitespace\n    assert meta.args == [\"returns\"]\n    assert meta.description == \"This function returns a value.\\nIt may be None.\"\n\ndef test_parse_empty_text_returns_none_description():\n    \"\"\"When the section body is empty or whitespace, description should be None.\"\"\"\n    sec = Section(\"Notes\", \"notes\")\n    empty_text = \"   \\n   \"\n    result = list(sec.parse(empty_text))\n    assert len(result) == 1\n    meta = result[0]\n    assert meta.description is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0055052390089259
+}

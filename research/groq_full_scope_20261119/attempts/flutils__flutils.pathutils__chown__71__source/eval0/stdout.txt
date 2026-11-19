@@ -1,0 +1,40 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_chown_with_glob_and_include_parent ____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chown__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_chown_with_glob_and_inclu0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f30ccfbad10>
+
+    def test_chown_with_glob_and_include_parent(tmp_path, monkeypatch):
+        # Create a directory with two files and test glob pattern with include_parent
+        dir_path = create_path(tmp_path, "dir", is_dir=True)
+        file1 = create_path(dir_path, "a.txt")
+        file2 = create_path(dir_path, "b.txt")
+        uid = pwd.getpwnam(os.getlogin()).pw_uid
+        gid = grp.getgrgid(os.getgid()).gr_gid
+        called = {"paths": []}
+        def fake_chown(path, uid_arg, gid_arg):
+            called["paths"].append((path, uid_arg, gid_arg))
+        monkeypatch.setattr(os, "chown", fake_chown)
+    
+        # Use glob pattern to match all files in dir and include parent
+        chown(f"{dir_path.as_posix()}/**", user=os.getlogin(), group=os.getgid(), include_parent=True)
+    
+        # Expect chown called for each file and for the parent directory
+        expected_paths = {file1.as_posix(), file2.as_posix(), dir_path.as_posix()}
+        actual_paths = {p[0] for p in called["paths"]}
+>       assert expected_paths == actual_paths, f"Expected paths {expected_paths}, got {actual_paths}"
+E       AssertionError: Expected paths {'/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chown__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_chown_with_glob_and_inclu0/dir/b.txt', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chown__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_chown_with_glob_and_inclu0/dir', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chown__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_chown_with_glob_and_inclu0/dir/a.txt'}, got set()
+E       assert {'/home/heuri...u0/dir/b.txt'} == set()
+E         
+E         Extra items in the left set:
+E         '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chown__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_chown_with_glob_and_inclu0/dir'
+E         '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chown__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_chown_with_glob_and_inclu0/dir/b.txt'
+E         '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chown__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_c...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+test_generated.py:61: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_chown_with_glob_and_include_parent - Assertion...
+1 failed, 2 passed in 0.11s

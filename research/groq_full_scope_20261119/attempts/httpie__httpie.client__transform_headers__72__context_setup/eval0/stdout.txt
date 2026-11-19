@@ -1,0 +1,29 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_preserve_original_repeated_headers ____________________
+
+    def test_preserve_original_repeated_headers():
+        # Original request has two identical header names with different values
+        original_headers = HTTPHeadersDict([("X-Token", "first"), ("X-Token", "second")])
+        req = requests.Request(
+            method="GET",
+            url="http://example.com",
+            headers=original_headers
+        )
+        session = requests.Session()
+        prepared = session.prepare_request(req)
+    
+        # Simulate a header override that removes one of the values
+        prepared.headers.pop("X-Token", None)
+        prepared.headers["X-Token"] = "first"
+    
+        apply_missing_repeated_headers(original_headers, prepared)
+    
+        # After applying, both original values should be present again
+>       values = prepared.headers.get_all("X-Token")
+E       AttributeError: 'HTTPHeadersDict' object has no attribute 'get_all'. Did you mean: 'getall'?
+
+test_generated.py:42: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_preserve_original_repeated_headers - Attribute...
+1 failed, 2 passed in 0.46s

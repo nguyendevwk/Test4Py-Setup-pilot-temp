@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-75bab355-a72a-4bda-bc61-097829807310",
+  "object": "chat.completion",
+  "created": 1795077339,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport inspect\nimport pytest\nfrom docstring_parser.numpydoc import DeprecationSection\nfrom docstring_parser.numpydoc.common import DocstringDeprecated\n\ndef test_parse_normal_deprecation_section():\n    \"\"\"Verify that a typical deprecation section is parsed correctly.\"\"\"\n    section = DeprecationSection(title=\"deprecation\", key=\"deprecated\")\n    raw_text = \"\"\"1.0\n    This function is deprecated because it is slow.\"\"\"\n    # The parser expects the body to be already cleaned by inspect.cleandoc\n    cleaned = inspect.cleandoc(raw_text)\n    result = list(section.parse(cleaned))\n    assert len(result) == 1\n    dep = result[0]\n    assert isinstance(dep, DocstringDeprecated)\n    assert dep.args == [\"deprecated\"]\n    assert dep.version == \"1.0\"\n    assert dep.description == \"This function is deprecated because it is slow.\"\n\ndef test_parse_deprecation_section_no_description():\n    \"\"\"When the description is missing, the parser should return None for it.\"\"\"\n    section = DeprecationSection(title=\"deprecation\", key=\"deprecated\")\n    raw_text = \"2.0\\n\"\n    cleaned = inspect.cleandoc(raw_text)\n    result = list(section.parse(cleaned))\n    assert len(result) == 1\n    dep = result[0]\n    assert dep.description is None\n    assert dep.version == \"2.0\"\n\ndef test_parse_deprecation_section_multiple_lines_description():\n    \"\"\"The parser should correctly handle multi‑line descriptions.\"\"\"\n    section = DeprecationSection(title=\"deprecation\", key=\"deprecated\")\n    raw_text = \"\"\"3.5\n    First line of the deprecation notice.\n    Second line continues the message.\"\"\"\n    cleaned = inspect.cleandoc(raw_text)\n    result = list(section.parse(cleaned))\n    assert len(result) == 1\n    dep = result[0]\n    expected_desc = \"First line of the deprecation notice.\\nSecond line continues the message.\"\n    assert dep.description == expected_desc\n    assert dep.version == \"3.5\"\n```",
+        "reasoning": "We need tests for DeprecationSection.parse. Three tests: normal, boundary (empty desc), error? maybe missing newline? But parse splits. Test that desc None handled. Also test that version cleaned. Use tmp_path? not needed. Just test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048450805,
+    "prompt_tokens": 866,
+    "prompt_time": 0.057607515,
+    "completion_tokens": 493,
+    "completion_time": 0.551976457,
+    "total_tokens": 1359,
+    "total_time": 0.609583972,
+    "completion_tokens_details": {
+      "reasoning_tokens": 53
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sf4xbwex6s6nje9dnrg8ty",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport inspect\nimport pytest\nfrom docstring_parser.numpydoc import DeprecationSection\nfrom docstring_parser.numpydoc.common import DocstringDeprecated\n\ndef test_parse_normal_deprecation_section():\n    \"\"\"Verify that a typical deprecation section is parsed correctly.\"\"\"\n    section = DeprecationSection(title=\"deprecation\", key=\"deprecated\")\n    raw_text = \"\"\"1.0\n    This function is deprecated because it is slow.\"\"\"\n    # The parser expects the body to be already cleaned by inspect.cleandoc\n    cleaned = inspect.cleandoc(raw_text)\n    result = list(section.parse(cleaned))\n    assert len(result) == 1\n    dep = result[0]\n    assert isinstance(dep, DocstringDeprecated)\n    assert dep.args == [\"deprecated\"]\n    assert dep.version == \"1.0\"\n    assert dep.description == \"This function is deprecated because it is slow.\"\n\ndef test_parse_deprecation_section_no_description():\n    \"\"\"When the description is missing, the parser should return None for it.\"\"\"\n    section = DeprecationSection(title=\"deprecation\", key=\"deprecated\")\n    raw_text = \"2.0\\n\"\n    cleaned = inspect.cleandoc(raw_text)\n    result = list(section.parse(cleaned))\n    assert len(result) == 1\n    dep = result[0]\n    assert dep.description is None\n    assert dep.version == \"2.0\"\n\ndef test_parse_deprecation_section_multiple_lines_description():\n    \"\"\"The parser should correctly handle multi‑line descriptions.\"\"\"\n    section = DeprecationSection(title=\"deprecation\", key=\"deprecated\")\n    raw_text = \"\"\"3.5\n    First line of the deprecation notice.\n    Second line continues the message.\"\"\"\n    cleaned = inspect.cleandoc(raw_text)\n    result = list(section.parse(cleaned))\n    assert len(result) == 1\n    dep = result[0]\n    expected_desc = \"First line of the deprecation notice.\\nSecond line continues the message.\"\n    assert dep.description == expected_desc\n    assert dep.version == \"3.5\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.993416621000506
+}

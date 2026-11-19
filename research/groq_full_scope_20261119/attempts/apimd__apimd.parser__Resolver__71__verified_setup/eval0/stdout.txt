@@ -1,0 +1,63 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_visit_constant_parses_and_resolves_name _________________
+
+    def test_visit_constant_parses_and_resolves_name():
+        # Constant string that is a valid Python expression (a Name)
+        code = "x = 'y'"
+        # alias maps 'y' to 'z', so the constant should resolve to Name('z')
+        transformed = apply_transformer(code, root="pkg", alias={"y": "z"})
+>       assert transformed == "x = z"
+E       AssertionError: assert 'x = y' == 'x = z'
+E         
+E         - x = z
+E         ?     ^
+E         + x = y
+E         ?     ^
+
+test_generated.py:18: AssertionError
+__________________ test_visit_name_resolves_self_and_aliases ___________________
+
+    def test_visit_name_resolves_self_and_aliases():
+        # self_ty replacement
+        code_self = "x: Self = None"
+        transformed_self = apply_transformer(code_self, root="pkg", alias={}, self_ty="Self")
+        assert transformed_self == "x: Self = None"
+    
+        # Alias resolution: 'foo' maps to 'typing.List[int]'
+        code_alias = "x: foo = None"
+        transformed_alias = apply_transformer(
+            code_alias,
+            root="pkg",
+            alias={"foo": "typing.List[int]"}
+        )
+        # The alias should be expanded to the actual type
+>       assert transformed_alias == "x: List[int] = None"
+E       AssertionError: assert 'x: foo = None' == 'x: List[int] = None'
+E         
+E         - x: List[int] = None
+E         + x: foo = None
+
+test_generated.py:39: AssertionError
+__________ test_visit_subscript_handles_union_and_optional_and_pep585 __________
+
+    def test_visit_subscript_handles_union_and_optional_and_pep585():
+        # Union via typing.Union
+        code_union = "x: typing.Union[int, str] = None"
+        transformed_union = apply_transformer(
+            code_union,
+            root="pkg",
+            alias={"typing.Union": "typing.Union"}
+        )
+>       assert transformed_union == "x: int | str = None"
+E       AssertionError: assert 'x: typing.Un..., str] = None' == 'x: int | str = None'
+E         
+E         - x: int | str = None
+E         + x: typing.Union[int, str] = None
+
+test_generated.py:58: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_visit_constant_parses_and_resolves_name - Asse...
+FAILED test_generated.py::test_visit_name_resolves_self_and_aliases - Asserti...
+FAILED test_generated.py::test_visit_subscript_handles_union_and_optional_and_pep585
+3 failed in 0.15s

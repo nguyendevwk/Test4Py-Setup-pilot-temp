@@ -1,0 +1,70 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_parse_from_object_with_class_attributes _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-259/test_parse_from_object_with_cl0')
+
+    def test_parse_from_object_with_class_attributes(tmp_path):
+        # Create a class with a docstring and attribute docstrings
+        class Sample:
+            """Class docstring with a short description."""
+    
+            attr1 = 42
+            """Attribute 1 description."""
+    
+            attr2 = "hello"
+            """Attribute 2 description."""
+    
+        # Parse the class object
+        result = parser.parse_from_object(Sample, style=DocstringStyle.GOOGLE)
+    
+        # The result should be a Docstring instance
+        assert isinstance(result, Docstring)
+    
+        # The class docstring should be parsed correctly
+        assert result.short_description == "Class docstring with a short description."
+    
+        # Attribute docstrings should be added to the result
+>       attr_docs = {attr.name: attr for attr in result.attributes}
+E       AttributeError: 'Docstring' object has no attribute 'attributes'
+
+../../../../../../../groq_context_development_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__46__atomic_verified_setup/eval0/test_generated.py:29: AttributeError
+________________ test_parse_from_object_with_module_attributes _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-259/test_parse_from_object_with_mo0')
+
+    def test_parse_from_object_with_module_attributes(tmp_path):
+        # Dynamically create a module with attributes and docstrings
+        mod = types.ModuleType("dummy_module")
+        mod.__doc__ = "Module docstring."
+        mod.var1 = 10
+>       mod.var1.__doc__ = "Variable 1 description."
+E       AttributeError: 'int' object attribute '__doc__' is read-only
+
+../../../../../../../groq_context_development_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__46__atomic_verified_setup/eval0/test_generated.py:44: AttributeError
+________________ test_parse_from_object_with_nonclass_nonmodule ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-259/test_parse_from_object_with_no0')
+
+    def test_parse_from_object_with_nonclass_nonmodule(tmp_path):
+        # Create a simple function with a docstring
+        def func(x: int) -> int:
+            """Function docstring."""
+            return x
+    
+        # Parse the function object
+        result = parser.parse_from_object(func, style=DocstringStyle.REST)
+    
+        # Verify that the function docstring is parsed
+        assert result.short_description == "Function docstring."
+    
+        # No attributes should be added for a function
+>       assert len(result.attributes) == 0
+E       AttributeError: 'Docstring' object has no attribute 'attributes'
+
+../../../../../../../groq_context_development_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__46__atomic_verified_setup/eval0/test_generated.py:75: AttributeError
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_context_development_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__46__atomic_verified_setup/eval0/test_generated.py::test_parse_from_object_with_class_attributes
+FAILED ../../../../../../../groq_context_development_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__46__atomic_verified_setup/eval0/test_generated.py::test_parse_from_object_with_module_attributes
+FAILED ../../../../../../../groq_context_development_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__46__atomic_verified_setup/eval0/test_generated.py::test_parse_from_object_with_nonclass_nonmodule
+3 failed in 0.19s

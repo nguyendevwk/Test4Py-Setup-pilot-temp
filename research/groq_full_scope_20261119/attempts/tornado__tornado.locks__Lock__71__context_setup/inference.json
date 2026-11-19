@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-04d71eb4-a772-4d11-9d07-40423547e12b",
+  "object": "chat.completion",
+  "created": 1795079452,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.locks import Lock\nfrom tornado import gen\n\n@pytest.mark.asyncio\nasync def test_lock_acquire_release():\n    lock = Lock()\n    # Initially unlocked: acquire should succeed immediately\n    await lock.acquire()\n    # After acquiring, the lock should be held; a second acquire will block\n    async def try_acquire():\n        await lock.acquire()\n    task = asyncio.create_task(try_acquire())\n    await asyncio.sleep(0.1)  # give the task time to start and block\n    assert not task.done(), \"Second acquire should be blocked while lock is held\"\n    # Release the lock and ensure the waiting task completes\n    lock.release()\n    await task\n    assert task.done(), \"Waiting acquire should complete after release\"\n\n@pytest.mark.asyncio\nasync def test_lock_release_unlocked_raises():\n    lock = Lock()\n    # Releasing an unlocked lock should raise RuntimeError\n    with pytest.raises(RuntimeError, match=\"release unlocked lock\"):\n        lock.release()\n\n@pytest.mark.asyncio\nasync def test_lock_async_context_manager():\n    lock = Lock()\n    # Use async with to acquire and release automatically\n    async def use_lock():\n        async with lock:\n            # Inside the context, the lock is held\n            assert lock._block._value == 0, \"Lock should be held inside async with\"\n        # After exiting, the lock should be released\n        assert lock._block._value == 1, \"Lock should be released after async with\"\n    await use_lock()\n```",
+        "reasoning": "We need 3 tests: normal acquire/release, boundary: releasing unlocked raises RuntimeError, async context manager. Use asyncio."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005221838,
+    "prompt_tokens": 1170,
+    "prompt_time": 0.026746688,
+    "completion_tokens": 357,
+    "completion_time": 0.440970095,
+    "total_tokens": 1527,
+    "total_time": 0.467716783,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 27
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh5d4mej0twjaqw55zcvtb",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.locks import Lock\nfrom tornado import gen\n\n@pytest.mark.asyncio\nasync def test_lock_acquire_release():\n    lock = Lock()\n    # Initially unlocked: acquire should succeed immediately\n    await lock.acquire()\n    # After acquiring, the lock should be held; a second acquire will block\n    async def try_acquire():\n        await lock.acquire()\n    task = asyncio.create_task(try_acquire())\n    await asyncio.sleep(0.1)  # give the task time to start and block\n    assert not task.done(), \"Second acquire should be blocked while lock is held\"\n    # Release the lock and ensure the waiting task completes\n    lock.release()\n    await task\n    assert task.done(), \"Waiting acquire should complete after release\"\n\n@pytest.mark.asyncio\nasync def test_lock_release_unlocked_raises():\n    lock = Lock()\n    # Releasing an unlocked lock should raise RuntimeError\n    with pytest.raises(RuntimeError, match=\"release unlocked lock\"):\n        lock.release()\n\n@pytest.mark.asyncio\nasync def test_lock_async_context_manager():\n    lock = Lock()\n    # Use async with to acquire and release automatically\n    async def use_lock():\n        async with lock:\n            # Inside the context, the lock is held\n            assert lock._block._value == 0, \"Lock should be held inside async with\"\n        # After exiting, the lock should be released\n        assert lock._block._value == 1, \"Lock should be released after async with\"\n    await use_lock()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "df6a9619324d438d88834455da608aa4",
+  "_api_plus_pacing_seconds": 1.1578828450292349
+}

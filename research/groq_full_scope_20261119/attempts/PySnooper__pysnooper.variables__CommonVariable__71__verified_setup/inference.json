@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-f9ecbf81-4371-47ad-b3da-de15a2f63c08",
+  "object": "chat.completion",
+  "created": 1795076291,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom pysnooper.variables import CommonVariable\nfrom pysnooper import utils\n\nclass DummyVariable(CommonVariable):\n    \"\"\"Concrete implementation of CommonVariable for testing.\"\"\"\n    def __init__(self, source, unambiguous_source, exclude=None):\n        super().__init__(source, unambiguous_source, exclude or set())\n\n    def _keys(self, main_value):\n        # Return all keys of a dict\n        return main_value.keys()\n\n    def _format_key(self, key):\n        # Simple formatting: wrap key in brackets\n        return f'[{key}]'\n\n    def _get_value(self, main_value, key):\n        # Return the value; raise if key is 'error'\n        if key == 'error':\n            raise ValueError(\"Intentional error\")\n        return main_value[key]\n\ndef test_normal_behavior():\n    \"\"\"Test that _items returns correct representations for a normal dict.\"\"\"\n    data = {'a': 1, 'b': 2}\n    var = DummyVariable('src', 'src_')\n    items = var._items(data)\n    # First item is the source representation\n    assert items[0] == ('src', utils.get_shortish_repr(data))\n    # Subsequent items correspond to keys 'a' and 'b'\n    expected = [\n        ('src_[a]', utils.get_shortish_repr(1)),\n        ('src_[b]', utils.get_shortish_repr(2)),\n    ]\n    assert items[1:] == expected\n\ndef test_exclude_key():\n    \"\"\"Test that keys in the exclude set are omitted.\"\"\"\n    data = {'a': 1, 'b': 2}\n    var = DummyVariable('src', 'src_', exclude={'b'})\n    items = var._items(data)\n    # Only key 'a' should appear\n    assert len(items) == 2\n    assert items[1] == ('src_[a]', utils.get_shortish_repr(1))\n    assert all('b' not in key for key, _ in items)\n\ndef test_error_in_get_value():\n    \"\"\"Test that a key raising an exception is skipped.\"\"\"\n    data = {'a': 1, 'error': 3}\n    var = DummyVariable('src', 'src_')\n    items = var._items(data)\n    # 'error' key should be omitted due to exception\n    keys = [k for k, _ in items]\n    assert 'src_[error]' not in keys\n    # Ensure other keys are present\n    assert 'src_[a]' in keys\n```",
+        "reasoning": "We need to test CommonVariable. But it's abstract; need subclass implementing _keys, _format_key, _get_value. We'll create dummy subclass in test. Test normal behavior: simple dict. Test boundary: key that raises exception in _get_value. Test error: exclude key. Use utils.get_shortish_repr; we can import utils. Let's inspect utils? Not provided. Assume it returns repr. We'll just test that output list contains expected strings. Use tmp_path? Not needed. Provide three test functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047366824,
+    "prompt_tokens": 431,
+    "prompt_time": 0.026760073,
+    "completion_tokens": 640,
+    "completion_time": 0.708224736,
+    "total_tokens": 1071,
+    "total_time": 0.734984809,
+    "completion_tokens_details": {
+      "reasoning_tokens": 104
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se4y88ey2bz91btscjjktr",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom pysnooper.variables import CommonVariable\nfrom pysnooper import utils\n\nclass DummyVariable(CommonVariable):\n    \"\"\"Concrete implementation of CommonVariable for testing.\"\"\"\n    def __init__(self, source, unambiguous_source, exclude=None):\n        super().__init__(source, unambiguous_source, exclude or set())\n\n    def _keys(self, main_value):\n        # Return all keys of a dict\n        return main_value.keys()\n\n    def _format_key(self, key):\n        # Simple formatting: wrap key in brackets\n        return f'[{key}]'\n\n    def _get_value(self, main_value, key):\n        # Return the value; raise if key is 'error'\n        if key == 'error':\n            raise ValueError(\"Intentional error\")\n        return main_value[key]\n\ndef test_normal_behavior():\n    \"\"\"Test that _items returns correct representations for a normal dict.\"\"\"\n    data = {'a': 1, 'b': 2}\n    var = DummyVariable('src', 'src_')\n    items = var._items(data)\n    # First item is the source representation\n    assert items[0] == ('src', utils.get_shortish_repr(data))\n    # Subsequent items correspond to keys 'a' and 'b'\n    expected = [\n        ('src_[a]', utils.get_shortish_repr(1)),\n        ('src_[b]', utils.get_shortish_repr(2)),\n    ]\n    assert items[1:] == expected\n\ndef test_exclude_key():\n    \"\"\"Test that keys in the exclude set are omitted.\"\"\"\n    data = {'a': 1, 'b': 2}\n    var = DummyVariable('src', 'src_', exclude={'b'})\n    items = var._items(data)\n    # Only key 'a' should appear\n    assert len(items) == 2\n    assert items[1] == ('src_[a]', utils.get_shortish_repr(1))\n    assert all('b' not in key for key, _ in items)\n\ndef test_error_in_get_value():\n    \"\"\"Test that a key raising an exception is skipped.\"\"\"\n    data = {'a': 1, 'error': 3}\n    var = DummyVariable('src', 'src_')\n    items = var._items(data)\n    # 'error' key should be omitted due to exception\n    keys = [k for k, _ in items]\n    assert 'src_[error]' not in keys\n    # Ensure other keys are present\n    assert 'src_[a]' in keys\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1019769969861954
+}

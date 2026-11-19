@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-21be42c8-481f-49f6-8475-39d94b93e561",
+  "object": "chat.completion",
+  "created": 1795077995,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport zipfile\nimport tempfile\nimport shutil\nimport pytest\n\nfrom thefuck.rules.dirty_unzip import match\n\n\ndef _create_zip(path, bad=False):\n    \"\"\"Create a zip file at `path`. If `bad` is True, truncate the file to make it invalid.\"\"\"\n    with zipfile.ZipFile(path, 'w') as zf:\n        zf.writestr('test.txt', 'content')\n    if bad:\n        # Truncate the file to corrupt it\n        with open(path, 'ab') as f:\n            f.truncate(10)\n\n\nclass DummyCommand:\n    \"\"\"Simple command object with a `script` attribute.\"\"\"\n    def __init__(self, script):\n        self.script = script\n\n\ndef test_match_with_d_flag(tmp_path):\n    \"\"\"When the script contains '-d', match should return False regardless of zip file.\"\"\"\n    zip_path = tmp_path / \"archive.zip\"\n    _create_zip(zip_path)\n    cmd = DummyCommand(f\"unzip -d {zip_path}\")\n    assert match(cmd) is False\n\n\ndef test_match_without_zip_file(tmp_path):\n    \"\"\"When the script does not reference a zip file, match should return False.\"\"\"\n    cmd = DummyCommand(\"unzip somefile.txt\")\n    assert match(cmd) is False\n\n\ndef test_match_with_bad_zip(tmp_path):\n    \"\"\"When the script references a corrupted zip file, match should return True.\"\"\"\n    bad_zip_path = tmp_path / \"bad.zip\"\n    _create_zip(bad_zip_path, bad=True)\n    cmd = DummyCommand(f\"unzip {bad_zip_path}\")\n    assert match(cmd) is True\n```",
+        "reasoning": "We need to test match function. Need to create dummy command object with script attribute. Also need to simulate zipfile behavior. We cannot modify product code. We can create temp zip files. Use tmp_path. For bad zip: create zip with bad file? _is_bad_zip checks zipfile.is_zipfile? Let's inspect _is_bad_zip. Not provided. But we can test that match returns False when '-d' present. Also when no zip file. And when bad zip. We can create a zip file with corrupted data? Use zipfile.ZipFile to create but then truncate. Use tmp_path to create file. Use command.script containing path. Use for_app? Not needed. We'll just call match. Need to import the module. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051927054,
+    "prompt_tokens": 287,
+    "prompt_time": 0.058677602,
+    "completion_tokens": 505,
+    "completion_time": 0.697867912,
+    "total_tokens": 792,
+    "total_time": 0.756545514,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 155
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfry92ezcrxxr8e39rd6hm",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport zipfile\nimport tempfile\nimport shutil\nimport pytest\n\nfrom thefuck.rules.dirty_unzip import match\n\n\ndef _create_zip(path, bad=False):\n    \"\"\"Create a zip file at `path`. If `bad` is True, truncate the file to make it invalid.\"\"\"\n    with zipfile.ZipFile(path, 'w') as zf:\n        zf.writestr('test.txt', 'content')\n    if bad:\n        # Truncate the file to corrupt it\n        with open(path, 'ab') as f:\n            f.truncate(10)\n\n\nclass DummyCommand:\n    \"\"\"Simple command object with a `script` attribute.\"\"\"\n    def __init__(self, script):\n        self.script = script\n\n\ndef test_match_with_d_flag(tmp_path):\n    \"\"\"When the script contains '-d', match should return False regardless of zip file.\"\"\"\n    zip_path = tmp_path / \"archive.zip\"\n    _create_zip(zip_path)\n    cmd = DummyCommand(f\"unzip -d {zip_path}\")\n    assert match(cmd) is False\n\n\ndef test_match_without_zip_file(tmp_path):\n    \"\"\"When the script does not reference a zip file, match should return False.\"\"\"\n    cmd = DummyCommand(\"unzip somefile.txt\")\n    assert match(cmd) is False\n\n\ndef test_match_with_bad_zip(tmp_path):\n    \"\"\"When the script references a corrupted zip file, match should return True.\"\"\"\n    bad_zip_path = tmp_path / \"bad.zip\"\n    _create_zip(bad_zip_path, bad=True)\n    cmd = DummyCommand(f\"unzip {bad_zip_path}\")\n    assert match(cmd) is True\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1009157589869574
+}

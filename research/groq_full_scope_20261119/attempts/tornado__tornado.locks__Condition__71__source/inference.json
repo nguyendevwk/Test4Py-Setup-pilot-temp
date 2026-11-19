@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-7dcd5f27-b718-4158-a3aa-cc22b52e6bb6",
+  "object": "chat.completion",
+  "created": 1795079606,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport datetime\nimport threading\nimport time\n\nimport pytest\nfrom tornado import ioloop\nfrom tornado.locks import Condition\n\n\ndef _run_loop(coro):\n    \"\"\"Run an asyncio coroutine while the Tornado IOLoop is running.\"\"\"\n    loop = ioloop.IOLoop.current()\n    result = None\n\n    def target():\n        nonlocal result\n        result = asyncio.run(coro)\n\n    t = threading.Thread(target=target)\n    t.start()\n    loop.start()\n    t.join()\n    return result\n\n\ndef test_condition_notify_immediately():\n    \"\"\"A waiter receives a notification when notify() is called before it awaits.\"\"\"\n    cond = Condition()\n\n    async def waiter():\n        return await cond.wait()\n\n    # Notify before awaiting\n    cond.notify()\n\n    result = _run_loop(waiter())\n    assert result is True, \"wait() should return True when notified immediately\"\n\n\ndef test_condition_timeout():\n    \"\"\"wait() returns False after the timeout expires without a notification.\"\"\"\n    cond = Condition()\n    timeout_seconds = 0.1\n\n    async def waiter():\n        return await cond.wait(timeout=timeout_seconds)\n\n    start = time.time()\n    result = _run_loop(waiter())\n    elapsed = time.time() - start\n    assert result is False, \"wait() should return False after timeout\"\n    assert elapsed >= timeout_seconds, \"wait() should wait at least the timeout duration\"\n\n\ndef test_condition_notify_all():\n    \"\"\"notify_all wakes all waiters, regardless of the number requested.\"\"\"\n    cond = Condition()\n    results = []\n\n    async def waiter(idx):\n        res = await cond.wait()\n        results.append((idx, res))\n\n    async def runner():\n        await asyncio.gather(*(waiter(i) for i in range(3)))\n        cond.notify_all()\n\n    _run_loop(runner())\n    # All waiters should have been notified\n    assert sorted(results) == [(0, True), (1, True), (2, True)]\n```",
+        "reasoning": "We need 3 tests. Use tmp_path? not needed. Test wait normal notify, timeout, notify_all. Use asyncio. Use tornado.gen? but we can use asyncio. Condition uses tornado.ioloop. Need to run IOLoop. Use tornado.ioloop.IOLoop.current(). Use asyncio event loop integration? Tornado's IOLoop can run with asyncio. We'll use tornado.ioloop.IOLoop.current().start? Instead use tornado.gen.maybe_future? simpler: use asyncio with tornado. Use tornado.ioloop.IOLoop.current().add_callback to schedule. We'll run tests with asyncio.run. Use Condition.wait returns Future that is compatible with await. We'll test.\n\nTest1: normal notify: create condition, start waiter coroutine that awaits condition.wait(); schedule notify after small delay using IOLoop.add_timeout. Use asyncio.sleep? but need to integrate. We'll use IOLoop.current().add_timeout(ioloop.IOLoop.current().time()+0.1, lambda: condition.notify()). Then run asyncio.run(asyncio.sleep(0.2))? Actually we need to run IOLoop. Use tornado.ioloop.IOLoop.current().start() in separate thread? Simpler: use tornado.gen.maybe_future? Might be complex.\n\nMaybe easier: use tornado.gen.sleep? But Condition.wait uses IOLoop for timeout. For notify, we can call condition.notify() directly before awaiting? That would notify immediately. So test normal: call notify before await? But waiters appended then notify will pop. That works. So test that await returns True.\n\nTest2: timeout: set timeout to 0.1 seconds. Use IOLoop.add_timeout to trigger? Wait will schedule on_timeout. We can just await and expect False after timeout. Use asyncio.sleep to allow loop to run. Need to run IOLoop. Use tornado.ioloop.IOLoop.current().start() in separate thread? Might be overkill.\n\nMaybe use tornado.gen.sleep? But Condition.wait uses IOLoop, so we need IOLoop running. We can use tornado.ioloop.IOLoop.current().start() in a thread and stop after. Use threading.\n\nImplement helper run_loop(func) that starts IOLoop in thread, runs func, then stops. Use queue to signal.\n\nSimpler: use tornado.ioloop.IOLoop.current().add_timeout to schedule notify. Then use asyncio.run to await condition.wait() which will block until future resolved. But IOLoop must be running. We can start IOLoop in separate thread before awaiting.\n\nImplement:\n\ndef run_in_loop(coro):\n    loop = ioloop.IOLoop.current()\n    result = None\n    def start():\n        nonlocal result\n        result = asyncio.run(coro)\n    t = threading.Thread(target=start)\n    t.start()\n    loop.start()\n    t.join()\n    return result\n\nBut starting IOLoop in main thread? Might conflict.\n\nTime is limited. Maybe simpler: use tornado.gen.maybe_future and tornado.ioloop.IOLoop.current().add_timeout and then use tornado.ioloop.IOLoop.current().start() and stop after.\n\nI'll craft tests accordingly."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004885,
+    "prompt_tokens": 967,
+    "prompt_time": 0.051984946,
+    "completion_tokens": 1070,
+    "completion_time": 1.136755345,
+    "total_tokens": 2037,
+    "total_time": 1.188740291,
+    "completion_tokens_details": {
+      "reasoning_tokens": 652
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sha370evar8yfta6hpvzm8",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport datetime\nimport threading\nimport time\n\nimport pytest\nfrom tornado import ioloop\nfrom tornado.locks import Condition\n\n\ndef _run_loop(coro):\n    \"\"\"Run an asyncio coroutine while the Tornado IOLoop is running.\"\"\"\n    loop = ioloop.IOLoop.current()\n    result = None\n\n    def target():\n        nonlocal result\n        result = asyncio.run(coro)\n\n    t = threading.Thread(target=target)\n    t.start()\n    loop.start()\n    t.join()\n    return result\n\n\ndef test_condition_notify_immediately():\n    \"\"\"A waiter receives a notification when notify() is called before it awaits.\"\"\"\n    cond = Condition()\n\n    async def waiter():\n        return await cond.wait()\n\n    # Notify before awaiting\n    cond.notify()\n\n    result = _run_loop(waiter())\n    assert result is True, \"wait() should return True when notified immediately\"\n\n\ndef test_condition_timeout():\n    \"\"\"wait() returns False after the timeout expires without a notification.\"\"\"\n    cond = Condition()\n    timeout_seconds = 0.1\n\n    async def waiter():\n        return await cond.wait(timeout=timeout_seconds)\n\n    start = time.time()\n    result = _run_loop(waiter())\n    elapsed = time.time() - start\n    assert result is False, \"wait() should return False after timeout\"\n    assert elapsed >= timeout_seconds, \"wait() should wait at least the timeout duration\"\n\n\ndef test_condition_notify_all():\n    \"\"\"notify_all wakes all waiters, regardless of the number requested.\"\"\"\n    cond = Condition()\n    results = []\n\n    async def waiter(idx):\n        res = await cond.wait()\n        results.append((idx, res))\n\n    async def runner():\n        await asyncio.gather(*(waiter(i) for i in range(3)))\n        cond.notify_all()\n\n    _run_loop(runner())\n    # All waiters should have been notified\n    assert sorted(results) == [(0, True), (1, True), (2, True)]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "edc3c76280c5493985cd5732cd60b71a",
+  "_api_plus_pacing_seconds": 2.1846938650123775
+}

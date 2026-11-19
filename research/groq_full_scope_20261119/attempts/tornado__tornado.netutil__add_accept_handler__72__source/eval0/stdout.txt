@@ -1,0 +1,43 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_add_accept_handler_calls_callback ____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__add_accept_handler__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_add_accept_handler_calls_0')
+
+    def test_add_accept_handler_calls_callback(tmp_path):
+        """The callback is invoked for each accepted connection."""
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setblocking(False)
+        server.bind(("127.0.0.1", 0))
+        server.listen(1)
+    
+        received = []
+    
+        def cb(conn, addr):
+            received.append((conn, addr))
+            conn.close()
+    
+        remove = add_accept_handler(server, cb)
+    
+        # Connect a client
+        client = socket.create_connection(server.getsockname())
+        client.close()
+    
+        # Run the IOLoop until the callback has been called
+        loop = IOLoop.current()
+        loop.add_timeout(loop.time() + 0.1, loop.stop)
+        loop.start()
+    
+        assert len(received) == 1
+        conn, addr = received[0]
+        assert isinstance(conn, socket.socket)
+>       assert addr == server.getsockname()
+E       AssertionError: assert ('127.0.0.1', 46094) == ('127.0.0.1', 45213)
+E         
+E         At index 1 diff: 46094 != 45213
+E         Use -v to get more diff
+
+test_generated.py:33: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_add_accept_handler_calls_callback - AssertionE...
+1 failed, 2 passed in 0.64s

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-4e2292f4-28e6-47cd-8ca6-a8a2f2cbf416",
+  "object": "chat.completion",
+  "created": 1795078310,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.exceptions import RangeNotSatisfiable\nfrom sanic.models.protocol_types import Range\n\n\nclass DummyRange:\n    \"\"\"Simple mock of the Range protocol with a total attribute.\"\"\"\n    def __init__(self, total: int):\n        self.total = total\n\n\ndef test_default_initialization():\n    \"\"\"RangeNotSatisfiable should set status_code, quiet, and default headers.\"\"\"\n    exc = RangeNotSatisfiable()\n    assert exc.status_code == 416\n    assert exc.quiet is True\n    # No custom headers should be present\n    assert exc.headers == {}\n    # Default message should be the status description\n    assert exc.message == \"Range Not Satisfiable\"\n\n\ndef test_content_range_header_inclusion():\n    \"\"\"Providing a content_range should add the correct Content-Range header.\"\"\"\n    dummy = DummyRange(total=12345)\n    exc = RangeNotSatisfiable(content_range=dummy)\n    assert exc.headers[\"Content-Range\"] == \"bytes */12345\"\n    # Ensure other headers remain unchanged\n    assert len(exc.headers) == 1\n\n\ndef test_custom_message_and_headers():\n    \"\"\"Custom message and headers should override defaults correctly.\"\"\"\n    custom_headers = {\"X-Custom\": \"value\"}\n    exc = RangeNotSatisfiable(\n        message=\"Custom error\",\n        headers=custom_headers,\n    )\n    assert exc.message == \"Custom error\"\n    assert exc.headers == custom_headers\n    # quiet should remain True unless explicitly overridden\n    assert exc.quiet is True\n```",
+        "reasoning": "We need three tests: normal init, content_range header, error when content_range missing total? but Range type has total property. Just test header set. Also test quiet default True. Use tmp_path? not needed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048416231,
+    "prompt_tokens": 1558,
+    "prompt_time": 0.195807212,
+    "completion_tokens": 370,
+    "completion_time": 0.45003822,
+    "total_tokens": 1928,
+    "total_time": 0.645845432,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 45
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg2jb1eeqsabxt2px2j7t6",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.exceptions import RangeNotSatisfiable\nfrom sanic.models.protocol_types import Range\n\n\nclass DummyRange:\n    \"\"\"Simple mock of the Range protocol with a total attribute.\"\"\"\n    def __init__(self, total: int):\n        self.total = total\n\n\ndef test_default_initialization():\n    \"\"\"RangeNotSatisfiable should set status_code, quiet, and default headers.\"\"\"\n    exc = RangeNotSatisfiable()\n    assert exc.status_code == 416\n    assert exc.quiet is True\n    # No custom headers should be present\n    assert exc.headers == {}\n    # Default message should be the status description\n    assert exc.message == \"Range Not Satisfiable\"\n\n\ndef test_content_range_header_inclusion():\n    \"\"\"Providing a content_range should add the correct Content-Range header.\"\"\"\n    dummy = DummyRange(total=12345)\n    exc = RangeNotSatisfiable(content_range=dummy)\n    assert exc.headers[\"Content-Range\"] == \"bytes */12345\"\n    # Ensure other headers remain unchanged\n    assert len(exc.headers) == 1\n\n\ndef test_custom_message_and_headers():\n    \"\"\"Custom message and headers should override defaults correctly.\"\"\"\n    custom_headers = {\"X-Custom\": \"value\"}\n    exc = RangeNotSatisfiable(\n        message=\"Custom error\",\n        headers=custom_headers,\n    )\n    assert exc.message == \"Custom error\"\n    assert exc.headers == custom_headers\n    # quiet should remain True unless explicitly overridden\n    assert exc.quiet is True\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.045784868998453
+}

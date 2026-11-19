@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-59eb9880-3d5d-43d1-a6bd-a7762e266833",
+  "object": "chat.completion",
+  "created": 1795079471,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom pathlib import Path\nfrom thefuck.rules.scm_correction import match, _get_actual_scm, wrong_scm_patterns, path_to_scm\n\n\nclass DummyCommand:\n    def __init__(self, script_parts, output):\n        self.script_parts = script_parts\n        self.output = output\n\n\ndef test_match_success(tmp_path):\n    # Create a git repository directory\n    git_dir = tmp_path / \".git\"\n    git_dir.mkdir()\n    # Command uses git and output contains the git error pattern\n    cmd = DummyCommand(script_parts=[\"git\"], output=\"fatal: Not a git repository\")\n    assert match(cmd) is True\n    # Ensure _get_actual_scm returns 'git'\n    assert _get_actual_scm() == \"git\"\n\n\ndef test_match_no_pattern(tmp_path):\n    # Create a git repository directory\n    git_dir = tmp_path / \".git\"\n    git_dir.mkdir()\n    # Command uses git but output does not contain the pattern\n    cmd = DummyCommand(script_parts=[\"git\"], output=\"some other error\")\n    assert match(cmd) is False\n    # _get_actual_scm still returns 'git'\n    assert _get_actual_scm() == \"git\"\n\n\ndef test_match_no_repository(tmp_path):\n    # No .git or .hg directory present\n    cmd = DummyCommand(script_parts=[\"git\"], output=\"fatal: Not a git repository\")\n    # Since no repository directory exists, match should be False\n    assert match(cmd) is False\n    # _get_actual_scm should return None\n    assert _get_actual_scm() is None\n```",
+        "reasoning": "We need to write tests for match function. We need to simulate command object with script_parts and output. Also Path.is_dir uses filesystem. We can create temporary directories with .git or .hg. Use tmp_path. Test normal: command.script_parts[0]='git', output contains pattern, and actual scm present. Expect True. Boundary: no matching pattern -> False. Error: no actual scm directory -> False. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004560165,
+    "prompt_tokens": 370,
+    "prompt_time": 0.008763056,
+    "completion_tokens": 433,
+    "completion_time": 0.575615486,
+    "total_tokens": 803,
+    "total_time": 0.584378542,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 88
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh6010et5828hf6y9bfx83",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom pathlib import Path\nfrom thefuck.rules.scm_correction import match, _get_actual_scm, wrong_scm_patterns, path_to_scm\n\n\nclass DummyCommand:\n    def __init__(self, script_parts, output):\n        self.script_parts = script_parts\n        self.output = output\n\n\ndef test_match_success(tmp_path):\n    # Create a git repository directory\n    git_dir = tmp_path / \".git\"\n    git_dir.mkdir()\n    # Command uses git and output contains the git error pattern\n    cmd = DummyCommand(script_parts=[\"git\"], output=\"fatal: Not a git repository\")\n    assert match(cmd) is True\n    # Ensure _get_actual_scm returns 'git'\n    assert _get_actual_scm() == \"git\"\n\n\ndef test_match_no_pattern(tmp_path):\n    # Create a git repository directory\n    git_dir = tmp_path / \".git\"\n    git_dir.mkdir()\n    # Command uses git but output does not contain the pattern\n    cmd = DummyCommand(script_parts=[\"git\"], output=\"some other error\")\n    assert match(cmd) is False\n    # _get_actual_scm still returns 'git'\n    assert _get_actual_scm() == \"git\"\n\n\ndef test_match_no_repository(tmp_path):\n    # No .git or .hg directory present\n    cmd = DummyCommand(script_parts=[\"git\"], output=\"fatal: Not a git repository\")\n    # Since no repository directory exists, match should be False\n    assert match(cmd) is False\n    # _get_actual_scm should return None\n    assert _get_actual_scm() is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "c54af45416554ada907fe83677bdaec4",
+  "_api_plus_pacing_seconds": 1.1792706190026365
+}

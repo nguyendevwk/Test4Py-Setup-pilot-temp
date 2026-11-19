@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-65fa13dd-7de1-4c38-9e3b-09189c78f24a",
+  "object": "chat.completion",
+  "created": 1795078850,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.composites import IfThenElse\nfrom typesystem.fields import Any, Int, String\n\n\ndef test_if_then_else_success():\n    \"\"\"\n    When the if_clause validates, the then_clause should be used.\n    \"\"\"\n    field = IfThenElse(if_clause=Int(), then_clause=String())\n    # Value 42 satisfies Int, so String validation should succeed (any string accepted)\n    result = field.validate(42)\n    assert result == 42  # String() returns the original value if it is a string, else raises\n    # Now test with a string that satisfies String()\n    result = field.validate(\"hello\")\n    assert result == \"hello\"\n\n\ndef test_if_then_else_else_path():\n    \"\"\"\n    When the if_clause fails, the else_clause should be used.\n    \"\"\"\n    field = IfThenElse(if_clause=Int(), else_clause=String())\n    # Value \"not an int\" fails Int, so String validation should succeed\n    result = field.validate(\"not an int\")\n    assert result == \"not an int\"\n    # Value 3.14 fails Int, should also go to else_clause\n    result = field.validate(3.14)\n    assert result == 3.14\n\n\ndef test_if_then_else_error_on_then():\n    \"\"\"\n    If the then_clause validation fails, the error should propagate.\n    \"\"\"\n    # then_clause expects a string, but we pass an int\n    field = IfThenElse(if_clause=Int(), then_clause=String())\n    with pytest.raises(Exception):\n        field.validate(123)  # 123 passes Int, then String() should raise\n```",
+        "reasoning": "Need tests for IfThenElse. Use simple fields: maybe typesystem.fields.Any, Int, String? Let's inspect typesystem.fields.Any. But we can import Any from typesystem.fields. Use Int? Let's check typesystem.fields.Int. Assume exists. We'll test: if_clause matches, then_clause used; else_clause used. Also boundary: if_clause fails with error. Also error behavior: if then_clause fails? Should propagate error? validate returns then_clause.validate(value) which may raise? Actually validate returns value or raises? In typesystem, validate may raise ValidationError. We'll test that error is raised. Use pytest.raises. Also test that if_clause None? Not allowed. We'll test that passing allow_null raises assertion. But that's in __init__ assert. Use pytest.raises(AssertionError). That's error behavior. Write three tests: test_if_then_else_success, test_if_then_else_else_path, test_if_then_else_error_on_then. Use tmp_path? Not needed. Provide code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.239946761,
+    "prompt_tokens": 407,
+    "prompt_time": 0.109135866,
+    "completion_tokens": 550,
+    "completion_time": 1.003231901,
+    "total_tokens": 957,
+    "total_time": 1.112367767,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 201
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgk0ztez4vhn2b3kfxgcww",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.composites import IfThenElse\nfrom typesystem.fields import Any, Int, String\n\n\ndef test_if_then_else_success():\n    \"\"\"\n    When the if_clause validates, the then_clause should be used.\n    \"\"\"\n    field = IfThenElse(if_clause=Int(), then_clause=String())\n    # Value 42 satisfies Int, so String validation should succeed (any string accepted)\n    result = field.validate(42)\n    assert result == 42  # String() returns the original value if it is a string, else raises\n    # Now test with a string that satisfies String()\n    result = field.validate(\"hello\")\n    assert result == \"hello\"\n\n\ndef test_if_then_else_else_path():\n    \"\"\"\n    When the if_clause fails, the else_clause should be used.\n    \"\"\"\n    field = IfThenElse(if_clause=Int(), else_clause=String())\n    # Value \"not an int\" fails Int, so String validation should succeed\n    result = field.validate(\"not an int\")\n    assert result == \"not an int\"\n    # Value 3.14 fails Int, should also go to else_clause\n    result = field.validate(3.14)\n    assert result == 3.14\n\n\ndef test_if_then_else_error_on_then():\n    \"\"\"\n    If the then_clause validation fails, the error should propagate.\n    \"\"\"\n    # then_clause expects a string, but we pass an int\n    field = IfThenElse(if_clause=Int(), then_clause=String())\n    with pytest.raises(Exception):\n        field.validate(123)  # 123 passes Int, then String() should raise\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.8076362360152416
+}

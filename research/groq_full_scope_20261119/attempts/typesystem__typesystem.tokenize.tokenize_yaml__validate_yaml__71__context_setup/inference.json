@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-5e9d4741-238d-43e8-bca7-0bddbd19001b",
+  "object": "chat.completion",
+  "created": 1795079460,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_yaml import validate_yaml\nfrom typesystem.base import ParseError\nfrom typesystem.fields import Field\nfrom typesystem.schemas import Schema\n\ndef test_validate_yaml_valid_scalar(tmp_path):\n    # Create a simple YAML scalar and validate against a Field\n    yaml_content = \"42\"\n    field = Field(int)\n    value, errors = validate_yaml(yaml_content, field)\n    assert value == 42\n    assert errors is None\n\ndef test_validate_yaml_empty_content_raises_parse_error(tmp_path):\n    # Empty string should raise ParseError with code \"no_content\"\n    yaml_content = \"\"\n    field = Field(str)\n    with pytest.raises(ParseError) as excinfo:\n        validate_yaml(yaml_content, field)\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    assert err.position.line_no == 1\n    assert err.position.column_no == 1\n    assert err.position.char_index == 0\n\ndef test_validate_yaml_syntax_error_returns_parse_error(tmp_path):\n    # Malformed YAML should raise ParseError with code \"parse_error\"\n    yaml_content = \"key: [unclosed list\"\n    field = Field(dict)\n    with pytest.raises(ParseError) as excinfo:\n        validate_yaml(yaml_content, field)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    # The error text should contain the scanner problem description\n    assert \"while scanning a simple key\" in err.text or \"while parsing a flow sequence\" in err.text\n    # Position should point to the problematic character\n    assert err.position.line_no >= 1\n    assert err.position.column_no >= 1\n    assert err.position.char_index >= 0\n```",
+        "reasoning": "We need three tests: normal valid yaml, boundary empty string error, and parse error. Use tmp_path for file? content string. Use validate_yaml. Ensure assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005907205,
+    "prompt_tokens": 1296,
+    "prompt_time": 0.068496343,
+    "completion_tokens": 417,
+    "completion_time": 0.427877425,
+    "total_tokens": 1713,
+    "total_time": 0.496373768,
+    "completion_tokens_details": {
+      "reasoning_tokens": 35
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh5n27ewe8cztc7sxrb2qb",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_yaml import validate_yaml\nfrom typesystem.base import ParseError\nfrom typesystem.fields import Field\nfrom typesystem.schemas import Schema\n\ndef test_validate_yaml_valid_scalar(tmp_path):\n    # Create a simple YAML scalar and validate against a Field\n    yaml_content = \"42\"\n    field = Field(int)\n    value, errors = validate_yaml(yaml_content, field)\n    assert value == 42\n    assert errors is None\n\ndef test_validate_yaml_empty_content_raises_parse_error(tmp_path):\n    # Empty string should raise ParseError with code \"no_content\"\n    yaml_content = \"\"\n    field = Field(str)\n    with pytest.raises(ParseError) as excinfo:\n        validate_yaml(yaml_content, field)\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    assert err.position.line_no == 1\n    assert err.position.column_no == 1\n    assert err.position.char_index == 0\n\ndef test_validate_yaml_syntax_error_returns_parse_error(tmp_path):\n    # Malformed YAML should raise ParseError with code \"parse_error\"\n    yaml_content = \"key: [unclosed list\"\n    field = Field(dict)\n    with pytest.raises(ParseError) as excinfo:\n        validate_yaml(yaml_content, field)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    # The error text should contain the scanner problem description\n    assert \"while scanning a simple key\" in err.text or \"while parsing a flow sequence\" in err.text\n    # Position should point to the problematic character\n    assert err.position.line_no >= 1\n    assert err.position.column_no >= 1\n    assert err.position.char_index >= 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "b7d96be62da043b2942dd8953e8e01be",
+  "_api_plus_pacing_seconds": 1.1886521190172061
+}

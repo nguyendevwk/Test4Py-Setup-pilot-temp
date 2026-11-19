@@ -1,0 +1,32 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_logformatter_bad_message _________________________
+
+    def test_logformatter_bad_message():
+        # Create a message that will raise when converted to string
+        class BadStr:
+            def __str__(self):
+                raise ValueError("bad conversion")
+        bad_msg = BadStr()
+        formatter = LogFormatter()
+        record = make_record(logging.ERROR, bad_msg)
+        formatted = formatter.format(record)
+        # The formatter should catch the exception and include it in the output
+        assert "Bad message" in formatted
+        assert "ValueError" in formatted
+        # The original message should not appear
+>       assert str(bad_msg) not in formatted
+
+test_generated.py:63: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.test_logformatter_bad_message.<locals>.BadStr object at 0x7fd5aafe5120>
+
+    def __str__(self):
+>       raise ValueError("bad conversion")
+E       ValueError: bad conversion
+
+test_generated.py:54: ValueError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_logformatter_bad_message - ValueError: bad con...
+1 failed, 2 passed in 0.24s

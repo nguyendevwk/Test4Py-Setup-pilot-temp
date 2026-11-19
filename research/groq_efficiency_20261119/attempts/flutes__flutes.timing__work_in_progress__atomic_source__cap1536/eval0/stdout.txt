@@ -1,0 +1,70 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_work_in_progress_normal _________________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7ff763708370>
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-119/test_work_in_progress_normal0')
+
+    def test_work_in_progress_normal(capsys, tmp_path):
+        """Verify normal usage prints description and elapsed time."""
+        start = time.time()
+        with work_in_progress("Test task"):
+            # Simulate a short operation
+            time.sleep(0.1)
+        end = time.time()
+        captured = capsys.readouterr()
+        # The output should start with the description and end with "done."
+        assert captured.out.startswith("Test task... ")
+>       assert captured.out.strip().endswith("done.")
+E       AssertionError: assert False
+E        +  where False = <built-in method endswith of str object at 0x7ff762f59020>('done.')
+E        +    where <built-in method endswith of str object at 0x7ff762f59020> = 'Test task... done. (0.10s)'.endswith
+E        +      where 'Test task... done. (0.10s)' = <built-in method strip of str object at 0x7ff762f58fd0>()
+E        +        where <built-in method strip of str object at 0x7ff762f58fd0> = 'Test task... done. (0.10s)\n'.strip
+E        +          where 'Test task... done. (0.10s)\n' = CaptureResult(out='Test task... done. (0.10s)\n', err='').out
+
+../../../../../../../groq_efficiency_20261119/attempts/flutes__flutes.timing__work_in_progress__atomic_source__cap1536/eval0/test_generated.py:16: AssertionError
+_____________________ test_work_in_progress_zero_duration ______________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7ff762f4b490>
+
+    def test_work_in_progress_zero_duration(capsys):
+        """Verify that zero-duration blocks still print correctly."""
+        with work_in_progress("Instant"):
+            pass
+        captured = capsys.readouterr()
+        assert captured.out.startswith("Instant... ")
+>       assert captured.out.strip().endswith("done.")
+E       AssertionError: assert False
+E        +  where False = <built-in method endswith of str object at 0x7ff762f59b60>('done.')
+E        +    where <built-in method endswith of str object at 0x7ff762f59b60> = 'Instant... done. (0.00s)'.endswith
+E        +      where 'Instant... done. (0.00s)' = <built-in method strip of str object at 0x7ff762f59bb0>()
+E        +        where <built-in method strip of str object at 0x7ff762f59bb0> = 'Instant... done. (0.00s)\n'.strip
+E        +          where 'Instant... done. (0.00s)\n' = CaptureResult(out='Instant... done. (0.00s)\n', err='').out
+
+../../../../../../../groq_efficiency_20261119/attempts/flutes__flutes.timing__work_in_progress__atomic_source__cap1536/eval0/test_generated.py:31: AssertionError
+___________ test_work_in_progress_exception_propagation_and_logging ____________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7ff762fb3be0>
+
+    def test_work_in_progress_exception_propagation_and_logging(capsys):
+        """Verify that an exception inside the block is re-raised and logging still occurs."""
+        with pytest.raises(RuntimeError):
+            with work_in_progress("Error task"):
+                raise RuntimeError("boom")
+        captured = capsys.readouterr()
+        assert captured.out.startswith("Error task... ")
+>       assert captured.out.strip().endswith("done.")
+E       AssertionError: assert False
+E        +  where False = <built-in method endswith of str object at 0x7ff762f7c8b0>('done.')
+E        +    where <built-in method endswith of str object at 0x7ff762f7c8b0> = 'Error task...'.endswith
+E        +      where 'Error task...' = <built-in method strip of str object at 0x7ff762fcad70>()
+E        +        where <built-in method strip of str object at 0x7ff762fcad70> = 'Error task... '.strip
+E        +          where 'Error task... ' = CaptureResult(out='Error task... ', err='').out
+
+../../../../../../../groq_efficiency_20261119/attempts/flutes__flutes.timing__work_in_progress__atomic_source__cap1536/eval0/test_generated.py:45: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_efficiency_20261119/attempts/flutes__flutes.timing__work_in_progress__atomic_source__cap1536/eval0/test_generated.py::test_work_in_progress_normal
+FAILED ../../../../../../../groq_efficiency_20261119/attempts/flutes__flutes.timing__work_in_progress__atomic_source__cap1536/eval0/test_generated.py::test_work_in_progress_zero_duration
+FAILED ../../../../../../../groq_efficiency_20261119/attempts/flutes__flutes.timing__work_in_progress__atomic_source__cap1536/eval0/test_generated.py::test_work_in_progress_exception_propagation_and_logging
+3 failed in 0.29s

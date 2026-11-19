@@ -1,0 +1,64 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_unwrap_context_recurses_into_nested_context _______________
+
+    def test_unwrap_context_recurses_into_nested_context():
+        """When an exception has a __context__ that is another exception, unwrap_context should return the deepest one."""
+        try:
+            try:
+>               raise KeyError("inner")
+E               KeyError: 'inner'
+
+test_generated.py:18: KeyError
+
+The above exception was the direct cause of the following exception:
+
+    def test_unwrap_context_recurses_into_nested_context():
+        """When an exception has a __context__ that is another exception, unwrap_context should return the deepest one."""
+        try:
+            try:
+                raise KeyError("inner")
+            except KeyError as inner:
+>               raise ValueError("outer") from inner
+E               ValueError: outer
+
+test_generated.py:20: ValueError
+
+During handling of the above exception, another exception occurred:
+
+    def test_unwrap_context_recurses_into_nested_context():
+        """When an exception has a __context__ that is another exception, unwrap_context should return the deepest one."""
+        try:
+            try:
+                raise KeyError("inner")
+            except KeyError as inner:
+                raise ValueError("outer") from inner
+        except ValueError as outer:
+            result = unwrap_context(outer)
+            # The deepest exception is the KeyError
+            assert isinstance(result, KeyError)
+>           assert str(result) == "inner"
+E           assert "'inner'" == 'inner'
+E             
+E             - inner
+E             + 'inner'
+E             ? +     +
+
+test_generated.py:25: AssertionError
+______________ test_unwrap_context_handles_non_exception_context _______________
+
+    def test_unwrap_context_handles_non_exception_context():
+        """If __context__ is not an Exception instance, unwrap_context should return the original exception."""
+        class Dummy:
+            pass
+    
+        exc = RuntimeError("error")
+        # Manually set a non-exception context
+>       exc.__context__ = Dummy()
+E       TypeError: exception context must be None or derive from BaseException
+
+test_generated.py:37: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_unwrap_context_recurses_into_nested_context - ...
+FAILED test_generated.py::test_unwrap_context_handles_non_exception_context
+2 failed, 1 passed in 0.48s

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-8c491e58-9398-49dc-981e-1872aaba428f",
+  "object": "chat.completion",
+  "created": 1795077755,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom decimal import Decimal\nfrom pypara.accounting.ledger import Ledger\nfrom pypara.accounting.accounts import Account\nfrom pypara.accounting.generic import Balance\nfrom pypara.accounting.journaling import Posting, Direction\n\n# Helper to create a minimal posting\ndef make_posting(amount: Decimal, direction: Direction) -> Posting:\n    return Posting(amount=amount, direction=direction)\n\ndef test_ledger_initial_balance_and_last_balance():\n    \"\"\"Ledger should expose its initial balance and compute last balance correctly.\"\"\"\n    acc = Account(name=\"TestAccount\")\n    init_balance = Balance(value=Decimal(\"100.00\"))\n    ledger = Ledger(account=acc, initial=init_balance)\n    # No entries yet, last_balance should equal initial\n    assert ledger._last_balance == Decimal(\"100.00\")\n    # Add a posting that increases balance\n    posting = make_posting(Decimal(\"25.00\"), Direction.CREDIT)\n    ledger.add(posting)\n    # After one entry, last_balance should reflect the change\n    assert ledger._last_balance == Decimal(\"125.00\")\n\ndef test_ledger_add_multiple_entries_and_balance_updates():\n    \"\"\"Adding multiple entries should accumulate balances correctly.\"\"\"\n    acc = Account(name=\"MultiEntryAccount\")\n    init_balance = Balance(value=Decimal(\"50.00\"))\n    ledger = Ledger(account=acc, initial=init_balance)\n    postings = [\n        make_posting(Decimal(\"10.00\"), Direction.CREDIT),\n        make_posting(Decimal(\"5.00\"), Direction.DEBIT),\n        make_posting(Decimal(\"20.00\"), Direction.CREDIT),\n    ]\n    expected_balances = [Decimal(\"60.00\"), Decimal(\"55.00\"), Decimal(\"75.00\")]\n    for posting, expected in zip(postings, expected_balances):\n        entry = ledger.add(posting)\n        assert entry.balance == expected\n    # Final last_balance should match last entry\n    assert ledger._last_balance == Decimal(\"75.00\")\n    # Entries list should contain all entries\n    assert len(ledger.entries) == 3\n\ndef test_ledger_add_invalid_posting_raises():\n    \"\"\"Adding a posting with an unsupported direction should raise an error.\"\"\"\n    acc = Account(name=\"ErrorAccount\")\n    init_balance = Balance(value=Decimal(\"0.00\"))\n    ledger = Ledger(account=acc, initial=init_balance)\n    # Create a posting with an invalid direction (e.g., None)\n    with pytest.raises(AttributeError):\n        ledger.add(Posting(amount=Decimal(\"10.00\"), direction=None))\n```",
+        "reasoning": "Need tests for Ledger.add, _last_balance. Use dummy Posting, LedgerEntry? Not defined. Probably import Ledger from module. We'll create minimal Account, Posting, LedgerEntry? But cannot modify product. Maybe LedgerEntry is defined elsewhere. We can simulate by creating a Ledger with dummy account and initial Balance. Use simple types. Probably LedgerEntry has attributes entry.balance. We'll just test that after add, entries length increments and balance updates. Use simple posting with amount Decimal. Use direction enum? Might be defined. Hard. Maybe skip? Probably can't."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052522349,
+    "prompt_tokens": 512,
+    "prompt_time": 0.318533337,
+    "completion_tokens": 653,
+    "completion_time": 1.656237443,
+    "total_tokens": 1165,
+    "total_time": 1.97477078,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 112
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfhjype6sab1g9g5jnxvb9",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom decimal import Decimal\nfrom pypara.accounting.ledger import Ledger\nfrom pypara.accounting.accounts import Account\nfrom pypara.accounting.generic import Balance\nfrom pypara.accounting.journaling import Posting, Direction\n\n# Helper to create a minimal posting\ndef make_posting(amount: Decimal, direction: Direction) -> Posting:\n    return Posting(amount=amount, direction=direction)\n\ndef test_ledger_initial_balance_and_last_balance():\n    \"\"\"Ledger should expose its initial balance and compute last balance correctly.\"\"\"\n    acc = Account(name=\"TestAccount\")\n    init_balance = Balance(value=Decimal(\"100.00\"))\n    ledger = Ledger(account=acc, initial=init_balance)\n    # No entries yet, last_balance should equal initial\n    assert ledger._last_balance == Decimal(\"100.00\")\n    # Add a posting that increases balance\n    posting = make_posting(Decimal(\"25.00\"), Direction.CREDIT)\n    ledger.add(posting)\n    # After one entry, last_balance should reflect the change\n    assert ledger._last_balance == Decimal(\"125.00\")\n\ndef test_ledger_add_multiple_entries_and_balance_updates():\n    \"\"\"Adding multiple entries should accumulate balances correctly.\"\"\"\n    acc = Account(name=\"MultiEntryAccount\")\n    init_balance = Balance(value=Decimal(\"50.00\"))\n    ledger = Ledger(account=acc, initial=init_balance)\n    postings = [\n        make_posting(Decimal(\"10.00\"), Direction.CREDIT),\n        make_posting(Decimal(\"5.00\"), Direction.DEBIT),\n        make_posting(Decimal(\"20.00\"), Direction.CREDIT),\n    ]\n    expected_balances = [Decimal(\"60.00\"), Decimal(\"55.00\"), Decimal(\"75.00\")]\n    for posting, expected in zip(postings, expected_balances):\n        entry = ledger.add(posting)\n        assert entry.balance == expected\n    # Final last_balance should match last entry\n    assert ledger._last_balance == Decimal(\"75.00\")\n    # Entries list should contain all entries\n    assert len(ledger.entries) == 3\n\ndef test_ledger_add_invalid_posting_raises():\n    \"\"\"Adding a posting with an unsupported direction should raise an error.\"\"\"\n    acc = Account(name=\"ErrorAccount\")\n    init_balance = Balance(value=Decimal(\"0.00\"))\n    ledger = Ledger(account=acc, initial=init_balance)\n    # Create a posting with an invalid direction (e.g., None)\n    with pytest.raises(AttributeError):\n        ledger.add(Posting(amount=Decimal(\"10.00\"), direction=None))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 2.361078084039036
+}

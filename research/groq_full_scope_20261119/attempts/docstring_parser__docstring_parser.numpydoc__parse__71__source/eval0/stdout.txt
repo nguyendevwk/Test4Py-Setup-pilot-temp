@@ -1,0 +1,86 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_parse_basic_docstring __________________________
+
+    def test_parse_basic_docstring():
+        doc = """
+        Short summary.
+    
+        Parameters
+        ----------
+        x : int
+            The first parameter.
+        y : str, optional
+            The second parameter.
+    
+        Returns
+        -------
+        bool
+            True if successful.
+    
+        Raises
+        ------
+        ValueError
+            If an error occurs.
+        """
+        parsed = parse(doc)
+        assert isinstance(parsed, Docstring)
+        # Summary
+        assert parsed.short_description == "Short summary."
+        # Parameters
+        assert len(parsed.params) == 2
+        names = {p.arg_name for p in parsed.params}
+        assert names == {"x", "y"}
+        # Return
+>       assert len(parsed.returns) == 1
+E       TypeError: object of type 'DocstringReturns' has no len()
+
+test_generated.py:35: TypeError
+__________________________ test_parse_empty_and_none ___________________________
+
+    def test_parse_empty_and_none():
+        # Empty string should produce an empty Docstring
+        empty = parse("")
+        assert isinstance(empty, Docstring)
+>       assert empty.short_description == ""
+E       AssertionError: assert None == ''
+E        +  where None = <docstring_parser.common.Docstring object at 0x7fbac097f550>.short_description
+
+test_generated.py:49: AssertionError
+__________________ test_parse_with_complex_types_and_defaults __________________
+
+    def test_parse_with_complex_types_and_defaults():
+        doc = """
+        Complex docstring.
+    
+        Parameters
+        ----------
+        data : list[dict[str, int]]
+            A list of dictionaries.
+        flag : bool = True
+            Optional flag.
+    
+        Returns
+        -------
+        tuple[int, str]
+            A tuple containing an integer and a string.
+    
+        Raises
+        ------
+        RuntimeError
+            If something bad happens.
+        """
+        parsed = parse(doc)
+        # Check parameter types and defaults
+        param_dict = {p.arg_name: p for p in parsed.params}
+        assert param_dict["data"].type_name == "list[dict[str, int]]"
+>       assert param_dict["flag"].default == "True"
+E       AssertionError: assert None == 'True'
+E        +  where None = <docstring_parser.common.DocstringParam object at 0x7fbac0913b50>.default
+
+test_generated.py:89: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_basic_docstring - TypeError: object of t...
+FAILED test_generated.py::test_parse_empty_and_none - AssertionError: assert ...
+FAILED test_generated.py::test_parse_with_complex_types_and_defaults - Assert...
+3 failed in 0.17s

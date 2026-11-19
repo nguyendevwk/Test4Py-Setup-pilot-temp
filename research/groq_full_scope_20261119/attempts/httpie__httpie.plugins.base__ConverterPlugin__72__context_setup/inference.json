@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-0c5d9906-ef3e-4307-8b25-e083451a56d1",
+  "object": "chat.completion",
+  "created": 1795076632,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.plugins.base import ConverterPlugin, BasePlugin\n\n\nclass DummyConverter(ConverterPlugin):\n    \"\"\"Concrete implementation for testing purposes.\"\"\"\n\n    def convert(self, body: bytes) -> tuple[str, str]:\n        # Simple echo converter\n        return (\"text/plain\", body.decode(\"utf-8\"))\n\n    @classmethod\n    def supports(cls, mime: str) -> bool:\n        return mime == \"text/plain\"\n\n\ndef test_converter_initialization_and_attributes():\n    \"\"\"Test that the plugin stores the MIME type correctly.\"\"\"\n    plugin = DummyConverter(\"text/plain\")\n    assert isinstance(plugin, DummyConverter)\n    assert plugin.mime == \"text/plain\"\n    # BasePlugin attributes should be present (even if None)\n    assert hasattr(plugin, \"name\")\n    assert hasattr(plugin, \"description\")\n    assert hasattr(plugin, \"package_name\")\n\n\ndef test_converter_supports_method():\n    \"\"\"Test the supports classmethod returns correct boolean.\"\"\"\n    assert DummyConverter.supports(\"text/plain\") is True\n    assert DummyConverter.supports(\"application/json\") is False\n    # Ensure it is a classmethod, not instance method\n    assert DummyConverter.supports.__func__ is DummyConverter.supports.__func__\n\n\ndef test_converter_convert_raises_on_base_and_works_on_dummy():\n    \"\"\"Test that the base class raises NotImplementedError and the dummy works.\"\"\"\n    base_plugin = ConverterPlugin(\"application/octet-stream\")\n    with pytest.raises(NotImplementedError):\n        base_plugin.convert(b\"data\")\n\n    dummy = DummyConverter(\"text/plain\")\n    result_type, result_content = dummy.convert(b\"hello\")\n    assert result_type == \"text/plain\"\n    assert result_content == \"hello\"\n```",
+        "reasoning": "We need to test ConverterPlugin. It has abstract methods. We can subclass to test behavior. Write tests for init, supports, convert raising NotImplemented. Use tmp_path? not needed. Provide three tests: init sets mime, supports returns False for unknown, convert raises. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053078193,
+    "prompt_tokens": 496,
+    "prompt_time": 0.024754716,
+    "completion_tokens": 416,
+    "completion_time": 0.483228229,
+    "total_tokens": 912,
+    "total_time": 0.507982945,
+    "completion_tokens_details": {
+      "reasoning_tokens": 60
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sefbb0eh9b7xb8bzh8h9ej",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.plugins.base import ConverterPlugin, BasePlugin\n\n\nclass DummyConverter(ConverterPlugin):\n    \"\"\"Concrete implementation for testing purposes.\"\"\"\n\n    def convert(self, body: bytes) -> tuple[str, str]:\n        # Simple echo converter\n        return (\"text/plain\", body.decode(\"utf-8\"))\n\n    @classmethod\n    def supports(cls, mime: str) -> bool:\n        return mime == \"text/plain\"\n\n\ndef test_converter_initialization_and_attributes():\n    \"\"\"Test that the plugin stores the MIME type correctly.\"\"\"\n    plugin = DummyConverter(\"text/plain\")\n    assert isinstance(plugin, DummyConverter)\n    assert plugin.mime == \"text/plain\"\n    # BasePlugin attributes should be present (even if None)\n    assert hasattr(plugin, \"name\")\n    assert hasattr(plugin, \"description\")\n    assert hasattr(plugin, \"package_name\")\n\n\ndef test_converter_supports_method():\n    \"\"\"Test the supports classmethod returns correct boolean.\"\"\"\n    assert DummyConverter.supports(\"text/plain\") is True\n    assert DummyConverter.supports(\"application/json\") is False\n    # Ensure it is a classmethod, not instance method\n    assert DummyConverter.supports.__func__ is DummyConverter.supports.__func__\n\n\ndef test_converter_convert_raises_on_base_and_works_on_dummy():\n    \"\"\"Test that the base class raises NotImplementedError and the dummy works.\"\"\"\n    base_plugin = ConverterPlugin(\"application/octet-stream\")\n    with pytest.raises(NotImplementedError):\n        base_plugin.convert(b\"data\")\n\n    dummy = DummyConverter(\"text/plain\")\n    result_type, result_content = dummy.convert(b\"hello\")\n    assert result_type == \"text/plain\"\n    assert result_content == \"hello\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8618282490060665
+}

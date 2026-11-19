@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-b027c24a-9ef7-4b21-a9e6-b1cb181d2c09",
+  "object": "chat.completion",
+  "created": 1795078370,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport types\nimport pytest\nfrom flutils.decorators import cached_property\n\n\nclass Simple:\n    def __init__(self):\n        self.counter = 0\n\n    @cached_property\n    def value(self):\n        self.counter += 1\n        return self.counter\n\n\nclass AsyncExample:\n    def __init__(self):\n        self.calls = 0\n\n    @cached_property\n    async def async_value(self):\n        self.calls += 1\n        await asyncio.sleep(0.01)\n        return self.calls\n\n\ndef test_cached_property_evaluates_once_and_can_be_reset():\n    obj = Simple()\n    # First access computes the value and increments counter\n    assert obj.value == 1\n    assert obj.counter == 1\n    # Subsequent access returns cached value without recomputation\n    assert obj.value == 1\n    assert obj.counter == 1\n    # Deleting the attribute forces recomputation\n    del obj.value\n    assert obj.value == 2\n    assert obj.counter == 2\n\n\n@pytest.mark.asyncio\nasync def test_cached_property_with_coroutine():\n    obj = AsyncExample()\n    # First await triggers coroutine execution and caching\n    result = await obj.async_value\n    assert result == 1\n    assert obj.calls == 1\n    # Subsequent await returns cached future result\n    result2 = await obj.async_value\n    assert result2 == 1\n    assert obj.calls == 1\n    # Deleting the attribute resets the cached future\n    del obj.async_value\n    result3 = await obj.async_value\n    assert result3 == 2\n    assert obj.calls == 2\n\n\ndef test_cached_property_is_descriptor_on_class():\n    # The descriptor should be accessible via the class\n    assert isinstance(Simple.value, cached_property)\n    # Accessing via the class returns the descriptor itself\n    assert Simple.value is Simple.__dict__['value']\n    # Accessing via an instance returns the cached value\n    instance = Simple()\n    assert instance.value == 1\n    # The descriptor is not stored in the instance dict after first access\n    assert 'value' not in instance.__dict__\n```",
+        "reasoning": "We need 3 test functions for cached_property. Test normal sync property, deletion resets, and coroutine property. Use tmp_path? not needed. Just simple."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.308151232,
+    "prompt_tokens": 738,
+    "prompt_time": 0.057468234,
+    "completion_tokens": 491,
+    "completion_time": 0.566177448,
+    "total_tokens": 1229,
+    "total_time": 0.623645682,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 33
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg4cbde4trry0m67j00zf5",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport types\nimport pytest\nfrom flutils.decorators import cached_property\n\n\nclass Simple:\n    def __init__(self):\n        self.counter = 0\n\n    @cached_property\n    def value(self):\n        self.counter += 1\n        return self.counter\n\n\nclass AsyncExample:\n    def __init__(self):\n        self.calls = 0\n\n    @cached_property\n    async def async_value(self):\n        self.calls += 1\n        await asyncio.sleep(0.01)\n        return self.calls\n\n\ndef test_cached_property_evaluates_once_and_can_be_reset():\n    obj = Simple()\n    # First access computes the value and increments counter\n    assert obj.value == 1\n    assert obj.counter == 1\n    # Subsequent access returns cached value without recomputation\n    assert obj.value == 1\n    assert obj.counter == 1\n    # Deleting the attribute forces recomputation\n    del obj.value\n    assert obj.value == 2\n    assert obj.counter == 2\n\n\n@pytest.mark.asyncio\nasync def test_cached_property_with_coroutine():\n    obj = AsyncExample()\n    # First await triggers coroutine execution and caching\n    result = await obj.async_value\n    assert result == 1\n    assert obj.calls == 1\n    # Subsequent await returns cached future result\n    result2 = await obj.async_value\n    assert result2 == 1\n    assert obj.calls == 1\n    # Deleting the attribute resets the cached future\n    del obj.async_value\n    result3 = await obj.async_value\n    assert result3 == 2\n    assert obj.calls == 2\n\n\ndef test_cached_property_is_descriptor_on_class():\n    # The descriptor should be accessible via the class\n    assert isinstance(Simple.value, cached_property)\n    # Accessing via the class returns the descriptor itself\n    assert Simple.value is Simple.__dict__['value']\n    # Accessing via an instance returns the cached value\n    instance = Simple()\n    assert instance.value == 1\n    # The descriptor is not stored in the instance dict after first access\n    assert 'value' not in instance.__dict__\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2882189630181529
+}

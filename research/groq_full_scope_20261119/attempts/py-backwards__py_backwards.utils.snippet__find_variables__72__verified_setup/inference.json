@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-97443cff-94c9-4bdd-a17c-742c281bbe8f",
+  "object": "chat.completion",
+  "created": 1795077971,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\n\nfrom py_backwards.utils.snippet import find_variables\nfrom py_backwards.utils.tree import replace_at, get_non_exp_parent_and_index\n\ndef parse_source(source: str) -> ast.Module:\n    \"\"\"Parse source code into a typed_ast Module.\"\"\"\n    return ast.parse(source)\n\ndef get_source_code(tree: ast.Module) -> str:\n    \"\"\"Return the source code of the AST (for debugging).\"\"\"\n    return ast.unparse(tree) if hasattr(ast, \"unparse\") else None\n\ndef test_find_variables_removes_let_and_yields_name(tmp_path):\n    source = \"\"\"\ndef foo():\n    let(x, 10)\n    y = x + 5\n    print(y)\n\"\"\"\n    tree = parse_source(source)\n    vars_found = list(find_variables(tree))\n    assert vars_found == [\"x\"]\n    # After removal, the body of foo should not contain the let call\n    func_def = tree.body[0]\n    assert isinstance(func_def, ast.FunctionDef)\n    # The first statement should now be the assignment to y\n    first_stmt = func_def.body[0]\n    assert isinstance(first_stmt, ast.Assign)\n    assert isinstance(first_stmt.targets[0], ast.Name)\n    assert first_stmt.targets[0].id == \"y\"\n\ndef test_find_variables_multiple_lets_and_other_calls(tmp_path):\n    source = \"\"\"\ndef bar():\n    let(a, 1)\n    let(b, 2)\n    z = a + b\n    print(z)\n    let(c, 3)\n\"\"\"\n    tree = parse_source(source)\n    vars_found = list(find_variables(tree))\n    assert vars_found == [\"a\", \"b\", \"c\"]\n    func_def = tree.body[0]\n    # After removal, there should be no Call nodes with func.id == 'let'\n    for node in ast.walk(func_def):\n        if isinstance(node, ast.Call):\n            assert not (isinstance(node.func, ast.Name) and node.func.id == 'let')\n\ndef test_find_variables_no_let_calls(tmp_path):\n    source = \"\"\"\ndef baz():\n    x = 5\n    y = x * 2\n    print(y)\n\"\"\"\n    tree = parse_source(source)\n    vars_found = list(find_variables(tree))\n    assert vars_found == []\n    # Tree should remain unchanged\n    func_def = tree.body[0]\n    assert isinstance(func_def, ast.FunctionDef)\n    assert len(func_def.body) == 3\n    assert isinstance(func_def.body[0], ast.Assign)\n    assert isinstance(func_def.body[1], ast.Assign)\n    assert isinstance(func_def.body[2], ast.Expr)\n```",
+        "reasoning": "We need tests for find_variables. We need to create AST from source using typed_ast? Use get_source? Probably use ast.parse from typed_ast? Let's import typed_ast.ast3 as ast. Use ast.parse. Then call find_variables. Ensure it yields variable names and removes let calls. Test normal: code with let(x, ...) and other calls. After calling, tree should have let removed. Use get_source to get source? But we can inspect tree.body. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052064026,
+    "prompt_tokens": 360,
+    "prompt_time": 0.027052653,
+    "completion_tokens": 665,
+    "completion_time": 0.761453329,
+    "total_tokens": 1025,
+    "total_time": 0.788505982,
+    "completion_tokens_details": {
+      "reasoning_tokens": 98
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfr6exe1m9jcna049kzzj6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\n\nfrom py_backwards.utils.snippet import find_variables\nfrom py_backwards.utils.tree import replace_at, get_non_exp_parent_and_index\n\ndef parse_source(source: str) -> ast.Module:\n    \"\"\"Parse source code into a typed_ast Module.\"\"\"\n    return ast.parse(source)\n\ndef get_source_code(tree: ast.Module) -> str:\n    \"\"\"Return the source code of the AST (for debugging).\"\"\"\n    return ast.unparse(tree) if hasattr(ast, \"unparse\") else None\n\ndef test_find_variables_removes_let_and_yields_name(tmp_path):\n    source = \"\"\"\ndef foo():\n    let(x, 10)\n    y = x + 5\n    print(y)\n\"\"\"\n    tree = parse_source(source)\n    vars_found = list(find_variables(tree))\n    assert vars_found == [\"x\"]\n    # After removal, the body of foo should not contain the let call\n    func_def = tree.body[0]\n    assert isinstance(func_def, ast.FunctionDef)\n    # The first statement should now be the assignment to y\n    first_stmt = func_def.body[0]\n    assert isinstance(first_stmt, ast.Assign)\n    assert isinstance(first_stmt.targets[0], ast.Name)\n    assert first_stmt.targets[0].id == \"y\"\n\ndef test_find_variables_multiple_lets_and_other_calls(tmp_path):\n    source = \"\"\"\ndef bar():\n    let(a, 1)\n    let(b, 2)\n    z = a + b\n    print(z)\n    let(c, 3)\n\"\"\"\n    tree = parse_source(source)\n    vars_found = list(find_variables(tree))\n    assert vars_found == [\"a\", \"b\", \"c\"]\n    func_def = tree.body[0]\n    # After removal, there should be no Call nodes with func.id == 'let'\n    for node in ast.walk(func_def):\n        if isinstance(node, ast.Call):\n            assert not (isinstance(node.func, ast.Name) and node.func.id == 'let')\n\ndef test_find_variables_no_let_calls(tmp_path):\n    source = \"\"\"\ndef baz():\n    x = 5\n    y = x * 2\n    print(y)\n\"\"\"\n    tree = parse_source(source)\n    vars_found = list(find_variables(tree))\n    assert vars_found == []\n    # Tree should remain unchanged\n    func_def = tree.body[0]\n    assert isinstance(func_def, ast.FunctionDef)\n    assert len(func_def.body) == 3\n    assert isinstance(func_def.body[0], ast.Assign)\n    assert isinstance(func_def.body[1], ast.Assign)\n    assert isinstance(func_def.body[2], ast.Expr)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1816420800168999
+}

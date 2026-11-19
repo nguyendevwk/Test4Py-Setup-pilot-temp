@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b02324ed-996e-496b-bcff-5bc107132076",
+  "object": "chat.completion",
+  "created": 1795078281,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport requests\nfrom httpie.client import transform_headers, apply_missing_repeated_headers\nfrom httpie.cli.dicts import HTTPHeadersDict\nfrom httpie.cli.constants import HTTP_OPTIONS\n\n# Helper to prepare a request\ndef _prepare(request: requests.Request) -> requests.PreparedRequest:\n    session = requests.Session()\n    return session.prepare_request(request)\n\ndef test_content_length_removal():\n    \"\"\"When a GET request has a misplaced Content-Length of 0, it should be removed.\"\"\"\n    req = requests.Request(\n        method=\"GET\",\n        url=\"http://example.com\",\n        headers={\"Content-Length\": \"123\"},\n    )\n    prepared = _prepare(req)\n    # Simulate requests inserting a 0 Content-Length for GET\n    prepared.headers[\"Content-Length\"] = \"0\"\n    transform_headers(req, prepared)\n    assert \"Content-Length\" not in prepared.headers\n\ndef test_missing_repeated_headers_preserve_original():\n    \"\"\"Headers that appear multiple times should keep all original values.\"\"\"\n    original = HTTPHeadersDict(\n        [\n            (\"X-Token\", \"first\"),\n            (\"X-Token\", \"second\"),\n            (\"X-Other\", \"value\"),\n        ]\n    )\n    req = requests.Request(\n        method=\"POST\",\n        url=\"http://example.com\",\n        headers=original,\n    )\n    prepared = _prepare(req)\n    # Simulate a header override by requests\n    prepared.headers[\"X-Token\"] = \"override\"\n    apply_missing_repeated_headers(original, prepared)\n    # All original X-Token values should be present\n    assert prepared.headers.get_all(\"X-Token\") == [\"first\", \"second\"]\n    # X-Other should remain unchanged\n    assert prepared.headers[\"X-Other\"] == \"value\"\n\ndef test_apply_missing_repeated_headers_no_change_when_no_override():\n    \"\"\"If requests does not override any header, the prepared headers stay the same.\"\"\"\n    original = HTTPHeadersDict([(\"Accept\", \"application/json\")])\n    req = requests.Request(\n        method=\"GET\",\n        url=\"http://example.com\",\n        headers=original,\n    )\n    prepared = _prepare(req)\n    # No override occurs\n    apply_missing_repeated_headers(original, prepared)\n    assert prepared.headers[\"Accept\"] == \"application/json\"\n```",
+        "reasoning": "Need tests for transform_headers and apply_missing_repeated_headers. Use requests.Request and PreparedRequest. Create request with headers, prepare via session. Use get_httpie_session? but can use requests.Session. Just test logic. Three tests: normal header preservation, content-length removal, repeated header merging."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053485324,
+    "prompt_tokens": 807,
+    "prompt_time": 0.043878886,
+    "completion_tokens": 539,
+    "completion_time": 0.588573748,
+    "total_tokens": 1346,
+    "total_time": 0.632452634,
+    "completion_tokens_details": {
+      "reasoning_tokens": 60
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg1p0ke57a1asc832q7p19",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport requests\nfrom httpie.client import transform_headers, apply_missing_repeated_headers\nfrom httpie.cli.dicts import HTTPHeadersDict\nfrom httpie.cli.constants import HTTP_OPTIONS\n\n# Helper to prepare a request\ndef _prepare(request: requests.Request) -> requests.PreparedRequest:\n    session = requests.Session()\n    return session.prepare_request(request)\n\ndef test_content_length_removal():\n    \"\"\"When a GET request has a misplaced Content-Length of 0, it should be removed.\"\"\"\n    req = requests.Request(\n        method=\"GET\",\n        url=\"http://example.com\",\n        headers={\"Content-Length\": \"123\"},\n    )\n    prepared = _prepare(req)\n    # Simulate requests inserting a 0 Content-Length for GET\n    prepared.headers[\"Content-Length\"] = \"0\"\n    transform_headers(req, prepared)\n    assert \"Content-Length\" not in prepared.headers\n\ndef test_missing_repeated_headers_preserve_original():\n    \"\"\"Headers that appear multiple times should keep all original values.\"\"\"\n    original = HTTPHeadersDict(\n        [\n            (\"X-Token\", \"first\"),\n            (\"X-Token\", \"second\"),\n            (\"X-Other\", \"value\"),\n        ]\n    )\n    req = requests.Request(\n        method=\"POST\",\n        url=\"http://example.com\",\n        headers=original,\n    )\n    prepared = _prepare(req)\n    # Simulate a header override by requests\n    prepared.headers[\"X-Token\"] = \"override\"\n    apply_missing_repeated_headers(original, prepared)\n    # All original X-Token values should be present\n    assert prepared.headers.get_all(\"X-Token\") == [\"first\", \"second\"]\n    # X-Other should remain unchanged\n    assert prepared.headers[\"X-Other\"] == \"value\"\n\ndef test_apply_missing_repeated_headers_no_change_when_no_override():\n    \"\"\"If requests does not override any header, the prepared headers stay the same.\"\"\"\n    original = HTTPHeadersDict([(\"Accept\", \"application/json\")])\n    req = requests.Request(\n        method=\"GET\",\n        url=\"http://example.com\",\n        headers=original,\n    )\n    prepared = _prepare(req)\n    # No override occurs\n    apply_missing_repeated_headers(original, prepared)\n    assert prepared.headers[\"Accept\"] == \"application/json\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.002532374986913
+}

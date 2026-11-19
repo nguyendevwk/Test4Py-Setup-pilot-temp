@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-02591779-cd0c-4de7-921c-d89306091b2b",
+  "object": "chat.completion",
+  "created": 1795076492,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom mimesis.schema import Field\nfrom mimesis.exceptions import FieldNameError, FieldError\nfrom mimesis.keys import _call_key_func\nfrom mimesis.types import Key\n\n\ndef test_field_generates_value_for_valid_name(tmp_path):\n    \"\"\"Field should return a non‑empty string for a known provider name.\"\"\"\n    field = Field()\n    # Use a provider that is guaranteed to exist in the default locale\n    value = field(\"username\")\n    assert isinstance(value, str)\n    assert value != \"\"  # non‑empty\n    # The value should be deterministic for the same seed\n    field2 = Field(seed=123)\n    value2 = field2(\"username\")\n    assert isinstance(value2, str)\n    assert value2 != \"\"\n\n\ndef test_field_raises_on_invalid_name():\n    \"\"\"Calling Field with an unknown provider name should raise FieldNameError.\"\"\"\n    field = Field()\n    with pytest.raises(FieldNameError):\n        field(\"nonexistent_provider\")\n\n\ndef test_field_uses_key_function(tmp_path):\n    \"\"\"Field should accept a key function and return its result.\"\"\"\n    field = Field()\n    # Define a key function that returns a fixed value\n    def key_func(provider, name, **kwargs):\n        return f\"fixed-{name}\"\n    result = field(\"email\", key=key_func)\n    assert result == \"fixed-email\"\n    # Ensure that the key function receives the provider instance and name\n    captured = {}\n    def key_func_capture(provider, name, **kwargs):\n        captured[\"provider\"] = provider\n        captured[\"name\"] = name\n        return \"captured\"\n    result2 = field(\"phone\", key=key_func_capture)\n    assert result2 == \"captured\"\n    assert isinstance(captured[\"provider\"], type(field))\n    assert captured[\"name\"] == \"phone\"\n```",
+        "reasoning": "We need to test Field class. We need import. Let's inspect source? But we can assume Field inherits BaseField with perform method. We need to test normal generation, boundary maybe key function, error behavior. Use tmp_path for any file? maybe not needed. We'll create Field instance and call with name. Check type. Also test that passing invalid name raises FieldNameError. Also test that passing key function works. Use _call_key_func? But we can pass key as lambda. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053095868,
+    "prompt_tokens": 627,
+    "prompt_time": 0.042014112,
+    "completion_tokens": 496,
+    "completion_time": 0.528092528,
+    "total_tokens": 1123,
+    "total_time": 0.57010664,
+    "completion_tokens_details": {
+      "reasoning_tokens": 103
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7seb2mseh4vv93x9b8e2kj8",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom mimesis.schema import Field\nfrom mimesis.exceptions import FieldNameError, FieldError\nfrom mimesis.keys import _call_key_func\nfrom mimesis.types import Key\n\n\ndef test_field_generates_value_for_valid_name(tmp_path):\n    \"\"\"Field should return a non‑empty string for a known provider name.\"\"\"\n    field = Field()\n    # Use a provider that is guaranteed to exist in the default locale\n    value = field(\"username\")\n    assert isinstance(value, str)\n    assert value != \"\"  # non‑empty\n    # The value should be deterministic for the same seed\n    field2 = Field(seed=123)\n    value2 = field2(\"username\")\n    assert isinstance(value2, str)\n    assert value2 != \"\"\n\n\ndef test_field_raises_on_invalid_name():\n    \"\"\"Calling Field with an unknown provider name should raise FieldNameError.\"\"\"\n    field = Field()\n    with pytest.raises(FieldNameError):\n        field(\"nonexistent_provider\")\n\n\ndef test_field_uses_key_function(tmp_path):\n    \"\"\"Field should accept a key function and return its result.\"\"\"\n    field = Field()\n    # Define a key function that returns a fixed value\n    def key_func(provider, name, **kwargs):\n        return f\"fixed-{name}\"\n    result = field(\"email\", key=key_func)\n    assert result == \"fixed-email\"\n    # Ensure that the key function receives the provider instance and name\n    captured = {}\n    def key_func_capture(provider, name, **kwargs):\n        captured[\"provider\"] = provider\n        captured[\"name\"] = name\n        return \"captured\"\n    result2 = field(\"phone\", key=key_func_capture)\n    assert result2 == \"captured\"\n    assert isinstance(captured[\"provider\"], type(field))\n    assert captured[\"name\"] == \"phone\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9109011760447174
+}

@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-20687618-327b-478c-80d2-aee584463a26",
+  "object": "chat.completion",
+  "created": 1795079596,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport socket\nimport time\nimport datetime\nimport ssl\nimport pytest\nfrom tornado.tcpclient import TCPClient\nfrom tornado.iostream import IOStream\nfrom tornado.ioloop import IOLoop\nfrom tornado.gen import TimeoutError\n\n@pytest.mark.asyncio\nasync def test_connect_success(tmp_path):\n    \"\"\"TCPClient should successfully connect to a local echo server.\"\"\"\n    # Start a simple echo server on an available port\n    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server_sock.bind((\"127.0.0.1\", 0))\n    server_sock.listen(1)\n    host, port = server_sock.getsockname()\n\n    async def server_loop():\n        conn, _ = server_sock.accept()\n        with conn:\n            data = conn.recv(1024)\n            conn.sendall(data)\n\n    # Run the server in a background thread\n    loop = IOLoop.current()\n    server_future = loop.run_in_executor(None, server_loop)\n\n    client = TCPClient()\n    stream = await client.connect(host, port, timeout=5)\n    assert isinstance(stream, IOStream)\n\n    test_msg = b\"hello\"\n    stream.write(test_msg)\n    await stream.read_bytes(len(test_msg))\n    # The server echoes back the same data\n    stream.close()\n    server_sock.close()\n    await server_future\n\n@pytest.mark.asyncio\nasync def test_connect_timeout(tmp_path):\n    \"\"\"TCPClient should raise TimeoutError when the connection times out.\"\"\"\n    # Use an IP that is unlikely to be reachable\n    unreachable_host = \"10.255.255.1\"\n    port = 12345\n    client = TCPClient()\n    with pytest.raises(TimeoutError):\n        await client.connect(unreachable_host, port, timeout=0.1)\n\n@pytest.mark.asyncio\nasync def test_source_ip_binding_error(tmp_path):\n    \"\"\"TCPClient should raise OSError when binding to an invalid source IP.\"\"\"\n    # Start a dummy server to accept connections\n    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server_sock.bind((\"127.0.0.1\", 0))\n    server_sock.listen(1)\n    host, port = server_sock.getsockname()\n\n    async def server_loop():\n        conn, _ = server_sock.accept()\n        with conn:\n            conn.recv(1024)\n\n    loop = IOLoop.current()\n    server_future = loop.run_in_executor(None, server_loop)\n\n    client = TCPClient()\n    # Use an invalid source IP that cannot be bound\n    with pytest.raises(OSError):\n        await client.connect(host, port, source_ip=\"256.256.256.256\", timeout=5)\n\n    server_sock.close()\n    await server_future\n```",
+        "reasoning": "We need to test TCPClient.connect behavior. But actual network connections may fail. We can use a local server. Use asyncio loop? Tornado IOLoop. We'll create a simple TCP server using socket listening on localhost. Then test connect returns IOStream. Also test timeout error by connecting to unreachable host with short timeout. Also test source_ip binding error? maybe binding to invalid port. We'll use tmp_path for server socket? Use socket. Use IOLoop.current().start? In tests, use asyncio event loop? Tornado's IOLoop can run. Use IOLoop.current().run_sync? We'll write async test functions with pytest.mark.asyncio. Use IOLoop.current().run_sync to run connect. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005280788,
+    "prompt_tokens": 1474,
+    "prompt_time": 0.091900998,
+    "completion_tokens": 723,
+    "completion_time": 0.781505391,
+    "total_tokens": 2197,
+    "total_time": 0.873406389,
+    "completion_tokens_details": {
+      "reasoning_tokens": 150
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh9sp2etw9k785jhg2fbye",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport socket\nimport time\nimport datetime\nimport ssl\nimport pytest\nfrom tornado.tcpclient import TCPClient\nfrom tornado.iostream import IOStream\nfrom tornado.ioloop import IOLoop\nfrom tornado.gen import TimeoutError\n\n@pytest.mark.asyncio\nasync def test_connect_success(tmp_path):\n    \"\"\"TCPClient should successfully connect to a local echo server.\"\"\"\n    # Start a simple echo server on an available port\n    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server_sock.bind((\"127.0.0.1\", 0))\n    server_sock.listen(1)\n    host, port = server_sock.getsockname()\n\n    async def server_loop():\n        conn, _ = server_sock.accept()\n        with conn:\n            data = conn.recv(1024)\n            conn.sendall(data)\n\n    # Run the server in a background thread\n    loop = IOLoop.current()\n    server_future = loop.run_in_executor(None, server_loop)\n\n    client = TCPClient()\n    stream = await client.connect(host, port, timeout=5)\n    assert isinstance(stream, IOStream)\n\n    test_msg = b\"hello\"\n    stream.write(test_msg)\n    await stream.read_bytes(len(test_msg))\n    # The server echoes back the same data\n    stream.close()\n    server_sock.close()\n    await server_future\n\n@pytest.mark.asyncio\nasync def test_connect_timeout(tmp_path):\n    \"\"\"TCPClient should raise TimeoutError when the connection times out.\"\"\"\n    # Use an IP that is unlikely to be reachable\n    unreachable_host = \"10.255.255.1\"\n    port = 12345\n    client = TCPClient()\n    with pytest.raises(TimeoutError):\n        await client.connect(unreachable_host, port, timeout=0.1)\n\n@pytest.mark.asyncio\nasync def test_source_ip_binding_error(tmp_path):\n    \"\"\"TCPClient should raise OSError when binding to an invalid source IP.\"\"\"\n    # Start a dummy server to accept connections\n    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server_sock.bind((\"127.0.0.1\", 0))\n    server_sock.listen(1)\n    host, port = server_sock.getsockname()\n\n    async def server_loop():\n        conn, _ = server_sock.accept()\n        with conn:\n            conn.recv(1024)\n\n    loop = IOLoop.current()\n    server_future = loop.run_in_executor(None, server_loop)\n\n    client = TCPClient()\n    # Use an invalid source IP that cannot be bound\n    with pytest.raises(OSError):\n        await client.connect(host, port, source_ip=\"256.256.256.256\", timeout=5)\n\n    server_sock.close()\n    await server_future\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "9d026c1d81044e83b7b4026748bf5b2a",
+  "_api_plus_pacing_seconds": 1.8676199069595896
+}

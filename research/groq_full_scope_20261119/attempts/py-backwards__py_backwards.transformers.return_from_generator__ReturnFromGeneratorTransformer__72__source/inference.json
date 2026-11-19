@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-3e99ca21-d854-48e3-83cd-8e7c34f6043b",
+  "object": "chat.completion",
+  "created": 1795078477,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.transformers.return_from_generator import ReturnFromGeneratorTransformer\n\ndef _parse_and_transform(code: str) -> ast.FunctionDef:\n    \"\"\"Parse the code into a FunctionDef node and apply the transformer.\"\"\"\n    module = ast.parse(code)\n    # The module body should contain a single FunctionDef\n    func = module.body[0]\n    transformer = ReturnFromGeneratorTransformer()\n    transformer.visit(module)\n    return func\n\ndef test_generator_return_replaced_with_raise():\n    code = \"\"\"\ndef gen():\n    yield 1\n    return 5\n\"\"\"\n    func = _parse_and_transform(code)\n    # After transformation, the last statement should be a Raise\n    last_stmt = func.body[-1]\n    assert isinstance(last_stmt, ast.Raise)\n    # The exception should be a Call to StopIteration\n    exc = last_stmt.exc\n    assert isinstance(exc, ast.Call)\n    assert isinstance(exc.func, ast.Name)\n    assert exc.func.id == \"StopIteration\"\n    # The exception should have an attribute assignment for value\n    # The body should contain an Assign before the Raise\n    assign = func.body[-2]\n    assert isinstance(assign, ast.Assign)\n    assert isinstance(assign.targets[0], ast.Attribute)\n    assert assign.targets[0].attr == \"value\"\n    # The assigned value should be the original return value\n    assert isinstance(assign.value, ast.Constant)\n    assert assign.value.value == 5\n\ndef test_non_generator_function_unchanged():\n    code = \"\"\"\ndef foo():\n    x = 1\n    return x\n\"\"\"\n    func = _parse_and_transform(code)\n    # The function body should remain unchanged\n    assert len(func.body) == 2\n    assert isinstance(func.body[0], ast.Assign)\n    assert isinstance(func.body[1], ast.Return)\n    assert func.body[1].value.value == 1\n\ndef test_return_without_value_is_ignored():\n    code = \"\"\"\ndef gen():\n    yield 1\n    return\n\"\"\"\n    func = _parse_and_transform(code)\n    # The return without value should remain unchanged\n    assert any(isinstance(stmt, ast.Return) for stmt in func.body)\n    # No Raise should be present\n    assert not any(isinstance(stmt, ast.Raise) for stmt in func.body)\n```",
+        "reasoning": "We need to test ReturnFromGeneratorTransformer. We need to import it. Use typed_ast ast3. We'll create code string, parse to ast, apply transformer, then unparse? We can use astor or typed_ast's unparse? Probably use typed_ast's ast3.unparse? Let's check. But we can compare transformed AST nodes. Simpler: check that return replaced by raise StopIteration with value. We can inspect parent.body after transformation. Write tests: normal generator with return, boundary: function without yield should not change, error: return without value? But transformer only handles return with value. Let's test that return without value is ignored. Use tmp_path? Not needed. Just create AST. Use typed_ast.parse? typed_ast has parse? Use typed_ast.ast3.parse? We'll import typed_ast.ast3 as ast. Use ast.parse? typed_ast.ast3.parse exists. We'll use ast.parse. Then apply transformer. Then check node.body. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053398928,
+    "prompt_tokens": 701,
+    "prompt_time": 0.041339891,
+    "completion_tokens": 700,
+    "completion_time": 0.79330897,
+    "total_tokens": 1401,
+    "total_time": 0.834648861,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 199
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg7mjre2v8xtptdh74pgxz",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.transformers.return_from_generator import ReturnFromGeneratorTransformer\n\ndef _parse_and_transform(code: str) -> ast.FunctionDef:\n    \"\"\"Parse the code into a FunctionDef node and apply the transformer.\"\"\"\n    module = ast.parse(code)\n    # The module body should contain a single FunctionDef\n    func = module.body[0]\n    transformer = ReturnFromGeneratorTransformer()\n    transformer.visit(module)\n    return func\n\ndef test_generator_return_replaced_with_raise():\n    code = \"\"\"\ndef gen():\n    yield 1\n    return 5\n\"\"\"\n    func = _parse_and_transform(code)\n    # After transformation, the last statement should be a Raise\n    last_stmt = func.body[-1]\n    assert isinstance(last_stmt, ast.Raise)\n    # The exception should be a Call to StopIteration\n    exc = last_stmt.exc\n    assert isinstance(exc, ast.Call)\n    assert isinstance(exc.func, ast.Name)\n    assert exc.func.id == \"StopIteration\"\n    # The exception should have an attribute assignment for value\n    # The body should contain an Assign before the Raise\n    assign = func.body[-2]\n    assert isinstance(assign, ast.Assign)\n    assert isinstance(assign.targets[0], ast.Attribute)\n    assert assign.targets[0].attr == \"value\"\n    # The assigned value should be the original return value\n    assert isinstance(assign.value, ast.Constant)\n    assert assign.value.value == 5\n\ndef test_non_generator_function_unchanged():\n    code = \"\"\"\ndef foo():\n    x = 1\n    return x\n\"\"\"\n    func = _parse_and_transform(code)\n    # The function body should remain unchanged\n    assert len(func.body) == 2\n    assert isinstance(func.body[0], ast.Assign)\n    assert isinstance(func.body[1], ast.Return)\n    assert func.body[1].value.value == 1\n\ndef test_return_without_value_is_ignored():\n    code = \"\"\"\ndef gen():\n    yield 1\n    return\n\"\"\"\n    func = _parse_and_transform(code)\n    # The return without value should remain unchanged\n    assert any(isinstance(stmt, ast.Return) for stmt in func.body)\n    # No Raise should be present\n    assert not any(isinstance(stmt, ast.Raise) for stmt in func.body)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2358217309811153
+}

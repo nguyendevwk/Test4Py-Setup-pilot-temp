@@ -1,0 +1,96 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_snippet_replaces_variables_correctly ___________________
+
+    def test_snippet_replaces_variables_correctly():
+        # Define a simple function that uses a variable placeholder
+        def func():
+            x = 1
+            y = 2
+            return x + y
+    
+        # Wrap the function in a snippet
+        snip = snippet(func)
+    
+        # Call get_body with a custom value for 'x'
+>       body = snip.get_body(x=10)
+
+test_generated.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py:128: in get_body
+    VariablesReplacer.replace(tree, variables)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py:89: in replace
+    inst.visit(tree)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:279: in visit
+    return visitor(node)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:334: in generic_visit
+    value = self.visit(value)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:279: in visit
+    return visitor(node)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py:44: in visit_FunctionDef
+    return self.generic_visit(node)  # type: ignore
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:334: in generic_visit
+    value = self.visit(value)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:279: in visit
+    return visitor(node)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:334: in generic_visit
+    value = self.visit(value)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:279: in visit
+    return visitor(node)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py:40: in visit_Name
+    return self.generic_visit(node)  # type: ignore
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:329: in generic_visit
+    for field, old_value in iter_fields(node):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = 10
+
+    def iter_fields(node):
+        """
+        Yield a tuple of ``(fieldname, value)`` for each field in ``node._fields``
+        that is present on *node*.
+        """
+>       for field in node._fields:
+E       AttributeError: 'int' object has no attribute '_fields'
+
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:197: AttributeError
+__________________ test_snippet_accepts_ast_name_as_variable ___________________
+
+    def test_snippet_accepts_ast_name_as_variable():
+        # Function that uses a variable placeholder
+        def func():
+            return a + b
+    
+        snip = snippet(func)
+    
+        # Pass an ast.Name instance for 'a'
+        name_a = ast.Name(id="alpha", ctx=ast.Load())
+        body = snip.get_body(a=name_a)
+    
+        # The return statement should use 'alpha' instead of 'a'
+        ret = body[0]
+>       assert isinstance(ret, ast.Return)
+E       AssertionError: assert False
+E        +  where False = isinstance(<typed_ast._ast3.Return object at 0x7f627da4f7f0>, <class 'ast.Return'>)
+E        +    where <class 'ast.Return'> = ast.Return
+
+test_generated.py:60: AssertionError
+___________________ test_snippet_raises_on_missing_variable ____________________
+
+    def test_snippet_raises_on_missing_variable():
+        # Function that references a variable not provided
+        def func():
+            return x + 1
+    
+        snip = snippet(func)
+    
+        # Calling get_body without providing 'x' should raise a KeyError
+>       with pytest.raises(KeyError):
+E       Failed: DID NOT RAISE KeyError
+
+test_generated.py:76: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_snippet_replaces_variables_correctly - Attribu...
+FAILED test_generated.py::test_snippet_accepts_ast_name_as_variable - Asserti...
+FAILED test_generated.py::test_snippet_raises_on_missing_variable - Failed: D...
+3 failed in 0.19s

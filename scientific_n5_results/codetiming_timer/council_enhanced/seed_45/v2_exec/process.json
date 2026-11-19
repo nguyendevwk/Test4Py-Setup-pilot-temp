@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/home/heurix/.cache/uv/builds-v0/.tmpNv9p8s/bin/python3",
+    "-m",
+    "coverage",
+    "run",
+    "--branch",
+    "--source=codetiming._timer",
+    "-m",
+    "pytest",
+    "-q",
+    "-o",
+    "addopts=",
+    "--confcutdir=/home/heurix/Documents/Test4Py_Setup/scientific_n5_results/codetiming_timer/council_enhanced/seed_45/v2_exec",
+    "-p",
+    "pytest_jsonreport.plugin",
+    "--json-report",
+    "--json-report-file=/home/heurix/Documents/Test4Py_Setup/scientific_n5_results/codetiming_timer/council_enhanced/seed_45/v2_exec/pytest_report.json",
+    "/home/heurix/Documents/Test4Py_Setup/scientific_n5_results/codetiming_timer/council_enhanced/seed_45/v2_exec/test_run.py"
+  ],
+  "returncode": 1,
+  "stdout": "F                                                                        [100%]\n=================================== FAILURES ===================================\n________________________ test_timer_start_stop_behavior ________________________\n\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f663d3a7770>\n\n    def test_timer_start_stop_behavior(monkeypatch):\n        # Ensure a clean state for the shared Timers instance\n        Timer.timers.clear()\n    \n        # Mock perf_counter to produce a deterministic elapsed time of 0.5 seconds\n        counter = iter([100.0, 100.5])\n        monkeypatch.setattr(time, \"perf_counter\", lambda: next(counter))\n    \n        # Capture logger output via a callable that appends to a list\n        logged = []\n    \n        # Create a Timer with a custom initial text and logger\n        t = Timer(\n            name=\"test\",\n            text=\"Elapsed: {:0.4f}s\",\n            initial_text=\"Timer {name} started\",\n            logger=lambda msg: logged.append(msg),\n        )\n    \n        # Start the timer and verify initial log\n        t.start()\n        assert logged[0] == \"Timer test started\"\n    \n        # Stop the timer and verify elapsed time log and return value\n        elapsed = t.stop()\n        assert logged[1] == \"Elapsed: 0.5000s\"\n        assert elapsed == 0.5\n    \n        # Verify that the elapsed time was recorded in the shared Timers instance\n        assert Timer.timers.total(\"test\") == 0.5\n    \n        # Starting an already running timer should raise TimerError\n        with pytest.raises(TimerError):\n>           t.start()\n\n../../scientific_n5_results/codetiming_timer/council_enhanced/seed_45/v2_exec/test_run.py:38: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ncodetiming/_timer.py:69: in start\n    self._start_time = time.perf_counter()\n                       ^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\n>   monkeypatch.setattr(time, \"perf_counter\", lambda: next(counter))\n                                                      ^^^^^^^^^^^^^\nE   StopIteration\n\n../../scientific_n5_results/codetiming_timer/council_enhanced/seed_45/v2_exec/test_run.py:11: StopIteration\n=========================== short test summary info ============================\nFAILED ../../scientific_n5_results/codetiming_timer/council_enhanced/seed_45/v2_exec/test_run.py::test_timer_start_stop_behavior\n1 failed in 0.11s\n",
+  "stderr": "",
+  "timeout": false,
+  "log_path": null,
+  "seconds": 1.8694523329904769
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-ec4a13e0-089b-4c6e-828b-b0e9ef71457f",
+  "object": "chat.completion",
+  "created": 1795078234,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom rich.progress import Progress, TaskID\nfrom tqdm.rich import FractionColumn\n\n\ndef _create_progress_and_task(total: float | None = None) -> tuple[Progress, TaskID]:\n    \"\"\"Helper to create a Progress instance and add a task.\"\"\"\n    progress = Progress()\n    task_id = progress.add_task(\"test\", total=total)\n    return progress, task_id\n\n\ndef test_fraction_column_basic():\n    \"\"\"Test rendering with default settings (no unit scaling).\"\"\"\n    progress, task_id = _create_progress_and_task(total=5)\n    progress.update(task_id, completed=2)\n\n    column = FractionColumn()\n    rendered = column.render(progress.tasks[task_id])\n    # Without scaling, unit is 1 and precision 0\n    assert rendered.plain == \"2/5 \"\n    assert rendered.style == \"progress.download\"\n\n\ndef test_fraction_column_unit_scale():\n    \"\"\"Test rendering with unit scaling enabled.\"\"\"\n    progress, task_id = _create_progress_and_task(total=1500)\n    progress.update(task_id, completed=750)\n\n    column = FractionColumn(unit_scale=True, unit_divisor=1000)\n    rendered = column.render(progress.tasks[task_id])\n    # 1500 bytes -> 1.5K, 750 bytes -> 0.8K (rounded to 1 decimal)\n    assert rendered.plain == \"0.8/1.5 K\"\n    assert rendered.style == \"progress.download\"\n\n\ndef test_fraction_column_no_total():\n    \"\"\"Test rendering when total is unknown (generator-like task).\"\"\"\n    progress, task_id = _create_progress_and_task(total=None)\n    progress.update(task_id, completed=123)\n\n    column = FractionColumn()\n    rendered = column.render(progress.tasks[task_id])\n    # Total is unknown, should display '?' for total\n    assert rendered.plain == \"123/? \"\n    assert rendered.style == \"progress.download\"\n```",
+        "reasoning": "We need tests for FractionColumn. Use tmp_path? Not needed. Just create Progress, add task, update, check render output. Use rich.progress.ProgressColumn. We'll instantiate FractionColumn, create Progress, add task with total, update completed, get render. Use .render(task). It returns Text. We can check .plain. Test unit_scale True and False. Also test when total None. Use pytest.raises? maybe test that unit_divisor negative raises? Not sure. We'll test boundary: completed equals total. Also test when total None. Ensure style. Let's write three tests: test_fraction_column_basic, test_fraction_column_unit_scale, test_fraction_column_no_total."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046191509,
+    "prompt_tokens": 547,
+    "prompt_time": 0.035862709,
+    "completion_tokens": 540,
+    "completion_time": 0.585320564,
+    "total_tokens": 1087,
+    "total_time": 0.621183273,
+    "completion_tokens_details": {
+      "reasoning_tokens": 136
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg07m4ex0vv1qvk2p7h45c",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom rich.progress import Progress, TaskID\nfrom tqdm.rich import FractionColumn\n\n\ndef _create_progress_and_task(total: float | None = None) -> tuple[Progress, TaskID]:\n    \"\"\"Helper to create a Progress instance and add a task.\"\"\"\n    progress = Progress()\n    task_id = progress.add_task(\"test\", total=total)\n    return progress, task_id\n\n\ndef test_fraction_column_basic():\n    \"\"\"Test rendering with default settings (no unit scaling).\"\"\"\n    progress, task_id = _create_progress_and_task(total=5)\n    progress.update(task_id, completed=2)\n\n    column = FractionColumn()\n    rendered = column.render(progress.tasks[task_id])\n    # Without scaling, unit is 1 and precision 0\n    assert rendered.plain == \"2/5 \"\n    assert rendered.style == \"progress.download\"\n\n\ndef test_fraction_column_unit_scale():\n    \"\"\"Test rendering with unit scaling enabled.\"\"\"\n    progress, task_id = _create_progress_and_task(total=1500)\n    progress.update(task_id, completed=750)\n\n    column = FractionColumn(unit_scale=True, unit_divisor=1000)\n    rendered = column.render(progress.tasks[task_id])\n    # 1500 bytes -> 1.5K, 750 bytes -> 0.8K (rounded to 1 decimal)\n    assert rendered.plain == \"0.8/1.5 K\"\n    assert rendered.style == \"progress.download\"\n\n\ndef test_fraction_column_no_total():\n    \"\"\"Test rendering when total is unknown (generator-like task).\"\"\"\n    progress, task_id = _create_progress_and_task(total=None)\n    progress.update(task_id, completed=123)\n\n    column = FractionColumn()\n    rendered = column.render(progress.tasks[task_id])\n    # Total is unknown, should display '?' for total\n    assert rendered.plain == \"123/? \"\n    assert rendered.style == \"progress.download\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0165796909714118
+}

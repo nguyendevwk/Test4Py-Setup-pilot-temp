@@ -1,0 +1,87 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_get_local_reprs_custom_repr_and_max_length ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_local_reprs_custom_re0')
+
+    def test_get_local_reprs_custom_repr_and_max_length(tmp_path):
+        # Define a function with a local variable that will be represented specially
+        def inner():
+            data = {"key": "value", "long": "x" * 50}
+            return inspect.currentframe()
+    
+        frame = inner()
+        # Custom repr: replace representation of dicts with a fixed string
+        def custom_repr(obj):
+            if isinstance(obj, dict):
+                return "<dict>"
+            return None
+    
+>       result = get_local_reprs(frame, custom_repr=custom_repr, max_length=10)
+
+test_generated.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/tracer.py:37: in get_local_reprs
+    result_items = [(key, utils.get_shortish_repr(value, custom_repr,
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/tracer.py:37: in <listcomp>
+    result_items = [(key, utils.get_shortish_repr(value, custom_repr,
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/utils.py:68: in get_shortish_repr
+    repr_function = get_repr_function(item, custom_repr)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = {'key': 'value', 'long': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'}
+custom_repr = <function test_get_local_reprs_custom_repr_and_max_length.<locals>.custom_repr at 0x7f61a90d24d0>
+
+    def get_repr_function(item, custom_repr):
+>       for condition, action in custom_repr:
+E       TypeError: 'function' object is not iterable
+
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/utils.py:51: TypeError
+_____________________ test_get_local_reprs_watch_and_error _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_local_reprs_watch_and0')
+
+    def test_get_local_reprs_watch_and_error(tmp_path):
+        # Define a function to capture a frame
+        def inner():
+            x = 42
+            return inspect.currentframe()
+    
+        frame = inner()
+    
+        # Define a watch object that provides items
+        class DummyWatch:
+            def items(self, frame, normalize):
+                # Return a dict with a key that is not in the frame locals
+                return {"watch_key": "watch_value"}
+    
+        watch_obj = DummyWatch()
+>       result = get_local_reprs(frame, watch=[watch_obj])
+
+test_generated.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+frame = <frame at 0x7f61a910ddf0, file '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__71__context_setup/eval0/test_generated.py', line 57, code inner>
+watch = [<test_generated.test_get_local_reprs_watch_and_error.<locals>.DummyWatch object at 0x7f61a929e260>]
+custom_repr = (), max_length = None, normalize = False
+
+    def get_local_reprs(frame, watch=(), custom_repr=(), max_length=None, normalize=False):
+        code = frame.f_code
+        vars_order = (code.co_varnames + code.co_cellvars + code.co_freevars +
+                      tuple(frame.f_locals.keys()))
+    
+        result_items = [(key, utils.get_shortish_repr(value, custom_repr,
+                                                      max_length, normalize))
+                        for key, value in frame.f_locals.items()]
+        result_items.sort(key=lambda key_value: vars_order.index(key_value[0]))
+        result = collections.OrderedDict(result_items)
+    
+        for variable in watch:
+>           result.update(sorted(variable.items(frame, normalize)))
+E           ValueError: too many values to unpack (expected 2)
+
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/tracer.py:44: ValueError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_local_reprs_custom_repr_and_max_length - T...
+FAILED test_generated.py::test_get_local_reprs_watch_and_error - ValueError: ...
+2 failed, 1 passed in 0.18s

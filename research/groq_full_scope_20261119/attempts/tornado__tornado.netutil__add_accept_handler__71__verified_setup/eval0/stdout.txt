@@ -1,0 +1,86 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_add_accept_handler_accepts_connection __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__add_accept_handler__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_add_accept_handler_accept0')
+
+    def test_add_accept_handler_accepts_connection(tmp_path):
+        """The callback is invoked with a new connection and its address."""
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.bind(("127.0.0.1", 0))
+        server.listen()
+        server.setblocking(False)
+    
+        received = []
+    
+        def callback(conn, addr):
+            received.append((conn, addr))
+            conn.close()
+    
+        remove = add_accept_handler(server, callback)
+    
+        loop = IOLoop.current()
+        thread = threading.Thread(target=_run_ioloop, args=(loop, 0.5))
+        thread.start()
+    
+        # Connect a client to trigger the accept handler
+        client = socket.create_connection(server.getsockname())
+        client.close()
+    
+        thread.join()
+    
+        assert len(received) == 1
+        conn, addr = received[0]
+        assert isinstance(conn, socket.socket)
+>       assert addr == server.getsockname()
+E       AssertionError: assert ('127.0.0.1', 34690) == ('127.0.0.1', 39211)
+E         
+E         At index 1 diff: 34690 != 39211
+E         Use -v to get more diff
+
+test_generated.py:47: AssertionError
+_____________ test_accept_handler_handles_nonblocking_and_aborted ______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.netutil__add_accept_handler__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_accept_handler_handles_no0')
+
+    def test_accept_handler_handles_nonblocking_and_aborted(tmp_path):
+        """The handler correctly ignores BlockingIOError and ConnectionAbortedError."""
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.bind(("127.0.0.1", 0))
+        server.listen()
+        server.setblocking(False)
+    
+        received = []
+    
+        def callback(conn, addr):
+            received.append((conn, addr))
+            conn.close()
+    
+        remove = add_accept_handler(server, callback)
+    
+        loop = IOLoop.current()
+        thread = threading.Thread(target=_run_ioloop, args=(loop, 0.5))
+        thread.start()
+    
+        # Simulate a connection that is immediately aborted by closing the client socket
+        client = socket.create_connection(server.getsockname())
+        client.close()  # abort before server accepts
+    
+        # Simulate a normal connection
+        client2 = socket.create_connection(server.getsockname())
+        client2.close()
+    
+        thread.join()
+    
+        # Only the normal connection should be recorded
+>       assert len(received) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len([(<socket.socket [closed] fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0>, ('127.0.0.1', 56...cket.socket [closed] fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0>, ('127.0.0.1', 56714))])
+
+test_generated.py:120: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_add_accept_handler_accepts_connection - Assert...
+FAILED test_generated.py::test_accept_handler_handles_nonblocking_and_aborted
+2 failed, 1 passed in 1.74s

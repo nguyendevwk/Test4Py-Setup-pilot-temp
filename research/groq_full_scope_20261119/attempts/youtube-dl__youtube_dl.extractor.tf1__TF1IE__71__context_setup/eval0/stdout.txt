@@ -1,0 +1,77 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_tf1ie_normal_extraction _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.tf1__TF1IE__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_tf1ie_normal_extraction0')
+
+    def test_tf1ie_normal_extraction(tmp_path):
+        # Construct a URL that matches the regex
+        url = 'https://www.tf1.fr/tmc/quotidien-avec-yann-barthes/videos/quotidien-premiere-partie-11-juin-2019.html'
+        # Extract program_slug and slug from the URL
+        match = re.match(TF1IE._VALID_URL, url)
+        assert match is not None
+        program_slug, slug = match.groups()
+    
+        # Prepare fake JSON response
+        fake_json = {
+            'data': {
+                'videoBySlug': {
+                    'streamId': 'wat123',
+                    'title': 'Test Video',
+                    'date': '2019-06-11T12:00:00Z',
+                    'publicPlayingInfos': {'duration': 1234},
+                    'season': '2',
+                    'episode': '5',
+                    'tags': [{'label': 'tag1'}, {'label': 'tag2'}],
+                    'decoration': {
+                        'image': {
+                            'sources': [
+                                {'url': 'http://thumb1.jpg', 'width': '640'},
+                                {'url': 'http://thumb2.jpg', 'width': '1280'},
+                            ]
+                        },
+                        'description': 'A description',
+                        'programLabel': 'Series Name',
+                    },
+                }
+            }
+        }
+    
+        # Monkeypatch the downloader
+        tf1 = TF1IE()
+        tf1._download_json = FakeDownloader(fake_json).download_json
+    
+        result = tf1._real_extract(url)
+    
+        assert result['_type'] == 'url_transparent'
+        assert result['id'] == 'wat123'
+        assert result['url'] == 'wat:wat123'
+        assert result['title'] == 'Test Video'
+        assert result['description'] == 'A description'
+>       assert result['timestamp'] == 1560273600  # 2019-06-11T12:00:00Z
+E       assert 1560254400 == 1560273600
+
+test_generated.py:59: AssertionError
+________________________ test_tf1ie_invalid_url_raises _________________________
+
+    def test_tf1ie_invalid_url_raises():
+        tf1 = TF1IE()
+        # URL that does not match the regex should raise a ValueError when re.match fails
+        with pytest.raises(ValueError):
+>           tf1._real_extract('https://www.example.com/not-a-tf1-url')
+
+test_generated.py:118: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.tf1.TF1IE object at 0x7f8dc4d6fa90>
+url = 'https://www.example.com/not-a-tf1-url'
+
+    def _real_extract(self, url):
+>       program_slug, slug = re.match(self._VALID_URL, url).groups()
+E       AttributeError: 'NoneType' object has no attribute 'groups'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/tf1.py:44: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_tf1ie_normal_extraction - assert 1560254400 ==...
+FAILED test_generated.py::test_tf1ie_invalid_url_raises - AttributeError: 'No...
+2 failed, 1 passed in 1.38s

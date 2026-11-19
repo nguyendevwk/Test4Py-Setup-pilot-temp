@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-e70a90cc-2d8e-49b2-a585-03ca252a3995",
+  "object": "chat.completion",
+  "created": 1795079385,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport builtins\nimport importlib\nimport os\nimport sys\nimport types\nimport pytest\nfrom pathlib import Path\n\n# Import the Rule class from the real module\nfrom thefuck.types import Rule\nfrom thefuck import settings, logs\n\n# Helper to create a temporary rule file\ndef create_rule_file(tmp_path, name, content):\n    path = tmp_path / f\"{name}.py\"\n    path.write_text(content)\n    return path\n\ndef test_rule_from_path_excluded(tmp_path):\n    \"\"\"Rule.from_path should return None for an excluded rule.\"\"\"\n    # Add a rule name to the excluded list\n    settings.exclude_rules.add(\"excluded_rule\")\n    rule_path = create_rule_file(tmp_path, \"excluded_rule\", \"\"\"\ndef match(cmd): return True\ndef get_new_command(cmd): return \"echo ok\"\n\"\"\")\n    # Ensure the rule is excluded\n    rule = Rule.from_path(rule_path)\n    assert rule is None\n    # Clean up\n    settings.exclude_rules.remove(\"excluded_rule\")\n\ndef test_rule_is_match_requires_output_false(tmp_path):\n    \"\"\"Rule.is_match should return True when requires_output is False and command has no output.\"\"\"\n    # Create a simple rule that matches any command\n    rule_path = create_rule_file(tmp_path, \"always_match\", \"\"\"\ndef match(cmd): return True\ndef get_new_command(cmd): return \"echo matched\"\nrequires_output = False\n\"\"\")\n    rule = Rule.from_path(rule_path)\n    assert rule is not None\n    # Create a dummy command object with output=None\n    Command = types.SimpleNamespace\n    cmd = Command(output=None)\n    assert rule.is_match(cmd) is True\n\ndef test_rule_get_corrected_commands_and_repr(tmp_path):\n    \"\"\"get_corrected_commands should yield CorrectedCommand objects with correct priority and __repr__ should be informative.\"\"\"\n    # Create a rule that returns two new commands\n    rule_path = create_rule_file(tmp_path, \"two_commands\", \"\"\"\ndef match(cmd): return True\ndef get_new_command(cmd): return [\"echo first\", \"echo second\"]\npriority = 10\n\"\"\")\n    rule = Rule.from_path(rule_path)\n    assert rule is not None\n    # Dummy command\n    Command = types.SimpleNamespace\n    cmd = Command(output=\"some output\")\n    corrected = list(rule.get_corrected_commands(cmd))\n    # Two corrected commands\n    assert len(corrected) == 2\n    # Check priorities: first should be 10, second 20\n    assert corrected[0].priority == 10\n    assert corrected[1].priority == 20\n    # __repr__ should include the rule name and other attributes\n    repr_str = repr(rule)\n    assert \"two_commands\" in repr_str\n    assert \"match\" in repr_str\n    assert \"get_new_command\" in repr_str\n    assert \"priority=10\" in repr_str\n```",
+        "reasoning": "We need three tests. Test __eq__ and __repr__? maybe test from_path with excluded rule. Use tmp_path to create a rule file. Test is_match with requires_output False. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054316029,
+    "prompt_tokens": 1068,
+    "prompt_time": 0.00913386,
+    "completion_tokens": 648,
+    "completion_time": 1.112975086,
+    "total_tokens": 1716,
+    "total_time": 1.122108946,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 43
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh3bjbe22bdn46cbyqam5d",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport builtins\nimport importlib\nimport os\nimport sys\nimport types\nimport pytest\nfrom pathlib import Path\n\n# Import the Rule class from the real module\nfrom thefuck.types import Rule\nfrom thefuck import settings, logs\n\n# Helper to create a temporary rule file\ndef create_rule_file(tmp_path, name, content):\n    path = tmp_path / f\"{name}.py\"\n    path.write_text(content)\n    return path\n\ndef test_rule_from_path_excluded(tmp_path):\n    \"\"\"Rule.from_path should return None for an excluded rule.\"\"\"\n    # Add a rule name to the excluded list\n    settings.exclude_rules.add(\"excluded_rule\")\n    rule_path = create_rule_file(tmp_path, \"excluded_rule\", \"\"\"\ndef match(cmd): return True\ndef get_new_command(cmd): return \"echo ok\"\n\"\"\")\n    # Ensure the rule is excluded\n    rule = Rule.from_path(rule_path)\n    assert rule is None\n    # Clean up\n    settings.exclude_rules.remove(\"excluded_rule\")\n\ndef test_rule_is_match_requires_output_false(tmp_path):\n    \"\"\"Rule.is_match should return True when requires_output is False and command has no output.\"\"\"\n    # Create a simple rule that matches any command\n    rule_path = create_rule_file(tmp_path, \"always_match\", \"\"\"\ndef match(cmd): return True\ndef get_new_command(cmd): return \"echo matched\"\nrequires_output = False\n\"\"\")\n    rule = Rule.from_path(rule_path)\n    assert rule is not None\n    # Create a dummy command object with output=None\n    Command = types.SimpleNamespace\n    cmd = Command(output=None)\n    assert rule.is_match(cmd) is True\n\ndef test_rule_get_corrected_commands_and_repr(tmp_path):\n    \"\"\"get_corrected_commands should yield CorrectedCommand objects with correct priority and __repr__ should be informative.\"\"\"\n    # Create a rule that returns two new commands\n    rule_path = create_rule_file(tmp_path, \"two_commands\", \"\"\"\ndef match(cmd): return True\ndef get_new_command(cmd): return [\"echo first\", \"echo second\"]\npriority = 10\n\"\"\")\n    rule = Rule.from_path(rule_path)\n    assert rule is not None\n    # Dummy command\n    Command = types.SimpleNamespace\n    cmd = Command(output=\"some output\")\n    corrected = list(rule.get_corrected_commands(cmd))\n    # Two corrected commands\n    assert len(corrected) == 2\n    # Check priorities: first should be 10, second 20\n    assert corrected[0].priority == 10\n    assert corrected[1].priority == 20\n    # __repr__ should include the rule name and other attributes\n    repr_str = repr(rule)\n    assert \"two_commands\" in repr_str\n    assert \"match\" in repr_str\n    assert \"get_new_command\" in repr_str\n    assert \"priority=10\" in repr_str\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "16df19a6c5264ae0bdd0780de269c858",
+  "_api_plus_pacing_seconds": 1.8076293210033327
+}

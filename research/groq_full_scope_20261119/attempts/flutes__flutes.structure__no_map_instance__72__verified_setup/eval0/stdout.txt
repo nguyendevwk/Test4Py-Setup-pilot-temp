@@ -1,0 +1,60 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_no_map_instance_sets_attribute_on_mutable_object _____________
+
+    def test_no_map_instance_sets_attribute_on_mutable_object():
+        """When the instance is mutable, the function should set the marker attribute."""
+        class MutableContainer:
+            def __init__(self, data):
+                self.data = data
+    
+        container = MutableContainer([1, 2, 3])
+        result = no_map_instance(container)
+    
+        # The function should return the same object
+        assert result is container
+        # The marker attribute should be present and truthy
+>       assert hasattr(result, _NO_MAP_INSTANCE_ATTR)
+E       AssertionError: assert False
+E        +  where False = hasattr(<test_generated.test_no_map_instance_sets_attribute_on_mutable_object.<locals>.MutableContainer object at 0x7f1c1f18e920>, '_NO_MAP_INSTANCE_ATTR')
+
+test_generated.py:19: AssertionError
+____________ test_no_map_instance_returns_same_object_for_immutable ____________
+
+    def test_no_map_instance_returns_same_object_for_immutable():
+        """When the instance is immutable, the function should return an instance of the same type."""
+        immutable_value = 42
+        result = no_map_instance(immutable_value)
+    
+        # The returned value should be equal to the original
+        assert result == immutable_value
+        # It should be the same type
+>       assert type(result) is type(immutable_value)
+E       AssertionError: assert <class 'flutes.structure._no_mapint'> is <class 'int'>
+E        +  where <class 'flutes.structure._no_mapint'> = type(42)
+E        +  and   <class 'int'> = type(42)
+
+test_generated.py:30: AssertionError
+____________ test_no_map_instance_fallback_for_non_settable_object _____________
+
+    def test_no_map_instance_fallback_for_non_settable_object():
+        """If setattr fails, the function should use the fallback mechanism and still return a valid instance."""
+        class ReadOnly:
+            __slots__ = ("value",)
+    
+            def __init__(self, value):
+                self.value = value
+    
+        ro = ReadOnly("test")
+        result = no_map_instance(ro)
+    
+        # The returned object should be equal to the original
+>       assert result == ro
+E       assert <flutes.structure._no_mapReadOnly object at 0x7f1c1efef600> == <test_generated.test_no_map_instance_fallback_for_non_settable_object.<locals>.ReadOnly object at 0x7f1c1f18f8b0>
+
+test_generated.py:46: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_no_map_instance_sets_attribute_on_mutable_object
+FAILED test_generated.py::test_no_map_instance_returns_same_object_for_immutable
+FAILED test_generated.py::test_no_map_instance_fallback_for_non_settable_object
+3 failed in 0.16s

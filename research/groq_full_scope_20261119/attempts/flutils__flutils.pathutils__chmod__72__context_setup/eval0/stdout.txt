@@ -1,0 +1,32 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_chmod_glob_and_parent __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chmod__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_chmod_glob_and_parent0')
+
+    def test_chmod_glob_and_parent(tmp_path):
+        """Glob pattern changes all matching files and optionally parent."""
+        # Create a directory tree
+        dir_path = tmp_path / "dir"
+        dir_path.mkdir()
+        (dir_path / "a.txt").write_text("a")
+        (dir_path / "b.txt").write_text("b")
+        # Set initial modes
+        dir_path.chmod(0o777)
+        for f in dir_path.iterdir():
+            f.chmod(0o666)
+        # Apply chmod with glob and include_parent=True
+        chmod(f"{tmp_path}/dir/*", mode_file=0o644, mode_dir=0o700, include_parent=True)
+        # Parent directory should be unchanged
+>       assert stat.S_IMODE(tmp_path.stat().st_mode) == 0o755
+E       AssertionError: assert 448 == 493
+E        +  where 448 = <built-in function S_IMODE>(16832)
+E        +    where <built-in function S_IMODE> = stat.S_IMODE
+E        +    and   16832 = os.stat_result(st_mode=16832, st_ino=9580426, st_dev=52, st_nlink=1, st_uid=1000, st_gid=1000, st_size=6, st_atime=1795078737, st_mtime=1795078737, st_ctime=1795078737).st_mode
+E        +      where os.stat_result(st_mode=16832, st_ino=9580426, st_dev=52, st_nlink=1, st_uid=1000, st_gid=1000, st_size=6, st_atime=1795078737, st_mtime=1795078737, st_ctime=1795078737) = stat()
+E        +        where stat = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chmod__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_chmod_glob_and_parent0').stat
+
+test_generated.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_chmod_glob_and_parent - AssertionError: assert...
+1 failed, 2 passed in 0.12s

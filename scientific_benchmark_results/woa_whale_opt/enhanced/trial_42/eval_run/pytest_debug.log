@@ -1,0 +1,26 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_whale_optimization_optimize_state_transition _______________
+
+    def test_whale_optimization_optimize_state_transition():
+        np.random.seed(0)
+        opt_func = lambda x, y: x**2 + y**2
+        constraints = [(-1, 1), (-1, 1)]
+        woa = WhaleOptimization(opt_func, constraints, nsols=3, b=1, a=2, a_step=0.5)
+        old_a = woa._a
+        woa.optimize()
+        # a should decrease by a_step
+        assert woa._a == pytest.approx(old_a - 0.5)
+        # best solution history should have one entry
+        assert len(woa._best_solutions) == 1
+        # first solution in new population should be the best solution
+        best_sol = woa._best_solutions[0]
+        assert woa._sols.shape == (3, 2)
+>       np.testing.assert_allclose(woa._sols[0], best_sol, atol=1e-8)
+E       ValueError: setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (2,) + inhomogeneous part.
+
+../eval_run/test_run.py:19: ValueError
+=========================== short test summary info ============================
+FAILED ../eval_run/test_run.py::test_whale_optimization_optimize_state_transition
+1 failed in 0.23s
+

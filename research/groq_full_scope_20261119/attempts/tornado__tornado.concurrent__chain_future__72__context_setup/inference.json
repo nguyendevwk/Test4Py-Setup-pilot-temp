@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-3d408019-8058-415a-8d7c-5701aca16633",
+  "object": "chat.completion",
+  "created": 1795079386,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import chain_future, Future, future_set_exception_unless_cancelled\n\n\n@pytest.mark.asyncio\nasync def test_chain_future_success():\n    \"\"\"When future `a` succeeds, `b` receives the same result.\"\"\"\n    a = Future()\n    b = Future()\n    chain_future(a, b)\n\n    # Resolve `a` with a value\n    a.set_result(42)\n\n    # Await `b` to ensure propagation\n    result = await b\n    assert result == 42, \"b should receive the result from a\"\n\n\n@pytest.mark.asyncio\nasync def test_chain_future_failure():\n    \"\"\"When future `a` fails, `b` receives the same exception.\"\"\"\n    a = Future()\n    b = Future()\n    chain_future(a, b)\n\n    # Fail `a` with a ValueError\n    a.set_exception(ValueError(\"boom\"))\n\n    # Await `b` and check exception type and message\n    with pytest.raises(ValueError) as excinfo:\n        await b\n    assert str(excinfo.value) == \"boom\", \"b should propagate the exception from a\"\n\n\n@pytest.mark.asyncio\nasync def test_chain_future_b_already_done():\n    \"\"\"If `b` is already done before `a` completes, `a`'s result is ignored.\"\"\"\n    a = Future()\n    b = Future()\n    # Pre-complete `b` with a different value\n    b.set_result(\"pre-set\")\n    chain_future(a, b)\n\n    # Complete `a` with a new value\n    a.set_result(99)\n\n    # Await `b` and ensure it still holds the pre-set value\n    result = await b\n    assert result == \"pre-set\", \"b should not be overwritten after completion\"\n```",
+        "reasoning": "We need 3 test functions. Test normal chaining success, failure propagation, and that if b already done, a completion does nothing. Use asyncio event loop. Use tmp_path not needed. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054999006,
+    "prompt_tokens": 1052,
+    "prompt_time": 0.016424854,
+    "completion_tokens": 426,
+    "completion_time": 0.776540662,
+    "total_tokens": 1478,
+    "total_time": 0.792965516,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 42
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh3ctze4dva2h8yaegrsjj",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import chain_future, Future, future_set_exception_unless_cancelled\n\n\n@pytest.mark.asyncio\nasync def test_chain_future_success():\n    \"\"\"When future `a` succeeds, `b` receives the same result.\"\"\"\n    a = Future()\n    b = Future()\n    chain_future(a, b)\n\n    # Resolve `a` with a value\n    a.set_result(42)\n\n    # Await `b` to ensure propagation\n    result = await b\n    assert result == 42, \"b should receive the result from a\"\n\n\n@pytest.mark.asyncio\nasync def test_chain_future_failure():\n    \"\"\"When future `a` fails, `b` receives the same exception.\"\"\"\n    a = Future()\n    b = Future()\n    chain_future(a, b)\n\n    # Fail `a` with a ValueError\n    a.set_exception(ValueError(\"boom\"))\n\n    # Await `b` and check exception type and message\n    with pytest.raises(ValueError) as excinfo:\n        await b\n    assert str(excinfo.value) == \"boom\", \"b should propagate the exception from a\"\n\n\n@pytest.mark.asyncio\nasync def test_chain_future_b_already_done():\n    \"\"\"If `b` is already done before `a` completes, `a`'s result is ignored.\"\"\"\n    a = Future()\n    b = Future()\n    # Pre-complete `b` with a different value\n    b.set_result(\"pre-set\")\n    chain_future(a, b)\n\n    # Complete `a` with a new value\n    a.set_result(99)\n\n    # Await `b` and ensure it still holds the pre-set value\n    result = await b\n    assert result == \"pre-set\", \"b should not be overwritten after completion\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "dfa8dd79d12547028fcfcebaf975fa8b",
+  "_api_plus_pacing_seconds": 1.490593217953574
+}

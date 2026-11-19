@@ -1,0 +1,182 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_get_rules_order_and_priority _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.corrector__get_rules__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_rules_order_and_prior0')
+
+    def test_get_rules_order_and_priority(tmp_path):
+        """Ensure get_rules returns rules sorted by priority."""
+        # Create two rule modules with different priorities
+        rule_a = tmp_path / "rule_a.py"
+        rule_a.write_text(
+            """
+    from thefuck.types import Rule
+    class RuleA(Rule):
+        priority = 10
+        def match(self, command):
+            return False
+        def get_new_command(self, command):
+            return command
+    """
+        )
+        rule_b = tmp_path / "rule_b.py"
+        rule_b.write_text(
+            """
+    from thefuck.types import Rule
+    class RuleB(Rule):
+        priority = 5
+        def match(self, command):
+            return False
+        def get_new_command(self, command):
+            return command
+    """
+        )
+    
+        # Ensure the temporary directory is in the import paths
+        sys.path.insert(0, str(tmp_path))
+        # Point settings to our temporary rule directory
+        settings.rule_dirs = [str(tmp_path)]
+    
+        # Import the modules so that get_loaded_rules can find them
+        importlib.invalidate_caches()
+        importlib.import_module("rule_a")
+        importlib.import_module("rule_b")
+    
+>       rules = get_rules()
+
+test_generated.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:46: in get_rules
+    paths = [rule_path for path in get_rules_import_paths()
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:46: in <listcomp>
+    paths = [rule_path for path in get_rules_import_paths()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_rules_import_paths():
+        """Yields all rules import paths.
+    
+        :rtype: Iterable[Path]
+    
+        """
+        # Bundled rules:
+        yield Path(__file__).parent.joinpath('rules')
+        # Rules defined by user:
+>       yield settings.user_dir.joinpath('rules')
+E       AttributeError: 'NoneType' object has no attribute 'joinpath'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:31: AttributeError
+________________________ test_get_rules_ignores_non_py _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.corrector__get_rules__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_rules_ignores_non_py0')
+
+    def test_get_rules_ignores_non_py(tmp_path):
+        """Non‑Python files should not be considered as rules."""
+        # Create a non‑Python file
+        txt_file = tmp_path / "not_a_rule.txt"
+        txt_file.write_text("Just some text")
+    
+        # Create a valid rule file
+        rule = tmp_path / "valid_rule.py"
+        rule.write_text(
+            """
+    from thefuck.types import Rule
+    class ValidRule(Rule):
+        priority = 1
+        def match(self, command):
+            return False
+        def get_new_command(self, command):
+            return command
+    """
+        )
+    
+        sys.path.insert(0, str(tmp_path))
+        settings.rule_dirs = [str(tmp_path)]
+        importlib.invalidate_caches()
+        importlib.import_module("valid_rule")
+    
+>       rules = get_rules()
+
+test_generated.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:46: in get_rules
+    paths = [rule_path for path in get_rules_import_paths()
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:46: in <listcomp>
+    paths = [rule_path for path in get_rules_import_paths()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_rules_import_paths():
+        """Yields all rules import paths.
+    
+        :rtype: Iterable[Path]
+    
+        """
+        # Bundled rules:
+        yield Path(__file__).parent.joinpath('rules')
+        # Rules defined by user:
+>       yield settings.user_dir.joinpath('rules')
+E       AttributeError: 'NoneType' object has no attribute 'joinpath'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:31: AttributeError
+_________________________ test_get_rules_syntax_error __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.corrector__get_rules__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_rules_syntax_error0')
+
+    def test_get_rules_syntax_error(tmp_path):
+        """A rule file with a syntax error should raise ImportError."""
+        bad_rule = tmp_path / "bad_rule.py"
+        bad_rule.write_text(
+            """
+    from thefuck.types import Rule
+    class BadRule(Rule):
+        priority = 1
+        def match(self, command):
+            return False
+        def get_new_command(self, command):
+            return command
+        def invalid_syntax
+    """
+        )
+    
+        sys.path.insert(0, str(tmp_path))
+        settings.rule_dirs = [str(tmp_path)]
+        importlib.invalidate_caches()
+    
+        with pytest.raises(ImportError):
+>           get_rules()
+
+test_generated.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:46: in get_rules
+    paths = [rule_path for path in get_rules_import_paths()
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:46: in <listcomp>
+    paths = [rule_path for path in get_rules_import_paths()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def get_rules_import_paths():
+        """Yields all rules import paths.
+    
+        :rtype: Iterable[Path]
+    
+        """
+        # Bundled rules:
+        yield Path(__file__).parent.joinpath('rules')
+        # Rules defined by user:
+>       yield settings.user_dir.joinpath('rules')
+E       AttributeError: 'NoneType' object has no attribute 'joinpath'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:31: AttributeError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_rules_order_and_priority - AttributeError:...
+FAILED test_generated.py::test_get_rules_ignores_non_py - AttributeError: 'No...
+FAILED test_generated.py::test_get_rules_syntax_error - AttributeError: 'None...
+3 failed, 2 warnings in 0.31s

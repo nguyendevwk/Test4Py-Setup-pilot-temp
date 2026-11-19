@@ -1,0 +1,35 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_humanize_bytes_boundary_values ______________________
+
+    def test_humanize_bytes_boundary_values():
+        # Zero bytes should be handled gracefully
+        assert humanize_bytes(0) == '0.00 B'
+        # Very large number crossing multiple thresholds
+        large = (1 << 50) + 123  # just over 1 PB
+        assert humanize_bytes(large, precision=0) == f'{large / (1 << 50):.0f} PB'
+        # Ensure that the function chooses the largest applicable factor
+>       assert humanize_bytes(1024 * 1024 - 1) == '1023.99 kB'  # just below 1 MB
+E       AssertionError: assert '1024.00 kB' == '1023.99 kB'
+E         
+E         - 1023.99 kB
+E         + 1024.00 kB
+
+test_generated.py:22: AssertionError
+______________________ test_humanize_bytes_invalid_input _______________________
+
+    def test_humanize_bytes_invalid_input():
+        # Negative numbers are not explicitly handled; function will still compute
+>       assert humanize_bytes(-1024) == '-1.00 kB'
+E       AssertionError: assert '-1024.00 B' == '-1.00 kB'
+E         
+E         - -1.00 kB
+E         ?       -
+E         + -1024.00 B
+E         ?   +++
+
+test_generated.py:26: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_humanize_bytes_boundary_values - AssertionErro...
+FAILED test_generated.py::test_humanize_bytes_invalid_input - AssertionError:...
+2 failed, 1 passed in 0.49s

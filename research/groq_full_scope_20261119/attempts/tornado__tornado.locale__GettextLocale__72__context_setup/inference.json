@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-fcd7c950-6042-4d81-913f-bc5df76966d1",
+  "object": "chat.completion",
+  "created": 1795077666,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado.locale import GettextLocale, CONTEXT_SEPARATOR\n\nclass DummyTranslations:\n    \"\"\"Simple mock of gettext translations that echoes inputs.\"\"\"\n    def gettext(self, msg):\n        return f\"translated:{msg}\"\n    def ngettext(self, singular, plural, count):\n        return f\"translated:{singular if count == 1 else plural}:{count}\"\n\ndef test_translate_single_and_plural():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Single message\n    assert locale.translate(\"hello\") == \"translated:hello\"\n    # Plural message with count 1\n    assert locale.translate(\"apple\", \"apples\", 1) == \"translated:apple:1\"\n    # Plural message with count 5\n    assert locale.translate(\"apple\", \"apples\", 5) == \"translated:apples:5\"\n\ndef test_pgettext_context_and_plural():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Context without plural\n    result = locale.pgettext(\"greeting\", \"hello\")\n    # DummyTranslations returns translated:context\\x04hello\n    assert result == \"translated:greeting\\x04hello\"\n    # Context with plural, count 1\n    result = locale.pgettext(\"fruit\", \"apple\", \"apples\", 1)\n    assert result == \"translated:apple:1\"\n    # Context with plural, count 3\n    result = locale.pgettext(\"fruit\", \"apple\", \"apples\", 3)\n    assert result == \"translated:apples:3\"\n\ndef test_error_on_missing_count():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    with pytest.raises(AssertionError):\n        locale.translate(\"apple\", \"apples\")  # missing count\n    with pytest.raises(AssertionError):\n        locale.pgettext(\"fruit\", \"apple\", \"apples\")  # missing count\n```",
+        "reasoning": "Need tests for GettextLocale. We can create dummy translations using gettext.NullTranslations? Actually NullTranslations returns original string. We can create a custom translations with gettext.GNUTranslations from a .mo file. But we can create a simple translations using gettext.NullTranslations but override ngettext/gettext to return something. Use a simple subclass? We can create a dummy translations object with attributes gettext and ngettext that return formatted strings. Then test translate and pgettext. Also test error when plural_message without count. Use pytest.raises. Write three tests: normal translate, plural translate, pgettext context missing. Use tmp_path? Not needed. Just use dummy translations."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.104479224,
+    "prompt_tokens": 781,
+    "prompt_time": 0.046271791,
+    "completion_tokens": 551,
+    "completion_time": 0.642196341,
+    "total_tokens": 1332,
+    "total_time": 0.688468132,
+    "completion_tokens_details": {
+      "reasoning_tokens": 133
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfexahej7bnvpbyttgj2mh",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado.locale import GettextLocale, CONTEXT_SEPARATOR\n\nclass DummyTranslations:\n    \"\"\"Simple mock of gettext translations that echoes inputs.\"\"\"\n    def gettext(self, msg):\n        return f\"translated:{msg}\"\n    def ngettext(self, singular, plural, count):\n        return f\"translated:{singular if count == 1 else plural}:{count}\"\n\ndef test_translate_single_and_plural():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Single message\n    assert locale.translate(\"hello\") == \"translated:hello\"\n    # Plural message with count 1\n    assert locale.translate(\"apple\", \"apples\", 1) == \"translated:apple:1\"\n    # Plural message with count 5\n    assert locale.translate(\"apple\", \"apples\", 5) == \"translated:apples:5\"\n\ndef test_pgettext_context_and_plural():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Context without plural\n    result = locale.pgettext(\"greeting\", \"hello\")\n    # DummyTranslations returns translated:context\\x04hello\n    assert result == \"translated:greeting\\x04hello\"\n    # Context with plural, count 1\n    result = locale.pgettext(\"fruit\", \"apple\", \"apples\", 1)\n    assert result == \"translated:apple:1\"\n    # Context with plural, count 3\n    result = locale.pgettext(\"fruit\", \"apple\", \"apples\", 3)\n    assert result == \"translated:apples:3\"\n\ndef test_error_on_missing_count():\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    with pytest.raises(AssertionError):\n        locale.translate(\"apple\", \"apples\")  # missing count\n    with pytest.raises(AssertionError):\n        locale.pgettext(\"fruit\", \"apple\", \"apples\")  # missing count\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.115599537966773
+}

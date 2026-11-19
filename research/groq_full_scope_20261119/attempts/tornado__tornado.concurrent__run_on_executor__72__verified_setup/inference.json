@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-7841dd1f-7a20-4aed-8fc2-8410e4138c2e",
+  "object": "chat.completion",
+  "created": 1795078671,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import run_on_executor, Future, chain_future\n\n# Test 1: normal usage – a method decorated with run_on_executor returns a Future\ndef test_run_on_executor_normal(tmp_path):\n    class Worker:\n        def __init__(self):\n            self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n        @run_on_executor\n        def compute(self, x, y):\n            return x + y\n\n    w = Worker()\n    fut = w.compute(3, 4)\n    assert isinstance(fut, Future)\n    # Await the Future to get the result\n    loop = asyncio.get_event_loop()\n    result = loop.run_until_complete(fut)\n    assert result == 7\n    w.executor.shutdown(wait=True)\n\n# Test 2: custom executor attribute name via keyword argument\ndef test_run_on_executor_custom_executor(tmp_path):\n    class Worker:\n        def __init__(self):\n            self._pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n        @run_on_executor(executor=\"_pool\")\n        def multiply(self, a, b):\n            return a * b\n\n    w = Worker()\n    fut = w.multiply(6, 7)\n    assert isinstance(fut, Future)\n    loop = asyncio.get_event_loop()\n    result = loop.run_until_complete(fut)\n    assert result == 42\n    w._pool.shutdown(wait=True)\n\n# Test 3: error handling – passing both positional and keyword arguments raises ValueError\ndef test_run_on_executor_invalid_args():\n    with pytest.raises(ValueError) as excinfo:\n        @run_on_executor(1, executor=\"foo\")\n        def dummy(self):\n            return 1\n    assert \"cannot combine positional and keyword args\" in str(excinfo.value)\n```",
+        "reasoning": "We need to test run_on_executor decorator. We can create a class with executor attribute as ThreadPoolExecutor. Test normal: method returns value. Boundary: executor missing? error. Error: passing both pos and kw args raises ValueError. Use tmp_path? not needed. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054563074,
+    "prompt_tokens": 838,
+    "prompt_time": 0.055407605,
+    "completion_tokens": 445,
+    "completion_time": 0.514639314,
+    "total_tokens": 1283,
+    "total_time": 0.570046919,
+    "completion_tokens_details": {
+      "reasoning_tokens": 60
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgdjrgedsrtqeata72pkha",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import run_on_executor, Future, chain_future\n\n# Test 1: normal usage – a method decorated with run_on_executor returns a Future\ndef test_run_on_executor_normal(tmp_path):\n    class Worker:\n        def __init__(self):\n            self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n        @run_on_executor\n        def compute(self, x, y):\n            return x + y\n\n    w = Worker()\n    fut = w.compute(3, 4)\n    assert isinstance(fut, Future)\n    # Await the Future to get the result\n    loop = asyncio.get_event_loop()\n    result = loop.run_until_complete(fut)\n    assert result == 7\n    w.executor.shutdown(wait=True)\n\n# Test 2: custom executor attribute name via keyword argument\ndef test_run_on_executor_custom_executor(tmp_path):\n    class Worker:\n        def __init__(self):\n            self._pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n        @run_on_executor(executor=\"_pool\")\n        def multiply(self, a, b):\n            return a * b\n\n    w = Worker()\n    fut = w.multiply(6, 7)\n    assert isinstance(fut, Future)\n    loop = asyncio.get_event_loop()\n    result = loop.run_until_complete(fut)\n    assert result == 42\n    w._pool.shutdown(wait=True)\n\n# Test 3: error handling – passing both positional and keyword arguments raises ValueError\ndef test_run_on_executor_invalid_args():\n    with pytest.raises(ValueError) as excinfo:\n        @run_on_executor(1, executor=\"foo\")\n        def dummy(self):\n            return 1\n    assert \"cannot combine positional and keyword args\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9718875580001622
+}

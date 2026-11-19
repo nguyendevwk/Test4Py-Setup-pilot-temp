@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-1f732f52-a293-4d63-8764-5aaf4ffe625f",
+  "object": "chat.completion",
+  "created": 1795079597,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport socket\nimport ssl\nimport time\nimport datetime\nimport pytest\nfrom tornado.tcpclient import TCPClient\nfrom tornado.ioloop import IOLoop\nfrom tornado.iostream import IOStream\nfrom tornado.gen import TimeoutError\n\n# Helper to run a simple echo server in a background thread\ndef start_echo_server(host=\"127.0.0.1\", port=0):\n    srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    srv.bind((host, port))\n    srv.listen(1)\n    addr = srv.getsockname()\n    async def handle_client():\n        conn, _ = srv.accept()\n        data = conn.recv(1024)\n        conn.sendall(data)\n        conn.close()\n    loop = asyncio.new_event_loop()\n    asyncio.set_event_loop(loop)\n    loop.create_task(handle_client())\n    loop.run_forever()\n    srv.close()\n\n@pytest.mark.asyncio\nasync def test_tcpclient_connect_success(tmp_path):\n    # Start echo server\n    srv_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    srv_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    srv_sock.bind((\"127.0.0.1\", 0))\n    srv_sock.listen(1)\n    host, port = srv_sock.getsockname()\n    async def echo():\n        conn, _ = srv_sock.accept()\n        data = conn.recv(1024)\n        conn.sendall(data)\n        conn.close()\n    loop = asyncio.get_event_loop()\n    loop.create_task(echo())\n    client = TCPClient()\n    stream = await client.connect(host, port)\n    assert isinstance(stream, IOStream)\n    msg = b\"hello\"\n    await stream.write(msg)\n    reply = await stream.read(len(msg))\n    assert reply == msg\n    stream.close()\n    srv_sock.close()\n\n@pytest.mark.asyncio\nasync def test_tcpclient_connect_timeout(tmp_path):\n    # Resolve to an unreachable IP\n    client = TCPClient()\n    with pytest.raises(TimeoutError):\n        await client.connect(\"10.255.255.1\", 12345, timeout=0.1)\n\n@pytest.mark.asyncio\nasync def test_tcpclient_source_ip_binding_error(tmp_path):\n    # Attempt to bind to an invalid source IP\n    client = TCPClient()\n    with pytest.raises(OSError):\n        await client.connect(\"127.0.0.1\", 80, source_ip=\"256.256.256.256\")\n```",
+        "reasoning": "Need tests: normal connect to local echo server? Use asyncio loop? Tornado uses IOLoop. We can create a simple TCP server using socket in thread. Use tmp_path for port? Use port 0 to get free. Test connect success, timeout error, and source_ip binding error. Use pytest.mark.asyncio."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005499545,
+    "prompt_tokens": 1423,
+    "prompt_time": 0.016536488,
+    "completion_tokens": 610,
+    "completion_time": 0.640704651,
+    "total_tokens": 2033,
+    "total_time": 0.657241139,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 67
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh9tsgebk90pfhxm2vb7dk",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport socket\nimport ssl\nimport time\nimport datetime\nimport pytest\nfrom tornado.tcpclient import TCPClient\nfrom tornado.ioloop import IOLoop\nfrom tornado.iostream import IOStream\nfrom tornado.gen import TimeoutError\n\n# Helper to run a simple echo server in a background thread\ndef start_echo_server(host=\"127.0.0.1\", port=0):\n    srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    srv.bind((host, port))\n    srv.listen(1)\n    addr = srv.getsockname()\n    async def handle_client():\n        conn, _ = srv.accept()\n        data = conn.recv(1024)\n        conn.sendall(data)\n        conn.close()\n    loop = asyncio.new_event_loop()\n    asyncio.set_event_loop(loop)\n    loop.create_task(handle_client())\n    loop.run_forever()\n    srv.close()\n\n@pytest.mark.asyncio\nasync def test_tcpclient_connect_success(tmp_path):\n    # Start echo server\n    srv_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    srv_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    srv_sock.bind((\"127.0.0.1\", 0))\n    srv_sock.listen(1)\n    host, port = srv_sock.getsockname()\n    async def echo():\n        conn, _ = srv_sock.accept()\n        data = conn.recv(1024)\n        conn.sendall(data)\n        conn.close()\n    loop = asyncio.get_event_loop()\n    loop.create_task(echo())\n    client = TCPClient()\n    stream = await client.connect(host, port)\n    assert isinstance(stream, IOStream)\n    msg = b\"hello\"\n    await stream.write(msg)\n    reply = await stream.read(len(msg))\n    assert reply == msg\n    stream.close()\n    srv_sock.close()\n\n@pytest.mark.asyncio\nasync def test_tcpclient_connect_timeout(tmp_path):\n    # Resolve to an unreachable IP\n    client = TCPClient()\n    with pytest.raises(TimeoutError):\n        await client.connect(\"10.255.255.1\", 12345, timeout=0.1)\n\n@pytest.mark.asyncio\nasync def test_tcpclient_source_ip_binding_error(tmp_path):\n    # Attempt to bind to an invalid source IP\n    client = TCPClient()\n    with pytest.raises(OSError):\n        await client.connect(\"127.0.0.1\", 80, source_ip=\"256.256.256.256\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "bfe7d7f3884a45fe8d7728a4e0290fa0",
+  "_api_plus_pacing_seconds": 1.7005819180049002
+}

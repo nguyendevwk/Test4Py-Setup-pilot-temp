@@ -1,0 +1,57 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_parse_xforwarded_with_real_ip_header ___________________
+
+    def test_parse_xforwarded_with_real_ip_header():
+        """When REAL_IP_HEADER is present, it should be used and other headers ignored."""
+        headers = DummyHeaders({
+            "X-Real-IP": "192.0.2.1",
+            "X-Forwarded-Proto": "HTTPS",
+            "X-Forwarded-Host": "example.com",
+            "X-Forwarded-Port": "443",
+            "X-Forwarded-Path": "/path",
+        })
+        config = DummyConfig(real_ip_header="X-Real-IP")
+        result = parse_xforwarded(headers, config)
+>       assert result == {
+            "for": "192.0.2.1",
+            "proto": "https",
+            "host": "example.com",
+            "port": 443,
+            "path": "/path",
+        }
+E       AssertionError: assert {'for': '192.0.2.1'} == {'for': '192....rt': 443, ...}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Right contains 4 more items:
+E         {'host': 'example.com', 'path': '/path', 'port': 443, 'proto': 'https'}
+E         Use -v to get more diff
+
+test_generated.py:35: AssertionError
+________ test_parse_xforwarded_with_proxies_count_and_multiple_headers _________
+
+    def test_parse_xforwarded_with_proxies_count_and_multiple_headers():
+        """When no REAL_IP_HEADER, proxies_count selects the correct address from multiple X-Forwarded-For entries."""
+        headers = DummyHeaders({
+            "X-Forwarded-For": ["203.0.113.1, 203.0.113.2", "203.0.113.3"],
+            "X-Forwarded-Proto": "http",
+        })
+        config = DummyConfig(forwarded_for_header="X-Forwarded-For", proxies_count=2)
+        result = parse_xforwarded(headers, config)
+        # The second-to-last address (index -2) should be used: 203.0.113.2
+>       assert result == {
+            "for": "203.0.113.2",
+            "proto": "http",
+        }
+E       AssertionError: assert {'for': '203.0.113.2'} == {'for': '203....roto': 'http'}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Right contains 1 more item:
+E         {'proto': 'http'}
+E         Use -v to get more diff
+
+test_generated.py:52: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_xforwarded_with_real_ip_header - Asserti...
+FAILED test_generated.py::test_parse_xforwarded_with_proxies_count_and_multiple_headers
+2 failed, 1 passed in 0.30s

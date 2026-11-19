@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-c7aa971a-7433-4ab4-a07e-04fa76415aee",
+  "object": "chat.completion",
+  "created": 1795079185,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport pytest\nfrom py_backwards.transformers.python2_future import Python2FutureTransformer\nfrom py_backwards.utils.snippet import snippet\n\ndef test_future_imports_added_to_simple_module():\n    code = \"x = 1\\nprint(x)\"\n    tree = snippet(code)\n    transformer = Python2FutureTransformer()\n    new_tree = transformer.visit(tree)\n    # The first four nodes should be the future imports\n    import_names = [\"absolute_import\", \"division\", \"print_function\", \"unicode_literals\"]\n    for i, name in enumerate(import_names):\n        node = new_tree.body[i]\n        assert isinstance(node, ast.ImportFrom)\n        assert node.module == \"__future__\"\n        assert node.names[0].name == name\n    # The rest of the body should remain unchanged\n    assert isinstance(new_tree.body[-1], ast.Expr)\n    assert isinstance(new_tree.body[-1].value, ast.Call)\n    assert transformer._tree_changed is True\n\ndef test_future_imports_added_to_empty_module():\n    code = \"\"\n    tree = snippet(code)\n    transformer = Python2FutureTransformer()\n    new_tree = transformer.visit(tree)\n    # Body should contain only the future imports\n    assert len(new_tree.body) == 4\n    import_names = [\"absolute_import\", \"division\", \"print_function\", \"unicode_literals\"]\n    for i, name in enumerate(import_names):\n        node = new_tree.body[i]\n        assert isinstance(node, ast.ImportFrom)\n        assert node.module == \"__future__\"\n        assert node.names[0].name == name\n    assert transformer._tree_changed is True\n\ndef test_future_imports_do_not_duplicate_if_present():\n    code = (\n        \"from __future__ import division\\n\"\n        \"x = 2\\n\"\n    )\n    tree = snippet(code)\n    transformer = Python2FutureTransformer()\n    new_tree = transformer.visit(tree)\n    # The first import should still be division, but all four should appear\n    import_names = [\"absolute_import\", \"division\", \"print_function\", \"unicode_literals\"]\n    for i, name in enumerate(import_names):\n        node = new_tree.body[i]\n        assert isinstance(node, ast.ImportFrom)\n        assert node.module == \"__future__\"\n        assert node.names[0].name == name\n    # The original division import should not be duplicated\n    assert len([n for n in new_tree.body if isinstance(n, ast.ImportFrom) and n.module == \"__future__\"]) == 4\n    assert transformer._tree_changed is True\n```",
+        "reasoning": "We need to test Python2FutureTransformer. We need to import it. Use typed_ast ast3. We can create a simple module AST, apply transformer, check imports added. Use snippet to parse code? snippet likely returns ast.Module. Let's inspect snippet? But we can't import. Assume snippet returns ast.Module from code string. We'll use snippet to parse. Then apply transformer. Check that first nodes are ImportFrom with module '__future__' and names. Also check that _tree_changed set. Write three tests: normal code, boundary empty body, error? maybe passing non-Module? But transformer expects Module. Could test that visiting non-Module returns unchanged? But BaseNodeTransformer may error. We'll test that transformer modifies body and sets flag. Also test that imports order preserved. Third test: ensure that if module already has future imports, they are not duplicated? Not sure. We'll just test that imports added at top. Use tmp_path? Not needed. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047762984,
+    "prompt_tokens": 362,
+    "prompt_time": 0.010233015,
+    "completion_tokens": 733,
+    "completion_time": 1.110228064,
+    "total_tokens": 1095,
+    "total_time": 1.120461079,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 199
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgx7qteadr5srtattc7atf",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport pytest\nfrom py_backwards.transformers.python2_future import Python2FutureTransformer\nfrom py_backwards.utils.snippet import snippet\n\ndef test_future_imports_added_to_simple_module():\n    code = \"x = 1\\nprint(x)\"\n    tree = snippet(code)\n    transformer = Python2FutureTransformer()\n    new_tree = transformer.visit(tree)\n    # The first four nodes should be the future imports\n    import_names = [\"absolute_import\", \"division\", \"print_function\", \"unicode_literals\"]\n    for i, name in enumerate(import_names):\n        node = new_tree.body[i]\n        assert isinstance(node, ast.ImportFrom)\n        assert node.module == \"__future__\"\n        assert node.names[0].name == name\n    # The rest of the body should remain unchanged\n    assert isinstance(new_tree.body[-1], ast.Expr)\n    assert isinstance(new_tree.body[-1].value, ast.Call)\n    assert transformer._tree_changed is True\n\ndef test_future_imports_added_to_empty_module():\n    code = \"\"\n    tree = snippet(code)\n    transformer = Python2FutureTransformer()\n    new_tree = transformer.visit(tree)\n    # Body should contain only the future imports\n    assert len(new_tree.body) == 4\n    import_names = [\"absolute_import\", \"division\", \"print_function\", \"unicode_literals\"]\n    for i, name in enumerate(import_names):\n        node = new_tree.body[i]\n        assert isinstance(node, ast.ImportFrom)\n        assert node.module == \"__future__\"\n        assert node.names[0].name == name\n    assert transformer._tree_changed is True\n\ndef test_future_imports_do_not_duplicate_if_present():\n    code = (\n        \"from __future__ import division\\n\"\n        \"x = 2\\n\"\n    )\n    tree = snippet(code)\n    transformer = Python2FutureTransformer()\n    new_tree = transformer.visit(tree)\n    # The first import should still be division, but all four should appear\n    import_names = [\"absolute_import\", \"division\", \"print_function\", \"unicode_literals\"]\n    for i, name in enumerate(import_names):\n        node = new_tree.body[i]\n        assert isinstance(node, ast.ImportFrom)\n        assert node.module == \"__future__\"\n        assert node.names[0].name == name\n    # The original division import should not be duplicated\n    assert len([n for n in new_tree.body if isinstance(n, ast.ImportFrom) and n.module == \"__future__\"]) == 4\n    assert transformer._tree_changed is True\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.551753854029812
+}

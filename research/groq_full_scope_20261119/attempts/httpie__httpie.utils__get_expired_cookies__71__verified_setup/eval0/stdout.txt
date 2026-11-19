@@ -1,0 +1,32 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_expired_cookies_with_expiration _____________________
+
+    def test_expired_cookies_with_expiration():
+        # Cookie with explicit expires timestamp in the past
+        past_ts = int(time.time()) - 10
+        cookie_str = f"sessionid=abc123; Expires={past_ts}"
+        expired = get_expired_cookies(cookie_str, now=time.time())
+>       assert len(expired) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+test_generated.py:10: AssertionError
+___________________ test_expired_cookies_boundary_equal_now ____________________
+
+    def test_expired_cookies_boundary_equal_now():
+        # Cookie expires exactly at the current time should be considered expired
+        now_ts = int(time.time())
+        cookie_str = f"token=xyz; Expires={now_ts}"
+        expired = get_expired_cookies(cookie_str, now=now_ts)
+>       assert expired == [{"name": "token", "path": "/"}]
+E       AssertionError: assert [] == [{'name': 'to... 'path': '/'}]
+E         
+E         Right contains one more item: {'name': 'token', 'path': '/'}
+E         Use -v to get more diff
+
+test_generated.py:19: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_expired_cookies_with_expiration - assert 0 == 1
+FAILED test_generated.py::test_expired_cookies_boundary_equal_now - Assertion...
+2 failed, 1 passed in 0.31s

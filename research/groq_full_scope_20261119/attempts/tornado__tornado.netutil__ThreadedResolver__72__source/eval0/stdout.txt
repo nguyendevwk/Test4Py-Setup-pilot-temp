@@ -1,0 +1,39 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_single_threadpool_shared_across_instances ________________
+
+    def test_single_threadpool_shared_across_instances():
+        """ThreadedResolver should share the same ThreadPoolExecutor across instances."""
+        resolver1 = ThreadedResolver()
+        resolver1.initialize(num_threads=5)
+        pool1 = resolver1.executor
+        resolver2 = ThreadedResolver()
+        resolver2.initialize(num_threads=5)
+        pool2 = resolver2.executor
+        assert pool1 is pool2, "Executors should be the same shared instance"
+        assert isinstance(pool1, concurrent.futures.ThreadPoolExecutor)
+>       assert pool1._max_workers == 5
+E       assert 10 == 5
+E        +  where 10 = <concurrent.futures.thread.ThreadPoolExecutor object at 0x7ff831cae170>._max_workers
+
+test_generated.py:16: AssertionError
+__________________ test_initialize_sets_close_executor_false ___________________
+
+    def test_initialize_sets_close_executor_false():
+        """initialize should set close_executor to False on the base ExecutorResolver."""
+        resolver = ThreadedResolver()
+        resolver.initialize(num_threads=2)
+        # The base class sets close_executor on the executor; we check the flag
+        # by inspecting the executor's shutdown behavior (it should not close on resolver close)
+        # Since we cannot directly access the flag, we ensure that calling close on resolver
+        # does not shut down the shared pool by checking that the pool is still running.
+        resolver.close()
+        # The pool should still be alive; attempting to submit a task should succeed
+>       future = resolver.executor.submit(lambda: 42)
+E       AttributeError: 'NoneType' object has no attribute 'submit'
+
+test_generated.py:41: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_single_threadpool_shared_across_instances - as...
+FAILED test_generated.py::test_initialize_sets_close_executor_false - Attribu...
+2 failed, 1 passed in 0.18s

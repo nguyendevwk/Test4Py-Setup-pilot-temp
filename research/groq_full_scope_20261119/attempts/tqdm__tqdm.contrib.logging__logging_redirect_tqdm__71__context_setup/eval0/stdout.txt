@@ -1,0 +1,93 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_logging_redirect_to_tqdm_write ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.logging__logging_redirect_tqdm__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_logging_redirect_to_tqdm_0')
+
+    def test_logging_redirect_to_tqdm_write(tmp_path):
+        """When a console logger is redirected, messages are written via tqdm.write."""
+        # Prepare a logger that writes to a StringIO stream
+        stream = io.StringIO()
+        handler = logging.StreamHandler(stream)
+        handler.setLevel(logging.INFO)
+        logger = logging.getLogger("test_logger")
+        logger.setLevel(logging.INFO)
+        logger.handlers = [handler]
+    
+        # Capture stdout to verify tqdm.write output
+        stdout_capture = io.StringIO()
+        with contextlib.redirect_stdout(stdout_capture):
+            with logging_redirect_tqdm([logger]):
+                logger.info("redirected message")
+    
+        # The message should appear in the captured stdout via tqdm.write
+        output = stdout_capture.getvalue()
+>       assert "redirected message" in output
+E       AssertionError: assert 'redirected message' in ''
+
+test_generated.py:29: AssertionError
+----------------------------- Captured stderr call -----------------------------
+redirected message
+------------------------------ Captured log call -------------------------------
+INFO     test_logger:test_generated.py:25 redirected message
+________________ test_original_handlers_restored_after_context _________________
+
+    def test_original_handlers_restored_after_context():
+        """After exiting the context, the original handlers are restored."""
+        logger = logging.getLogger("restore_logger")
+        logger.setLevel(logging.INFO)
+        original_handler = logging.StreamHandler(sys.stderr)
+        logger.handlers = [original_handler]
+    
+        # Capture stderr to ensure original handler writes after context
+        stderr_capture = io.StringIO()
+        with contextlib.redirect_stderr(stderr_capture):
+            with logging_redirect_tqdm([logger]):
+                logger.info("inside context")
+            logger.info("outside context")
+    
+        # Inside context, message should not appear on stderr
+>       assert "inside context" not in stderr_capture.getvalue()
+E       AssertionError: assert 'inside context' not in 'inside context\n'
+E         
+E         'inside context' is contained here:
+E         Strings contain only whitespace, escaping them using repr()
+E           'inside context\n'
+
+test_generated.py:49: AssertionError
+----------------------------- Captured stderr call -----------------------------
+inside context
+outside context
+------------------------------ Captured log call -------------------------------
+INFO     restore_logger:test_generated.py:45 inside context
+INFO     restore_logger:test_generated.py:46 outside context
+_______________________ test_no_loggers_default_behavior _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.logging__logging_redirect_tqdm__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_no_loggers_default_behavi0')
+
+    def test_no_loggers_default_behavior(tmp_path):
+        """When no loggers are provided, the root logger is used and restored."""
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.INFO)
+        original_handlers = root_logger.handlers.copy()
+    
+        # Capture stdout to verify tqdm.write output
+        stdout_capture = io.StringIO()
+        with contextlib.redirect_stdout(stdout_capture):
+            with logging_redirect_tqdm():
+                root_logger.info("root message")
+    
+        output = stdout_capture.getvalue()
+>       assert "root message" in output
+E       AssertionError: assert 'root message' in ''
+
+test_generated.py:67: AssertionError
+----------------------------- Captured stderr call -----------------------------
+root message
+------------------------------ Captured log call -------------------------------
+INFO     root:test_generated.py:64 root message
+=========================== short test summary info ============================
+FAILED test_generated.py::test_logging_redirect_to_tqdm_write - AssertionErro...
+FAILED test_generated.py::test_original_handlers_restored_after_context - Ass...
+FAILED test_generated.py::test_no_loggers_default_behavior - AssertionError: ...
+3 failed in 0.19s

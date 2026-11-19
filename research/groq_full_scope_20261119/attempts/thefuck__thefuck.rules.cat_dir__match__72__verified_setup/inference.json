@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-9e3e060f-e6bc-457c-b899-b99dace05c2d",
+  "object": "chat.completion",
+  "created": 1795078834,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport pytest\nfrom thefuck.rules.cat_dir import match\n\nclass DummyCommand:\n    def __init__(self, output, script_parts):\n        self.output = output\n        self.script_parts = script_parts\n\ndef test_match_detects_cat_dir(tmp_path):\n    # Create a temporary directory to act as the target\n    dir_path = tmp_path / \"subdir\"\n    dir_path.mkdir()\n    cmd = DummyCommand(\n        output=\"cat: somefile.txt: No such file or directory\",\n        script_parts=[\"cat\", str(dir_path)]\n    )\n    assert match(cmd) is True\n\ndef test_match_fails_when_output_not_starting_with_cat():\n    cmd = DummyCommand(\n        output=\"ls: cannot access 'nonexistent': No such file or directory\",\n        script_parts=[\"cat\", \"/tmp\"]\n    )\n    assert match(cmd) is False\n\ndef test_match_raises_index_error_when_script_parts_too_short():\n    cmd = DummyCommand(\n        output=\"cat: /tmp: No such file or directory\",\n        script_parts=[\"cat\"]  # missing second part\n    )\n    with pytest.raises(IndexError):\n        match(cmd)\n```",
+        "reasoning": "We need to write tests for match function. Need to create command object with output and script_parts. Use simple class. Test normal: output starts with 'cat: ' and second part is dir. Boundary: output doesn't start. Error: script_parts missing? maybe index error. But match expects script_parts[1] so error if len<2. Should raise? We can test that it raises IndexError. Use pytest.raises. Three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049522532,
+    "prompt_tokens": 256,
+    "prompt_time": 0.000167908,
+    "completion_tokens": 342,
+    "completion_time": 0.483794406,
+    "total_tokens": 598,
+    "total_time": 0.483962314,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 91
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgjhn9e6vsjgv5chf6da76",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport pytest\nfrom thefuck.rules.cat_dir import match\n\nclass DummyCommand:\n    def __init__(self, output, script_parts):\n        self.output = output\n        self.script_parts = script_parts\n\ndef test_match_detects_cat_dir(tmp_path):\n    # Create a temporary directory to act as the target\n    dir_path = tmp_path / \"subdir\"\n    dir_path.mkdir()\n    cmd = DummyCommand(\n        output=\"cat: somefile.txt: No such file or directory\",\n        script_parts=[\"cat\", str(dir_path)]\n    )\n    assert match(cmd) is True\n\ndef test_match_fails_when_output_not_starting_with_cat():\n    cmd = DummyCommand(\n        output=\"ls: cannot access 'nonexistent': No such file or directory\",\n        script_parts=[\"cat\", \"/tmp\"]\n    )\n    assert match(cmd) is False\n\ndef test_match_raises_index_error_when_script_parts_too_short():\n    cmd = DummyCommand(\n        output=\"cat: /tmp: No such file or directory\",\n        script_parts=[\"cat\"]  # missing second part\n    )\n    with pytest.raises(IndexError):\n        match(cmd)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9277059650048614
+}

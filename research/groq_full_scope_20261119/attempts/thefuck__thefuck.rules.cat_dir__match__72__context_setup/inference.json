@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-4fbe1e79-76e6-45f1-9de5-53e802035724",
+  "object": "chat.completion",
+  "created": 1795078833,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport pytest\nfrom thefuck.rules.cat_dir import match\n\n\nclass DummyCommand:\n    def __init__(self, output, script_parts):\n        self.output = output\n        self.script_parts = script_parts\n\n\ndef test_match_true_when_output_and_directory(tmp_path):\n    \"\"\"match should return True when output starts with 'cat: ' and the second\n    script part is an existing directory.\"\"\"\n    dir_path = tmp_path / \"subdir\"\n    dir_path.mkdir()\n    cmd = DummyCommand(output=\"cat: something\", script_parts=[\"cat\", str(dir_path)])\n    assert match(cmd) is True\n\n\ndef test_match_false_when_not_a_directory(tmp_path):\n    \"\"\"match should return False when the second script part is not a directory.\"\"\"\n    file_path = tmp_path / \"file.txt\"\n    file_path.write_text(\"content\")\n    cmd = DummyCommand(output=\"cat: something\", script_parts=[\"cat\", str(file_path)])\n    assert match(cmd) is False\n\n\ndef test_match_raises_index_error_when_script_parts_too_short(tmp_path):\n    \"\"\"match should raise IndexError if script_parts has fewer than two elements.\"\"\"\n    cmd = DummyCommand(output=\"cat: something\", script_parts=[\"cat\"])\n    with pytest.raises(IndexError):\n        match(cmd)\n```",
+        "reasoning": "We need to write tests for match function. Need to create command object with output and script_parts. Use tmp_path to create dir. Three tests: normal match true, boundary false when not dir, error when missing parts? maybe index error. But match accesses script_parts[1] so need at least two parts. For error scenario, maybe command.script_parts shorter leads to IndexError; but match should not raise? It will raise. So test that it raises IndexError. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051648566,
+    "prompt_tokens": 256,
+    "prompt_time": 0.019034884,
+    "completion_tokens": 373,
+    "completion_time": 0.427072393,
+    "total_tokens": 629,
+    "total_time": 0.446107277,
+    "completion_tokens_details": {
+      "reasoning_tokens": 101
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgjgsfee99ezn1v2fvy7d1",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport pytest\nfrom thefuck.rules.cat_dir import match\n\n\nclass DummyCommand:\n    def __init__(self, output, script_parts):\n        self.output = output\n        self.script_parts = script_parts\n\n\ndef test_match_true_when_output_and_directory(tmp_path):\n    \"\"\"match should return True when output starts with 'cat: ' and the second\n    script part is an existing directory.\"\"\"\n    dir_path = tmp_path / \"subdir\"\n    dir_path.mkdir()\n    cmd = DummyCommand(output=\"cat: something\", script_parts=[\"cat\", str(dir_path)])\n    assert match(cmd) is True\n\n\ndef test_match_false_when_not_a_directory(tmp_path):\n    \"\"\"match should return False when the second script part is not a directory.\"\"\"\n    file_path = tmp_path / \"file.txt\"\n    file_path.write_text(\"content\")\n    cmd = DummyCommand(output=\"cat: something\", script_parts=[\"cat\", str(file_path)])\n    assert match(cmd) is False\n\n\ndef test_match_raises_index_error_when_script_parts_too_short(tmp_path):\n    \"\"\"match should raise IndexError if script_parts has fewer than two elements.\"\"\"\n    cmd = DummyCommand(output=\"cat: something\", script_parts=[\"cat\"])\n    with pytest.raises(IndexError):\n        match(cmd)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8554279940435663
+}

@@ -1,0 +1,58 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_dcc_registers_default __________________________
+
+    def test_dcc_registers_default():
+        """Decorator registers a DCC with default parameters."""
+        # Apply decorator
+        decorated = dcc("ACT/360")(dummy_calculator)
+        # The function should now have a __dcc attribute
+        assert hasattr(decorated, "__dcc")
+        dcc_obj = getattr(decorated, "__dcc")
+        assert isinstance(dcc_obj, DCC)
+        # The registry should contain the new DCC
+>       assert dcc_obj in DCCRegistry._registry  # type: ignore[attr-defined]
+E       AttributeError: 'DCCRegistryMachinery' object has no attribute '_registry'. Did you mean: 'registry'?
+
+test_generated.py:19: AttributeError
+__________________ test_dcc_registers_with_altnames_and_ccys ___________________
+
+    def test_dcc_registers_with_altnames_and_ccys():
+        """Decorator registers a DCC with alternative names and currencies."""
+        alt_names = {"Actual/360", "ACT/360"}
+        # Use a real Currency instance
+>       usd = Currency("USD")
+E       TypeError: Currency.__init__() missing 5 required positional arguments: 'name', 'decimals', 'type', 'quantizer', and 'hashcache'
+
+test_generated.py:25: TypeError
+_________________ test_dcc_decorator_returns_original_function _________________
+
+    def test_dcc_decorator_returns_original_function():
+        """Decorator returns the original function unchanged."""
+>       decorated = dcc("ACT/360")(dummy_calculator)
+
+test_generated.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/dcc.py:428: in register_and_return_dcfc
+    DCCRegistry.register(dcc)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <pypara.dcc.DCCRegistryMachinery object at 0x7f888d4a6c20>
+dcc = DCC(name='ACT/360', altnames=set(), currencies=set(), calculate_fraction_method=<function dummy_calculator at 0x7f888d466a70>)
+
+    def register(self, dcc: DCC) -> None:
+        """
+        Attempts to register the given day count convention.
+        """
+        ## Check if the main name is ever registered before:
+        if self._is_registered(dcc.name):
+            ## Yep, raise a TypeError:
+>           raise TypeError(f"Day count convention '{dcc.name}' is already registered")
+E           TypeError: Day count convention 'ACT/360' is already registered
+
+../../../../groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/dcc.py:318: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_dcc_registers_default - AttributeError: 'DCCRe...
+FAILED test_generated.py::test_dcc_registers_with_altnames_and_ccys - TypeErr...
+FAILED test_generated.py::test_dcc_decorator_returns_original_function - Type...
+3 failed in 0.20s

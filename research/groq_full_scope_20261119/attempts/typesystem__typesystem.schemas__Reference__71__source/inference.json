@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-151a6b78-9646-4382-9c44-2a0b7f17676e",
+  "object": "chat.completion",
+  "created": 1795079377,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem import Schema, String, ValidationError\nfrom typesystem.schemas import Reference\nfrom typesystem.base import Definitions\n\n\nclass Person(Schema):\n    name = String()\n\n\nclass Company(Schema):\n    name = String()\n    employee = Reference(to=\"Person\", definitions=Definitions({\"Person\": Person}))\n\n\ndef test_reference_validates_nested_schema():\n    data = {\"name\": \"Acme Corp\", \"employee\": {\"name\": \"Alice\"}}\n    company = Company.validate(data)\n    assert isinstance(company, Company)\n    assert company.name == \"Acme Corp\"\n    assert isinstance(company.employee, Person)\n    assert company.employee.name == \"Alice\"\n\n\ndef test_reference_allows_null_when_allowed():\n    class NullableCompany(Schema):\n        name = String()\n        employee = Reference(\n            to=\"Person\",\n            definitions=Definitions({\"Person\": Person}),\n            allow_null=True,\n        )\n\n    data = {\"name\": \"Acme Corp\", \"employee\": None}\n    company = NullableCompany.validate(data)\n    assert company.employee is None\n\n\ndef test_reference_raises_error_on_null_when_not_allowed():\n    data = {\"name\": \"Acme Corp\", \"employee\": None}\n    with pytest.raises(ValidationError) as excinfo:\n        Company.validate(data)\n    assert \"May not be null.\" in str(excinfo.value)\n```",
+        "reasoning": "We need to test Reference field. Need Definitions mapping. Use simple schema. Let's create a dummy schema with a field that references another schema. Use typesystem library. We'll test normal validation, null handling, error. We'll create two schemas: Person with name string, and Company with name string and employee Reference to Person. Use tmp_path? Not needed. Just test. Use pytest.raises for error. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04624111,
+    "prompt_tokens": 409,
+    "prompt_time": 0.055341449,
+    "completion_tokens": 370,
+    "completion_time": 0.43830619,
+    "total_tokens": 779,
+    "total_time": 0.493647639,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 85
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh33x0e0mtdsxkk66d4j70",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem import Schema, String, ValidationError\nfrom typesystem.schemas import Reference\nfrom typesystem.base import Definitions\n\n\nclass Person(Schema):\n    name = String()\n\n\nclass Company(Schema):\n    name = String()\n    employee = Reference(to=\"Person\", definitions=Definitions({\"Person\": Person}))\n\n\ndef test_reference_validates_nested_schema():\n    data = {\"name\": \"Acme Corp\", \"employee\": {\"name\": \"Alice\"}}\n    company = Company.validate(data)\n    assert isinstance(company, Company)\n    assert company.name == \"Acme Corp\"\n    assert isinstance(company.employee, Person)\n    assert company.employee.name == \"Alice\"\n\n\ndef test_reference_allows_null_when_allowed():\n    class NullableCompany(Schema):\n        name = String()\n        employee = Reference(\n            to=\"Person\",\n            definitions=Definitions({\"Person\": Person}),\n            allow_null=True,\n        )\n\n    data = {\"name\": \"Acme Corp\", \"employee\": None}\n    company = NullableCompany.validate(data)\n    assert company.employee is None\n\n\ndef test_reference_raises_error_on_null_when_not_allowed():\n    data = {\"name\": \"Acme Corp\", \"employee\": None}\n    with pytest.raises(ValidationError) as excinfo:\n        Company.validate(data)\n    assert \"May not be null.\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "e4c5317cf2094ba0bf3d0e9119eab555",
+  "_api_plus_pacing_seconds": 1.1659648080240004
+}

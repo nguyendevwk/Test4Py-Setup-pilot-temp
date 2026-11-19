@@ -1,0 +1,50 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_file_not_found_basic_attributes _____________________
+
+    def test_file_not_found_basic_attributes():
+        exc = FileNotFound("File missing", path="/tmp/missing.txt", relative_url="/missing.txt")
+        assert isinstance(exc, FileNotFound)
+        assert exc.message == "File missing"
+        assert exc.path == "/tmp/missing.txt"
+        assert exc.relative_url == "/missing.txt"
+        # Default status code should be 404
+>       assert exc.status == 404
+E       AttributeError: 'FileNotFound' object has no attribute 'status'
+
+test_generated.py:13: AttributeError
+____________________ test_file_not_found_headers_and_quiet _____________________
+
+    def test_file_not_found_headers_and_quiet():
+        headers = {"X-Custom": "value"}
+        exc = FileNotFound(quiet=True, headers=headers)
+        # quiet flag should be stored on the exception
+        assert getattr(exc, "quiet", None) is True
+        # headers should be accessible via the headers attribute
+        assert exc.headers == headers
+        # message defaults to None, but status remains 404
+>       assert exc.message is None
+E       AssertionError: assert 'Not Found' is None
+E        +  where 'Not Found' = FileNotFound('Not Found').message
+
+test_generated.py:25: AssertionError
+____________________ test_file_not_found_context_and_extra _____________________
+
+    def test_file_not_found_context_and_extra():
+        context = {"user": "alice"}
+        extra = {"debug": True}
+        exc = FileNotFound(context=context, extra=extra)
+        # context and extra should be stored on the exception
+        assert exc.context == context
+        assert exc.extra == extra
+        # Ensure that the exception can be converted to a dict (common in Sanic)
+        # The dict representation should include the status and message
+>       exc_dict = exc.to_dict()
+E       AttributeError: 'FileNotFound' object has no attribute 'to_dict'
+
+test_generated.py:38: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_file_not_found_basic_attributes - AttributeErr...
+FAILED test_generated.py::test_file_not_found_headers_and_quiet - AssertionEr...
+FAILED test_generated.py::test_file_not_found_context_and_extra - AttributeEr...
+3 failed in 0.31s

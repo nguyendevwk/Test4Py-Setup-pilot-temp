@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-8a71737e-7eab-45ac-9799-25d48d3ce78b",
+  "object": "chat.completion",
+  "created": 1795076373,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom pypara.dcc import DCCRegistryMachinery\n\n# Minimal stub for a DCC object used only for registration tests\nclass DummyDCC:\n    def __init__(self, name: str, altnames: list[str] | None = None):\n        self.name = name\n        self.altnames = altnames or []\n\ndef test_register_and_find_basic():\n    \"\"\"Register a DCC and verify it can be found by main and alternative names.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc = DummyDCC(\"Act/Act\", [\"ACT/ACT\", \"act/act\"])\n    registry.register(dcc)\n\n    # Direct lookup by main name\n    assert registry.find(\"Act/Act\") is dcc\n\n    # Lookup by alternative name (case-insensitive)\n    assert registry.find(\"act/act\") is dcc\n    assert registry.find(\"ACT/ACT\") is dcc\n\n    # Lookup with whitespace and case changes\n    assert registry.find(\"  act/act  \") is dcc\n\ndef test_register_conflict_on_main_and_altnames():\n    \"\"\"Registering a DCC with a duplicate main or alternative name raises TypeError.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc1 = DummyDCC(\"Act/Act\")\n    dcc2 = DummyDCC(\"Act/Act\")  # same main name\n    dcc3 = DummyDCC(\"Act/Act\", [\"ACT/ACT\"])  # duplicate alternative name\n\n    registry.register(dcc1)\n\n    # Duplicate main name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        registry.register(dcc2)\n\n    # Duplicate alternative name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        registry.register(dcc3)\n\ndef test_registry_table_and_properties():\n    \"\"\"Verify that registry.table contains all entries and registry.registry returns list.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc_main = DummyDCC(\"Act/Act\")\n    dcc_alt = DummyDCC(\"Act/Act\", [\"ACT/ACT\"])\n    registry.register(dcc_main)\n    registry.register(dcc_alt)\n\n    # registry.table should contain both main and alternative entries\n    table = registry.table\n    assert \"Act/Act\" in table\n    assert \"ACT/ACT\" in table\n    assert table[\"Act/Act\"] is dcc_main\n    assert table[\"ACT/ACT\"] is dcc_alt\n\n    # registry.registry should list only main entries\n    registry_list = registry.registry\n    assert dcc_main in registry_list\n    assert dcc_alt not in registry_list\n    assert len(registry_list) == 2\n```",
+        "reasoning": "We need tests for DCCRegistryMachinery. Likely DCCRegistry is a singleton? But we can test register, find, conflict. Use dummy DCC class with name and altnames. Create simple DCC with minimal attributes. Test registration, conflict, find with case."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047713422,
+    "prompt_tokens": 1301,
+    "prompt_time": 0.052230917,
+    "completion_tokens": 632,
+    "completion_time": 0.831698989,
+    "total_tokens": 1933,
+    "total_time": 0.883929906,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 59
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se7e1aeqbb2cpe5kp0nwqy",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom pypara.dcc import DCCRegistryMachinery\n\n# Minimal stub for a DCC object used only for registration tests\nclass DummyDCC:\n    def __init__(self, name: str, altnames: list[str] | None = None):\n        self.name = name\n        self.altnames = altnames or []\n\ndef test_register_and_find_basic():\n    \"\"\"Register a DCC and verify it can be found by main and alternative names.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc = DummyDCC(\"Act/Act\", [\"ACT/ACT\", \"act/act\"])\n    registry.register(dcc)\n\n    # Direct lookup by main name\n    assert registry.find(\"Act/Act\") is dcc\n\n    # Lookup by alternative name (case-insensitive)\n    assert registry.find(\"act/act\") is dcc\n    assert registry.find(\"ACT/ACT\") is dcc\n\n    # Lookup with whitespace and case changes\n    assert registry.find(\"  act/act  \") is dcc\n\ndef test_register_conflict_on_main_and_altnames():\n    \"\"\"Registering a DCC with a duplicate main or alternative name raises TypeError.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc1 = DummyDCC(\"Act/Act\")\n    dcc2 = DummyDCC(\"Act/Act\")  # same main name\n    dcc3 = DummyDCC(\"Act/Act\", [\"ACT/ACT\"])  # duplicate alternative name\n\n    registry.register(dcc1)\n\n    # Duplicate main name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        registry.register(dcc2)\n\n    # Duplicate alternative name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        registry.register(dcc3)\n\ndef test_registry_table_and_properties():\n    \"\"\"Verify that registry.table contains all entries and registry.registry returns list.\"\"\"\n    registry = DCCRegistryMachinery()\n    dcc_main = DummyDCC(\"Act/Act\")\n    dcc_alt = DummyDCC(\"Act/Act\", [\"ACT/ACT\"])\n    registry.register(dcc_main)\n    registry.register(dcc_alt)\n\n    # registry.table should contain both main and alternative entries\n    table = registry.table\n    assert \"Act/Act\" in table\n    assert \"ACT/ACT\" in table\n    assert table[\"Act/Act\"] is dcc_main\n    assert table[\"ACT/ACT\"] is dcc_alt\n\n    # registry.registry should list only main entries\n    registry_list = registry.registry\n    assert dcc_main in registry_list\n    assert dcc_alt not in registry_list\n    assert len(registry_list) == 2\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.220316617982462
+}

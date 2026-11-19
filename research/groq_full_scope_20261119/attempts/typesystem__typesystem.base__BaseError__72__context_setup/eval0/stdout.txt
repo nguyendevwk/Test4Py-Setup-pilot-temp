@@ -1,0 +1,33 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_error_on_invalid_initialization_and_equality _______________
+
+    def test_error_on_invalid_initialization_and_equality():
+        # Instantiating with both text and messages should raise an AssertionError
+        with pytest.raises(AssertionError):
+            ValidationError(text="foo", messages=[Message(text="bar")])
+    
+        # Instantiating with messages but missing required fields should raise an AssertionError
+        with pytest.raises(AssertionError):
+            ValidationError(messages=[])
+    
+        # Two ValidationError instances with identical messages should be equal
+        e1 = ValidationError(messages=[Message(text="A", code="c1")])
+        e2 = ValidationError(messages=[Message(text="A", code="c1")])
+        assert e1 == e2
+    
+        # Different messages should not be equal
+        e3 = ValidationError(messages=[Message(text="B", code="c1")])
+        assert e1 != e3
+    
+        # Hash consistency
+        assert hash(e1) == hash(e2)
+>       assert hash(e1) != hash(e3)
+E       AssertionError: assert -3679396377722472860 != -3679396377722472860
+E        +  where -3679396377722472860 = hash(ValidationError(text='A', code='c1'))
+E        +  and   -3679396377722472860 = hash(ValidationError(text='B', code='c1'))
+
+test_generated.py:80: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_error_on_invalid_initialization_and_equality
+1 failed, 2 passed in 0.12s

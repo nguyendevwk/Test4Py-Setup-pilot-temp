@@ -1,0 +1,79 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_number_coerce_and_precision _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/typesystem__typesystem.fields__Number__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_number_coerce_and_precisi0')
+
+    def test_number_coerce_and_precision(tmp_path):
+        # Create a Number field that coerces strings to int and rounds to 2 decimal places
+>       field = Number(
+            numeric_type=int,
+            precision="0.01",
+            coerce_types=True,
+        )
+
+test_generated.py:8: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.fields.Number object at 0x7f6ef93e5c60>, minimum = None
+maximum = None, exclusive_minimum = None, exclusive_maximum = None
+precision = '0.01', multiple_of = None, coerce_types = True
+kwargs = {'numeric_type': <class 'int'>}
+
+    def __init__(
+        self,
+        *,
+        minimum: typing.Union[int, float, decimal.Decimal] = None,
+        maximum: typing.Union[int, float, decimal.Decimal] = None,
+        exclusive_minimum: typing.Union[int, float, decimal.Decimal] = None,
+        exclusive_maximum: typing.Union[int, float, decimal.Decimal] = None,
+        precision: str = None,
+        multiple_of: typing.Union[int, float, decimal.Decimal] = None,
+        coerce_types: bool = True,
+        **kwargs: typing.Any,
+    ):
+>       super().__init__(**kwargs)
+E       TypeError: Field.__init__() got an unexpected keyword argument 'numeric_type'
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:217: TypeError
+_____________________ test_number_boundary_and_multiple_of _____________________
+
+    def test_number_boundary_and_multiple_of():
+        # Field with minimum, maximum, exclusive bounds and multiple_of
+        field = Number(
+            minimum=0,
+            maximum=10,
+            exclusive_minimum=0,
+            exclusive_maximum=10,
+            multiple_of=2,
+            coerce_types=True,
+        )
+        # 2 is valid (>= exclusive_minimum and <= exclusive_maximum)
+        assert field.validate(2) == 2
+        # 10 is invalid because it equals exclusive_maximum
+        with pytest.raises(ValidationError) as excinfo:
+            field.validate(10)
+>       assert "exclusive_maximum" in excinfo.value.text
+E       AttributeError: 'ValidationError' object has no attribute 'text'
+
+test_generated.py:37: AttributeError
+___________________________ test_number_error_cases ____________________________
+
+    def test_number_error_cases():
+        # Field that does not allow null and does not coerce types
+        field = Number(
+            coerce_types=False,
+            allow_null=False,
+        )
+        # None should raise null error
+        with pytest.raises(ValidationError) as excinfo:
+            field.validate(None)
+>       assert "null" in excinfo.value.text
+E       AttributeError: 'ValidationError' object has no attribute 'text'
+
+test_generated.py:52: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_number_coerce_and_precision - TypeError: Field...
+FAILED test_generated.py::test_number_boundary_and_multiple_of - AttributeErr...
+FAILED test_generated.py::test_number_error_cases - AttributeError: 'Validati...
+3 failed in 0.16s

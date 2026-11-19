@@ -1,0 +1,94 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_get_local_reprs_order_and_repr ______________________
+
+    def test_get_local_reprs_order_and_repr():
+        # Define a function with several local variables
+        def sample():
+            a = 1
+            b = "hello"
+            c = [1, 2, 3]
+            d = {"key": "value"}
+            return locals()
+    
+        # Capture the frame of the function call
+        frame = inspect.currentframe()
+        try:
+            # Call the function to populate locals
+            sample()
+            # Get the frame of the function itself
+            func_frame = frame.f_back
+            # Call get_local_reprs on that frame
+            result = get_local_reprs(func_frame)
+            # The result should be an OrderedDict preserving the order of co_varnames
+            expected_keys = list(func_frame.f_code.co_varnames)
+>           assert list(result.keys()) == expected_keys
+E           AssertionError: assert ['pyfuncitem'...', 'funcargs'] == ['pyfuncitem'...gs', 'result']
+E             
+E             At index 3 diff: 'funcargs' != 'result'
+E             Use -v to get more diff
+
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_verified_setup/eval0/test_generated.py:33: AssertionError
+________________ test_get_local_reprs_with_watch_and_normalize _________________
+
+    def test_get_local_reprs_with_watch_and_normalize():
+        # Define a function that uses a local variable and a watch
+        def sample():
+            x = 42
+            return locals()
+    
+        frame = inspect.currentframe()
+        try:
+            sample()
+            func_frame = frame.f_back
+            # Use DummyWatch to add a watched item
+            watch = [DummyWatch()]
+>           result = get_local_reprs(func_frame, watch=watch, normalize=True)
+
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_verified_setup/eval0/test_generated.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+frame = <frame at 0x7f0b4a76a5c0, file '/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/_pytest/python.py', line 187, code pytest_pyfunc_call>
+watch = [<test_generated.DummyWatch object at 0x7f0b4ac6b7c0>], custom_repr = ()
+max_length = None, normalize = True
+
+    def get_local_reprs(frame, watch=(), custom_repr=(), max_length=None, normalize=False):
+        code = frame.f_code
+        vars_order = (code.co_varnames + code.co_cellvars + code.co_freevars +
+                      tuple(frame.f_locals.keys()))
+    
+        result_items = [(key, utils.get_shortish_repr(value, custom_repr,
+                                                      max_length, normalize))
+                        for key, value in frame.f_locals.items()]
+        result_items.sort(key=lambda key_value: vars_order.index(key_value[0]))
+        result = collections.OrderedDict(result_items)
+    
+        for variable in watch:
+>           result.update(sorted(variable.items(frame, normalize)))
+E           ValueError: too many values to unpack (expected 2)
+
+pysnooper/tracer.py:44: ValueError
+__________________ test_get_local_reprs_max_length_truncation __________________
+
+    def test_get_local_reprs_max_length_truncation():
+        # Define a function with a very long string
+        def sample():
+            long_str = "a" * 200
+            return locals()
+    
+        frame = inspect.currentframe()
+        try:
+            sample()
+            func_frame = frame.f_back
+            # Set max_length to 50 to force truncation
+            result = get_local_reprs(func_frame, max_length=50)
+            # The representation of long_str should be truncated
+>           repr_value = result["long_str"]
+E           KeyError: 'long_str'
+
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_verified_setup/eval0/test_generated.py:76: KeyError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_verified_setup/eval0/test_generated.py::test_get_local_reprs_order_and_repr
+FAILED ../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_verified_setup/eval0/test_generated.py::test_get_local_reprs_with_watch_and_normalize
+FAILED ../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__43__atomic_verified_setup/eval0/test_generated.py::test_get_local_reprs_max_length_truncation
+3 failed in 0.17s

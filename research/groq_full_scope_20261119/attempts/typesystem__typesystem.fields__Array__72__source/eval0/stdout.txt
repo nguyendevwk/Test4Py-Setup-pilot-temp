@@ -1,0 +1,41 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_array_with_exact_items_and_unique ____________________
+
+    def test_array_with_exact_items_and_unique():
+        # Array expects exactly 3 items, all strings, and they must be unique
+        field = Array(items=String(), exact_items=3, unique_items=True)
+        # Valid input
+        valid = ["a", "b", "c"]
+        assert field.validate(valid) == ["a", "b", "c"]
+    
+        # Duplicate items should raise ValidationError
+        with pytest.raises(ValidationError) as excinfo:
+            field.validate(["x", "x", "y"])
+        messages = excinfo.value.messages
+>       assert any(msg.code == "unique_items" for msg in messages)
+E       TypeError: 'method' object is not iterable
+
+test_generated.py:15: TypeError
+_________________ test_array_with_additional_items_and_min_max _________________
+
+    def test_array_with_additional_items_and_min_max():
+        # Array expects at least 2 items, at most 4, first two must be integers, rest strings
+        int_field = Integer()
+        str_field = String()
+        field = Array(items=[int_field, int_field], additional_items=str_field, min_items=2, max_items=4)
+        # Valid input with 3 items
+        valid = [1, 2, "three"]
+        assert field.validate(valid) == [1, 2, "three"]
+    
+        # Too few items
+        with pytest.raises(ValidationError) as excinfo:
+            field.validate([1])
+>       assert excinfo.value.messages[0].code == "min_items"
+E       TypeError: 'method' object is not subscriptable
+
+test_generated.py:31: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_array_with_exact_items_and_unique - TypeError:...
+FAILED test_generated.py::test_array_with_additional_items_and_min_max - Type...
+2 failed, 1 passed in 0.12s

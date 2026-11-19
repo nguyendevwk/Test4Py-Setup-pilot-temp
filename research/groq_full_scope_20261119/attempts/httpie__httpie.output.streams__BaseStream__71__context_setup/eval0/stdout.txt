@@ -1,0 +1,47 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_stream_normal_output ___________________________
+
+    def test_stream_normal_output():
+        msg = DummyMessage(
+            headers="HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n",
+            body=b"Hello, world!",
+            metadata="Request: GET /",
+        )
+>       opts = OutputOptions(headers=True, body=True, meta=True)
+E       TypeError: OutputOptions.__new__() missing 1 required positional argument: 'kind'
+
+test_generated.py:43: TypeError
+_______________________ test_stream_no_body_only_headers _______________________
+
+    def test_stream_no_body_only_headers():
+        msg = DummyMessage(
+            headers="HTTP/1.1 204 No Content\r\n",
+            body=b"",
+            metadata="",
+        )
+>       opts = OutputOptions(headers=True, body=False, meta=False)
+E       TypeError: OutputOptions.__new__() missing 1 required positional argument: 'kind'
+
+test_generated.py:62: TypeError
+______________________ test_stream_body_suppressed_error _______________________
+
+    def test_stream_body_suppressed_error():
+        class SuppressStream(BaseStream):
+            def iter_body(self):
+                raise DataSuppressedError("Body suppressed")
+    
+        msg = DummyMessage(
+            headers="HTTP/1.1 200 OK\r\n",
+            body=b"ignored",
+            metadata="",
+        )
+>       opts = OutputOptions(headers=True, body=True, meta=False)
+E       TypeError: OutputOptions.__new__() missing 1 required positional argument: 'kind'
+
+test_generated.py:77: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_stream_normal_output - TypeError: OutputOption...
+FAILED test_generated.py::test_stream_no_body_only_headers - TypeError: Outpu...
+FAILED test_generated.py::test_stream_body_suppressed_error - TypeError: Outp...
+3 failed in 0.78s

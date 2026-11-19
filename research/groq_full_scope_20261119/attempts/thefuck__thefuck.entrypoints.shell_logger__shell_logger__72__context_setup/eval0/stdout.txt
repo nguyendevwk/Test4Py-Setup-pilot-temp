@@ -1,0 +1,110 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_read_wraps_when_buffer_full _______________________
+
+f = <mmap.mmap closed=False, access=ACCESS_WRITE, length=10, pos=0, offset=0>
+fd = 0
+
+    def _read(f, fd):
+        data = os.read(fd, 1024)
+        try:
+>           f.write(data)
+E           ValueError: data out of range
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/entrypoints/shell_logger.py:17: ValueError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.entrypoints.shell_logger__shell_logger__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_read_wraps_when_buffer_fu0')
+
+    def test_read_wraps_when_buffer_full(tmp_path):
+        """_read should wrap around when the mmap buffer is full."""
+        # Create a small mmap file
+        file_path = tmp_path / "log"
+        fd = os.open(str(file_path), os.O_CREAT | os.O_RDWR)
+        os.write(fd, b'\x00' * 10)  # small buffer
+        buf = mmap.mmap(fd, 10, mmap.MAP_SHARED, mmap.PROT_WRITE)
+    
+        # Write more than buffer size to trigger ValueError
+        data = b'A' * 20
+        # Simulate reading from a file descriptor that returns data
+        def fake_read(_fd, _n):
+            return data
+    
+        # Replace os.read temporarily
+        original_read = os.read
+        os.read = fake_read
+        try:
+>           _read(buf, 0)
+
+test_generated.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = <mmap.mmap closed=False, access=ACCESS_WRITE, length=10, pos=0, offset=0>
+fd = 0
+
+    def _read(f, fd):
+        data = os.read(fd, 1024)
+        try:
+            f.write(data)
+        except ValueError:
+            position = const.LOG_SIZE_IN_BYTES - const.LOG_SIZE_TO_CLEAN
+>           f.move(0, const.LOG_SIZE_TO_CLEAN, position)
+E           ValueError: source, destination, or count out of range
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/entrypoints/shell_logger.py:20: ValueError
+_______________ test_shell_logger_warns_and_exits_when_no_shell ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa9833dbb50>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7fa9833dba30>
+
+    def test_shell_logger_warns_and_exits_when_no_shell(monkeypatch, caplog):
+        """shell_logger should warn and exit with code 1 when SHELL env var is missing."""
+        monkeypatch.delenv("SHELL", raising=False)
+        with pytest.raises(SystemExit) as excinfo:
+            shell_logger("dummy_output")
+        assert excinfo.value.code == 1
+>       assert any("Shell logger doesn't support your platform." in rec.message for rec in caplog.records)
+E       assert False
+E        +  where False = any(<generator object test_shell_logger_warns_and_exits_when_no_shell.<locals>.<genexpr> at 0x7fa98337eab0>)
+
+test_generated.py:44: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[41m[37m[1m[WARN] Shell logger doesn't support your platform.[0m
+_______________________ test_set_pty_size_does_not_raise _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.entrypoints.shell_logger__shell_logger__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_set_pty_size_does_not_rai0')
+
+    def test_set_pty_size_does_not_raise(tmp_path):
+        """_set_pty_size should not raise an exception when called with a valid fd."""
+        # Use /dev/null as a dummy file descriptor
+        fd = os.open("/dev/null", os.O_RDWR)
+        try:
+>           _set_pty_size(fd)
+
+test_generated.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+master_fd = 13
+
+    def _set_pty_size(master_fd):
+        buf = array.array('h', [0, 0, 0, 0])
+>       fcntl.ioctl(pty.STDOUT_FILENO, termios.TIOCGWINSZ, buf, True)
+E       OSError: [Errno 25] Inappropriate ioctl for device
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/entrypoints/shell_logger.py:29: OSError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_read_wraps_when_buffer_full - ValueError: sour...
+FAILED test_generated.py::test_shell_logger_warns_and_exits_when_no_shell - a...
+FAILED test_generated.py::test_set_pty_size_does_not_raise - OSError: [Errno ...
+3 failed, 2 warnings in 0.25s

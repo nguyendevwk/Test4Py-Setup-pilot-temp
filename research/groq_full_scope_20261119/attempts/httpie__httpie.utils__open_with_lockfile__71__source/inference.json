@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-c299be46-d41a-4ee1-80b6-bdcbf1302404",
+  "object": "chat.completion",
+  "created": 1795079448,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport tempfile\nimport pytest\nfrom pathlib import Path\nfrom httpie.utils import open_with_lockfile, LockFileError\n\n\ndef test_open_with_lockfile_creates_and_removes_lock(tmp_path: Path):\n    \"\"\"Normal usage: file is opened and lock file is removed after context.\"\"\"\n    test_file = tmp_path / \"sample.txt\"\n    test_file.write_text(\"hello world\")\n\n    lock_file = Path(tempfile.gettempdir()) / \\\n        os.path.basename(str(test_file)).encode().hex()\n\n    # Ensure no lock file exists before\n    assert not lock_file.exists()\n\n    with open_with_lockfile(test_file, \"r\") as f:\n        # Inside context: lock file should exist\n        assert lock_file.exists()\n        content = f.read()\n        assert content == \"hello world\"\n\n    # After context: lock file should be removed\n    assert not lock_file.exists()\n\n\ndef test_open_with_lockfile_raises_on_existing_lock(tmp_path: Path):\n    \"\"\"If another process has created the lock file, opening should fail.\"\"\"\n    test_file = tmp_path / \"locked.txt\"\n    test_file.write_text(\"data\")\n\n    lock_file = Path(tempfile.gettempdir()) / \\\n        os.path.basename(str(test_file)).encode().hex()\n    lock_file.touch()  # Simulate existing lock\n\n    with pytest.raises(LockFileError):\n        with open_with_lockfile(test_file, \"r\"):\n            pass\n\n    # Clean up\n    lock_file.unlink()\n\n\ndef test_open_with_lockfile_removes_lock_on_exception(tmp_path: Path):\n    \"\"\"If an exception occurs inside the context, the lock file is still removed.\"\"\"\n    test_file = tmp_path / \"error.txt\"\n    test_file.write_text(\"content\")\n\n    lock_file = Path(tempfile.gettempdir()) / \\\n        os.path.basename(str(test_file)).encode().hex()\n\n    try:\n        with open_with_lockfile(test_file, \"r\") as f:\n            assert lock_file.exists()\n            raise RuntimeError(\"intentional error\")\n    except RuntimeError:\n        pass\n\n    # After exception, lock file should be removed\n    assert not lock_file.exists()\n```",
+        "reasoning": "We need tests for open_with_lockfile. We need to test normal behavior: file opened, lock file created and removed. Boundary: if lock file exists raise LockFileError. Error: maybe file not exist? open will raise FileNotFoundError. Also test that lock file removed even if exception inside context. Use tmp_path. Need LockFileError defined? Not in snippet. Probably defined elsewhere. We can import from httpie.utils. Let's assume it's defined. We'll write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005110166,
+    "prompt_tokens": 463,
+    "prompt_time": 0.029153714,
+    "completion_tokens": 554,
+    "completion_time": 0.609845565,
+    "total_tokens": 1017,
+    "total_time": 0.638999279,
+    "completion_tokens_details": {
+      "reasoning_tokens": 99
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh591teaqsjs31hwfaz4nw",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport tempfile\nimport pytest\nfrom pathlib import Path\nfrom httpie.utils import open_with_lockfile, LockFileError\n\n\ndef test_open_with_lockfile_creates_and_removes_lock(tmp_path: Path):\n    \"\"\"Normal usage: file is opened and lock file is removed after context.\"\"\"\n    test_file = tmp_path / \"sample.txt\"\n    test_file.write_text(\"hello world\")\n\n    lock_file = Path(tempfile.gettempdir()) / \\\n        os.path.basename(str(test_file)).encode().hex()\n\n    # Ensure no lock file exists before\n    assert not lock_file.exists()\n\n    with open_with_lockfile(test_file, \"r\") as f:\n        # Inside context: lock file should exist\n        assert lock_file.exists()\n        content = f.read()\n        assert content == \"hello world\"\n\n    # After context: lock file should be removed\n    assert not lock_file.exists()\n\n\ndef test_open_with_lockfile_raises_on_existing_lock(tmp_path: Path):\n    \"\"\"If another process has created the lock file, opening should fail.\"\"\"\n    test_file = tmp_path / \"locked.txt\"\n    test_file.write_text(\"data\")\n\n    lock_file = Path(tempfile.gettempdir()) / \\\n        os.path.basename(str(test_file)).encode().hex()\n    lock_file.touch()  # Simulate existing lock\n\n    with pytest.raises(LockFileError):\n        with open_with_lockfile(test_file, \"r\"):\n            pass\n\n    # Clean up\n    lock_file.unlink()\n\n\ndef test_open_with_lockfile_removes_lock_on_exception(tmp_path: Path):\n    \"\"\"If an exception occurs inside the context, the lock file is still removed.\"\"\"\n    test_file = tmp_path / \"error.txt\"\n    test_file.write_text(\"content\")\n\n    lock_file = Path(tempfile.gettempdir()) / \\\n        os.path.basename(str(test_file)).encode().hex()\n\n    try:\n        with open_with_lockfile(test_file, \"r\") as f:\n            assert lock_file.exists()\n            raise RuntimeError(\"intentional error\")\n    except RuntimeError:\n        pass\n\n    # After exception, lock file should be removed\n    assert not lock_file.exists()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "55315aa0e04b423bb5f745e8c40360ca",
+  "_api_plus_pacing_seconds": 1.3211739199468866
+}

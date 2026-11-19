@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-2e2c228b-9005-4728-a0f7-7b3d4b64877c",
+  "object": "chat.completion",
+  "created": 1795076701,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport warnings\nfrom tqdm._tqdm_pandas import tqdm_pandas\nfrom tqdm import TqdmDeprecationWarning\n\n\nclass DummyClass:\n    def __init__(self):\n        self.pandas_called = False\n        self.pandas_kwargs = None\n\n    def pandas(self, **kwargs):\n        self.pandas_called = True\n        self.pandas_kwargs = kwargs\n\n\nclass DummyInstance:\n    def __init__(self):\n        self.fp = DummyFile()\n        self.deprecated_t = None\n\n    def pandas(self, **kwargs):\n        # This method should not be called for instance case\n        raise RuntimeError(\"Instance pandas should not be called\")\n\n\nclass DummyFile:\n    def __init__(self):\n        self.written = []\n\n    def write(self, msg):\n        self.written.append(msg)\n\n\ndef test_tqdm_pandas_with_class_triggers_warning_and_calls_pandas(tmp_path):\n    dummy = DummyClass()\n    with pytest.warns(TqdmDeprecationWarning, match=\"Please use `tqdm.pandas`\"):\n        tqdm_pandas(DummyClass, desc=\"test\")\n    assert dummy.pandas_called, \"pandas method on class was not called\"\n    assert dummy.pandas_kwargs == {\"desc\": \"test\"}\n\n\ndef test_tqdm_pandas_with_instance_triggers_warning_and_calls_pandas_on_type(tmp_path):\n    dummy = DummyInstance()\n    with pytest.warns(TqdmDeprecationWarning, match=\"Please use `tqdm.pandas`\"):\n        tqdm_pandas(dummy, total=10)\n    # The instance's pandas should not be called; instead type(dummy).pandas is called\n    # Since DummyInstance has no pandas on type, we expect no error but no call\n    # Ensure no exception and warning emitted\n    assert dummy.deprecated_t is None, \"deprecated_t should remain None\"\n\n\ndef test_tqdm_pandas_with_nonclass_noninstance_triggers_warning_and_calls_type_pandas(tmp_path):\n    class Custom:\n        def __init__(self):\n            self.fp = DummyFile()\n            self.deprecated_t = None\n\n        def pandas(self, **kwargs):\n            self.deprecated_t = kwargs\n\n    custom = Custom()\n    with pytest.warns(TqdmDeprecationWarning, match=\"Please use `tqdm.pandas`\"):\n        tqdm_pandas(custom, bar_format=\"{}\")\n    assert custom.deprecated_t == {\"bar_format\": \"{}\"}, \"type pandas was not called with correct kwargs\"\n```",
+        "reasoning": "We need tests for tqdm_pandas. It uses TqdmDeprecationWarning. We can import tqdm_pandas from tqdm._tqdm_pandas. We need to test normal, boundary, error. Cases: passing a class type, passing an instance. We can create dummy class with pandas method. Use tmp_path? Not needed. Use pytest.raises? No exception expected. Just check that TqdmDeprecationWarning is emitted? It's a warning class. We can capture warnings. Use pytest.warns. Test that calling with class triggers warning and calls pandas on class. For instance, create dummy class with pandas method that records call. For instance case, create dummy instance with fp attribute. Ensure warning and method called. Third test maybe passing something else triggers? If tclass not type and no __name__ startswith, then goes else. So test that. Use dummy instance with fp. Ensure warning. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052059604,
+    "prompt_tokens": 450,
+    "prompt_time": 0.015043114,
+    "completion_tokens": 722,
+    "completion_time": 1.075199823,
+    "total_tokens": 1172,
+    "total_time": 1.090242937,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 191
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sehe20efa84ns6jcbh2bcr",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport warnings\nfrom tqdm._tqdm_pandas import tqdm_pandas\nfrom tqdm import TqdmDeprecationWarning\n\n\nclass DummyClass:\n    def __init__(self):\n        self.pandas_called = False\n        self.pandas_kwargs = None\n\n    def pandas(self, **kwargs):\n        self.pandas_called = True\n        self.pandas_kwargs = kwargs\n\n\nclass DummyInstance:\n    def __init__(self):\n        self.fp = DummyFile()\n        self.deprecated_t = None\n\n    def pandas(self, **kwargs):\n        # This method should not be called for instance case\n        raise RuntimeError(\"Instance pandas should not be called\")\n\n\nclass DummyFile:\n    def __init__(self):\n        self.written = []\n\n    def write(self, msg):\n        self.written.append(msg)\n\n\ndef test_tqdm_pandas_with_class_triggers_warning_and_calls_pandas(tmp_path):\n    dummy = DummyClass()\n    with pytest.warns(TqdmDeprecationWarning, match=\"Please use `tqdm.pandas`\"):\n        tqdm_pandas(DummyClass, desc=\"test\")\n    assert dummy.pandas_called, \"pandas method on class was not called\"\n    assert dummy.pandas_kwargs == {\"desc\": \"test\"}\n\n\ndef test_tqdm_pandas_with_instance_triggers_warning_and_calls_pandas_on_type(tmp_path):\n    dummy = DummyInstance()\n    with pytest.warns(TqdmDeprecationWarning, match=\"Please use `tqdm.pandas`\"):\n        tqdm_pandas(dummy, total=10)\n    # The instance's pandas should not be called; instead type(dummy).pandas is called\n    # Since DummyInstance has no pandas on type, we expect no error but no call\n    # Ensure no exception and warning emitted\n    assert dummy.deprecated_t is None, \"deprecated_t should remain None\"\n\n\ndef test_tqdm_pandas_with_nonclass_noninstance_triggers_warning_and_calls_type_pandas(tmp_path):\n    class Custom:\n        def __init__(self):\n            self.fp = DummyFile()\n            self.deprecated_t = None\n\n        def pandas(self, **kwargs):\n            self.deprecated_t = kwargs\n\n    custom = Custom()\n    with pytest.warns(TqdmDeprecationWarning, match=\"Please use `tqdm.pandas`\"):\n        tqdm_pandas(custom, bar_format=\"{}\")\n    assert custom.deprecated_t == {\"bar_format\": \"{}\"}, \"type pandas was not called with correct kwargs\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4562490479438566
+}

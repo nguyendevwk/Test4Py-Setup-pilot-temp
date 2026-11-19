@@ -1,0 +1,77 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_basic_repr_and_normalize _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-148/test_basic_repr_and_normalize0')
+
+    def test_basic_repr_and_normalize(tmp_path):
+        # A simple object with a custom repr that includes newlines and carriage returns
+        class Obj:
+            def __repr__(self):
+                return "Line1\r\nLine2\nLine3"
+    
+        obj = Obj()
+        # Without normalization, newlines and carriage returns should be removed
+        assert get_shortish_repr(obj) == "Line1Line2Line3"
+        # With normalization, the string should be lowercased and spaces removed
+        # (normalize_repr lowercases and removes spaces)
+>       assert get_shortish_repr(obj, normalize=True) == "line1line2line3"
+E       AssertionError: assert 'Line1Line2Line3' == 'line1line2line3'
+E         
+E         - line1line2line3
+E         ? ^    ^    ^
+E         + Line1Line2Line3
+E         ? ^    ^    ^
+
+../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__44__atomic_verified_setup/eval0/test_generated.py:15: AssertionError
+____________________________ test_truncate_behavior ____________________________
+
+    def test_truncate_behavior():
+        # A long string that will be truncated
+        long_str = "a" * 50
+        # max_length 10 should cut to 10 characters
+>       assert get_shortish_repr(long_str, max_length=10) == "a" * 10
+E       assert "'aa...aaa'" == 'aaaaaaaaaa'
+E         
+E         - aaaaaaaaaa
+E         + 'aa...aaa'
+
+../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__44__atomic_verified_setup/eval0/test_generated.py:21: AssertionError
+______________________ test_error_in_repr_and_custom_repr ______________________
+
+    def test_error_in_repr_and_custom_repr():
+        # A class whose __repr__ raises an exception
+        class BadRepr:
+            def __repr__(self):
+                raise ValueError("bad repr")
+    
+        bad = BadRepr()
+        # get_shortish_repr should catch the exception and return 'REPR FAILED'
+        assert get_shortish_repr(bad) == "REPR FAILED"
+    
+        # Custom repr functions can also raise; they should be tried before the default
+        def bad_custom_repr(item):
+            raise RuntimeError("custom fail")
+    
+        # Provide a custom_repr tuple that includes the failing function
+>       assert get_shortish_repr(bad, custom_repr=(bad_custom_repr,)) == "REPR FAILED"
+
+../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__44__atomic_verified_setup/eval0/test_generated.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+pysnooper/utils.py:68: in get_shortish_repr
+    repr_function = get_repr_function(item, custom_repr)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = <[ValueError('bad repr') raised in repr()] BadRepr object at 0x7f81ab269ab0>
+custom_repr = (<function test_error_in_repr_and_custom_repr.<locals>.bad_custom_repr at 0x7f81aad67490>,)
+
+    def get_repr_function(item, custom_repr):
+>       for condition, action in custom_repr:
+E       TypeError: cannot unpack non-iterable function object
+
+pysnooper/utils.py:51: TypeError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__44__atomic_verified_setup/eval0/test_generated.py::test_basic_repr_and_normalize
+FAILED ../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__44__atomic_verified_setup/eval0/test_generated.py::test_truncate_behavior
+FAILED ../../../../../../attempts/PySnooper__pysnooper.utils__get_shortish_repr__44__atomic_verified_setup/eval0/test_generated.py::test_error_in_repr_and_custom_repr
+3 failed in 0.18s

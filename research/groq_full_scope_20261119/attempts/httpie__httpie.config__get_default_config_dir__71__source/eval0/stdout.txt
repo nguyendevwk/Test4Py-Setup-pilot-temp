@@ -1,0 +1,29 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_xdg_default_config_dir __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__get_default_config_dir__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_xdg_default_config_dir0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fbb4c98f580>
+
+    def test_xdg_default_config_dir(tmp_path, monkeypatch):
+        """When no legacy directory and no env override, XDG default is used."""
+        # Create a fake home directory without legacy config
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        # Patch Path.home to return our fake home
+        monkeypatch.setattr(Path, "home", lambda: fake_home)
+        # Ensure no legacy dir
+        legacy_dir = fake_home / DEFAULT_RELATIVE_LEGACY_CONFIG_DIR
+        assert not legacy_dir.exists()
+        # Ensure no env override
+        monkeypatch.delenv(ENV_HTTPIE_CONFIG_DIR, raising=False)
+        # Ensure no XDG_CONFIG_HOME set
+        monkeypatch.delenv(ENV_XDG_CONFIG_HOME, raising=False)
+        result = get_default_config_dir()
+>       expected = fake_home / DEFAULT_RELATIVE_XDG_CONFIG_HOME / DEFAULT_CONFIG_DIRNAME
+E       NameError: name 'DEFAULT_RELATIVE_XDG_CONFIG_HOME' is not defined
+
+test_generated.py:55: NameError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_xdg_default_config_dir - NameError: name 'DEFA...
+1 failed, 2 passed in 0.17s

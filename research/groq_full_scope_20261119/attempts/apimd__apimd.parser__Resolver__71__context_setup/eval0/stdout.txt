@@ -1,0 +1,35 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_visit_name_resolves_alias_and_typevar __________________
+
+    def test_visit_name_resolves_alias_and_typevar():
+        # Alias mapping: "mymod.bar" -> "typing.TypeVar('T')"
+        alias_map = {"mymod.bar": "typing.TypeVar('T')"}
+        resolver = Resolver(root="mymod", alias=alias_map)
+        # Create a Name node for "bar"
+        name_node = ast.Name(id="bar", ctx=ast.Load())
+        # Resolve the name
+        resolved = resolver.visit(name_node)
+        # Since the alias is a TypeVar, the resolver should return the original node
+>       assert resolved is name_node
+E       assert <ast.Call object at 0x7f5a47dea020> is <ast.Name object at 0x7f5a47deaef0>
+
+test_generated.py:26: AssertionError
+___________________ test_visit_subscript_union_and_optional ____________________
+
+    def test_visit_subscript_union_and_optional():
+        resolver = Resolver(root="mymod", alias={})
+        # Union: typing.Union[int, str]
+        union_expr = ast.parse("typing.Union[int, str]").body[0].value
+        resolved_union = resolver.visit(union_expr)
+        # Should be a BinOp with BitOr between int and str
+>       assert isinstance(resolved_union, ast.BinOp)
+E       AssertionError: assert False
+E        +  where False = isinstance(<ast.Subscript object at 0x7f5a47d7bb20>, <class 'ast.BinOp'>)
+E        +    where <class 'ast.BinOp'> = ast.BinOp
+
+test_generated.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_visit_name_resolves_alias_and_typevar - assert...
+FAILED test_generated.py::test_visit_subscript_union_and_optional - Assertion...
+2 failed, 1 passed in 0.16s

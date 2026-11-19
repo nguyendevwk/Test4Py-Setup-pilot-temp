@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-41af1340-b07f-4b2b-b8ea-f31435d54854",
+  "object": "chat.completion",
+  "created": 1795076561,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import tokenize_json, ParseError\nfrom typesystem.tokenize.tokens import DictToken, ListToken, ScalarToken, Token\n\ndef test_tokenize_json_normal_object():\n    json_str = '{\"a\": 1, \"b\": [true, false, null], \"c\": \"text\"}'\n    token = tokenize_json(json_str)\n    assert isinstance(token, DictToken)\n    assert token.value == {\"a\": 1, \"b\": [True, False, None], \"c\": \"text\"}\n    # Verify positions: first key starts at column 2 (after '{')\n    assert token.start == 0\n    assert token.end == len(json_str) - 1\n    # Check nested list token\n    nested_list = token.value[\"b\"]\n    assert isinstance(nested_list, list)\n    # Ensure scalar tokens inside list have correct types\n    assert isinstance(token.value[\"a\"], int)\n    assert isinstance(token.value[\"c\"], str)\n\ndef test_tokenize_json_empty_string_raises():\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    assert err.position.column_no == 1\n    assert err.position.line_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_json_invalid_syntax_raises():\n    bad_json = '{\"a\": 1, \"b\": [true, false, null], \"c\": \"text\"'  # missing closing brace\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(bad_json)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    # The error message should contain the original JSONDecodeError message\n    assert \"Expecting\" in err.text\n    # Position should point to the end of the string\n    assert err.position.column_no == len(bad_json) + 1\n    assert err.position.line_no == 1\n    assert err.position.char_index == len(bad_json)\n```",
+        "reasoning": "Need three tests: normal JSON, boundary empty string, error malformed. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.18749236,
+    "prompt_tokens": 1114,
+    "prompt_time": 0.056886282,
+    "completion_tokens": 470,
+    "completion_time": 0.576884378,
+    "total_tokens": 1584,
+    "total_time": 0.63377066,
+    "completion_tokens_details": {
+      "reasoning_tokens": 19
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sed666ej5stx3c8zr6kzw4",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import tokenize_json, ParseError\nfrom typesystem.tokenize.tokens import DictToken, ListToken, ScalarToken, Token\n\ndef test_tokenize_json_normal_object():\n    json_str = '{\"a\": 1, \"b\": [true, false, null], \"c\": \"text\"}'\n    token = tokenize_json(json_str)\n    assert isinstance(token, DictToken)\n    assert token.value == {\"a\": 1, \"b\": [True, False, None], \"c\": \"text\"}\n    # Verify positions: first key starts at column 2 (after '{')\n    assert token.start == 0\n    assert token.end == len(json_str) - 1\n    # Check nested list token\n    nested_list = token.value[\"b\"]\n    assert isinstance(nested_list, list)\n    # Ensure scalar tokens inside list have correct types\n    assert isinstance(token.value[\"a\"], int)\n    assert isinstance(token.value[\"c\"], str)\n\ndef test_tokenize_json_empty_string_raises():\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    assert err.position.column_no == 1\n    assert err.position.line_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_json_invalid_syntax_raises():\n    bad_json = '{\"a\": 1, \"b\": [true, false, null], \"c\": \"text\"'  # missing closing brace\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(bad_json)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    # The error message should contain the original JSONDecodeError message\n    assert \"Expecting\" in err.text\n    # Position should point to the end of the string\n    assert err.position.column_no == len(bad_json) + 1\n    assert err.position.line_no == 1\n    assert err.position.char_index == len(bad_json)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1192300980328582
+}

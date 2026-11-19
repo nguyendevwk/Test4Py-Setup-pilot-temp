@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-c3b1d319-6745-4ecc-bd7b-daba0caa31b8",
+  "object": "chat.completion",
+  "created": 1795079354,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport asyncio\nfrom tornado.queues import LifoQueue\nfrom tornado import gen\n\n@pytest.mark.asyncio\nasync def test_lifo_order():\n    \"\"\"Items are retrieved in LIFO order.\"\"\"\n    q = LifoQueue()\n    q.put(1)\n    q.put(2)\n    q.put(3)\n    assert await q.get() == 3\n    assert await q.get() == 2\n    assert await q.get() == 1\n\n@pytest.mark.asyncio\nasync def test_maxsize_behavior():\n    \"\"\"Queue respects the maxsize limit.\"\"\"\n    q = LifoQueue(maxsize=2)\n    q.put_nowait(10)\n    q.put_nowait(20)\n    with pytest.raises(ValueError):\n        q.put_nowait(30)  # exceeds maxsize\n    # Ensure we can still get the two items\n    assert await q.get() == 20\n    assert await q.get() == 10\n\n@pytest.mark.asyncio\nasync def test_get_nowait_empty():\n    \"\"\"get_nowait raises Empty when queue is empty.\"\"\"\n    q = LifoQueue()\n    with pytest.raises(asyncio.QueueEmpty):\n        q.get_nowait()\n```",
+        "reasoning": "Need tests for LifoQueue. Use tmp_path? Not needed. Just test put/get order, boundary maxsize, error when full? LifoQueue inherits Queue from tornado. Let's inspect behavior: maxsize limits? In Queue, put may block if full. But LifoQueue._put just appends. For maxsize, Queue._put may check. We'll test that putting more than maxsize raises ValueError? Actually Queue.put raises ValueError if full? Let's quickly recall: tornado.queues.Queue has put_nowait and put. put_nowait raises ValueError if full. We'll test that. Also test get returns LIFO. Use async. Use pytest.mark.asyncio. Write three tests: normal LIFO, maxsize blocking behavior, error on get from empty? get blocks; but get_nowait raises queue.Empty. We'll test get_nowait raises. Use tmp_path not needed. Provide three independent tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046209159,
+    "prompt_tokens": 494,
+    "prompt_time": 0.02558348,
+    "completion_tokens": 444,
+    "completion_time": 0.499078114,
+    "total_tokens": 938,
+    "total_time": 0.524661594,
+    "completion_tokens_details": {
+      "reasoning_tokens": 187
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh2deke2ys0vbx3jwbcrst",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport asyncio\nfrom tornado.queues import LifoQueue\nfrom tornado import gen\n\n@pytest.mark.asyncio\nasync def test_lifo_order():\n    \"\"\"Items are retrieved in LIFO order.\"\"\"\n    q = LifoQueue()\n    q.put(1)\n    q.put(2)\n    q.put(3)\n    assert await q.get() == 3\n    assert await q.get() == 2\n    assert await q.get() == 1\n\n@pytest.mark.asyncio\nasync def test_maxsize_behavior():\n    \"\"\"Queue respects the maxsize limit.\"\"\"\n    q = LifoQueue(maxsize=2)\n    q.put_nowait(10)\n    q.put_nowait(20)\n    with pytest.raises(ValueError):\n        q.put_nowait(30)  # exceeds maxsize\n    # Ensure we can still get the two items\n    assert await q.get() == 20\n    assert await q.get() == 10\n\n@pytest.mark.asyncio\nasync def test_get_nowait_empty():\n    \"\"\"get_nowait raises Empty when queue is empty.\"\"\"\n    q = LifoQueue()\n    with pytest.raises(asyncio.QueueEmpty):\n        q.get_nowait()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9555666990345344
+}

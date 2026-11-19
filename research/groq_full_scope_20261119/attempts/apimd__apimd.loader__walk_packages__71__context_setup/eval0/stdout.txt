@@ -1,0 +1,59 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_walk_packages_yields_expected_names ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_yields_expe0')
+
+    def test_walk_packages_yields_expected_names(tmp_path):
+        # Create a package structure:
+        # tmp_path/
+        #   pkg/
+        #     __init__.py
+        #     module.py
+        #     subpkg/
+        #       __init__.py
+        #       submodule.py
+        pkg = tmp_path / "pkg"
+        pkg.mkdir()
+        (pkg / "__init__.py").write_text("")
+        (pkg / "module.py").write_text("")
+        subpkg = pkg / "subpkg"
+        subpkg.mkdir()
+        (subpkg / "__init__.py").write_text("")
+        (subpkg / "submodule.py").write_text("")
+    
+        # Walk packages
+        results = list(walk_packages("pkg", str(tmp_path)))
+        # Expected names: pkg, pkg.module, pkg.subpkg, pkg.subpkg.submodule
+        expected = {
+            ("pkg", str(pkg)),
+            ("pkg.module", str(pkg / "module.py")),
+            ("pkg.subpkg", str(subpkg)),
+            ("pkg.subpkg.submodule", str(subpkg / "submodule.py")),
+        }
+>       assert set(results) == expected
+E       AssertionError: assert {('pkg', '/ho...g/submodule')} == {('pkg', '/ho...ubmodule.py')}
+E         
+E         Extra items in the left set:
+E         ('pkg.module', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_yields_expe0/pkg/module')
+E         ('pkg', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_yields_expe0/pkg/__init__')
+E         ('pkg.subpkg.submodule', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+test_generated.py:34: AssertionError
+________________ test_walk_packages_raises_on_nonexistent_path _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_raises_on_n0')
+
+    def test_walk_packages_raises_on_nonexistent_path(tmp_path):
+        # Provide a path that does not exist
+        nonexistent = tmp_path / "does_not_exist"
+>       with pytest.raises(FileNotFoundError):
+E       Failed: DID NOT RAISE FileNotFoundError
+
+test_generated.py:57: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_walk_packages_yields_expected_names - Assertio...
+FAILED test_generated.py::test_walk_packages_raises_on_nonexistent_path - Fai...
+2 failed, 1 passed in 0.12s

@@ -21,11 +21,15 @@ from pilot.grounding import dependency_context
 from pilot.upstream_adapter import load_cpu_embedding, install_type_guards, stdlib_import_patch, validate_imports, tolerate_empty_pytest_report
 from council.critic import audit_test_quality
 from council.runner import repair_audit
+from pilot.measurement import retained_counts
+from pilot.output_contract import OutputContractError
+from pilot.api_contract import POLICY as API_CONTRACT_POLICY, OPERATIONS as API_OPERATIONS, augment_prompt, candidate_accepted
 
 
-def run_pytest(root, work, name, nodes, source, timeout, coverage=False):
+def run_pytest(root, work, name, nodes, source, timeout, coverage=False, python=None):
     directory=work/name;directory.mkdir(parents=True)
-    args=[sys.executable,'-m']
+    python=python or sys.executable
+    args=[python,'-m']
     if coverage:args+=['coverage','run','--branch',f'--source={source}','-m']
     args+=['pytest','-p','pytest_jsonreport.plugin','-o','addopts=',
            '--json-report',f'--json-report-file={directory/"pytest.json"}',*nodes]
@@ -36,7 +40,7 @@ def run_pytest(root, work, name, nodes, source, timeout, coverage=False):
     data=json.loads((directory/'pytest.json').read_text()) if (directory/'pytest.json').exists() else {}
     cov={}
     if coverage:
-        covproc=command([sys.executable,'-m','coverage','json','-o',directory/'coverage.json'],cwd=root,env=env,timeout=timeout)
+        covproc=command([python,'-m','coverage','json','-o',directory/'coverage.json'],cwd=root,env=env,timeout=timeout)
         write_json(directory/'coverage_process.json',covproc)
         if (directory/'coverage.json').exists():cov=json.loads((directory/'coverage.json').read_text())
     return process,data,cov
@@ -95,7 +99,7 @@ def main():
                         arm=settings.get('arm', 'legacy'), audit=audit))
             # Original reduction/repair behavior is retained in baseline. Improved
             # proposals that change/drop assertions require review and get no credit.
-            return bool(accepted and (not improved or audit['accepted'] and not audit.get('review_required', False)))
+            return candidate_accepted(accepted, audit, settings.get('arm'), settings.get('acceptance_policy'))
         if settings.get('paired_protocol'):
             testcase.Testcase.assert_check = checked_suite
         for name in ('find_syntax_error','find_assert_error'):
@@ -138,6 +142,20 @@ def main():
                             append_json(work/'context_unresolved.jsonl', dict(function=fn.func_name, **context))
                         user+='\nSource dependencies (not inferred outputs):\n'+json.dumps(context['snippets'])
                         user+='\nModel summaries/examples are unverified hypotheses. Do not carry contradicted imports/type assumptions into repairs. Preserve assertions; no output copying.'
+            if settings.get('mechanism') == API_CONTRACT_POLICY and frame.f_code.co_name in API_OPERATIONS:
+                operation = frame.f_code.co_name
+                owner = frame.f_locals.get('self'); fn = getattr(owner, 'func', None)
+                if fn is not None:
+                    relative = Path(fn.file.file_path).relative_to(root)
+                    try:
+                        system, user, evidence = augment_prompt(system,user,root,relative,fn.func_name,
+                            enabled=settings.get('arm')=='api_contract', max_chars=settings.get('api_contract_max_chars',2500))
+                        append_json(work/'api_contract_context.jsonl',dict(operation=operation,function=fn.func_name,
+                            arm=settings.get('arm'),evidence=evidence,status='evidence_added' if evidence else 'shared_instruction_only'))
+                    except ValueError as exc:
+                        system,user,_ = augment_prompt(system,user,root,relative,fn.func_name,enabled=False)
+                        append_json(work/'api_contract_context.jsonl',dict(operation=operation,function=fn.func_name,
+                            arm=settings.get('arm'),status='unknown',error=repr(exc)))
             del frame
             return await original_ask(system,user)
         gptapi.model.aask=ask
@@ -149,34 +167,51 @@ def main():
                 return all_files
             async def generate_test_case(self):
                 # Keep upstream generation/repair for every function in selected modules.
+                total=sum(len(f.functions) for f in self.file_messages if f.mod_name in selected)
+                completed=0
+                emit(work,backend.phase,'round_start',round_index=self.progress_round,rounds_total=settings['rounds'],
+                     functions_completed=0,functions_total=total)
                 for file in self.file_messages:
                     if file.mod_name in selected:
                         for fn in file.functions:
+                            emit(work,backend.phase,'function_start',current_function=fn.func_name,current_module=file.mod_name,
+                                 functions_completed=completed,functions_total=total)
+                            outcome='processed'
                             try:
                                 await fn.test_manager.generate_test_case()
                             except Exception as exc:
+                                outcome='error'
                                 text=str(exc).lower()
                                 category=('resource_budget' if any(term in text for term in ('budget exceeded','out of memory','cuda error')) else
-                                          'candidate_output' if isinstance(exc,ValueError) and any(term in text for term in ('expected one complete python block','no complete final answer')) else 'framework_error')
+                                          'candidate_output' if isinstance(exc,OutputContractError) or
+                                          isinstance(exc,ValueError) and any(term in text for term in ('expected one complete python block','no complete final answer')) else 'framework_error')
                                 append_json(work/'generation_errors.jsonl', dict(module=file.mod_name, function=fn.func_name,
                                     phase=backend.phase, category=category, error=repr(exc), traceback=traceback.format_exc()))
+                            finally:
+                                completed+=1
+                                emit(work,backend.phase,'function_end',current_function=fn.func_name,current_module=file.mod_name,
+                                     functions_completed=completed,functions_total=total,function_outcome=outcome)
         stage=time.perf_counter();project=SelectedProject(str(root),settings['source_path'])
         from pilot.instrumentation import instrument_initialization
-        instrument_initialization(project,work);asyncio.run(project.init())
+        instrument_initialization(project,work,getattr(message,'function_database',None));asyncio.run(project.init())
+        emit(work,'initialization','ready',initialization_complete=True)
         missing=selected-{f.mod_name for f in project.file_messages}
         if missing:raise ValueError(f'Selected modules absent from upstream analysis: {sorted(missing)}')
         result['stages']['initialization']=time.perf_counter()-stage
+        write_json(work/'report.json',result)
         write_json(work/'analysis_scope.json',dict(analyzed_modules=[f.mod_name for f in project.file_messages],
                    selected_generation_modules=settings['modules'],scope='full production package, generation restricted to selected modules'))
         if settings.get('paired_protocol') and not settings.get('fixture_mode'):
             backend.torch.manual_seed(settings['seed'])
         for index in range(settings['rounds']):
             backend.phase=f'generation_round_{index+1}';stage=time.perf_counter()
+            project.progress_round=index+1
             project.generate_once();recoder.score.first_run=False
             result['stages'][backend.phase]=time.perf_counter()-stage
             write_json(work/f'round_{index+1}.json',recoder.score.to_json())
             write_json(work/'report.json', result)
             emit(work,'generation','round_end',rounds_completed=index+1,rounds_total=settings['rounds'])
+        emit(work,'scoring','original_start',modules_completed=0,modules_total=len(settings['modules']))
         ownership={}
         for file in project.file_messages:
             if file.mod_name in selected:
@@ -191,11 +226,16 @@ def main():
         else:proc,data=dict(returncode=5,timeout=False),{}
         from pilot.scoring import passed_nodes
         eligible=passed_nodes(data)
+        emit(work,'scoring','module_start',modules_completed=0,modules_total=len(settings['modules']),mutants_completed=0,mutants_total=0)
         for module in settings['modules']:
+            emit(work,'scoring','module_start',current_module=module,modules_completed=len(result['modules']),
+                 modules_total=len(settings['modules']),mutants_completed=0,mutants_total=0)
             nodes=[n for n in eligible if ownership.get(n.split('::')[0])==module]
             row=dict(project=settings['project'],module=module,status='no_valid_tests',passed=len(nodes),
                 retained_files=sum(v==module for v in ownership.values()),line_pct=None,branch_pct=None,
                 mutation_score=None,semantic_assertion_accuracy=None)
+            row.update(retained_counts(proc,data,[f for f,m in ownership.items() if m==module]))
+            row['coverage_scope']='replayed original-passing retained nodes; not full candidate-suite coverage'
             if testfiles and (proc['timeout'] or proc['returncode'] not in (0,1)):
                 row['status']='original_execution_incomplete'
             if nodes and row['status'] != 'original_execution_incomplete':
@@ -215,9 +255,11 @@ def main():
                     raise RuntimeError('Mutation source differs from locked original')
                 row['mutant_pool_hash'] = digest(manifest_pool)
                 row['mutants'] = []
+                emit(work,'scoring','mutant_end',mutants_completed=0,mutants_total=len(manifest_pool['mutants']))
                 for mutant in manifest_pool['mutants']:
                     if not nodes or row['status'] != 'scored':
                         row['mutants'].append(dict(id=mutant['id'], verdict='no_stable_eligible_tests'))
+                        emit(work,'scoring','mutant_end',mutants_completed=len(row['mutants']),mutants_total=len(manifest_pool['mutants']))
                         continue
                     mutant_root = work/'mutants'/module/mutant['id']/'product'
                     shutil.copytree(root, mutant_root, ignore=shutil.ignore_patterns('.git', '__pycache__', '*.pyc'))
@@ -225,10 +267,16 @@ def main():
                     mp, mr, _ = run_pytest(mutant_root, work, 'mutant-'+module+'-'+mutant['id'], nodes,
                                            settings['source_path'], settings['score_timeout'])
                     row['mutants'].append(dict(id=mutant['id'], verdict=verdict(mp, mr, nodes)))
+                    emit(work,'scoring','mutant_end',mutants_completed=len(row['mutants']),mutants_total=len(manifest_pool['mutants']))
                 if row['mutants'] and all(m['verdict'] in ('killed', 'survived') for m in row['mutants']):
                     row['mutation_score'] = sum(m['verdict'] == 'killed' for m in row['mutants'])/len(row['mutants'])
                 row['mutation_scope'] = manifest_pool['scope']
+                row['mutants_planned']=len(manifest_pool['mutants'])
+                row['mutants_killed']=sum(m['verdict']=='killed' for m in row['mutants'])
+                row['mutants_survived']=sum(m['verdict']=='survived' for m in row['mutants'])
+                row['mutants_unresolved']=len(row['mutants'])-row['mutants_killed']-row['mutants_survived']
             result['modules'].append(row)
+            emit(work,'scoring','module_end',modules_completed=len(result['modules']),modules_total=len(settings['modules']),module_status=row['status'])
         if source_hashes() != before:
             raise RuntimeError('Product Python source changed; all scores rejected')
         result['generation_stats']=recoder.score.to_json()
@@ -242,6 +290,8 @@ def main():
     calls=[json.loads(line) for line in call_path.read_text().splitlines()] if call_path.exists() else []
     result['hardware_budget_ok'] = not any(any(term in str(c.get('error','')).lower() for term in
                                         ('out of memory','budget exceeded','cuda error')) for c in calls)
+    result['hardware_budget_ok'] = result['hardware_budget_ok'] and not any(
+        term in str(result.get('error','')).lower() for term in ('out of memory','budget exceeded','cuda error'))
     generation_errors=[json.loads(line) for line in (work/'generation_errors.jsonl').read_text().splitlines()] if (work/'generation_errors.jsonl').exists() else []
     result['generation_error_count'] = len(generation_errors)
     result['unexpected_generation_errors'] = sum(e['category']=='framework_error' for e in generation_errors)
@@ -258,6 +308,7 @@ def main():
             generation_output_tokens=sum(c.get('output_tokens',0) for c in calls if c.get('phase')!='initialization'),
             gpu_peak_allocated_gib=backend.torch.cuda.max_memory_allocated()/1024**3)
     write_json(work/'report.json',result)
+    emit(work,'finished','worker_end',status=result['status'])
     print(f"Project {settings['project']}: {result['status']}; module records={len(result['modules'])}",flush=True)
     return 0 if result['status']=='execution_complete' else 1
 

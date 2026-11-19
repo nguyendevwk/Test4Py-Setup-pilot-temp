@@ -1,0 +1,53 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_product_basic_and_total_computation ___________________
+
+    def test_product_basic_and_total_computation():
+        # Use a custom tqdm_class that simply records the total passed to it
+        class DummyTqdm:
+            def __init__(self, iterable, total=None, **kwargs):
+                self.iterable = iterable
+                self.total = total
+                self.kwargs = kwargs
+            def __iter__(self):
+                return iter(self.iterable)
+    
+        # Two small iterables
+        a = [1, 2]
+        b = ['x', 'y']
+        # Expected product
+        expected = list(itertools.product(a, b))
+        # Call the tqdm_product with our dummy tqdm_class
+        result = list(tqdm_product(a, b, tqdm_class=DummyTqdm))
+        assert result == expected
+        # Total should be len(a)*len(b) = 4
+>       assert DummyTqdm.total == 4
+E       AttributeError: type object 'DummyTqdm' has no attribute 'total'
+
+test_generated.py:25: AttributeError
+____________________ test_product_repeat_and_total_override ____________________
+
+    def test_product_repeat_and_total_override():
+        # Use a dummy tqdm_class that records the total
+        class DummyTqdm:
+            def __init__(self, iterable, total=None, **kwargs):
+                self.iterable = iterable
+                self.total = total
+            def __iter__(self):
+                return iter(self.iterable)
+    
+        # Repeat 2 times over a single iterable
+        iterable = [0, 1]
+        # Expected product with repeat=2
+        expected = list(itertools.product(iterable, repeat=2))
+        # Compute total manually: len(iterable)**repeat = 2**2 = 4
+        result = list(tqdm_product(iterable, repeat=2, tqdm_class=DummyTqdm))
+        assert result == expected
+>       assert DummyTqdm.total == 4
+E       AttributeError: type object 'DummyTqdm' has no attribute 'total'
+
+test_generated.py:43: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_product_basic_and_total_computation - Attribut...
+FAILED test_generated.py::test_product_repeat_and_total_override - AttributeE...
+2 failed, 1 passed in 0.17s

@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-e25ea914-7c7e-475c-b37c-db310d379ec5",
+  "object": "chat.completion",
+  "created": 1795079479,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado.escape import linkify\n\ndef test_basic_linkify_and_html_escape():\n    # Plain URL should be converted to an <a> tag and HTML escaped\n    raw = 'Visit http://example.com?x=1&y=2 and <b>bold</b> text.'\n    result = linkify(raw)\n    assert '<a href=\"http://example.com?x=1&y=2\">http://example.com?x=1&y=2</a>' in result\n    # Ensure that the <b> tag is escaped\n    assert '&lt;b&gt;bold&lt;/b&gt;' in result\n    # No extra params should be added\n    assert 'rel=' not in result\n\ndef test_shorten_long_url_and_title_attribute():\n    # A very long URL should be shortened when shorten=True\n    long_url = 'http://example.com/' + 'a'*100 + '?q=' + 'b'*50\n    raw = f'Check this out: {long_url}'\n    result = linkify(raw, shorten=True)\n    # The displayed URL should be truncated and end with \"...\"\n    assert result.count('...') == 1\n    # The href should contain the full URL\n    assert f'href=\"{long_url}\"' in result\n    # The title attribute should be present with the full href\n    assert f'title=\"{long_url}\"' in result\n\ndef test_require_protocol_and_callable_extra_params():\n    # URLs without protocol should not be linkified when require_protocol=True\n    raw = 'Visit www.example.com and http://good.com'\n    result = linkify(raw, require_protocol=True)\n    assert 'www.example.com' in result  # not linkified\n    assert '<a href=\"http://good.com\">http://good.com</a>' in result\n\n    # Test callable extra_params that adds class based on domain\n    def extra_cb(url):\n        return 'class=\"internal\"' if 'good.com' in url else 'class=\"external\"'\n\n    result = linkify(raw, require_protocol=True, extra_params=extra_cb)\n    assert '<a href=\"http://good.com\" class=\"internal\">http://good.com</a>' in result\n    # The non-protocol URL remains plain text\n    assert 'www.example.com' in result\n```",
+        "reasoning": "We need three tests. Use tmp_path? not needed. Test normal linkify, boundary shorten, error protocol. Use pytest.raises? maybe test that non-protocol not linkified when require_protocol True. Also test extra_params callable. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004500889,
+    "prompt_tokens": 1150,
+    "prompt_time": 0.073598371,
+    "completion_tokens": 549,
+    "completion_time": 0.580852898,
+    "total_tokens": 1699,
+    "total_time": 0.654451269,
+    "completion_tokens_details": {
+      "reasoning_tokens": 51
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh676ge1n9nawqp7ewc6cp",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado.escape import linkify\n\ndef test_basic_linkify_and_html_escape():\n    # Plain URL should be converted to an <a> tag and HTML escaped\n    raw = 'Visit http://example.com?x=1&y=2 and <b>bold</b> text.'\n    result = linkify(raw)\n    assert '<a href=\"http://example.com?x=1&y=2\">http://example.com?x=1&y=2</a>' in result\n    # Ensure that the <b> tag is escaped\n    assert '&lt;b&gt;bold&lt;/b&gt;' in result\n    # No extra params should be added\n    assert 'rel=' not in result\n\ndef test_shorten_long_url_and_title_attribute():\n    # A very long URL should be shortened when shorten=True\n    long_url = 'http://example.com/' + 'a'*100 + '?q=' + 'b'*50\n    raw = f'Check this out: {long_url}'\n    result = linkify(raw, shorten=True)\n    # The displayed URL should be truncated and end with \"...\"\n    assert result.count('...') == 1\n    # The href should contain the full URL\n    assert f'href=\"{long_url}\"' in result\n    # The title attribute should be present with the full href\n    assert f'title=\"{long_url}\"' in result\n\ndef test_require_protocol_and_callable_extra_params():\n    # URLs without protocol should not be linkified when require_protocol=True\n    raw = 'Visit www.example.com and http://good.com'\n    result = linkify(raw, require_protocol=True)\n    assert 'www.example.com' in result  # not linkified\n    assert '<a href=\"http://good.com\">http://good.com</a>' in result\n\n    # Test callable extra_params that adds class based on domain\n    def extra_cb(url):\n        return 'class=\"internal\"' if 'good.com' in url else 'class=\"external\"'\n\n    result = linkify(raw, require_protocol=True, extra_params=extra_cb)\n    assert '<a href=\"http://good.com\" class=\"internal\">http://good.com</a>' in result\n    # The non-protocol URL remains plain text\n    assert 'www.example.com' in result\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "fb127a102ffc4486bc7bb2dc4a81d605",
+  "_api_plus_pacing_seconds": 1.3268251970293932
+}

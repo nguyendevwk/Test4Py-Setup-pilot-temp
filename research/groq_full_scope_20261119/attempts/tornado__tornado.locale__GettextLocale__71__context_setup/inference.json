@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-40a5f92a-75e9-4be2-b44f-b24c8040d02c",
+  "object": "chat.completion",
+  "created": 1795077663,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport gettext\nimport pytest\nfrom tornado.locale import GettextLocale, CONTEXT_SEPARATOR\n\nclass DummyTranslations:\n    \"\"\"Simple translations object mimicking gettext.NullTranslations.\"\"\"\n    def gettext(self, msgid: str) -> str:\n        # Return the msgid unchanged unless it contains the context separator\n        if CONTEXT_SEPARATOR in msgid:\n            # Simulate missing translation by returning the original msgid\n            return msgid\n        return f\"translated:{msgid}\"\n\n    def ngettext(self, singular: str, plural: str, n: int) -> str:\n        # Return singular or plural based on n\n        return singular if n == 1 else plural\n\ndef test_translate_singular_and_plural():\n    \"\"\"Test GettextLocale.translate handles singular and plural correctly.\"\"\"\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Singular translation\n    assert locale.translate(\"hello\") == \"translated:hello\"\n    # Plural translation with count 1\n    assert locale.translate(\"apple\", \"apples\", 1) == \"apple\"\n    # Plural translation with count 2\n    assert locale.translate(\"apple\", \"apples\", 2) == \"apples\"\n\ndef test_pgettext_context_found_and_missing():\n    \"\"\"Test GettextLocale.pgettext with context that is found and not found.\"\"\"\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Context found: gettext returns a string without separator\n    result_found = locale.pgettext(\"greeting\", \"hello\")\n    assert result_found == \"translated:greeting\\x04hello\"\n    # Context missing: gettext returns the original msgid containing separator\n    # We simulate missing by having DummyTranslations return the msgid unchanged\n    # when it contains the separator. The fallback should return the original message.\n    result_missing = locale.pgettext(\"missing\", \"hello\")\n    assert result_missing == \"hello\"\n\ndef test_pgettext_plural_with_context_and_fallback():\n    \"\"\"Test GettextLocale.pgettext with plural forms and context fallback.\"\"\"\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Context found for plural: ngettext returns the plural form\n    result = locale.pgettext(\"item\", \"apple\", \"apples\", 3)\n    assert result == \"apples\"\n    # Context missing for plural: fallback to normal ngettext\n    # Simulate missing by having DummyTranslations return msgid with separator\n    # The fallback should still return the plural form\n    result_fallback = locale.pgettext(\"missing\", \"apple\", \"apples\", 1)\n    assert result_fallback == \"apple\"\n```",
+        "reasoning": "We need to test GettextLocale. Need to create dummy translations using gettext.NullTranslations? We can create a gettext.GNUTranslations from a .mo file. But we can create a dummy translations object with gettext.NullTranslations? NullTranslations has gettext returning msgid. For ngettext returns plural form. We can subclass to override. Simpler: create a custom class with gettext and ngettext methods. Use that. Test translate with singular, plural. Test pgettext with context not found and found. Use CONTEXT_SEPARATOR. We'll create translations that return context prefixed string. For pgettext context found: we can set gettext to return \"translated\". For not found: return string containing separator. We'll test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.136621707,
+    "prompt_tokens": 781,
+    "prompt_time": 0.047082588,
+    "completion_tokens": 708,
+    "completion_time": 0.816633124,
+    "total_tokens": 1489,
+    "total_time": 0.863715712,
+    "completion_tokens_details": {
+      "reasoning_tokens": 143
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfet3ae979j9d7w1qmnwxv",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport gettext\nimport pytest\nfrom tornado.locale import GettextLocale, CONTEXT_SEPARATOR\n\nclass DummyTranslations:\n    \"\"\"Simple translations object mimicking gettext.NullTranslations.\"\"\"\n    def gettext(self, msgid: str) -> str:\n        # Return the msgid unchanged unless it contains the context separator\n        if CONTEXT_SEPARATOR in msgid:\n            # Simulate missing translation by returning the original msgid\n            return msgid\n        return f\"translated:{msgid}\"\n\n    def ngettext(self, singular: str, plural: str, n: int) -> str:\n        # Return singular or plural based on n\n        return singular if n == 1 else plural\n\ndef test_translate_singular_and_plural():\n    \"\"\"Test GettextLocale.translate handles singular and plural correctly.\"\"\"\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Singular translation\n    assert locale.translate(\"hello\") == \"translated:hello\"\n    # Plural translation with count 1\n    assert locale.translate(\"apple\", \"apples\", 1) == \"apple\"\n    # Plural translation with count 2\n    assert locale.translate(\"apple\", \"apples\", 2) == \"apples\"\n\ndef test_pgettext_context_found_and_missing():\n    \"\"\"Test GettextLocale.pgettext with context that is found and not found.\"\"\"\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Context found: gettext returns a string without separator\n    result_found = locale.pgettext(\"greeting\", \"hello\")\n    assert result_found == \"translated:greeting\\x04hello\"\n    # Context missing: gettext returns the original msgid containing separator\n    # We simulate missing by having DummyTranslations return the msgid unchanged\n    # when it contains the separator. The fallback should return the original message.\n    result_missing = locale.pgettext(\"missing\", \"hello\")\n    assert result_missing == \"hello\"\n\ndef test_pgettext_plural_with_context_and_fallback():\n    \"\"\"Test GettextLocale.pgettext with plural forms and context fallback.\"\"\"\n    translations = DummyTranslations()\n    locale = GettextLocale(\"en\", translations)\n    # Context found for plural: ngettext returns the plural form\n    result = locale.pgettext(\"item\", \"apple\", \"apples\", 3)\n    assert result == \"apples\"\n    # Context missing for plural: fallback to normal ngettext\n    # Simulate missing by having DummyTranslations return msgid with separator\n    # The fallback should still return the plural form\n    result_fallback = locale.pgettext(\"missing\", \"apple\", \"apples\", 1)\n    assert result_fallback == \"apple\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3355138709885068
+}

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-2804931c-78c6-4a75-af4a-f103910929d3",
+  "object": "chat.completion",
+  "created": 1795078624,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom flutils.txtutils import len_without_ansi\n\n# Regular expression used inside the function (re-exported for clarity)\n_ANSI_RE = re.compile(r'\\x1b\\[[0-9;]*m')\n\ndef test_len_without_ansi_single_string_with_ansi():\n    \"\"\"A single string containing ANSI escape codes should return the\n    length of the visible characters only.\"\"\"\n    text = \"\\x1b[38;5;209mfoobar\\x1b[0m\"\n    # The visible text is \"foobar\" which has 6 characters\n    assert len_without_ansi(text) == 6\n\ndef test_len_without_ansi_list_of_strings_with_mixed_content():\n    \"\"\"A list of strings, some with ANSI codes and some plain, should\n    correctly sum the lengths of the visible parts.\"\"\"\n    parts = [\n        \"\\x1b[31mred\\x1b[0m\",\n        \"text\",\n        \"\\x1b[1mbold\\x1b[0m\",\n        \"\\x1b[0m\",  # only ANSI, no visible chars\n    ]\n    # Visible parts: \"red\" (3), \"text\" (4), \"bold\" (4) => total 11\n    assert len_without_ansi(parts) == 11\n\ndef test_len_without_ansi_invalid_sequence_raises_type_error():\n    \"\"\"Passing a non-sequence (e.g., an integer) should raise a TypeError\n    because the function expects a sequence of strings.\"\"\"\n    with pytest.raises(TypeError):\n        len_without_ansi(123)\n```",
+        "reasoning": "Need tests for len_without_ansi. Use tmp_path? not needed. Write three tests: normal string with ansi, list of strings with ansi, error boundary: non-string sequence? maybe empty. Use pytest.raises? function expects Sequence; if pass int should error? It will treat int has no capitalize? int has no capitalize, so seq becomes list of chars? Actually int has no capitalize, so seq remains int, then seq = [c for c in chain(*map(_ANSI_RE.split, seq)) if c] will iterate over int -> TypeError. So test that raises TypeError. Use pytest.raises(TypeError). Also test normal: string with ansi returns correct length. Third: list of strings with ansi and normal. Use precise assertion."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05514956,
+    "prompt_tokens": 512,
+    "prompt_time": 7.9669e-05,
+    "completion_tokens": 498,
+    "completion_time": 0.551263757,
+    "total_tokens": 1010,
+    "total_time": 0.551343426,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 153
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgc4wrek6b4w490k2w45vp",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom flutils.txtutils import len_without_ansi\n\n# Regular expression used inside the function (re-exported for clarity)\n_ANSI_RE = re.compile(r'\\x1b\\[[0-9;]*m')\n\ndef test_len_without_ansi_single_string_with_ansi():\n    \"\"\"A single string containing ANSI escape codes should return the\n    length of the visible characters only.\"\"\"\n    text = \"\\x1b[38;5;209mfoobar\\x1b[0m\"\n    # The visible text is \"foobar\" which has 6 characters\n    assert len_without_ansi(text) == 6\n\ndef test_len_without_ansi_list_of_strings_with_mixed_content():\n    \"\"\"A list of strings, some with ANSI codes and some plain, should\n    correctly sum the lengths of the visible parts.\"\"\"\n    parts = [\n        \"\\x1b[31mred\\x1b[0m\",\n        \"text\",\n        \"\\x1b[1mbold\\x1b[0m\",\n        \"\\x1b[0m\",  # only ANSI, no visible chars\n    ]\n    # Visible parts: \"red\" (3), \"text\" (4), \"bold\" (4) => total 11\n    assert len_without_ansi(parts) == 11\n\ndef test_len_without_ansi_invalid_sequence_raises_type_error():\n    \"\"\"Passing a non-sequence (e.g., an integer) should raise a TypeError\n    because the function expects a sequence of strings.\"\"\"\n    with pytest.raises(TypeError):\n        len_without_ansi(123)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9557797149755061
+}

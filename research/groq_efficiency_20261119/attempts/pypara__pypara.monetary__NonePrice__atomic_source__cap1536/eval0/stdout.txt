@@ -1,0 +1,68 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_noneprice_comparisons_and_properties ___________________
+
+    def test_noneprice_comparisons_and_properties():
+        np = NonePrice()
+        # defined/undefined flags
+        assert not np.defined
+        assert np.undefined
+        # boolean conversion
+        assert bool(np) is False
+        # equality only with same class
+        assert np == NonePrice()
+        assert np != 5
+        # comparison logic
+        assert np.lt(NonePrice()) is False
+>       assert np.lt(5) is False  # 5 is not a Price, but lt expects Price; still False
+
+../../../../../../../groq_efficiency_20261119/attempts/pypara__pypara.monetary__NonePrice__atomic_source__cap1536/eval0/test_generated.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <pypara.monetary.NonePrice object at 0x7f4cbe1894e0>, other = 5
+
+    def lt(self, other: "Price") -> bool:
+>       return other.defined
+E       AttributeError: 'int' object has no attribute 'defined'
+
+pypara/monetary.py:1956: AttributeError
+___________________ test_noneprice_arithmetic_and_conversion ___________________
+
+    def test_noneprice_arithmetic_and_conversion():
+        np = NonePrice()
+        # arithmetic with other Price returns other
+        other = NonePrice()
+        assert np + other is other
+        assert np - other == -other
+        # scalar operations return self
+        assert np * 2 == np
+        assert np / 3 == np
+        assert np // 4 == np
+        # multiply returns self, times returns NoMoney
+        assert np.multiply(5) == np
+        assert np.times(5) is NoMoney
+        # convert returns self
+>       assert np.convert(Currency("EUR")) is np
+E       TypeError: Currency.__init__() missing 5 required positional arguments: 'name', 'decimals', 'type', 'quantizer', and 'hashcache'
+
+../../../../../../../groq_efficiency_20261119/attempts/pypara__pypara.monetary__NonePrice__atomic_source__cap1536/eval0/test_generated.py:42: TypeError
+____________________ test_noneprice_or_else_and_exceptions _____________________
+
+    def test_noneprice_or_else_and_exceptions():
+        np = NonePrice()
+        # or_else executes the supplied callable
+        called = {"flag": False}
+        def supplier():
+            called["flag"] = True
+            return NonePrice()
+        result = np.or_else(supplier)
+        assert called["flag"] is True
+>       assert result is np
+E       assert <pypara.monetary.NonePrice object at 0x7f4cbdb97480> is <pypara.monetary.NonePrice object at 0x7f4cbdb97400>
+
+../../../../../../../groq_efficiency_20261119/attempts/pypara__pypara.monetary__NonePrice__atomic_source__cap1536/eval0/test_generated.py:55: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_efficiency_20261119/attempts/pypara__pypara.monetary__NonePrice__atomic_source__cap1536/eval0/test_generated.py::test_noneprice_comparisons_and_properties
+FAILED ../../../../../../../groq_efficiency_20261119/attempts/pypara__pypara.monetary__NonePrice__atomic_source__cap1536/eval0/test_generated.py::test_noneprice_arithmetic_and_conversion
+FAILED ../../../../../../../groq_efficiency_20261119/attempts/pypara__pypara.monetary__NonePrice__atomic_source__cap1536/eval0/test_generated.py::test_noneprice_or_else_and_exceptions
+3 failed in 0.27s

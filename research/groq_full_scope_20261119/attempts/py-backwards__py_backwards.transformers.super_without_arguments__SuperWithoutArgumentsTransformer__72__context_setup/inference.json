@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b7afed7e-9e35-481e-9a86-4f1414687bda",
+  "object": "chat.completion",
+  "created": 1795076173,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport io\nimport typed_ast.ast3 as ast\nimport pytest\n\nfrom py_backwards.transformers.super_without_arguments import SuperWithoutArgumentsTransformer\n\n\ndef find_call_node(tree):\n    \"\"\"Return the first ast.Call node in the tree.\"\"\"\n    for node in ast.walk(tree):\n        if isinstance(node, ast.Call):\n            return node\n    return None\n\n\ndef test_super_inside_class_method_transforms_correctly():\n    source = \"\"\"\nclass MyClass:\n    def method(self):\n        super()\n\"\"\"\n    tree = ast.parse(source)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call_node = find_call_node(tree)\n    assert call_node is not None\n    # After transformation, super() should have two arguments: class name and self\n    assert len(call_node.args) == 2\n    assert isinstance(call_node.args[0], ast.Name)\n    assert isinstance(call_node.args[1], ast.Name)\n    assert call_node.args[0].id == \"MyClass\"\n    assert call_node.args[1].id == \"self\"\n\n\ndef test_super_outside_function_no_change_and_warning(capfd):\n    source = \"\"\"\nclass MyClass:\n    super()\n\"\"\"\n    tree = ast.parse(source)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call_node = find_call_node(tree)\n    assert call_node is not None\n    # No arguments should be added because super() is outside a function\n    assert len(call_node.args) == 0\n\n    # Capture warning output\n    out, err = capfd.readouterr()\n    assert \"super() outside of function\" in err\n\n\ndef test_super_outside_class_no_change_and_warning(capfd):\n    source = \"\"\"\ndef func():\n    super()\n\"\"\"\n    tree = ast.parse(source)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call_node = find_call_node(tree)\n    assert call_node is not None\n    # No arguments should be added because super() is outside a class\n    assert len(call_node.args) == 0\n\n    # Capture warning output\n    out, err = capfd.readouterr()\n    assert \"super() outside of class\" in err\n```",
+        "reasoning": "We need to write tests for SuperWithoutArgumentsTransformer. We need to import it. We'll create code that builds an AST from source using typed_ast.ast3. Then apply transformer. Then check transformed code. Use tmp_path for writing files? Not needed. Just use ast.parse. Use typed_ast.ast3.parse? typed_ast provides parse? Let's check: typed_ast.ast3.parse? Probably same as ast.parse. We'll use typed_ast.ast3.parse. Then apply transformer. Then unparse? typed_ast doesn't have unparse. We can use astor or ast.unparse? But no external packages. We can inspect AST nodes. For test, we can check that after transformation, the Call node has args length 2 and names match class and self. We'll traverse AST to find Call node. Use ast.walk. Write three tests: normal inside class method, boundary: super() outside function -> warn but no change, error: super() inside function but no class -> warn. Use caplog to capture warnings? warn function likely prints? Let's inspect warn. But we can't import. We'll assume warn prints to stderr. We can capture stderr. Use capsys. We'll test that no change occurs. Use assert node.args unchanged. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047927163,
+    "prompt_tokens": 543,
+    "prompt_time": 0.037895697,
+    "completion_tokens": 715,
+    "completion_time": 0.825837381,
+    "total_tokens": 1258,
+    "total_time": 0.863733078,
+    "completion_tokens_details": {
+      "reasoning_tokens": 251
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se1ankeqvr0yvk7w6ar024",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport io\nimport typed_ast.ast3 as ast\nimport pytest\n\nfrom py_backwards.transformers.super_without_arguments import SuperWithoutArgumentsTransformer\n\n\ndef find_call_node(tree):\n    \"\"\"Return the first ast.Call node in the tree.\"\"\"\n    for node in ast.walk(tree):\n        if isinstance(node, ast.Call):\n            return node\n    return None\n\n\ndef test_super_inside_class_method_transforms_correctly():\n    source = \"\"\"\nclass MyClass:\n    def method(self):\n        super()\n\"\"\"\n    tree = ast.parse(source)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call_node = find_call_node(tree)\n    assert call_node is not None\n    # After transformation, super() should have two arguments: class name and self\n    assert len(call_node.args) == 2\n    assert isinstance(call_node.args[0], ast.Name)\n    assert isinstance(call_node.args[1], ast.Name)\n    assert call_node.args[0].id == \"MyClass\"\n    assert call_node.args[1].id == \"self\"\n\n\ndef test_super_outside_function_no_change_and_warning(capfd):\n    source = \"\"\"\nclass MyClass:\n    super()\n\"\"\"\n    tree = ast.parse(source)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call_node = find_call_node(tree)\n    assert call_node is not None\n    # No arguments should be added because super() is outside a function\n    assert len(call_node.args) == 0\n\n    # Capture warning output\n    out, err = capfd.readouterr()\n    assert \"super() outside of function\" in err\n\n\ndef test_super_outside_class_no_change_and_warning(capfd):\n    source = \"\"\"\ndef func():\n    super()\n\"\"\"\n    tree = ast.parse(source)\n    transformer = SuperWithoutArgumentsTransformer()\n    transformer.visit(tree)\n\n    call_node = find_call_node(tree)\n    assert call_node is not None\n    # No arguments should be added because super() is outside a class\n    assert len(call_node.args) == 0\n\n    # Capture warning output\n    out, err = capfd.readouterr()\n    assert \"super() outside of class\" in err\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3481584250112064
+}

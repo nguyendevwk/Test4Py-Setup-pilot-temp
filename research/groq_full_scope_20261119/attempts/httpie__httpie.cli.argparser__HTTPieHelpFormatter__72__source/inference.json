@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-e8712b93-de35-4de4-9c1d-01ca0f34d96b",
+  "object": "chat.completion",
+  "created": 1795079665,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport argparse\nimport sys\nimport textwrap\nimport pytest\nfrom httpie.cli.argparser import HTTPieHelpFormatter\n\ndef test_split_lines_dedents_and_adds_blank_line():\n    formatter = HTTPieHelpFormatter()\n    raw = \"  Line one\\n    Line two\\n  Line three\"\n    lines = formatter._split_lines(raw, 80)\n    # dedent removes common indentation, strip removes trailing spaces, adds two newlines\n    expected = [\"Line one\", \"Line two\", \"Line three\", \"\"]\n    assert lines == expected\n\ndef test_add_usage_shows_only_positional_arguments(tmp_path):\n    parser = argparse.ArgumentParser(\n        prog=\"httpie\",\n        usage=\"%(prog)s [options] URL\",\n        formatter_class=HTTPieHelpFormatter,\n        add_help=False,\n    )\n    parser.add_argument(\"url\", help=\"Target URL\")\n    parser.add_argument(\"-v\", \"--verbose\", action=\"store_true\", help=\"Verbose output\")\n    # Capture help output\n    help_text = parser.format_help()\n    # Only positional argument should appear in usage line\n    assert \"usage:\" in help_text\n    assert \"httpie [options] URL\" in help_text\n    assert \"-v\" not in help_text.splitlines()[0]  # option not in usage line\n    # Positional argument description should be present\n    assert \"Target URL\" in help_text\n\ndef test_add_usage_includes_invalid_option_action():\n    parser = argparse.ArgumentParser(\n        prog=\"httpie\",\n        usage=\"%(prog)s [options] URL\",\n        formatter_class=HTTPieHelpFormatter,\n        add_help=False,\n    )\n    parser.add_argument(\"url\", help=\"Target URL\")\n    parser.add_argument(\"-f\", \"--format\", help=\"Response format\")\n    # Simulate invalid option by parsing bad args\n    with pytest.raises(SystemExit):\n        parser.parse_args([\"--format=invalid\", \"http://example.com\"])\n    # After the error, the formatter should include the invalid action in usage\n    # Capture the formatter's usage by creating a new parser with the same formatter\n    formatter = HTTPieHelpFormatter()\n    # Manually invoke add_usage with the action that caused the error\n    # The action is the one for --format\n    action = next(a for a in parser._actions if a.dest == \"format\")\n    usage_text = formatter.add_usage(\n        usage=\"%(prog)s [options] URL\",\n        actions=[action],\n        groups=[],\n        prefix=\"usage:\\n    \"\n    )\n    # The usage should contain the invalid option string\n    assert \"--format\" in usage_text\n    assert \"httpie [options] URL\" in usage_text\n```",
+        "reasoning": "We need three tests for HTTPieHelpFormatter. Test normal formatting, boundary: max_help_position small, error handling when exception. Use argparse to create parser with formatter. Test that add_usage only shows positional. Also test _split_lines dedent. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00527686,
+    "prompt_tokens": 751,
+    "prompt_time": 0.038958616,
+    "completion_tokens": 625,
+    "completion_time": 0.645363617,
+    "total_tokens": 1376,
+    "total_time": 0.684322233,
+    "completion_tokens_details": {
+      "reasoning_tokens": 54
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7shbxcyegm9nbejdxz9755f",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport argparse\nimport sys\nimport textwrap\nimport pytest\nfrom httpie.cli.argparser import HTTPieHelpFormatter\n\ndef test_split_lines_dedents_and_adds_blank_line():\n    formatter = HTTPieHelpFormatter()\n    raw = \"  Line one\\n    Line two\\n  Line three\"\n    lines = formatter._split_lines(raw, 80)\n    # dedent removes common indentation, strip removes trailing spaces, adds two newlines\n    expected = [\"Line one\", \"Line two\", \"Line three\", \"\"]\n    assert lines == expected\n\ndef test_add_usage_shows_only_positional_arguments(tmp_path):\n    parser = argparse.ArgumentParser(\n        prog=\"httpie\",\n        usage=\"%(prog)s [options] URL\",\n        formatter_class=HTTPieHelpFormatter,\n        add_help=False,\n    )\n    parser.add_argument(\"url\", help=\"Target URL\")\n    parser.add_argument(\"-v\", \"--verbose\", action=\"store_true\", help=\"Verbose output\")\n    # Capture help output\n    help_text = parser.format_help()\n    # Only positional argument should appear in usage line\n    assert \"usage:\" in help_text\n    assert \"httpie [options] URL\" in help_text\n    assert \"-v\" not in help_text.splitlines()[0]  # option not in usage line\n    # Positional argument description should be present\n    assert \"Target URL\" in help_text\n\ndef test_add_usage_includes_invalid_option_action():\n    parser = argparse.ArgumentParser(\n        prog=\"httpie\",\n        usage=\"%(prog)s [options] URL\",\n        formatter_class=HTTPieHelpFormatter,\n        add_help=False,\n    )\n    parser.add_argument(\"url\", help=\"Target URL\")\n    parser.add_argument(\"-f\", \"--format\", help=\"Response format\")\n    # Simulate invalid option by parsing bad args\n    with pytest.raises(SystemExit):\n        parser.parse_args([\"--format=invalid\", \"http://example.com\"])\n    # After the error, the formatter should include the invalid action in usage\n    # Capture the formatter's usage by creating a new parser with the same formatter\n    formatter = HTTPieHelpFormatter()\n    # Manually invoke add_usage with the action that caused the error\n    # The action is the one for --format\n    action = next(a for a in parser._actions if a.dest == \"format\")\n    usage_text = formatter.add_usage(\n        usage=\"%(prog)s [options] URL\",\n        actions=[action],\n        groups=[],\n        prefix=\"usage:\\n    \"\n    )\n    # The usage should contain the invalid option string\n    assert \"--format\" in usage_text\n    assert \"httpie [options] URL\" in usage_text\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "0318a5c5cac349f8892cc12613aeb805",
+  "_api_plus_pacing_seconds": 2.1457186600309797
+}

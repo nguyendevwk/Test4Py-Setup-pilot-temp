@@ -1,0 +1,47 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________________ test_valid_url_match _____________________________
+
+    def test_valid_url_match():
+        """NRKTVSeriesIE._VALID_URL should match expected NRK series URLs."""
+        pattern = re.compile(NRKTVSeriesIE._VALID_URL)
+        # Known valid URLs from the extractor tests
+        valid_urls = [
+            "https://tv.nrk.no/serie/groenn-glede",
+            "https://radio.nrk.no/serie/dickie-dick-dickens",
+            "https://nrksuper.no/serie/labyrint",
+            "https://tv.nrk.no/serie/backstage",
+        ]
+        for url in valid_urls:
+            assert pattern.match(url), f"URL {url!r} should match the pattern"
+    
+        # URLs that should not match (different domain or path)
+        invalid_urls = [
+            "https://tv.nrk.no/episode/123",
+            "https://radio.nrk.no/podkast/ulrikkes_univers/l_96f4f1b0-de54-4e6a-b4f1-b0de54fe6af8",
+            "https://example.com/serie/groenn-glede",
+        ]
+        for url in invalid_urls:
+>           assert not pattern.match(url), f"URL {url!r} should not match the pattern"
+E           AssertionError: URL 'https://radio.nrk.no/podkast/ulrikkes_univers/l_96f4f1b0-de54-4e6a-b4f1-b0de54fe6af8' should not match the pattern
+E           assert not <re.Match object; span=(0, 45), match='https://radio.nrk.no/podkast/ulrikkes_univers'>
+E            +  where <re.Match object; span=(0, 45), match='https://radio.nrk.no/podkast/ulrikkes_univers'> = <built-in method match of re.Pattern object at 0x55bf9915fec0>('https://radio.nrk.no/podkast/ulrikkes_univers/l_96f4f1b0-de54-4e6a-b4f1-b0de54fe6af8')
+E            +    where <built-in method match of re.Pattern object at 0x55bf9915fec0> = re.compile('https?://(?P<domain>(?:tv|radio)\\.nrk|(?:tv\\.)?nrksuper)\\.no/(?P<serie_kind>serie|pod[ck]ast)/(?P<id>[^/]+)').match
+
+test_generated.py:26: AssertionError
+___________________ test_suitable_excludes_other_extractors ____________________
+
+    def test_suitable_excludes_other_extractors():
+        """NRKTVSeriesIE.suitable must return False when a more specific extractor matches."""
+        # URL that matches NRKTVIE
+        url_tv = "https://tv.nrk.no/serie/hellums-kro"
+>       assert NRKTVIE.suitable(url_tv)
+E       AssertionError: assert False
+E        +  where False = suitable('https://tv.nrk.no/serie/hellums-kro')
+E        +    where suitable = NRKTVIE.suitable
+
+test_generated.py:33: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_valid_url_match - AssertionError: URL 'https:/...
+FAILED test_generated.py::test_suitable_excludes_other_extractors - Assertion...
+2 failed, 1 passed in 0.82s

@@ -1,0 +1,90 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+______________________________ test_main_success _______________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/py-backwards__py_backwards.main__main__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_main_success0')
+capsys = <_pytest.capture.CaptureFixture object at 0x7fa4046df370>
+reset_sys_argv = None
+
+    def test_main_success(tmp_path, capsys, reset_sys_argv):
+        # Create a simple Python file that uses an f-string (Python 3.6 feature)
+        src_file = tmp_path / "hello.py"
+        src_file.write_text('print(f"Hello, {1+1}")\n')
+    
+        # Output directory
+        out_dir = tmp_path / "out"
+        out_dir.mkdir()
+    
+        # Prepare command line arguments
+        sys.argv = [
+            "py-backwards",
+            "-i", str(src_file),
+            "-o", str(out_dir),
+            "-t", "3.5",  # target version
+        ]
+    
+        # Run main
+        exit_code = main_module.main()
+    
+        # Verify exit code is 0
+        assert exit_code == 0
+    
+        # Verify output file exists
+        out_file = out_dir / src_file.name
+        assert out_file.exists()
+    
+        # Verify that the output file contains the transformed code
+        # (the exact transformation is not specified, but it should not contain the original f-string)
+        out_text = out_file.read_text()
+        assert 'f"Hello' not in out_text
+>       assert 'Hello, 2' in out_text
+E       assert 'Hello, 2' in "\nprint(''.join(['Hello, ', '{}'.format((1 + 1))]))\n"
+
+test_generated.py:48: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[1mCompilation succeed[0m:
+  target: [1m3.5[0m
+  files: [1m1[0m
+  took: [1m0.02[0m seconds
+________________________ test_main_invalid_input_output ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/py-backwards__py_backwards.main__main__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_main_invalid_input_output0')
+capsys = <_pytest.capture.CaptureFixture object at 0x7fa40486fbe0>
+reset_sys_argv = None
+
+    def test_main_invalid_input_output(tmp_path, capsys, reset_sys_argv):
+        # Create a source file
+        src_file = tmp_path / "script.py"
+        src_file.write_text('print("test")\n')
+    
+        # Output path is a file, but input is a file (valid) – this should be fine
+        # To trigger InvalidInputOutput, we need input as a directory and output as a file
+        src_dir = tmp_path / "src_dir"
+        src_dir.mkdir()
+        (src_dir / "mod.py").write_text('print("mod")\n')
+    
+        out_file = tmp_path / "output.py"  # file instead of directory
+    
+        sys.argv = [
+            "py-backwards",
+            "-i", str(src_dir),
+            "-o", str(out_file),
+            "-t", "3.5",
+        ]
+    
+        exit_code = main_module.main()
+    
+        # Exit code should be 1 for error
+        assert exit_code == 1
+    
+        # Error message should mention invalid output
+        captured = capsys.readouterr()
+>       assert "invalid output" in captured.err
+E       assert 'invalid output' in '\x1b[31mInvalid output, when input "[\'/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempt...etup/eval0/tmp/pytest-of-heurix/pytest-0/test_main_invalid_input_output0/output.py" should be a directory too\x1b[0m\n'
+E        +  where '\x1b[31mInvalid output, when input "[\'/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempt...etup/eval0/tmp/pytest-of-heurix/pytest-0/test_main_invalid_input_output0/output.py" should be a directory too\x1b[0m\n' = CaptureResult(out='', err='\x1b[31mInvalid output, when input "[\'/home/heurix/Documents/Test4Py_Setup/research/groq_f...tup/eval0/tmp/pytest-of-heurix/pytest-0/test_main_invalid_input_output0/output.py" should be a directory too\x1b[0m\n').err
+
+test_generated.py:106: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_main_success - assert 'Hello, 2' in "\nprint('...
+FAILED test_generated.py::test_main_invalid_input_output - assert 'invalid ou...
+2 failed, 1 passed in 0.27s

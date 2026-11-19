@@ -1,0 +1,210 @@
+"""What every style's composer shares."""
+
+import re
+import typing as T
+
+from ._text import param_spec
+from .common import (
+    Docstring,
+    DocstringExample,
+    DocstringMeta,
+    DocstringParam,
+    Kind,
+    meta_as_attribute,
+)
+
+
+def kind_of(meta: DocstringMeta) -> Kind:
+    """Tell what a meta documents, for composing it.
+
+    That is its ``kind``, except that a text meta keyed like a ReST
+    ``:ivar:`` field is an attribute.
+    """
+    if meta.kind is Kind.TEXT and meta_as_attribute(meta):
+        return Kind.ATTRIBUTE
+    return meta.kind
+
+
+class SectionTable:
+    """The titled sections a composer writes items in, by kind.
+
+    :param titles: each section's title and the kinds that go in it, in
+        the order the sections are written
+    """
+
+    def __init__(
+        self, titles: T.Sequence[T.Tuple[str, T.AbstractSet[Kind]]]
+    ) -> None:
+        self.titles = [title for title, _kinds in titles]
+        self.index = {
+            kind: i
+            for i, (_title, kinds) in enumerate(titles)
+            for kind in kinds
+        }
+
+
+def section_runs(
+    docstring: Docstring,
+    table: SectionTable,
+    alone: T.AbstractSet[Kind] = frozenset(),
+) -> T.List[T.Tuple[T.Optional[str], T.List[T.Any]]]:
+    """Split a docstring's meta into titled sections, in its order.
+
+    Items in a row that go in one section are written in one, so that the
+    sections read back in the order of the meta. A ReST ``:ivar:`` style
+    field goes in as the attribute it stands for.
+
+    :param alone: the kinds whose items each take a section of their own,
+        as the style reads one item from such a section
+    :returns: each section's title and items, with None as the title of
+        a meta that no section takes, which is alone in its run
+    """
+    index = table.index
+    runs: T.List[T.Tuple[T.Optional[str], T.List[T.Any]]] = []
+    last: T.Optional[int] = None
+    for meta in docstring.meta:
+        item = meta
+        if type(meta) is DocstringMeta:
+            item = meta_as_attribute(meta) or meta
+            kind = Kind.TEXT if item is meta else Kind.ATTRIBUTE
+        else:
+            kind = kind_of(meta)
+        position = index.get(kind)
+        if position is None:
+            runs.append((None, [meta]))
+        elif position == last and kind not in alone:
+            runs[-1][1].append(item)
+        else:
+            runs.append((table.titles[position], [item]))
+        last = position
+    return runs
+
+
+def field_name(
+    meta: DocstringMeta, own: T.AbstractSet[str], by_kind: T.Dict[Kind, str]
+) -> str:
+    """Return the field name a param is written with in a style.
+
+    :param own: the keys the style writes as they are
+    :param by_kind: the style's field name for each kind of param, where
+        the param's own key is not one of them; ``param`` otherwise
+    """
+    key = meta.key or "param"
+    if key in own:
+        return key
+    return by_kind.get(kind_of(meta), "param")
+
+
+def written_type(param: DocstringParam) -> T.Optional[str]:
+    """Return a param's type as written, if it reads back as the param's.
+
+    That keeps marks such as ``int, optional`` as they were, where a style
+    would write its own, and keeps a type with no mark from gaining one
+    for a default the description states.
+
+    :returns: the type as written, or None to compose the param's type
+    """
+    raw = param.raw_type_name
+    if raw is None:
+        return None
+    if (
+        raw == param.type_name
+        and not param.is_optional
+        and param.default is None
+    ):
+        return raw
+    spec = param_spec(raw, param.description)
+    if (
+        spec.type_name == param.type_name
+        and spec.is_optional == bool(param.is_optional)
+        and spec.default == param.default
+    ):
+        return raw
+    return None
+
+
+def field_text(meta: DocstringMeta) -> str:
+    """Return a text meta's key and the words after it, as in a field.
+
+    A method's name goes in its description instead, as a signature
+    holds characters a field's head cannot.
+    """
+    if meta.kind is Kind.METHOD:
+        return meta.key or "methods"
+    return " ".join(part for part in (meta.key, meta.name) if part)
+
+
+def field_description(meta: DocstringMeta) -> T.Optional[str]:
+    """Return a text meta's description, as in a field: for a method,
+    its name and then its description."""
+    if meta.kind is Kind.METHOD:
+        lines = [part for part in (meta.name, meta.description) if part]
+        return "\n".join(lines) or None
+    return meta.description
+
+
+def hang(head: str, lines: T.Iterable[str], indent: str) -> str:
+    """Join a head and the lines under it, indented.
+
+    A blank line stays empty rather than holding the indent, so that no
+    composed line ends in whitespace.
+    """
+    return "\n".join(
+        [head] + [indent + line if line else "" for line in lines]
+    )
+
+
+def start_on_new_line(text: str) -> str:
+    """Start a composed docstring on a new line if it has to.
+
+    A docstring's first line takes no part in its dedent, so lines after
+    it that are all indented, such as an indented long description or a
+    field's continuation lines, lose that indent when read back. Starting
+    on a new line puts the first line in the dedent.
+    """
+    newline = text.find("\n")
+    if (
+        newline >= 0
+        and _UNINDENTED.search(text, newline) is None
+        and text[newline:].strip()
+    ):
+        return "\n" + text
+    return text
+
+
+# A line after the first that is not indented.
+_UNINDENTED = re.compile(r"\n\S")
+
+
+def description_lines(docstring: Docstring) -> T.List[str]:
+    """The short and long description, each followed by a blank if asked."""
+    long = docstring.long_description
+    parts = []
+    if docstring.short_description:
+        parts.append(docstring.short_description)
+    if docstring.blank_after_short_description:
+        parts.append("")
+    if long:
+        parts.append(long)
+    if docstring.blank_after_long_description:
+        parts.append("")
+    return parts
+
+
+def examples_text(examples: T.Sequence[DocstringExample]) -> str:
+    """Write examples as doctest reads them back: each one's text, a blank
+    line, then its snippet.
+
+    A blank line ends a snippet's expected output, so one goes before an
+    example's text. A snippet with no text follows the last one directly,
+    as its ``>>>`` already ends that output.
+    """
+    text = ""
+    for example in examples:
+        if example.description:
+            text += ("\n\n" if text else "") + example.description
+            if example.snippet:
+                text += "\n\n" + example.snippet
+        elif example.snippet:
+            text += ("\n" if text else "") + example.snippet
+    return text

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-6cf8ff76-6bba-4c43-9435-a3c9ed2ad00d",
+  "object": "chat.completion",
+  "created": 1795076361,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast as py_ast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.transformers.dict_unpacking import DictUnpackingTransformer\n\n\ndef parse_and_transform(code: str) -> ast.Module:\n    \"\"\"Parse source code with typed_ast and apply the transformer.\"\"\"\n    module = ast.parse(code)\n    transformer = DictUnpackingTransformer()\n    transformed = transformer.visit(module)\n    # Ensure the transformer actually changed the tree\n    assert transformer._tree_changed\n    return transformed\n\n\ndef test_simple_unpacking():\n    \"\"\"A dict with a single unpacking should be merged into a call.\"\"\"\n    code = \"{1: 1, **{'a': 2}}\"\n    transformed = parse_and_transform(code)\n\n    # The top-level node should be a Call to _py_backwards_merge_dicts\n    assert isinstance(transformed.body[0], ast.Expr)\n    call = transformed.body[0].value\n    assert isinstance(call, ast.Call)\n    assert isinstance(call.func, ast.Name)\n    assert call.func.id == \"_py_backwards_merge_dicts\"\n\n    # The argument should be a List containing one Dict\n    assert len(call.args) == 1\n    list_node = call.args[0]\n    assert isinstance(list_node, ast.List)\n    assert len(list_node.elts) == 1\n    dict_node = list_node.elts[0]\n    assert isinstance(dict_node, ast.Dict)\n\n    # The dict should contain the original key/value pair\n    assert len(dict_node.keys) == 1\n    key = dict_node.keys[0]\n    value = dict_node.values[0]\n    assert isinstance(key, ast.Num) and key.n == 1\n    assert isinstance(value, ast.Num) and value.n == 1\n\n\ndef test_no_unpacking():\n    \"\"\"A dict without unpacking should remain unchanged.\"\"\"\n    code = \"{'x': 10, 'y': 20}\"\n    transformed = parse_and_transform(code)\n\n    # The transformer should not modify the dict\n    expr = transformed.body[0]\n    assert isinstance(expr, ast.Expr)\n    dict_node = expr.value\n    assert isinstance(dict_node, ast.Dict)\n\n    # Keys and values should match the original\n    keys = [k.s if isinstance(k, ast.Str) else k.n for k in dict_node.keys]\n    values = [v.n if isinstance(v, ast.Num) else v.s for v in dict_node.values]\n    assert keys == [\"x\", \"y\"]\n    assert values == [10, 20]\n\n\ndef test_multiple_unpackings():\n    \"\"\"A dict with multiple unpackings should merge all parts correctly.\"\"\"\n    code = \"{1: 1, **{'a': 2}, **{'b': 3}, 4: 4}\"\n    transformed = parse_and_transform(code)\n\n    expr = transformed.body[0]\n    assert isinstance(expr, ast.Expr)\n    call = expr.value\n    assert isinstance(call, ast.Call)\n    assert call.func.id == \"_py_backwards_merge_dicts\"\n\n    list_node = call.args[0]\n    assert isinstance(list_node, ast.List)\n    # Expect three elements: first dict, second dict, third dict\n    assert len(list_node.elts) == 3\n    for idx, expected in enumerate([{\"1\": 1}, {\"a\": 2}, {\"b\": 3, \"4\": 4}]):\n        dict_node = list_node.elts[idx]\n        assert isinstance(dict_node, ast.Dict)\n        keys = [k.s if isinstance(k, ast.Str) else k.n for k in dict_node.keys]\n        values = [v.n if isinstance(v, ast.Num) else v.s for v in dict_node.values]\n        assert dict(zip(keys, values)) == expected\n```",
+        "reasoning": "We need to write tests for DictUnpackingTransformer. We need to import it. Use typed_ast to parse code. Use transformer to transform module. Then check resulting AST. We'll test normal case with dict unpacking, boundary no unpacking, error? maybe invalid None key? But transformer expects None in keys for unpacking. We'll test that it merges correctly. Use snippet to get code? snippet function maybe returns code string? But we can just use ast.parse. Use typed_ast.parse? typed_ast has ast3.parse? Let's import typed_ast.ast3 as ast. Use ast.parse. Then apply transformer. Then unparse? typed_ast doesn't have unparse. We can inspect AST nodes. For merged dict, should be Call to _py_backwards_merge_dicts with list of dicts and calls. We'll assert structure. Write three tests: 1) simple dict with unpacking. 2) dict without unpacking remains unchanged. 3) dict with multiple unpackings. Use tmp_path? Not needed. We'll just test AST."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053843095,
+    "prompt_tokens": 790,
+    "prompt_time": 0.066915202,
+    "completion_tokens": 1001,
+    "completion_time": 1.110868103,
+    "total_tokens": 1791,
+    "total_time": 1.177783305,
+    "completion_tokens_details": {
+      "reasoning_tokens": 212
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se71zye5ya6vg2gt8f189m",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast as py_ast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.transformers.dict_unpacking import DictUnpackingTransformer\n\n\ndef parse_and_transform(code: str) -> ast.Module:\n    \"\"\"Parse source code with typed_ast and apply the transformer.\"\"\"\n    module = ast.parse(code)\n    transformer = DictUnpackingTransformer()\n    transformed = transformer.visit(module)\n    # Ensure the transformer actually changed the tree\n    assert transformer._tree_changed\n    return transformed\n\n\ndef test_simple_unpacking():\n    \"\"\"A dict with a single unpacking should be merged into a call.\"\"\"\n    code = \"{1: 1, **{'a': 2}}\"\n    transformed = parse_and_transform(code)\n\n    # The top-level node should be a Call to _py_backwards_merge_dicts\n    assert isinstance(transformed.body[0], ast.Expr)\n    call = transformed.body[0].value\n    assert isinstance(call, ast.Call)\n    assert isinstance(call.func, ast.Name)\n    assert call.func.id == \"_py_backwards_merge_dicts\"\n\n    # The argument should be a List containing one Dict\n    assert len(call.args) == 1\n    list_node = call.args[0]\n    assert isinstance(list_node, ast.List)\n    assert len(list_node.elts) == 1\n    dict_node = list_node.elts[0]\n    assert isinstance(dict_node, ast.Dict)\n\n    # The dict should contain the original key/value pair\n    assert len(dict_node.keys) == 1\n    key = dict_node.keys[0]\n    value = dict_node.values[0]\n    assert isinstance(key, ast.Num) and key.n == 1\n    assert isinstance(value, ast.Num) and value.n == 1\n\n\ndef test_no_unpacking():\n    \"\"\"A dict without unpacking should remain unchanged.\"\"\"\n    code = \"{'x': 10, 'y': 20}\"\n    transformed = parse_and_transform(code)\n\n    # The transformer should not modify the dict\n    expr = transformed.body[0]\n    assert isinstance(expr, ast.Expr)\n    dict_node = expr.value\n    assert isinstance(dict_node, ast.Dict)\n\n    # Keys and values should match the original\n    keys = [k.s if isinstance(k, ast.Str) else k.n for k in dict_node.keys]\n    values = [v.n if isinstance(v, ast.Num) else v.s for v in dict_node.values]\n    assert keys == [\"x\", \"y\"]\n    assert values == [10, 20]\n\n\ndef test_multiple_unpackings():\n    \"\"\"A dict with multiple unpackings should merge all parts correctly.\"\"\"\n    code = \"{1: 1, **{'a': 2}, **{'b': 3}, 4: 4}\"\n    transformed = parse_and_transform(code)\n\n    expr = transformed.body[0]\n    assert isinstance(expr, ast.Expr)\n    call = expr.value\n    assert isinstance(call, ast.Call)\n    assert call.func.id == \"_py_backwards_merge_dicts\"\n\n    list_node = call.args[0]\n    assert isinstance(list_node, ast.List)\n    # Expect three elements: first dict, second dict, third dict\n    assert len(list_node.elts) == 3\n    for idx, expected in enumerate([{\"1\": 1}, {\"a\": 2}, {\"b\": 3, \"4\": 4}]):\n        dict_node = list_node.elts[idx]\n        assert isinstance(dict_node, ast.Dict)\n        keys = [k.s if isinstance(k, ast.Str) else k.n for k in dict_node.keys]\n        values = [v.n if isinstance(v, ast.Num) else v.s for v in dict_node.values]\n        assert dict(zip(keys, values)) == expected\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.514311665960122
+}

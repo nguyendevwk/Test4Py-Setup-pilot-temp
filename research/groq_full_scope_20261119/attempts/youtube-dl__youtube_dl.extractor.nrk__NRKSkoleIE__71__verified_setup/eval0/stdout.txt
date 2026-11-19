@@ -1,0 +1,81 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_real_extract_success ___________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f564d78e8f0>
+ie = <youtube_dl.extractor.nrk.NRKSkoleIE object at 0x7f564c6a99c0>
+
+    def test_real_extract_success(monkeypatch, ie):
+        # Mock _download_json to return a dict with psId
+        def mock_download_json(url, video_id):
+            assert url == f'https://nrkno-skole-prod.kube.nrk.no/skole/api/media/{video_id}'
+            assert video_id == '14099'
+            return {'psId': '6021'}
+        monkeypatch.setattr(ie, '_download_json', mock_download_json)
+    
+        result = ie._real_extract('https://www.nrk.no/skole/?page=search&q=&mediaId=14099')
+>       assert result.url == 'nrk:6021'
+E       AttributeError: 'dict' object has no attribute 'url'
+
+test_generated.py:18: AttributeError
+________________________ test_real_extract_missing_psid ________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f564c6abac0>
+ie = <youtube_dl.extractor.nrk.NRKSkoleIE object at 0x7f564c6aba30>
+
+    def test_real_extract_missing_psid(monkeypatch, ie):
+        # Mock _download_json to return dict without psId
+        def mock_download_json(url, video_id):
+            return {}
+        monkeypatch.setattr(ie, '_download_json', mock_download_json)
+    
+        with pytest.raises(ExtractorError) as excinfo:
+>           ie._real_extract('https://www.nrk.no/skole/?page=search&q=&mediaId=14099')
+
+test_generated.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.nrk.NRKSkoleIE object at 0x7f564c6aba30>
+url = 'https://www.nrk.no/skole/?page=search&q=&mediaId=14099'
+
+    def _real_extract(self, url):
+        video_id = self._match_id(url)
+    
+>       nrk_id = self._download_json(
+            'https://nrkno-skole-prod.kube.nrk.no/skole/api/media/%s' % video_id,
+            video_id)['psId']
+E       KeyError: 'psId'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/nrk.py:869: KeyError
+________________________ test_real_extract_invalid_url _________________________
+
+ie = <youtube_dl.extractor.nrk.NRKSkoleIE object at 0x7f564c547a30>
+
+    def test_real_extract_invalid_url(ie):
+        # URL that does not match the pattern should raise ExtractorError
+        with pytest.raises(ExtractorError):
+>           ie._real_extract('https://www.nrk.no/skole/?page=search&q=&mediaId=abc')
+
+test_generated.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/nrk.py:867: in _real_extract
+    video_id = self._match_id(url)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'youtube_dl.extractor.nrk.NRKSkoleIE'>
+url = 'https://www.nrk.no/skole/?page=search&q=&mediaId=abc'
+
+    @classmethod
+    def _match_id(cls, url):
+        if '_VALID_URL_RE' not in cls.__dict__:
+            cls._VALID_URL_RE = re.compile(cls._VALID_URL)
+        m = cls._VALID_URL_RE.match(url)
+>       assert m
+E       AssertionError
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:422: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_real_extract_success - AttributeError: 'dict' ...
+FAILED test_generated.py::test_real_extract_missing_psid - KeyError: 'psId'
+FAILED test_generated.py::test_real_extract_invalid_url - AssertionError
+3 failed in 1.26s

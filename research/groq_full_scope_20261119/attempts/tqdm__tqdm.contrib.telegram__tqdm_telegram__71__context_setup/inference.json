@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b761d782-a3eb-41f1-957b-83c7879fe2db",
+  "object": "chat.completion",
+  "created": 1795076841,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tqdm.contrib.telegram import tqdm_telegram\n\nclass DummyIO:\n    def __init__(self):\n        self.written = []\n        self.deleted = False\n\n    def write(self, s):\n        self.written.append(s)\n\n    def delete(self):\n        self.deleted = True\n\ndef test_disable_no_tgio(tmp_path):\n    \"\"\"When disable=True, tqdm_telegram should not create a TelegramIO instance.\"\"\"\n    t = tqdm_telegram(disable=True)\n    assert not hasattr(t, \"tgio\"), \"tgio should not be created when disabled\"\n\ndef test_display_replaces_bar_format(tmp_path):\n    \"\"\"display should replace <bar/> with a formatted bar and call tgio.write.\"\"\"\n    t = tqdm_telegram(disable=True)\n    dummy = DummyIO()\n    t.tgio = dummy\n    # Prepare a format_dict that would normally contain a bar placeholder\n    t.format_dict = {\n        \"bar_format\": \"Progress: <bar/>\",\n        \"n\": 5,\n        \"total\": 10,\n        \"elapsed\": 1,\n        \"rate\": 5,\n        \"remaining\": 5,\n        \"desc\": \"test\",\n    }\n    # Call display; it should call dummy.write with the formatted string\n    t.display()\n    assert dummy.written, \"tgio.write should have been called\"\n    written = dummy.written[-1]\n    # The bar placeholder should be replaced with a formatted bar\n    assert \"{bar:10u}\" in written, \"bar placeholder not replaced correctly\"\n\ndef test_clear_writes_empty_when_not_disabled(tmp_path):\n    \"\"\"clear should call tgio.write('') when not disabled.\"\"\"\n    t = tqdm_telegram(disable=False)\n    dummy = DummyIO()\n    t.tgio = dummy\n    t.clear()\n    assert dummy.written, \"tgio.write should have been called during clear\"\n    assert dummy.written[-1] == \"\", \"clear should write an empty string\"\n```",
+        "reasoning": "We need tests for tqdm_telegram. But it requires network. We cannot. But we can test that it raises error when token missing? It uses envwrap. Hard. Maybe test that __init__ sets tgio when disable False. We can monkeypatch TelegramIO to avoid network. But cannot mock target. But we can subclass? We can create dummy token that causes error but we can catch. Use pytest.raises for requests exception? But network not allowed. Maybe use token 'invalid' and expect warning? But network call will happen. Can't. Maybe test that when disable=True, tgio not created. Use subclass? We can patch envwrap to no-op? But cannot modify product. But we can set env var to skip? envwrap likely reads env. But we can set env var TQDM_TELEGRAM_TOKEN to something. But still network. Maybe test that display uses format_meter. We can instantiate with disable=True to avoid network. Then call display and ensure no exception. Use dummy iterable. Let's write tests: 1) test_disable_no_tgio: instantiate with disable=True, ensure no attribute tgio. 2) test_display_calls_write: monkeypatch tgio.write to record. But cannot modify target. But we can set tgio after init? We can set tgio manually. 3) test_close_deletes: set tgio.delete to record. Use disable=False? But network. We can set token to None? It will still call TelegramIO. That will error. But we can set disable=True to avoid. But close will skip. Hard.\n\nMaybe test that format_dict bar_format replaced. Use disable=True, set format_dict manually, call display, ensure tgio.write called with expected string. We can set tgio to dummy object with write capturing. We can assign after init. That is allowed. So test 2: create tqdm_telegram(disable=True), set tgio to dummy, set format_dict with bar_format containing <bar/>. Call display, check dummy captured string contains bar:10u. Test 3: test_clear writes empty when not disabled. Use dummy tgio, disable=False, call clear, check write called with \"\". But tgio created? We can set tgio after init. So okay. Let's code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004877789,
+    "prompt_tokens": 1297,
+    "prompt_time": 0.100203825,
+    "completion_tokens": 883,
+    "completion_time": 0.943361486,
+    "total_tokens": 2180,
+    "total_time": 1.043565311,
+    "completion_tokens_details": {
+      "reasoning_tokens": 465
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7senptxej8t8fcvpj4q4g6q",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tqdm.contrib.telegram import tqdm_telegram\n\nclass DummyIO:\n    def __init__(self):\n        self.written = []\n        self.deleted = False\n\n    def write(self, s):\n        self.written.append(s)\n\n    def delete(self):\n        self.deleted = True\n\ndef test_disable_no_tgio(tmp_path):\n    \"\"\"When disable=True, tqdm_telegram should not create a TelegramIO instance.\"\"\"\n    t = tqdm_telegram(disable=True)\n    assert not hasattr(t, \"tgio\"), \"tgio should not be created when disabled\"\n\ndef test_display_replaces_bar_format(tmp_path):\n    \"\"\"display should replace <bar/> with a formatted bar and call tgio.write.\"\"\"\n    t = tqdm_telegram(disable=True)\n    dummy = DummyIO()\n    t.tgio = dummy\n    # Prepare a format_dict that would normally contain a bar placeholder\n    t.format_dict = {\n        \"bar_format\": \"Progress: <bar/>\",\n        \"n\": 5,\n        \"total\": 10,\n        \"elapsed\": 1,\n        \"rate\": 5,\n        \"remaining\": 5,\n        \"desc\": \"test\",\n    }\n    # Call display; it should call dummy.write with the formatted string\n    t.display()\n    assert dummy.written, \"tgio.write should have been called\"\n    written = dummy.written[-1]\n    # The bar placeholder should be replaced with a formatted bar\n    assert \"{bar:10u}\" in written, \"bar placeholder not replaced correctly\"\n\ndef test_clear_writes_empty_when_not_disabled(tmp_path):\n    \"\"\"clear should call tgio.write('') when not disabled.\"\"\"\n    t = tqdm_telegram(disable=False)\n    dummy = DummyIO()\n    t.tgio = dummy\n    t.clear()\n    assert dummy.written, \"tgio.write should have been called during clear\"\n    assert dummy.written[-1] == \"\", \"clear should write an empty string\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4034014099743217
+}

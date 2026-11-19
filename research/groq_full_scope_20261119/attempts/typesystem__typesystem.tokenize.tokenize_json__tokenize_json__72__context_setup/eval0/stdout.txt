@@ -1,0 +1,42 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_tokenize_json_normal_object _______________________
+
+    def test_tokenize_json_normal_object():
+        json_str = '{"a": 1, "b": [true, false, null], "c": "text"}'
+        token = tokenize_json(json_str)
+        assert isinstance(token, DictToken)
+        assert token.value == {"a": 1, "b": [True, False, None], "c": "text"}
+        # Check that scalar tokens inside have correct positions
+        inner_tokens = token.value
+>       assert isinstance(inner_tokens["b"], ListToken)
+E       assert False
+E        +  where False = isinstance([True, False, None], ListToken)
+
+test_generated.py:12: AssertionError
+____________________ test_tokenize_json_empty_string_raises ____________________
+
+    def test_tokenize_json_empty_string_raises():
+        with pytest.raises(ParseError) as excinfo:
+            tokenize_json("")
+        err = excinfo.value
+>       assert err.code == "no_content"
+E       AttributeError: 'ParseError' object has no attribute 'code'
+
+test_generated.py:25: AttributeError
+___________________ test_tokenize_json_invalid_syntax_raises ___________________
+
+    def test_tokenize_json_invalid_syntax_raises():
+        bad_json = '{"missing": "value",}'
+        with pytest.raises(ParseError) as excinfo:
+            tokenize_json(bad_json)
+        err = excinfo.value
+>       assert err.code == "parse_error"
+E       AttributeError: 'ParseError' object has no attribute 'code'
+
+test_generated.py:36: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_tokenize_json_normal_object - assert False
+FAILED test_generated.py::test_tokenize_json_empty_string_raises - AttributeE...
+FAILED test_generated.py::test_tokenize_json_invalid_syntax_raises - Attribut...
+3 failed in 0.14s

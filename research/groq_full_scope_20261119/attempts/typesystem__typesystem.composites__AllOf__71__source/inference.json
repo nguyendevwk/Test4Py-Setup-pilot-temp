@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-323648b2-f7f2-4690-a7a2-1de2f2fcacb2",
+  "object": "chat.completion",
+  "created": 1795076078,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.composites import AllOf\nfrom typesystem.fields import Field\n\nclass IntField(Field):\n    def validate(self, value):\n        if not isinstance(value, int):\n            raise ValueError(\"Not an int\")\n        return value\n\nclass StrField(Field):\n    def validate(self, value):\n        if not isinstance(value, str):\n            raise ValueError(\"Not a str\")\n        return value\n\ndef test_allof_success_and_failure():\n    # AllOf should succeed when all child fields validate\n    all_of = AllOf([IntField(), StrField()])\n    # Value that satisfies both: int and str cannot be same, so use two separate validations\n    # Instead, test that AllOf passes when each child validates the same value\n    # Here we use a custom field that accepts any value\n    class AnyField(Field):\n        def validate(self, value):\n            return value\n    all_of_any = AllOf([AnyField(), AnyField()])\n    assert all_of_any.validate(42) == 42\n\n    # Now test failure: one child fails\n    all_of_fail = AllOf([IntField(), StrField()])\n    with pytest.raises(ValueError, match=\"Not a str\"):\n        all_of_fail.validate(42)  # IntField passes, StrField fails\n\ndef test_allof_empty_list_returns_value():\n    # An empty AllOf should simply return the value\n    all_of_empty = AllOf([])\n    assert all_of_empty.validate(\"anything\") == \"anything\"\n\ndef test_allof_disallows_allow_null_kwarg():\n    # Passing allow_null should raise an AssertionError\n    with pytest.raises(AssertionError):\n        AllOf([IntField()], allow_null=True)\n```",
+        "reasoning": "We need tests for AllOf. It inherits Field. We need to import. Let's inspect Field? But we can just test behavior: AllOf should validate that all child fields validate. Use simple fields: maybe typesystem.fields.Any? But Any likely accepts any. We need a field that fails: maybe typesystem.fields.String? Not sure. Let's inspect typesystem.fields.We can't import here but assume typical: Field has validate method. We can create dummy Field subclass that records calls. But we cannot modify product code. But we can create a mock Field subclass in test. But AllOf expects list of Field instances. We can create simple Field subclass that raises if value not int. Use typesystem.fields.Field? We can subclass Field. Let's import Field. Then create IntField(Field) with validate checking isinstance(value,int). Then test AllOf with two IntField: validate passes for int, fails for str. Also test boundary: empty list? AllOf requires list; but if empty, loop does nothing, returns value. Test error: passing allow_null kw raises assertion. Use pytest.raises AssertionError. Use tmp_path? Not needed. But requirement says temporary files must use tmp_path. Not needed. We'll just write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05372651,
+    "prompt_tokens": 348,
+    "prompt_time": 0.01836923,
+    "completion_tokens": 619,
+    "completion_time": 0.673320581,
+    "total_tokens": 967,
+    "total_time": 0.691689811,
+    "completion_tokens_details": {
+      "reasoning_tokens": 250
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdye87erf8gzawxge1as4k",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.composites import AllOf\nfrom typesystem.fields import Field\n\nclass IntField(Field):\n    def validate(self, value):\n        if not isinstance(value, int):\n            raise ValueError(\"Not an int\")\n        return value\n\nclass StrField(Field):\n    def validate(self, value):\n        if not isinstance(value, str):\n            raise ValueError(\"Not a str\")\n        return value\n\ndef test_allof_success_and_failure():\n    # AllOf should succeed when all child fields validate\n    all_of = AllOf([IntField(), StrField()])\n    # Value that satisfies both: int and str cannot be same, so use two separate validations\n    # Instead, test that AllOf passes when each child validates the same value\n    # Here we use a custom field that accepts any value\n    class AnyField(Field):\n        def validate(self, value):\n            return value\n    all_of_any = AllOf([AnyField(), AnyField()])\n    assert all_of_any.validate(42) == 42\n\n    # Now test failure: one child fails\n    all_of_fail = AllOf([IntField(), StrField()])\n    with pytest.raises(ValueError, match=\"Not a str\"):\n        all_of_fail.validate(42)  # IntField passes, StrField fails\n\ndef test_allof_empty_list_returns_value():\n    # An empty AllOf should simply return the value\n    all_of_empty = AllOf([])\n    assert all_of_empty.validate(\"anything\") == \"anything\"\n\ndef test_allof_disallows_allow_null_kwarg():\n    # Passing allow_null should raise an AssertionError\n    with pytest.raises(AssertionError):\n        AllOf([IntField()], allow_null=True)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1431084119831212
+}

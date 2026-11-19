@@ -1,0 +1,268 @@
+{
+  "candidates": [
+    {
+      "module": "py_backwards.main",
+      "symbol": "main",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/main.py",
+      "source_sha256": "6d768a58e5bec0fc348f842e577c3a6f6bf86034e6602d54dc203bcd115f8f51",
+      "source": "from colorama import init\nfrom argparse import ArgumentParser\nimport sys\nfrom .compiler import compile_files\nfrom .conf import init_settings\nfrom . import const, messages, exceptions\n\ndef main() -> int:\n    parser = ArgumentParser(\n        'py-backwards',\n        description='Python to python compiler that allows you to use some '\n                    'Python 3.6 features in older versions.')\n    parser.add_argument('-i', '--input', type=str, nargs='+', required=True,\n                        help='input file or folder')\n    parser.add_argument('-o', '--output', type=str, required=True,\n                        help='output file or folder')\n    parser.add_argument('-t', '--target', type=str,\n                        required=True, choices=const.TARGETS.keys(),\n                        help='target python version')\n    parser.add_argument('-r', '--root', type=str, required=False,\n                        help='sources root')\n    parser.add_argument('-d', '--debug', action='store_true', required=False,\n                        help='enable debug output')\n    args = parser.parse_args()\n    init_settings(args)\n\n    try:\n        for input_ in args.input:\n            result = compile_files(input_, args.output,\n                                   const.TARGETS[args.target],\n                                   args.root)\n    except exceptions.CompilationError as e:\n        print(messages.syntax_error(e), file=sys.stderr)\n        return 1\n    except exceptions.TransformationError as e:\n        print(messages.transformation_error(e), file=sys.stderr)\n        return 1\n    except exceptions.InputDoesntExists:\n        print(messages.input_doesnt_exists(args.input), file=sys.stderr)\n        return 1\n    except exceptions.InvalidInputOutput:\n        print(messages.invalid_output(args.input, args.output),\n              file=sys.stderr)\n        return 1\n    except PermissionError:\n        print(messages.permission_error(args.output), file=sys.stderr)\n        return 1\n\n    print(messages.compilation_result(result))\n    return 0",
+      "source_lines": 43
+    },
+    {
+      "module": "py_backwards.transformers.base",
+      "symbol": "BaseTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/base.py",
+      "source_sha256": "eb603eda7f50f97ae47d98b424a9208833114fc9d76348141207391cbb17cdda",
+      "source": "from abc import ABCMeta, abstractmethod\nfrom typing import List, Tuple, Union, Optional, Iterable, Dict\nfrom typed_ast import ast3 as ast\nfrom ..types import CompilationTarget, TransformationResult\nfrom ..utils.snippet import snippet, extend\n\nclass BaseTransformer(metaclass=ABCMeta):\n    target = None  # type: CompilationTarget\n\n    @classmethod\n    @abstractmethod\n    def transform(cls, tree: ast.AST) -> TransformationResult:\n        ...",
+      "source_lines": 7
+    },
+    {
+      "module": "py_backwards.transformers.base",
+      "symbol": "BaseNodeTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/base.py",
+      "source_sha256": "eb603eda7f50f97ae47d98b424a9208833114fc9d76348141207391cbb17cdda",
+      "source": "from abc import ABCMeta, abstractmethod\nfrom typing import List, Tuple, Union, Optional, Iterable, Dict\nfrom typed_ast import ast3 as ast\nfrom ..types import CompilationTarget, TransformationResult\nfrom ..utils.snippet import snippet, extend\n\nclass BaseNodeTransformer(BaseTransformer, ast.NodeTransformer):\n    dependencies = []  # type: List[str]\n\n    def __init__(self, tree: ast.AST) -> None:\n        super().__init__()\n        self._tree = tree\n        self._tree_changed = False\n\n    @classmethod\n    def transform(cls, tree: ast.AST) -> TransformationResult:\n        inst = cls(tree)\n        inst.visit(tree)\n        return TransformationResult(tree, inst._tree_changed, cls.dependencies)",
+      "source_lines": 13
+    },
+    {
+      "module": "py_backwards.transformers.base",
+      "symbol": "import_rewrite",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/base.py",
+      "source_sha256": "eb603eda7f50f97ae47d98b424a9208833114fc9d76348141207391cbb17cdda",
+      "source": "from abc import ABCMeta, abstractmethod\nfrom typing import List, Tuple, Union, Optional, Iterable, Dict\nfrom typed_ast import ast3 as ast\nfrom ..types import CompilationTarget, TransformationResult\nfrom ..utils.snippet import snippet, extend\n\ndef import_rewrite(previous, current):\n    try:\n        extend(previous)\n    except ImportError:\n        extend(current)",
+      "source_lines": 5
+    },
+    {
+      "module": "py_backwards.transformers.base",
+      "symbol": "BaseImportRewrite",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/base.py",
+      "source_sha256": "eb603eda7f50f97ae47d98b424a9208833114fc9d76348141207391cbb17cdda",
+      "source": "from abc import ABCMeta, abstractmethod\nfrom typing import List, Tuple, Union, Optional, Iterable, Dict\nfrom typed_ast import ast3 as ast\nfrom ..types import CompilationTarget, TransformationResult\nfrom ..utils.snippet import snippet, extend\n\nclass BaseImportRewrite(BaseNodeTransformer):\n    rewrites = []  # type: List[Tuple[str, str]]\n\n    def _get_matched_rewrite(self, name: Optional[str]) -> Optional[Tuple[str, str]]:\n        \"\"\"Returns rewrite for module name.\"\"\"\n        if name is None:\n            return None\n\n        for from_, to in self.rewrites:\n            if name == from_ or name.startswith(from_ + '.'):\n                return from_, to\n\n        return None\n\n    def _replace_import(self, node: ast.Import, from_: str, to: str) -> ast.Try:\n        \"\"\"Replace import with try/except with old and new import.\"\"\"\n        self._tree_changed = True\n\n        rewrote_name = node.names[0].name.replace(from_, to, 1)\n        import_as = node.names[0].asname or node.names[0].name.split('.')[-1]\n\n        rewrote = ast.Import(names=[\n            ast.alias(name=rewrote_name,\n                      asname=import_as)])\n\n        return import_rewrite.get_body(previous=node,  # type: ignore\n                                       current=rewrote)[0]\n\n    def visit_Import(self, node: ast.Import) -> Union[ast.Import, ast.Try]:\n        rewrite = self._get_matched_rewrite(node.names[0].name)\n        if rewrite:\n            return self._replace_import(node, *rewrite)\n\n        return self.generic_visit(node)\n\n    def _replace_import_from_module(self, node: ast.ImportFrom, from_: str, to: str) -> ast.Try:\n        \"\"\"Replaces import from with try/except with old and new import module.\"\"\"\n        self._tree_changed = True\n\n        rewrote_module = node.module.replace(from_, to, 1)\n        rewrote = ast.ImportFrom(module=rewrote_module,\n                                 names=node.names,\n                                 level=node.level)\n\n        return import_rewrite.get_body(previous=node,  # type: ignore\n                                       current=rewrote)[0]\n\n    def _get_names_to_replace(self, node: ast.ImportFrom) -> Iterable[Tuple[str, Tuple[str, str]]]:\n        \"\"\"Finds names/aliases to replace.\"\"\"\n        for alias in node.names:\n            full_name = '{}.{}'.format(node.module, alias.name)\n            if alias.name != '*':\n                rewrite = self._get_matched_rewrite(full_name)\n                if rewrite:\n                    yield (full_name, rewrite)\n\n    def _get_replaced_import_from_part(self, node: ast.ImportFrom, alias: ast.alias,\n                                       names_to_replace: Dict[str, Tuple[str, str]]) -> ast.ImportFrom:\n        \"\"\"Returns import from statement with changed module or alias.\"\"\"\n        full_name = '{}.{}'.format(node.module, alias.name)\n        if full_name in names_to_replace:\n            full_name = full_name.replace(names_to_replace[full_name][0],\n                                          names_to_replace[full_name][1],\n                                          1)\n        module_name = '.'.join(full_name.split('.')[:-1])\n        name = full_name.split('.')[-1]\n        return ast.ImportFrom(\n            module=module_name,\n            names=[ast.alias(name=name,\n                             asname=alias.asname or alias.name)],\n            level=node.level)\n\n    def _replace_import_from_names(self, node: ast.ImportFrom,\n                                   names_to_replace: Dict[str, Tuple[str, str]]) -> ast.Try:\n        \"\"\"Replaces import from with try/except with old and new \n        import module and names.\n        \n        \"\"\"\n        self._tree_changed = True\n\n        rewrotes = [\n            self._get_replaced_import_from_part(node, alias, names_to_replace)\n            for alias in node.names]\n\n        return import_rewrite.get_body(previous=node,  # type: ignore\n                                       current=rewrotes)[0]\n\n    def visit_ImportFrom(self, node: ast.ImportFrom) -> Union[ast.ImportFrom, ast.Try]:\n        rewrite = self._get_matched_rewrite(node.module)\n        if rewrite:\n            return self._replace_import_from_module(node, *rewrite)\n\n        names_to_replace = dict(self._get_names_to_replace(node))\n        if names_to_replace:\n            return self._replace_import_from_names(node, names_to_replace)\n\n        return self.generic_visit(node)",
+      "source_lines": 97
+    },
+    {
+      "module": "py_backwards.transformers.dict_unpacking",
+      "symbol": "merge_dicts",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/dict_unpacking.py",
+      "source_sha256": "08cff85a531481a97b8fbaf3093f90b10aeb05491017d10466c59583cf705b1f",
+      "source": "from typing import Union, Iterable, Optional, List, Tuple\nfrom typed_ast import ast3 as ast\nfrom ..utils.tree import insert_at\nfrom ..utils.snippet import snippet\nfrom .base import BaseNodeTransformer\n\ndef merge_dicts():\n    def _py_backwards_merge_dicts(dicts):\n        result = {}\n        for dict_ in dicts:\n            result.update(dict_)\n        return result",
+      "source_lines": 6
+    },
+    {
+      "module": "py_backwards.transformers.dict_unpacking",
+      "symbol": "DictUnpackingTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/dict_unpacking.py",
+      "source_sha256": "08cff85a531481a97b8fbaf3093f90b10aeb05491017d10466c59583cf705b1f",
+      "source": "from typing import Union, Iterable, Optional, List, Tuple\nfrom typed_ast import ast3 as ast\nfrom ..utils.tree import insert_at\nfrom ..utils.snippet import snippet\nfrom .base import BaseNodeTransformer\n\nclass DictUnpackingTransformer(BaseNodeTransformer):\n    \"\"\"Compiles:\n    \n        {1: 1, **dict_a}\n        \n    To:\n    \n        _py_backwards_merge_dicts([{1: 1}], dict_a})\n    \n    \"\"\"\n    target = (3, 4)\n\n    def _split_by_None(self, pairs: Iterable[Pair]) -> Splitted:\n        \"\"\"Splits pairs to lists separated by dict unpacking statements.\"\"\"\n        result = [[]]  # type: Splitted\n        for key, value in pairs:\n            if key is None:\n                result.append(value)\n                result.append([])\n            else:\n                assert isinstance(result[-1], list)\n                result[-1].append((key, value))\n\n        return result\n\n    def _prepare_splitted(self, splitted: Splitted) \\\n            -> Iterable[Union[ast.Call, ast.Dict]]:\n        \"\"\"Wraps splitted in Call or Dict.\"\"\"\n        for group in splitted:\n            if not isinstance(group, list):\n                yield ast.Call(\n                    func=ast.Name(id='dict'),\n                    args=[group],\n                    keywords=[])\n            elif group:\n                yield ast.Dict(keys=[key for key, _ in group],\n                               values=[value for _, value in group])\n\n    def _merge_dicts(self, xs: Iterable[Union[ast.Call, ast.Dict]]) \\\n            -> ast.Call:\n        \"\"\"Creates call of function for merging dicts.\"\"\"\n        return ast.Call(\n            func=ast.Name(id='_py_backwards_merge_dicts'),\n            args=[ast.List(elts=list(xs))],\n            keywords=[])\n\n    def visit_Module(self, node: ast.Module) -> ast.Module:\n        insert_at(0, node, merge_dicts.get_body())  # type: ignore\n        return self.generic_visit(node)  # type: ignore\n\n    def visit_Dict(self, node: ast.Dict) -> Union[ast.Dict, ast.Call]:\n        if None not in node.keys:\n            return self.generic_visit(node)  # type: ignore\n\n        self._tree_changed = True\n        pairs = zip(node.keys, node.values)\n        splitted = self._split_by_None(pairs)\n        prepared = self._prepare_splitted(splitted)\n        return self._merge_dicts(prepared)",
+      "source_lines": 59
+    },
+    {
+      "module": "py_backwards.transformers.metaclass",
+      "symbol": "MetaclassTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/metaclass.py",
+      "source_sha256": "64648673d59ee1624dda98d37d5943be0f7c9a1cba5db6721b2b0a63ac6079de",
+      "source": "from typed_ast import ast3 as ast\nfrom ..utils.snippet import snippet\nfrom ..utils.tree import insert_at\nfrom .base import BaseNodeTransformer\n\nclass MetaclassTransformer(BaseNodeTransformer):\n    \"\"\"Compiles:\n        class A(metaclass=B):\n            pass\n    To:\n        class A(_py_backwards_six_with_metaclass(B))\n    \n    \"\"\"\n    target = (2, 7)\n    dependencies = ['six']\n\n    def visit_Module(self, node: ast.Module) -> ast.Module:\n        insert_at(0, node, six_import.get_body())\n        return self.generic_visit(node)  # type: ignore\n\n    def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef:\n        if node.keywords:\n            metaclass = node.keywords[0].value\n            node.bases = class_bases.get_body(metaclass=metaclass,  # type: ignore\n                                              bases=ast.List(elts=node.bases))\n            node.keywords = []\n            self._tree_changed = True\n\n        return self.generic_visit(node)",
+      "source_lines": 24
+    },
+    {
+      "module": "py_backwards.transformers.python2_future",
+      "symbol": "imports",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/python2_future.py",
+      "source_sha256": "c6acc11956d36b88e8e7b8ce3360ef10f599e08d1a33d283404fd35bc6635789",
+      "source": "from typed_ast import ast3 as ast\nfrom ..utils.snippet import snippet\nfrom .base import BaseNodeTransformer\n\ndef imports(future):\n    from future import absolute_import\n    from future import division\n    from future import print_function\n    from future import unicode_literals",
+      "source_lines": 5
+    },
+    {
+      "module": "py_backwards.transformers.python2_future",
+      "symbol": "Python2FutureTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/python2_future.py",
+      "source_sha256": "c6acc11956d36b88e8e7b8ce3360ef10f599e08d1a33d283404fd35bc6635789",
+      "source": "from typed_ast import ast3 as ast\nfrom ..utils.snippet import snippet\nfrom .base import BaseNodeTransformer\n\nclass Python2FutureTransformer(BaseNodeTransformer):\n    \"\"\"Prepends module with:\n        from __future__ import absolute_import\n        from __future__ import division\n        from __future__ import print_function\n        from __future__ import unicode_literals\n            \n    \"\"\"\n    target = (2, 7)\n\n    def visit_Module(self, node: ast.Module) -> ast.Module:\n        self._tree_changed = True\n        node.body = imports.get_body(future='__future__') + node.body  # type: ignore\n        return self.generic_visit(node)",
+      "source_lines": 14
+    },
+    {
+      "module": "py_backwards.transformers.return_from_generator",
+      "symbol": "return_from_generator",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/return_from_generator.py",
+      "source_sha256": "7401eeb8d816f80e4ab608cbb2fa395cf3f1311a325f623dd9f90eaa74c35f3a",
+      "source": "from typing import List, Tuple, Any\nfrom typed_ast import ast3 as ast\nfrom ..utils.snippet import snippet, let\nfrom .base import BaseNodeTransformer\n\ndef return_from_generator(return_value):\n    let(exc)\n    exc = StopIteration()\n    exc.value = return_value\n    raise exc",
+      "source_lines": 5
+    },
+    {
+      "module": "py_backwards.transformers.return_from_generator",
+      "symbol": "ReturnFromGeneratorTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/return_from_generator.py",
+      "source_sha256": "7401eeb8d816f80e4ab608cbb2fa395cf3f1311a325f623dd9f90eaa74c35f3a",
+      "source": "from typing import List, Tuple, Any\nfrom typed_ast import ast3 as ast\nfrom ..utils.snippet import snippet, let\nfrom .base import BaseNodeTransformer\n\nclass ReturnFromGeneratorTransformer(BaseNodeTransformer):\n    \"\"\"Compiles return in generators like:\n        def fn():\n            yield 1\n            return 5\n    To:\n        def fn():\n            yield 1\n            exc = StopIteration()\n            exc.value = 5\n            raise exc\n    \"\"\"\n    target = (3, 2)\n\n    def _find_generator_returns(self, node: ast.FunctionDef) \\\n            -> List[Tuple[ast.stmt, ast.Return]]:\n        \"\"\"Using bfs find all `return` statements in function.\"\"\"\n        to_check = [(node, x) for x in node.body]  # type: ignore\n        returns = []\n        has_yield = False\n        while to_check:\n            parent, current = to_check.pop()\n\n            if isinstance(current, ast.FunctionDef):\n                continue\n            elif hasattr(current, 'value'):\n                to_check.append((current, current.value))  # type: ignore\n            elif hasattr(current, 'body') and isinstance(current.body, list):  # type: ignore\n                to_check.extend([(parent, x) for x in current.body])  # type: ignore\n\n            if isinstance(current, ast.Yield) or isinstance(current, ast.YieldFrom):\n                has_yield = True\n\n            if isinstance(current, ast.Return) and current.value is not None:\n                returns.append((parent, current))\n\n        if has_yield:\n            return returns  # type: ignore\n        else:\n            return []\n\n    def _replace_return(self, parent: Any, return_: ast.Return) -> None:\n        \"\"\"Replace return with exception raising.\"\"\"\n        index = parent.body.index(return_)\n        parent.body.pop(index)\n\n        for line in return_from_generator.get_body(return_value=return_.value)[::-1]:\n            parent.body.insert(index, line)\n\n    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:\n        generator_returns = self._find_generator_returns(node)\n\n        if generator_returns:\n            self._tree_changed = True\n\n        for parent, return_ in generator_returns:\n            self._replace_return(parent, return_)\n\n        return self.generic_visit(node)",
+      "source_lines": 59
+    },
+    {
+      "module": "py_backwards.transformers.six_moves",
+      "symbol": "MovedAttribute",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/six_moves.py",
+      "source_sha256": "f59bdb5686d55e209a8dea4384d6739392c5af78614d0da00b3d914dc2cbbccf",
+      "source": "from ..utils.helpers import eager\nfrom .base import BaseImportRewrite\n\nclass MovedAttribute:\n    def __init__(self, name, old_mod, new_mod, old_attr=None, new_attr=None):\n        self.name = name\n        if new_mod is None:\n            new_mod = name\n        self.new_mod = new_mod\n        if new_attr is None:\n            if old_attr is None:\n                new_attr = name\n            else:\n                new_attr = old_attr\n        self.new_attr = new_attr",
+      "source_lines": 12
+    },
+    {
+      "module": "py_backwards.transformers.six_moves",
+      "symbol": "MovedModule",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/six_moves.py",
+      "source_sha256": "f59bdb5686d55e209a8dea4384d6739392c5af78614d0da00b3d914dc2cbbccf",
+      "source": "from ..utils.helpers import eager\nfrom .base import BaseImportRewrite\n\nclass MovedModule:\n    def __init__(self, name, old, new=None):\n        self.name = name\n        if new is None:\n            new = name\n        self.new = new",
+      "source_lines": 6
+    },
+    {
+      "module": "py_backwards.transformers.six_moves",
+      "symbol": "SixMovesTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/six_moves.py",
+      "source_sha256": "f59bdb5686d55e209a8dea4384d6739392c5af78614d0da00b3d914dc2cbbccf",
+      "source": "from ..utils.helpers import eager\nfrom .base import BaseImportRewrite\n\nclass SixMovesTransformer(BaseImportRewrite):\n    \"\"\"Replaces moved modules with ones from `six.moves`.\"\"\"\n    target = (2, 7)\n    rewrites = _get_rewrites()\n    dependencies = ['six']",
+      "source_lines": 5
+    },
+    {
+      "module": "py_backwards.transformers.starred_unpacking",
+      "symbol": "StarredUnpackingTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/starred_unpacking.py",
+      "source_sha256": "766d082f588cd9374799892a3a333e0d94c7edcd993821abda67ad7dad5c4b55",
+      "source": "from typing import Union, Iterable, List\nfrom typed_ast import ast3 as ast\nfrom .base import BaseNodeTransformer\n\nclass StarredUnpackingTransformer(BaseNodeTransformer):\n    \"\"\"Compiles:\n        [2, *range(10), 1]\n        print(*range(1), *range(3))\n    To:\n        [2] + list(range(10)) + [1]\n        print(*(list(range(1)) + list(range(3))))\n        \n    \"\"\"\n    target = (3, 4)\n\n    def _has_starred(self, xs: List[ast.expr]) -> bool:\n        for x in xs:\n            if isinstance(x, ast.Starred):\n                return True\n\n        return False\n\n    def _split_by_starred(self, xs: Iterable[ast.expr]) -> List[Splitted]:\n        \"\"\"Split `xs` to separate list by Starred.\"\"\"\n        lists = [[]]  # type: List[Splitted]\n        for x in xs:\n            if isinstance(x, ast.Starred):\n                lists.append(x)\n                lists.append([])\n            else:\n                assert isinstance(lists[-1], list)\n                lists[-1].append(x)\n        return lists\n\n    def _prepare_lists(self, xs: List[Splitted]) -> Iterable[ListEntry]:\n        \"\"\"Wrap starred in list call and list elts to just List.\"\"\"\n        for x in xs:\n            if isinstance(x, ast.Starred):\n                yield ast.Call(\n                    func=ast.Name(id='list'),\n                    args=[x.value],\n                    keywords=[])\n            elif x:\n                yield ast.List(elts=x)\n\n    def _merge_lists(self, xs: List[ListEntry]) -> Union[ast.BinOp, ListEntry]:\n        \"\"\"Merge lists by summing them.\"\"\"\n        if len(xs) == 1:\n            return xs[0]\n\n        result = ast.BinOp(left=xs[0], right=xs[1], op=ast.Add())\n        for x in xs[2:]:\n            result = ast.BinOp(left=result, right=x, op=ast.Add())\n        return result\n\n    def _to_sum_of_lists(self, xs: List[ast.expr]) -> Union[ast.BinOp, ListEntry]:\n        \"\"\"Convert list of arguments / list to sum of lists.\"\"\"\n        splitted = self._split_by_starred(xs)\n        prepared = list(self._prepare_lists(splitted))\n        return self._merge_lists(prepared)\n\n    def visit_List(self, node: ast.List) -> ast.List:\n        if not self._has_starred(node.elts):\n            return self.generic_visit(node)  # type: ignore\n\n        self._tree_changed = True\n\n        return self.generic_visit(self._to_sum_of_lists(node.elts))  # type: ignore\n\n    def visit_Call(self, node: ast.Call) -> ast.Call:\n        if not self._has_starred(node.args):\n            return self.generic_visit(self.generic_visit(node))  # type: ignore\n\n        self._tree_changed = True\n\n        args = self._to_sum_of_lists(node.args)\n        node.args = [ast.Starred(value=args)]\n        return self.generic_visit(node)",
+      "source_lines": 74
+    },
+    {
+      "module": "py_backwards.transformers.string_types",
+      "symbol": "StringTypesTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/string_types.py",
+      "source_sha256": "4d9ea9c1c382c13b969e871f855b65edddef82add232088813a2597c0ec5c0ee",
+      "source": "from typed_ast import ast3 as ast\nfrom ..utils.tree import find\nfrom ..types import TransformationResult\nfrom .base import BaseTransformer\n\nclass StringTypesTransformer(BaseTransformer):\n    \"\"\"Replaces `str` with `unicode`. \n\n    \"\"\"\n    target = (2, 7)\n\n    @classmethod\n    def transform(cls, tree: ast.AST) -> TransformationResult:\n        tree_changed = False\n\n        for node in find(tree, ast.Name):\n            if node.id == 'str':\n                node.id = 'unicode'\n                tree_changed = True\n\n        return TransformationResult(tree, tree_changed, [])",
+      "source_lines": 16
+    },
+    {
+      "module": "py_backwards.transformers.super_without_arguments",
+      "symbol": "SuperWithoutArgumentsTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/super_without_arguments.py",
+      "source_sha256": "186d0cf680605f7ad65baac28335539a70adcd29466057ca8f3b25823dd1373a",
+      "source": "from typed_ast import ast3 as ast\nfrom ..utils.tree import get_closest_parent_of\nfrom ..utils.helpers import warn\nfrom ..exceptions import NodeNotFound\nfrom .base import BaseNodeTransformer\n\nclass SuperWithoutArgumentsTransformer(BaseNodeTransformer):\n    \"\"\"Compiles:\n        super()\n    To:\n        super(Cls, self)\n        super(Cls, cls)\n            \n    \"\"\"\n    target = (2, 7)\n\n    def _replace_super_args(self, node: ast.Call) -> None:\n        try:\n            func = get_closest_parent_of(self._tree, node, ast.FunctionDef)\n        except NodeNotFound:\n            warn('super() outside of function')\n            return\n\n        try:\n            cls = get_closest_parent_of(self._tree, node, ast.ClassDef)\n        except NodeNotFound:\n            warn('super() outside of class')\n            return\n\n        node.args = [ast.Name(id=cls.name), ast.Name(id=func.args.args[0].arg)]\n\n    def visit_Call(self, node: ast.Call) -> ast.Call:\n        if isinstance(node.func, ast.Name) and node.func.id == 'super' and not len(node.args):\n            self._replace_super_args(node)\n            self._tree_changed = True\n\n        return self.generic_visit(node)",
+      "source_lines": 31
+    },
+    {
+      "module": "py_backwards.transformers.variables_annotations",
+      "symbol": "VariablesAnnotationsTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/variables_annotations.py",
+      "source_sha256": "2445ee365d56ad084e2160fe2006eba4c97f5423a6b3cc93e0cddd5aa5b85a3f",
+      "source": "from typed_ast import ast3 as ast\nfrom ..utils.tree import find, get_non_exp_parent_and_index, insert_at\nfrom ..utils.helpers import warn\nfrom ..types import TransformationResult\nfrom ..exceptions import NodeNotFound\nfrom .base import BaseTransformer\n\nclass VariablesAnnotationsTransformer(BaseTransformer):\n    \"\"\"Compiles:\n        a: int = 10\n        b: int\n    To:\n        a = 10\n\n    \"\"\"\n    target = (3, 5)\n\n    @classmethod\n    def transform(cls, tree: ast.AST) -> TransformationResult:\n        tree_changed = False\n\n        for node in find(tree, ast.AnnAssign):\n            try:\n                parent, index = get_non_exp_parent_and_index(tree, node)\n            except NodeNotFound:\n                warn('Assignment outside of body')\n                continue\n\n            tree_changed = True\n            parent.body.pop(index)  # type: ignore\n\n            if node.value is not None:\n                insert_at(index, parent,\n                          ast.Assign(targets=[node.target],  # type: ignore\n                                     value=node.value,\n                                     type_comment=node.annotation))\n\n        return TransformationResult(tree, tree_changed, [])",
+      "source_lines": 31
+    },
+    {
+      "module": "py_backwards.transformers.yield_from",
+      "symbol": "yield_from",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/yield_from.py",
+      "source_sha256": "148fd798e651e5267348d85a4612ef80b1a8bb2aa3d09fa4f5eee2430fb6496c",
+      "source": "from typing import Optional, List, Type, Union\nfrom typed_ast import ast3 as ast\nfrom ..utils.tree import insert_at\nfrom ..utils.snippet import snippet, let, extend\nfrom ..utils.helpers import VariablesGenerator\nfrom .base import BaseNodeTransformer\n\ndef yield_from(generator, exc, assignment):\n    let(iterable)\n    iterable = iter(generator)\n    while True:\n        try:\n            yield next(iterable)\n        except StopIteration as exc:\n            extend(assignment)\n            break",
+      "source_lines": 9
+    },
+    {
+      "module": "py_backwards.transformers.yield_from",
+      "symbol": "YieldFromTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/yield_from.py",
+      "source_sha256": "148fd798e651e5267348d85a4612ef80b1a8bb2aa3d09fa4f5eee2430fb6496c",
+      "source": "from typing import Optional, List, Type, Union\nfrom typed_ast import ast3 as ast\nfrom ..utils.tree import insert_at\nfrom ..utils.snippet import snippet, let, extend\nfrom ..utils.helpers import VariablesGenerator\nfrom .base import BaseNodeTransformer\n\nclass YieldFromTransformer(BaseNodeTransformer):\n    \"\"\"Compiles yield from to special while statement.\"\"\"\n    target = (3, 2)\n\n    def _get_yield_from_index(self, node: ast.AST,\n                              type_: Type[Holder]) -> Optional[int]:\n        if hasattr(node, 'body') and isinstance(node.body, list):  # type: ignore\n            for n, child in enumerate(node.body):  # type: ignore\n                if isinstance(child, type_) and isinstance(child.value, ast.YieldFrom):\n                    return n\n\n        return None\n\n    def _emulate_yield_from(self, target: Optional[ast.AST],\n                            node: ast.YieldFrom) -> List[ast.AST]:\n        exc = VariablesGenerator.generate('exc')\n        if target is not None:\n            assignment = result_assignment.get_body(exc=exc, target=target)\n        else:\n            assignment = []\n\n        return yield_from.get_body(generator=node.value,\n                                   assignment=assignment,\n                                   exc=exc)\n\n    def _handle_assignments(self, node: Node) -> Node:\n        while True:\n            index = self._get_yield_from_index(node, ast.Assign)\n            if index is None:\n                return node\n\n            assign = node.body.pop(index)\n            yield_from_ast = self._emulate_yield_from(assign.targets[0],  # type: ignore\n                                                      assign.value)  # type: ignore\n            insert_at(index, node, yield_from_ast)\n            self._tree_changed = True\n\n    def _handle_expressions(self, node: Node) -> Node:\n        while True:\n            index = self._get_yield_from_index(node, ast.Expr)\n            if index is None:\n                return node\n\n            exp = node.body.pop(index)\n            yield_from_ast = self._emulate_yield_from(None, exp.value)  # type: ignore\n            insert_at(index, node, yield_from_ast)\n            self._tree_changed = True\n\n    def visit(self, node: ast.AST) -> ast.AST:\n        node = self._handle_assignments(node)  # type: ignore\n        node = self._handle_expressions(node)  # type: ignore\n        return self.generic_visit(node)",
+      "source_lines": 52
+    },
+    {
+      "module": "py_backwards.utils.helpers",
+      "symbol": "eager",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/helpers.py",
+      "source_sha256": "0b59a0955d2924460b1f1141718483d6780383ebf95227cba7018bf32769f5c7",
+      "source": "from inspect import getsource\nimport re\nimport sys\nfrom typing import Any, Callable, Iterable, List, TypeVar\nfrom functools import wraps\nfrom ..conf import settings\nfrom .. import messages\n\ndef eager(fn: Callable[..., Iterable[T]]) -> Callable[..., List[T]]:\n    @wraps(fn)\n    def wrapped(*args: Any, **kwargs: Any) -> List[T]:\n        return list(fn(*args, **kwargs))\n\n    return wrapped",
+      "source_lines": 6
+    },
+    {
+      "module": "py_backwards.utils.helpers",
+      "symbol": "VariablesGenerator",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/helpers.py",
+      "source_sha256": "0b59a0955d2924460b1f1141718483d6780383ebf95227cba7018bf32769f5c7",
+      "source": "from inspect import getsource\nimport re\nimport sys\nfrom typing import Any, Callable, Iterable, List, TypeVar\nfrom functools import wraps\nfrom ..conf import settings\nfrom .. import messages\n\nclass VariablesGenerator:\n    _counter = 0\n\n    @classmethod\n    def generate(cls, variable: str) -> str:\n        \"\"\"Generates unique name for variable.\"\"\"\n        try:\n            return '_py_backwards_{}_{}'.format(variable, cls._counter)\n        finally:\n            cls._counter += 1",
+      "source_lines": 10
+    },
+    {
+      "module": "py_backwards.utils.helpers",
+      "symbol": "get_source",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/helpers.py",
+      "source_sha256": "0b59a0955d2924460b1f1141718483d6780383ebf95227cba7018bf32769f5c7",
+      "source": "from inspect import getsource\nimport re\nimport sys\nfrom typing import Any, Callable, Iterable, List, TypeVar\nfrom functools import wraps\nfrom ..conf import settings\nfrom .. import messages\n\ndef get_source(fn: Callable[..., Any]) -> str:\n    \"\"\"Returns source code of the function.\"\"\"\n    source_lines = getsource(fn).split('\\n')\n    padding = len(re.findall(r'^(\\s*)', source_lines[0])[0])\n    return '\\n'.join(line[padding:] for line in source_lines)",
+      "source_lines": 5
+    },
+    {
+      "module": "py_backwards.utils.snippet",
+      "symbol": "find_variables",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py",
+      "source_sha256": "9b8fbe52e787cfc96ceda51b8c1ad9d9577e01c93324820f4fbc4abf88f55ccb",
+      "source": "from typing import Callable, Any, List, Dict, Iterable, Union, TypeVar\nfrom typed_ast import ast3 as ast\nfrom .tree import find, get_non_exp_parent_and_index, replace_at\nfrom .helpers import eager, VariablesGenerator, get_source\n\ndef find_variables(tree: ast.AST) -> Iterable[str]:\n    \"\"\"Finds variables and remove `let` calls.\"\"\"\n    for node in find(tree, ast.Call):\n        if isinstance(node.func, ast.Name) and node.func.id == 'let':\n            parent, index = get_non_exp_parent_and_index(tree, node)\n            parent.body.pop(index)  # type: ignore\n            yield node.args[0].id",
+      "source_lines": 7
+    },
+    {
+      "module": "py_backwards.utils.snippet",
+      "symbol": "VariablesReplacer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py",
+      "source_sha256": "9b8fbe52e787cfc96ceda51b8c1ad9d9577e01c93324820f4fbc4abf88f55ccb",
+      "source": "from typing import Callable, Any, List, Dict, Iterable, Union, TypeVar\nfrom typed_ast import ast3 as ast\nfrom .tree import find, get_non_exp_parent_and_index, replace_at\nfrom .helpers import eager, VariablesGenerator, get_source\n\nclass VariablesReplacer(ast.NodeTransformer):\n    \"\"\"Replaces declared variables with unique names.\"\"\"\n\n    def __init__(self, variables: Dict[str, Variable]) -> None:\n        self._variables = variables\n\n    def _replace_field_or_node(self, node: T, field: str, all_types=False) -> T:\n        value = getattr(node, field, None)\n        if value in self._variables:\n            if isinstance(self._variables[value], str):\n                setattr(node, field, self._variables[value])\n            elif all_types or isinstance(self._variables[value], type(node)):\n                node = self._variables[value]  # type: ignore\n\n        return node\n\n    def visit_Name(self, node: ast.Name) -> ast.Name:\n        node = self._replace_field_or_node(node, 'id', True)\n        return self.generic_visit(node)  # type: ignore\n\n    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:\n        node = self._replace_field_or_node(node, 'name')\n        return self.generic_visit(node)  # type: ignore\n\n    def visit_Attribute(self, node: ast.Attribute) -> ast.Attribute:\n        node = self._replace_field_or_node(node, 'name')\n        return self.generic_visit(node)  # type: ignore\n\n    def visit_keyword(self, node: ast.keyword) -> ast.keyword:\n        node = self._replace_field_or_node(node, 'arg')\n        return self.generic_visit(node)  # type: ignore\n\n    def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef:\n        node = self._replace_field_or_node(node, 'name')\n        return self.generic_visit(node)  # type: ignore\n\n    def visit_arg(self, node: ast.arg) -> ast.arg:\n        node = self._replace_field_or_node(node, 'arg')\n        return self.generic_visit(node)  # type: ignore\n\n    def _replace_module(self, module: str) -> str:\n        def _replace(name):\n            if name in self._variables:\n                if isinstance(self._variables[name], str):\n                    return self._variables[name]\n\n            return name\n\n        return '.'.join(_replace(part) for part in module.split('.'))\n\n    def visit_ImportFrom(self, node: ast.ImportFrom) -> ast.ImportFrom:\n        node.module = self._replace_module(node.module)\n        return self.generic_visit(node)  # type: ignore\n\n    def visit_alias(self, node: ast.alias) -> ast.alias:\n        node.name = self._replace_module(node.name)\n        node = self._replace_field_or_node(node, 'asname')\n        return self.generic_visit(node)  # type: ignore\n\n    def visit_ExceptHandler(self, node: ast.ExceptHandler) -> ast.ExceptHandler:\n        node = self._replace_field_or_node(node, 'name')\n        return self.generic_visit(node)  # type: ignore\n\n    @classmethod\n    def replace(cls, tree: T, variables: Dict[str, Variable]) -> T:\n        \"\"\"Replaces all variables with unique names.\"\"\"\n        inst = cls(variables)\n        inst.visit(tree)\n        return tree",
+      "source_lines": 69
+    },
+    {
+      "module": "py_backwards.utils.snippet",
+      "symbol": "extend_tree",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py",
+      "source_sha256": "9b8fbe52e787cfc96ceda51b8c1ad9d9577e01c93324820f4fbc4abf88f55ccb",
+      "source": "from typing import Callable, Any, List, Dict, Iterable, Union, TypeVar\nfrom typed_ast import ast3 as ast\nfrom .tree import find, get_non_exp_parent_and_index, replace_at\nfrom .helpers import eager, VariablesGenerator, get_source\n\ndef extend_tree(tree: ast.AST, variables: Dict[str, Variable]) -> None:\n    for node in find(tree, ast.Call):\n        if isinstance(node.func, ast.Name) and node.func.id == 'extend':\n            parent, index = get_non_exp_parent_and_index(tree, node)\n            replace_at(index, parent, variables[node.args[0].id])",
+      "source_lines": 5
+    },
+    {
+      "module": "py_backwards.utils.snippet",
+      "symbol": "snippet",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py",
+      "source_sha256": "9b8fbe52e787cfc96ceda51b8c1ad9d9577e01c93324820f4fbc4abf88f55ccb",
+      "source": "from typing import Callable, Any, List, Dict, Iterable, Union, TypeVar\nfrom typed_ast import ast3 as ast\nfrom .tree import find, get_non_exp_parent_and_index, replace_at\nfrom .helpers import eager, VariablesGenerator, get_source\n\nclass snippet:\n    \"\"\"Snippet of code.\"\"\"\n\n    def __init__(self, fn: Callable[..., None]) -> None:\n        self._fn = fn\n\n    def _get_variables(self, tree: ast.AST,\n                       snippet_kwargs: Dict[str, Variable]) -> Dict[str, Variable]:\n        names = find_variables(tree)\n        variables = {name: VariablesGenerator.generate(name)\n                     for name in names}\n\n        for key, val in snippet_kwargs.items():\n            if isinstance(val, ast.Name):\n                variables[key] = val.id\n            else:\n                variables[key] = val  # type: ignore\n\n        return variables  # type: ignore\n\n    def get_body(self, **snippet_kwargs: Variable) -> List[ast.AST]:\n        \"\"\"Get AST of snippet body with replaced variables.\"\"\"\n        source = get_source(self._fn)\n        tree = ast.parse(source)\n        variables = self._get_variables(tree, snippet_kwargs)\n        extend_tree(tree, variables)\n        VariablesReplacer.replace(tree, variables)\n        return tree.body[0].body",
+      "source_lines": 28
+    },
+    {
+      "module": "py_backwards.utils.snippet",
+      "symbol": "let",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py",
+      "source_sha256": "9b8fbe52e787cfc96ceda51b8c1ad9d9577e01c93324820f4fbc4abf88f55ccb",
+      "source": "from typing import Callable, Any, List, Dict, Iterable, Union, TypeVar\nfrom typed_ast import ast3 as ast\nfrom .tree import find, get_non_exp_parent_and_index, replace_at\nfrom .helpers import eager, VariablesGenerator, get_source\n\ndef let(var: Any) -> None:\n    \"\"\"Declares unique value in snippet. Code of snippet like:\n    \n        let(x)\n        x += 1\n        y = 1\n        \n    Will end up like:\n        \n        _py_backwards_x_0 += 1\n        y = 1\n    \"\"\"",
+      "source_lines": 12
+    },
+    {
+      "module": "py_backwards.utils.snippet",
+      "symbol": "extend",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py",
+      "source_sha256": "9b8fbe52e787cfc96ceda51b8c1ad9d9577e01c93324820f4fbc4abf88f55ccb",
+      "source": "from typing import Callable, Any, List, Dict, Iterable, Union, TypeVar\nfrom typed_ast import ast3 as ast\nfrom .tree import find, get_non_exp_parent_and_index, replace_at\nfrom .helpers import eager, VariablesGenerator, get_source\n\ndef extend(var: Any) -> None:\n    \"\"\"Extends code, so code like:\n    \n        extend(vars)\n        print(x, y)\n        \n    When vars contains AST of assignments will end up:\n    \n        x = 1\n        x = 2\n        print(x, y)\n    \"\"\"",
+      "source_lines": 12
+    }
+  ],
+  "errors": [],
+  "site": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages",
+  "version": "0.7",
+  "packages": {
+    "py-backwards-astunparse": "1.5.0.post3",
+    "typed-ast": "1.5.5",
+    "typing_extensions": "4.16.0",
+    "iniconfig": "2.3.1",
+    "autopep8": "2.3.2",
+    "pycodestyle": "2.15.0",
+    "six": "1.17.0",
+    "wheel": "0.48.0",
+    "pytest-json-report": "1.5.0",
+    "pluggy": "1.7.0",
+    "packaging": "26.3",
+    "pytest-metadata": "3.1.1",
+    "py-backwards": "0.7",
+    "tomli": "2.5.0",
+    "exceptiongroup": "1.3.1",
+    "colorama": "0.4.6",
+    "pytest": "9.2.0",
+    "coverage": "7.16.2",
+    "Pygments": "2.21.0"
+  }
+}

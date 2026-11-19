@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-d71a4c3b-f940-4585-a0ad-f897ba90fb69",
+  "object": "chat.completion",
+  "created": 1795076909,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport sys\nimport argparse\nimport pytest\nfrom httpie.cli.argparser import BaseHTTPieArgumentParser\nfrom httpie.context import Environment\n\n@pytest.fixture\ndef env_with_stdin():\n    \"\"\"Environment with stdin containing data and not a tty.\"\"\"\n    env = Environment()\n    env.stdin = io.BytesIO(b\"data\")\n    env.stdin_isatty = False\n    env.stdout = io.BytesIO()\n    env.stderr = io.BytesIO()\n    env.stdout_encoding = \"utf-8\"\n    return env\n\n@pytest.fixture\ndef env_without_stdin():\n    \"\"\"Environment with stdin empty and a tty.\"\"\"\n    env = Environment()\n    env.stdin = io.BytesIO(b\"\")\n    env.stdin_isatty = True\n    env.stdout = io.BytesIO()\n    env.stderr = io.BytesIO()\n    env.stdout_encoding = \"utf-8\"\n    return env\n\ndef test_parse_args_sets_traceback_on_debug(env_with_stdin):\n    parser = BaseHTTPieArgumentParser()\n    # Add a dummy debug flag\n    parser.add_argument(\"--debug\", action=\"store_true\")\n    args = parser.parse_args(env_with_stdin, args=[\"--debug\"])\n    assert args.debug is True\n    assert args.traceback is True  # debug flag should enable traceback\n\ndef test_parse_args_detects_stdin_data(env_with_stdin):\n    parser = BaseHTTPieArgumentParser()\n    # No explicit flags; parser should detect stdin data\n    args = parser.parse_args(env_with_stdin, args=[])\n    assert parser.has_stdin_data is True\n    assert parser.has_input_data is True\n    # Ensure that stdin data is not consumed by argparse\n    env_with_stdin.stdin.seek(0)\n    assert env_with_stdin.stdin.read() == b\"data\"\n\ndef test_parse_args_no_stdin_data_when_tty(env_without_stdin):\n    parser = BaseHTTPieArgumentParser()\n    args = parser.parse_args(env_without_stdin, args=[])\n    assert parser.has_stdin_data is False\n    assert parser.has_input_data is False\n    # Ensure that stdin is still empty\n    env_without_stdin.stdin.seek(0)\n    assert env_without_stdin.stdin.read() == b\"\"\n```",
+        "reasoning": "Need tests for BaseHTTPieArgumentParser parse_args behavior. Use tmp_path for env? Environment likely from httpie.context. We can create minimal Environment with stdin, stdout, stderr, etc. Use simple args. Test has_stdin_data logic. Also test debug flag sets traceback. Third test maybe error handling? parse_args returns namespace. We'll instantiate parser with description. Use env with stdin not isatty. Use BytesIO. Let's craft."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053462391,
+    "prompt_tokens": 760,
+    "prompt_time": 0.018688396,
+    "completion_tokens": 560,
+    "completion_time": 0.754798203,
+    "total_tokens": 1320,
+    "total_time": 0.773486599,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 91
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7seqseje69a4nvpbvq8bwp3",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport sys\nimport argparse\nimport pytest\nfrom httpie.cli.argparser import BaseHTTPieArgumentParser\nfrom httpie.context import Environment\n\n@pytest.fixture\ndef env_with_stdin():\n    \"\"\"Environment with stdin containing data and not a tty.\"\"\"\n    env = Environment()\n    env.stdin = io.BytesIO(b\"data\")\n    env.stdin_isatty = False\n    env.stdout = io.BytesIO()\n    env.stderr = io.BytesIO()\n    env.stdout_encoding = \"utf-8\"\n    return env\n\n@pytest.fixture\ndef env_without_stdin():\n    \"\"\"Environment with stdin empty and a tty.\"\"\"\n    env = Environment()\n    env.stdin = io.BytesIO(b\"\")\n    env.stdin_isatty = True\n    env.stdout = io.BytesIO()\n    env.stderr = io.BytesIO()\n    env.stdout_encoding = \"utf-8\"\n    return env\n\ndef test_parse_args_sets_traceback_on_debug(env_with_stdin):\n    parser = BaseHTTPieArgumentParser()\n    # Add a dummy debug flag\n    parser.add_argument(\"--debug\", action=\"store_true\")\n    args = parser.parse_args(env_with_stdin, args=[\"--debug\"])\n    assert args.debug is True\n    assert args.traceback is True  # debug flag should enable traceback\n\ndef test_parse_args_detects_stdin_data(env_with_stdin):\n    parser = BaseHTTPieArgumentParser()\n    # No explicit flags; parser should detect stdin data\n    args = parser.parse_args(env_with_stdin, args=[])\n    assert parser.has_stdin_data is True\n    assert parser.has_input_data is True\n    # Ensure that stdin data is not consumed by argparse\n    env_with_stdin.stdin.seek(0)\n    assert env_with_stdin.stdin.read() == b\"data\"\n\ndef test_parse_args_no_stdin_data_when_tty(env_without_stdin):\n    parser = BaseHTTPieArgumentParser()\n    args = parser.parse_args(env_without_stdin, args=[])\n    assert parser.has_stdin_data is False\n    assert parser.has_input_data is False\n    # Ensure that stdin is still empty\n    env_without_stdin.stdin.seek(0)\n    assert env_without_stdin.stdin.read() == b\"\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.144461587013211
+}

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-a04a0c11-ed26-4eb3-ac22-9356e5262b9f",
+  "object": "chat.completion",
+  "created": 1795079248,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.transformers.metaclass import MetaclassTransformer\nfrom py_backwards.utils.snippet import snippet\nfrom py_backwards.utils.tree import unparse\n\ndef _transform(source: str) -> str:\n    \"\"\"Helper that parses, transforms, and unparses a source string.\"\"\"\n    tree = snippet(source)\n    transformer = MetaclassTransformer()\n    transformed = transformer.visit(tree)\n    return unparse(transformed)\n\ndef test_metaclass_transformation():\n    src = \"\"\"\nclass A(metaclass=B):\n    pass\n\"\"\"\n    result = _transform(src)\n    # The transformed class should inherit from the helper function\n    assert \"class A(_py_backwards_six_with_metaclass(B)):\" in result\n    # The original metaclass keyword should be removed\n    assert \"metaclass=\" not in result\n    # The six import should be added at the top\n    assert result.strip().startswith(\"import six\")\n\ndef test_no_metaclass_no_change():\n    src = \"\"\"\nclass C:\n    x = 1\n\"\"\"\n    result = _transform(src)\n    # No metaclass keyword, so the class should remain unchanged\n    assert \"class C:\" in result\n    assert \"x = 1\" in result\n    # No six import should be added\n    assert not result.strip().startswith(\"import six\")\n\ndef test_multiple_keywords_remains_other_keywords():\n    src = \"\"\"\nclass D(metaclass=Meta, kw=42):\n    pass\n\"\"\"\n    result = _transform(src)\n    # Only the first keyword (metaclass) should be removed\n    assert \"class D(_py_backwards_six_with_metaclass(Meta)):\" in result\n    # The second keyword should still be present as a keyword argument\n    assert \"kw=42\" in result\n    # The metaclass keyword should no longer appear\n    assert \"metaclass=\" not in result\n```",
+        "reasoning": "We need to test MetaclassTransformer. We need to import it. We need to create AST from source, run transformer, then unparse to code and compare. Use typed_ast ast3. Use snippet to parse. Let's inspect snippet? It's in utils.snippet. But we can just use ast.parse? But typed_ast ast3 parse? Use snippet to get node. We'll test: normal class with metaclass, boundary: class without metaclass, error: class with multiple keywords? But transformer only handles first keyword. We'll test that it removes keyword and adds base. Use tmp_path to write output? Just compare string.\n\nImplement three tests: test_metaclass_transformation, test_no_metaclass_no_change, test_multiple_keywords_remains? Actually transformer only handles first keyword; if multiple, it will only process first and leave others? We'll test that only first keyword removed.\n\nUse snippet to parse code. snippet likely returns ast.Module. We'll import snippet. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05376276,
+    "prompt_tokens": 444,
+    "prompt_time": 0.02267947,
+    "completion_tokens": 613,
+    "completion_time": 0.939712217,
+    "total_tokens": 1057,
+    "total_time": 0.962391687,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 197
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgz5rjem7tzv11bwg9abft",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.transformers.metaclass import MetaclassTransformer\nfrom py_backwards.utils.snippet import snippet\nfrom py_backwards.utils.tree import unparse\n\ndef _transform(source: str) -> str:\n    \"\"\"Helper that parses, transforms, and unparses a source string.\"\"\"\n    tree = snippet(source)\n    transformer = MetaclassTransformer()\n    transformed = transformer.visit(tree)\n    return unparse(transformed)\n\ndef test_metaclass_transformation():\n    src = \"\"\"\nclass A(metaclass=B):\n    pass\n\"\"\"\n    result = _transform(src)\n    # The transformed class should inherit from the helper function\n    assert \"class A(_py_backwards_six_with_metaclass(B)):\" in result\n    # The original metaclass keyword should be removed\n    assert \"metaclass=\" not in result\n    # The six import should be added at the top\n    assert result.strip().startswith(\"import six\")\n\ndef test_no_metaclass_no_change():\n    src = \"\"\"\nclass C:\n    x = 1\n\"\"\"\n    result = _transform(src)\n    # No metaclass keyword, so the class should remain unchanged\n    assert \"class C:\" in result\n    assert \"x = 1\" in result\n    # No six import should be added\n    assert not result.strip().startswith(\"import six\")\n\ndef test_multiple_keywords_remains_other_keywords():\n    src = \"\"\"\nclass D(metaclass=Meta, kw=42):\n    pass\n\"\"\"\n    result = _transform(src)\n    # Only the first keyword (metaclass) should be removed\n    assert \"class D(_py_backwards_six_with_metaclass(Meta)):\" in result\n    # The second keyword should still be present as a keyword argument\n    assert \"kw=42\" in result\n    # The metaclass keyword should no longer appear\n    assert \"metaclass=\" not in result\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3865377440233715
+}

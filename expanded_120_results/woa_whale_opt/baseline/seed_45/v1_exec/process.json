@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/home/heurix/.cache/uv/builds-v0/.tmpKsOndk/bin/python3",
+    "-m",
+    "coverage",
+    "run",
+    "--branch",
+    "--source=src.whale_optimization",
+    "-m",
+    "pytest",
+    "-q",
+    "-o",
+    "addopts=",
+    "--confcutdir=/home/heurix/Documents/Test4Py_Setup/expanded_120_results/woa_whale_opt/baseline/seed_45/v1_exec",
+    "-p",
+    "pytest_jsonreport.plugin",
+    "--json-report",
+    "--json-report-file=/home/heurix/Documents/Test4Py_Setup/expanded_120_results/woa_whale_opt/baseline/seed_45/v1_exec/pytest_report.json",
+    "/home/heurix/Documents/Test4Py_Setup/expanded_120_results/woa_whale_opt/baseline/seed_45/v1_exec/test_run.py"
+  ],
+  "returncode": 1,
+  "stdout": "F                                                                        [100%]\n=================================== FAILURES ===================================\n________________ test_optimize_includes_best_and_updates_state _________________\n\n    def test_optimize_includes_best_and_updates_state():\n        # deterministic random seed\n        np.random.seed(42)\n    \n        # simple objective: sum of coordinates (minimization)\n        opt_func = lambda x, y: x + y\n        constraints = [(0.0, 1.0), (0.0, 1.0)]\n        nsols = 3\n        b = 1.0\n        a = 1.0\n        a_step = 0.1\n    \n        wo = WhaleOptimization(opt_func, constraints, nsols, b, a, a_step, maximize=False)\n    \n        # capture initial state\n        initial_sols = wo.get_solutions().copy()\n        initial_a = wo._a\n        # rank solutions to find current best\n        ranked = wo._rank_solutions()\n        best_before = ranked[0]\n    \n        # run one optimization step\n        wo.optimize()\n    \n        # after optimization, shape should remain unchanged\n        assert wo.get_solutions().shape == initial_sols.shape\n    \n        # a should be decreased by a_step\n        assert wo._a == pytest.approx(initial_a - a_step)\n    \n        # best solution should be first element in new population\n        new_sols = wo.get_solutions()\n        assert np.allclose(new_sols[0], best_before)\n    \n        # history of best solutions should have grown by one\n>       assert len(wo._best_solutions) == 1\nE       assert 2 == 1\nE        +  where 2 = len([(np.float64(0.8879884621476077), array([0.73199394, 0.15599452])), (np.float64(0.8879884621476077), array([0.73199394, 0.15599452]))])\nE        +    where [(np.float64(0.8879884621476077), array([0.73199394, 0.15599452])), (np.float64(0.8879884621476077), array([0.73199394, 0.15599452]))] = <src.whale_optimization.WhaleOptimization object at 0x7f957526dd00>._best_solutions\n\n../../expanded_120_results/woa_whale_opt/baseline/seed_45/v1_exec/test_run.py:40: AssertionError\n=========================== short test summary info ============================\nFAILED ../../expanded_120_results/woa_whale_opt/baseline/seed_45/v1_exec/test_run.py::test_optimize_includes_best_and_updates_state\n1 failed in 0.38s\n",
+  "stderr": "",
+  "timeout": false,
+  "log_path": null,
+  "seconds": 2.093402653001249
+}

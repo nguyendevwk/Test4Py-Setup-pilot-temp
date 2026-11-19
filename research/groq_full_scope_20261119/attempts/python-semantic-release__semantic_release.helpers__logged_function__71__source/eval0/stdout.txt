@@ -1,0 +1,79 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_logged_function_normal_behavior _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/python-semantic-release__semantic_release.helpers__logged_function__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_logged_function_normal_be0')
+
+    def test_logged_function_normal_behavior(tmp_path):
+        logger = ListLogger()
+    
+        @logged_function(logger)
+        def add(a, b):
+            return a + b
+    
+        result = add(2, 3)
+        assert result == 5
+        # First debug message should log function call
+>       assert logger.messages[0] == "add(2, 3), "
+E       AssertionError: assert 'add(2, 3, )' == 'add(2, 3), '
+E         
+E         - add(2, 3), 
+E         ?          --
+E         + add(2, 3, )
+E         ?         ++
+
+test_generated.py:28: AssertionError
+________________ test_logged_function_with_kwargs_and_boundary _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/python-semantic-release__semantic_release.helpers__logged_function__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_logged_function_with_kwar0')
+
+    def test_logged_function_with_kwargs_and_boundary(tmp_path):
+        logger = ListLogger()
+    
+        @logged_function(logger)
+        def concat(prefix, *args, sep=" ", **kwargs):
+            return sep.join([prefix] + list(args) + [kwargs.get("suffix", "")])
+    
+        result = concat("Hello", "world", sep="-", suffix="!")
+        assert result == "Hello-world-!"
+        # Check that keyword arguments are logged correctly
+        assert "sep='-'" in logger.messages[0]
+        assert "suffix='!'" in logger.messages[0]
+        # Return value logged
+>       assert logger.messages[1] == "concat -> Hello-world-!"
+E       AssertionError: assert 'test_logged_...Hello-world-!' == 'concat -> Hello-world-!'
+E         
+E         - concat -> Hello-world-!
+E         + test_logged_function_with_kwargs_and_boundary.<locals>.concat -> Hello-world-!
+
+test_generated.py:46: AssertionError
+__________________ test_logged_function_exception_propagation __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/python-semantic-release__semantic_release.helpers__logged_function__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_logged_function_exception0')
+
+    def test_logged_function_exception_propagation(tmp_path):
+        logger = ListLogger()
+    
+        @logged_function(logger)
+        def divide(a, b):
+            return a / b
+    
+        with pytest.raises(ZeroDivisionError):
+            divide(1, 0)
+    
+        # Only the call debug message should be present; no result message
+        assert len(logger.messages) == 1
+>       assert logger.messages[0] == "divide(1, 0), "
+E       AssertionError: assert 'divide(1, 0, )' == 'divide(1, 0), '
+E         
+E         - divide(1, 0), 
+E         ?             --
+E         + divide(1, 0, )
+E         ?            ++
+
+test_generated.py:61: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_logged_function_normal_behavior - AssertionErr...
+FAILED test_generated.py::test_logged_function_with_kwargs_and_boundary - Ass...
+FAILED test_generated.py::test_logged_function_exception_propagation - Assert...
+3 failed in 0.49s

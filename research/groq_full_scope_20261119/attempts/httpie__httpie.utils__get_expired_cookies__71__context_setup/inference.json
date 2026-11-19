@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-a97e5784-db7b-4d3d-acba-6974fd27f324",
+  "object": "chat.completion",
+  "created": 1795079610,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport time\nimport pytest\nfrom httpie.utils import get_expired_cookies, _max_age_to_expires, split_cookies\n\ndef test_expired_and_non_expired_cookies():\n    # Cookie string with one expired and one non‑expired cookie\n    now = time.time()\n    expired_cookie = f\"session=abc; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(now - 10))}\"\n    non_expired_cookie = f\"token=xyz; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(now + 1000))}\"\n    cookies_str = f\"{expired_cookie}, {non_expired_cookie}\"\n    result = get_expired_cookies(cookies_str, now=now)\n    assert len(result) == 1\n    assert result[0]['name'] == 'session'\n    assert result[0]['path'] == '/'  # default path\n\ndef test_max_age_conversion_to_expires():\n    # Cookie with max-age but no Expires attribute\n    now = time.time()\n    cookie_str = \"id=123; Max-Age=5\"\n    # split_cookies returns list of cookie strings\n    attr_sets = split_cookies(cookie_str)\n    # parse_ns_headers expects list of cookie strings\n    from http.cookiejar import parse_ns_headers\n    attrs = parse_ns_headers(attr_sets)\n    cookies = [dict(a[1:], name=a[0][0]) for a in attrs]\n    _max_age_to_expires(cookies=cookies, now=now)\n    # After conversion, expires should be now + 5\n    expires = cookies[0].get('expires')\n    assert expires is not None\n    assert abs(expires - (now + 5)) < 1e-6\n\ndef test_empty_and_invalid_cookie_strings():\n    # Empty string should yield no expired cookies\n    assert get_expired_cookies(\"\") == []\n\n    # Malformed cookie string that cannot be parsed should not raise\n    malformed = \"badcookie\"\n    result = get_expired_cookies(malformed)\n    # Since no Expires attribute, it should not be considered expired\n    assert result == []\n```",
+        "reasoning": "Need 3 tests: normal expired, boundary (expires exactly now), error (invalid cookie string). Use tmp_path? not needed. Use time control. Use time.time() monkeypatch? Use now param. Test that expired cookies returned. Test that non-expired not returned. Test that max-age conversion works. Also test error: malformed cookie string leads to empty? parse_ns_headers may raise? Let's test that passing None? but function expects str. Maybe passing empty string returns empty list. Use that."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00451643,
+    "prompt_tokens": 721,
+    "prompt_time": 0.039083329,
+    "completion_tokens": 587,
+    "completion_time": 0.637081876,
+    "total_tokens": 1308,
+    "total_time": 0.676165205,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 103
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sha7t1edpb812kfxqryt6z",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport time\nimport pytest\nfrom httpie.utils import get_expired_cookies, _max_age_to_expires, split_cookies\n\ndef test_expired_and_non_expired_cookies():\n    # Cookie string with one expired and one non‑expired cookie\n    now = time.time()\n    expired_cookie = f\"session=abc; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(now - 10))}\"\n    non_expired_cookie = f\"token=xyz; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(now + 1000))}\"\n    cookies_str = f\"{expired_cookie}, {non_expired_cookie}\"\n    result = get_expired_cookies(cookies_str, now=now)\n    assert len(result) == 1\n    assert result[0]['name'] == 'session'\n    assert result[0]['path'] == '/'  # default path\n\ndef test_max_age_conversion_to_expires():\n    # Cookie with max-age but no Expires attribute\n    now = time.time()\n    cookie_str = \"id=123; Max-Age=5\"\n    # split_cookies returns list of cookie strings\n    attr_sets = split_cookies(cookie_str)\n    # parse_ns_headers expects list of cookie strings\n    from http.cookiejar import parse_ns_headers\n    attrs = parse_ns_headers(attr_sets)\n    cookies = [dict(a[1:], name=a[0][0]) for a in attrs]\n    _max_age_to_expires(cookies=cookies, now=now)\n    # After conversion, expires should be now + 5\n    expires = cookies[0].get('expires')\n    assert expires is not None\n    assert abs(expires - (now + 5)) < 1e-6\n\ndef test_empty_and_invalid_cookie_strings():\n    # Empty string should yield no expired cookies\n    assert get_expired_cookies(\"\") == []\n\n    # Malformed cookie string that cannot be parsed should not raise\n    malformed = \"badcookie\"\n    result = get_expired_cookies(malformed)\n    # Since no Expires attribute, it should not be considered expired\n    assert result == []\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "5ed95a862caf4d6aa32016e1fffeeb00",
+  "_api_plus_pacing_seconds": 3.6599166239611804
+}

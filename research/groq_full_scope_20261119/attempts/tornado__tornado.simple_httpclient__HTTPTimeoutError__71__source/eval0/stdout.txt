@@ -1,0 +1,52 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_http_timeout_error_str_representation __________________
+
+    def test_http_timeout_error_str_representation():
+        """__str__ should return the message if provided, otherwise a default."""
+        # Case 1: message provided
+        msg = "Custom timeout message"
+        err_with_msg = HTTPTimeoutError(msg)
+        assert str(err_with_msg) == msg
+    
+        # Case 2: empty message defaults to "Timeout"
+        err_without_msg = HTTPTimeoutError("")
+>       assert str(err_without_msg) == "Timeout"
+E       AssertionError: assert 'Unknown' == 'Timeout'
+E         
+E         - Timeout
+E         + Unknown
+
+test_generated.py:28: AssertionError
+_____________ test_http_timeout_error_inherits_http_error_behavior _____________
+
+    def test_http_timeout_error_inherits_http_error_behavior():
+        """HTTPTimeoutError should behave like a normal HTTPError when used in exception handling."""
+        msg = "Timeout occurred"
+        err = HTTPTimeoutError(msg)
+        try:
+>           raise err
+E           tornado.simple_httpclient.HTTPTimeoutError: Timeout occurred
+
+test_generated.py:36: HTTPTimeoutError
+
+During handling of the above exception, another exception occurred:
+
+    def test_http_timeout_error_inherits_http_error_behavior():
+        """HTTPTimeoutError should behave like a normal HTTPError when used in exception handling."""
+        msg = "Timeout occurred"
+        err = HTTPTimeoutError(msg)
+        try:
+            raise err
+        except HTTPError as e:
+            # The caught exception should be the same instance
+            assert e is err
+            # The HTTPError base class provides a `reason` attribute
+>           assert e.reason == msg
+E           AttributeError: 'HTTPTimeoutError' object has no attribute 'reason'
+
+test_generated.py:41: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_http_timeout_error_str_representation - Assert...
+FAILED test_generated.py::test_http_timeout_error_inherits_http_error_behavior
+2 failed, 1 passed in 0.26s

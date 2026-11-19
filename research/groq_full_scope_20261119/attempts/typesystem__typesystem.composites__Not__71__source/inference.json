@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b27a53a3-28e3-4d15-a703-099ce99f69fd",
+  "object": "chat.completion",
+  "created": 1795078337,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.composites import Not\nfrom typesystem.fields import Field\n\nclass EqualsField(Field):\n    \"\"\"A simple field that fails validation when the value equals a target.\"\"\"\n    def __init__(self, target, **kwargs):\n        super().__init__(**kwargs)\n        self.target = target\n\n    def validate(self, value):\n        if value == self.target:\n            raise self.validation_error(\"equals\")\n        return value\n\ndef test_not_allows_non_matching_values():\n    \"\"\"Not should return the value when the negated field does not match.\"\"\"\n    negated = EqualsField(target=42)\n    not_field = Not(negated)\n    assert not_field.validate(10) == 10\n    assert not_field.validate(\"hello\") == \"hello\"\n    assert not_field.validate(None) is None\n\ndef test_not_boundary_with_none_and_different_type():\n    \"\"\"Not should handle None and other types that do not match the negated field.\"\"\"\n    negated = EqualsField(target=0)\n    not_field = Not(negated)\n    # None is not equal to 0, so validation should pass\n    assert not_field.validate(None) is None\n    # A string that is not \"0\" should also pass\n    assert not_field.validate(\"0\") == \"0\"\n\ndef test_not_raises_when_negated_matches():\n    \"\"\"Not should raise a validation error when the negated field matches.\"\"\"\n    negated = EqualsField(target=99)\n    not_field = Not(negated)\n    with pytest.raises(Exception) as excinfo:\n        not_field.validate(99)\n    # The error message should come from Not.errors[\"negated\"]\n    assert \"Must not match.\" in str(excinfo.value)\n```",
+        "reasoning": "We need to write tests for Not field. It inherits Field. We need to test normal, boundary, error. Use tmp_path? Not needed. Use pytest. We'll import Not and a simple Field subclass to test. Maybe use Any field? typesystem.fields.Any? Let's inspect Any. But we can create a simple field that validates integer >0. But we can't modify product code. We can use typesystem.fields.Any which accepts any value. But we need a negated field that fails on certain values. Maybe use typesystem.fields.Int? Not sure. Let's inspect typesystem.fields.Any. But we can't import. We'll just use Any which accepts any value. But we need a negated that fails on certain value. We can create a custom field by subclassing Field? But we can't modify product code but can define a custom field in test. Field is imported from typesystem.fields. We can subclass Field to create a simple validator that fails on value 42. Then Not should allow all values except those that match negated. So test that Not.validate returns value when negated fails, and raises error when negated passes.\n\nAlso test boundary: maybe test that Not raises error when negated passes for None? But allow_null not allowed. Use assert.\n\nTest error: passing a value that matches negated should raise validation_error. Use pytest.raises.\n\nAlso test that Not.validate_or_error? Not defined? Field likely has validate_or_error. We'll use validate.\n\nImplement custom field:\n\nclass EqualsField(Field):\n    def __init__(self, target, **kwargs): super().__init__(**kwargs); self.target=target\n    def validate(self, value): if value==self.target: raise self.validation_error(\"equals\") else: return value\n\nBut we need to use validation_error method. Field likely has that. We'll just call super.\n\nTest 1: normal: negated field that fails on 42. Not.validate(10) returns 10.\n\nTest 2: boundary: test that Not.validate(None) works? But allow_null not allowed. But None passes negated? Our EqualsField will treat None != target, so passes. So Not.validate(None) returns None.\n\nTest 3: error: Not.validate(42) raises validation_error with message \"Must not match.\" Use pytest.raises and check message.\n\nLet's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054681771,
+    "prompt_tokens": 356,
+    "prompt_time": 0.022481598,
+    "completion_tokens": 844,
+    "completion_time": 0.95886954,
+    "total_tokens": 1200,
+    "total_time": 0.981351138,
+    "completion_tokens_details": {
+      "reasoning_tokens": 475
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg3c77ez994hd2a9nbde18",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.composites import Not\nfrom typesystem.fields import Field\n\nclass EqualsField(Field):\n    \"\"\"A simple field that fails validation when the value equals a target.\"\"\"\n    def __init__(self, target, **kwargs):\n        super().__init__(**kwargs)\n        self.target = target\n\n    def validate(self, value):\n        if value == self.target:\n            raise self.validation_error(\"equals\")\n        return value\n\ndef test_not_allows_non_matching_values():\n    \"\"\"Not should return the value when the negated field does not match.\"\"\"\n    negated = EqualsField(target=42)\n    not_field = Not(negated)\n    assert not_field.validate(10) == 10\n    assert not_field.validate(\"hello\") == \"hello\"\n    assert not_field.validate(None) is None\n\ndef test_not_boundary_with_none_and_different_type():\n    \"\"\"Not should handle None and other types that do not match the negated field.\"\"\"\n    negated = EqualsField(target=0)\n    not_field = Not(negated)\n    # None is not equal to 0, so validation should pass\n    assert not_field.validate(None) is None\n    # A string that is not \"0\" should also pass\n    assert not_field.validate(\"0\") == \"0\"\n\ndef test_not_raises_when_negated_matches():\n    \"\"\"Not should raise a validation error when the negated field matches.\"\"\"\n    negated = EqualsField(target=99)\n    not_field = Not(negated)\n    with pytest.raises(Exception) as excinfo:\n        not_field.validate(99)\n    # The error message should come from Not.errors[\"negated\"]\n    assert \"Must not match.\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3785743720363826
+}

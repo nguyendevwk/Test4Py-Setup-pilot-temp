@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-d2203dcd-3592-4bc7-8c38-2b1fecbfd6bb",
+  "object": "chat.completion",
+  "created": 1795078473,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as ast3\nimport pytest\nfrom py_backwards.transformers.return_from_generator import ReturnFromGeneratorTransformer\nfrom py_backwards.utils.snippet import snippet\n\ndef parse_and_transform(code: str) -> ast3.Module:\n    \"\"\"Parse source code to an AST3 module and apply the transformer.\"\"\"\n    tree = ast3.parse(code)\n    transformer = ReturnFromGeneratorTransformer()\n    transformer.visit(tree)\n    return tree\n\ndef test_return_replaced_with_exception():\n    code = \"\"\"\ndef gen():\n    yield 1\n    return 5\n\"\"\"\n    tree = parse_and_transform(code)\n    # Find the function definition\n    func = next(node for node in tree.body if isinstance(node, ast3.FunctionDef))\n    # The body should now contain a Yield and an exception raise sequence\n    body = func.body\n    # The first statement should still be the Yield\n    assert isinstance(body[0], ast3.Yield)\n    # The next statements should be the exception construction and raise\n    # We expect three statements: exc = StopIteration(), exc.value = 5, raise exc\n    assert len(body) == 3\n    exc_assign, value_assign, raise_stmt = body[1], body[2], body[3] if len(body) > 3 else None\n    # Check that the exception is created correctly\n    assert isinstance(exc_assign, ast3.Assign)\n    assert isinstance(exc_assign.value, ast3.Call)\n    assert exc_assign.value.func.id == \"StopIteration\"\n    # Check that the value is assigned\n    assert isinstance(value_assign, ast3.Assign)\n    assert isinstance(value_assign.value, ast3.Constant)\n    assert value_assign.value.value == 5\n    # Check that the raise statement raises the exception variable\n    assert isinstance(raise_stmt, ast3.Raise)\n    assert isinstance(raise_stmt.exc, ast3.Name)\n    assert raise_stmt.exc.id == \"exc\"\n\ndef test_no_yield_no_transformation():\n    code = \"\"\"\ndef normal():\n    a = 1\n    return 2\n\"\"\"\n    tree = parse_and_transform(code)\n    func = next(node for node in tree.body if isinstance(node, ast3.FunctionDef))\n    # The body should remain unchanged\n    assert len(func.body) == 2\n    assert isinstance(func.body[0], ast3.Assign)\n    assert isinstance(func.body[1], ast3.Return)\n    # Ensure the transformer did not mark tree as changed\n    transformer = ReturnFromGeneratorTransformer()\n    transformer.visit(tree)\n    assert not transformer._tree_changed\n\ndef test_multiple_returns_and_yield():\n    code = \"\"\"\ndef multi():\n    yield 1\n    if True:\n        return 3\n    else:\n        return 4\n\"\"\"\n    tree = parse_and_transform(code)\n    func = next(node for node in tree.body if isinstance(node, ast3.FunctionDef))\n    # After transformation, there should be two exception raise sequences\n    # The body should start with Yield, then first exception sequence, then second\n    assert isinstance(func.body[0], ast3.Yield)\n    # Find all Raise statements\n    raises = [node for node in func.body if isinstance(node, ast3.Raise)]\n    assert len(raises) == 2\n    # Each raise should raise 'exc'\n    for r in raises:\n        assert isinstance(r.exc, ast3.Name)\n        assert r.exc.id == \"exc\"\n```",
+        "reasoning": "We need to test ReturnFromGeneratorTransformer. We need to import it. Use typed_ast to parse code. We'll create a function with yield and return, run transformer, then unparse to code? typed_ast doesn't have unparse. We can inspect AST. We'll check that return replaced by exception raising nodes. Use ast3. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051938855,
+    "prompt_tokens": 796,
+    "prompt_time": 0.016701715,
+    "completion_tokens": 793,
+    "completion_time": 0.974846853,
+    "total_tokens": 1589,
+    "total_time": 0.991548568,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 71
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg7gzjex98djk5q3zn6n1q",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as ast3\nimport pytest\nfrom py_backwards.transformers.return_from_generator import ReturnFromGeneratorTransformer\nfrom py_backwards.utils.snippet import snippet\n\ndef parse_and_transform(code: str) -> ast3.Module:\n    \"\"\"Parse source code to an AST3 module and apply the transformer.\"\"\"\n    tree = ast3.parse(code)\n    transformer = ReturnFromGeneratorTransformer()\n    transformer.visit(tree)\n    return tree\n\ndef test_return_replaced_with_exception():\n    code = \"\"\"\ndef gen():\n    yield 1\n    return 5\n\"\"\"\n    tree = parse_and_transform(code)\n    # Find the function definition\n    func = next(node for node in tree.body if isinstance(node, ast3.FunctionDef))\n    # The body should now contain a Yield and an exception raise sequence\n    body = func.body\n    # The first statement should still be the Yield\n    assert isinstance(body[0], ast3.Yield)\n    # The next statements should be the exception construction and raise\n    # We expect three statements: exc = StopIteration(), exc.value = 5, raise exc\n    assert len(body) == 3\n    exc_assign, value_assign, raise_stmt = body[1], body[2], body[3] if len(body) > 3 else None\n    # Check that the exception is created correctly\n    assert isinstance(exc_assign, ast3.Assign)\n    assert isinstance(exc_assign.value, ast3.Call)\n    assert exc_assign.value.func.id == \"StopIteration\"\n    # Check that the value is assigned\n    assert isinstance(value_assign, ast3.Assign)\n    assert isinstance(value_assign.value, ast3.Constant)\n    assert value_assign.value.value == 5\n    # Check that the raise statement raises the exception variable\n    assert isinstance(raise_stmt, ast3.Raise)\n    assert isinstance(raise_stmt.exc, ast3.Name)\n    assert raise_stmt.exc.id == \"exc\"\n\ndef test_no_yield_no_transformation():\n    code = \"\"\"\ndef normal():\n    a = 1\n    return 2\n\"\"\"\n    tree = parse_and_transform(code)\n    func = next(node for node in tree.body if isinstance(node, ast3.FunctionDef))\n    # The body should remain unchanged\n    assert len(func.body) == 2\n    assert isinstance(func.body[0], ast3.Assign)\n    assert isinstance(func.body[1], ast3.Return)\n    # Ensure the transformer did not mark tree as changed\n    transformer = ReturnFromGeneratorTransformer()\n    transformer.visit(tree)\n    assert not transformer._tree_changed\n\ndef test_multiple_returns_and_yield():\n    code = \"\"\"\ndef multi():\n    yield 1\n    if True:\n        return 3\n    else:\n        return 4\n\"\"\"\n    tree = parse_and_transform(code)\n    func = next(node for node in tree.body if isinstance(node, ast3.FunctionDef))\n    # After transformation, there should be two exception raise sequences\n    # The body should start with Yield, then first exception sequence, then second\n    assert isinstance(func.body[0], ast3.Yield)\n    # Find all Raise statements\n    raises = [node for node in func.body if isinstance(node, ast3.Raise)]\n    assert len(raises) == 2\n    # Each raise should raise 'exc'\n    for r in raises:\n        assert isinstance(r.exc, ast3.Name)\n        assert r.exc.id == \"exc\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3820666460087523
+}

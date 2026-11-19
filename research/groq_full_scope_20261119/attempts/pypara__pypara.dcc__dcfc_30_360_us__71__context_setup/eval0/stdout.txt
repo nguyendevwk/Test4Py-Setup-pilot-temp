@@ -1,0 +1,38 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_last_day_of_month_adjustments ______________________
+
+    def test_last_day_of_month_adjustments():
+        """Verify that last‑day‑of‑month dates are converted to 30 and 31→30 rules."""
+        # start is last day of February (non‑leap year)
+        start = datetime.date(2023, 2, 28)
+        # asof is last day of March
+        asof = datetime.date(2023, 3, 31)
+        end = asof
+        # d1 should become 30, d2 should become 30 (since asof is last day)
+        nod = (30 - 30) + 30 * (3 - 2) + 360 * (2023 - 2023)  # 30
+        expected = Decimal(nod) / Decimal(360)
+        assert dcfc_30_360_us(start, asof, end) == expected
+>       assert expected == Decimal('0.0833333333333333')
+E       AssertionError: assert Decimal('0.08333333333333333333333333333') == Decimal('0.0833333333333333')
+E        +  where Decimal('0.0833333333333333') = Decimal('0.0833333333333333')
+
+test_generated.py:32: AssertionError
+_____________________ test_day_31_adjustment_and_boundary ______________________
+
+    def test_day_31_adjustment_and_boundary():
+        """Check that a day 31 in the asof month is set to 30 when d1 is 30 or 31."""
+        start = datetime.date(2023, 1, 31)
+        asof = datetime.date(2023, 2, 28)  # d2=28, d1=31 → d1 becomes 30
+        end = asof
+        nod = (28 - 30) + 30 * (2 - 1) + 360 * (2023 - 2023)  # -2 + 30 = 28
+        expected = Decimal(nod) / Decimal(360)
+>       assert dcfc_30_360_us(start, asof, end) == expected
+E       AssertionError: assert Decimal('0.08333333333333333333333333333') == Decimal('0.07777777777777777777777777778')
+E        +  where Decimal('0.08333333333333333333333333333') = dcfc_30_360_us(datetime.date(2023, 1, 31), datetime.date(2023, 2, 28), datetime.date(2023, 2, 28))
+
+test_generated.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_last_day_of_month_adjustments - AssertionError...
+FAILED test_generated.py::test_day_31_adjustment_and_boundary - AssertionErro...
+2 failed, 1 passed in 0.16s

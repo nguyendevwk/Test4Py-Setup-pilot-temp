@@ -1,0 +1,57 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_boundary_start_equals_end ________________________
+
+    def test_boundary_start_equals_end():
+        """When start and end are the same, the fraction should be zero."""
+        start = datetime.date(2021, 1, 1)
+        asof = datetime.date(2021, 1, 1)
+        end = datetime.date(2021, 1, 1)
+>       result = dcfc_act_act_icma(start=start, asof=asof, end=end)
+
+test_generated.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+start = datetime.date(2021, 1, 1), asof = datetime.date(2021, 1, 1)
+end = datetime.date(2021, 1, 1), freq = None
+
+    @dcc("Act/Act (ICMA)", {"Actual/Actual (ICMA)", "ISMA-99", "Act/Act (ISMA)"})
+    def dcfc_act_act_icma(start: Date, asof: Date, end: Date, freq: Optional[Decimal] = None) -> Decimal:
+        """
+        Computes the day count fraction for "Act/Act (ICMA)" convention.
+    
+        :param start: The start date of the period.
+        :param asof: The date which the day count fraction to be calculated as of.
+        :param end: The end date of the period (a.k.a. termination date).
+        :return: Day count fraction.
+    
+        >>> ex1_start, ex1_asof, ex1_end = datetime.date(2019, 3, 2), datetime.date(2019, 9, 10), datetime.date(2020, 3, 2)
+        >>> round(dcfc_act_act_icma(start=ex1_start, asof=ex1_asof, end=ex1_end), 10)
+        Decimal('0.5245901639')
+        """
+        ## Get the number of actual days:
+        p1 = Decimal(_get_actual_day_count(start, asof))
+    
+        ## Get the number of days in the period:
+        p2 = Decimal(_get_actual_day_count(start, end))
+    
+        ## Compute the ratio and return:
+>       return p1 / p2 / Decimal(freq or ONE)
+E       decimal.InvalidOperation: [<class 'decimal.DivisionUndefined'>]
+
+../../../../groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/dcc.py:504: InvalidOperation
+__________________________ test_error_asof_after_end ___________________________
+
+    def test_error_asof_after_end():
+        """The function should raise a ValueError if asof is after the end date."""
+        start = datetime.date(2020, 1, 1)
+        asof = datetime.date(2020, 12, 31)
+        end = datetime.date(2020, 6, 30)
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE ValueError
+
+test_generated.py:32: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_boundary_start_equals_end - decimal.InvalidOpe...
+FAILED test_generated.py::test_error_asof_after_end - Failed: DID NOT RAISE V...
+2 failed, 1 passed in 0.15s

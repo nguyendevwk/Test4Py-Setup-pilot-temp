@@ -1,0 +1,76 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_single_task_runs_and_completes ______________________
+
+    def test_single_task_runs_and_completes():
+        """Submitting a single task should run and complete."""
+        worker = MonoWorker()
+        result_container = []
+    
+        def task():
+            time.sleep(0.1)
+            result_container.append("done")
+    
+        future = worker.submit(task)
+        assert isinstance(future, Future)
+        # Wait for completion
+        future.result(timeout=1)
+        assert result_container == ["done"]
+        assert future.done()
+        # After completion, the deque should be empty
+>       assert len(worker.futures) == 0
+E       assert 1 == 0
+E        +  where 1 = len(deque([<Future at 0x7fde0bc4b7f0 state=finished returned NoneType>]))
+E        +    where deque([<Future at 0x7fde0bc4b7f0 state=finished returned NoneType>]) = <tqdm.contrib.utils_worker.MonoWorker object at 0x7fde0bc4b6a0>.futures
+
+test_generated.py:24: AssertionError
+_______________ test_waiting_task_replaced_by_latest_submission ________________
+
+    def test_waiting_task_replaced_by_latest_submission():
+        """The most recent submission should replace any waiting task."""
+        worker = MonoWorker()
+        order = []
+    
+        def long_task():
+            time.sleep(0.2)
+            order.append("long")
+    
+        def short_task():
+            time.sleep(0.05)
+            order.append("short")
+    
+        # Submit long task first
+        long_future = worker.submit(long_task)
+        # Immediately submit short task, which should replace the waiting one
+        short_future = worker.submit(short_task)
+    
+        # The deque should contain only the running long task
+>       assert len(worker.futures) == 1
+E       assert 2 == 1
+E        +  where 2 = len(deque([<Future at 0x7fde0bcb72e0 state=running>, <Future at 0x7fde0bcb6f80 state=pending>]))
+E        +    where deque([<Future at 0x7fde0bcb72e0 state=running>, <Future at 0x7fde0bcb6f80 state=pending>]) = <tqdm.contrib.utils_worker.MonoWorker object at 0x7fde0bcb73a0>.futures
+
+test_generated.py:46: AssertionError
+____________ test_submission_of_failing_task_does_not_append_future ____________
+
+    def test_submission_of_failing_task_does_not_append_future():
+        """If the submitted function raises, no Future should be appended."""
+        worker = MonoWorker()
+        counter = 0
+    
+        def failing_task():
+            nonlocal counter
+            counter += 1
+            raise ValueError("intentional failure")
+    
+        future = worker.submit(failing_task)
+        # The submit method catches the exception and does not return a Future
+>       assert future is None
+E       assert <Future at 0x7fde0bce7d60 state=finished raised ValueError> is None
+
+test_generated.py:67: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_single_task_runs_and_completes - assert 1 == 0
+FAILED test_generated.py::test_waiting_task_replaced_by_latest_submission - a...
+FAILED test_generated.py::test_submission_of_failing_task_does_not_append_future
+3 failed in 0.27s

@@ -1,0 +1,26 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_chmod_glob_pattern_and_include_parent __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chmod__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_chmod_glob_pattern_and_in0')
+
+    def test_chmod_glob_pattern_and_include_parent(tmp_path):
+        # Setup nested structure
+        (tmp_path / "a").mkdir()
+        (tmp_path / "a" / "b.txt").write_text("data")
+        (tmp_path / "a" / "c").mkdir()
+        (tmp_path / "a" / "c" / "d.txt").write_text("more")
+    
+        # Apply glob pattern to change all files to 0o600 and dirs to 0o700
+        chmod(tmp_path / "a/**", mode_file=0o600, mode_dir=0o700, include_parent=True)
+    
+        # Check parent directory of pattern (tmp_path/a) mode
+        parent_mode = stat.S_IMODE(os.lstat(tmp_path / "a").st_mode)
+>       assert parent_mode == 0o700, f"Parent dir mode should be 0o700, got {oct(parent_mode)}"
+E       AssertionError: Parent dir mode should be 0o700, got 0o755
+E       assert 493 == 448
+
+test_generated.py:37: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_chmod_glob_pattern_and_include_parent - Assert...
+1 failed, 2 passed in 0.11s

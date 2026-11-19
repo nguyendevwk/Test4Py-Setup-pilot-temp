@@ -1,0 +1,84 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_name_and_function_replacement ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/py-backwards__py_backwards.utils.snippet__VariablesReplacer__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_name_and_function_replace0')
+
+    def test_name_and_function_replacement(tmp_path):
+        code = """
+    def foo(x):
+        y = x + 1
+        return y
+    """
+        tree = parse_code(code)
+        variables = {"foo": "bar", "x": "z", "y": "w"}
+        VariablesReplacer.replace(tree, variables)
+    
+        # Check function name replaced
+        assert get_function_names(tree) == ["bar"]
+    
+        # Check variable names replaced
+>       assert get_name_ids(tree) == ["z", "w", "z", "w"]
+E       AssertionError: assert ['w', 'w', 'z'] == ['z', 'w', 'z', 'w']
+E         
+E         At index 0 diff: 'w' != 'z'
+E         Right contains one more item: 'w'
+E         Use -v to get more diff
+
+test_generated.py:44: AssertionError
+______________________ test_import_and_alias_replacement _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/py-backwards__py_backwards.utils.snippet__VariablesReplacer__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_import_and_alias_replacem0')
+
+    def test_import_and_alias_replacement(tmp_path):
+        code = """
+    from module.sub import foo as bar
+    import module.sub as mod
+    """
+        tree = parse_code(code)
+        variables = {"module": "pkg", "sub": "inner", "foo": "baz", "bar": "qux", "mod": "m"}
+        VariablesReplacer.replace(tree, variables)
+    
+        # Check ImportFrom module replaced
+        assert get_import_from_modules(tree) == ["pkg.inner"]
+    
+        # Check alias names replaced
+>       assert get_alias_names(tree) == ["pkg.inner.baz", "pkg.inner"]
+E       AssertionError: assert ['baz', 'pkg.inner'] == ['pkg.inner.baz', 'pkg.inner']
+E         
+E         At index 0 diff: 'baz' != 'pkg.inner.baz'
+E         Use -v to get more diff
+
+test_generated.py:59: AssertionError
+________________ test_except_handler_and_attribute_replacement _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/py-backwards__py_backwards.utils.snippet__VariablesReplacer__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_except_handler_and_attrib0')
+
+    def test_except_handler_and_attribute_replacement(tmp_path):
+        code = """
+    try:
+        pass
+    except ValueError as err:
+        print(err)
+    """
+        tree = parse_code(code)
+        variables = {"ValueError": "CustomError", "err": "error", "print": "log"}
+        VariablesReplacer.replace(tree, variables)
+    
+        # Check except handler name replaced
+        assert get_except_names(tree) == ["error"]
+    
+        # Check attribute names (print is a Name, not Attribute, so test Name replacement)
+>       assert get_name_ids(tree) == ["log", "error"]
+E       AssertionError: assert ['CustomError...log', 'error'] == ['log', 'error']
+E         
+E         At index 0 diff: 'CustomError' != 'log'
+E         Left contains one more item: 'error'
+E         Use -v to get more diff
+
+test_generated.py:76: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_name_and_function_replacement - AssertionError...
+FAILED test_generated.py::test_import_and_alias_replacement - AssertionError:...
+FAILED test_generated.py::test_except_handler_and_attribute_replacement - Ass...
+3 failed in 0.17s

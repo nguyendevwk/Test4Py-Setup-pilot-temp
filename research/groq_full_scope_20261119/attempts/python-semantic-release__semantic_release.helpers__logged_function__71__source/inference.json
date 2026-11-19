@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a6b481d4-1ba5-4df2-9454-cd50264897ba",
+  "object": "chat.completion",
+  "created": 1795076041,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport pytest\nfrom semantic_release.helpers import logged_function\n\n\nclass ListLogger:\n    \"\"\"Simple logger that records debug messages in a list.\"\"\"\n    def __init__(self):\n        self.messages = []\n\n    def debug(self, msg, *args, **kwargs):\n        # Mimic logging.Formatter behavior for % formatting\n        if args:\n            msg = msg % tuple(args)\n        self.messages.append(msg)\n\n\ndef test_logged_function_normal_behavior(tmp_path):\n    logger = ListLogger()\n\n    @logged_function(logger)\n    def add(a, b):\n        return a + b\n\n    result = add(2, 3)\n    assert result == 5\n    # First debug message should log function call\n    assert logger.messages[0] == \"add(2, 3), \"\n    # Second debug message should log return value\n    assert logger.messages[1] == \"add -> 5\"\n\n\ndef test_logged_function_with_kwargs_and_boundary(tmp_path):\n    logger = ListLogger()\n\n    @logged_function(logger)\n    def concat(prefix, *args, sep=\" \", **kwargs):\n        return sep.join([prefix] + list(args) + [kwargs.get(\"suffix\", \"\")])\n\n    result = concat(\"Hello\", \"world\", sep=\"-\", suffix=\"!\")\n    assert result == \"Hello-world-!\"\n    # Check that keyword arguments are logged correctly\n    assert \"sep='-'\" in logger.messages[0]\n    assert \"suffix='!'\" in logger.messages[0]\n    # Return value logged\n    assert logger.messages[1] == \"concat -> Hello-world-!\"\n\n\ndef test_logged_function_exception_propagation(tmp_path):\n    logger = ListLogger()\n\n    @logged_function(logger)\n    def divide(a, b):\n        return a / b\n\n    with pytest.raises(ZeroDivisionError):\n        divide(1, 0)\n\n    # Only the call debug message should be present; no result message\n    assert len(logger.messages) == 1\n    assert logger.messages[0] == \"divide(1, 0), \"\n```",
+        "reasoning": "Need tests for logged_function. Use a dummy logger capturing messages. Test normal, boundary, error. Use tmp_path? not needed. Use real logger? Use a custom logger with list. Test that debug called with correct format. Also test that function returns value. Third test error: function raises exception, ensure logger still called? It logs before, then exception propagates. Ensure no result log. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052418866,
+    "prompt_tokens": 543,
+    "prompt_time": 0.026781093,
+    "completion_tokens": 519,
+    "completion_time": 0.555312022,
+    "total_tokens": 1062,
+    "total_time": 0.582093115,
+    "completion_tokens_details": {
+      "reasoning_tokens": 84
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sdx9wdef4ag0qpbtxkse12",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport pytest\nfrom semantic_release.helpers import logged_function\n\n\nclass ListLogger:\n    \"\"\"Simple logger that records debug messages in a list.\"\"\"\n    def __init__(self):\n        self.messages = []\n\n    def debug(self, msg, *args, **kwargs):\n        # Mimic logging.Formatter behavior for % formatting\n        if args:\n            msg = msg % tuple(args)\n        self.messages.append(msg)\n\n\ndef test_logged_function_normal_behavior(tmp_path):\n    logger = ListLogger()\n\n    @logged_function(logger)\n    def add(a, b):\n        return a + b\n\n    result = add(2, 3)\n    assert result == 5\n    # First debug message should log function call\n    assert logger.messages[0] == \"add(2, 3), \"\n    # Second debug message should log return value\n    assert logger.messages[1] == \"add -> 5\"\n\n\ndef test_logged_function_with_kwargs_and_boundary(tmp_path):\n    logger = ListLogger()\n\n    @logged_function(logger)\n    def concat(prefix, *args, sep=\" \", **kwargs):\n        return sep.join([prefix] + list(args) + [kwargs.get(\"suffix\", \"\")])\n\n    result = concat(\"Hello\", \"world\", sep=\"-\", suffix=\"!\")\n    assert result == \"Hello-world-!\"\n    # Check that keyword arguments are logged correctly\n    assert \"sep='-'\" in logger.messages[0]\n    assert \"suffix='!'\" in logger.messages[0]\n    # Return value logged\n    assert logger.messages[1] == \"concat -> Hello-world-!\"\n\n\ndef test_logged_function_exception_propagation(tmp_path):\n    logger = ListLogger()\n\n    @logged_function(logger)\n    def divide(a, b):\n        return a / b\n\n    with pytest.raises(ZeroDivisionError):\n        divide(1, 0)\n\n    # Only the call debug message should be present; no result message\n    assert len(logger.messages) == 1\n    assert logger.messages[0] == \"divide(1, 0), \"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9183195069781505
+}

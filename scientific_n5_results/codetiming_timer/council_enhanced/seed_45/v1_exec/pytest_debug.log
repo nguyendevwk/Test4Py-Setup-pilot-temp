@@ -1,0 +1,36 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________________ test_timer_start_stop_behavior ________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8a7b7a4920>
+
+    def test_timer_start_stop_behavior(monkeypatch):
+        # Ensure a clean state for the shared Timers instance
+        Timer.timers.clear()
+    
+        # Mock perf_counter to produce a deterministic elapsed time of 0.5 seconds
+        counter = iter([100.0, 100.5])
+        monkeypatch.setattr(time, "perf_counter", lambda: next(counter))
+    
+        # Capture logger output
+        logged = []
+    
+        # Create a Timer with a custom initial text and logger
+        t = Timer(
+            name="test",
+            text="Elapsed: {:0.4f}s",
+            initial_text="Timer {name} started",
+            logger=logged,
+        )
+    
+        # Start the timer and verify initial log
+        t.start()
+>       assert logged[0] == "Timer test started"
+               ^^^^^^^^^
+E       IndexError: list index out of range
+
+../../scientific_n5_results/codetiming_timer/council_enhanced/seed_45/v1_exec/test_run.py:26: IndexError
+=========================== short test summary info ============================
+FAILED ../../scientific_n5_results/codetiming_timer/council_enhanced/seed_45/v1_exec/test_run.py::test_timer_start_stop_behavior
+1 failed in 0.11s
+

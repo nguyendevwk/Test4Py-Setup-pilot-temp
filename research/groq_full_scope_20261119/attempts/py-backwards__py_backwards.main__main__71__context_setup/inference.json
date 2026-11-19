@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-327d83c1-a0d6-4aa5-bc91-fb878dc18e5d",
+  "object": "chat.completion",
+  "created": 1795077851,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport os\nimport io\nimport pytest\nfrom py_backwards.main import main\nfrom py_backwards import exceptions, messages\n\n@pytest.fixture\ndef simple_py(tmp_path):\n    \"\"\"Create a minimal Python file using a f-string.\"\"\"\n    file_path = tmp_path / \"sample.py\"\n    file_path.write_text('print(f\"Hello {1+1}\")\\n')\n    return file_path\n\ndef test_main_success(tmp_path, simple_py, monkeypatch, capsys):\n    \"\"\"Test that main compiles a simple file and returns 0.\"\"\"\n    output_dir = tmp_path / \"out\"\n    output_dir.mkdir()\n    # Simulate command line arguments\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(simple_py),\n        \"-o\", str(output_dir),\n        \"-t\", \"py36\",  # assume py36 is a valid target\n    ])\n    ret = main()\n    captured = capsys.readouterr()\n    # The result message should be printed to stdout\n    assert ret == 0\n    assert \"Compilation finished\" in captured.out\n    # The output file should exist\n    out_file = output_dir / simple_py.name\n    assert out_file.exists()\n    # The compiled content should not contain the original f-string\n    compiled = out_file.read_text()\n    assert 'f\"Hello' not in compiled\n\ndef test_main_input_doesnt_exist(tmp_path, monkeypatch, capsys):\n    \"\"\"Test that providing a non‑existent input file triggers the correct error.\"\"\"\n    output_dir = tmp_path / \"out\"\n    output_dir.mkdir()\n    fake_input = tmp_path / \"does_not_exist.py\"\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(fake_input),\n        \"-o\", str(output_dir),\n        \"-t\", \"py36\",\n    ])\n    ret = main()\n    captured = capsys.readouterr()\n    assert ret == 1\n    assert messages.syntax_error(exceptions.CompilationError(\"\")).strip() in captured.err\n    # No output file should be created\n    assert not any(output_dir.iterdir())\n\ndef test_main_invalid_input_output(tmp_path, simple_py, monkeypatch, capsys):\n    \"\"\"Test that using the same file for input and output triggers InvalidInputOutput.\"\"\"\n    # Use the same path for input and output\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(simple_py),\n        \"-o\", str(simple_py),\n        \"-t\", \"py36\",\n    ])\n    ret = main()\n    captured = capsys.readouterr()\n    assert ret == 1\n    assert messages.invalid_output([str(simple_py)], str(simple_py)) in captured.err\n```",
+        "reasoning": "We need three test functions for main. We can simulate command line args via monkeypatch sys.argv. Use tmp_path for files. Need to test normal, boundary, error. For normal: create a simple python file that uses f-string (Python3.6) and compile to older version? But compile_files likely transforms. We can just test that main returns 0 and prints result. But we don't know compile_files behavior. We can create a dummy file and check output file exists. For error: provide non-existent input to trigger InputDoesntExists. For boundary: maybe empty output folder? But need to test invalid input-output? Use same file as input and output? That triggers InvalidInputOutput. We'll rely on exceptions. We'll need to import main. Use capsys to capture output. Use monkeypatch to set sys.argv. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051636491,
+    "prompt_tokens": 614,
+    "prompt_time": 0.031961139,
+    "completion_tokens": 764,
+    "completion_time": 0.862972581,
+    "total_tokens": 1378,
+    "total_time": 0.89493372,
+    "completion_tokens_details": {
+      "reasoning_tokens": 172
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfmhe4ebqtx56rbbcyk6qy",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport os\nimport io\nimport pytest\nfrom py_backwards.main import main\nfrom py_backwards import exceptions, messages\n\n@pytest.fixture\ndef simple_py(tmp_path):\n    \"\"\"Create a minimal Python file using a f-string.\"\"\"\n    file_path = tmp_path / \"sample.py\"\n    file_path.write_text('print(f\"Hello {1+1}\")\\n')\n    return file_path\n\ndef test_main_success(tmp_path, simple_py, monkeypatch, capsys):\n    \"\"\"Test that main compiles a simple file and returns 0.\"\"\"\n    output_dir = tmp_path / \"out\"\n    output_dir.mkdir()\n    # Simulate command line arguments\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(simple_py),\n        \"-o\", str(output_dir),\n        \"-t\", \"py36\",  # assume py36 is a valid target\n    ])\n    ret = main()\n    captured = capsys.readouterr()\n    # The result message should be printed to stdout\n    assert ret == 0\n    assert \"Compilation finished\" in captured.out\n    # The output file should exist\n    out_file = output_dir / simple_py.name\n    assert out_file.exists()\n    # The compiled content should not contain the original f-string\n    compiled = out_file.read_text()\n    assert 'f\"Hello' not in compiled\n\ndef test_main_input_doesnt_exist(tmp_path, monkeypatch, capsys):\n    \"\"\"Test that providing a non‑existent input file triggers the correct error.\"\"\"\n    output_dir = tmp_path / \"out\"\n    output_dir.mkdir()\n    fake_input = tmp_path / \"does_not_exist.py\"\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(fake_input),\n        \"-o\", str(output_dir),\n        \"-t\", \"py36\",\n    ])\n    ret = main()\n    captured = capsys.readouterr()\n    assert ret == 1\n    assert messages.syntax_error(exceptions.CompilationError(\"\")).strip() in captured.err\n    # No output file should be created\n    assert not any(output_dir.iterdir())\n\ndef test_main_invalid_input_output(tmp_path, simple_py, monkeypatch, capsys):\n    \"\"\"Test that using the same file for input and output triggers InvalidInputOutput.\"\"\"\n    # Use the same path for input and output\n    monkeypatch.setattr(sys, \"argv\", [\n        \"py-backwards\",\n        \"-i\", str(simple_py),\n        \"-o\", str(simple_py),\n        \"-t\", \"py36\",\n    ])\n    ret = main()\n    captured = capsys.readouterr()\n    assert ret == 1\n    assert messages.invalid_output([str(simple_py)], str(simple_py)) in captured.err\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2338955089799128
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-f378fdc1-fe5d-4682-ab71-7acae45283b1",
+  "object": "chat.completion",
+  "created": 1795076720,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom pysnooper.utils import get_shortish_repr, get_repr_function, truncate, normalize_repr\n\n# ------------------------------------------------------------------\n# Test 1: Normal behavior with default settings\n# ------------------------------------------------------------------\ndef test_get_shortish_repr_basic():\n    # Simple integer: repr is \"1\"\n    result = get_shortish_repr(1)\n    assert result == \"1\", \"repr of integer should be unchanged\"\n\n    # String with newline: should have newlines removed\n    s = \"line1\\nline2\\rline3\"\n    result = get_shortish_repr(s)\n    assert \"\\n\" not in result and \"\\r\" not in result\n    assert result == \"line1line2line3\", \"newlines should be stripped\"\n\n    # Custom repr function that returns a long string\n    long_str = \"a\" * 50\n    custom_repr = (str, lambda x: long_str)\n    result = get_shortish_repr(\"anything\", custom_repr=custom_repr)\n    assert result == long_str, \"custom repr should override default\"\n\n# ------------------------------------------------------------------\n# Test 2: Truncation and normalization\n# ------------------------------------------------------------------\ndef test_get_shortish_repr_truncate_and_normalize():\n    # Create a string that will be truncated\n    original = \"0123456789\"\n    # Truncate to 5 characters\n    truncated = get_shortish_repr(original, max_length=5)\n    assert truncated == \"01234\", \"should truncate to 5 characters\"\n\n    # Normalize: replace non-printable characters\n    # Use a string with a tab and a newline\n    raw = \"foo\\tbar\\nbaz\"\n    normalized = get_shortish_repr(raw, normalize=True)\n    # normalize_repr should replace tab with space and remove newline\n    expected = normalize_repr(\"foo\\tbar\\nbaz\")\n    assert normalized == expected, \"normalize should process control characters\"\n\n    # Combined: truncate after normalization\n    combined = get_shortish_repr(raw, normalize=True, max_length=6)\n    # normalize first, then truncate\n    expected_combined = truncate(normalize_repr(raw), 6)\n    assert combined == expected_combined, \"order of normalize and truncate should be correct\"\n\n# ------------------------------------------------------------------\n# Test 3: Error handling when repr function raises\n# ------------------------------------------------------------------\ndef test_get_shortish_repr_repr_failure():\n    # Define a custom repr that raises an exception\n    def bad_repr(obj):\n        raise RuntimeError(\"cannot represent\")\n\n    custom_repr = (object, bad_repr)\n    # Use an object instance\n    obj = object()\n    result = get_shortish_repr(obj, custom_repr=custom_repr)\n    assert result == \"REPR FAILED\", \"should return placeholder on repr failure\"\n\n    # Ensure that the exception is not propagated\n    try:\n        get_shortish_repr(obj, custom_repr=custom_repr)\n    except Exception:\n        pytest.fail(\"get_shortish_repr should not raise exceptions\")\n\n    # Verify that the default repr function is used when custom_repr does not match type\n    result_default = get_shortish_repr(obj)\n    assert result_default.startswith(\"<object\"), \"default repr should be used when no custom match\"\n```",
+        "reasoning": "We need to test get_shortish_repr. Let's inspect other functions: get_repr_function, normalize_repr, truncate. Assume they exist. We'll write tests for normal, boundary, error. Use tmp_path? Not needed. We'll test that for a simple object, repr is truncated. Also test normalize removes newlines. Also test error handling: if repr_function raises, returns 'REPR FAILED'. We need to create a custom repr that raises. Use custom_repr param to override. Provide a tuple of (type, function). For error scenario, custom_repr that raises. Also test max_length boundary: when max_length=0 returns empty string? truncate likely truncates to max_length. We'll assume truncate returns first max_length chars. We'll test that. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051759975,
+    "prompt_tokens": 389,
+    "prompt_time": 0.022621564,
+    "completion_tokens": 815,
+    "completion_time": 0.992561879,
+    "total_tokens": 1204,
+    "total_time": 1.015183443,
+    "completion_tokens_details": {
+      "reasoning_tokens": 155
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sej12vednb1p30nr2jqtvn",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom pysnooper.utils import get_shortish_repr, get_repr_function, truncate, normalize_repr\n\n# ------------------------------------------------------------------\n# Test 1: Normal behavior with default settings\n# ------------------------------------------------------------------\ndef test_get_shortish_repr_basic():\n    # Simple integer: repr is \"1\"\n    result = get_shortish_repr(1)\n    assert result == \"1\", \"repr of integer should be unchanged\"\n\n    # String with newline: should have newlines removed\n    s = \"line1\\nline2\\rline3\"\n    result = get_shortish_repr(s)\n    assert \"\\n\" not in result and \"\\r\" not in result\n    assert result == \"line1line2line3\", \"newlines should be stripped\"\n\n    # Custom repr function that returns a long string\n    long_str = \"a\" * 50\n    custom_repr = (str, lambda x: long_str)\n    result = get_shortish_repr(\"anything\", custom_repr=custom_repr)\n    assert result == long_str, \"custom repr should override default\"\n\n# ------------------------------------------------------------------\n# Test 2: Truncation and normalization\n# ------------------------------------------------------------------\ndef test_get_shortish_repr_truncate_and_normalize():\n    # Create a string that will be truncated\n    original = \"0123456789\"\n    # Truncate to 5 characters\n    truncated = get_shortish_repr(original, max_length=5)\n    assert truncated == \"01234\", \"should truncate to 5 characters\"\n\n    # Normalize: replace non-printable characters\n    # Use a string with a tab and a newline\n    raw = \"foo\\tbar\\nbaz\"\n    normalized = get_shortish_repr(raw, normalize=True)\n    # normalize_repr should replace tab with space and remove newline\n    expected = normalize_repr(\"foo\\tbar\\nbaz\")\n    assert normalized == expected, \"normalize should process control characters\"\n\n    # Combined: truncate after normalization\n    combined = get_shortish_repr(raw, normalize=True, max_length=6)\n    # normalize first, then truncate\n    expected_combined = truncate(normalize_repr(raw), 6)\n    assert combined == expected_combined, \"order of normalize and truncate should be correct\"\n\n# ------------------------------------------------------------------\n# Test 3: Error handling when repr function raises\n# ------------------------------------------------------------------\ndef test_get_shortish_repr_repr_failure():\n    # Define a custom repr that raises an exception\n    def bad_repr(obj):\n        raise RuntimeError(\"cannot represent\")\n\n    custom_repr = (object, bad_repr)\n    # Use an object instance\n    obj = object()\n    result = get_shortish_repr(obj, custom_repr=custom_repr)\n    assert result == \"REPR FAILED\", \"should return placeholder on repr failure\"\n\n    # Ensure that the exception is not propagated\n    try:\n        get_shortish_repr(obj, custom_repr=custom_repr)\n    except Exception:\n        pytest.fail(\"get_shortish_repr should not raise exceptions\")\n\n    # Verify that the default repr function is used when custom_repr does not match type\n    result_default = get_shortish_repr(obj)\n    assert result_default.startswith(\"<object\"), \"default repr should be used when no custom match\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3723621999961324
+}

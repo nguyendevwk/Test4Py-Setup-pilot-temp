@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-1cd15791-16e3-42a3-ab21-5ecac4a07b18",
+  "object": "chat.completion",
+  "created": 1795078891,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport ast\nfrom typed_ast import ast3 as typed_ast\nfrom py_backwards.transformers.base import BaseTransformer\nfrom py_backwards.types import TransformationResult\n\n# Test 1: Ensure the abstract BaseTransformer cannot be used directly\ndef test_base_transformer_abstract():\n    with pytest.raises(TypeError):\n        BaseTransformer.transform(typed_ast.Module(body=[]))\n\n# Test 2: Subclass implements transform and returns expected structure\ndef test_subclass_transform_returns_tuple():\n    class DummyTransformer(BaseTransformer):\n        target = None\n\n        @classmethod\n        def transform(cls, tree: typed_ast.AST) -> TransformationResult:\n            # Return a tuple of (new_tree, mapping)\n            return (tree, {})\n\n    module = typed_ast.Module(body=[])\n    result = DummyTransformer.transform(module)\n    assert isinstance(result, tuple)\n    assert len(result) == 2\n    assert result[0] is module\n    assert isinstance(result[1], dict)\n\n# Test 3: Subclass transform must accept only ast.AST instances\ndef test_subclass_transform_type_check(tmp_path):\n    class StrictTransformer(BaseTransformer):\n        target = None\n\n        @classmethod\n        def transform(cls, tree: typed_ast.AST) -> TransformationResult:\n            if not isinstance(tree, typed_ast.AST):\n                raise TypeError(\"Expected typed_ast.AST\")\n            return (tree, {})\n\n    module = typed_ast.Module(body=[])\n    # Valid call\n    result = StrictTransformer.transform(module)\n    assert result[0] is module\n\n    # Invalid call should raise TypeError\n    with pytest.raises(TypeError, match=\"Expected typed_ast.AST\"):\n        StrictTransformer.transform(42)\n```",
+        "reasoning": "We need to test BaseTransformer.transform abstract method? Can't instantiate. Maybe test that subclass must implement. Create dummy subclass? But cannot modify product. But we can create subclass in test. Test that calling BaseTransformer.transform raises TypeError? Actually abstractmethod prevents instantiation but calling classmethod on BaseTransformer will raise TypeError? Let's try: BaseTransformer.transform? It's abstractmethod, so calling will raise TypeError: Can't instantiate abstract class BaseTransformer with abstract methods transform. But calling classmethod directly? It will still be abstract? I think calling BaseTransformer.transform will raise TypeError. Test that. Also test that subclass implements and works. Use simple AST node. Use typed_ast ast3. Create a simple ast.Module. Then subclass that returns something. Test that transform returns expected. Also test error when passing wrong type. Let's write three tests: 1) calling BaseTransformer.transform raises TypeError. 2) subclass implements transform correctly returns tuple. 3) passing non-ast raises TypeError? But transform signature expects ast.AST; we can test that passing int raises TypeError? But implementation may not check. So maybe skip. Instead test that subclass transform returns correct type. Third test: subclass with wrong return type raises AssertionError? Not. Maybe test that transform returns a tuple of (new_tree, mapping). We'll just assert type. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049533887,
+    "prompt_tokens": 318,
+    "prompt_time": 0.008257702,
+    "completion_tokens": 639,
+    "completion_time": 0.730499467,
+    "total_tokens": 957,
+    "total_time": 0.738757169,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 276
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgm9fgexe8jq6p6mt9vv71",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport ast\nfrom typed_ast import ast3 as typed_ast\nfrom py_backwards.transformers.base import BaseTransformer\nfrom py_backwards.types import TransformationResult\n\n# Test 1: Ensure the abstract BaseTransformer cannot be used directly\ndef test_base_transformer_abstract():\n    with pytest.raises(TypeError):\n        BaseTransformer.transform(typed_ast.Module(body=[]))\n\n# Test 2: Subclass implements transform and returns expected structure\ndef test_subclass_transform_returns_tuple():\n    class DummyTransformer(BaseTransformer):\n        target = None\n\n        @classmethod\n        def transform(cls, tree: typed_ast.AST) -> TransformationResult:\n            # Return a tuple of (new_tree, mapping)\n            return (tree, {})\n\n    module = typed_ast.Module(body=[])\n    result = DummyTransformer.transform(module)\n    assert isinstance(result, tuple)\n    assert len(result) == 2\n    assert result[0] is module\n    assert isinstance(result[1], dict)\n\n# Test 3: Subclass transform must accept only ast.AST instances\ndef test_subclass_transform_type_check(tmp_path):\n    class StrictTransformer(BaseTransformer):\n        target = None\n\n        @classmethod\n        def transform(cls, tree: typed_ast.AST) -> TransformationResult:\n            if not isinstance(tree, typed_ast.AST):\n                raise TypeError(\"Expected typed_ast.AST\")\n            return (tree, {})\n\n    module = typed_ast.Module(body=[])\n    # Valid call\n    result = StrictTransformer.transform(module)\n    assert result[0] is module\n\n    # Invalid call should raise TypeError\n    with pytest.raises(TypeError, match=\"Expected typed_ast.AST\"):\n        StrictTransformer.transform(42)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1480489840032533
+}

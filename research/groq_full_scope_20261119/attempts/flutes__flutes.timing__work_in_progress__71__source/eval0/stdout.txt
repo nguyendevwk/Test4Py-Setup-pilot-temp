@@ -1,0 +1,73 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_work_in_progress_context_prints_and_times ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutes__flutes.timing__work_in_progress__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_work_in_progress_context_0')
+capsys = <_pytest.capture.CaptureFixture object at 0x7f08332c4b80>
+
+    def test_work_in_progress_context_prints_and_times(tmp_path, capsys):
+        """Verify that the context manager prints the description and elapsed time."""
+        start = time.time()
+        with work_in_progress("Test block"):
+            time.sleep(0.1)
+        end = time.time()
+        captured = capsys.readouterr()
+        # The output should start with the description and end with "done."
+        assert captured.out.startswith("Test block... ")
+>       assert captured.out.strip().endswith("done.")
+E       AssertionError: assert False
+E        +  where False = <built-in method endswith of str object at 0x7f08332c2470>('done.')
+E        +    where <built-in method endswith of str object at 0x7f08332c2470> = 'Test block... done. (0.10s)'.endswith
+E        +      where 'Test block... done. (0.10s)' = <built-in method strip of str object at 0x7f08332c2420>()
+E        +        where <built-in method strip of str object at 0x7f08332c2420> = 'Test block... done. (0.10s)\n'.strip
+E        +          where 'Test block... done. (0.10s)\n' = CaptureResult(out='Test block... done. (0.10s)\n', err='').out
+
+test_generated.py:14: AssertionError
+_______________ test_work_in_progress_decorator_prints_and_times _______________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7f08332c7430>
+
+    def test_work_in_progress_decorator_prints_and_times(capsys):
+        """Verify that the decorator works and prints timing information."""
+        @work_in_progress("Decorated function")
+        def dummy():
+            time.sleep(0.05)
+        dummy()
+        captured = capsys.readouterr()
+        assert captured.out.startswith("Decorated function... ")
+>       assert captured.out.strip().endswith("done.")
+E       AssertionError: assert False
+E        +  where False = <built-in method endswith of str object at 0x7f083327e5b0>('done.')
+E        +    where <built-in method endswith of str object at 0x7f083327e5b0> = 'Decorated function... done. (0.05s)'.endswith
+E        +      where 'Decorated function... done. (0.05s)' = <built-in method strip of str object at 0x7f083327e790>()
+E        +        where <built-in method strip of str object at 0x7f083327e790> = 'Decorated function... done. (0.05s)\n'.strip
+E        +          where 'Decorated function... done. (0.05s)\n' = CaptureResult(out='Decorated function... done. (0.05s)\n', err='').out
+
+test_generated.py:29: AssertionError
+___________________ test_work_in_progress_exception_handling ___________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7f083311fbe0>
+
+    def test_work_in_progress_exception_handling(capsys):
+        """Verify that the context manager still prints timing when an exception occurs."""
+        try:
+            with work_in_progress("Error block"):
+                raise ValueError("test error")
+        except ValueError:
+            pass
+        captured = capsys.readouterr()
+        assert captured.out.startswith("Error block... ")
+>       assert captured.out.strip().endswith("done.")
+E       AssertionError: assert False
+E        +  where False = <built-in method endswith of str object at 0x7f08332dab30>('done.')
+E        +    where <built-in method endswith of str object at 0x7f08332dab30> = 'Error block...'.endswith
+E        +      where 'Error block...' = <built-in method strip of str object at 0x7f08332db770>()
+E        +        where <built-in method strip of str object at 0x7f08332db770> = 'Error block... '.strip
+E        +          where 'Error block... ' = CaptureResult(out='Error block... ', err='').out
+
+test_generated.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_work_in_progress_context_prints_and_times - As...
+FAILED test_generated.py::test_work_in_progress_decorator_prints_and_times - ...
+FAILED test_generated.py::test_work_in_progress_exception_handling - Assertio...
+3 failed in 0.32s

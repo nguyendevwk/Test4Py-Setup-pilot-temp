@@ -1,0 +1,52 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________________ test_parse_numpydoc_sections_and_content ___________________
+
+    def test_parse_numpydoc_sections_and_content():
+        docstring = textwrap.dedent("""\
+            Summary.
+    
+            Parameters
+            ----------
+            x : int
+                Param x.
+    
+            Returns
+            -------
+            int
+                Return value.
+    
+            Raises
+            ------
+            ValueError
+                Error description.
+    
+            Examples
+            --------
+            >>> result = func(1)
+            >>> assert result == 1
+        """)
+        doc = parse(docstring)
+        assert isinstance(doc, Docstring)
+        assert doc.short_description == "Summary."
+        assert len(doc.params) == 1
+        param = doc.params[0]
+        assert (param.arg_name, param.type_name, param.description) == ("x", "int", "Param x.")
+        assert doc.returns is not None
+        ret = doc.returns
+        assert (ret.type_name, ret.description) == ("int", "Return value.")
+        raises = doc.raises
+        assert isinstance(raises, list)
+        assert len(raises) == 1
+        raise_ = raises[0]
+        assert (raise_.type_name, raise_.description) == ("ValueError", "Error description.")
+>       assert len(doc.examples) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len([DocstringExample(kind=Kind.EXAMPLES, key='examples', snippet='>>> result = func(1)'), DocstringExample(kind=Kind.EXAMPLES, key='examples', snippet='>>> assert result == 1')])
+E        +    where [DocstringExample(kind=Kind.EXAMPLES, key='examples', snippet='>>> result = func(1)'), DocstringExample(kind=Kind.EXAMPLES, key='examples', snippet='>>> assert result == 1')] = Docstring(style=DocstringStyle.NUMPYDOC, short_description='Summary.', blank_after_short_description=True, meta=[Docst...ippet='>>> result = func(1)'), DocstringExample(kind=Kind.EXAMPLES, key='examples', snippet='>>> assert result == 1')]).examples
+
+../../curated_benchmark_results/sota_council_results/runs_refined/docstring_parser_numpydoc/seed_45/eval_r2/test_run.py:44: AssertionError
+=========================== short test summary info ============================
+FAILED ../../curated_benchmark_results/sota_council_results/runs_refined/docstring_parser_numpydoc/seed_45/eval_r2/test_run.py::test_parse_numpydoc_sections_and_content
+1 failed in 0.26s
+

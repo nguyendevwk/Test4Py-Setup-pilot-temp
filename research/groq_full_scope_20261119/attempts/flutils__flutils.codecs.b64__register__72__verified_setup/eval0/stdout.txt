@@ -1,0 +1,71 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_register_adds_codec_and_decodes_correctly ________________
+
+    def test_register_adds_codec_and_decodes_correctly():
+        # Ensure codec is not registered before calling register
+        with pytest.raises(LookupError):
+            codecs.getdecoder(NAME)
+    
+        # Register the codec
+        register()
+    
+        # After registration, the decoder should be available
+        decoder = codecs.getdecoder(NAME)
+        assert decoder is not None
+    
+        # Test that the decoder correctly decodes a base64 string
+        original = b"Hello, world!"
+        encoded = base64.b64encode(original).decode()
+>       decoded, _ = decoder(encoded)
+
+test_generated.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = 'SGVsbG8sIHdvcmxkIQ==', errors = 'strict'
+
+    def decode(
+            data: _ByteString,
+            errors: _STR = 'strict'
+    ) -> Tuple[str, int]:
+        """Convert the given ``data`` into base64 Characters.
+    
+        Args:
+            data (bytes or bytearray or memoryview): Bytes to be converted
+                to a string of base64 characters.
+            errors (str or :obj:`~UserString`): Not used.  This argument exists
+                to meet the interface requirements.  Any value given to this
+                argument is ignored.
+    
+        Returns:
+            str: of base64 Characters
+            int: the number of the given ``data`` bytes consumed.
+        """
+        # Convert memoryview and bytearray objects to bytes.
+>       data_bytes = bytes(data)
+E       TypeError: string argument without an encoding
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/b64.py:84: TypeError
+_______________ test_decoder_handles_invalid_base64_raises_error _______________
+
+    def test_decoder_handles_invalid_base64_raises_error():
+        # Register the codec
+        register()
+        decoder = codecs.getdecoder(NAME)
+    
+        # Provide an invalid base64 string; the decoder should raise a binascii.Error
+        invalid_encoded = "!!!invalid!!!"
+        with pytest.raises(Exception) as excinfo:
+            decoder(invalid_encoded)
+        # The underlying exception should be a binascii.Error
+>       assert excinfo.type.__name__ == "Error"
+E       AssertionError: assert 'TypeError' == 'Error'
+E         
+E         - Error
+E         + TypeError
+
+test_generated.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_register_adds_codec_and_decodes_correctly - Ty...
+FAILED test_generated.py::test_decoder_handles_invalid_base64_raises_error - ...
+2 failed, 1 passed in 0.11s

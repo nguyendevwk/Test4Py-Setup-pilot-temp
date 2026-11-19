@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-139fe3f0-6110-444c-b59f-f88f48301a1f",
+  "object": "chat.completion",
+  "created": 1795079651,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport threading\nimport time\nimport types\nimport importlib\nimport pytest\n\n# Import the target function and the module to patch globals\nmod = importlib.import_module(\"httpie.uploads\")\nobserve = mod.observe_stdin_for_data_thread\nis_windows = mod.is_windows\nREAD_THRESHOLD = getattr(mod, \"READ_THRESHOLD\", 5)  # default if not defined\n\n\nclass DummyStderr:\n    def __init__(self):\n        self.written = []\n\n    def write(self, msg: str):\n        self.written.append(msg)\n\n\nclass DummyEnv:\n    def __init__(self):\n        self.stderr = DummyStderr()\n\n\ndef test_warning_is_written_when_no_input(monkeypatch):\n    \"\"\"When the read event is not set within READ_THRESHOLD, a warning is written.\"\"\"\n    # Ensure we are not on Windows and set a short threshold\n    monkeypatch.setattr(mod, \"is_windows\", False)\n    monkeypatch.setattr(mod, \"READ_THRESHOLD\", 0.1)\n\n    env = DummyEnv()\n    read_event = threading.Event()\n    # Call the function; it starts a daemon thread\n    observe(env, io.BytesIO(b\"\"), read_event)\n\n    # Wait longer than the threshold to allow the thread to run\n    time.sleep(0.2)\n\n    # The warning should have been written to stderr\n    assert any(\"warning: no stdin data read\" in msg for msg in env.stderr.written)\n\n\ndef test_no_warning_when_event_set(monkeypatch):\n    \"\"\"If the read event is set before the threshold, no warning is written.\"\"\"\n    monkeypatch.setattr(mod, \"is_windows\", False)\n    monkeypatch.setattr(mod, \"READ_THRESHOLD\", 0.5)\n\n    env = DummyEnv()\n    read_event = threading.Event()\n    observe(env, io.BytesIO(b\"\"), read_event)\n\n    # Set the event before the threshold expires\n    time.sleep(0.1)\n    read_event.set()\n\n    # Wait to ensure thread would have run if it were to warn\n    time.sleep(0.5)\n\n    # No warning should have been written\n    assert not env.stderr.written\n\n\ndef test_no_thread_when_windows_or_threshold_zero(monkeypatch):\n    \"\"\"On Windows or when READ_THRESHOLD is 0, the function returns immediately without starting a thread.\"\"\"\n    # Case 1: Windows\n    monkeypatch.setattr(mod, \"is_windows\", True)\n    env = DummyEnv()\n    read_event = threading.Event()\n    result = observe(env, io.BytesIO(b\"\"), read_event)\n    assert result is None\n    assert not env.stderr.written\n\n    # Case 2: Threshold zero\n    monkeypatch.setattr(mod, \"is_windows\", False)\n    monkeypatch.setattr(mod, \"READ_THRESHOLD\", 0)\n    env2 = DummyEnv()\n    read_event2 = threading.Event()\n    result2 = observe(env2, io.BytesIO(b\"\"), read_event2)\n    assert result2 is None\n    assert not env2.stderr.written\n```",
+        "reasoning": "We need to test observe_stdin_for_data_thread. It uses global READ_THRESHOLD? Not defined in snippet. Likely imported from somewhere. We need to simulate environment. We can patch is_windows to False. Use a dummy Environment with stderr having write method. Use threading.Event. We need to test that if event not set within threshold, warning written. We can set READ_THRESHOLD to small value via monkeypatch. Also test that if threshold 0, no thread. Also test that on windows returns None. We'll need to import the function. Use tmp_path? Not needed. We'll create dummy env. Use monkeypatch to set is_windows. Use monkeypatch to set READ_THRESHOLD. We'll need to import the module. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004890158,
+    "prompt_tokens": 629,
+    "prompt_time": 0.033811437,
+    "completion_tokens": 788,
+    "completion_time": 0.834273072,
+    "total_tokens": 1417,
+    "total_time": 0.868084509,
+    "completion_tokens_details": {
+      "reasoning_tokens": 149
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7shbfjaeaf81f42h5fqjkv2",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport threading\nimport time\nimport types\nimport importlib\nimport pytest\n\n# Import the target function and the module to patch globals\nmod = importlib.import_module(\"httpie.uploads\")\nobserve = mod.observe_stdin_for_data_thread\nis_windows = mod.is_windows\nREAD_THRESHOLD = getattr(mod, \"READ_THRESHOLD\", 5)  # default if not defined\n\n\nclass DummyStderr:\n    def __init__(self):\n        self.written = []\n\n    def write(self, msg: str):\n        self.written.append(msg)\n\n\nclass DummyEnv:\n    def __init__(self):\n        self.stderr = DummyStderr()\n\n\ndef test_warning_is_written_when_no_input(monkeypatch):\n    \"\"\"When the read event is not set within READ_THRESHOLD, a warning is written.\"\"\"\n    # Ensure we are not on Windows and set a short threshold\n    monkeypatch.setattr(mod, \"is_windows\", False)\n    monkeypatch.setattr(mod, \"READ_THRESHOLD\", 0.1)\n\n    env = DummyEnv()\n    read_event = threading.Event()\n    # Call the function; it starts a daemon thread\n    observe(env, io.BytesIO(b\"\"), read_event)\n\n    # Wait longer than the threshold to allow the thread to run\n    time.sleep(0.2)\n\n    # The warning should have been written to stderr\n    assert any(\"warning: no stdin data read\" in msg for msg in env.stderr.written)\n\n\ndef test_no_warning_when_event_set(monkeypatch):\n    \"\"\"If the read event is set before the threshold, no warning is written.\"\"\"\n    monkeypatch.setattr(mod, \"is_windows\", False)\n    monkeypatch.setattr(mod, \"READ_THRESHOLD\", 0.5)\n\n    env = DummyEnv()\n    read_event = threading.Event()\n    observe(env, io.BytesIO(b\"\"), read_event)\n\n    # Set the event before the threshold expires\n    time.sleep(0.1)\n    read_event.set()\n\n    # Wait to ensure thread would have run if it were to warn\n    time.sleep(0.5)\n\n    # No warning should have been written\n    assert not env.stderr.written\n\n\ndef test_no_thread_when_windows_or_threshold_zero(monkeypatch):\n    \"\"\"On Windows or when READ_THRESHOLD is 0, the function returns immediately without starting a thread.\"\"\"\n    # Case 1: Windows\n    monkeypatch.setattr(mod, \"is_windows\", True)\n    env = DummyEnv()\n    read_event = threading.Event()\n    result = observe(env, io.BytesIO(b\"\"), read_event)\n    assert result is None\n    assert not env.stderr.written\n\n    # Case 2: Threshold zero\n    monkeypatch.setattr(mod, \"is_windows\", False)\n    monkeypatch.setattr(mod, \"READ_THRESHOLD\", 0)\n    env2 = DummyEnv()\n    read_event2 = threading.Event()\n    result2 = observe(env2, io.BytesIO(b\"\"), read_event2)\n    assert result2 is None\n    assert not env2.stderr.written\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "9994caac4fae426596d6c0a784a7dca2",
+  "_api_plus_pacing_seconds": 2.333641495963093
+}

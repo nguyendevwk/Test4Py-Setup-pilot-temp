@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-baa0f8fe-c068-4bf6-8973-0f0e9139793b",
+  "object": "chat.completion",
+  "created": 1795077116,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom mimesis.providers.generic import Generic\nfrom mimesis.providers.base import BaseProvider, ProviderRegistry\nfrom mimesis.types import MissingSeed\n\n\nclass DummyProvider(BaseProvider):\n    \"\"\"Simple provider that records reseed calls.\"\"\"\n\n    def __init__(self, seed=MissingSeed):\n        super().__init__(seed=seed)\n        self.reseed_calls = []\n\n    def reseed(self, seed=MissingSeed):\n        super().reseed(seed)\n        self.reseed_calls.append(seed)\n\n\ndef test_generic_provider_access_and_str():\n    \"\"\"Generic should expose providers as attributes and have a readable string.\"\"\"\n    g = Generic()\n    # The 'address' provider is a common BaseProvider; it should be available.\n    assert hasattr(g, \"address\")\n    # Accessing the provider should return an instance of the provider class.\n    address_provider = getattr(g, \"address\")\n    assert isinstance(address_provider, BaseProvider)\n    # The string representation should include the locale.\n    assert str(g).startswith(\"Generic <\")\n    assert str(g).endswith(\">\")  # simple format check\n\n\ndef test_add_provider_invalid_and_valid():\n    \"\"\"add_provider should reject non‑subclass and accept a valid provider.\"\"\"\n    g = Generic()\n    # Reject a non‑class argument.\n    with pytest.raises(TypeError, match=\"must be a class\"):\n        g.add_provider(42)\n\n    # Reject a class that is not a BaseProvider subclass.\n    class NotProvider:\n        pass\n\n    with pytest.raises(TypeError, match=\"must be a subclass\"):\n        g.add_provider(NotProvider)\n\n    # Valid provider should be added and accessible.\n    g.add_provider(DummyProvider)\n    assert hasattr(g, \"dummyprovider\")\n    assert isinstance(g.dummyprovider, DummyProvider)\n\n    # Using the in‑place addition operator should also work.\n    g += DummyProvider\n    assert hasattr(g, \"dummyprovider\")\n    assert isinstance(g.dummyprovider, DummyProvider)\n\n\ndef test_reseed_propagates_to_providers(tmp_path):\n    \"\"\"reseed should propagate to all providers that implement reseed.\"\"\"\n    g = Generic()\n    # Add a dummy provider that records reseed calls.\n    g.add_provider(DummyProvider)\n    dummy = g.dummyprovider\n    assert dummy.reseed_calls == []\n\n    # Reseed Generic with a specific seed.\n    g.reseed(seed=12345)\n    # The dummy provider should have recorded the reseed call.\n    assert dummy.reseed_calls == [12345]\n\n    # Reseed again with a different seed.\n    g.reseed(seed=67890)\n    assert dummy.reseed_calls == [12345, 67890]\n```",
+        "reasoning": "Need tests for Generic: test attribute access, reseed, add_provider. Use tmp_path? maybe not. Just instantiate Generic, check provider attribute exists. Also test error on adding non subclass. Third test: reseed changes random? Hard. Maybe check that reseed propagates to providers: create dummy provider subclass with reseed tracking. Use simple provider. We'll create custom provider class inside test. Ensure add_provider works. Also test __iadd__.\n\nLet's write three tests: test_generic_provider_access, test_add_provider_error, test_reseed_propagation. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048615011,
+    "prompt_tokens": 1385,
+    "prompt_time": 0.011265238,
+    "completion_tokens": 683,
+    "completion_time": 0.882541647,
+    "total_tokens": 2068,
+    "total_time": 0.893806885,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 119
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sey417evpsbv2xw7phr4xk",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom mimesis.providers.generic import Generic\nfrom mimesis.providers.base import BaseProvider, ProviderRegistry\nfrom mimesis.types import MissingSeed\n\n\nclass DummyProvider(BaseProvider):\n    \"\"\"Simple provider that records reseed calls.\"\"\"\n\n    def __init__(self, seed=MissingSeed):\n        super().__init__(seed=seed)\n        self.reseed_calls = []\n\n    def reseed(self, seed=MissingSeed):\n        super().reseed(seed)\n        self.reseed_calls.append(seed)\n\n\ndef test_generic_provider_access_and_str():\n    \"\"\"Generic should expose providers as attributes and have a readable string.\"\"\"\n    g = Generic()\n    # The 'address' provider is a common BaseProvider; it should be available.\n    assert hasattr(g, \"address\")\n    # Accessing the provider should return an instance of the provider class.\n    address_provider = getattr(g, \"address\")\n    assert isinstance(address_provider, BaseProvider)\n    # The string representation should include the locale.\n    assert str(g).startswith(\"Generic <\")\n    assert str(g).endswith(\">\")  # simple format check\n\n\ndef test_add_provider_invalid_and_valid():\n    \"\"\"add_provider should reject non‑subclass and accept a valid provider.\"\"\"\n    g = Generic()\n    # Reject a non‑class argument.\n    with pytest.raises(TypeError, match=\"must be a class\"):\n        g.add_provider(42)\n\n    # Reject a class that is not a BaseProvider subclass.\n    class NotProvider:\n        pass\n\n    with pytest.raises(TypeError, match=\"must be a subclass\"):\n        g.add_provider(NotProvider)\n\n    # Valid provider should be added and accessible.\n    g.add_provider(DummyProvider)\n    assert hasattr(g, \"dummyprovider\")\n    assert isinstance(g.dummyprovider, DummyProvider)\n\n    # Using the in‑place addition operator should also work.\n    g += DummyProvider\n    assert hasattr(g, \"dummyprovider\")\n    assert isinstance(g.dummyprovider, DummyProvider)\n\n\ndef test_reseed_propagates_to_providers(tmp_path):\n    \"\"\"reseed should propagate to all providers that implement reseed.\"\"\"\n    g = Generic()\n    # Add a dummy provider that records reseed calls.\n    g.add_provider(DummyProvider)\n    dummy = g.dummyprovider\n    assert dummy.reseed_calls == []\n\n    # Reseed Generic with a specific seed.\n    g.reseed(seed=12345)\n    # The dummy provider should have recorded the reseed call.\n    assert dummy.reseed_calls == [12345]\n\n    # Reseed again with a different seed.\n    g.reseed(seed=67890)\n    assert dummy.reseed_calls == [12345, 67890]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2562262800056487
+}

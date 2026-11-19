@@ -1,0 +1,44 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_rawstream_iter_body_chunks ________________________
+
+    def test_rawstream_iter_body_chunks():
+        body = b"HelloWorld" * 10  # 100 bytes
+        msg = DummyMessage(body=body)
+>       opts = OutputOptions(headers=False, body=True, meta=False)
+E       TypeError: OutputOptions.__new__() missing 1 required positional argument: 'kind'
+
+test_generated.py:35: TypeError
+________________ test_rawstream_headers_and_metadata_inclusion _________________
+
+    def test_rawstream_headers_and_metadata_inclusion():
+        body = b"data"
+        headers = "Content-Type: text/plain"
+        metadata = "meta-info"
+        msg = DummyMessage(body=body, headers=headers, metadata=metadata)
+>       opts = OutputOptions(headers=True, body=True, meta=True)
+E       TypeError: OutputOptions.__new__() missing 1 required positional argument: 'kind'
+
+test_generated.py:48: TypeError
+_____________________ test_rawstream_data_suppressed_error _____________________
+
+    def test_rawstream_data_suppressed_error():
+        class SuppressMessage(HTTPMessage):
+            def iter_body(self, chunk_size: int):
+                raise DataSuppressedError("Body suppressed")
+    
+            def headers(self):
+                return "X-Test: 1"
+    
+            def metadata(self):
+                return ""
+    
+>       msg = SuppressMessage()
+E       TypeError: HTTPMessage.__init__() missing 1 required positional argument: 'orig'
+
+test_generated.py:73: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_rawstream_iter_body_chunks - TypeError: Output...
+FAILED test_generated.py::test_rawstream_headers_and_metadata_inclusion - Typ...
+FAILED test_generated.py::test_rawstream_data_suppressed_error - TypeError: H...
+3 failed in 0.81s

@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-84c08509-3dba-4a95-b994-88708dafbb1e",
+  "object": "chat.completion",
+  "created": 1795079652,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport sys\nimport time\nimport threading\nimport types\nimport builtins\nimport importlib\nimport pytest\n\n# Import the target function and related globals\nfrom httpie.uploads import observe_stdin_for_data_thread, READ_THRESHOLD, is_windows\n\n# Helper to create a minimal Environment with a writable stderr\nclass DummyEnv:\n    def __init__(self):\n        self.stderr = io.StringIO()\n\n# Test that a warning is emitted when no data is read within the threshold\ndef test_observe_stdin_warning_emitted(monkeypatch, tmp_path):\n    # Ensure we are not on Windows and set a short threshold\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0.1)\n\n    env = DummyEnv()\n    read_event = threading.Event()\n\n    # Capture the thread start time\n    start = time.time()\n    observe_stdin_for_data_thread(env, sys.stdin, read_event)\n\n    # Wait longer than the threshold to allow the warning to be written\n    time.sleep(0.2)\n\n    # The warning should be present in stderr\n    output = env.stderr.getvalue()\n    assert '> warning: no stdin data read in 0.1s' in output\n    # Ensure the warning is emitted after the threshold\n    assert time.time() - start >= 0.1\n\n# Test that no warning is emitted if the event is set before the threshold\ndef test_observe_stdin_no_warning_when_event_set(monkeypatch, tmp_path):\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0.5)\n\n    env = DummyEnv()\n    read_event = threading.Event()\n\n    observe_stdin_for_data_thread(env, sys.stdin, read_event)\n\n    # Set the event before the threshold expires\n    read_event.set()\n\n    # Wait a bit to ensure the thread would have fired if it were to\n    time.sleep(0.6)\n\n    # No warning should be present\n    assert env.stderr.getvalue() == ''\n\n# Test that when READ_THRESHOLD is zero, the function returns immediately\ndef test_observe_stdin_no_thread_when_threshold_zero(monkeypatch, tmp_path):\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0)\n\n    env = DummyEnv()\n    read_event = threading.Event()\n\n    observe_stdin_for_data_thread(env, sys.stdin, read_event)\n\n    # Since threshold is zero, no thread should be started and no warning emitted\n    assert env.stderr.getvalue() == ''\n```",
+        "reasoning": "We need three test functions for observe_stdin_for_data_thread. We can simulate non-windows by patching is_windows to False. Also patch READ_THRESHOLD. Use threading.Event. We need to capture env.stderr writes. Use a dummy Environment with stderr as StringIO. Test that when event not set within threshold, warning written. Also test that if event set before timeout, no warning. Also test that if READ_THRESHOLD=0, no thread starts. Use monkeypatch."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004680408,
+    "prompt_tokens": 666,
+    "prompt_time": 0.047554025,
+    "completion_tokens": 671,
+    "completion_time": 0.742238645,
+    "total_tokens": 1337,
+    "total_time": 0.78979267,
+    "completion_tokens_details": {
+      "reasoning_tokens": 96
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7shbfynetta86adscrenmst",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport sys\nimport time\nimport threading\nimport types\nimport builtins\nimport importlib\nimport pytest\n\n# Import the target function and related globals\nfrom httpie.uploads import observe_stdin_for_data_thread, READ_THRESHOLD, is_windows\n\n# Helper to create a minimal Environment with a writable stderr\nclass DummyEnv:\n    def __init__(self):\n        self.stderr = io.StringIO()\n\n# Test that a warning is emitted when no data is read within the threshold\ndef test_observe_stdin_warning_emitted(monkeypatch, tmp_path):\n    # Ensure we are not on Windows and set a short threshold\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0.1)\n\n    env = DummyEnv()\n    read_event = threading.Event()\n\n    # Capture the thread start time\n    start = time.time()\n    observe_stdin_for_data_thread(env, sys.stdin, read_event)\n\n    # Wait longer than the threshold to allow the warning to be written\n    time.sleep(0.2)\n\n    # The warning should be present in stderr\n    output = env.stderr.getvalue()\n    assert '> warning: no stdin data read in 0.1s' in output\n    # Ensure the warning is emitted after the threshold\n    assert time.time() - start >= 0.1\n\n# Test that no warning is emitted if the event is set before the threshold\ndef test_observe_stdin_no_warning_when_event_set(monkeypatch, tmp_path):\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0.5)\n\n    env = DummyEnv()\n    read_event = threading.Event()\n\n    observe_stdin_for_data_thread(env, sys.stdin, read_event)\n\n    # Set the event before the threshold expires\n    read_event.set()\n\n    # Wait a bit to ensure the thread would have fired if it were to\n    time.sleep(0.6)\n\n    # No warning should be present\n    assert env.stderr.getvalue() == ''\n\n# Test that when READ_THRESHOLD is zero, the function returns immediately\ndef test_observe_stdin_no_thread_when_threshold_zero(monkeypatch, tmp_path):\n    monkeypatch.setattr('httpie.uploads.is_windows', False)\n    monkeypatch.setattr('httpie.uploads.READ_THRESHOLD', 0)\n\n    env = DummyEnv()\n    read_event = threading.Event()\n\n    observe_stdin_for_data_thread(env, sys.stdin, read_event)\n\n    # Since threshold is zero, no thread should be started and no warning emitted\n    assert env.stderr.getvalue() == ''\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "0f149757683b4974b58959a46ba24c55",
+  "_api_plus_pacing_seconds": 1.5133287879871204
+}

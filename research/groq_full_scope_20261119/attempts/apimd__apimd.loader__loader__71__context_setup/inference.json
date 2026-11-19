@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-20745882-a907-4b84-b07e-b29182668bce",
+  "object": "chat.completion",
+  "created": 1795077058,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport builtins\nimport importlib\nimport sys\nimport types\nimport os\nimport re\nimport logging\nimport pytest\n\nfrom apimd.loader import loader, walk_packages, _read, _load_module, PEP561_SUFFIX\nfrom apimd.parser import Parser\n\n# Helper to create a simple package structure\ndef create_pkg(tmp_path, pkg_name, files):\n    pkg_path = tmp_path / pkg_name\n    pkg_path.mkdir()\n    for fname, content in files.items():\n        (pkg_path / fname).write_text(content)\n    return pkg_path\n\ndef test_loader_parses_python_file(tmp_path):\n    \"\"\"Loader should parse a normal .py file and return compiled output containing the module name.\"\"\"\n    pkg = create_pkg(tmp_path, \"mypkg\", {\"__init__.py\": \"x = 1\\n\"})\n    out = loader(str(pkg), str(tmp_path), link=False, level=0, toc=False)\n    assert isinstance(out, str)\n    assert \"mypkg\" in out\n    # Ensure that the content of the file was read\n    assert \"x = 1\" in _read(str(pkg / \"__init__.py\"))\n\ndef test_loader_handles_stub_only(tmp_path):\n    \"\"\"Loader should process a package that only contains a .pyi stub and still return output.\"\"\"\n    pkg = create_pkg(tmp_path, \"stubpkg\", {\"__init__.pyi\": \"def foo() -> int: ...\\n\"})\n    out = loader(str(pkg), str(tmp_path), link=False, level=0, toc=False)\n    assert isinstance(out, str)\n    assert \"stubpkg\" in out\n    # The stub file should be read\n    assert \"def foo\" in _read(str(pkg / \"__init__.pyi\"))\n\ndef test_walk_packages_filters_non_package_files(tmp_path):\n    \"\"\"walk_packages should ignore files outside the package and non-.py/.pyi files.\"\"\"\n    pkg = create_pkg(tmp_path, \"mypkg\", {\n        \"__init__.py\": \"pass\\n\",\n        \"module.py\": \"pass\\n\",\n        \"not_a_pkg.txt\": \"ignore\\n\",\n        \"sub/__init__.py\": \"pass\\n\",\n    })\n    # Create a subdirectory that is not a package\n    (pkg / \"sub\").mkdir()\n    (pkg / \"sub\" / \"file.py\").write_text(\"pass\\n\")\n    names = list(walk_packages(\"mypkg\", str(tmp_path)))\n    # Should include mypkg, mypkg.module, mypkg.sub\n    expected = {\"mypkg\", \"mypkg.module\", \"mypkg.sub\"}\n    assert set(name for name, _ in names) == expected\n    # Ensure that non-package file is not yielded\n    assert all(\"not_a_pkg\" not in name for name, _ in names)\n```",
+        "reasoning": "Need tests for loader. We'll create temp package structure. Test normal: simple .py file parsed. Need Parser behavior? We can't inspect. But loader returns compiled string. We can check that loader returns non-empty string. Also test that extension module loading works: create .so? can't. Instead test that when no .py but .pyi exists, loader still processes. Also test error: missing file? maybe raise? loader doesn't raise. Maybe test that warning logged? Hard. We'll just test that loader returns string and includes module name. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.125824504,
+    "prompt_tokens": 878,
+    "prompt_time": 0.051004361,
+    "completion_tokens": 703,
+    "completion_time": 0.786869703,
+    "total_tokens": 1581,
+    "total_time": 0.837874064,
+    "completion_tokens_details": {
+      "reasoning_tokens": 114
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sewb7zekttvw46zkdff04e",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport builtins\nimport importlib\nimport sys\nimport types\nimport os\nimport re\nimport logging\nimport pytest\n\nfrom apimd.loader import loader, walk_packages, _read, _load_module, PEP561_SUFFIX\nfrom apimd.parser import Parser\n\n# Helper to create a simple package structure\ndef create_pkg(tmp_path, pkg_name, files):\n    pkg_path = tmp_path / pkg_name\n    pkg_path.mkdir()\n    for fname, content in files.items():\n        (pkg_path / fname).write_text(content)\n    return pkg_path\n\ndef test_loader_parses_python_file(tmp_path):\n    \"\"\"Loader should parse a normal .py file and return compiled output containing the module name.\"\"\"\n    pkg = create_pkg(tmp_path, \"mypkg\", {\"__init__.py\": \"x = 1\\n\"})\n    out = loader(str(pkg), str(tmp_path), link=False, level=0, toc=False)\n    assert isinstance(out, str)\n    assert \"mypkg\" in out\n    # Ensure that the content of the file was read\n    assert \"x = 1\" in _read(str(pkg / \"__init__.py\"))\n\ndef test_loader_handles_stub_only(tmp_path):\n    \"\"\"Loader should process a package that only contains a .pyi stub and still return output.\"\"\"\n    pkg = create_pkg(tmp_path, \"stubpkg\", {\"__init__.pyi\": \"def foo() -> int: ...\\n\"})\n    out = loader(str(pkg), str(tmp_path), link=False, level=0, toc=False)\n    assert isinstance(out, str)\n    assert \"stubpkg\" in out\n    # The stub file should be read\n    assert \"def foo\" in _read(str(pkg / \"__init__.pyi\"))\n\ndef test_walk_packages_filters_non_package_files(tmp_path):\n    \"\"\"walk_packages should ignore files outside the package and non-.py/.pyi files.\"\"\"\n    pkg = create_pkg(tmp_path, \"mypkg\", {\n        \"__init__.py\": \"pass\\n\",\n        \"module.py\": \"pass\\n\",\n        \"not_a_pkg.txt\": \"ignore\\n\",\n        \"sub/__init__.py\": \"pass\\n\",\n    })\n    # Create a subdirectory that is not a package\n    (pkg / \"sub\").mkdir()\n    (pkg / \"sub\" / \"file.py\").write_text(\"pass\\n\")\n    names = list(walk_packages(\"mypkg\", str(tmp_path)))\n    # Should include mypkg, mypkg.module, mypkg.sub\n    expected = {\"mypkg\", \"mypkg.module\", \"mypkg.sub\"}\n    assert set(name for name, _ in names) == expected\n    # Ensure that non-package file is not yielded\n    assert all(\"not_a_pkg\" not in name for name, _ in names)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.277551197039429
+}

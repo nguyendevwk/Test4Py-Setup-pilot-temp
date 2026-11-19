@@ -1,0 +1,41 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_get_valid_types_with_various_type_entries ________________
+
+    def test_get_valid_types_with_various_type_entries():
+        # Case 1: type as a single string
+        data = {"type": "string"}
+        types, allow_null = get_valid_types(data)
+        assert types == {"string"}
+        assert allow_null is False
+    
+        # Case 2: type as a list including null and number
+        data = {"type": ["null", "number", "integer", "boolean"]}
+        types, allow_null = get_valid_types(data)
+        # number should override integer, null should be removed
+        assert types == {"number", "boolean"}
+        assert allow_null is True
+    
+        # Case 3: type omitted, defaults to all primitive types
+        data = {}
+        types, allow_null = get_valid_types(data)
+        assert types == {"boolean", "object", "array", "number", "string"}
+>       assert allow_null is False
+E       assert True is False
+
+test_generated.py:22: AssertionError
+____________ test_get_valid_types_with_empty_and_nonstandard_inputs ____________
+
+    def test_get_valid_types_with_empty_and_nonstandard_inputs():
+        # Empty type list should default to all primitive types
+        data = {"type": []}
+        types, allow_null = get_valid_types(data)
+        assert types == {"boolean", "object", "array", "number", "string"}
+>       assert allow_null is False
+E       assert True is False
+
+test_generated.py:29: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_valid_types_with_various_type_entries - as...
+FAILED test_generated.py::test_get_valid_types_with_empty_and_nonstandard_inputs
+2 failed, 1 passed in 0.21s

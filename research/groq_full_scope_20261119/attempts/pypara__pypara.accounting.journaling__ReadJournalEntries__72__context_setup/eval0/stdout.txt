@@ -1,0 +1,96 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_read_journal_entries_returns_iterable_of_entries _____________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/pypara__pypara.accounting.journaling__ReadJournalEntries__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_read_journal_entries_retu0')
+
+    def test_read_journal_entries_returns_iterable_of_entries(tmp_path):
+        """Normal scenario: a ReadJournalEntries implementation returns a list of JournalEntry objects."""
+        # Define a simple implementation of the protocol
+        def reader(period: DateRange) -> list[JournalEntry[DummyAccount]]:
+            entry = JournalEntry[DummyAccount](date=period.start, description="Test", source=DummyAccount("Cash", AccountType.ASSET))
+            entry.post(period.start, entry.source, Quantity(100))
+            return [entry]
+    
+        # Ensure the function satisfies the protocol
+>       assert isinstance(reader, ReadJournalEntries)
+
+test_generated.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'pypara.accounting.journaling.ReadJournalEntries'>
+instance = <function test_read_journal_entries_returns_iterable_of_entries.<locals>.reader at 0x7f25d41ae290>
+
+    def __instancecheck__(cls, instance):
+        # We need this method for situations where attributes are
+        # assigned in __init__.
+        if (
+            getattr(cls, '_is_protocol', False) and
+            not getattr(cls, '_is_runtime_protocol', False) and
+            not _allow_reckless_class_checks(depth=2)
+        ):
+>           raise TypeError("Instance and class checks can only be used with"
+                            " @runtime_checkable protocols")
+E           TypeError: Instance and class checks can only be used with @runtime_checkable protocols
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/typing.py:1498: TypeError
+__________ test_journal_entry_validation_raises_on_unbalanced_entries __________
+
+    def test_journal_entry_validation_raises_on_unbalanced_entries():
+        """Boundary scenario: validation should raise when debits and credits are not equal."""
+>       entry = JournalEntry[DummyAccount](date=datetime.date.today(), description="Unbalanced", source=DummyAccount("Revenue", AccountType.REVENUE))
+
+test_generated.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <enum 'AccountType'>, name = 'REVENUE'
+
+    def __getattr__(cls, name):
+        """
+        Return the enum member matching `name`
+    
+        We use __getattr__ instead of descriptors or inserting into the enum
+        class' __dict__ in order to support `name` and `value` being both
+        properties for enum members (which live in the class' __dict__) and
+        enum members themselves.
+        """
+        if _is_dunder(name):
+            raise AttributeError(name)
+        try:
+            return cls._member_map_[name]
+        except KeyError:
+>           raise AttributeError(name) from None
+E           AttributeError: REVENUE. Did you mean: 'REVENUES'?
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/enum.py:437: AttributeError
+__________________ test_direction_of_raises_on_zero_quantity ___________________
+
+    def test_direction_of_raises_on_zero_quantity():
+        """Error scenario: Direction.of should raise when quantity is zero."""
+        zero_qty = Quantity(0)
+        with pytest.raises(AssertionError, match="Encountered a `0` quantity"):
+>           Direction.of(zero_qty)
+
+test_generated.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <enum 'Direction'>, quantity = 0
+
+    @classmethod
+    def of(cls, quantity: Quantity) -> "Direction":
+        """
+        Returns the corresponding direction as per the sign of the quantity.
+    
+        :param quantity: Quantity to find the direction of.
+        :return: Direction for the quantity.
+        :raises AssertionError: If quantity is zero which implies a programming error.
+        """
+>       assert not quantity.is_zero(), "Encountered a `0` quantity. This implies a programming error."
+E       AttributeError: 'int' object has no attribute 'is_zero'
+
+../../../../groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/accounting/journaling.py:49: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_read_journal_entries_returns_iterable_of_entries
+FAILED test_generated.py::test_journal_entry_validation_raises_on_unbalanced_entries
+FAILED test_generated.py::test_direction_of_raises_on_zero_quantity - Attribu...
+3 failed in 0.32s

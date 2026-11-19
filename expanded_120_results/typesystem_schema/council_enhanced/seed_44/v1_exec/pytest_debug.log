@@ -1,0 +1,35 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_schema_validate_various_cases ______________________
+
+    def test_schema_validate_various_cases():
+        schema = Schema(
+            fields={
+                "username": String(max_length=50),
+                "age": Integer(),
+                "email": String(default="default@example.com"),
+                "read_only_field": String(read_only=True),
+            }
+        )
+    
+        # Valid input: defaults applied, read-only omitted
+        valid_input = {"username": "bob", "age": 30, "read_only_field": "ignored"}
+        result = schema.validate(valid_input)
+        assert result == {"username": "bob", "age": 30, "email": "default@example.com"}
+        assert "read_only_field" not in result
+    
+        # Missing required field 'age'
+        with pytest.raises(ValidationError) as excinfo:
+            schema.validate({"username": "bob"})
+        error = excinfo.value
+>       assert any(msg.code == "required" and msg.index == ["age"] for msg in error.messages)
+                                                                              ^^^^^^^^^^^^^^
+E       TypeError: 'method' object is not iterable
+
+../../expanded_120_results/typesystem_schema/council_enhanced/seed_44/v1_exec/test_run.py:26: TypeError
+=========================== short test summary info ============================
+FAILED ../../expanded_120_results/typesystem_schema/council_enhanced/seed_44/v1_exec/test_run.py::test_schema_validate_various_cases
+1 failed in 0.19s
+
+/home/heurix/.cache/uv/archive-v0/ZMxlGZafGJre2eGL/lib/python3.12/site-packages/coverage/inorout.py:560: CoverageWarning: Module tests was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.17.3/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")

@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-8939c3e0-1f51-4d72-a509-810a2b46118e",
+  "object": "chat.completion",
+  "created": 1795079566,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.streams import RawStream\n\n\nclass DummyMessage:\n    \"\"\"A minimal HTTPMessage stub with an iter_body method.\"\"\"\n\n    def __init__(self, body: bytes):\n        self._body = body\n\n    def iter_body(self, chunk_size: int):\n        \"\"\"Yield the body in chunks of the given size.\"\"\"\n        for i in range(0, len(self._body), chunk_size):\n            yield self._body[i : i + chunk_size]\n\n\ndef test_iter_body_chunks_normal():\n    \"\"\"RawStream should split the body into chunks of the requested size.\"\"\"\n    body = b\"HelloWorld\"\n    msg = DummyMessage(body)\n    stream = RawStream(chunk_size=5, msg=msg)\n    chunks = list(stream.iter_body())\n    assert chunks == [b\"Hello\", b\"World\"]\n    assert all(isinstance(chunk, bytes) for chunk in chunks)\n\n\ndef test_iter_body_chunks_boundary():\n    \"\"\"If the chunk size exceeds the body length, the whole body is returned as one chunk.\"\"\"\n    body = b\"Short\"\n    msg = DummyMessage(body)\n    stream = RawStream(chunk_size=100, msg=msg)\n    chunks = list(stream.iter_body())\n    assert chunks == [b\"Short\"]\n    assert len(chunks) == 1\n\n\ndef test_iter_body_returns_generator_and_bytes():\n    \"\"\"iter_body should return an iterable that yields bytes objects.\"\"\"\n    body = b\"Data\"\n    msg = DummyMessage(body)\n    stream = RawStream(chunk_size=2, msg=msg)\n    result = stream.iter_body()\n    assert hasattr(result, \"__iter__\")  # is iterable\n    first_chunk = next(iter(result))\n    assert isinstance(first_chunk, bytes)\n    assert first_chunk == b\"Da\"\n```",
+        "reasoning": "We need to test RawStream iter_body behavior. Need to create a dummy HTTPMessage with iter_body method. Use Environment? But RawStream inherits BaseStream not shown. We can instantiate RawStream with msg. Provide msg with iter_body returning generator yielding chunks. Test normal, boundary (chunk size larger than body), error (invalid chunk size?). We'll test that iter_body yields correct chunks. Use tmp_path? Not needed. We'll create simple message. Use RawStream(chunk_size=5). Provide body \"HelloWorld\". iter_body should yield b'Hello', b'World'. Also test chunk_size larger than body: chunk_size=20 yields whole body. Also test zero chunk_size? maybe raises ValueError? But not defined. We'll test that passing negative chunk_size raises ValueError? Not implemented. So maybe test that iter_body returns generator type. We'll assert type. Use pytest.raises for invalid type? Not. We'll just test normal and boundary. Need third test: ensure that iter_body yields bytes not str. Use assert isinstance(chunk, bytes). Provide message with iter_body that yields bytes. We'll create simple class. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.017365975,
+    "prompt_tokens": 382,
+    "prompt_time": 0.012928927,
+    "completion_tokens": 606,
+    "completion_time": 0.768044855,
+    "total_tokens": 988,
+    "total_time": 0.780973782,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 230
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh8w28eadtszneap66rzgk",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.streams import RawStream\n\n\nclass DummyMessage:\n    \"\"\"A minimal HTTPMessage stub with an iter_body method.\"\"\"\n\n    def __init__(self, body: bytes):\n        self._body = body\n\n    def iter_body(self, chunk_size: int):\n        \"\"\"Yield the body in chunks of the given size.\"\"\"\n        for i in range(0, len(self._body), chunk_size):\n            yield self._body[i : i + chunk_size]\n\n\ndef test_iter_body_chunks_normal():\n    \"\"\"RawStream should split the body into chunks of the requested size.\"\"\"\n    body = b\"HelloWorld\"\n    msg = DummyMessage(body)\n    stream = RawStream(chunk_size=5, msg=msg)\n    chunks = list(stream.iter_body())\n    assert chunks == [b\"Hello\", b\"World\"]\n    assert all(isinstance(chunk, bytes) for chunk in chunks)\n\n\ndef test_iter_body_chunks_boundary():\n    \"\"\"If the chunk size exceeds the body length, the whole body is returned as one chunk.\"\"\"\n    body = b\"Short\"\n    msg = DummyMessage(body)\n    stream = RawStream(chunk_size=100, msg=msg)\n    chunks = list(stream.iter_body())\n    assert chunks == [b\"Short\"]\n    assert len(chunks) == 1\n\n\ndef test_iter_body_returns_generator_and_bytes():\n    \"\"\"iter_body should return an iterable that yields bytes objects.\"\"\"\n    body = b\"Data\"\n    msg = DummyMessage(body)\n    stream = RawStream(chunk_size=2, msg=msg)\n    result = stream.iter_body()\n    assert hasattr(result, \"__iter__\")  # is iterable\n    first_chunk = next(iter(result))\n    assert isinstance(first_chunk, bytes)\n    assert first_chunk == b\"Da\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "b61ab971a3434a1abbf679f9c4c58e67",
+  "_api_plus_pacing_seconds": 2.528010263980832
+}

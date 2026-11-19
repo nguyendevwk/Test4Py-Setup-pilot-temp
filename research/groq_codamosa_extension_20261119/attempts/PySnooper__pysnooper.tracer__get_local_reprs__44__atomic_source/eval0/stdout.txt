@@ -1,0 +1,124 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_get_local_reprs_order_and_repr ______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-142/test_get_local_reprs_order_and0')
+
+    def test_get_local_reprs_order_and_repr(tmp_path):
+        """Test that local variables are ordered correctly and their reprs are produced."""
+        def inner():
+            a = 1
+            b = 2
+            c = "hello"
+            frame = inspect.currentframe()
+            result = get_local_reprs(frame, max_length=None, normalize=False)
+            # Order should follow co_varnames + f_locals keys
+            assert list(result.keys()) == ["a", "b", "c"]
+            # Reprs should be shortish
+            assert result["a"] == "1"
+            assert result["b"] == "2"
+            assert result["c"] == "'hello'"
+    
+>       inner()
+
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__44__atomic_source/eval0/test_generated.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def inner():
+        a = 1
+        b = 2
+        c = "hello"
+        frame = inspect.currentframe()
+        result = get_local_reprs(frame, max_length=None, normalize=False)
+        # Order should follow co_varnames + f_locals keys
+>       assert list(result.keys()) == ["a", "b", "c"]
+E       AssertionError: assert ['a', 'b', 'c', 'frame'] == ['a', 'b', 'c']
+E         
+E         Left contains one more item: 'frame'
+E         Use -v to get more diff
+
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__44__atomic_source/eval0/test_generated.py:19: AssertionError
+__________________ test_get_local_reprs_max_length_truncation __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-142/test_get_local_reprs_max_lengt0')
+
+    def test_get_local_reprs_max_length_truncation(tmp_path):
+        """Test that long string values are truncated when max_length is set."""
+        long_str = "x" * 100
+        def inner():
+            s = long_str
+            frame = inspect.currentframe()
+            result = get_local_reprs(frame, max_length=10, normalize=False)
+            # The repr should be truncated to 10 characters (including quotes)
+            assert result["s"].startswith("'x" * 9)  # 9 x's plus opening quote
+            assert result["s"].endswith("'")  # closing quote
+    
+>       inner()
+
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__44__atomic_source/eval0/test_generated.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def inner():
+        s = long_str
+        frame = inspect.currentframe()
+        result = get_local_reprs(frame, max_length=10, normalize=False)
+        # The repr should be truncated to 10 characters (including quotes)
+>       assert result["s"].startswith("'x" * 9)  # 9 x's plus opening quote
+E       assert False
+E        +  where False = <built-in method startswith of str object at 0x7f457855be30>(("'x" * 9))
+E        +    where <built-in method startswith of str object at 0x7f457855be30> = "'xx...xxx'".startswith
+
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__44__atomic_source/eval0/test_generated.py:36: AssertionError
+_______________________ test_get_local_reprs_with_watch ________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-142/test_get_local_reprs_with_watc0')
+
+    def test_get_local_reprs_with_watch(tmp_path):
+        """Test that watch variables are merged and sorted correctly."""
+        class DummyWatch:
+            def items(self, frame, normalize):
+                # Return a dict with a key that should appear after locals
+                return {"z": 99}
+    
+        def inner():
+            a = 1
+            b = 2
+            frame = inspect.currentframe()
+            result = get_local_reprs(frame, watch=[DummyWatch()], max_length=None, normalize=False)
+            # Order should be a, b, z
+            assert list(result.keys()) == ["a", "b", "z"]
+            assert result["z"] == "99"
+    
+>       inner()
+
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__44__atomic_source/eval0/test_generated.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__44__atomic_source/eval0/test_generated.py:53: in inner
+    result = get_local_reprs(frame, watch=[DummyWatch()], max_length=None, normalize=False)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+frame = <frame at 0x56018ac0d530, file '/home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__44__atomic_source/eval0/test_generated.py', line 53, code inner>
+watch = [<test_generated.test_get_local_reprs_with_watch.<locals>.DummyWatch object at 0x7f4578983cd0>]
+custom_repr = (), max_length = None, normalize = False
+
+    def get_local_reprs(frame, watch=(), custom_repr=(), max_length=None, normalize=False):
+        code = frame.f_code
+        vars_order = (code.co_varnames + code.co_cellvars + code.co_freevars +
+                      tuple(frame.f_locals.keys()))
+    
+        result_items = [(key, utils.get_shortish_repr(value, custom_repr,
+                                                      max_length, normalize))
+                        for key, value in frame.f_locals.items()]
+        result_items.sort(key=lambda key_value: vars_order.index(key_value[0]))
+        result = collections.OrderedDict(result_items)
+    
+        for variable in watch:
+>           result.update(sorted(variable.items(frame, normalize)))
+E           ValueError: need more than 1 value to unpack
+
+pysnooper/tracer.py:44: ValueError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__44__atomic_source/eval0/test_generated.py::test_get_local_reprs_order_and_repr
+FAILED ../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__44__atomic_source/eval0/test_generated.py::test_get_local_reprs_max_length_truncation
+FAILED ../../../../../../attempts/PySnooper__pysnooper.tracer__get_local_reprs__44__atomic_source/eval0/test_generated.py::test_get_local_reprs_with_watch
+3 failed in 0.19s

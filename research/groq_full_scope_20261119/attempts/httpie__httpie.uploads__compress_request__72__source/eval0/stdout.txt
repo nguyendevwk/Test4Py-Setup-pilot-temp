@@ -1,0 +1,28 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_compress_file_like_body_never_economical _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.uploads__compress_request__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_compress_file_like_body_n0')
+
+    def test_compress_file_like_body_never_economical(tmp_path):
+        # Create a file-like object that does not compress well
+        data = b"".join([bytes([i % 256]) for i in range(1000)])
+        file_obj = io.BytesIO(data)
+        req = requests.Request("POST", "http://example.com")
+        prepped = req.prepare()
+        prepped.body = file_obj
+        prepped.headers = {}
+    
+        compress_request(prepped, always=False)
+    
+        # Since compression is not economical, body should remain unchanged
+>       assert prepped.body == data
+E       assert b"x\x9cc`dbfa...\x1d\x03\xe7<" == b'\x00\x01\x0...4\xe5\xe6\xe7'
+E         
+E         At index 0 diff: b'x' != b'\x00'
+E         Use -v to get more diff
+
+test_generated.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_compress_file_like_body_never_economical - ass...
+1 failed, 2 passed in 0.51s

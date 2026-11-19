@@ -1,0 +1,34 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_render_variable_list_and_non_string_types ________________
+
+    def test_render_variable_list_and_non_string_types():
+        env = Environment()
+        context = {"project_name": "Test Project"}
+        raw_list = [
+            "{{ cookiecutter.project_name }}",
+            42,
+            True,
+            {"nested": "{{ cookiecutter.project_name }}"}
+        ]
+        rendered = render_variable(env, raw_list, context)
+        assert isinstance(rendered, list)
+        assert rendered[0] == "Test Project"
+>       assert rendered[1] == 42
+E       AssertionError: assert '42' == 42
+
+test_generated.py:34: AssertionError
+________________ test_render_variable_undefined_variable_raises ________________
+
+    def test_render_variable_undefined_variable_raises():
+        env = Environment()
+        context = {"existing": "value"}
+        raw = "{{ cookiecutter.nonexistent }}"
+>       with pytest.raises(Exception) as excinfo:
+E       Failed: DID NOT RAISE Exception
+
+test_generated.py:43: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_render_variable_list_and_non_string_types - As...
+FAILED test_generated.py::test_render_variable_undefined_variable_raises - Fa...
+2 failed, 1 passed in 0.21s

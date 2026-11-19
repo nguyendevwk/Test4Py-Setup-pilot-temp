@@ -1,0 +1,43 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_reference_validates_nested_schema ____________________
+
+    def test_reference_validates_nested_schema():
+        """Reference should validate a nested schema instance correctly."""
+        person_data = {"name": "Alice", "address": {"street": "123 Main St", "city": "Wonderland"}}
+>       person = Person.validate(person_data)
+E       TypeError: Schema.validate() missing 1 required positional argument: 'value'
+
+../../../../../../attempts/typesystem__typesystem.schemas__Reference__42__atomic_verified_setup/eval0/test_generated.py:17: TypeError
+___________________ test_reference_allows_null_when_allowed ____________________
+
+    def test_reference_allows_null_when_allowed():
+        """Reference should allow None when allow_null is True."""
+        class NullablePerson(typesystem.Schema):
+            name = typesystem.String()
+            address = Reference(to="Address", definitions=typesystem.schemas.Definitions({"Address": Address}), allow_null=True)
+    
+        person_data = {"name": "Bob", "address": None}
+>       person = NullablePerson.validate(person_data)
+E       TypeError: Schema.validate() missing 1 required positional argument: 'value'
+
+../../../../../../attempts/typesystem__typesystem.schemas__Reference__42__atomic_verified_setup/eval0/test_generated.py:31: TypeError
+_____________ test_reference_raises_error_on_null_when_not_allowed _____________
+
+    def test_reference_raises_error_on_null_when_not_allowed():
+        """Reference should raise ValidationError when value is None and allow_null is False."""
+        class StrictPerson(typesystem.Schema):
+            name = typesystem.String()
+            address = Reference(to="Address", definitions=typesystem.schemas.Definitions({"Address": Address}))
+    
+        person_data = {"name": "Charlie", "address": None}
+        with pytest.raises(ValidationError) as excinfo:
+>           StrictPerson.validate(person_data)
+E           TypeError: Schema.validate() missing 1 required positional argument: 'value'
+
+../../../../../../attempts/typesystem__typesystem.schemas__Reference__42__atomic_verified_setup/eval0/test_generated.py:42: TypeError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/typesystem__typesystem.schemas__Reference__42__atomic_verified_setup/eval0/test_generated.py::test_reference_validates_nested_schema
+FAILED ../../../../../../attempts/typesystem__typesystem.schemas__Reference__42__atomic_verified_setup/eval0/test_generated.py::test_reference_allows_null_when_allowed
+FAILED ../../../../../../attempts/typesystem__typesystem.schemas__Reference__42__atomic_verified_setup/eval0/test_generated.py::test_reference_raises_error_on_null_when_not_allowed
+3 failed in 0.15s

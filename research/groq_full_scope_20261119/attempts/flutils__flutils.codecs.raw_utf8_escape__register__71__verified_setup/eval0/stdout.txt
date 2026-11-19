@@ -1,0 +1,159 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_register_adds_decoder_and_encoder ____________________
+
+    def test_register_adds_decoder_and_encoder():
+        """Calling register should add a decoder and encoder for the codec name."""
+        # Ensure the codec is not already registered
+        with pytest.raises(LookupError):
+            codecs.getdecoder(CODEC_NAME)
+    
+        # Register the codec
+        mod.register()
+    
+        # After registration, decoder and encoder should be available
+        decoder = codecs.getdecoder(CODEC_NAME)
+        encoder = codecs.getencoder(CODEC_NAME)
+    
+        # Test that decoding a simple byte string returns the expected Unicode string
+        sample_bytes = b"hello\\nworld"
+        decoded, _ = decoder(sample_bytes)
+>       assert decoded == "hello\\nworld"
+E       AssertionError: assert 'hello\nworld' == 'hello\\nworld'
+E         
+E         - hello\nworld
+E         + hello
+E         + world
+
+test_generated.py:31: AssertionError
+_____________________ test_codec_roundtrip_with_userstring _____________________
+
+data = b'foo\\x9bar\\xabaz', errors = 'strict'
+
+    def decode(
+            data: _ByteString,
+            errors: _Str = 'strict'
+    ) -> Tuple[str, int]:
+        """Convert a bytes type of escaped utf8 hexadecimal to a string.
+    
+        Args:
+            data (bytes or bytearray or memoryview): The escaped utf8
+                hexadecimal bytes.
+            errors (str or :obj:`~UserString`): The error checking level.
+    
+        Returns:
+            str: The given ``data`` (of escaped utf8 hexadecimal bytes)
+                converted into a :obj:`str`.
+            int: The number of the given ``data`` bytes consumed.
+    
+        Raises:
+             UnicodeDecodeError: if the given ``data`` contains escaped
+                utf8 hexadecimal that references invalid utf8 bytes.
+    
+    
+        """
+        # Convert memoryview and bytearray objects to bytes.
+        data_bytes = bytes(data)
+    
+        # Convert the given 'errors', that are of type UserString into a str.
+        errors_input = str(errors)
+    
+        # Convert the utf8 bytes into a string of latin-1 characters.
+        # This basically maps the exact utf8 bytes to the string. Also,
+        # this converts any escaped hexadecimal sequences \\xHH into
+        # \xHH bytes.
+        text_str_latin1 = data_bytes.decode('unicode_escape')
+    
+        # Convert the string of latin-1 characters (which are actually
+        # utf8 characters) into bytes.
+        text_bytes_utf8 = text_str_latin1.encode('latin1')
+    
+        # Convert the utf8 bytes into a string.
+        try:
+>           out = text_bytes_utf8.decode('utf-8', errors=errors_input)
+E           UnicodeDecodeError: 'utf-8' codec can't decode byte 0x9b in position 3: invalid start byte
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/raw_utf8_escape.py:131: UnicodeDecodeError
+
+During handling of the above exception, another exception occurred:
+
+    def test_codec_roundtrip_with_userstring():
+        """The codec should correctly round‑trip a UserString instance."""
+        from collections import UserString
+    
+        # Register the codec
+        mod.register()
+    
+        # Create a UserString containing escape sequences
+        original = UserString("foo\\tbar\\nbaz")
+    
+        # Encode the UserString to bytes
+        encoder = codecs.getencoder(CODEC_NAME)
+        encoded_bytes, _ = encoder(original)
+        assert isinstance(encoded_bytes, bytes)
+    
+        # Decode the bytes back to a string
+        decoder = codecs.getdecoder(CODEC_NAME)
+>       decoded_str, _ = decoder(encoded_bytes)
+
+test_generated.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = b'foo\\x9bar\\xabaz', errors = 'strict'
+
+    def decode(
+            data: _ByteString,
+            errors: _Str = 'strict'
+    ) -> Tuple[str, int]:
+        """Convert a bytes type of escaped utf8 hexadecimal to a string.
+    
+        Args:
+            data (bytes or bytearray or memoryview): The escaped utf8
+                hexadecimal bytes.
+            errors (str or :obj:`~UserString`): The error checking level.
+    
+        Returns:
+            str: The given ``data`` (of escaped utf8 hexadecimal bytes)
+                converted into a :obj:`str`.
+            int: The number of the given ``data`` bytes consumed.
+    
+        Raises:
+             UnicodeDecodeError: if the given ``data`` contains escaped
+                utf8 hexadecimal that references invalid utf8 bytes.
+    
+    
+        """
+        # Convert memoryview and bytearray objects to bytes.
+        data_bytes = bytes(data)
+    
+        # Convert the given 'errors', that are of type UserString into a str.
+        errors_input = str(errors)
+    
+        # Convert the utf8 bytes into a string of latin-1 characters.
+        # This basically maps the exact utf8 bytes to the string. Also,
+        # this converts any escaped hexadecimal sequences \\xHH into
+        # \xHH bytes.
+        text_str_latin1 = data_bytes.decode('unicode_escape')
+    
+        # Convert the string of latin-1 characters (which are actually
+        # utf8 characters) into bytes.
+        text_bytes_utf8 = text_str_latin1.encode('latin1')
+    
+        # Convert the utf8 bytes into a string.
+        try:
+            out = text_bytes_utf8.decode('utf-8', errors=errors_input)
+        except UnicodeDecodeError as e:
+>           raise UnicodeDecodeError(
+                'eutf8h',
+                data_bytes,
+                e.start,
+                e.end,
+                e.reason
+            )
+E           UnicodeDecodeError: 'eutf8h' codec can't decode byte 0x5c in position 3: invalid start byte
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/raw_utf8_escape.py:133: UnicodeDecodeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_register_adds_decoder_and_encoder - AssertionE...
+FAILED test_generated.py::test_codec_roundtrip_with_userstring - UnicodeDecod...
+2 failed, 1 passed in 0.13s

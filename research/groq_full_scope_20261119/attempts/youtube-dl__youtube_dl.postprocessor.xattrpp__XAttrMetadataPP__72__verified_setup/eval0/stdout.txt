@@ -1,0 +1,27 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_run_metadata_error_no_space _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.post...ssor.xattrpp__XAttrMetadataPP__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_run_metadata_error_no_spa0')
+downloader = <test_generated.DummyDownloader object at 0x7f58e2ff4310>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f58e2ff4970>
+
+    def test_run_metadata_error_no_space(tmp_path, downloader, monkeypatch):
+        file_path = tmp_path / "video.mp4"
+        file_path.write_text("dummy")
+        info = {"filepath": str(file_path), "title": "Test"}
+        # Simulate XAttrMetadataError with NO_SPACE after one write
+        def fake_write_xattr(fname, name, value):
+            raise XAttrMetadataError("NO_SPACE")
+        monkeypatch.setattr("youtube_dl.postprocessor.xattrpp.write_xattr", fake_write_xattr)
+        pp = XAttrMetadataPP(downloader)
+        pp.run(info)
+        # Expect a warning about no disk space
+>       assert any(msg[0] == "warning" and "no disk space" in msg[1] for msg in downloader.messages)
+E       assert False
+E        +  where False = any(<generator object test_run_metadata_error_no_space.<locals>.<genexpr> at 0x7f58e30086d0>)
+
+test_generated.py:80: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_run_metadata_error_no_space - assert False
+1 failed, 2 passed in 0.65s

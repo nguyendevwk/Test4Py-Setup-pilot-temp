@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-cb1de64b-971d-43e0-9552-38d979768081",
+  "object": "chat.completion",
+  "created": 1795078921,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport types\nimport importlib\nimport tempfile\nimport shutil\nimport pytest\nfrom thefuck.conf import Settings\nfrom thefuck import const\n\n@pytest.fixture\ndef settings_instance(tmp_path):\n    \"\"\"Create a Settings instance with a temporary user directory.\"\"\"\n    # Patch the environment to point to the temporary config directory\n    original_xdg = os.environ.get(\"XDG_CONFIG_HOME\")\n    os.environ[\"XDG_CONFIG_HOME\"] = str(tmp_path)\n    try:\n        s = Settings()\n        yield s\n    finally:\n        if original_xdg is None:\n            del os.environ[\"XDG_CONFIG_HOME\"]\n        else:\n            os.environ[\"XDG_CONFIG_HOME\"] = original_xdg\n\ndef test_settings_file_creation_and_loading(settings_instance):\n    \"\"\"Verify that a default settings file is created and loaded correctly.\"\"\"\n    s = settings_instance\n    # The init method should create the settings file and load defaults\n    s.init()\n    # The file should exist\n    settings_path = s.user_dir.joinpath(\"settings.py\")\n    assert settings_path.is_file()\n    # The loaded settings should contain all default keys\n    for key in const.DEFAULT_SETTINGS:\n        assert key in s\n        # Default values should match the defaults unless overridden\n        assert s[key] == const.DEFAULT_SETTINGS[key]\n    # Modify the settings file to change a value\n    with settings_path.open(\"a\", encoding=\"utf-8\") as f:\n        f.write(\"\\nSOME_NEW_SETTING = 42\\n\")\n    # Reinitialize to load the new setting\n    s.init()\n    assert s.get(\"SOME_NEW_SETTING\") == 42\n\ndef test_settings_env_overrides(settings_instance):\n    \"\"\"Verify that environment variables override file settings.\"\"\"\n    s = settings_instance\n    # Create a settings file with a known value\n    settings_path = s.user_dir.joinpath(\"settings.py\")\n    settings_path.write_text(\"DEBUG = False\\n\", encoding=\"utf-8\")\n    # Set environment variable to override DEBUG\n    os.environ[\"THEFUCK_DEBUG\"] = \"True\"\n    s.init()\n    # The environment value should override the file value\n    assert s[\"debug\"] is True\n    # Clean up\n    del os.environ[\"THEFUCK_DEBUG\"]\n\ndef test_settings_args_overrides(settings_instance):\n    \"\"\"Verify that command line arguments override env and file settings.\"\"\"\n    s = settings_instance\n    # Create a settings file with a known value\n    settings_path = s.user_dir.joinpath(\"settings.py\")\n    settings_path.write_text(\"REPEAT = 1\\n\", encoding=\"utf-8\")\n    # Set environment variable to override REPEAT\n    os.environ[\"THEFUCK_REPEAT\"] = \"2\"\n    # Prepare a simple args namespace\n    class Args:\n        yes = False\n        debug = False\n        repeat = 3\n    args = Args()\n    s.init(args=args)\n    # The args value should override env and file\n    assert s[\"repeat\"] == 3\n    # Clean up\n    del os.environ[\"THEFUCK_REPEAT\"]\n```",
+        "reasoning": "Need tests for Settings init, env, file. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049791941,
+    "prompt_tokens": 1145,
+    "prompt_time": 0.027594008,
+    "completion_tokens": 663,
+    "completion_time": 0.900176294,
+    "total_tokens": 1808,
+    "total_time": 0.927770302,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 15
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgn6nbewzrerr7dftr982j",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport types\nimport importlib\nimport tempfile\nimport shutil\nimport pytest\nfrom thefuck.conf import Settings\nfrom thefuck import const\n\n@pytest.fixture\ndef settings_instance(tmp_path):\n    \"\"\"Create a Settings instance with a temporary user directory.\"\"\"\n    # Patch the environment to point to the temporary config directory\n    original_xdg = os.environ.get(\"XDG_CONFIG_HOME\")\n    os.environ[\"XDG_CONFIG_HOME\"] = str(tmp_path)\n    try:\n        s = Settings()\n        yield s\n    finally:\n        if original_xdg is None:\n            del os.environ[\"XDG_CONFIG_HOME\"]\n        else:\n            os.environ[\"XDG_CONFIG_HOME\"] = original_xdg\n\ndef test_settings_file_creation_and_loading(settings_instance):\n    \"\"\"Verify that a default settings file is created and loaded correctly.\"\"\"\n    s = settings_instance\n    # The init method should create the settings file and load defaults\n    s.init()\n    # The file should exist\n    settings_path = s.user_dir.joinpath(\"settings.py\")\n    assert settings_path.is_file()\n    # The loaded settings should contain all default keys\n    for key in const.DEFAULT_SETTINGS:\n        assert key in s\n        # Default values should match the defaults unless overridden\n        assert s[key] == const.DEFAULT_SETTINGS[key]\n    # Modify the settings file to change a value\n    with settings_path.open(\"a\", encoding=\"utf-8\") as f:\n        f.write(\"\\nSOME_NEW_SETTING = 42\\n\")\n    # Reinitialize to load the new setting\n    s.init()\n    assert s.get(\"SOME_NEW_SETTING\") == 42\n\ndef test_settings_env_overrides(settings_instance):\n    \"\"\"Verify that environment variables override file settings.\"\"\"\n    s = settings_instance\n    # Create a settings file with a known value\n    settings_path = s.user_dir.joinpath(\"settings.py\")\n    settings_path.write_text(\"DEBUG = False\\n\", encoding=\"utf-8\")\n    # Set environment variable to override DEBUG\n    os.environ[\"THEFUCK_DEBUG\"] = \"True\"\n    s.init()\n    # The environment value should override the file value\n    assert s[\"debug\"] is True\n    # Clean up\n    del os.environ[\"THEFUCK_DEBUG\"]\n\ndef test_settings_args_overrides(settings_instance):\n    \"\"\"Verify that command line arguments override env and file settings.\"\"\"\n    s = settings_instance\n    # Create a settings file with a known value\n    settings_path = s.user_dir.joinpath(\"settings.py\")\n    settings_path.write_text(\"REPEAT = 1\\n\", encoding=\"utf-8\")\n    # Set environment variable to override REPEAT\n    os.environ[\"THEFUCK_REPEAT\"] = \"2\"\n    # Prepare a simple args namespace\n    class Args:\n        yes = False\n        debug = False\n        repeat = 3\n    args = Args()\n    s.init(args=args)\n    # The args value should override env and file\n    assert s[\"repeat\"] == 3\n    # Clean up\n    del os.environ[\"THEFUCK_REPEAT\"]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.348463073023595
+}

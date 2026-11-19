@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-3fa39865-d804-4a62-a404-00d13ab61512",
+  "object": "chat.completion",
+  "created": 1795079544,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport types\nimport pytest\nfrom tornado import options\n\n# Helper to reset options between tests\ndef reset_options():\n    options._options = {}\n    options._parse_callbacks = []\n\n@pytest.fixture(autouse=True)\ndef cleanup():\n    reset_options()\n    yield\n    reset_options()\n\ndef test_callback_invoked_after_parse(tmp_path):\n    \"\"\"The callback added via add_parse_callback is executed after parsing.\"\"\"\n    counter = {\"called\": 0}\n\n    def callback():\n        counter[\"called\"] += 1\n\n    options.add_parse_callback(callback)\n\n    # Define a dummy option to trigger parsing\n    options.define(\"dummy\", default=\"value\", type=str, help=\"dummy option\")\n\n    # Simulate command line parsing\n    sys.argv = [\"prog\", \"--dummy\", \"test\"]\n    options.parse_command_line()\n\n    assert counter[\"called\"] == 1\n    assert options.get(\"dummy\") == \"test\"\n\ndef test_multiple_callbacks_order(tmp_path):\n    \"\"\"Callbacks are called in the order they were added.\"\"\"\n    order = []\n\n    def first():\n        order.append(\"first\")\n\n    def second():\n        order.append(\"second\")\n\n    options.add_parse_callback(first)\n    options.add_parse_callback(second)\n\n    options.define(\"dummy\", default=\"value\", type=str, help=\"dummy option\")\n    sys.argv = [\"prog\", \"--dummy\", \"test\"]\n    options.parse_command_line()\n\n    assert order == [\"first\", \"second\"]\n\ndef test_callback_called_once_per_parse(tmp_path):\n    \"\"\"Each callback is invoked exactly once per parse invocation.\"\"\"\n    counter = {\"called\": 0}\n\n    def callback():\n        counter[\"called\"] += 1\n\n    options.add_parse_callback(callback)\n\n    options.define(\"dummy\", default=\"value\", type=str, help=\"dummy option\")\n    sys.argv = [\"prog\", \"--dummy\", \"test\"]\n    options.parse_command_line()\n\n    # Parse again with same options\n    sys.argv = [\"prog\", \"--dummy\", \"other\"]\n    options.parse_command_line()\n\n    assert counter[\"called\"] == 2\n```",
+        "reasoning": "We need to test add_parse_callback. It calls options.add_parse_callback. options is from tornado.options? In module, options likely imported earlier. Let's inspect. But we can't. Assume options is from tornado.options. We'll test that callback is stored and invoked after parsing. Use a dummy parser? We can simulate by calling add_parse_callback and then calling options.parse? But we can't modify code. We can import tornado.options and use its API. Let's write tests: 1) callback is called after parse. 2) multiple callbacks order. 3) callback exception propagates? Maybe test that callback is called even if parse fails? But parse may raise. We'll test that callback is called after parse completes. Use tmp_path to create a config file? But parse can read from command line. Use options.parse_command_line? We'll set sys.argv. Use a simple option. We'll test that callback increments counter. Also test that callback is called only once per parse. Third test: callback can be added multiple times and called each time. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.009523917,
+    "prompt_tokens": 347,
+    "prompt_time": 0.011273625,
+    "completion_tokens": 644,
+    "completion_time": 0.891708619,
+    "total_tokens": 991,
+    "total_time": 0.902982244,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 212
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh86wmev49ekqkh798152w",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport types\nimport pytest\nfrom tornado import options\n\n# Helper to reset options between tests\ndef reset_options():\n    options._options = {}\n    options._parse_callbacks = []\n\n@pytest.fixture(autouse=True)\ndef cleanup():\n    reset_options()\n    yield\n    reset_options()\n\ndef test_callback_invoked_after_parse(tmp_path):\n    \"\"\"The callback added via add_parse_callback is executed after parsing.\"\"\"\n    counter = {\"called\": 0}\n\n    def callback():\n        counter[\"called\"] += 1\n\n    options.add_parse_callback(callback)\n\n    # Define a dummy option to trigger parsing\n    options.define(\"dummy\", default=\"value\", type=str, help=\"dummy option\")\n\n    # Simulate command line parsing\n    sys.argv = [\"prog\", \"--dummy\", \"test\"]\n    options.parse_command_line()\n\n    assert counter[\"called\"] == 1\n    assert options.get(\"dummy\") == \"test\"\n\ndef test_multiple_callbacks_order(tmp_path):\n    \"\"\"Callbacks are called in the order they were added.\"\"\"\n    order = []\n\n    def first():\n        order.append(\"first\")\n\n    def second():\n        order.append(\"second\")\n\n    options.add_parse_callback(first)\n    options.add_parse_callback(second)\n\n    options.define(\"dummy\", default=\"value\", type=str, help=\"dummy option\")\n    sys.argv = [\"prog\", \"--dummy\", \"test\"]\n    options.parse_command_line()\n\n    assert order == [\"first\", \"second\"]\n\ndef test_callback_called_once_per_parse(tmp_path):\n    \"\"\"Each callback is invoked exactly once per parse invocation.\"\"\"\n    counter = {\"called\": 0}\n\n    def callback():\n        counter[\"called\"] += 1\n\n    options.add_parse_callback(callback)\n\n    options.define(\"dummy\", default=\"value\", type=str, help=\"dummy option\")\n    sys.argv = [\"prog\", \"--dummy\", \"test\"]\n    options.parse_command_line()\n\n    # Parse again with same options\n    sys.argv = [\"prog\", \"--dummy\", \"other\"]\n    options.parse_command_line()\n\n    assert counter[\"called\"] == 2\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "c1f4ba465c0c40d0993621f309638bf9",
+  "_api_plus_pacing_seconds": 1.649672583967913
+}

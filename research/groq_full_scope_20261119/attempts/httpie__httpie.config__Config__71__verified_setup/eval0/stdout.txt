@@ -1,0 +1,58 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________________ test_custom_config_file ____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_custom_config_file0')
+
+    def test_custom_config_file(tmp_path):
+        """Config should load values from an existing JSON file."""
+        # Create a custom config file with some overrides
+        config_path = tmp_path / Config.FILENAME
+        data = {
+            "default_options": ["--verbose"],
+            "plugins_dir": "~/custom_plugins",
+            "developer_mode": True
+        }
+        config_path.write_text(json.dumps(data), encoding="utf-8")
+    
+        cfg = Config(directory=tmp_path)
+    
+        # default_options should reflect the file
+>       assert cfg.default_options == ["--verbose"]
+E       AssertionError: assert [] == ['--verbose']
+E         
+E         Right contains one more item: '--verbose'
+E         Use -v to get more diff
+
+test_generated.py:41: AssertionError
+________________________ test_missing_keys_and_updates _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_missing_keys_and_updates0')
+
+    def test_missing_keys_and_updates(tmp_path):
+        """Config should handle missing keys gracefully and allow updates."""
+        cfg = Config(directory=tmp_path)
+    
+        # Accessing a non-existent key via get should return None
+        assert cfg.get("nonexistent_key") is None
+    
+        # Update a key and verify persistence
+        cfg["default_options"] = ["--no-color"]
+        assert cfg.default_options == ["--no-color"]
+    
+        # Write the config to disk
+        cfg.save()  # assuming BaseConfigDict provides a save method
+    
+        # Reload from disk and verify values persist
+        cfg2 = Config(directory=tmp_path)
+>       assert cfg2.default_options == ["--no-color"]
+E       AssertionError: assert [] == ['--no-color']
+E         
+E         Right contains one more item: '--no-color'
+E         Use -v to get more diff
+
+test_generated.py:68: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_custom_config_file - AssertionError: assert []...
+FAILED test_generated.py::test_missing_keys_and_updates - AssertionError: ass...
+2 failed, 1 passed in 0.23s

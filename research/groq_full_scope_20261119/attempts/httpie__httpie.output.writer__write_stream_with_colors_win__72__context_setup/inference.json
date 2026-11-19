@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a8323a39-8b29-471a-85ee-b94cd186bf2f",
+  "object": "chat.completion",
+  "created": 1795078885,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport sys\nimport pytest\nfrom httpie.output.writer import write_stream_with_colors_win\nfrom httpie.output.streams import BaseStream\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields predefined byte chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n        self._iter = iter(chunks)\n\n    def __iter__(self):\n        return self\n\n    def __next__(self):\n        return next(self._iter)\n\ndef test_write_stream_with_colors_win_writes_color_and_non_color_chunks(tmp_path):\n    # Prepare chunks: one with ANSI escape, one plain\n    color_chunk = b'\\x1b[31mRed text\\x1b[0m'\n    plain_chunk = b'Plain text'\n    stream = DummyStream([color_chunk, plain_chunk])\n\n    # Create a text file with a BytesIO buffer\n    file_path = tmp_path / \"output.txt\"\n    with open(file_path, \"w\", encoding=\"utf-8\") as f:\n        # Write the stream to the file\n        write_stream_with_colors_win(stream, f, flush=False)\n\n    # Read back the file content\n    with open(file_path, \"rb\") as f:\n        content = f.read()\n\n    # The color chunk should be decoded to text and written as UTF-8 bytes\n    expected_text = color_chunk.decode(\"utf-8\")\n    # The plain chunk should be written directly to the buffer\n    expected_bytes = plain_chunk\n    assert content == expected_text.encode(\"utf-8\") + expected_bytes\n\ndef test_write_stream_with_colors_win_flush_behavior(tmp_path):\n    # Two chunks, both non-color\n    chunk1 = b'First'\n    chunk2 = b'Second'\n    stream = DummyStream([chunk1, chunk2])\n\n    file_path = tmp_path / \"flush.txt\"\n    with open(file_path, \"w\", encoding=\"utf-8\") as f:\n        # Flush after each chunk\n        write_stream_with_colors_win(stream, f, flush=True)\n\n    # After writing, the file should contain both chunks concatenated\n    with open(file_path, \"rb\") as f:\n        content = f.read()\n    assert content == chunk1 + chunk2\n\ndef test_write_stream_with_colors_win_handles_empty_stream(tmp_path):\n    # Empty stream should produce no output\n    stream = DummyStream([])\n\n    file_path = tmp_path / \"empty.txt\"\n    with open(file_path, \"w\", encoding=\"utf-8\") as f:\n        write_stream_with_colors_win(stream, f, flush=False)\n\n    # File should be empty\n    assert file_path.read_bytes() == b''\n```",
+        "reasoning": "We need tests for this function. It iterates over stream, writes to outfile. We can create a dummy BaseStream that yields bytes. Use BytesIO for outfile? But outfile must have .buffer attribute. Use io.BytesIO for buffer? Actually TextIO has .buffer. Use io.TextIOWrapper around BytesIO. Test that color chunks are decoded and written to text, non-color to buffer. Also test flush behavior. Use tmp_path for file. Use real function."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047171714,
+    "prompt_tokens": 462,
+    "prompt_time": 0.030051585,
+    "completion_tokens": 668,
+    "completion_time": 0.748043335,
+    "total_tokens": 1130,
+    "total_time": 0.77809492,
+    "completion_tokens_details": {
+      "reasoning_tokens": 97
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgm2zeeqptt268jn8a6nkf",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport sys\nimport pytest\nfrom httpie.output.writer import write_stream_with_colors_win\nfrom httpie.output.streams import BaseStream\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields predefined byte chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n        self._iter = iter(chunks)\n\n    def __iter__(self):\n        return self\n\n    def __next__(self):\n        return next(self._iter)\n\ndef test_write_stream_with_colors_win_writes_color_and_non_color_chunks(tmp_path):\n    # Prepare chunks: one with ANSI escape, one plain\n    color_chunk = b'\\x1b[31mRed text\\x1b[0m'\n    plain_chunk = b'Plain text'\n    stream = DummyStream([color_chunk, plain_chunk])\n\n    # Create a text file with a BytesIO buffer\n    file_path = tmp_path / \"output.txt\"\n    with open(file_path, \"w\", encoding=\"utf-8\") as f:\n        # Write the stream to the file\n        write_stream_with_colors_win(stream, f, flush=False)\n\n    # Read back the file content\n    with open(file_path, \"rb\") as f:\n        content = f.read()\n\n    # The color chunk should be decoded to text and written as UTF-8 bytes\n    expected_text = color_chunk.decode(\"utf-8\")\n    # The plain chunk should be written directly to the buffer\n    expected_bytes = plain_chunk\n    assert content == expected_text.encode(\"utf-8\") + expected_bytes\n\ndef test_write_stream_with_colors_win_flush_behavior(tmp_path):\n    # Two chunks, both non-color\n    chunk1 = b'First'\n    chunk2 = b'Second'\n    stream = DummyStream([chunk1, chunk2])\n\n    file_path = tmp_path / \"flush.txt\"\n    with open(file_path, \"w\", encoding=\"utf-8\") as f:\n        # Flush after each chunk\n        write_stream_with_colors_win(stream, f, flush=True)\n\n    # After writing, the file should contain both chunks concatenated\n    with open(file_path, \"rb\") as f:\n        content = f.read()\n    assert content == chunk1 + chunk2\n\ndef test_write_stream_with_colors_win_handles_empty_stream(tmp_path):\n    # Empty stream should produce no output\n    stream = DummyStream([])\n\n    file_path = tmp_path / \"empty.txt\"\n    with open(file_path, \"w\", encoding=\"utf-8\") as f:\n        write_stream_with_colors_win(stream, f, flush=False)\n\n    # File should be empty\n    assert file_path.read_bytes() == b''\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2005853399750777
+}

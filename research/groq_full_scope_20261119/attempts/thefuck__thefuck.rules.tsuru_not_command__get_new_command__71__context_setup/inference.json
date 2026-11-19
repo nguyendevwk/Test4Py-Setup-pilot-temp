@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-6593858c-520a-403e-8903-6c255c528614",
+  "object": "chat.completion",
+  "created": 1795076684,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules.tsuru_not_command import get_new_command\nfrom types import SimpleNamespace\n\ndef test_get_new_command_replaces_broken_command(monkeypatch):\n    # Arrange: mock the helper functions\n    def fake_get_all_matched_commands(output):\n        return [\"tsuru deploy\", \"tsuru status\"]\n    def fake_replace_command(command, broken, suggestions):\n        # Return a string that shows what would be replaced\n        return f\"Replaced '{broken}' with {suggestions}\"\n    monkeypatch.setattr(\n        \"thefuck.rules.tsuru_not_command.get_all_matched_commands\",\n        fake_get_all_matched_commands,\n    )\n    monkeypatch.setattr(\n        \"thefuck.rules.tsuru_not_command.replace_command\",\n        fake_replace_command,\n    )\n\n    # Create a command object with the expected output\n    cmd = SimpleNamespace(\n        output='Error: tsuru: \"deploy\" is not a tsuru command',\n        command=\"tsuru deploy\",\n    )\n\n    # Act\n    result = get_new_command(cmd)\n\n    # Assert\n    assert result == \"Replaced 'deploy' with ['tsuru deploy', 'tsuru status']\"\n\ndef test_get_new_command_with_multiple_quotes(monkeypatch):\n    # Arrange: mock the helper functions\n    def fake_get_all_matched_commands(output):\n        return [\"tsuru start\", \"tsuru stop\"]\n    def fake_replace_command(command, broken, suggestions):\n        return f\"Replaced '{broken}' with {suggestions}\"\n    monkeypatch.setattr(\n        \"thefuck.rules.tsuru_not_command.get_all_matched_commands\",\n        fake_get_all_matched_commands,\n    )\n    monkeypatch.setattr(\n        \"thefuck.rules.tsuru_not_command.replace_command\",\n        fake_replace_command,\n    )\n\n    # Command output contains two quoted strings; regex should pick the first\n    cmd = SimpleNamespace(\n        output='Error: tsuru: \"start\" is not a tsuru command and tsuru: \"stop\" is not a tsuru command',\n        command=\"tsuru start\",\n    )\n\n    # Act\n    result = get_new_command(cmd)\n\n    # Assert\n    assert result == \"Replaced 'start' with ['tsuru start', 'tsuru stop']\"\n\ndef test_get_new_command_no_match_raises(monkeypatch):\n    # Arrange: mock get_all_matched_commands to avoid side effects\n    monkeypatch.setattr(\n        \"thefuck.rules.tsuru_not_command.get_all_matched_commands\",\n        lambda output: [],\n    )\n    # replace_command should not be called; we don't patch it\n\n    # Command output does not contain the expected pattern\n    cmd = SimpleNamespace(\n        output='Some unrelated error message',\n        command=\"tsuru unknown\",\n    )\n\n    # Act & Assert: should raise IndexError due to regex findall[0]\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n```",
+        "reasoning": "We need to test get_new_command. We need to create a command object with output containing pattern. Use a simple object with attributes output and maybe command string. get_all_matched_commands likely returns list of suggestions. We can mock? But cannot mock target. But we can import get_all_matched_commands from thefuck.utils. But that function may rely on external. Let's inspect? Assume it returns list of commands from output. For test, we can monkeypatch get_all_matched_commands by temporarily replacing in the module? But cannot modify product code. But we can patch via monkeypatch fixture. That's allowed. Use monkeypatch to replace get_all_matched_commands to return known list. Then test replace_command behavior. replace_command likely replaces broken command in command.command string. We can also patch replace_command to a dummy? But we need to test actual replace_command? Might be complex. Instead, we can patch both get_all_matched_commands and replace_command to simple functions to test that get_new_command calls them correctly. But requirement: no mocks of target. But patching imported functions is okay? It's mocking but not target. It's allowed? Probably okay. We'll patch in the module. Use monkeypatch to set get_all_matched_commands to lambda output: ['tsuru deploy', 'tsuru status'] and replace_command to lambda cmd, broken, suggestions: f\"Replaced: {broken} -> {suggestions}\". Then test output. Also test that regex extraction works. Third test: error when no match raises IndexError. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053692498,
+    "prompt_tokens": 292,
+    "prompt_time": 0.01624303,
+    "completion_tokens": 930,
+    "completion_time": 1.036058645,
+    "total_tokens": 1222,
+    "total_time": 1.052301675,
+    "completion_tokens_details": {
+      "reasoning_tokens": 314
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7segxt3e7va9722mt00xfzm",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules.tsuru_not_command import get_new_command\nfrom types import SimpleNamespace\n\ndef test_get_new_command_replaces_broken_command(monkeypatch):\n    # Arrange: mock the helper functions\n    def fake_get_all_matched_commands(output):\n        return [\"tsuru deploy\", \"tsuru status\"]\n    def fake_replace_command(command, broken, suggestions):\n        # Return a string that shows what would be replaced\n        return f\"Replaced '{broken}' with {suggestions}\"\n    monkeypatch.setattr(\n        \"thefuck.rules.tsuru_not_command.get_all_matched_commands\",\n        fake_get_all_matched_commands,\n    )\n    monkeypatch.setattr(\n        \"thefuck.rules.tsuru_not_command.replace_command\",\n        fake_replace_command,\n    )\n\n    # Create a command object with the expected output\n    cmd = SimpleNamespace(\n        output='Error: tsuru: \"deploy\" is not a tsuru command',\n        command=\"tsuru deploy\",\n    )\n\n    # Act\n    result = get_new_command(cmd)\n\n    # Assert\n    assert result == \"Replaced 'deploy' with ['tsuru deploy', 'tsuru status']\"\n\ndef test_get_new_command_with_multiple_quotes(monkeypatch):\n    # Arrange: mock the helper functions\n    def fake_get_all_matched_commands(output):\n        return [\"tsuru start\", \"tsuru stop\"]\n    def fake_replace_command(command, broken, suggestions):\n        return f\"Replaced '{broken}' with {suggestions}\"\n    monkeypatch.setattr(\n        \"thefuck.rules.tsuru_not_command.get_all_matched_commands\",\n        fake_get_all_matched_commands,\n    )\n    monkeypatch.setattr(\n        \"thefuck.rules.tsuru_not_command.replace_command\",\n        fake_replace_command,\n    )\n\n    # Command output contains two quoted strings; regex should pick the first\n    cmd = SimpleNamespace(\n        output='Error: tsuru: \"start\" is not a tsuru command and tsuru: \"stop\" is not a tsuru command',\n        command=\"tsuru start\",\n    )\n\n    # Act\n    result = get_new_command(cmd)\n\n    # Assert\n    assert result == \"Replaced 'start' with ['tsuru start', 'tsuru stop']\"\n\ndef test_get_new_command_no_match_raises(monkeypatch):\n    # Arrange: mock get_all_matched_commands to avoid side effects\n    monkeypatch.setattr(\n        \"thefuck.rules.tsuru_not_command.get_all_matched_commands\",\n        lambda output: [],\n    )\n    # replace_command should not be called; we don't patch it\n\n    # Command output does not contain the expected pattern\n    cmd = SimpleNamespace(\n        output='Some unrelated error message',\n        command=\"tsuru unknown\",\n    )\n\n    # Act & Assert: should raise IndexError due to regex findall[0]\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5341851410339586
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-4b88d220-0ddf-4048-b11a-94c0f576637b",
+  "object": "chat.completion",
+  "created": 1795076080,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport typesystem\nfrom typesystem.fields import Field\n\n# Create a simple Field subclass for testing\nclass PositiveIntField(Field):\n    def validate(self, value):\n        if not isinstance(value, int) or value <= 0:\n            raise ValueError(\"Value must be a positive integer\")\n        return value\n\ndef test_allof_valid_value_passes(tmp_path):\n    \"\"\"AllOf should accept a value that satisfies all child fields.\"\"\"\n    all_of_field = typesystem.composites.AllOf(\n        all_of=[PositiveIntField(), PositiveIntField()]\n    )\n    # The value 5 satisfies both PositiveIntField instances\n    result = all_of_field.validate(5)\n    assert result == 5\n\ndef test_allof_invalid_value_raises(tmp_path):\n    \"\"\"AllOf should raise an exception if any child field fails validation.\"\"\"\n    all_of_field = typesystem.composites.AllOf(\n        all_of=[PositiveIntField(), PositiveIntField()]\n    )\n    with pytest.raises(ValueError, match=\"Value must be a positive integer\"):\n        all_of_field.validate(-3)\n\ndef test_allof_disallows_allow_null_kw(tmp_path):\n    \"\"\"AllOf should not accept the allow_null keyword argument.\"\"\"\n    with pytest.raises(AssertionError):\n        typesystem.composites.AllOf(all_of=[PositiveIntField()], allow_null=True)\n```",
+        "reasoning": "We need to write tests for AllOf. It inherits Field. We need to test normal, boundary, error. We can create dummy Field subclasses that validate. Use typesystem.fields.Any? Let's inspect typesystem.fields.Any. Probably a Field that accepts any. But we need a field that fails. Maybe use typesystem.fields.Int? But not sure. We can create a custom Field subclass for test. But cannot modify product code. But we can subclass Field in test. Use Field.validate to raise ValueError. Let's create a DummyField that accepts only int >0. Use AllOf with two such fields. Test that valid passes, invalid fails. Also test boundary: empty list? AllOf requires list. But maybe empty list passes. Test error: passing allow_null kw raises assertion. Use pytest.raises AssertionError. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051892172,
+    "prompt_tokens": 408,
+    "prompt_time": 0.028800037,
+    "completion_tokens": 460,
+    "completion_time": 0.517836672,
+    "total_tokens": 868,
+    "total_time": 0.546636709,
+    "completion_tokens_details": {
+      "reasoning_tokens": 170
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sdyg9gev88ebar0wzhpk8b",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport typesystem\nfrom typesystem.fields import Field\n\n# Create a simple Field subclass for testing\nclass PositiveIntField(Field):\n    def validate(self, value):\n        if not isinstance(value, int) or value <= 0:\n            raise ValueError(\"Value must be a positive integer\")\n        return value\n\ndef test_allof_valid_value_passes(tmp_path):\n    \"\"\"AllOf should accept a value that satisfies all child fields.\"\"\"\n    all_of_field = typesystem.composites.AllOf(\n        all_of=[PositiveIntField(), PositiveIntField()]\n    )\n    # The value 5 satisfies both PositiveIntField instances\n    result = all_of_field.validate(5)\n    assert result == 5\n\ndef test_allof_invalid_value_raises(tmp_path):\n    \"\"\"AllOf should raise an exception if any child field fails validation.\"\"\"\n    all_of_field = typesystem.composites.AllOf(\n        all_of=[PositiveIntField(), PositiveIntField()]\n    )\n    with pytest.raises(ValueError, match=\"Value must be a positive integer\"):\n        all_of_field.validate(-3)\n\ndef test_allof_disallows_allow_null_kw(tmp_path):\n    \"\"\"AllOf should not accept the allow_null keyword argument.\"\"\"\n    with pytest.raises(AssertionError):\n        typesystem.composites.AllOf(all_of=[PositiveIntField()], allow_null=True)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8887007280136459
+}

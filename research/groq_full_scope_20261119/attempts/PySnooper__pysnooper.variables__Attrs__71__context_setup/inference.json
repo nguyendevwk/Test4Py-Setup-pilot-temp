@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-3e5a0996-debe-4c4d-9bf7-311fee874547",
+  "object": "chat.completion",
+  "created": 1795076863,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport types\nfrom pysnooper.variables import Attrs\nfrom pysnooper import utils\n\n# Helper class with both __dict__ and __slots__\nclass SlotDict:\n    __slots__ = ('slot_attr',)\n    def __init__(self):\n        self.dict_attr = 42\n        self.slot_attr = 'slot'\n\n# Helper class with an attribute that raises on access\nclass BadAttr:\n    def __init__(self):\n        self.good = 'ok'\n    @property\n    def bad(self):\n        raise RuntimeError('access error')\n\ndef test_attrs_collects_dict_and_slots(tmp_path):\n    obj = SlotDict()\n    var = Attrs('obj')\n    # Create a dummy frame with obj in locals\n    frame = types.FrameType(\n        None, {}, {'obj': obj}, None, None, None, None, None, None, None, None, None, None, None, None\n    )\n    items = var.items(frame)\n    # Expect source and two attributes\n    assert items[0] == ('obj', utils.get_shortish_repr(obj))\n    # The order of attributes is not guaranteed; check presence\n    keys = {key for key, _ in items[1:]}\n    assert '.dict_attr' in keys\n    assert '.slot_attr' in keys\n    # Verify values\n    values = {key: val for key, val in items[1:]}\n    assert values['.dict_attr'] == utils.get_shortish_repr(42)\n    assert values['.slot_attr'] == utils.get_shortish_repr('slot')\n\ndef test_attrs_excludes_specified_keys(tmp_path):\n    obj = SlotDict()\n    var = Attrs('obj', exclude=('slot_attr',))\n    frame = types.FrameType(\n        None, {}, {'obj': obj}, None, None, None, None, None, None, None, None, None, None, None, None\n    )\n    items = var.items(frame)\n    keys = {key for key, _ in items[1:]}\n    assert '.slot_attr' not in keys\n    assert '.dict_attr' in keys\n\ndef test_attrs_skips_attributes_that_raise(tmp_path):\n    obj = BadAttr()\n    var = Attrs('obj')\n    frame = types.FrameType(\n        None, {}, {'obj': obj}, None, None, None, None, None, None, None, None, None, None, None, None\n    )\n    items = var.items(frame)\n    keys = {key for key, _ in items[1:]}\n    # 'bad' should be omitted due to exception\n    assert '.bad' not in keys\n    assert '.good' in keys\n    # Ensure no exception propagates\n    assert all(isinstance(val, str) for _, val in items)\n```",
+        "reasoning": "We need tests for Attrs. Use tmp_path for any file? Not needed. We'll create a simple class with __dict__ and __slots__. Test that items returns list with source and attributes. Also test exclusion. Also test error handling when attribute raises. Create class with property that raises. Ensure that exception is skipped. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005143111,
+    "prompt_tokens": 748,
+    "prompt_time": 0.03984314,
+    "completion_tokens": 667,
+    "completion_time": 0.751458655,
+    "total_tokens": 1415,
+    "total_time": 0.791301795,
+    "completion_tokens_details": {
+      "reasoning_tokens": 70
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sepcj1eksscmwa4phcs0h6",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport types\nfrom pysnooper.variables import Attrs\nfrom pysnooper import utils\n\n# Helper class with both __dict__ and __slots__\nclass SlotDict:\n    __slots__ = ('slot_attr',)\n    def __init__(self):\n        self.dict_attr = 42\n        self.slot_attr = 'slot'\n\n# Helper class with an attribute that raises on access\nclass BadAttr:\n    def __init__(self):\n        self.good = 'ok'\n    @property\n    def bad(self):\n        raise RuntimeError('access error')\n\ndef test_attrs_collects_dict_and_slots(tmp_path):\n    obj = SlotDict()\n    var = Attrs('obj')\n    # Create a dummy frame with obj in locals\n    frame = types.FrameType(\n        None, {}, {'obj': obj}, None, None, None, None, None, None, None, None, None, None, None, None\n    )\n    items = var.items(frame)\n    # Expect source and two attributes\n    assert items[0] == ('obj', utils.get_shortish_repr(obj))\n    # The order of attributes is not guaranteed; check presence\n    keys = {key for key, _ in items[1:]}\n    assert '.dict_attr' in keys\n    assert '.slot_attr' in keys\n    # Verify values\n    values = {key: val for key, val in items[1:]}\n    assert values['.dict_attr'] == utils.get_shortish_repr(42)\n    assert values['.slot_attr'] == utils.get_shortish_repr('slot')\n\ndef test_attrs_excludes_specified_keys(tmp_path):\n    obj = SlotDict()\n    var = Attrs('obj', exclude=('slot_attr',))\n    frame = types.FrameType(\n        None, {}, {'obj': obj}, None, None, None, None, None, None, None, None, None, None, None, None\n    )\n    items = var.items(frame)\n    keys = {key for key, _ in items[1:]}\n    assert '.slot_attr' not in keys\n    assert '.dict_attr' in keys\n\ndef test_attrs_skips_attributes_that_raise(tmp_path):\n    obj = BadAttr()\n    var = Attrs('obj')\n    frame = types.FrameType(\n        None, {}, {'obj': obj}, None, None, None, None, None, None, None, None, None, None, None, None\n    )\n    items = var.items(frame)\n    keys = {key for key, _ in items[1:]}\n    # 'bad' should be omitted due to exception\n    assert '.bad' not in keys\n    assert '.good' in keys\n    # Ensure no exception propagates\n    assert all(isinstance(val, str) for _, val in items)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1182322049862705
+}

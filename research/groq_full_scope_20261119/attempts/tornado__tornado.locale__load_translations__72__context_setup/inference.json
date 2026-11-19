@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-845d6c68-b035-477d-9087-44a0f7139f1e",
+  "object": "chat.completion",
+  "created": 1795079155,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport csv\nimport pytest\nfrom tornado.locale import load_translations, _translations, _supported_locales, _default_locale\n\ndef test_load_translations_basic(tmp_path):\n    # Create a simple CSV with two locales\n    csv_content = \"\"\"\\\n\"I love you\",\"Te amo\"\n\"%(name)s liked this\",\"A %(name)s les gustó esto\",\"plural\"\n\"%(name)s liked this\",\"A %(name)s le gustó esto\",\"singular\"\n\"\"\"\n    (tmp_path / \"es_GT.csv\").write_text(csv_content, encoding=\"utf-8-sig\")\n    (tmp_path / \"fr_FR.csv\").write_text(csv_content, encoding=\"utf-8-sig\")\n    load_translations(str(tmp_path))\n    # Check that both locales are loaded\n    assert \"es_GT\" in _translations\n    assert \"fr_FR\" in _translations\n    # Check that the translations dictionary contains the expected keys\n    assert _translations[\"es_GT\"][\"plural\"][\"I love you\"] == \"Te amo\"\n    assert _translations[\"es_GT\"][\"plural\"][\"%(name)s liked this\"] == \"A %(name)s les gustó esto\"\n    assert _translations[\"es_GT\"][\"singular\"][\"%(name)s liked this\"] == \"A %(name)s le gustó esto\"\n    # Supported locales should include the default and the two new ones\n    assert _supported_locales == frozenset([\"en_US\", \"es_GT\", \"fr_FR\"])\n\ndef test_load_translations_missing_plural_column(tmp_path):\n    # CSV with only two columns (no plural indicator)\n    csv_content = \"\"\"\\\n\"Hello\",\"Hola\"\n\"\"\"\n    (tmp_path / \"es_ES.csv\").write_text(csv_content, encoding=\"utf-8-sig\")\n    load_translations(str(tmp_path))\n    # The missing plural column defaults to \"unknown\"\n    assert _translations[\"es_ES\"][\"unknown\"][\"Hello\"] == \"Hola\"\n    # Supported locales should include the default and the new one\n    assert _supported_locales == frozenset([\"en_US\", \"es_ES\"])\n\ndef test_load_translations_invalid_locale(tmp_path, caplog):\n    # CSV file with an invalid locale name\n    csv_content = \"\"\"\\\n\"Good morning\",\"Buenos días\"\n\"\"\"\n    (tmp_path / \"invalid-locale.csv\").write_text(csv_content, encoding=\"utf-8-sig\")\n    load_translations(str(tmp_path))\n    # No new locale should be added\n    assert \"invalid-locale\" not in _translations\n    # The error should be logged\n    assert any(\n        \"Unrecognized locale\" in record.message and \"invalid-locale.csv\" in record.message\n        for record in caplog.records\n    )\n```",
+        "reasoning": "We need three test functions. Test normal loading, boundary (empty file, missing plural column), error (invalid locale name). Use tmp_path. Ensure global vars updated."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04681082,
+    "prompt_tokens": 1204,
+    "prompt_time": 0.255944838,
+    "completion_tokens": 606,
+    "completion_time": 0.666790207,
+    "total_tokens": 1810,
+    "total_time": 0.922735045,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 35
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgwb5hen78vvk5wgex1nmt",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport csv\nimport pytest\nfrom tornado.locale import load_translations, _translations, _supported_locales, _default_locale\n\ndef test_load_translations_basic(tmp_path):\n    # Create a simple CSV with two locales\n    csv_content = \"\"\"\\\n\"I love you\",\"Te amo\"\n\"%(name)s liked this\",\"A %(name)s les gustó esto\",\"plural\"\n\"%(name)s liked this\",\"A %(name)s le gustó esto\",\"singular\"\n\"\"\"\n    (tmp_path / \"es_GT.csv\").write_text(csv_content, encoding=\"utf-8-sig\")\n    (tmp_path / \"fr_FR.csv\").write_text(csv_content, encoding=\"utf-8-sig\")\n    load_translations(str(tmp_path))\n    # Check that both locales are loaded\n    assert \"es_GT\" in _translations\n    assert \"fr_FR\" in _translations\n    # Check that the translations dictionary contains the expected keys\n    assert _translations[\"es_GT\"][\"plural\"][\"I love you\"] == \"Te amo\"\n    assert _translations[\"es_GT\"][\"plural\"][\"%(name)s liked this\"] == \"A %(name)s les gustó esto\"\n    assert _translations[\"es_GT\"][\"singular\"][\"%(name)s liked this\"] == \"A %(name)s le gustó esto\"\n    # Supported locales should include the default and the two new ones\n    assert _supported_locales == frozenset([\"en_US\", \"es_GT\", \"fr_FR\"])\n\ndef test_load_translations_missing_plural_column(tmp_path):\n    # CSV with only two columns (no plural indicator)\n    csv_content = \"\"\"\\\n\"Hello\",\"Hola\"\n\"\"\"\n    (tmp_path / \"es_ES.csv\").write_text(csv_content, encoding=\"utf-8-sig\")\n    load_translations(str(tmp_path))\n    # The missing plural column defaults to \"unknown\"\n    assert _translations[\"es_ES\"][\"unknown\"][\"Hello\"] == \"Hola\"\n    # Supported locales should include the default and the new one\n    assert _supported_locales == frozenset([\"en_US\", \"es_ES\"])\n\ndef test_load_translations_invalid_locale(tmp_path, caplog):\n    # CSV file with an invalid locale name\n    csv_content = \"\"\"\\\n\"Good morning\",\"Buenos días\"\n\"\"\"\n    (tmp_path / \"invalid-locale.csv\").write_text(csv_content, encoding=\"utf-8-sig\")\n    load_translations(str(tmp_path))\n    # No new locale should be added\n    assert \"invalid-locale\" not in _translations\n    # The error should be logged\n    assert any(\n        \"Unrecognized locale\" in record.message and \"invalid-locale.csv\" in record.message\n        for record in caplog.records\n    )\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3354484289884567
+}

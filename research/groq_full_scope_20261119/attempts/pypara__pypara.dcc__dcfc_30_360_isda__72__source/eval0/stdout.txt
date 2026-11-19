@@ -1,0 +1,33 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_start_day_31_adjustment _________________________
+
+    def test_start_day_31_adjustment():
+        """Verify that a start date of the 31st is adjusted to the 30th."""
+        start = datetime.date(2023, 1, 31)
+        asof = datetime.date(2023, 3, 31)
+        end = asof
+        result = dcfc_30_360_isda(start, asof, end)
+        # Adjusted start: 2023-01-30, asof remains 2023-03-31
+        # nod = (31-30) + 30*(3-1) + 360*(0) = 1 + 60 = 61
+        # fraction = 61/360
+>       assert result == Decimal("61") / Decimal(360)
+E       AssertionError: assert Decimal('0.1666666666666666666666666667') == (Decimal('61') / Decimal('360'))
+E        +  where Decimal('61') = Decimal('61')
+E        +  and   Decimal('360') = Decimal(360)
+
+test_generated.py:28: AssertionError
+________________ test_asof_day_31_with_start_day_30_adjustment _________________
+
+    def test_asof_day_31_with_start_day_30_adjustment():
+        """Check that when start day is 30 and asof day is 31, asof is adjusted to 30."""
+        start = datetime.date(2023, 2, 28)  # not 30, but we set to 30 manually
+        # Force start day to 30 by using 30th of month
+>       start = datetime.date(2023, 2, 30) if hasattr(datetime.date, 'replace') else datetime.date(2023, 2, 28)
+E       ValueError: day is out of range for month
+
+test_generated.py:35: ValueError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_start_day_31_adjustment - AssertionError: asse...
+FAILED test_generated.py::test_asof_day_31_with_start_day_30_adjustment - Val...
+2 failed, 1 passed in 0.13s

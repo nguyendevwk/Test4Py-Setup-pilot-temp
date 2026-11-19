@@ -1,0 +1,38 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_forbidden_default_attributes _______________________
+
+    def test_forbidden_default_attributes():
+        """Forbidden should default to status 403 and quiet=True."""
+        exc = Forbidden()
+        assert isinstance(exc, Forbidden)
+        assert exc.status_code == 403
+        # quiet defaults to True as defined on the class
+        assert exc.quiet is True
+        # message defaults to None
+>       assert exc.message is None
+E       AssertionError: assert 'Forbidden' is None
+E        +  where 'Forbidden' = Forbidden('Forbidden').message
+
+test_generated.py:13: AssertionError
+_______________________ test_forbidden_context_and_extra _______________________
+
+    def test_forbidden_context_and_extra():
+        """Context and extra mappings should be preserved on the exception."""
+        context = {"user_id": 42}
+        extra = {"debug": "info"}
+        exc = Forbidden("Forbidden", context=context, extra=extra)
+        assert exc.context == context
+        assert exc.extra == extra
+        # Ensure that context and extra are distinct objects
+        assert exc.context is not exc.extra
+        # Changing the original dicts should not affect the stored ones
+        context["user_id"] = 99
+>       assert exc.context["user_id"] == 42
+E       assert 99 == 42
+
+test_generated.py:44: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_forbidden_default_attributes - AssertionError:...
+FAILED test_generated.py::test_forbidden_context_and_extra - assert 99 == 42
+2 failed, 1 passed in 0.34s

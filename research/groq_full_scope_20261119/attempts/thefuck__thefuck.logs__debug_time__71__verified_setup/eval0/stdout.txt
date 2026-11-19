@@ -1,0 +1,40 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_debug_time_boundary_zero_duration ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fe3cf1d1510>
+
+    def test_debug_time_boundary_zero_duration(monkeypatch):
+        """
+        Test that the context manager works even when the block executes instantly.
+        """
+        recorder = DebugRecorder()
+        monkeypatch.setattr(logs, "debug", recorder)
+    
+        with logs.debug_time("instant"):
+            pass  # no work
+    
+        assert len(recorder.calls) == 1
+        # Duration should be very small but still a string
+        assert "instant took:" in recorder.calls[0]
+        # Ensure the duration part is a valid time delta representation
+        duration_part = recorder.calls[0].split("instant took:")[1].strip()
+        # It should end with a unit like 'seconds' or similar
+>       assert any(unit in duration_part for unit in ("seconds", "microseconds", "milliseconds"))
+E       assert False
+E        +  where False = any(<generator object test_debug_time_boundary_zero_duration.<locals>.<genexpr> at 0x7fe3ce96d690>)
+
+test_generated.py:54: AssertionError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_debug_time_boundary_zero_duration - assert False
+1 failed, 2 passed, 2 warnings in 0.13s

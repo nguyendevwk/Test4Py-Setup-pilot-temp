@@ -1,0 +1,42 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_proxy_error_initialization_with_code_only ________________
+
+    def test_proxy_error_initialization_with_code_only():
+        """When only a code is provided, ProxyError should look up a default message."""
+        # Use a known code that exists in the CODES mapping
+        # The mapping is not exposed, but we can rely on the default message for an unknown code
+>       err = ProxyError(0xFF)  # 0xFF is unlikely to be in CODES
+
+test_generated.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ProxyError(), code = 255, msg = None
+
+    def __init__(self, code=None, msg=None):
+        if code is not None and msg is None:
+>           msg = self.CODES.get(code) or 'unknown error'
+E           AttributeError: 'ProxyError' object has no attribute 'CODES'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/socks.py:63: AttributeError
+_____________ test_proxy_error_default_initialization_and_constant _____________
+
+    def test_proxy_error_default_initialization_and_constant():
+        """ProxyError without arguments should default to code None and use ERR_SUCCESS."""
+        err = ProxyError()
+        assert isinstance(err, ProxyError)
+        assert isinstance(err, socket.error)
+        # Default code should be None
+        assert err.args[0] is None
+        # Default message should be the string representation of ERR_SUCCESS
+        # Since ERR_SUCCESS is 0x00, the default message is likely '0' or similar
+        # We check that the message is a string and not empty
+>       assert isinstance(err.args[1], str) and err.args[1] != ''
+E       assert (False)
+E        +  where False = isinstance(None, str)
+
+test_generated.py:37: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_proxy_error_initialization_with_code_only - At...
+FAILED test_generated.py::test_proxy_error_default_initialization_and_constant
+2 failed, 1 passed in 0.73s

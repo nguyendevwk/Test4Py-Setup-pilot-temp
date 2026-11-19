@@ -1,0 +1,54 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_number_valid_and_precision ________________________
+
+    def test_number_valid_and_precision():
+        # Normal numeric validation with precision rounding
+        field = Number(minimum=0, maximum=10, precision="0.01")
+        result = field.validate("3.14159")
+>       assert isinstance(result, float)
+E       AssertionError: assert False
+E        +  where False = isinstance(Decimal('3.14'), float)
+
+test_generated.py:10: AssertionError
+_______________________ test_number_boundary_conditions ________________________
+
+    def test_number_boundary_conditions():
+        # Inclusive minimum and maximum
+        field = Number(minimum=0, maximum=5)
+        assert field.validate(0) == 0
+        assert field.validate(5) == 5
+    
+        # Exclusive boundaries
+        field_excl = Number(exclusive_minimum=0, exclusive_maximum=5)
+        with pytest.raises(ValidationError) as excinfo:
+            field_excl.validate(0)
+>       assert "exclusive_minimum" in str(excinfo.value)
+E       AssertionError: assert 'exclusive_minimum' in 'Must be greater than 0.'
+E        +  where 'Must be greater than 0.' = str(ValidationError(text='Must be greater than 0.', code='exclusive_minimum'))
+E        +    where ValidationError(text='Must be greater than 0.', code='exclusive_minimum') = <ExceptionInfo ValidationError(text='Must be greater than 0.', code='exclusive_minimum') tblen=2>.value
+
+test_generated.py:30: AssertionError
+___________________________ test_number_error_cases ____________________________
+
+    def test_number_error_cases():
+        field = Number(minimum=10, coerce_types=False)
+        # Null not allowed
+        with pytest.raises(ValidationError) as excinfo:
+            field.validate(None)
+        assert "null" in str(excinfo.value)
+    
+        # Non-numeric string when coercion disabled
+        with pytest.raises(ValidationError) as excinfo:
+            field.validate("abc")
+>       assert "type" in str(excinfo.value)
+E       AssertionError: assert 'type' in 'Must be a number.'
+E        +  where 'Must be a number.' = str(ValidationError(text='Must be a number.', code='type'))
+E        +    where ValidationError(text='Must be a number.', code='type') = <ExceptionInfo ValidationError(text='Must be a number.', code='type') tblen=2>.value
+
+test_generated.py:52: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_number_valid_and_precision - AssertionError: a...
+FAILED test_generated.py::test_number_boundary_conditions - AssertionError: a...
+FAILED test_generated.py::test_number_error_cases - AssertionError: assert 't...
+3 failed in 0.14s

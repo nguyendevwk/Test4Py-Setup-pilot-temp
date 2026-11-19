@@ -1,0 +1,31 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_waiting_task_replacement _________________________
+
+    def test_waiting_task_replacement():
+        """Submitting a second task should replace the waiting one if the first is still pending."""
+        worker = MonoWorker()
+        order = []
+    
+        def first_task():
+            time.sleep(0.1)
+            order.append("first")
+    
+        def second_task():
+            order.append("second")
+    
+        # Submit first task; it will be waiting because the pool is busy
+        first_future = worker.submit(first_task)
+        # Immediately submit second task; it should replace the waiting first task
+        second_future = worker.submit(second_task)
+    
+        # The first future should have been cancelled
+>       assert first_future.cancelled()
+E       assert False
+E        +  where False = cancelled()
+E        +    where cancelled = <Future at 0x7fa8a8130dc0 state=running>.cancelled
+
+test_generated.py:44: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_waiting_task_replacement - assert False
+1 failed, 2 passed in 0.40s

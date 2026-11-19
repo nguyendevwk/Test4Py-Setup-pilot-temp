@@ -1,0 +1,69 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_tcpclient_connect_and_echo ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.tcpclient__TCPClient__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_tcpclient_connect_and_ech0')
+
+    def test_tcpclient_connect_and_echo(tmp_path):
+        """Normal connection: send data and receive echo."""
+        server, host, port, thread = start_echo_server(tmp_path)
+        try:
+            client = TCPClient()
+            stream = IOLoop.current().run_sync(
+                lambda: client.connect(host, port, timeout=5)
+            )
+            # Send a message and read the echo
+            message = b"hello"
+            stream.write(message)
+            received = stream.read_until_close()
+>           assert received == message
+E           AssertionError: assert <Future finis...sult=b'hello'> == b'hello'
+E             
+E             Use -v to get more diff
+
+test_generated.py:44: AssertionError
+________________________ test_tcpclient_connect_timeout ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.tcpclient__TCPClient__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_tcpclient_connect_timeout0')
+
+    def test_tcpclient_connect_timeout(tmp_path):
+        """Connection attempt to an unreachable port should raise TimeoutError."""
+        # Pick a port unlikely to be open
+        host = "127.0.0.1"
+        port = 65535  # usually closed
+        client = TCPClient()
+        with pytest.raises(TimeoutError):
+>           IOLoop.current().run_sync(
+                lambda: client.connect(host, port, timeout=0.1)
+            )
+
+test_generated.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/ioloop.py:547: in run_sync
+    return future_cell["future"].result()
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/tcpclient.py:279: in connect
+    af, addr, stream = await connector.start(connect_timeout=timeout)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tornado.tcpclient._Connector object at 0x7ff6c6e88790>
+addrs = <list_iterator object at 0x7ff6c6e88880>
+af = <AddressFamily.AF_INET: 2>, addr = ('127.0.0.1', 65535)
+future = <Future finished exception=StreamClosedError('Stream is closed')>
+
+    def on_connect_done(
+        self,
+        addrs: Iterator[Tuple[socket.AddressFamily, Tuple]],
+        af: socket.AddressFamily,
+        addr: Tuple,
+        future: "Future[IOStream]",
+    ) -> None:
+        self.remaining -= 1
+        try:
+>           stream = future.result()
+E           tornado.iostream.StreamClosedError: Stream is closed
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/tcpclient.py:142: StreamClosedError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_tcpclient_connect_and_echo - AssertionError: a...
+FAILED test_generated.py::test_tcpclient_connect_timeout - tornado.iostream.S...
+2 failed, 1 passed in 1.39s

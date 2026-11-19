@@ -1,0 +1,59 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_parse_from_object_with_attribute_docstrings _______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_from_object_with_at0')
+
+    def test_parse_from_object_with_attribute_docstrings(tmp_path):
+        """When parsing a class, attribute docstrings are added to the result."""
+        class Sample:
+            """Class docstring."""
+    
+            attr1 = 1
+            """Attribute 1 description."""
+    
+            attr2 = "value"
+            """Attribute 2 description."""
+    
+        doc = parser.parse_from_object(Sample, style=DocstringStyle.GOOGLE)
+        # The class docstring should be present
+        assert doc.short_description == "Class docstring."
+        # Attribute docstrings should be parsed and attached
+>       attr_docs = {a.name: a for a in doc.attributes}
+E       AttributeError: 'Docstring' object has no attribute 'attributes'
+
+test_generated.py:22: AttributeError
+_______ test_parse_from_object_with_no_docstring_returns_empty_docstring _______
+
+    def test_parse_from_object_with_no_docstring_returns_empty_docstring():
+        """Parsing an object with no docstring yields an empty Docstring."""
+        class EmptyDoc:
+            pass
+    
+        doc = parser.parse_from_object(EmptyDoc)
+        # No short description, no attributes, etc.
+        assert doc.short_description is None
+        assert doc.long_description is None
+        assert doc.params == []
+        assert doc.returns is None
+        assert doc.raises == []
+>       assert doc.attributes == []
+E       AttributeError: 'Docstring' object has no attribute 'attributes'
+
+test_generated.py:41: AttributeError
+_________ test_parse_from_object_with_invalid_style_raises_parse_error _________
+
+    def test_parse_from_object_with_invalid_style_raises_parse_error():
+        """Providing a style that cannot parse the docstring raises ParseError."""
+        class BadDoc:
+            """This docstring is not in any supported style."""
+    
+>       with pytest.raises(ParseError):
+E       Failed: DID NOT RAISE ParseError
+
+test_generated.py:49: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_from_object_with_attribute_docstrings - ...
+FAILED test_generated.py::test_parse_from_object_with_no_docstring_returns_empty_docstring
+FAILED test_generated.py::test_parse_from_object_with_invalid_style_raises_parse_error
+3 failed in 0.16s

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-92f4d52c-25e0-4efb-b9d9-fa0d497f93f1",
+  "object": "chat.completion",
+  "created": 1795077251,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport enum\nimport json\nimport os\nimport tempfile\nimport pytest\nfrom mimesis.providers.base import BaseProvider\nfrom mimesis.exceptions import NonEnumerableError\nfrom mimesis import random as _random\n\n\nclass DummyProvider(BaseProvider):\n    \"\"\"Simple provider exposing the underlying random instance.\"\"\"\n\n    def random_int(self, a: int, b: int) -> int:\n        return self.random.randint(a, b)\n\n\ndef test_reseed_same_seed_generates_same_sequence(tmp_path):\n    \"\"\"Two providers with the same seed produce identical random numbers.\"\"\"\n    seed = 12345\n    provider1 = DummyProvider(seed=seed)\n    provider2 = DummyProvider(seed=seed)\n\n    # Generate a sequence of random integers from each provider\n    seq1 = [provider1.random_int(1, 100) for _ in range(5)]\n    seq2 = [provider2.random_int(1, 100) for _ in range(5)]\n\n    assert seq1 == seq2, \"Sequences should be identical for the same seed\"\n\n\ndef test_validate_enum_raises_on_invalid_item():\n    \"\"\"validate_enum should raise NonEnumerableError when item is not a member of the enum.\"\"\"\n    class Color(enum.Enum):\n        RED = 1\n        GREEN = 2\n        BLUE = 3\n\n    provider = DummyProvider()\n    with pytest.raises(NonEnumerableError) as excinfo:\n        provider.validate_enum(\"YELLOW\", Color)\n\n    assert str(excinfo.value) == str(Color), \"Error message should contain the enum type\"\n\n\ndef test_read_global_file_raises_file_not_found(tmp_path):\n    \"\"\"_read_global_file should raise FileNotFoundError for missing files.\"\"\"\n    provider = DummyProvider()\n    missing_file = \"nonexistent.json\"\n\n    with pytest.raises(FileNotFoundError):\n        provider._read_global_file(missing_file)\n```",
+        "reasoning": "We need three tests for BaseProvider. Test init with custom random, test validate_enum error, test _read_global_file reading. Use tmp_path? For file reading, need to create a file in DATADIR/global? Can't modify product. But we can create a temporary file path and monkeypatch DATADIR? Can't modify product. Maybe test that FileNotFoundError raised for non-existent file. Use pytest.raises. Also test reseed behavior: two providers with same seed produce same random sequence. Use random.choice? But BaseProvider doesn't expose. We can subclass to expose random. Create DummyProvider inheriting BaseProvider. Then test that reseed with same seed gives same first random int. Use random.randint. Use provider.random.randint. So test. Also test validate_enum: create simple Enum. Use enum.Enum. Provide None returns random choice. Hard to assert. Instead test that passing invalid raises NonEnumerableError. Use enum.Enum. So three tests: test_reseed_same_seed, test_validate_enum_invalid, test_read_global_file_not_found."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048427554,
+    "prompt_tokens": 1219,
+    "prompt_time": 0.016290096,
+    "completion_tokens": 604,
+    "completion_time": 0.715933629,
+    "total_tokens": 1823,
+    "total_time": 0.732223725,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 212
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sf2789ehnsss4sxtvj4swd",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport enum\nimport json\nimport os\nimport tempfile\nimport pytest\nfrom mimesis.providers.base import BaseProvider\nfrom mimesis.exceptions import NonEnumerableError\nfrom mimesis import random as _random\n\n\nclass DummyProvider(BaseProvider):\n    \"\"\"Simple provider exposing the underlying random instance.\"\"\"\n\n    def random_int(self, a: int, b: int) -> int:\n        return self.random.randint(a, b)\n\n\ndef test_reseed_same_seed_generates_same_sequence(tmp_path):\n    \"\"\"Two providers with the same seed produce identical random numbers.\"\"\"\n    seed = 12345\n    provider1 = DummyProvider(seed=seed)\n    provider2 = DummyProvider(seed=seed)\n\n    # Generate a sequence of random integers from each provider\n    seq1 = [provider1.random_int(1, 100) for _ in range(5)]\n    seq2 = [provider2.random_int(1, 100) for _ in range(5)]\n\n    assert seq1 == seq2, \"Sequences should be identical for the same seed\"\n\n\ndef test_validate_enum_raises_on_invalid_item():\n    \"\"\"validate_enum should raise NonEnumerableError when item is not a member of the enum.\"\"\"\n    class Color(enum.Enum):\n        RED = 1\n        GREEN = 2\n        BLUE = 3\n\n    provider = DummyProvider()\n    with pytest.raises(NonEnumerableError) as excinfo:\n        provider.validate_enum(\"YELLOW\", Color)\n\n    assert str(excinfo.value) == str(Color), \"Error message should contain the enum type\"\n\n\ndef test_read_global_file_raises_file_not_found(tmp_path):\n    \"\"\"_read_global_file should raise FileNotFoundError for missing files.\"\"\"\n    provider = DummyProvider()\n    missing_file = \"nonexistent.json\"\n\n    with pytest.raises(FileNotFoundError):\n        provider._read_global_file(missing_file)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2308292670059018
+}

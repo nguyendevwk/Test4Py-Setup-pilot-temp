@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-8f5d510f-f3ee-4e64-8af3-93999e466129",
+  "object": "chat.completion",
+  "created": 1795076963,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom thefuck.types import Command\nfrom thefuck.exceptions import EmptyCommand\nfrom thefuck.shells import shell\n\ndef test_command_equality_and_repr():\n    cmd1 = Command(\"ls -l\", \"output1\")\n    cmd2 = Command(\"ls -l\", \"output1\")\n    cmd3 = Command(\"ls -a\", \"output1\")\n    assert cmd1 == cmd2\n    assert cmd1 != cmd3\n    assert repr(cmd1) == \"Command(script=ls -l, output=output1)\"\n\ndef test_script_parts_and_update(tmp_path):\n    # create a simple script with quoted argument\n    script = 'echo \"hello world\"'\n    cmd = Command(script, \"output\")\n    parts = cmd.script_parts\n    assert parts == ['echo', 'hello world']\n    # update should create a new instance with modified script\n    new_cmd = cmd.update(script='echo \"new\"')\n    assert new_cmd.script == 'echo \"new\"'\n    assert new_cmd.output == \"output\"\n    # original command remains unchanged\n    assert cmd.script == script\n\ndef test_from_raw_script_empty_and_valid(tmp_path):\n    # Empty raw_script should raise EmptyCommand\n    with pytest.raises(EmptyCommand):\n        Command.from_raw_script([])\n    # raw_script with only whitespace should also raise\n    with pytest.raises(EmptyCommand):\n        Command.from_raw_script([\"   \"])\n    # Valid raw_script: split into parts, then format and expand\n    raw = [\"echo\", \"test\"]\n    cmd = Command.from_raw_script(raw)\n    # script should be the joined raw script\n    assert cmd.script == \"echo test\"\n    # output should not be empty (depends on shell, but should be a string)\n    assert isinstance(cmd.output, str)\n```",
+        "reasoning": "We need tests for Command. Use tmp_path for any file? Not needed. Test equality, script_parts splitting, from_raw_script error. Use real shell split_command. Probably use simple script. Ensure from_raw_script raises EmptyCommand when raw_script empty or all spaces. Also test update returns new instance. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.411202694,
+    "prompt_tokens": 745,
+    "prompt_time": 0.042641432,
+    "completion_tokens": 448,
+    "completion_time": 0.49235916,
+    "total_tokens": 1193,
+    "total_time": 0.535000592,
+    "completion_tokens_details": {
+      "reasoning_tokens": 66
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sese4hem1avm8gzczrxvm9",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom thefuck.types import Command\nfrom thefuck.exceptions import EmptyCommand\nfrom thefuck.shells import shell\n\ndef test_command_equality_and_repr():\n    cmd1 = Command(\"ls -l\", \"output1\")\n    cmd2 = Command(\"ls -l\", \"output1\")\n    cmd3 = Command(\"ls -a\", \"output1\")\n    assert cmd1 == cmd2\n    assert cmd1 != cmd3\n    assert repr(cmd1) == \"Command(script=ls -l, output=output1)\"\n\ndef test_script_parts_and_update(tmp_path):\n    # create a simple script with quoted argument\n    script = 'echo \"hello world\"'\n    cmd = Command(script, \"output\")\n    parts = cmd.script_parts\n    assert parts == ['echo', 'hello world']\n    # update should create a new instance with modified script\n    new_cmd = cmd.update(script='echo \"new\"')\n    assert new_cmd.script == 'echo \"new\"'\n    assert new_cmd.output == \"output\"\n    # original command remains unchanged\n    assert cmd.script == script\n\ndef test_from_raw_script_empty_and_valid(tmp_path):\n    # Empty raw_script should raise EmptyCommand\n    with pytest.raises(EmptyCommand):\n        Command.from_raw_script([])\n    # raw_script with only whitespace should also raise\n    with pytest.raises(EmptyCommand):\n        Command.from_raw_script([\"   \"])\n    # Valid raw_script: split into parts, then format and expand\n    raw = [\"echo\", \"test\"]\n    cmd = Command.from_raw_script(raw)\n    # script should be the joined raw script\n    assert cmd.script == \"echo test\"\n    # output should not be empty (depends on shell, but should be a string)\n    assert isinstance(cmd.output, str)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2681879950105213
+}

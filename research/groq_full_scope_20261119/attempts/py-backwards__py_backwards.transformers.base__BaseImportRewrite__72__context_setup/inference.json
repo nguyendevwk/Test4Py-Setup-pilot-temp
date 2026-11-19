@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-21c59d11-af05-418d-9e80-6e1718720184",
+  "object": "chat.completion",
+  "created": 1795079040,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.transformers.base import BaseImportRewrite, BaseNodeTransformer, import_rewrite\nfrom py_backwards.types import TransformationResult\n\n# Helper transformer that defines specific rewrites\nclass TestImportRewrite(BaseImportRewrite):\n    rewrites = [(\"oldpkg\", \"newpkg\")]\n\n\ndef test_simple_import_rewrite(tmp_path):\n    \"\"\"Verify that a plain import is rewritten with a try/except wrapper.\"\"\"\n    source = \"import oldpkg\\n\"\n    tree = typed_ast.parse(source)\n    transformer = TestImportRewrite(tree)\n    transformer.visit(tree)\n\n    # The tree should have changed\n    assert transformer._tree_changed is True\n\n    # The root should now be a Try node (import_rewrite returns a Try)\n    assert isinstance(tree, typed_ast.Try)\n\n    # The body of the Try should contain the original import\n    original_import = tree.body[0]\n    assert isinstance(original_import, typed_ast.Import)\n    assert original_import.names[0].name == \"oldpkg\"\n\n    # The except handler should contain the rewritten import\n    except_handler = tree.handlers[0]\n    rewritten_import = except_handler.body[0]\n    assert isinstance(rewritten_import, typed_ast.Import)\n    assert rewritten_import.names[0].name == \"newpkg\"\n\n\ndef test_import_from_rewrite(tmp_path):\n    \"\"\"Verify that an import-from statement is rewritten correctly.\"\"\"\n    source = \"from oldpkg import foo\\n\"\n    tree = typed_ast.parse(source)\n    transformer = TestImportRewrite(tree)\n    transformer.visit(tree)\n\n    assert transformer._tree_changed is True\n    assert isinstance(tree, typed_ast.Try)\n\n    # Original import-from in the try body\n    original_import_from = tree.body[0]\n    assert isinstance(original_import_from, typed_ast.ImportFrom)\n    assert original_import_from.module == \"oldpkg\"\n\n    # Except handler contains rewritten import-from\n    except_handler = tree.handlers[0]\n    rewritten_import_from = except_handler.body[0]\n    assert isinstance(rewritten_import_from, typed_ast.ImportFrom)\n    assert rewritten_import_from.module == \"newpkg\"\n\n\ndef test_no_rewrite(tmp_path):\n    \"\"\"Verify that imports not matching rewrites are left untouched.\"\"\"\n    source = \"import otherpkg\\n\"\n    tree = typed_ast.parse(source)\n    transformer = TestImportRewrite(tree)\n    transformer.visit(tree)\n\n    # No changes should have been made\n    assert transformer._tree_changed is False\n    # The root node remains a Module with a single Import\n    assert isinstance(tree, typed_ast.Module)\n    assert len(tree.body) == 1\n    assert isinstance(tree.body[0], typed_ast.Import)\n    assert tree.body[0].names[0].name == \"otherpkg\"\n```",
+        "reasoning": "Need tests for BaseImportRewrite. We need to create subclass with rewrites. Use typed_ast ast3. We'll write tests creating Import nodes. Use BaseImportRewrite.transform? Actually BaseImportRewrite inherits BaseNodeTransformer. We can instantiate and visit. Use ast.parse to get tree. Test import rewrite. Write three tests: simple import rewrite, import from rewrite, and no rewrite. Use tmp_path? Not needed. Use assert tree changed flag."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05372642,
+    "prompt_tokens": 1391,
+    "prompt_time": 0.036036707,
+    "completion_tokens": 676,
+    "completion_time": 1.586639978,
+    "total_tokens": 2067,
+    "total_time": 1.622676685,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 91
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgrsv0ecqtt8zrhqwrhttr",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.transformers.base import BaseImportRewrite, BaseNodeTransformer, import_rewrite\nfrom py_backwards.types import TransformationResult\n\n# Helper transformer that defines specific rewrites\nclass TestImportRewrite(BaseImportRewrite):\n    rewrites = [(\"oldpkg\", \"newpkg\")]\n\n\ndef test_simple_import_rewrite(tmp_path):\n    \"\"\"Verify that a plain import is rewritten with a try/except wrapper.\"\"\"\n    source = \"import oldpkg\\n\"\n    tree = typed_ast.parse(source)\n    transformer = TestImportRewrite(tree)\n    transformer.visit(tree)\n\n    # The tree should have changed\n    assert transformer._tree_changed is True\n\n    # The root should now be a Try node (import_rewrite returns a Try)\n    assert isinstance(tree, typed_ast.Try)\n\n    # The body of the Try should contain the original import\n    original_import = tree.body[0]\n    assert isinstance(original_import, typed_ast.Import)\n    assert original_import.names[0].name == \"oldpkg\"\n\n    # The except handler should contain the rewritten import\n    except_handler = tree.handlers[0]\n    rewritten_import = except_handler.body[0]\n    assert isinstance(rewritten_import, typed_ast.Import)\n    assert rewritten_import.names[0].name == \"newpkg\"\n\n\ndef test_import_from_rewrite(tmp_path):\n    \"\"\"Verify that an import-from statement is rewritten correctly.\"\"\"\n    source = \"from oldpkg import foo\\n\"\n    tree = typed_ast.parse(source)\n    transformer = TestImportRewrite(tree)\n    transformer.visit(tree)\n\n    assert transformer._tree_changed is True\n    assert isinstance(tree, typed_ast.Try)\n\n    # Original import-from in the try body\n    original_import_from = tree.body[0]\n    assert isinstance(original_import_from, typed_ast.ImportFrom)\n    assert original_import_from.module == \"oldpkg\"\n\n    # Except handler contains rewritten import-from\n    except_handler = tree.handlers[0]\n    rewritten_import_from = except_handler.body[0]\n    assert isinstance(rewritten_import_from, typed_ast.ImportFrom)\n    assert rewritten_import_from.module == \"newpkg\"\n\n\ndef test_no_rewrite(tmp_path):\n    \"\"\"Verify that imports not matching rewrites are left untouched.\"\"\"\n    source = \"import otherpkg\\n\"\n    tree = typed_ast.parse(source)\n    transformer = TestImportRewrite(tree)\n    transformer.visit(tree)\n\n    # No changes should have been made\n    assert transformer._tree_changed is False\n    # The root node remains a Module with a single Import\n    assert isinstance(tree, typed_ast.Module)\n    assert len(tree.body) == 1\n    assert isinstance(tree.body[0], typed_ast.Import)\n    assert tree.body[0].names[0].name == \"otherpkg\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 2.0357731219846755
+}

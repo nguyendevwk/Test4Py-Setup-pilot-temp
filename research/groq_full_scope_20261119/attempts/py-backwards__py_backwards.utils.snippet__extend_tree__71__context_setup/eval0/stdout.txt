@@ -1,0 +1,44 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_extend_tree_replaces_call_with_variable _________________
+
+    def test_extend_tree_replaces_call_with_variable():
+        # Source contains a call to extend that should be replaced by a variable.
+        src = """
+    def foo():
+        x = extend(y)
+    """
+        tree = build_tree(src)
+        # Prepare variables mapping: 'y' should be replaced by a string literal.
+        variables = {'y': typed_ast.Str(s='replaced')}
+        extend_tree(tree, variables)
+    
+        # After transformation, the call should be replaced by the string literal.
+        # Find the assignment target and value.
+>       assign = find(tree, typed_ast.Assign)[0]
+E       TypeError: 'generator' object is not subscriptable
+
+test_generated.py:23: TypeError
+________________ test_extend_tree_no_effect_when_no_extend_call ________________
+
+    def test_extend_tree_no_effect_when_no_extend_call():
+        # Source without any extend calls should remain unchanged.
+        src = """
+    def bar():
+        a = 1
+        b = 2
+    """
+        tree = build_tree(src)
+        variables = {'x': typed_ast.Str(s='unused')}
+        extend_tree(tree, variables)
+    
+        # The tree should still contain the original assignments.
+        assigns = find(tree, typed_ast.Assign)
+>       assert len(assigns) == 2
+E       TypeError: object of type 'generator' has no len()
+
+test_generated.py:40: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extend_tree_replaces_call_with_variable - Type...
+FAILED test_generated.py::test_extend_tree_no_effect_when_no_extend_call - Ty...
+2 failed, 1 passed in 0.12s

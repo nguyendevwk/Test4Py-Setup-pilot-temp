@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a02fb20b-ff6d-4765-87c2-ffce5b389bfb",
+  "object": "chat.completion",
+  "created": 1795076601,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport warnings\nimport pytest\nfrom dataclasses import dataclass, field as dc_field\nfrom enum import Enum\nfrom typing import Optional, Tuple, Union\n\nfrom dataclasses_json.mm import build_type\nfrom dataclasses_json import dataclass_json\nfrom marshmallow import fields\n\n# Helper mixin used by build_type\nclass Mixin:\n    pass\n\n# 1. Test nested dataclass handling\n@dataclass_json\n@dataclass\nclass Inner(Mixin):\n    x: int\n\n@dataclass\nclass Outer:\n    inner: Inner\n\ndef test_nested_dataclass_field():\n    # Build field for Outer.inner\n    field_obj = build_type(Outer.__annotations__['inner'], {}, Mixin, Outer.__dataclass_fields__['inner'], Outer)\n    # Should be a Nested field pointing to Inner.schema()\n    assert isinstance(field_obj, fields.Nested)\n    assert field_obj.schema_class == Inner.schema()\n    # field_many should be False because Inner is not a collection\n    assert field_obj.metadata.get('field_many', False) is False\n\n# 2. Test optional and tuple handling\n@dataclass\nclass TupleHolder:\n    opt: Optional[int]\n    tup: Tuple[int, ...]\n    enum: Enum  # placeholder, will be overridden\n\nclass Color(Enum):\n    RED = 1\n    GREEN = 2\n\ndef test_optional_and_tuple_and_enum():\n    # Override enum field type\n    TupleHolder.__annotations__['enum'] = Color\n    # Build optional field\n    opt_field = build_type(TupleHolder.__annotations__['opt'], {}, Mixin, TupleHolder.__dataclass_fields__['opt'], TupleHolder)\n    assert isinstance(opt_field, fields.Field)\n    assert opt_field.metadata.get('allow_none', False) is True\n\n    # Build tuple field\n    tup_field = build_type(TupleHolder.__annotations__['tup'], {}, Mixin, TupleHolder.__dataclass_fields__['tup'], TupleHolder)\n    assert isinstance(tup_field, fields.Tuple)\n    # Tuple should have a single element type int\n    assert len(tup_field.fields) == 1\n    assert isinstance(tup_field.fields[0], fields.Integer)\n\n    # Build enum field\n    enum_field = build_type(TupleHolder.__annotations__['enum'], {}, Mixin, TupleHolder.__dataclass_fields__['enum'], TupleHolder)\n    assert isinstance(enum_field, fields.Enum)\n    assert enum_field.enum == Color\n    assert enum_field.by_value is True\n\n# 3. Test union handling and warning for unknown type\n@dataclass\nclass UnionHolder:\n    union: Union[int, str, None]\n\ndef test_union_and_unknown_type_warning():\n    # Build union field\n    union_field = build_type(UnionHolder.__annotations__['union'], {}, Mixin, UnionHolder.__dataclass_fields__['union'], UnionHolder)\n    # Should be a custom _UnionField type from dataclasses_json\n    from dataclasses_json.core import _UnionField\n    assert isinstance(union_field, _UnionField)\n    # The union descriptor should map int and str to corresponding fields\n    assert set(union_field.union_desc.keys()) == {int, str}\n\n    # Test warning for unknown type\n    class Unknown:\n        pass\n    with pytest.warns(UserWarning) as record:\n        unknown_field = build_type(Unknown, {}, Mixin, None, None)\n    assert any(\"Unknown type\" in str(w.message) for w in record)\n    assert isinstance(unknown_field, fields.Field)\n```",
+        "reasoning": "We need tests for build_type. We need to import it. Use tmp_path? Not needed. We'll test nested dataclass, optional, tuple, enum, union. Use simple dataclasses. Ensure warnings. Use pytest.warns. Use assert type."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051962424,
+    "prompt_tokens": 867,
+    "prompt_time": 0.051121613,
+    "completion_tokens": 791,
+    "completion_time": 0.902531739,
+    "total_tokens": 1658,
+    "total_time": 0.953653352,
+    "completion_tokens_details": {
+      "reasoning_tokens": 52
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7seecy6e1xtts5qefczt01b",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport warnings\nimport pytest\nfrom dataclasses import dataclass, field as dc_field\nfrom enum import Enum\nfrom typing import Optional, Tuple, Union\n\nfrom dataclasses_json.mm import build_type\nfrom dataclasses_json import dataclass_json\nfrom marshmallow import fields\n\n# Helper mixin used by build_type\nclass Mixin:\n    pass\n\n# 1. Test nested dataclass handling\n@dataclass_json\n@dataclass\nclass Inner(Mixin):\n    x: int\n\n@dataclass\nclass Outer:\n    inner: Inner\n\ndef test_nested_dataclass_field():\n    # Build field for Outer.inner\n    field_obj = build_type(Outer.__annotations__['inner'], {}, Mixin, Outer.__dataclass_fields__['inner'], Outer)\n    # Should be a Nested field pointing to Inner.schema()\n    assert isinstance(field_obj, fields.Nested)\n    assert field_obj.schema_class == Inner.schema()\n    # field_many should be False because Inner is not a collection\n    assert field_obj.metadata.get('field_many', False) is False\n\n# 2. Test optional and tuple handling\n@dataclass\nclass TupleHolder:\n    opt: Optional[int]\n    tup: Tuple[int, ...]\n    enum: Enum  # placeholder, will be overridden\n\nclass Color(Enum):\n    RED = 1\n    GREEN = 2\n\ndef test_optional_and_tuple_and_enum():\n    # Override enum field type\n    TupleHolder.__annotations__['enum'] = Color\n    # Build optional field\n    opt_field = build_type(TupleHolder.__annotations__['opt'], {}, Mixin, TupleHolder.__dataclass_fields__['opt'], TupleHolder)\n    assert isinstance(opt_field, fields.Field)\n    assert opt_field.metadata.get('allow_none', False) is True\n\n    # Build tuple field\n    tup_field = build_type(TupleHolder.__annotations__['tup'], {}, Mixin, TupleHolder.__dataclass_fields__['tup'], TupleHolder)\n    assert isinstance(tup_field, fields.Tuple)\n    # Tuple should have a single element type int\n    assert len(tup_field.fields) == 1\n    assert isinstance(tup_field.fields[0], fields.Integer)\n\n    # Build enum field\n    enum_field = build_type(TupleHolder.__annotations__['enum'], {}, Mixin, TupleHolder.__dataclass_fields__['enum'], TupleHolder)\n    assert isinstance(enum_field, fields.Enum)\n    assert enum_field.enum == Color\n    assert enum_field.by_value is True\n\n# 3. Test union handling and warning for unknown type\n@dataclass\nclass UnionHolder:\n    union: Union[int, str, None]\n\ndef test_union_and_unknown_type_warning():\n    # Build union field\n    union_field = build_type(UnionHolder.__annotations__['union'], {}, Mixin, UnionHolder.__dataclass_fields__['union'], UnionHolder)\n    # Should be a custom _UnionField type from dataclasses_json\n    from dataclasses_json.core import _UnionField\n    assert isinstance(union_field, _UnionField)\n    # The union descriptor should map int and str to corresponding fields\n    assert set(union_field.union_desc.keys()) == {int, str}\n\n    # Test warning for unknown type\n    class Unknown:\n        pass\n    with pytest.warns(UserWarning) as record:\n        unknown_field = build_type(Unknown, {}, Mixin, None, None)\n    assert any(\"Unknown type\" in str(w.message) for w in record)\n    assert isinstance(unknown_field, fields.Field)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2963038600282744
+}

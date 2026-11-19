@@ -1,0 +1,72 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_split_lines_dedents_and_splits ______________________
+
+    def test_split_lines_dedents_and_splits():
+        """_split_lines should dedent multiline help and split into lines."""
+>       formatter = HTTPieHelpFormatter()
+
+test_generated.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <httpie.cli.argparser.HTTPieHelpFormatter object at 0x7f3661235630>
+max_help_position = 6, args = (), kwargs = {'max_help_position': 6}
+
+    def __init__(self, max_help_position=6, *args, **kwargs):
+        # A smaller indent for args help.
+        kwargs['max_help_position'] = max_help_position
+>       super().__init__(*args, **kwargs)
+E       TypeError: HelpFormatter.__init__() missing 1 required positional argument: 'prog'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/cli/argparser.py:45: TypeError
+_______________ test_add_usage_includes_only_positional_actions ________________
+
+    def test_add_usage_includes_only_positional_actions():
+        """add_usage should only display positional arguments."""
+        parser = argparse.ArgumentParser(
+            prog="testprog",
+            usage="%(prog)s [options] <url>",
+            formatter_class=HTTPieHelpFormatter,
+        )
+        # Add a positional argument and an optional one
+        parser.add_argument("url", help="Target URL")
+        parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode")
+        # Capture the help output
+        help_text = parser.format_help()
+        # The usage line should only contain the positional argument
+>       assert "usage:\n    testprog <url>" in help_text
+E       AssertionError: assert 'usage:\n    testprog <url>' in 'usage:\n    testprog [options] <url>\n\npositional arguments:\n  url\n      Target URL\n      \n\noptions:\n  -h, --help\n      show this help message and exit\n      \n  -v, --verbose\n      Verbose mode\n      \n'
+
+test_generated.py:40: AssertionError
+________________ test_add_usage_includes_invalid_option_action _________________
+
+    def test_add_usage_includes_invalid_option_action():
+        """When an invalid option is passed, the offending action is included in usage."""
+        parser = argparse.ArgumentParser(
+            prog="testprog",
+            usage="%(prog)s [options] <url>",
+            formatter_class=HTTPieHelpFormatter,
+        )
+        parser.add_argument("url", help="Target URL")
+        parser.add_argument("--style", choices=["dark", "light"], help="Style choice")
+        # Simulate parsing with an invalid value for --style to trigger ArgumentError
+        with pytest.raises(SystemExit) as excinfo:
+            parser.parse_args(["--style=invalid", "http://example.com"])
+        # The exit code should be 2 (argparse error)
+        assert excinfo.value.code == 2
+        # Capture the help output after the error
+        help_text = parser.format_help()
+        # The usage line should now include the --style option
+>       assert "usage:\n    testprog --style <style> <url>" in help_text
+E       AssertionError: assert 'usage:\n    testprog --style <style> <url>' in 'usage:\n    testprog [options] <url>\n\npositional arguments:\n  url\n      Target URL\n      \n\noptions:\n  -h, --help\n      show this help message and exit\n      \n  --style {dark,light}\n      Style choice\n      \n'
+
+test_generated.py:63: AssertionError
+----------------------------- Captured stderr call -----------------------------
+usage:
+    testprog [options] <url>
+testprog: error: argument --style: invalid choice: 'invalid' (choose from 'dark', 'light')
+=========================== short test summary info ============================
+FAILED test_generated.py::test_split_lines_dedents_and_splits - TypeError: He...
+FAILED test_generated.py::test_add_usage_includes_only_positional_actions - A...
+FAILED test_generated.py::test_add_usage_includes_invalid_option_action - Ass...
+3 failed in 0.90s

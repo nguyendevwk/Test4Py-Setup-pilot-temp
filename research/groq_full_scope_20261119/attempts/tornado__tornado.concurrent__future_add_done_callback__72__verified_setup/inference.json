@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-9565a159-674a-4748-8aa2-2cdc48f5df84",
+  "object": "chat.completion",
+  "created": 1795079395,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import future_add_done_callback\n\n\ndef test_callback_called_immediately_for_done_concurrent_future():\n    # Create a concurrent.futures.Future that is already done\n    fut = concurrent.futures.Future()\n    fut.set_result(42)\n\n    called = {\"count\": 0, \"future\": None}\n\n    def cb(f):\n        called[\"count\"] += 1\n        called[\"future\"] = f\n\n    future_add_done_callback(fut, cb)\n\n    # The callback should have been called exactly once\n    assert called[\"count\"] == 1\n    # The callback should receive the same future instance\n    assert called[\"future\"] is fut\n    # The future should still be done\n    assert fut.done()\n    assert fut.result() == 42\n\n\ndef test_callback_called_after_completion_asyncio_future():\n    # Create an asyncio.Future that is not yet done\n    loop = asyncio.new_event_loop()\n    asyncio.set_event_loop(loop)\n    fut = asyncio.Future(loop=loop)\n\n    called = {\"count\": 0, \"future\": None}\n\n    def cb(f):\n        called[\"count\"] += 1\n        called[\"future\"] = f\n\n    future_add_done_callback(fut, cb)\n\n    # The callback should not have been called yet\n    assert called[\"count\"] == 0\n\n    # Resolve the future\n    fut.set_result(\"ok\")\n    # Run the event loop briefly to allow callbacks to fire\n    loop.run_until_complete(asyncio.sleep(0))\n\n    # Now the callback should have been called once\n    assert called[\"count\"] == 1\n    assert called[\"future\"] is fut\n    assert fut.result() == \"ok\"\n\n    loop.close()\n\n\ndef test_callback_receives_future_when_future_completes_after_registration():\n    # Create a concurrent.futures.Future that will be completed later\n    fut = concurrent.futures.Future()\n\n    called = {\"count\": 0, \"future\": None}\n\n    def cb(f):\n        called[\"count\"] += 1\n        called[\"future\"] = f\n\n    future_add_done_callback(fut, cb)\n\n    # The callback should not have been called yet\n    assert called[\"count\"] == 0\n\n    # Complete the future\n    fut.set_result(\"finished\")\n\n    # The callback should now be called\n    assert called[\"count\"] == 1\n    assert called[\"future\"] is fut\n    assert fut.result() == \"finished\"\n```",
+        "reasoning": "We need tests for this function. Use concurrent.futures.Future and asyncio.Future. Test that callback called immediately if done. Test that callback called after completion. Test that callback receives future. Use tmp_path? not needed. Provide three test functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05413934,
+    "prompt_tokens": 394,
+    "prompt_time": 0.03724838,
+    "completion_tokens": 579,
+    "completion_time": 0.668866319,
+    "total_tokens": 973,
+    "total_time": 0.706114699,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 50
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh3nmke2ha9rqbpphn4jwy",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import future_add_done_callback\n\n\ndef test_callback_called_immediately_for_done_concurrent_future():\n    # Create a concurrent.futures.Future that is already done\n    fut = concurrent.futures.Future()\n    fut.set_result(42)\n\n    called = {\"count\": 0, \"future\": None}\n\n    def cb(f):\n        called[\"count\"] += 1\n        called[\"future\"] = f\n\n    future_add_done_callback(fut, cb)\n\n    # The callback should have been called exactly once\n    assert called[\"count\"] == 1\n    # The callback should receive the same future instance\n    assert called[\"future\"] is fut\n    # The future should still be done\n    assert fut.done()\n    assert fut.result() == 42\n\n\ndef test_callback_called_after_completion_asyncio_future():\n    # Create an asyncio.Future that is not yet done\n    loop = asyncio.new_event_loop()\n    asyncio.set_event_loop(loop)\n    fut = asyncio.Future(loop=loop)\n\n    called = {\"count\": 0, \"future\": None}\n\n    def cb(f):\n        called[\"count\"] += 1\n        called[\"future\"] = f\n\n    future_add_done_callback(fut, cb)\n\n    # The callback should not have been called yet\n    assert called[\"count\"] == 0\n\n    # Resolve the future\n    fut.set_result(\"ok\")\n    # Run the event loop briefly to allow callbacks to fire\n    loop.run_until_complete(asyncio.sleep(0))\n\n    # Now the callback should have been called once\n    assert called[\"count\"] == 1\n    assert called[\"future\"] is fut\n    assert fut.result() == \"ok\"\n\n    loop.close()\n\n\ndef test_callback_receives_future_when_future_completes_after_registration():\n    # Create a concurrent.futures.Future that will be completed later\n    fut = concurrent.futures.Future()\n\n    called = {\"count\": 0, \"future\": None}\n\n    def cb(f):\n        called[\"count\"] += 1\n        called[\"future\"] = f\n\n    future_add_done_callback(fut, cb)\n\n    # The callback should not have been called yet\n    assert called[\"count\"] == 0\n\n    # Complete the future\n    fut.set_result(\"finished\")\n\n    # The callback should now be called\n    assert called[\"count\"] == 1\n    assert called[\"future\"] is fut\n    assert fut.result() == \"finished\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "6b40b6b5f96d41be9fbc854e0cd744d7",
+  "_api_plus_pacing_seconds": 1.6257275710231625
+}

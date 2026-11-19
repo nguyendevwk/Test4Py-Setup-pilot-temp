@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-86a9d56f-d7a6-426b-9942-4d46dd74e22d",
+  "object": "chat.completion",
+  "created": 1795079325,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom decimal import Decimal\n\nfrom pypara.dcc import dcc, DCCRegistry, DCC, ZERO\n\n# --------------------------------------------------------------------------- #\n# Test 1: Registration conflict raises TypeError\n# --------------------------------------------------------------------------- #\ndef test_dcc_registration_conflict():\n    # Define a simple day count function\n    def simple_func(start, asof, end, freq=None):\n        return Decimal(1)\n\n    # Register a convention with a main name\n    @dcc(\"TestConvention\")\n    def func1(start, asof, end, freq=None):\n        return simple_func(start, asof, end, freq)\n\n    # Attempt to register another convention with the same main name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"TestConvention\")\n        def func2(start, asof, end, freq=None):\n            return simple_func(start, asof, end, freq)\n\n    # Attempt to register a convention with an alternative name that conflicts\n    @dcc(\"UniqueConvention\", altnames={\"ConflictAlt\"})\n    def func3(start, asof, end, freq=None):\n        return simple_func(start, asof, end, freq)\n\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"AnotherConvention\", altnames={\"ConflictAlt\"})\n        def func4(start, asof, end, freq=None):\n            return simple_func(start, asof, end, freq)\n\n# --------------------------------------------------------------------------- #\n# Test 2: find method respects stripping and uppercasing\n# --------------------------------------------------------------------------- #\ndef test_dcc_registry_find_stripping_and_uppercasing():\n    # Register a convention with mixed case and spaces\n    @dcc(\"  MixedCase  \")\n    def mixed_func(start, asof, end, freq=None):\n        return Decimal(0)\n\n    # Should find by exact name\n    found_exact = DCCRegistry.find(\"  MixedCase  \")\n    assert found_exact is not None\n    assert found_exact.name == \"  MixedCase  \"\n\n    # Should find by stripped and uppercased name\n    found_stripped = DCCRegistry.find(\"mixedcase\")\n    assert found_stripped is not None\n    assert found_stripped.name == \"  MixedCase  \"\n\n    # Should not find a non-existent name\n    assert DCCRegistry.find(\"NonExistent\") is None\n\n# --------------------------------------------------------------------------- #\n# Test 3: calculate_fraction returns ZERO when dates are out of order\n# --------------------------------------------------------------------------- #\ndef test_dcc_calculate_fraction_boundary():\n    # Register a convention that simply returns the difference in days\n    @dcc(\"DiffDays\")\n    def diff_func(start, asof, end, freq=None):\n        return Decimal((end - start).days)\n\n    dcc_obj = DCCRegistry.find(\"DiffDays\")\n    assert dcc_obj is not None\n\n    start = datetime.date(2023, 1, 1)\n    end = datetime.date(2023, 1, 10)\n    asof_in_range = datetime.date(2023, 1, 5)\n    asof_before = datetime.date(2022, 12, 31)\n    asof_after = datetime.date(2023, 1, 11)\n\n    # Normal case: asof within range\n    assert dcc_obj.calculate_fraction(start, asof_in_range, end) == Decimal(9)\n\n    # Boundary case: asof before start\n    assert dcc_obj.calculate_fraction(start, asof_before, end) == ZERO\n\n    # Boundary case: asof after end\n    assert dcc_obj.calculate_fraction(start, asof_after, end) == ZERO\n```",
+        "reasoning": "We need three tests: test registration conflict, test find with strip/upper, test calculate_fraction boundary. Use tmp_path? not needed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004976187,
+    "prompt_tokens": 2542,
+    "prompt_time": 0.021359123,
+    "completion_tokens": 794,
+    "completion_time": 0.888696253,
+    "total_tokens": 3336,
+    "total_time": 0.910055376,
+    "prompt_tokens_details": {
+      "cached_tokens": 2304
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 29
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh1geaezgtpeqkrwr8sf5j",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom decimal import Decimal\n\nfrom pypara.dcc import dcc, DCCRegistry, DCC, ZERO\n\n# --------------------------------------------------------------------------- #\n# Test 1: Registration conflict raises TypeError\n# --------------------------------------------------------------------------- #\ndef test_dcc_registration_conflict():\n    # Define a simple day count function\n    def simple_func(start, asof, end, freq=None):\n        return Decimal(1)\n\n    # Register a convention with a main name\n    @dcc(\"TestConvention\")\n    def func1(start, asof, end, freq=None):\n        return simple_func(start, asof, end, freq)\n\n    # Attempt to register another convention with the same main name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"TestConvention\")\n        def func2(start, asof, end, freq=None):\n            return simple_func(start, asof, end, freq)\n\n    # Attempt to register a convention with an alternative name that conflicts\n    @dcc(\"UniqueConvention\", altnames={\"ConflictAlt\"})\n    def func3(start, asof, end, freq=None):\n        return simple_func(start, asof, end, freq)\n\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"AnotherConvention\", altnames={\"ConflictAlt\"})\n        def func4(start, asof, end, freq=None):\n            return simple_func(start, asof, end, freq)\n\n# --------------------------------------------------------------------------- #\n# Test 2: find method respects stripping and uppercasing\n# --------------------------------------------------------------------------- #\ndef test_dcc_registry_find_stripping_and_uppercasing():\n    # Register a convention with mixed case and spaces\n    @dcc(\"  MixedCase  \")\n    def mixed_func(start, asof, end, freq=None):\n        return Decimal(0)\n\n    # Should find by exact name\n    found_exact = DCCRegistry.find(\"  MixedCase  \")\n    assert found_exact is not None\n    assert found_exact.name == \"  MixedCase  \"\n\n    # Should find by stripped and uppercased name\n    found_stripped = DCCRegistry.find(\"mixedcase\")\n    assert found_stripped is not None\n    assert found_stripped.name == \"  MixedCase  \"\n\n    # Should not find a non-existent name\n    assert DCCRegistry.find(\"NonExistent\") is None\n\n# --------------------------------------------------------------------------- #\n# Test 3: calculate_fraction returns ZERO when dates are out of order\n# --------------------------------------------------------------------------- #\ndef test_dcc_calculate_fraction_boundary():\n    # Register a convention that simply returns the difference in days\n    @dcc(\"DiffDays\")\n    def diff_func(start, asof, end, freq=None):\n        return Decimal((end - start).days)\n\n    dcc_obj = DCCRegistry.find(\"DiffDays\")\n    assert dcc_obj is not None\n\n    start = datetime.date(2023, 1, 1)\n    end = datetime.date(2023, 1, 10)\n    asof_in_range = datetime.date(2023, 1, 5)\n    asof_before = datetime.date(2022, 12, 31)\n    asof_after = datetime.date(2023, 1, 11)\n\n    # Normal case: asof within range\n    assert dcc_obj.calculate_fraction(start, asof_in_range, end) == Decimal(9)\n\n    # Boundary case: asof before start\n    assert dcc_obj.calculate_fraction(start, asof_before, end) == ZERO\n\n    # Boundary case: asof after end\n    assert dcc_obj.calculate_fraction(start, asof_after, end) == ZERO\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3892152489861473
+}

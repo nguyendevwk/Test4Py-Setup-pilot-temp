@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-08ef4228-e978-4e71-969a-1badb0d3a102",
+  "object": "chat.completion",
+  "created": 1795075960,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import Resolver, _m\n\n# Helper to transform source code using Resolver\ndef transform(source: str, root: str, alias: dict[str, str], self_ty: str = \"\") -> str:\n    tree = ast.parse(source)\n    resolver = Resolver(root, alias, self_ty)\n    transformed = resolver.visit(tree)\n    ast.fix_missing_locations(transformed)\n    return ast.unparse(transformed)\n\ndef test_constant_string_evaluation(tmp_path):\n    # A string constant that is a valid expression should be replaced\n    src = \"x = '1 + 2'\"\n    result = transform(src, root=\"mymod\", alias={}, self_ty=\"\")\n    assert result.strip() == \"x = 3\"\n\n    # A string constant that is not a valid expression remains unchanged\n    src = \"y = 'invalid expression'\"\n    result = transform(src, root=\"mymod\", alias={}, self_ty=\"\")\n    assert result.strip() == \"y = 'invalid expression'\"\n\ndef test_name_alias_and_self_resolution(tmp_path):\n    # Alias mapping replaces a name with a new expression\n    src = \"a = foo\"\n    alias = {\"mymod.foo\": \"bar + 1\"}\n    result = transform(src, root=\"mymod\", alias=alias, self_ty=\"\")\n    assert result.strip() == \"a = bar + 1\"\n\n    # self_ty replacement turns the identifier into 'Self'\n    src = \"b = self_ty\"\n    result = transform(src, root=\"mymod\", alias={}, self_ty=\"self_ty\")\n    assert result.strip() == \"b = Self\"\n\ndef test_subscript_pep585_and_optional(tmp_path):\n    # PEP585 deprecated name should be replaced with the modern equivalent\n    src = \"c: typing.List[int]\"\n    alias = {\"mymod.typing.List\": \"typing.List\"}\n    result = transform(src, root=\"mymod\", alias=alias, self_ty=\"\")\n    assert \"typing.List[int]\" in result  # unchanged because alias maps to same\n\n    # Optional conversion: typing.Optional[int] -> int | None\n    src = \"d: typing.Optional[int]\"\n    alias = {\"mymod.typing.Optional\": \"typing.Optional\"}\n    result = transform(src, root=\"mymod\", alias=alias, self_ty=\"\")\n    assert \"int | None\" in result\n\n    # Union conversion: typing.Union[int, str] -> int | str\n    src = \"e: typing.Union[int, str]\"\n    alias = {\"mymod.typing.Union\": \"typing.Union\"}\n    result = transform(src, root=\"mymod\", alias=alias, self_ty=\"\")\n    assert \"int | str\" in result\n```",
+        "reasoning": "Need tests for Resolver. Use tmp_path to create code string, parse, transform. Test visit_Constant string eval, visit_Name alias, visit_Subscript PEP585."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046750517,
+    "prompt_tokens": 1063,
+    "prompt_time": 0.063351312,
+    "completion_tokens": 623,
+    "completion_time": 0.724546231,
+    "total_tokens": 1686,
+    "total_time": 0.787897543,
+    "completion_tokens_details": {
+      "reasoning_tokens": 36
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdtv41exb8j4txespygf24",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import Resolver, _m\n\n# Helper to transform source code using Resolver\ndef transform(source: str, root: str, alias: dict[str, str], self_ty: str = \"\") -> str:\n    tree = ast.parse(source)\n    resolver = Resolver(root, alias, self_ty)\n    transformed = resolver.visit(tree)\n    ast.fix_missing_locations(transformed)\n    return ast.unparse(transformed)\n\ndef test_constant_string_evaluation(tmp_path):\n    # A string constant that is a valid expression should be replaced\n    src = \"x = '1 + 2'\"\n    result = transform(src, root=\"mymod\", alias={}, self_ty=\"\")\n    assert result.strip() == \"x = 3\"\n\n    # A string constant that is not a valid expression remains unchanged\n    src = \"y = 'invalid expression'\"\n    result = transform(src, root=\"mymod\", alias={}, self_ty=\"\")\n    assert result.strip() == \"y = 'invalid expression'\"\n\ndef test_name_alias_and_self_resolution(tmp_path):\n    # Alias mapping replaces a name with a new expression\n    src = \"a = foo\"\n    alias = {\"mymod.foo\": \"bar + 1\"}\n    result = transform(src, root=\"mymod\", alias=alias, self_ty=\"\")\n    assert result.strip() == \"a = bar + 1\"\n\n    # self_ty replacement turns the identifier into 'Self'\n    src = \"b = self_ty\"\n    result = transform(src, root=\"mymod\", alias={}, self_ty=\"self_ty\")\n    assert result.strip() == \"b = Self\"\n\ndef test_subscript_pep585_and_optional(tmp_path):\n    # PEP585 deprecated name should be replaced with the modern equivalent\n    src = \"c: typing.List[int]\"\n    alias = {\"mymod.typing.List\": \"typing.List\"}\n    result = transform(src, root=\"mymod\", alias=alias, self_ty=\"\")\n    assert \"typing.List[int]\" in result  # unchanged because alias maps to same\n\n    # Optional conversion: typing.Optional[int] -> int | None\n    src = \"d: typing.Optional[int]\"\n    alias = {\"mymod.typing.Optional\": \"typing.Optional\"}\n    result = transform(src, root=\"mymod\", alias=alias, self_ty=\"\")\n    assert \"int | None\" in result\n\n    # Union conversion: typing.Union[int, str] -> int | str\n    src = \"e: typing.Union[int, str]\"\n    alias = {\"mymod.typing.Union\": \"typing.Union\"}\n    result = transform(src, root=\"mymod\", alias=alias, self_ty=\"\")\n    assert \"int | str\" in result\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1369574200361967
+}

@@ -1,0 +1,74 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_parse_class_with_attribute_docstring ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring...ser.parser__parse_from_object__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_class_with_attribut0')
+
+    def test_parse_class_with_attribute_docstring(tmp_path):
+        # Create a class with a docstring and an attribute docstring
+        class MyClass:
+            """This is the class docstring."""
+    
+            my_attr = 42
+            """Attribute docstring for my_attr."""
+    
+        # Parse the class
+        parsed = parse_from_object(MyClass, style=DocstringStyle.AUTO)
+    
+        # The class docstring should be parsed
+        assert parsed.short_description == "This is the class docstring."
+    
+        # The attribute docstring should be present
+>       assert any(
+            param.name == "my_attr" and param.description == "Attribute docstring for my_attr."
+            for param in parsed.params
+        ), "Attribute docstring not found in parsed params"
+
+test_generated.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x7fb8383b6c50>
+
+    assert any(
+>       param.name == "my_attr" and param.description == "Attribute docstring for my_attr."
+        for param in parsed.params
+    ), "Attribute docstring not found in parsed params"
+E   AttributeError: 'DocstringParam' object has no attribute 'name'
+
+test_generated.py:25: AttributeError
+__________________ test_parse_module_with_attribute_docstring __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring...ser.parser__parse_from_object__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_module_with_attribu0')
+
+    def test_parse_module_with_attribute_docstring(tmp_path):
+        # Dynamically create a module with an attribute docstring
+        mod = types.ModuleType("temp_mod")
+        mod.__doc__ = "Module docstring."
+        mod.some_var = "value"
+>       mod.some_var.__doc__ = "Docstring for some_var."
+E       AttributeError: 'str' object attribute '__doc__' is read-only
+
+test_generated.py:35: AttributeError
+_____________________ test_parse_object_without_docstring ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring...ser.parser__parse_from_object__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_object_without_docs0')
+
+    def test_parse_object_without_docstring(tmp_path):
+        # An integer has no docstring (None)
+        obj = 123
+    
+        # Parsing should not raise and return an empty Docstring
+        parsed = parse_from_object(obj, style=DocstringStyle.AUTO)
+    
+        assert isinstance(parsed, Docstring)
+>       assert parsed.short_description == ""
+E       AssertionError: assert 'int([x]) -> integer' == ''
+E         
+E         + int([x]) -> integer
+
+test_generated.py:58: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_class_with_attribute_docstring - Attribu...
+FAILED test_generated.py::test_parse_module_with_attribute_docstring - Attrib...
+FAILED test_generated.py::test_parse_object_without_docstring - AssertionErro...
+3 failed in 0.16s

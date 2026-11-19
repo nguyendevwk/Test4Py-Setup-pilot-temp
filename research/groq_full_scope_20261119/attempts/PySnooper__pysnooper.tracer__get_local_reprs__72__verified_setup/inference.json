@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-9d828d61-5185-4ac0-aafe-ecd0c2b029e2",
+  "object": "chat.completion",
+  "created": 1795077807,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport inspect\nimport collections\nimport pytest\nfrom pysnooper.tracer import get_local_reprs\nfrom pysnooper.variables import CommonVariable, Exploding, BaseVariable\nfrom pysnooper import utils\n\ndef test_get_local_reprs_order_and_repr(tmp_path):\n    # Define a function with several local variables\n    def sample():\n        a = 1\n        b = \"hello\"\n        c = [1, 2, 3]\n        d = {\"key\": \"value\"}\n        e = 3.14159\n        return locals()\n\n    # Capture the frame of the function call\n    frame = inspect.currentframe()\n    # Call get_local_reprs on the frame of sample()\n    result = get_local_reprs(frame, max_length=10, normalize=True)\n\n    # The result should be an OrderedDict preserving the order of co_varnames\n    # plus any additional locals (here all are defined in the function)\n    expected_keys = [\"a\", \"b\", \"c\", \"d\", \"e\"]\n    assert list(result.keys()) == expected_keys\n\n    # Check that the reprs are shortish and normalized\n    assert result[\"a\"] == \"1\"\n    assert result[\"b\"] == \"'hello'\"\n    assert result[\"c\"] == \"[1, 2, 3]\"\n    assert result[\"d\"] == \"{'key': 'value'}\"\n    assert result[\"e\"] == \"3.14159\"\n\ndef test_get_local_reprs_with_watch_variable(tmp_path):\n    # Create a dummy watch variable that returns a dict of items\n    class DummyWatch:\n        def items(self, frame, normalize):\n            return {\"watch1\": \"value1\", \"watch2\": \"value2\"}\n\n    # Define a function with locals\n    def sample():\n        x = 42\n        y = \"test\"\n        return locals()\n\n    frame = inspect.currentframe()\n    watch = DummyWatch()\n    result = get_local_reprs(frame, watch=(watch,), normalize=False)\n\n    # The watch items should be merged into the result\n    assert \"watch1\" in result\n    assert \"watch2\" in result\n    assert result[\"watch1\"] == \"value1\"\n    assert result[\"watch2\"] == \"value2\"\n\n    # The original locals should still be present\n    assert \"x\" in result and result[\"x\"] == \"42\"\n    assert \"y\" in result and result[\"y\"] == \"'test'\"\n\ndef test_get_local_reprs_invalid_watch_raises(tmp_path):\n    # Passing a non-iterable watch should raise a TypeError\n    def sample():\n        a = 1\n        return locals()\n\n    frame = inspect.currentframe()\n    with pytest.raises(TypeError):\n        get_local_reprs(frame, watch=42, normalize=False)\n```",
+        "reasoning": "We need to test get_local_reprs. We'll create a function that defines locals and call get_local_reprs on its frame. Use tmp_path? Not needed. We'll test normal behavior: ordering, repr. Also test watch variable: use a dummy variable class with items method. Also test error: passing non-callable? maybe custom_repr list. We'll just test that passing custom_repr list works. Use pytest.raises for invalid watch? maybe watch expects iterable of variables. If we pass int, it will error. We'll test that."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052335668,
+    "prompt_tokens": 413,
+    "prompt_time": 0.023032241,
+    "completion_tokens": 703,
+    "completion_time": 0.798627894,
+    "total_tokens": 1116,
+    "total_time": 0.821660135,
+    "completion_tokens_details": {
+      "reasoning_tokens": 108
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfk6y9ec083bz5xmbcybbe",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport inspect\nimport collections\nimport pytest\nfrom pysnooper.tracer import get_local_reprs\nfrom pysnooper.variables import CommonVariable, Exploding, BaseVariable\nfrom pysnooper import utils\n\ndef test_get_local_reprs_order_and_repr(tmp_path):\n    # Define a function with several local variables\n    def sample():\n        a = 1\n        b = \"hello\"\n        c = [1, 2, 3]\n        d = {\"key\": \"value\"}\n        e = 3.14159\n        return locals()\n\n    # Capture the frame of the function call\n    frame = inspect.currentframe()\n    # Call get_local_reprs on the frame of sample()\n    result = get_local_reprs(frame, max_length=10, normalize=True)\n\n    # The result should be an OrderedDict preserving the order of co_varnames\n    # plus any additional locals (here all are defined in the function)\n    expected_keys = [\"a\", \"b\", \"c\", \"d\", \"e\"]\n    assert list(result.keys()) == expected_keys\n\n    # Check that the reprs are shortish and normalized\n    assert result[\"a\"] == \"1\"\n    assert result[\"b\"] == \"'hello'\"\n    assert result[\"c\"] == \"[1, 2, 3]\"\n    assert result[\"d\"] == \"{'key': 'value'}\"\n    assert result[\"e\"] == \"3.14159\"\n\ndef test_get_local_reprs_with_watch_variable(tmp_path):\n    # Create a dummy watch variable that returns a dict of items\n    class DummyWatch:\n        def items(self, frame, normalize):\n            return {\"watch1\": \"value1\", \"watch2\": \"value2\"}\n\n    # Define a function with locals\n    def sample():\n        x = 42\n        y = \"test\"\n        return locals()\n\n    frame = inspect.currentframe()\n    watch = DummyWatch()\n    result = get_local_reprs(frame, watch=(watch,), normalize=False)\n\n    # The watch items should be merged into the result\n    assert \"watch1\" in result\n    assert \"watch2\" in result\n    assert result[\"watch1\"] == \"value1\"\n    assert result[\"watch2\"] == \"value2\"\n\n    # The original locals should still be present\n    assert \"x\" in result and result[\"x\"] == \"42\"\n    assert \"y\" in result and result[\"y\"] == \"'test'\"\n\ndef test_get_local_reprs_invalid_watch_raises(tmp_path):\n    # Passing a non-iterable watch should raise a TypeError\n    def sample():\n        a = 1\n        return locals()\n\n    frame = inspect.currentframe()\n    with pytest.raises(TypeError):\n        get_local_reprs(frame, watch=42, normalize=False)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2012704130029306
+}

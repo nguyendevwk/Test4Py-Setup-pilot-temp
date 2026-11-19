@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-0a3db9a6-c22a-470d-b5a8-4474708e68dc",
+  "object": "chat.completion",
+  "created": 1795077969,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.utils.snippet import find_variables\n\ndef test_find_variables_removes_single_let_and_yields_name():\n    source = \"\"\"\ndef foo():\n    let x = 1\n    return x\n\"\"\"\n    tree = ast.parse(source)\n    names = list(find_variables(tree))\n    assert names == [\"x\"]\n    # After removal, the body should contain only the return statement\n    body = tree.body[0].body\n    assert len(body) == 1\n    assert isinstance(body[0], ast.Return)\n    # Ensure no remaining let calls\n    for node in ast.walk(tree):\n        if isinstance(node, ast.Call):\n            assert not (isinstance(node.func, ast.Name) and node.func.id == \"let\")\n\ndef test_find_variables_handles_multiple_lets_and_other_calls():\n    source = \"\"\"\ndef bar():\n    let a = 2\n    let b = 3\n    print(a, b)\n\"\"\"\n    tree = ast.parse(source)\n    names = list(find_variables(tree))\n    assert set(names) == {\"a\", \"b\"}\n    # Body should contain only the print call\n    body = tree.body[0].body\n    assert len(body) == 1\n    assert isinstance(body[0], ast.Expr)\n    assert isinstance(body[0].value, ast.Call)\n    # No let calls remain\n    for node in ast.walk(tree):\n        if isinstance(node, ast.Call):\n            assert not (isinstance(node.func, ast.Name) and node.func.id == \"let\")\n\ndef test_find_variables_no_let_calls_leaves_tree_unchanged():\n    source = \"\"\"\ndef baz():\n    x = 5\n    y = x + 1\n    return y\n\"\"\"\n    tree = ast.parse(source)\n    original_source = pyast.unparse(tree)\n    names = list(find_variables(tree))\n    assert names == []\n    # Tree should be unchanged\n    new_source = pyast.unparse(tree)\n    assert new_source == original_source\n```",
+        "reasoning": "We need tests for find_variables. We need to create AST from source using typed_ast? Use ast.parse? typed_ast.ast3. We'll import find_variables. Test normal: let x=... removed. Boundary: no let calls. Error: let with non Name? but function expects Name. We can test that it yields variable names and removes nodes. Use get_source? Not needed. We'll parse code with let calls. Use typed_ast.ast3.parse? Let's check. Use typed_ast.ast3.parse. We'll create code string. Then call find_variables. After, check that tree no longer has let calls. Use ast.walk to ensure no ast.Call with func Name 'let'. Also check yielded names. Third test: multiple let calls. Also test that if let not present, nothing removed. Use tmp_path? Not needed. Provide three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05348545,
+    "prompt_tokens": 360,
+    "prompt_time": 0.119512029,
+    "completion_tokens": 612,
+    "completion_time": 1.051778642,
+    "total_tokens": 972,
+    "total_time": 1.171290671,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 172
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfr3yvexhv6n5fxbwm8yhy",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.utils.snippet import find_variables\n\ndef test_find_variables_removes_single_let_and_yields_name():\n    source = \"\"\"\ndef foo():\n    let x = 1\n    return x\n\"\"\"\n    tree = ast.parse(source)\n    names = list(find_variables(tree))\n    assert names == [\"x\"]\n    # After removal, the body should contain only the return statement\n    body = tree.body[0].body\n    assert len(body) == 1\n    assert isinstance(body[0], ast.Return)\n    # Ensure no remaining let calls\n    for node in ast.walk(tree):\n        if isinstance(node, ast.Call):\n            assert not (isinstance(node.func, ast.Name) and node.func.id == \"let\")\n\ndef test_find_variables_handles_multiple_lets_and_other_calls():\n    source = \"\"\"\ndef bar():\n    let a = 2\n    let b = 3\n    print(a, b)\n\"\"\"\n    tree = ast.parse(source)\n    names = list(find_variables(tree))\n    assert set(names) == {\"a\", \"b\"}\n    # Body should contain only the print call\n    body = tree.body[0].body\n    assert len(body) == 1\n    assert isinstance(body[0], ast.Expr)\n    assert isinstance(body[0].value, ast.Call)\n    # No let calls remain\n    for node in ast.walk(tree):\n        if isinstance(node, ast.Call):\n            assert not (isinstance(node.func, ast.Name) and node.func.id == \"let\")\n\ndef test_find_variables_no_let_calls_leaves_tree_unchanged():\n    source = \"\"\"\ndef baz():\n    x = 5\n    y = x + 1\n    return y\n\"\"\"\n    tree = ast.parse(source)\n    original_source = pyast.unparse(tree)\n    names = list(find_variables(tree))\n    assert names == []\n    # Tree should be unchanged\n    new_source = pyast.unparse(tree)\n    assert new_source == original_source\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5787086060154252
+}

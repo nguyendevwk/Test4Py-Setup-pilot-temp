@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-100c2b56-cdf7-44f1-981d-5646d73967da",
+  "object": "chat.completion",
+  "created": 1795076032,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as ast3\nimport pytest\nfrom py_backwards.utils.snippet import VariablesReplacer\n\n\ndef test_name_and_attribute_replacement():\n    source = \"\"\"\ndef foo(x):\n    y = x + 1\n    return y\n\"\"\"\n    tree = ast3.parse(source)\n    vars_map = {\"foo\": \"bar\", \"x\": \"z\", \"y\": \"w\"}\n    VariablesReplacer.replace(tree, vars_map)\n    # Verify function name replaced\n    func = next(node for node in ast3.walk(tree) if isinstance(node, ast3.FunctionDef))\n    assert func.name == \"bar\"\n    # Verify argument name replaced\n    arg = func.args.args[0]\n    assert arg.arg == \"z\"\n    # Verify variable usage replaced\n    assign = next(node for node in ast3.walk(tree) if isinstance(node, ast3.Assign))\n    target = assign.targets[0]\n    assert isinstance(target, ast3.Name) and target.id == \"w\"\n    value = assign.value\n    assert isinstance(value, ast3.BinOp)\n    left = value.left\n    assert isinstance(left, ast3.Name) and left.id == \"z\"\n\n\ndef test_import_from_and_alias_replacement():\n    source = \"from module.sub import foo as bar\"\n    tree = ast3.parse(source)\n    vars_map = {\"module\": \"pkg\", \"sub\": \"mod\", \"foo\": \"baz\", \"bar\": \"qux\"}\n    VariablesReplacer.replace(tree, vars_map)\n    import_node = next(node for node in ast3.walk(tree) if isinstance(node, ast3.ImportFrom))\n    assert import_node.module == \"pkg.mod\"\n    alias = import_node.names[0]\n    assert alias.name == \"baz\"\n    assert alias.asname == \"qux\"\n\n\ndef test_unmapped_variables_remain_unchanged():\n    source = \"a = 1\\nb = a + 2\"\n    tree = ast3.parse(source)\n    vars_map = {\"a\": \"x\"}  # 'b' not mapped\n    VariablesReplacer.replace(tree, vars_map)\n    assign_a = next(node for node in ast3.walk(tree) if isinstance(node, ast3.Assign) and node.targets[0].id == \"x\")\n    assign_b = next(node for node in ast3.walk(tree) if isinstance(node, ast3.Assign) and node.targets[0].id == \"b\")\n    assert assign_a is not None\n    assert assign_b is not None\n    # Ensure 'b' remains unchanged\n    assert assign_b.targets[0].id == \"b\"\n    # Ensure 'a' replaced with 'x'\n    assert assign_a.targets[0].id == \"x\"\n```",
+        "reasoning": "We need three tests. Use ast.parse to get tree, apply VariablesReplacer.replace. Test normal replacement of Name, FunctionDef name, ImportFrom module. Also test error: variable not in dict should remain. Use tmp_path? not needed. Provide assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052174509,
+    "prompt_tokens": 1045,
+    "prompt_time": 0.051771321,
+    "completion_tokens": 634,
+    "completion_time": 0.868527816,
+    "total_tokens": 1679,
+    "total_time": 0.920299137,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 54
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sdx0vkex4v0pc8dqqk72qc",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as ast3\nimport pytest\nfrom py_backwards.utils.snippet import VariablesReplacer\n\n\ndef test_name_and_attribute_replacement():\n    source = \"\"\"\ndef foo(x):\n    y = x + 1\n    return y\n\"\"\"\n    tree = ast3.parse(source)\n    vars_map = {\"foo\": \"bar\", \"x\": \"z\", \"y\": \"w\"}\n    VariablesReplacer.replace(tree, vars_map)\n    # Verify function name replaced\n    func = next(node for node in ast3.walk(tree) if isinstance(node, ast3.FunctionDef))\n    assert func.name == \"bar\"\n    # Verify argument name replaced\n    arg = func.args.args[0]\n    assert arg.arg == \"z\"\n    # Verify variable usage replaced\n    assign = next(node for node in ast3.walk(tree) if isinstance(node, ast3.Assign))\n    target = assign.targets[0]\n    assert isinstance(target, ast3.Name) and target.id == \"w\"\n    value = assign.value\n    assert isinstance(value, ast3.BinOp)\n    left = value.left\n    assert isinstance(left, ast3.Name) and left.id == \"z\"\n\n\ndef test_import_from_and_alias_replacement():\n    source = \"from module.sub import foo as bar\"\n    tree = ast3.parse(source)\n    vars_map = {\"module\": \"pkg\", \"sub\": \"mod\", \"foo\": \"baz\", \"bar\": \"qux\"}\n    VariablesReplacer.replace(tree, vars_map)\n    import_node = next(node for node in ast3.walk(tree) if isinstance(node, ast3.ImportFrom))\n    assert import_node.module == \"pkg.mod\"\n    alias = import_node.names[0]\n    assert alias.name == \"baz\"\n    assert alias.asname == \"qux\"\n\n\ndef test_unmapped_variables_remain_unchanged():\n    source = \"a = 1\\nb = a + 2\"\n    tree = ast3.parse(source)\n    vars_map = {\"a\": \"x\"}  # 'b' not mapped\n    VariablesReplacer.replace(tree, vars_map)\n    assign_a = next(node for node in ast3.walk(tree) if isinstance(node, ast3.Assign) and node.targets[0].id == \"x\")\n    assign_b = next(node for node in ast3.walk(tree) if isinstance(node, ast3.Assign) and node.targets[0].id == \"b\")\n    assert assign_a is not None\n    assert assign_b is not None\n    # Ensure 'b' remains unchanged\n    assert assign_b.targets[0].id == \"b\"\n    # Ensure 'a' replaced with 'x'\n    assert assign_a.targets[0].id == \"x\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.227612866961863
+}

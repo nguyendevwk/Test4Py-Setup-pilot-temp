@@ -9,6 +9,8 @@ def load_causal_model(settings, torch, model_class, quantization_class):
         raise ValueError('quantization must be nf4 or none')
     opts = dict(revision=settings['model_revision'], device_map={'': 'cuda:0'},
                 torch_dtype=torch.float16, low_cpu_mem_usage=True)
+    from pilot.attention import configure_attention
+    opts.update(configure_attention(settings))
     if mode == 'nf4':
         opts['quantization_config'] = quantization_class(load_in_4bit=True,
             bnb_4bit_compute_dtype=torch.float16, bnb_4bit_quant_type='nf4',

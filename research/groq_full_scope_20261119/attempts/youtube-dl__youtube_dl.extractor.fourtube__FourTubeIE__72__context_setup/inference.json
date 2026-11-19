@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-77c968ab-6dd2-458e-b8a4-d36a8dd1f752",
+  "object": "chat.completion",
+  "created": 1795077800,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.fourtube import FourTubeIE, FourTubeBaseIE\n\n# Helper subclass that overrides network calls to return controlled HTML\nclass TestFourTubeIE(FourTubeIE):\n    def __init__(self, html):\n        super().__init__()\n        self._html = html\n\n    def _download_webpage(self, url, video_id, note=None, errnote=None, headers=None, data=None, timeout=None, *, fatal=True):\n        # Return the pre‑supplied HTML regardless of URL\n        return self._html\n\n    def _download_json(self, url, video_id, data=None, headers=None, note=None, timeout=None, *, fatal=True):\n        # Return a fake token JSON mapping format to URL\n        return {\"1080\": \"https://example.com/1080.mp4\", \"720\": \"https://example.com/720.mp4\"}\n\n# Sample HTML containing all required meta tags and a button with media id\nBASE_HTML = \"\"\"\n<html>\n<head>\n<meta name=\"name\" content=\"Sample Video Title\">\n<meta name=\"uploadDate\" content=\"2021-01-01T12:00:00Z\">\n<meta name=\"thumbnailUrl\" content=\"https://example.com/thumb.jpg\">\n<meta name=\"duration\" content=\"PT5M30S\">\n<meta itemprop=\"interactionCount\" content=\"UserPlays:1,234\">\n<meta itemprop=\"interactionCount\" content=\"UserLikes:56\">\n</head>\n<body>\n<a class=\"item-to-subscribe\" href=\"/channel/awesome-channel\" title=\"Go to Awesome Channel page\">Awesome Channel</a>\n<ul class=\"list\">\n<li><a href=\"#\">Tag1</a></li>\n<li><a href=\"#\">Tag2</a></li>\n</ul>\n<button data-id=\"12345\" data-quality=\"1080\"></button>\n<button data-quality=\"720\"></button>\n</body>\n</html>\n\"\"\"\n\n# Test normal extraction with all fields present\ndef test_four_tube_ie_normal_extraction():\n    ie = TestFourTubeIE(BASE_HTML)\n    result = ie._real_extract(\"http://www.4tube.com/videos/123456/sample-video\")\n    assert result[\"id\"] == \"123456\"\n    assert result[\"title\"] == \"Sample Video Title\"\n    assert result[\"thumbnail\"] == \"https://example.com/thumb.jpg\"\n    assert result[\"uploader\"] == \"Awesome Channel\"\n    assert result[\"uploader_id\"] == \"awesome-channel\"\n    assert result[\"view_count\"] == 1234\n    assert result[\"like_count\"] == 56\n    assert result[\"duration\"] == 330  # 5 minutes 30 seconds\n    assert result[\"age_limit\"] == 18\n    # Formats should contain two entries with correct URLs\n    formats = result[\"formats\"]\n    assert len(formats) == 2\n    urls = {f[\"format_id\"]: f[\"url\"] for f in formats}\n    assert urls[\"1080p\"] == \"https://example.com/1080.mp4\"\n    assert urls[\"720p\"] == \"https://example.com/720.mp4\"\n\n# Test extraction when optional fields are missing (e.g., uploader, categories)\ndef test_four_tube_ie_missing_optional():\n    html = BASE_HTML.replace('Awesome Channel', '').replace('Tag1', '').replace('Tag2', '')\n    ie = TestFourTubeIE(html)\n    result = ie._real_extract(\"http://www.4tube.com/videos/654321/another-video\")\n    assert result[\"uploader\"] is None\n    assert result[\"uploader_id\"] is None\n    assert result[\"categories\"] is None\n\n# Test that missing required meta 'name' raises an error\ndef test_four_tube_ie_missing_required():\n    html = BASE_HTML.replace('<meta name=\"name\"', '<meta name=\"title\"')\n    ie = TestFourTubeIE(html)\n    with pytest.raises(Exception) as excinfo:\n        ie._real_extract(\"http://www.4tube.com/videos/111111/missing-title\")\n    assert \"name\" in str(excinfo.value)\n```",
+        "reasoning": "We need tests for FourTubeIE. But we cannot download real webpage. We can simulate by monkeypatching download methods. But no mocks allowed. So we need to use actual network? Not allowed. So we need to test parsing logic with sample HTML. We can instantiate FourTubeIE and override _download_webpage to return sample HTML. But that's monkeypatching target? It's allowed? They said no mocks of target. But monkeypatching method is okay? It's not mocking external. We'll use subclass to override. We'll test _real_extract with sample HTML. Provide minimal HTML containing needed tags. Use tmp_path? Not needed. Provide three tests: normal extraction, missing optional fields, error when required missing. Use pytest.raises for missing required? In code, missing title will raise? _html_search_meta likely raises if not found. So test that missing title raises. We'll create subclass."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046144586,
+    "prompt_tokens": 1725,
+    "prompt_time": 0.124487223,
+    "completion_tokens": 1045,
+    "completion_time": 1.184450421,
+    "total_tokens": 2770,
+    "total_time": 1.308937644,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 181
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfjz71e88aj4vprw9wz3x7",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.fourtube import FourTubeIE, FourTubeBaseIE\n\n# Helper subclass that overrides network calls to return controlled HTML\nclass TestFourTubeIE(FourTubeIE):\n    def __init__(self, html):\n        super().__init__()\n        self._html = html\n\n    def _download_webpage(self, url, video_id, note=None, errnote=None, headers=None, data=None, timeout=None, *, fatal=True):\n        # Return the pre‑supplied HTML regardless of URL\n        return self._html\n\n    def _download_json(self, url, video_id, data=None, headers=None, note=None, timeout=None, *, fatal=True):\n        # Return a fake token JSON mapping format to URL\n        return {\"1080\": \"https://example.com/1080.mp4\", \"720\": \"https://example.com/720.mp4\"}\n\n# Sample HTML containing all required meta tags and a button with media id\nBASE_HTML = \"\"\"\n<html>\n<head>\n<meta name=\"name\" content=\"Sample Video Title\">\n<meta name=\"uploadDate\" content=\"2021-01-01T12:00:00Z\">\n<meta name=\"thumbnailUrl\" content=\"https://example.com/thumb.jpg\">\n<meta name=\"duration\" content=\"PT5M30S\">\n<meta itemprop=\"interactionCount\" content=\"UserPlays:1,234\">\n<meta itemprop=\"interactionCount\" content=\"UserLikes:56\">\n</head>\n<body>\n<a class=\"item-to-subscribe\" href=\"/channel/awesome-channel\" title=\"Go to Awesome Channel page\">Awesome Channel</a>\n<ul class=\"list\">\n<li><a href=\"#\">Tag1</a></li>\n<li><a href=\"#\">Tag2</a></li>\n</ul>\n<button data-id=\"12345\" data-quality=\"1080\"></button>\n<button data-quality=\"720\"></button>\n</body>\n</html>\n\"\"\"\n\n# Test normal extraction with all fields present\ndef test_four_tube_ie_normal_extraction():\n    ie = TestFourTubeIE(BASE_HTML)\n    result = ie._real_extract(\"http://www.4tube.com/videos/123456/sample-video\")\n    assert result[\"id\"] == \"123456\"\n    assert result[\"title\"] == \"Sample Video Title\"\n    assert result[\"thumbnail\"] == \"https://example.com/thumb.jpg\"\n    assert result[\"uploader\"] == \"Awesome Channel\"\n    assert result[\"uploader_id\"] == \"awesome-channel\"\n    assert result[\"view_count\"] == 1234\n    assert result[\"like_count\"] == 56\n    assert result[\"duration\"] == 330  # 5 minutes 30 seconds\n    assert result[\"age_limit\"] == 18\n    # Formats should contain two entries with correct URLs\n    formats = result[\"formats\"]\n    assert len(formats) == 2\n    urls = {f[\"format_id\"]: f[\"url\"] for f in formats}\n    assert urls[\"1080p\"] == \"https://example.com/1080.mp4\"\n    assert urls[\"720p\"] == \"https://example.com/720.mp4\"\n\n# Test extraction when optional fields are missing (e.g., uploader, categories)\ndef test_four_tube_ie_missing_optional():\n    html = BASE_HTML.replace('Awesome Channel', '').replace('Tag1', '').replace('Tag2', '')\n    ie = TestFourTubeIE(html)\n    result = ie._real_extract(\"http://www.4tube.com/videos/654321/another-video\")\n    assert result[\"uploader\"] is None\n    assert result[\"uploader_id\"] is None\n    assert result[\"categories\"] is None\n\n# Test that missing required meta 'name' raises an error\ndef test_four_tube_ie_missing_required():\n    html = BASE_HTML.replace('<meta name=\"name\"', '<meta name=\"title\"')\n    ie = TestFourTubeIE(html)\n    with pytest.raises(Exception) as excinfo:\n        ie._real_extract(\"http://www.4tube.com/videos/111111/missing-title\")\n    assert \"name\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.6719597739866003
+}

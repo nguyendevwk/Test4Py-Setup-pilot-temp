@@ -1,0 +1,67 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_match_prefers_q_and_specificity _____________________
+
+    def test_match_prefers_q_and_specificity():
+        # Accept header with two entries: one with higher q, one more specific
+>       accept = make_accept_list("text/*;q=0.8", "text/html;q=0.5")
+
+test_generated.py:11: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mimes = ('text/*;q=0.8', 'text/html;q=0.5')
+
+    def make_accept_list(*mimes: str):
+        # Each mime string is parsed into a MediaType by AcceptList constructor
+>       return AcceptList(*mimes)
+E       TypeError: list expected at most 1 argument, got 2
+
+test_generated.py:7: TypeError
+_____________________ test_match_with_wildcards_and_order ______________________
+
+    def test_match_with_wildcards_and_order():
+        # Accept header with wildcard and specific type
+>       accept = make_accept_list("image/*;q=0.7", "image/png;q=0.9")
+
+test_generated.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mimes = ('image/*;q=0.7', 'image/png;q=0.9')
+
+    def make_accept_list(*mimes: str):
+        # Each mime string is parsed into a MediaType by AcceptList constructor
+>       return AcceptList(*mimes)
+E       TypeError: list expected at most 1 argument, got 2
+
+test_generated.py:7: TypeError
+__________________ test_match_no_match_and_wildcard_disabled ___________________
+
+    def test_match_no_match_and_wildcard_disabled():
+        # Accept header with only a wildcard
+        accept = make_accept_list("*/*;q=0.5")
+        # Search for a type not present
+>       result = accept.match("application/xml")
+
+test_generated.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages/sanic/headers.py:284: in match
+    a = sorted(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <enumerate object at 0x7f1af0705ec0>
+
+    a = sorted(
+        (-acc.q, i, j, mime, acc)
+        for j, acc in enumerate(self)
+        if accept_wildcards or not acc.has_wildcard
+        for i, mime in enumerate(mimes)
+>       if acc.match(mime)
+    )
+E   AttributeError: 'str' object has no attribute 'match'
+
+../../../../groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages/sanic/headers.py:289: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_match_prefers_q_and_specificity - TypeError: l...
+FAILED test_generated.py::test_match_with_wildcards_and_order - TypeError: li...
+FAILED test_generated.py::test_match_no_match_and_wildcard_disabled - Attribu...
+3 failed in 0.35s

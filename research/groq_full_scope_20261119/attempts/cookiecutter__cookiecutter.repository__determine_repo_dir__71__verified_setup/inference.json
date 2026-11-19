@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-7144fdab-c543-4fe5-a8e3-69a2848f1663",
+  "object": "chat.completion",
+  "created": 1795075971,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport zipfile\nimport shutil\nfrom pathlib import Path\nimport pytest\nfrom cookiecutter.repository import determine_repo_dir\nfrom cookiecutter.exceptions import RepositoryNotFound\n\ndef test_determine_repo_dir_local(tmp_path):\n    # Create a local template directory with cookiecutter.json\n    template_dir = tmp_path / \"my_template\"\n    template_dir.mkdir()\n    (template_dir / \"cookiecutter.json\").write_text('{\"project_name\":\"test\"}')\n    # Call determine_repo_dir with the local path\n    repo_dir, cleanup = determine_repo_dir(\n        template=str(template_dir),\n        abbreviations={},\n        clone_to_dir=tmp_path,\n        checkout=None,\n        no_input=True,\n        password=None,\n        directory=None,\n    )\n    assert repo_dir == str(template_dir)\n    assert cleanup is False\n\ndef test_determine_repo_dir_zip(tmp_path):\n    # Create a zip file containing cookiecutter.json\n    zip_path = tmp_path / \"template.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        zf.writestr(\"cookiecutter.json\", '{\"project_name\":\"zip\"}')\n    # Call determine_repo_dir with the zip file path\n    repo_dir, cleanup = determine_repo_dir(\n        template=str(zip_path),\n        abbreviations={},\n        clone_to_dir=tmp_path,\n        checkout=None,\n        no_input=True,\n        password=None,\n        directory=None,\n    )\n    # The zip should be extracted into a temporary directory\n    assert Path(repo_dir).is_dir()\n    assert (Path(repo_dir) / \"cookiecutter.json\").exists()\n    assert cleanup is True\n\ndef test_determine_repo_dir_not_found(tmp_path):\n    # Provide a non-existent path\n    non_existent = tmp_path / \"does_not_exist\"\n    with pytest.raises(RepositoryNotFound) as excinfo:\n        determine_repo_dir(\n            template=str(non_existent),\n            abbreviations={},\n            clone_to_dir=tmp_path,\n            checkout=None,\n            no_input=True,\n            password=None,\n            directory=None,\n        )\n    assert str(non_existent) in str(excinfo.value)\n```",
+        "reasoning": "We need to test determine_repo_dir. We can create temporary directories and files. Use tmp_path. Need to test normal: local path with cookiecutter.json. Boundary: zip file? But unzip requires actual zip. We can create a zip file with cookiecutter.json. Use cookiecutter.zipfile.unzip? But we can simulate by creating a zip and calling determine_repo_dir; unzip will extract. Need to ensure unzip works. Use tmp_path. For error: invalid path leads to RepositoryNotFound. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054121558,
+    "prompt_tokens": 810,
+    "prompt_time": 0.041797689,
+    "completion_tokens": 567,
+    "completion_time": 0.64380966,
+    "total_tokens": 1377,
+    "total_time": 0.685607349,
+    "completion_tokens_details": {
+      "reasoning_tokens": 109
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdv64ge97rgxm1q60qq1ma",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport zipfile\nimport shutil\nfrom pathlib import Path\nimport pytest\nfrom cookiecutter.repository import determine_repo_dir\nfrom cookiecutter.exceptions import RepositoryNotFound\n\ndef test_determine_repo_dir_local(tmp_path):\n    # Create a local template directory with cookiecutter.json\n    template_dir = tmp_path / \"my_template\"\n    template_dir.mkdir()\n    (template_dir / \"cookiecutter.json\").write_text('{\"project_name\":\"test\"}')\n    # Call determine_repo_dir with the local path\n    repo_dir, cleanup = determine_repo_dir(\n        template=str(template_dir),\n        abbreviations={},\n        clone_to_dir=tmp_path,\n        checkout=None,\n        no_input=True,\n        password=None,\n        directory=None,\n    )\n    assert repo_dir == str(template_dir)\n    assert cleanup is False\n\ndef test_determine_repo_dir_zip(tmp_path):\n    # Create a zip file containing cookiecutter.json\n    zip_path = tmp_path / \"template.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        zf.writestr(\"cookiecutter.json\", '{\"project_name\":\"zip\"}')\n    # Call determine_repo_dir with the zip file path\n    repo_dir, cleanup = determine_repo_dir(\n        template=str(zip_path),\n        abbreviations={},\n        clone_to_dir=tmp_path,\n        checkout=None,\n        no_input=True,\n        password=None,\n        directory=None,\n    )\n    # The zip should be extracted into a temporary directory\n    assert Path(repo_dir).is_dir()\n    assert (Path(repo_dir) / \"cookiecutter.json\").exists()\n    assert cleanup is True\n\ndef test_determine_repo_dir_not_found(tmp_path):\n    # Provide a non-existent path\n    non_existent = tmp_path / \"does_not_exist\"\n    with pytest.raises(RepositoryNotFound) as excinfo:\n        determine_repo_dir(\n            template=str(non_existent),\n            abbreviations={},\n            clone_to_dir=tmp_path,\n            checkout=None,\n            no_input=True,\n            password=None,\n            directory=None,\n        )\n    assert str(non_existent) in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0175942750065587
+}

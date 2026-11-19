@@ -1,0 +1,57 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_split_command_handles_escaped_spaces_and_unicode _____________
+
+    def test_split_command_handles_escaped_spaces_and_unicode():
+        g = Generic()
+        # command with escaped space and unicode character
+        cmd = r'echo "Hello\ World" \u2603'
+        parts = g.split_command(cmd)
+        # shlex should split into ['echo', 'Hello World', '☃']
+>       assert parts == ['echo', 'Hello World', '☃']
+E       AssertionError: assert ['echo', 'Hel...rld', 'u2603'] == ['echo', 'Hello World', '☃']
+E         
+E         At index 1 diff: 'Hello\\ World' != 'Hello World'
+E         Use -v to get more diff
+
+test_generated.py:38: AssertionError
+_________________ test_info_handles_exception_from_get_version _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3e867ed000>
+
+    def test_info_handles_exception_from_get_version(monkeypatch):
+        g = Generic()
+        # monkeypatch _get_version to raise an exception
+        def raise_exc():
+            raise RuntimeError('version not found')
+        monkeypatch.setattr(g, '_get_version', raise_exc)
+        # capture warn output
+        messages = []
+        def fake_warn(msg):
+            messages.append(msg)
+        monkeypatch.setattr(warn, '__call__', fake_warn)
+        # call info and verify it returns only friendly_name
+        result = g.info()
+        assert result == 'Generic Shell'
+        # verify that warn was called with the expected message
+>       assert any('Could not determine shell version' in m for m in messages)
+E       assert False
+E        +  where False = any(<generator object test_info_handles_exception_from_get_version.<locals>.<genexpr> at 0x7f3e869bbbc0>)
+
+test_generated.py:57: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[41m[37m[1m[WARN] Could not determine shell version: version not found[0m
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_split_command_handles_escaped_spaces_and_unicode
+FAILED test_generated.py::test_info_handles_exception_from_get_version - asse...
+2 failed, 1 passed, 2 warnings in 0.15s

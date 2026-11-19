@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-5b9a4c93-4f3f-48e8-98b5-4489292c11c4",
+  "object": "chat.completion",
+  "created": 1795079622,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKBaseIE\nfrom youtube_dl.utils import ExtractorError\n\nclass DummyNRK(NRKBaseIE):\n    def __init__(self):\n        super().__init__()\n        self._download_json_called = False\n\n    def _download_json(self, url, video_id, note, fatal=True, query=None, headers=None):\n        self._download_json_called = True\n        return {}\n\ndef test_raise_error_geo_blocked(monkeypatch):\n    dummy = DummyNRK()\n    data = {'messageType': 'ProgramIsGeoBlocked'}\n    with pytest.raises(ExtractorError) as excinfo:\n        dummy._raise_error(data)\n    assert 'NRK har ikke rettigheter' in str(excinfo.value)\n    assert dummy._GEO_COUNTRIES == ['NO']\n\ndef test_raise_error_other_message(monkeypatch):\n    dummy = DummyNRK()\n    data = {'messageType': 'ProgramRightsHasExpired', 'endUserMessage': 'Expired'}\n    with pytest.raises(ExtractorError) as excinfo:\n        dummy._raise_error(data)\n    assert 'Expired' in str(excinfo.value)\n    assert 'ProgramRightsHasExpired' not in str(excinfo.value)\n\ndef test_extract_nrk_formats_akamai(monkeypatch):\n    dummy = DummyNRK()\n    asset_url = 'https://example.akamaihd.net/i/12345'\n    video_id = 'vid123'\n    # Mock the akamai extraction to return a known list\n    def fake_akamai(url, vid):\n        return [{'url': url, 'format_id': 'akamai'}]\n    monkeypatch.setattr(dummy, '_extract_akamai_formats', fake_akamai)\n    formats = dummy._extract_nrk_formats(asset_url, video_id)\n    assert isinstance(formats, list)\n    assert formats[0]['format_id'] == 'akamai'\n    assert formats[0]['url'] == asset_url\n```",
+        "reasoning": "Need tests for NRKBaseIE._raise_error and _extract_nrk_formats. Use dummy subclass? We can instantiate NRKBaseIE? It inherits InfoExtractor; need minimal environment. Maybe create a dummy class inheriting NRKBaseIE and override _download_json to avoid network. For _raise_error, test geo and other messages. Use pytest.raises. For _extract_nrk_formats, test that it returns formats list when asset_url matches akamai. We can mock _extract_akamai_formats to return known list. Use monkeypatch. Also test that it removes parameters. Use tmp_path? Not needed. Provide three tests: test_raise_error_geo, test_raise_error_other, test_extract_nrk_formats_akamai. Use monkeypatch."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005217756,
+    "prompt_tokens": 906,
+    "prompt_time": 0.072170076,
+    "completion_tokens": 573,
+    "completion_time": 0.600881832,
+    "total_tokens": 1479,
+    "total_time": 0.673051908,
+    "completion_tokens_details": {
+      "reasoning_tokens": 153
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7shajwwetbtyxzzjshb5eg1",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKBaseIE\nfrom youtube_dl.utils import ExtractorError\n\nclass DummyNRK(NRKBaseIE):\n    def __init__(self):\n        super().__init__()\n        self._download_json_called = False\n\n    def _download_json(self, url, video_id, note, fatal=True, query=None, headers=None):\n        self._download_json_called = True\n        return {}\n\ndef test_raise_error_geo_blocked(monkeypatch):\n    dummy = DummyNRK()\n    data = {'messageType': 'ProgramIsGeoBlocked'}\n    with pytest.raises(ExtractorError) as excinfo:\n        dummy._raise_error(data)\n    assert 'NRK har ikke rettigheter' in str(excinfo.value)\n    assert dummy._GEO_COUNTRIES == ['NO']\n\ndef test_raise_error_other_message(monkeypatch):\n    dummy = DummyNRK()\n    data = {'messageType': 'ProgramRightsHasExpired', 'endUserMessage': 'Expired'}\n    with pytest.raises(ExtractorError) as excinfo:\n        dummy._raise_error(data)\n    assert 'Expired' in str(excinfo.value)\n    assert 'ProgramRightsHasExpired' not in str(excinfo.value)\n\ndef test_extract_nrk_formats_akamai(monkeypatch):\n    dummy = DummyNRK()\n    asset_url = 'https://example.akamaihd.net/i/12345'\n    video_id = 'vid123'\n    # Mock the akamai extraction to return a known list\n    def fake_akamai(url, vid):\n        return [{'url': url, 'format_id': 'akamai'}]\n    monkeypatch.setattr(dummy, '_extract_akamai_formats', fake_akamai)\n    formats = dummy._extract_nrk_formats(asset_url, video_id)\n    assert isinstance(formats, list)\n    assert formats[0]['format_id'] == 'akamai'\n    assert formats[0]['url'] == asset_url\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "f006857a5a3a45479a7c8adfa71de631",
+  "_api_plus_pacing_seconds": 1.2131328149698675
+}

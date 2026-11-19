@@ -1,0 +1,47 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_exploding_mapping ____________________________
+
+    def test_exploding_mapping():
+        source = "data"
+        data = {"a": 1, "b": 2}
+        var = Exploding(source)
+        # Use a dummy frame with locals containing data
+        class DummyFrame:
+            f_globals = {}
+            f_locals = {"data": data}
+        items = var.items(DummyFrame())
+        # First item is the source itself
+        assert items[0] == ("data", "{'a': 1, 'b': 2}")
+        # Subsequent items correspond to keys
+        expected_keys = {"data.a", "data.b"}
+        actual_keys = {k for k, _ in items[1:]}
+>       assert actual_keys == expected_keys
+E       assert {"data['a']", "data['b']"} == {'data.a', 'data.b'}
+E         
+E         Extra items in the left set:
+E         "data['b']"
+E         "data['a']"
+E         Extra items in the right set:
+E         'data.a'
+E         'data.b'
+E         Use -v to get more diff
+
+test_generated.py:20: AssertionError
+________________________ test_attrs_with_slots_and_dict ________________________
+
+    def test_attrs_with_slots_and_dict():
+        class WithSlots:
+            __slots__ = ("x", "y")
+            def __init__(self):
+                self.x = 5
+                self.y = 6
+        obj = WithSlots()
+>       obj.z = 7  # add a dict attribute
+E       AttributeError: 'WithSlots' object has no attribute 'z'
+
+test_generated.py:46: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_exploding_mapping - assert {"data['a']", "data...
+FAILED test_generated.py::test_attrs_with_slots_and_dict - AttributeError: 'W...
+2 failed, 1 passed in 0.11s

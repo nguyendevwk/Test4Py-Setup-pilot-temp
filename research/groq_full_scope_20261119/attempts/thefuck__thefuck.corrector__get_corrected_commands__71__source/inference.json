@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-e72aefde-3897-4b7f-a15c-ec4d1d14e77d",
+  "object": "chat.completion",
+  "created": 1795079511,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom thefuck.corrector import get_corrected_commands, organize_commands, get_rules\nfrom thefuck.types import Command, CorrectedCommand\n\n# Helper classes to simulate rules\nclass DummyRule:\n    def __init__(self, match, outputs):\n        self._match = match\n        self._outputs = outputs\n\n    def is_match(self, command):\n        return self._match\n\n    def get_corrected_commands(self, command):\n        for out in self._outputs:\n            yield CorrectedCommand(out, command)\n\n\ndef test_get_corrected_commands_dedup_and_sort(monkeypatch, tmp_path):\n    # Prepare a command\n    cmd = Command(\"echo hello\", tmp_path, None, None)\n\n    # Two rules: one matches, one does not\n    rule1 = DummyRule(True, [\"echo hi\", \"echo hello\"])\n    rule2 = DummyRule(False, [\"echo bye\"])\n\n    # Patch get_rules to return our dummy rules\n    monkeypatch.setattr(\"thefuck.corrector.get_rules\", lambda: [rule1, rule2])\n\n    # Patch organize_commands to simply return a list for easier inspection\n    monkeypatch.setattr(\"thefuck.corrector.organize_commands\", lambda cmds: list(cmds))\n\n    # Call the function\n    result = get_corrected_commands(cmd)\n\n    # Expected unique sorted commands: \"echo hello\" and \"echo hi\"\n    expected = [CorrectedCommand(\"echo hello\", cmd), CorrectedCommand(\"echo hi\", cmd)]\n    assert result == expected\n\n\ndef test_get_corrected_commands_empty(monkeypatch, tmp_path):\n    cmd = Command(\"ls\", tmp_path, None, None)\n\n    # No rules match\n    rule = DummyRule(False, [\"ls -l\"])\n    monkeypatch.setattr(\"thefuck.corrector.get_rules\", lambda: [rule])\n    monkeypatch.setattr(\"thefuck.corrector.organize_commands\", lambda cmds: list(cmds))\n\n    result = get_corrected_commands(cmd)\n    assert result == []\n\n\ndef test_get_corrected_commands_rule_exception(monkeypatch, tmp_path):\n    cmd = Command(\"cat file\", tmp_path, None, None)\n\n    # Rule that raises an exception during get_corrected_commands\n    class BadRule:\n        def is_match(self, command):\n            return True\n\n        def get_corrected_commands(self, command):\n            raise RuntimeError(\"unexpected error\")\n\n    monkeypatch.setattr(\"thefuck.corrector.get_rules\", lambda: [BadRule()])\n    monkeypatch.setattr(\"thefuck.corrector.organize_commands\", lambda cmds: list(cmds))\n\n    with pytest.raises(RuntimeError, match=\"unexpected error\"):\n        list(get_corrected_commands(cmd))\n```",
+        "reasoning": "We need to test get_corrected_commands. Need to import from thefuck.corrector. We need to simulate rules. get_rules likely from .conf. We can monkeypatch get_rules? But cannot modify product code. But we can patch via monkeypatch fixture. Use import thefuck.corrector and monkeypatch thefuck.corrector.get_rules to return custom rules. Each rule has is_match and get_corrected_commands. Also organize_commands? It's imported? Not shown but likely in same module. We can patch organize_commands too to observe. But we can test that generator yields sorted unique. We can create dummy rules. Use simple classes. Write three tests: normal behavior with two rules producing overlapping commands, boundary empty, error when rule raises exception? But no mocks. We can test that if rule.get_corrected_commands raises, it propagates? Use pytest.raises. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005656589,
+    "prompt_tokens": 327,
+    "prompt_time": 0.017417852,
+    "completion_tokens": 743,
+    "completion_time": 0.81704178,
+    "total_tokens": 1070,
+    "total_time": 0.834459632,
+    "completion_tokens_details": {
+      "reasoning_tokens": 178
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh76vze7v80kgjf9rxb8q9",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom thefuck.corrector import get_corrected_commands, organize_commands, get_rules\nfrom thefuck.types import Command, CorrectedCommand\n\n# Helper classes to simulate rules\nclass DummyRule:\n    def __init__(self, match, outputs):\n        self._match = match\n        self._outputs = outputs\n\n    def is_match(self, command):\n        return self._match\n\n    def get_corrected_commands(self, command):\n        for out in self._outputs:\n            yield CorrectedCommand(out, command)\n\n\ndef test_get_corrected_commands_dedup_and_sort(monkeypatch, tmp_path):\n    # Prepare a command\n    cmd = Command(\"echo hello\", tmp_path, None, None)\n\n    # Two rules: one matches, one does not\n    rule1 = DummyRule(True, [\"echo hi\", \"echo hello\"])\n    rule2 = DummyRule(False, [\"echo bye\"])\n\n    # Patch get_rules to return our dummy rules\n    monkeypatch.setattr(\"thefuck.corrector.get_rules\", lambda: [rule1, rule2])\n\n    # Patch organize_commands to simply return a list for easier inspection\n    monkeypatch.setattr(\"thefuck.corrector.organize_commands\", lambda cmds: list(cmds))\n\n    # Call the function\n    result = get_corrected_commands(cmd)\n\n    # Expected unique sorted commands: \"echo hello\" and \"echo hi\"\n    expected = [CorrectedCommand(\"echo hello\", cmd), CorrectedCommand(\"echo hi\", cmd)]\n    assert result == expected\n\n\ndef test_get_corrected_commands_empty(monkeypatch, tmp_path):\n    cmd = Command(\"ls\", tmp_path, None, None)\n\n    # No rules match\n    rule = DummyRule(False, [\"ls -l\"])\n    monkeypatch.setattr(\"thefuck.corrector.get_rules\", lambda: [rule])\n    monkeypatch.setattr(\"thefuck.corrector.organize_commands\", lambda cmds: list(cmds))\n\n    result = get_corrected_commands(cmd)\n    assert result == []\n\n\ndef test_get_corrected_commands_rule_exception(monkeypatch, tmp_path):\n    cmd = Command(\"cat file\", tmp_path, None, None)\n\n    # Rule that raises an exception during get_corrected_commands\n    class BadRule:\n        def is_match(self, command):\n            return True\n\n        def get_corrected_commands(self, command):\n            raise RuntimeError(\"unexpected error\")\n\n    monkeypatch.setattr(\"thefuck.corrector.get_rules\", lambda: [BadRule()])\n    monkeypatch.setattr(\"thefuck.corrector.organize_commands\", lambda cmds: list(cmds))\n\n    with pytest.raises(RuntimeError, match=\"unexpected error\"):\n        list(get_corrected_commands(cmd))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "1455a75a1d264ad0b292d4578cac1eac",
+  "_api_plus_pacing_seconds": 1.6690024840063415
+}

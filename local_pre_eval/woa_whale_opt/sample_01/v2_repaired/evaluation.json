@@ -1,0 +1,16 @@
+{
+  "status": "test_failure",
+  "exit_code": 1,
+  "timeout": false,
+  "total_nodes": 1,
+  "collected": 1,
+  "collection_errors": 0,
+  "passing_nodes": [],
+  "pass_count": 0,
+  "suite_pass": false,
+  "line_pct": null,
+  "branch_pct": null,
+  "coverage_status": "not_measured: suite not all-pass",
+  "stdout": "F                                                                        [100%]\n=================================== FAILURES ===================================\n_______________________ test_rank_and_constrain_behavior _______________________\n\n    def test_rank_and_constrain_behavior():\n        # Define a simple objective: sum of squares\n        opt_func = lambda x, y: x**2 + y**2\n        constraints = [(-10, 10), (-10, 10)]\n        woa = WhaleOptimization(opt_func, constraints, nsols=3, b=1, a=2, a_step=0.1)\n    \n        # Manually set solutions to known values\n        woa._sols = np.array([[3, 4], [1, 1], [5, 5]])  # shape (3,2)\n    \n        # Rank solutions and capture best\n        ranked = woa._rank_solutions()\n        # Expected order: [1,1] (fitness 2), [3,4] (25), [5,5] (50)\n        assert ranked[0].tolist() == [1, 1]\n        assert ranked[1].tolist() == [3, 4]\n        assert ranked[2].tolist() == [5, 5]\n    \n        # Best solution stored in history\n        assert len(woa._best_solutions) == 1\n        best_fitness, best_sol = woa._best_solutions[0]\n        assert best_fitness == 2\n        assert best_sol.tolist() == [1, 1]\n    \n        # Test constraint enforcement: clamp values outside bounds\n        out_of_bounds = np.array([12, -12])\n        constrained = woa._constrain_solution(out_of_bounds)\n>       assert constrained == [-10, 10]\nE       assert [10, -10] == [-10, 10]\nE         \nE         At index 0 diff: 10 != -10\nE         Use -v to get more diff\n\n../v2_repaired/test_run.py:30: AssertionError\n=========================== short test summary info ============================\nFAILED ../v2_repaired/test_run.py::test_rank_and_constrain_behavior - assert ...\n1 failed in 0.38s\n",
+  "stderr": ""
+}

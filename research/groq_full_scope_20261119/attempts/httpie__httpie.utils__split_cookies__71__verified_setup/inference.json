@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-93821bc3-b445-4a53-94dd-69de5b312cdb",
+  "object": "chat.completion",
+  "created": 1795079238,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom httpie.utils import split_cookies\n\n# The regex used internally by split_cookies is not part of the public API,\n# but we can access it via the module's globals for testing purposes.\nRE_COOKIE_SPLIT = re.compile(r',\\s*(?=[^=]+=)')\n\ndef test_split_cookies_normal():\n    \"\"\"\n    Verify that split_cookies correctly splits a header string containing\n    multiple cookies, even when a cookie value contains a comma.\n    \"\"\"\n    header = (\n        \"sessionid=abc123, \"\n        \"theme=light, \"\n        \"prefs=lang=en,us, \"\n        \"token=xyz,789\"\n    )\n    result = split_cookies(header)\n    # Expected split: each cookie name=value pair\n    expected = [\n        \"sessionid=abc123\",\n        \"theme=light\",\n        \"prefs=lang=en,us\",\n        \"token=xyz,789\"\n    ]\n    assert result == expected, f\"Expected {expected}, got {result}\"\n    # Ensure that the split regex did not split inside values\n    assert all(',' not in cookie.split('=')[1] or cookie.split('=')[1] in [\"lang=en,us\", \"xyz,789\"] for cookie in result)\n\ndef test_split_cookies_empty_and_none():\n    \"\"\"\n    split_cookies should return an empty list for falsy inputs.\n    \"\"\"\n    assert split_cookies(\"\") == [], \"Empty string should return empty list\"\n    assert split_cookies(None) == [], \"None should return empty list\"\n    assert split_cookies([]) == [], \"Empty list should return empty list\"\n\ndef test_split_cookies_single_cookie_no_comma():\n    \"\"\"\n    When the header contains a single cookie without any commas,\n    the function should return a list with that single cookie.\n    \"\"\"\n    header = \"user=alice\"\n    result = split_cookies(header)\n    assert result == [\"user=alice\"], f\"Expected ['user=alice'], got {result}\"\n    # Ensure no accidental splitting\n    assert len(result) == 1\n```",
+        "reasoning": "We need to test split_cookies. Need RE_COOKIE_SPLIT defined? Not in snippet. But assume imported from module. We'll import split_cookies. Write tests: normal with multiple cookies separated by comma, but value contains comma. boundary: empty string. error: None? It returns [] if not cookies. test that. Use tmp_path not needed. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046704788,
+    "prompt_tokens": 398,
+    "prompt_time": 0.024185122,
+    "completion_tokens": 524,
+    "completion_time": 0.586283689,
+    "total_tokens": 922,
+    "total_time": 0.610468811,
+    "completion_tokens_details": {
+      "reasoning_tokens": 77
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgyw0vespv5tpthetjc1th",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom httpie.utils import split_cookies\n\n# The regex used internally by split_cookies is not part of the public API,\n# but we can access it via the module's globals for testing purposes.\nRE_COOKIE_SPLIT = re.compile(r',\\s*(?=[^=]+=)')\n\ndef test_split_cookies_normal():\n    \"\"\"\n    Verify that split_cookies correctly splits a header string containing\n    multiple cookies, even when a cookie value contains a comma.\n    \"\"\"\n    header = (\n        \"sessionid=abc123, \"\n        \"theme=light, \"\n        \"prefs=lang=en,us, \"\n        \"token=xyz,789\"\n    )\n    result = split_cookies(header)\n    # Expected split: each cookie name=value pair\n    expected = [\n        \"sessionid=abc123\",\n        \"theme=light\",\n        \"prefs=lang=en,us\",\n        \"token=xyz,789\"\n    ]\n    assert result == expected, f\"Expected {expected}, got {result}\"\n    # Ensure that the split regex did not split inside values\n    assert all(',' not in cookie.split('=')[1] or cookie.split('=')[1] in [\"lang=en,us\", \"xyz,789\"] for cookie in result)\n\ndef test_split_cookies_empty_and_none():\n    \"\"\"\n    split_cookies should return an empty list for falsy inputs.\n    \"\"\"\n    assert split_cookies(\"\") == [], \"Empty string should return empty list\"\n    assert split_cookies(None) == [], \"None should return empty list\"\n    assert split_cookies([]) == [], \"Empty list should return empty list\"\n\ndef test_split_cookies_single_cookie_no_comma():\n    \"\"\"\n    When the header contains a single cookie without any commas,\n    the function should return a list with that single cookie.\n    \"\"\"\n    header = \"user=alice\"\n    result = split_cookies(header)\n    assert result == [\"user=alice\"], f\"Expected ['user=alice'], got {result}\"\n    # Ensure no accidental splitting\n    assert len(result) == 1\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0307004100177437
+}

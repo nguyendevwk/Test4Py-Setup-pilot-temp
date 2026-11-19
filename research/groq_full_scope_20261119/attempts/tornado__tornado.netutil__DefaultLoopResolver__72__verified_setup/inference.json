@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-7f2671a7-4e82-4399-8339-f849e206bfa1",
+  "object": "chat.completion",
+  "created": 1795079472,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport socket\nimport pytest\nfrom tornado.netutil import DefaultLoopResolver\n\n\n@pytest.mark.asyncio\nasync def test_resolve_localhost_returns_addresses():\n    resolver = DefaultLoopResolver()\n    # Resolve a common service port that should exist on localhost\n    results = await resolver.resolve(\"localhost\", 80)\n    # Each result is a tuple (family, address)\n    assert isinstance(results, list)\n    assert len(results) > 0\n    for fam, addr in results:\n        assert fam in (socket.AF_INET, socket.AF_INET6)\n        # Address should be a tuple of (host, port)\n        assert isinstance(addr, tuple)\n        assert addr[1] == 80\n\n\n@pytest.mark.asyncio\nasync def test_resolve_invalid_host_raises_gaierror():\n    resolver = DefaultLoopResolver()\n    with pytest.raises(socket.gaierror):\n        await resolver.resolve(\"this.host.does.not.exist\", 80)\n\n\n@pytest.mark.asyncio\nasync def test_resolve_with_specific_family():\n    resolver = DefaultLoopResolver()\n    # Resolve using IPv4 family only\n    results = await resolver.resolve(\"localhost\", 80, family=socket.AF_INET)\n    assert all(fam == socket.AF_INET for fam, _ in results)\n    # Resolve using IPv6 family only\n    results6 = await resolver.resolve(\"localhost\", 80, family=socket.AF_INET6)\n    # Depending on the system, IPv6 may or may not be available; if not, the list may be empty\n    if results6:\n        assert all(fam == socket.AF_INET6 for fam, _ in results6)\n```",
+        "reasoning": "We need to write tests for DefaultLoopResolver.resolve. We need to import it. Use tmp_path? Not needed. Just test normal resolution, boundary (invalid host), error (e.g., port 0?). Use asyncio.run to call. Three test functions. Ensure deterministic: use localhost. Test that resolving 'localhost', 80 returns list with AF_INET or AF_INET6. For boundary: resolve 'nonexistent.host', expect exception? getaddrinfo raises socket.gaierror. Use pytest.raises. Third: test that passing port 0 returns error? Actually getaddrinfo may accept 0? Might return addresses. Maybe test that passing invalid family raises? But getaddrinfo will ignore? Let's test that passing family=socket.AF_INET6 on a host that only has IPv4 returns empty list? Actually getaddrinfo will return IPv6 if available. Use 'localhost' which may have both. We can assert that at least one entry. Use asyncio.get_running_loop. Use pytest.mark.asyncio. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005734404,
+    "prompt_tokens": 532,
+    "prompt_time": 0.028535767,
+    "completion_tokens": 557,
+    "completion_time": 0.58622712,
+    "total_tokens": 1089,
+    "total_time": 0.614762887,
+    "completion_tokens_details": {
+      "reasoning_tokens": 209
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh60weej1aqq5ch06cbk5j",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport socket\nimport pytest\nfrom tornado.netutil import DefaultLoopResolver\n\n\n@pytest.mark.asyncio\nasync def test_resolve_localhost_returns_addresses():\n    resolver = DefaultLoopResolver()\n    # Resolve a common service port that should exist on localhost\n    results = await resolver.resolve(\"localhost\", 80)\n    # Each result is a tuple (family, address)\n    assert isinstance(results, list)\n    assert len(results) > 0\n    for fam, addr in results:\n        assert fam in (socket.AF_INET, socket.AF_INET6)\n        # Address should be a tuple of (host, port)\n        assert isinstance(addr, tuple)\n        assert addr[1] == 80\n\n\n@pytest.mark.asyncio\nasync def test_resolve_invalid_host_raises_gaierror():\n    resolver = DefaultLoopResolver()\n    with pytest.raises(socket.gaierror):\n        await resolver.resolve(\"this.host.does.not.exist\", 80)\n\n\n@pytest.mark.asyncio\nasync def test_resolve_with_specific_family():\n    resolver = DefaultLoopResolver()\n    # Resolve using IPv4 family only\n    results = await resolver.resolve(\"localhost\", 80, family=socket.AF_INET)\n    assert all(fam == socket.AF_INET for fam, _ in results)\n    # Resolve using IPv6 family only\n    results6 = await resolver.resolve(\"localhost\", 80, family=socket.AF_INET6)\n    # Depending on the system, IPv6 may or may not be available; if not, the list may be empty\n    if results6:\n        assert all(fam == socket.AF_INET6 for fam, _ in results6)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "45216238824042bca39bcce6b0e3b439",
+  "_api_plus_pacing_seconds": 1.289675783016719
+}

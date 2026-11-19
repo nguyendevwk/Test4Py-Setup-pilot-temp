@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-3678b05f-4348-4fd8-8d56-bd5752600fff",
+  "object": "chat.completion",
+  "created": 1795076120,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport inspect\nfrom docstring_parser import parser, epydoc, google, numpydoc, rest\nfrom docstring_parser.common import DocstringStyle, RenderingStyle, ParseError\n\n# Helper function to parse a docstring from a function\ndef get_parsed_docstring(func, style=DocstringStyle.AUTO):\n    return parser.parse(inspect.getsource(func), style=style)\n\n# 1. Normal rendering with default style and compact rendering\ndef test_compose_default_style_and_rendering():\n    def sample_func(a, b):\n        \"\"\"\n        :param a: first argument\n        :type a: int\n        :param b: second argument\n        :type b: str\n        :return: result\n        :rtype: bool\n        \"\"\"\n        return True\n\n    parsed = get_parsed_docstring(sample_func)\n    composed = parser.compose(parsed)\n    # The composed string should contain the original tags in the same order\n    assert \":param a:\" in composed\n    assert \":type a:\" in composed\n    assert \":param b:\" in composed\n    assert \":type b:\" in composed\n    assert \":return:\" in composed\n    assert \":rtype:\" in composed\n    # Compact rendering should not add extra blank lines\n    assert \"\\n\\n\" not in composed\n\n# 2. Rendering with explicit style override (google) and expanded rendering\ndef test_compose_explicit_google_style_and_expanded_rendering():\n    def sample_func(x, y):\n        \"\"\"\n        Args:\n            x (int): first value\n            y (str): second value\n\n        Returns:\n            bool: description\n        \"\"\"\n        return False\n\n    parsed = get_parsed_docstring(sample_func, style=DocstringStyle.GOOGLE)\n    composed = parser.compose(parsed, style=DocstringStyle.GOOGLE, rendering_style=RenderingStyle.EXPANDED)\n    # Expanded rendering should include a blank line after the description\n    assert \"\\n\\n\" in composed\n    # Google style tags should be present\n    assert \"Args:\" in composed\n    assert \"Returns:\" in composed\n    # Ensure the tags are correctly formatted\n    assert \"x (int):\" in composed\n    assert \"y (str):\" in composed\n    assert \"bool:\" in composed\n\n# 3. Error handling: passing an invalid docstring object should raise TypeError\ndef test_compose_invalid_docstring_raises_type_error():\n    with pytest.raises(TypeError):\n        parser.compose(None)\n```",
+        "reasoning": "We need tests for compose. Use docstring_parser to parse a docstring then compose. Use tmp_path? Not needed. Just test normal, boundary, error. For error: passing wrong type? compose expects Docstring. If pass None should raise? Let's test that passing None raises TypeError. Also test that style override works. Use a simple function with epydoc style. Use parser to parse. Then compose with default and with specific style. Also test rendering_style compact vs expanded? Use RenderingStyle. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052020903,
+    "prompt_tokens": 429,
+    "prompt_time": 0.019709957,
+    "completion_tokens": 638,
+    "completion_time": 0.691232305,
+    "total_tokens": 1067,
+    "total_time": 0.710942262,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 109
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sdzq9denyvs7xww7cfk9wg",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport inspect\nfrom docstring_parser import parser, epydoc, google, numpydoc, rest\nfrom docstring_parser.common import DocstringStyle, RenderingStyle, ParseError\n\n# Helper function to parse a docstring from a function\ndef get_parsed_docstring(func, style=DocstringStyle.AUTO):\n    return parser.parse(inspect.getsource(func), style=style)\n\n# 1. Normal rendering with default style and compact rendering\ndef test_compose_default_style_and_rendering():\n    def sample_func(a, b):\n        \"\"\"\n        :param a: first argument\n        :type a: int\n        :param b: second argument\n        :type b: str\n        :return: result\n        :rtype: bool\n        \"\"\"\n        return True\n\n    parsed = get_parsed_docstring(sample_func)\n    composed = parser.compose(parsed)\n    # The composed string should contain the original tags in the same order\n    assert \":param a:\" in composed\n    assert \":type a:\" in composed\n    assert \":param b:\" in composed\n    assert \":type b:\" in composed\n    assert \":return:\" in composed\n    assert \":rtype:\" in composed\n    # Compact rendering should not add extra blank lines\n    assert \"\\n\\n\" not in composed\n\n# 2. Rendering with explicit style override (google) and expanded rendering\ndef test_compose_explicit_google_style_and_expanded_rendering():\n    def sample_func(x, y):\n        \"\"\"\n        Args:\n            x (int): first value\n            y (str): second value\n\n        Returns:\n            bool: description\n        \"\"\"\n        return False\n\n    parsed = get_parsed_docstring(sample_func, style=DocstringStyle.GOOGLE)\n    composed = parser.compose(parsed, style=DocstringStyle.GOOGLE, rendering_style=RenderingStyle.EXPANDED)\n    # Expanded rendering should include a blank line after the description\n    assert \"\\n\\n\" in composed\n    # Google style tags should be present\n    assert \"Args:\" in composed\n    assert \"Returns:\" in composed\n    # Ensure the tags are correctly formatted\n    assert \"x (int):\" in composed\n    assert \"y (str):\" in composed\n    assert \"bool:\" in composed\n\n# 3. Error handling: passing an invalid docstring object should raise TypeError\ndef test_compose_invalid_docstring_raises_type_error():\n    with pytest.raises(TypeError):\n        parser.compose(None)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0683418560074642
+}

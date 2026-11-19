@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-3933b32c-2482-4629-8536-6c9708a284b7",
+  "object": "chat.completion",
+  "created": 1795078901,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom decimal import Decimal\n\nfrom pypara.exchange import FXRate\nfrom pypara.currencies import Currencies\nfrom pypara.commons.numbers import ONE, ZERO\nfrom pypara.commons.zeitgeist import Date\n\n\ndef test_fxrate_normal_and_invert(tmp_path):\n    \"\"\"Test normal creation via `of` and the inversion operator.\"\"\"\n    eur = Currencies[\"EUR\"]\n    usd = Currencies[\"USD\"]\n    today = Date(datetime.date.today())\n\n    # Normal creation\n    rate = FXRate.of(eur, usd, today, Decimal(\"2.5\"))\n    assert rate.ccy1 == eur\n    assert rate.ccy2 == usd\n    assert rate.date == today\n    assert rate.value == Decimal(\"2.5\")\n\n    # Inversion\n    inv_rate = ~rate\n    assert inv_rate.ccy1 == usd\n    assert inv_rate.ccy2 == eur\n    assert inv_rate.date == today\n    assert inv_rate.value == Decimal(\"0.4\")  # 1 / 2.5 == 0.4\n\n\ndef test_fxrate_boundary_value(tmp_path):\n    \"\"\"Test boundary condition: value must be > 0.\"\"\"\n    eur = Currencies[\"EUR\"]\n    usd = Currencies[\"USD\"]\n    today = Date(datetime.date.today())\n\n    # Value exactly zero should raise\n    with pytest.raises(ValueError, match=\"FX rate value can not be equal to or less than `zero`\"):\n        FXRate.of(eur, usd, today, ZERO)\n\n    # Value just above zero should succeed\n    rate = FXRate.of(eur, usd, today, Decimal(\"0.0001\"))\n    assert rate.value == Decimal(\"0.0001\")\n\n\ndef test_fxrate_error_conditions(tmp_path):\n    \"\"\"Test various error conditions for invalid arguments.\"\"\"\n    eur = Currencies[\"EUR\"]\n    usd = Currencies[\"USD\"]\n    today = Date(datetime.date.today())\n\n    # Same currency with non-one value\n    with pytest.raises(ValueError, match=\"FX rate to the same currency must be `one`\"):\n        FXRate.of(eur, eur, today, Decimal(\"1.1\"))\n\n    # Invalid type for ccy1\n    with pytest.raises(ValueError, match=\"CCY/1 must be of type `Currency`\"):\n        FXRate.of(\"EUR\", usd, today, Decimal(\"1.0\"))\n\n    # Invalid type for ccy2\n    with pytest.raises(ValueError, match=\"CCY/2 must be of type `Currency`\"):\n        FXRate.of(eur, \"USD\", today, Decimal(\"1.0\"))\n\n    # Invalid type for value\n    with pytest.raises(ValueError, match=\"FX rate value must be of type `Decimal`\"):\n        FXRate.of(eur, usd, today, 1.0)\n\n    # Invalid type for date\n    with pytest.raises(ValueError, match=\"FX rate date must be of type `date`\"):\n        FXRate.of(eur, usd, datetime.date.today(), Decimal(\"1.0\"))\n```",
+        "reasoning": "Need tests for normal, boundary, error. Use Currency and Date from package. Assume available. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053322029,
+    "prompt_tokens": 1114,
+    "prompt_time": 0.09005879,
+    "completion_tokens": 668,
+    "completion_time": 0.800869653,
+    "total_tokens": 1782,
+    "total_time": 0.890928443,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 24
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgmjd9eskat3qc0y7kvcb6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom decimal import Decimal\n\nfrom pypara.exchange import FXRate\nfrom pypara.currencies import Currencies\nfrom pypara.commons.numbers import ONE, ZERO\nfrom pypara.commons.zeitgeist import Date\n\n\ndef test_fxrate_normal_and_invert(tmp_path):\n    \"\"\"Test normal creation via `of` and the inversion operator.\"\"\"\n    eur = Currencies[\"EUR\"]\n    usd = Currencies[\"USD\"]\n    today = Date(datetime.date.today())\n\n    # Normal creation\n    rate = FXRate.of(eur, usd, today, Decimal(\"2.5\"))\n    assert rate.ccy1 == eur\n    assert rate.ccy2 == usd\n    assert rate.date == today\n    assert rate.value == Decimal(\"2.5\")\n\n    # Inversion\n    inv_rate = ~rate\n    assert inv_rate.ccy1 == usd\n    assert inv_rate.ccy2 == eur\n    assert inv_rate.date == today\n    assert inv_rate.value == Decimal(\"0.4\")  # 1 / 2.5 == 0.4\n\n\ndef test_fxrate_boundary_value(tmp_path):\n    \"\"\"Test boundary condition: value must be > 0.\"\"\"\n    eur = Currencies[\"EUR\"]\n    usd = Currencies[\"USD\"]\n    today = Date(datetime.date.today())\n\n    # Value exactly zero should raise\n    with pytest.raises(ValueError, match=\"FX rate value can not be equal to or less than `zero`\"):\n        FXRate.of(eur, usd, today, ZERO)\n\n    # Value just above zero should succeed\n    rate = FXRate.of(eur, usd, today, Decimal(\"0.0001\"))\n    assert rate.value == Decimal(\"0.0001\")\n\n\ndef test_fxrate_error_conditions(tmp_path):\n    \"\"\"Test various error conditions for invalid arguments.\"\"\"\n    eur = Currencies[\"EUR\"]\n    usd = Currencies[\"USD\"]\n    today = Date(datetime.date.today())\n\n    # Same currency with non-one value\n    with pytest.raises(ValueError, match=\"FX rate to the same currency must be `one`\"):\n        FXRate.of(eur, eur, today, Decimal(\"1.1\"))\n\n    # Invalid type for ccy1\n    with pytest.raises(ValueError, match=\"CCY/1 must be of type `Currency`\"):\n        FXRate.of(\"EUR\", usd, today, Decimal(\"1.0\"))\n\n    # Invalid type for ccy2\n    with pytest.raises(ValueError, match=\"CCY/2 must be of type `Currency`\"):\n        FXRate.of(eur, \"USD\", today, Decimal(\"1.0\"))\n\n    # Invalid type for value\n    with pytest.raises(ValueError, match=\"FX rate value must be of type `Decimal`\"):\n        FXRate.of(eur, usd, today, 1.0)\n\n    # Invalid type for date\n    with pytest.raises(ValueError, match=\"FX rate date must be of type `date`\"):\n        FXRate.of(eur, usd, datetime.date.today(), Decimal(\"1.0\"))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3184522049850784
+}

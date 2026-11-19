@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-58699055-f588-4076-8eee-05c50c28bad9",
+  "object": "chat.completion",
+  "created": 1795078887,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport pytest\nfrom py_backwards.transformers.base import BaseTransformer\nfrom typed_ast import ast3 as typed_ast\n\n\ndef test_abstract_transform_raises_type_error():\n    \"\"\"\n    Verify that calling the abstract transform method on a subclass that\n    does not implement it raises a TypeError.\n    \"\"\"\n    class DummyTransformer(BaseTransformer):\n        pass\n\n    # Instantiate the subclass (allowed because abstract methods are not enforced on instantiation)\n    transformer = DummyTransformer()\n    # Create a simple AST node to pass to the method\n    node = typed_ast.parse(\"x = 1\")\n    with pytest.raises(TypeError):\n        DummyTransformer.transform(node)\n\n\ndef test_subclass_can_implement_transform_and_return_expected_result():\n    \"\"\"\n    Verify that a concrete subclass can implement transform and return a\n    TransformationResult that contains the expected keys.\n    \"\"\"\n    class ConcreteTransformer(BaseTransformer):\n        target = \"dummy_target\"\n\n        @classmethod\n        def transform(cls, tree: typed_ast.AST):\n            # For testing, simply return a dict with the target and the number of nodes\n            node_count = sum(1 for _ in ast.walk(tree))\n            return {\"target\": cls.target, \"node_count\": node_count}\n\n    # Create a simple AST node\n    node = typed_ast.parse(\"a = 2\\nb = 3\")\n    result = ConcreteTransformer.transform(node)\n\n    assert isinstance(result, dict)\n    assert result[\"target\"] == \"dummy_target\"\n    assert result[\"node_count\"] == 4  # Assign, Name, Constant, Module\n\n\ndef test_target_attribute_can_be_overridden_and_accessed():\n    \"\"\"\n    Verify that the target attribute can be overridden in a subclass and\n    accessed via the class.\n    \"\"\"\n    class OverrideTransformer(BaseTransformer):\n        target = \"overridden\"\n\n    assert OverrideTransformer.target == \"overridden\"\n    # Ensure that the base class still has target None\n    assert BaseTransformer.target is None\n```",
+        "reasoning": "We need to test BaseTransformer.transform abstract method? Can't instantiate. Maybe test that subclass must implement. Create dummy subclass. Test that calling BaseTransformer.transform raises TypeError? Actually abstractmethod prevents instantiation but calling via subclass without implementation raises TypeError. We'll create subclass without override and attempt to call transform -> should raise TypeError. Also test that subclass with implementation works. Also test that target attribute can be set. Provide simple AST node. Use typed_ast ast3. Create simple expression. Use snippet? Not needed. We'll import BaseTransformer. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054717584,
+    "prompt_tokens": 318,
+    "prompt_time": 0.038968075,
+    "completion_tokens": 528,
+    "completion_time": 0.593603144,
+    "total_tokens": 846,
+    "total_time": 0.632571219,
+    "completion_tokens_details": {
+      "reasoning_tokens": 113
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgm5qxees8byvcew42jnpa",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport pytest\nfrom py_backwards.transformers.base import BaseTransformer\nfrom typed_ast import ast3 as typed_ast\n\n\ndef test_abstract_transform_raises_type_error():\n    \"\"\"\n    Verify that calling the abstract transform method on a subclass that\n    does not implement it raises a TypeError.\n    \"\"\"\n    class DummyTransformer(BaseTransformer):\n        pass\n\n    # Instantiate the subclass (allowed because abstract methods are not enforced on instantiation)\n    transformer = DummyTransformer()\n    # Create a simple AST node to pass to the method\n    node = typed_ast.parse(\"x = 1\")\n    with pytest.raises(TypeError):\n        DummyTransformer.transform(node)\n\n\ndef test_subclass_can_implement_transform_and_return_expected_result():\n    \"\"\"\n    Verify that a concrete subclass can implement transform and return a\n    TransformationResult that contains the expected keys.\n    \"\"\"\n    class ConcreteTransformer(BaseTransformer):\n        target = \"dummy_target\"\n\n        @classmethod\n        def transform(cls, tree: typed_ast.AST):\n            # For testing, simply return a dict with the target and the number of nodes\n            node_count = sum(1 for _ in ast.walk(tree))\n            return {\"target\": cls.target, \"node_count\": node_count}\n\n    # Create a simple AST node\n    node = typed_ast.parse(\"a = 2\\nb = 3\")\n    result = ConcreteTransformer.transform(node)\n\n    assert isinstance(result, dict)\n    assert result[\"target\"] == \"dummy_target\"\n    assert result[\"node_count\"] == 4  # Assign, Name, Constant, Module\n\n\ndef test_target_attribute_can_be_overridden_and_accessed():\n    \"\"\"\n    Verify that the target attribute can be overridden in a subclass and\n    accessed via the class.\n    \"\"\"\n    class OverrideTransformer(BaseTransformer):\n        target = \"overridden\"\n\n    assert OverrideTransformer.target == \"overridden\"\n    # Ensure that the base class still has target None\n    assert BaseTransformer.target is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0668110059923492
+}

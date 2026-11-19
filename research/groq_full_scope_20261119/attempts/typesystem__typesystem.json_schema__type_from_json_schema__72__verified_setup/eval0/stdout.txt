@@ -1,0 +1,36 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_multiple_types_union_and_null ______________________
+
+    def test_multiple_types_union_and_null():
+        """When the schema lists multiple types, a Union of the corresponding Fields is returned."""
+        schema = {"type": ["string", "null", "number"]}
+        field = type_from_json_schema(schema, empty_definitions())
+        assert isinstance(field, Union)
+        # The Union should contain exactly two concrete types (string and number) and allow null
+        concrete_types = {type(f) for f in field.any_of}
+>       assert concrete_types == {String, Number}
+E       AssertionError: assert {<class 'type...elds.String'>} == {<class 'type...elds.String'>}
+E         
+E         Extra items in the left set:
+E         <class 'typesystem.fields.Float'>
+E         Extra items in the right set:
+E         <class 'typesystem.fields.Number'>
+E         Use -v to get more diff
+
+test_generated.py:39: AssertionError
+________________________ test_no_type_with_null_allowed ________________________
+
+    def test_no_type_with_null_allowed():
+        """When no type is specified but null is allowed, a Const(None) is returned."""
+        schema = {"type": ["null"]}
+        field = type_from_json_schema(schema, empty_definitions())
+        assert isinstance(field, Const)
+>       assert field.value is None
+E       AttributeError: 'Const' object has no attribute 'value'
+
+test_generated.py:51: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_multiple_types_union_and_null - AssertionError...
+FAILED test_generated.py::test_no_type_with_null_allowed - AttributeError: 'C...
+2 failed, 1 passed in 0.19s

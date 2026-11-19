@@ -1,0 +1,57 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_loader_parses_python_module _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__loader__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_loader_parses_python_modu0')
+
+    def test_loader_parses_python_module(tmp_path):
+        # Create a package with a single .py module
+        create_pkg(tmp_path, "mypkg", {"mod.py": "x = 42\n"})
+        # Ensure the package is importable
+        sys.path.insert(0, str(tmp_path))
+        try:
+            result = loader(str(tmp_path), str(tmp_path), link=False, level=0, toc=False)
+            # The compiled output should contain the module name
+>           assert "mypkg.mod" in result
+E           AssertionError: assert 'mypkg.mod' in '\n'
+
+test_generated.py:28: AssertionError
+_________________________ test_loader_parses_stub_only _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__loader__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_loader_parses_stub_only0')
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7fd26fdfe140>
+
+    def test_loader_parses_stub_only(tmp_path, caplog):
+        # Create a package with only a .pyi stub
+        create_pkg(tmp_path, "stubpkg", {"stub.pyi": "def foo() -> int: ...\n"})
+        sys.path.insert(0, str(tmp_path))
+        try:
+            caplog.set_level(logger.level)
+            result = loader(str(tmp_path), str(tmp_path), link=False, level=0, toc=False)
+            # The compiled output should still contain the module name
+>           assert "stubpkg.stub" in result
+E           AssertionError: assert 'stubpkg.stub' in '\n'
+
+test_generated.py:43: AssertionError
+_______________________ test_loader_skips_missing_source _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__loader__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_loader_skips_missing_sour0')
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7fd27036e1d0>
+
+    def test_loader_skips_missing_source(tmp_path, caplog):
+        # Create a package with a .py file that references a missing module
+        create_pkg(tmp_path, "brokenpkg", {"broken.py": "import nonexistent\n"})
+        sys.path.insert(0, str(tmp_path))
+        try:
+            caplog.set_level(logger.level)
+            result = loader(str(tmp_path), str(tmp_path), link=False, level=0, toc=False)
+            # The compiled output should still contain the module name
+>           assert "brokenpkg.broken" in result
+E           AssertionError: assert 'brokenpkg.broken' in '\n'
+
+test_generated.py:58: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_loader_parses_python_module - AssertionError: ...
+FAILED test_generated.py::test_loader_parses_stub_only - AssertionError: asse...
+FAILED test_generated.py::test_loader_skips_missing_source - AssertionError: ...
+3 failed in 0.13s

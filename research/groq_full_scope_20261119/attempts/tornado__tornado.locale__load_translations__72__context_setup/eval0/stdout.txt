@@ -1,0 +1,41 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_load_translations_basic _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_translations__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_translations_basic0')
+
+    def test_load_translations_basic(tmp_path):
+        # Create a simple CSV with two locales
+        csv_content = """\
+    "I love you","Te amo"
+    "%(name)s liked this","A %(name)s les gustó esto","plural"
+    "%(name)s liked this","A %(name)s le gustó esto","singular"
+    """
+        (tmp_path / "es_GT.csv").write_text(csv_content, encoding="utf-8-sig")
+        (tmp_path / "fr_FR.csv").write_text(csv_content, encoding="utf-8-sig")
+        load_translations(str(tmp_path))
+        # Check that both locales are loaded
+>       assert "es_GT" in _translations
+E       AssertionError: assert 'es_GT' in {}
+
+test_generated.py:17: AssertionError
+_________________ test_load_translations_missing_plural_column _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_translations__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_translations_missing0')
+
+    def test_load_translations_missing_plural_column(tmp_path):
+        # CSV with only two columns (no plural indicator)
+        csv_content = """\
+    "Hello","Hola"
+    """
+        (tmp_path / "es_ES.csv").write_text(csv_content, encoding="utf-8-sig")
+        load_translations(str(tmp_path))
+        # The missing plural column defaults to "unknown"
+>       assert _translations["es_ES"]["unknown"]["Hello"] == "Hola"
+E       KeyError: 'es_ES'
+
+test_generated.py:34: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_load_translations_basic - AssertionError: asse...
+FAILED test_generated.py::test_load_translations_missing_plural_column - KeyE...
+2 failed, 1 passed in 0.17s

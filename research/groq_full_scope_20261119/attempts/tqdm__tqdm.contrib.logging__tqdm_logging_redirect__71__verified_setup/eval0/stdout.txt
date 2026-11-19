@@ -1,0 +1,36 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_logging_redirect_to_tqdm_output _____________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7ff9a42aec20>
+
+    def test_logging_redirect_to_tqdm_output(capsys):
+        """Messages logged inside the context are written to the tqdm bar."""
+        logger = logging.getLogger("tqdm_test")
+        logger.setLevel(logging.INFO)
+        # Ensure no handlers interfere
+        logger.handlers = []
+    
+        with tqdm_logging_redirect(total=3, desc="test") as pbar:
+            logger.info("Hello from tqdm")
+            pbar.update(1)
+            logger.info("Another message")
+            pbar.update(1)
+            logger.info("Final message")
+            pbar.update(1)
+    
+        # Capture stdout and check that the logged messages appear
+        captured = capsys.readouterr()
+        # The messages should be present in the output, each on a new line
+>       assert "Hello from tqdm" in captured.out
+E       AssertionError: assert 'Hello from tqdm' in ''
+E        +  where '' = CaptureResult(out='', err='\rtest:   0%|          | 0/3 [00:00<?, ?it/s]\r                                           \...age\n\rtest:  67%|██████▋   | 2/3 [00:00<00:00, 2294.48it/s]\rtest: 100%|██████████| 3/3 [00:00<00:00, 2813.71it/s]\n').out
+
+test_generated.py:26: AssertionError
+------------------------------ Captured log call -------------------------------
+INFO     tqdm_test:test_generated.py:16 Hello from tqdm
+INFO     tqdm_test:test_generated.py:18 Another message
+INFO     tqdm_test:test_generated.py:20 Final message
+=========================== short test summary info ============================
+FAILED test_generated.py::test_logging_redirect_to_tqdm_output - AssertionErr...
+1 failed, 2 passed in 0.13s

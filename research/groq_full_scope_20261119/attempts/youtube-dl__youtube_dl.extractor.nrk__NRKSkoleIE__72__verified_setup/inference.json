@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-a3d1fcfa-79b3-43ea-a565-faafc3cc910e",
+  "object": "chat.completion",
+  "created": 1795079590,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKSkoleIE\n\ndef test_valid_url_parsing():\n    \"\"\"The extractor should correctly parse the mediaId from a valid URL.\"\"\"\n    ie = NRKSkoleIE()\n    url = 'https://www.nrk.no/skole/?page=search&q=&mediaId=14099'\n    video_id = ie._match_id(url)\n    assert video_id == '14099', f\"Expected mediaId '14099', got {video_id}\"\n\ndef test_only_matching_url():\n    \"\"\"The second test case should only match the URL and not attempt extraction.\"\"\"\n    ie = NRKSkoleIE()\n    url = 'https://www.nrk.no/skole/?page=objectives&subject=naturfag&objective=K15114&mediaId=19355'\n    # The extractor should match the URL but the test data indicates only_matching,\n    # so we just confirm that _match_id works and no further extraction is attempted.\n    video_id = ie._match_id(url)\n    assert video_id == '19355', f\"Expected mediaId '19355', got {video_id}\"\n\ndef test_real_extract(monkeypatch):\n    \"\"\"_real_extract should return a url_result with the correct NRK ID format.\"\"\"\n    ie = NRKSkoleIE()\n    # Monkeypatch _download_json to avoid network calls and return a controlled response\n    def fake_download_json(url, video_id):\n        # The URL passed to _download_json should contain the video_id\n        assert video_id == '14099'\n        assert f'/media/{video_id}' in url\n        return {'psId': '6021'}\n    monkeypatch.setattr(ie, '_download_json', fake_download_json)\n\n    url = 'https://www.nrk.no/skole/?page=search&q=&mediaId=14099'\n    result = ie._real_extract(url)\n    # The result should be a url_result with the NRK ID prefixed by 'nrk:'\n    assert result.url == 'nrk:6021', f\"Expected 'nrk:6021', got {result.url}\"\n    assert result._type == 'url', f\"Expected result type 'url', got {result._type}\"\n```",
+        "reasoning": "We need to write tests for NRKSkoleIE. It uses _download_json to fetch API. We cannot hit network. But we can test parsing of URL and that _real_extract returns url_result with correct format given mocked _download_json. But cannot mock. We can instantiate IE and override _download_json? We can't modify code but can monkeypatch method on instance. Use monkeypatch fixture. Three tests: test_valid_url_parsing, test_only_matching, test_real_extract. Use monkeypatch to replace _download_json to return dict with psId. Use tmp_path? not needed. Ensure no network. Provide deterministic."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005388739,
+    "prompt_tokens": 651,
+    "prompt_time": 0.04111411,
+    "completion_tokens": 609,
+    "completion_time": 0.647968711,
+    "total_tokens": 1260,
+    "total_time": 0.689082821,
+    "completion_tokens_details": {
+      "reasoning_tokens": 128
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh9krjeze88ja0rff1ad98",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKSkoleIE\n\ndef test_valid_url_parsing():\n    \"\"\"The extractor should correctly parse the mediaId from a valid URL.\"\"\"\n    ie = NRKSkoleIE()\n    url = 'https://www.nrk.no/skole/?page=search&q=&mediaId=14099'\n    video_id = ie._match_id(url)\n    assert video_id == '14099', f\"Expected mediaId '14099', got {video_id}\"\n\ndef test_only_matching_url():\n    \"\"\"The second test case should only match the URL and not attempt extraction.\"\"\"\n    ie = NRKSkoleIE()\n    url = 'https://www.nrk.no/skole/?page=objectives&subject=naturfag&objective=K15114&mediaId=19355'\n    # The extractor should match the URL but the test data indicates only_matching,\n    # so we just confirm that _match_id works and no further extraction is attempted.\n    video_id = ie._match_id(url)\n    assert video_id == '19355', f\"Expected mediaId '19355', got {video_id}\"\n\ndef test_real_extract(monkeypatch):\n    \"\"\"_real_extract should return a url_result with the correct NRK ID format.\"\"\"\n    ie = NRKSkoleIE()\n    # Monkeypatch _download_json to avoid network calls and return a controlled response\n    def fake_download_json(url, video_id):\n        # The URL passed to _download_json should contain the video_id\n        assert video_id == '14099'\n        assert f'/media/{video_id}' in url\n        return {'psId': '6021'}\n    monkeypatch.setattr(ie, '_download_json', fake_download_json)\n\n    url = 'https://www.nrk.no/skole/?page=search&q=&mediaId=14099'\n    result = ie._real_extract(url)\n    # The result should be a url_result with the NRK ID prefixed by 'nrk:'\n    assert result.url == 'nrk:6021', f\"Expected 'nrk:6021', got {result.url}\"\n    assert result._type == 'url', f\"Expected result type 'url', got {result._type}\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "b78f923dea764b41a8139003e9adab1d",
+  "_api_plus_pacing_seconds": 1.5474801270174794
+}

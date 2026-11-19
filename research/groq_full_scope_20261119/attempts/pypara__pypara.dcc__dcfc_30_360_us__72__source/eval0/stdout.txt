@@ -1,0 +1,31 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_last_day_of_month_adjustment _______________________
+
+    def test_last_day_of_month_adjustment():
+        """When start is last day of month, d1 should be set to 30."""
+        start = datetime.date(2021, 1, 31)  # last day of January
+        asof = datetime.date(2021, 2, 28)   # last day of February
+        result = dcfc_30_360_us(start=start, asof=asof, end=asof)
+        # d1 becomes 30, d2 becomes 28 (not 30 because asof is not last day of month)
+        # nod = (28-30) + 30*(2-1) = -2 + 30 = 28
+        # fraction = 28/360 = 0.0777777777777778
+>       assert round(result, 14) == Decimal("0.07777777777778")
+E       AssertionError: assert Decimal('0.08333333333333') == Decimal('0.07777777777778')
+E        +  where Decimal('0.08333333333333') = round(Decimal('0.08333333333333333333333333333'), 14)
+E        +  and   Decimal('0.07777777777778') = Decimal('0.07777777777778')
+
+test_generated.py:26: AssertionError
+____________________________ test_day_31_adjustment ____________________________
+
+    def test_day_31_adjustment():
+        """When d2 is 31 and d1 is 30 or 31, d2 should be set to 30."""
+        start = datetime.date(2020, 3, 30)
+>       asof = datetime.date(2020, 4, 31)  # April 31 does not exist, use 30
+E       ValueError: day is out of range for month
+
+test_generated.py:32: ValueError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_last_day_of_month_adjustment - AssertionError:...
+FAILED test_generated.py::test_day_31_adjustment - ValueError: day is out of ...
+2 failed, 1 passed in 0.14s

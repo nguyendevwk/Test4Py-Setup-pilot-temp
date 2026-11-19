@@ -1,0 +1,64 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_parse_basic_docstring __________________________
+
+    def test_parse_basic_docstring():
+        doc = """
+        Short description.
+    
+        Long description line 1.
+        Long description line 2.
+    
+        Parameters
+        ----------
+        x : int
+            The first parameter.
+        y : str
+            The second parameter.
+    
+        Returns
+        -------
+        bool
+            True if successful.
+        """
+        result = parse(doc)
+        assert isinstance(result, Docstring)
+        assert result.style == DocstringStyle.NUMPYDOC
+        # Short and long description
+        assert result.short_description == "Short description."
+        assert result.long_description == "Long description line 1.\nLong description line 2."
+        # Blank flags
+>       assert result.blank_after_short_description is False
+E       assert True is False
+E        +  where True = <docstring_parser.common.Docstring object at 0x7f8598831ab0>.blank_after_short_description
+
+test_generated.py:31: AssertionError
+___________________ test_parse_boundary_and_invalid_section ____________________
+
+    def test_parse_boundary_and_invalid_section():
+        # Docstring with a section that is not in DEFAULT_SECTIONS should be ignored
+        doc = """
+        Short.
+    
+        Unknown
+        ------
+        This should be ignored.
+    
+        Parameters
+        ----------
+        a : float
+            Value.
+        """
+        res = parse(doc)
+        # Only Parameters section should be parsed
+        assert len(res.meta) == 1
+        assert res.meta[0].args[0] == "param"
+>       assert "a : float" in res.meta[0].description
+E       AssertionError: assert 'a : float' in 'Value.'
+E        +  where 'Value.' = <docstring_parser.common.DocstringParam object at 0x7f8598888f10>.description
+
+test_generated.py:73: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_basic_docstring - assert True is False
+FAILED test_generated.py::test_parse_boundary_and_invalid_section - Assertion...
+2 failed, 1 passed in 0.15s

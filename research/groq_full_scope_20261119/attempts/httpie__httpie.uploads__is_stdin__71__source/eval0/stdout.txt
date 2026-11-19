@@ -1,0 +1,44 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_is_stdin_with_regular_file ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.uploads__is_stdin__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_is_stdin_with_regular_fil0')
+
+    def test_is_stdin_with_regular_file(tmp_path):
+        """`is_stdin` should return False for a normal file."""
+        file_path = tmp_path / "test.txt"
+        file_path.write_text("content")
+        with open(file_path, "rb") as f:
+>           assert is_stdin(f) is False
+
+test_generated.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/uploads.py:93: in is_stdin
+    return file_no == sys.stdin.fileno()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_pytest.capture.DontReadFromInput object at 0x7efdbc8f5c60>
+
+    def fileno(self) -> int:
+>       raise UnsupportedOperation("redirected stdin is pseudofile, has no fileno()")
+E       io.UnsupportedOperation: redirected stdin is pseudofile, has no fileno()
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/_pytest/capture.py:247: UnsupportedOperation
+_______________________ test_is_stdin_with_stdin_object ________________________
+
+    def test_is_stdin_with_stdin_object():
+        """`is_stdin` should return True when the file's fileno matches sys.stdin's."""
+        class DummyStdin:
+            def fileno(self):
+                return sys.stdin.fileno()
+    
+        dummy = DummyStdin()
+>       assert is_stdin(dummy) is True
+E       assert False is True
+E        +  where False = is_stdin(<test_generated.test_is_stdin_with_stdin_object.<locals>.DummyStdin object at 0x7efdbba664d0>)
+
+test_generated.py:23: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_is_stdin_with_regular_file - io.UnsupportedOpe...
+FAILED test_generated.py::test_is_stdin_with_stdin_object - assert False is True
+2 failed, 1 passed in 0.69s

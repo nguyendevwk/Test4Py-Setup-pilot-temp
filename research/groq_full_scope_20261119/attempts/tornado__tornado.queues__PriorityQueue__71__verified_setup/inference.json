@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-197db007-5af6-4fc2-8809-e9d1bcd0538c",
+  "object": "chat.completion",
+  "created": 1795077428,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.queues import PriorityQueue\nfrom tornado.concurrent import Future\nfrom tornado.locks import Event\n\n@pytest.mark.asyncio\nasync def test_priority_order():\n    \"\"\"Items are retrieved in ascending priority order.\"\"\"\n    q = PriorityQueue()\n    # Put items with varying priorities\n    await q.put((5, \"low\"))\n    await q.put((1, \"high\"))\n    await q.put((3, \"medium\"))\n    # Retrieve items and check order\n    first = await q.get()\n    second = await q.get()\n    third = await q.get()\n    assert first == (1, \"high\")\n    assert second == (3, \"medium\")\n    assert third == (5, \"low\")\n    # Queue should now be empty\n    assert q.empty()\n\n@pytest.mark.asyncio\nasync def test_maxsize_and_put_nowait():\n    \"\"\"put_nowait raises QueueFull when the queue reaches its maxsize.\"\"\"\n    maxsize = 2\n    q = PriorityQueue(maxsize=maxsize)\n    # Fill the queue to its maxsize\n    await q.put_nowait((10, \"item1\"))\n    await q.put_nowait((20, \"item2\"))\n    # Next put_nowait should raise QueueFull\n    with pytest.raises(asyncio.QueueFull):\n        q.put_nowait((30, \"item3\"))\n    # Ensure the queue still contains the two items\n    assert q.qsize() == maxsize\n    assert await q.get() == (10, \"item1\")\n    assert await q.get() == (20, \"item2\")\n\n@pytest.mark.asyncio\nasync def test_get_nowait_on_empty():\n    \"\"\"get_nowait raises QueueEmpty when the queue is empty.\"\"\"\n    q = PriorityQueue()\n    # Queue is initially empty\n    with pytest.raises(asyncio.QueueEmpty):\n        q.get_nowait()\n    # Put an item and then get it\n    await q.put_nowait((0, \"only\"))\n    assert q.qsize() == 1\n    assert q.get_nowait() == (0, \"only\")\n    # Queue should be empty again\n    with pytest.raises(asyncio.QueueEmpty):\n        q.get_nowait()\n```",
+        "reasoning": "We need to test PriorityQueue from tornado.queues. Write three tests: normal enqueue/dequeue, boundary maxsize, error when over maxsize? But PriorityQueue inherits Queue; check behavior. Let's inspect tornado.queues.Queue. But assume typical behavior: put blocks if full. In async context. Use asyncio. We'll test that items retrieved in priority order. Second test: maxsize limit: put more than maxsize raises? In asyncio.Queue, put blocks until space. But we can use put_nowait to raise QueueFull. Use put_nowait. Third test: error when get from empty? get_nowait raises QueueEmpty. Use that.\n\nImplement tests with asyncio. Use pytest.mark.asyncio. Use tmp_path not needed. Provide three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048501,
+    "prompt_tokens": 550,
+    "prompt_time": 0.03249158,
+    "completion_tokens": 620,
+    "completion_time": 0.662686885,
+    "total_tokens": 1170,
+    "total_time": 0.695178465,
+    "completion_tokens_details": {
+      "reasoning_tokens": 153
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sf7my9e5qazcn89crshjdx",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.queues import PriorityQueue\nfrom tornado.concurrent import Future\nfrom tornado.locks import Event\n\n@pytest.mark.asyncio\nasync def test_priority_order():\n    \"\"\"Items are retrieved in ascending priority order.\"\"\"\n    q = PriorityQueue()\n    # Put items with varying priorities\n    await q.put((5, \"low\"))\n    await q.put((1, \"high\"))\n    await q.put((3, \"medium\"))\n    # Retrieve items and check order\n    first = await q.get()\n    second = await q.get()\n    third = await q.get()\n    assert first == (1, \"high\")\n    assert second == (3, \"medium\")\n    assert third == (5, \"low\")\n    # Queue should now be empty\n    assert q.empty()\n\n@pytest.mark.asyncio\nasync def test_maxsize_and_put_nowait():\n    \"\"\"put_nowait raises QueueFull when the queue reaches its maxsize.\"\"\"\n    maxsize = 2\n    q = PriorityQueue(maxsize=maxsize)\n    # Fill the queue to its maxsize\n    await q.put_nowait((10, \"item1\"))\n    await q.put_nowait((20, \"item2\"))\n    # Next put_nowait should raise QueueFull\n    with pytest.raises(asyncio.QueueFull):\n        q.put_nowait((30, \"item3\"))\n    # Ensure the queue still contains the two items\n    assert q.qsize() == maxsize\n    assert await q.get() == (10, \"item1\")\n    assert await q.get() == (20, \"item2\")\n\n@pytest.mark.asyncio\nasync def test_get_nowait_on_empty():\n    \"\"\"get_nowait raises QueueEmpty when the queue is empty.\"\"\"\n    q = PriorityQueue()\n    # Queue is initially empty\n    with pytest.raises(asyncio.QueueEmpty):\n        q.get_nowait()\n    # Put an item and then get it\n    await q.put_nowait((0, \"only\"))\n    assert q.qsize() == 1\n    assert q.get_nowait() == (0, \"only\")\n    # Queue should be empty again\n    with pytest.raises(asyncio.QueueEmpty):\n        q.get_nowait()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0650601540110074
+}

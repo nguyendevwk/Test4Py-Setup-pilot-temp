@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-e3e774b1-bd8d-4f90-b538-06829bdbb9f2",
+  "object": "chat.completion",
+  "created": 1795079377,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport typesystem\nfrom typesystem.schemas import Reference, Definitions\nfrom typesystem import ValidationError\n\n\nclass Child(typesystem.Schema):\n    name = typesystem.String()\n\n\nclass Parent(typesystem.Schema):\n    child = Reference(to=\"child\", definitions=Definitions({\"child\": Child}))\n\n\ndef test_reference_validates_and_serializes():\n    \"\"\"Reference should validate a nested schema and serialize to a dict.\"\"\"\n    data = {\"child\": {\"name\": \"Alice\"}}\n    parent = Parent(**data)\n    assert isinstance(parent.child, Child)\n    assert parent.child.name == \"Alice\"\n    # serialization should produce a dict representation of the child\n    assert parent.child.serialize() == {\"name\": \"Alice\"}\n\n\ndef test_reference_allows_null_when_configured():\n    \"\"\"Reference should allow None when allow_null is True.\"\"\"\n    class NullableParent(typesystem.Schema):\n        child = Reference(\n            to=\"child\",\n            definitions=Definitions({\"child\": Child}),\n            allow_null=True,\n        )\n\n    parent = NullableParent(child=None)\n    assert parent.child is None\n    # serialization of None should remain None\n    assert parent.child.serialize() is None\n\n\ndef test_reference_raises_validation_error_on_invalid_value():\n    \"\"\"Reference should raise ValidationError when value is not a dict.\"\"\"\n    with pytest.raises(ValidationError) as excinfo:\n        Parent(child=\"not a dict\")\n    assert \"child\" in str(excinfo.value)\n    assert \"Expected a dict\" in str(excinfo.value)\n```",
+        "reasoning": "We need to write tests for Reference field. Need Definitions class? In typesystem.schemas. Let's inspect.We don't have source but assume Definitions is mapping of names to schema classes. We can create simple schema using typesystem.Schema. Let's import typesystem.We'll write tests: 1) normal validation passes. 2) boundary: allow_null True. 3) error: invalid value raises ValidationError. Use tmp_path? Not needed. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053760263,
+    "prompt_tokens": 475,
+    "prompt_time": 0.031495746,
+    "completion_tokens": 424,
+    "completion_time": 0.481427966,
+    "total_tokens": 899,
+    "total_time": 0.512923712,
+    "completion_tokens_details": {
+      "reasoning_tokens": 96
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh342deq380gtg6g9qsp95",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport typesystem\nfrom typesystem.schemas import Reference, Definitions\nfrom typesystem import ValidationError\n\n\nclass Child(typesystem.Schema):\n    name = typesystem.String()\n\n\nclass Parent(typesystem.Schema):\n    child = Reference(to=\"child\", definitions=Definitions({\"child\": Child}))\n\n\ndef test_reference_validates_and_serializes():\n    \"\"\"Reference should validate a nested schema and serialize to a dict.\"\"\"\n    data = {\"child\": {\"name\": \"Alice\"}}\n    parent = Parent(**data)\n    assert isinstance(parent.child, Child)\n    assert parent.child.name == \"Alice\"\n    # serialization should produce a dict representation of the child\n    assert parent.child.serialize() == {\"name\": \"Alice\"}\n\n\ndef test_reference_allows_null_when_configured():\n    \"\"\"Reference should allow None when allow_null is True.\"\"\"\n    class NullableParent(typesystem.Schema):\n        child = Reference(\n            to=\"child\",\n            definitions=Definitions({\"child\": Child}),\n            allow_null=True,\n        )\n\n    parent = NullableParent(child=None)\n    assert parent.child is None\n    # serialization of None should remain None\n    assert parent.child.serialize() is None\n\n\ndef test_reference_raises_validation_error_on_invalid_value():\n    \"\"\"Reference should raise ValidationError when value is not a dict.\"\"\"\n    with pytest.raises(ValidationError) as excinfo:\n        Parent(child=\"not a dict\")\n    assert \"child\" in str(excinfo.value)\n    assert \"Expected a dict\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "7bdf2b2a68f04760a353c9cc42893c5a",
+  "_api_plus_pacing_seconds": 1.2960041009937413
+}

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-e16201c1-eda5-4fa3-83fe-049f49cdf6e1",
+  "object": "chat.completion",
+  "created": 1795076142,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport pytest\nfrom httpie.output.writer import write_stream\nfrom httpie.output.streams import BaseStream\n\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields predefined byte chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def __iter__(self):\n        return iter(self._chunks)\n\n\ndef test_write_stream_with_buffer_and_flush(tmp_path):\n    \"\"\"Ensure that write_stream writes to the buffer and flushes when requested.\"\"\"\n    # Prepare a BytesIO object to capture output\n    outfile = io.BytesIO()\n    # Dummy stream yields two chunks\n    stream = DummyStream([b\"hello \", b\"world\"])\n    # Call write_stream with flush=True\n    write_stream(stream, outfile, flush=True)\n    # Verify that the buffer contains the concatenated chunks\n    assert outfile.getvalue() == b\"hello world\"\n    # Since BytesIO does not expose flush, we rely on no exception being raised\n\n\ndef test_write_stream_without_buffer(tmp_path):\n    \"\"\"Ensure that write_stream works when the outfile has no buffer attribute.\"\"\"\n    class TextFileLike:\n        \"\"\"Simple text file-like object without a buffer attribute.\"\"\"\n        def __init__(self):\n            self.data = bytearray()\n            self.flushed = False\n\n        def write(self, chunk):\n            self.data.extend(chunk)\n\n        def flush(self):\n            self.flushed = True\n\n    outfile = TextFileLike()\n    stream = DummyStream([b\"foo\", b\"bar\"])\n    write_stream(stream, outfile, flush=False)\n    assert outfile.data == bytearray(b\"foobar\")\n    assert not outfile.flushed\n\n\ndef test_write_stream_flush_called(tmp_path):\n    \"\"\"Verify that flush is called on the outfile when flush=True.\"\"\"\n    class FlushTracker:\n        def __init__(self):\n            self.flush_count = 0\n            self.buffer = io.BytesIO()\n\n        def flush(self):\n            self.flush_count += 1\n\n    outfile = FlushTracker()\n    stream = DummyStream([b\"abc\", b\"def\"])\n    write_stream(stream, outfile, flush=True)\n    # Each chunk should trigger a flush\n    assert outfile.flush_count == 2\n    assert outfile.buffer.getvalue() == b\"abcdef\"\n```",
+        "reasoning": "We need tests for write_stream. It writes chunks from stream to outfile buffer. We can create a dummy BaseStream that yields bytes. Use BytesIO as outfile. Test that flush called when flush True. Use a custom file-like with flush tracking. Also test that if outfile has no buffer attribute, it writes directly. Also test error? maybe when stream raises? But no error handling. Just normal. Three tests: normal with buffer, normal without buffer, flush behavior. Use tmp_path for file? Use BytesIO. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053598046,
+    "prompt_tokens": 419,
+    "prompt_time": 0.061415221,
+    "completion_tokens": 584,
+    "completion_time": 0.810510103,
+    "total_tokens": 1003,
+    "total_time": 0.871925324,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 109
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se0cs0eda8hg53ktbwfgym",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport pytest\nfrom httpie.output.writer import write_stream\nfrom httpie.output.streams import BaseStream\n\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields predefined byte chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def __iter__(self):\n        return iter(self._chunks)\n\n\ndef test_write_stream_with_buffer_and_flush(tmp_path):\n    \"\"\"Ensure that write_stream writes to the buffer and flushes when requested.\"\"\"\n    # Prepare a BytesIO object to capture output\n    outfile = io.BytesIO()\n    # Dummy stream yields two chunks\n    stream = DummyStream([b\"hello \", b\"world\"])\n    # Call write_stream with flush=True\n    write_stream(stream, outfile, flush=True)\n    # Verify that the buffer contains the concatenated chunks\n    assert outfile.getvalue() == b\"hello world\"\n    # Since BytesIO does not expose flush, we rely on no exception being raised\n\n\ndef test_write_stream_without_buffer(tmp_path):\n    \"\"\"Ensure that write_stream works when the outfile has no buffer attribute.\"\"\"\n    class TextFileLike:\n        \"\"\"Simple text file-like object without a buffer attribute.\"\"\"\n        def __init__(self):\n            self.data = bytearray()\n            self.flushed = False\n\n        def write(self, chunk):\n            self.data.extend(chunk)\n\n        def flush(self):\n            self.flushed = True\n\n    outfile = TextFileLike()\n    stream = DummyStream([b\"foo\", b\"bar\"])\n    write_stream(stream, outfile, flush=False)\n    assert outfile.data == bytearray(b\"foobar\")\n    assert not outfile.flushed\n\n\ndef test_write_stream_flush_called(tmp_path):\n    \"\"\"Verify that flush is called on the outfile when flush=True.\"\"\"\n    class FlushTracker:\n        def __init__(self):\n            self.flush_count = 0\n            self.buffer = io.BytesIO()\n\n        def flush(self):\n            self.flush_count += 1\n\n    outfile = FlushTracker()\n    stream = DummyStream([b\"abc\", b\"def\"])\n    write_stream(stream, outfile, flush=True)\n    # Each chunk should trigger a flush\n    assert outfile.flush_count == 2\n    assert outfile.buffer.getvalue() == b\"abcdef\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2275695650023408
+}

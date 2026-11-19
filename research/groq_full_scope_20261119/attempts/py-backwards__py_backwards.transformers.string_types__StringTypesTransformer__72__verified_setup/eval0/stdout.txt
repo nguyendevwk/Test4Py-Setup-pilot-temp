@@ -1,0 +1,47 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_transform_replaces_str_with_unicode ___________________
+
+    def test_transform_replaces_str_with_unicode():
+        source = "x = str('hello')\nprint(str(x))"
+        tree = parse_source(source)
+    
+        result: TransformationResult = StringTypesTransformer.transform(tree)
+    
+        # The tree should have changed
+>       assert result.changed is True
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:26: AttributeError
+_____________________ test_transform_no_change_when_no_str _____________________
+
+    def test_transform_no_change_when_no_str():
+        source = "x = 42\nprint(x)"
+        tree = parse_source(source)
+    
+        result: TransformationResult = StringTypesTransformer.transform(tree)
+    
+        # The tree should not have changed
+>       assert result.changed is False
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:43: AttributeError
+__________________ test_transform_does_not_modify_other_names __________________
+
+    def test_transform_does_not_modify_other_names():
+        source = "str = 5\nprint(str)\nprint('str')"
+        tree = parse_source(source)
+    
+        result: TransformationResult = StringTypesTransformer.transform(tree)
+    
+        # The tree should have changed because the Name node 'str' in the assignment
+        # is replaced, but string literals remain unchanged
+>       assert result.changed is True
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:58: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_transform_replaces_str_with_unicode - Attribut...
+FAILED test_generated.py::test_transform_no_change_when_no_str - AttributeErr...
+FAILED test_generated.py::test_transform_does_not_modify_other_names - Attrib...
+3 failed in 0.14s

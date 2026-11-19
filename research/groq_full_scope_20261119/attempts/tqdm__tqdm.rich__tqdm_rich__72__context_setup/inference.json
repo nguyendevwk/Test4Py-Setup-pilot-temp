@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-e625f473-19a3-464d-a64c-203e5f28760c",
+  "object": "chat.completion",
+  "created": 1795076274,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tqdm.rich import tqdm_rich\nfrom tqdm import tqdm as std_tqdm\n\n# --------------------------------------------------------------------------- #\n# Test 1: Normal operation – progress bar updates correctly for a small list\n# --------------------------------------------------------------------------- #\ndef test_tqdm_rich_progress_updates(tmp_path):\n    data = list(range(5))\n    # Instantiate tqdm_rich with a short iterable\n    with tqdm_rich(data, leave=False, disable=False) as pbar:\n        # The rich Progress instance should be created\n        assert hasattr(pbar, \"_prog\")\n        # The task id should be set\n        assert hasattr(pbar, \"_task_id\")\n        # Initially, no items processed\n        assert pbar.n == 0\n        # Iterate through the data\n        for _ in pbar:\n            pass\n        # After iteration, all items processed\n        assert pbar.n == len(data)\n        # The internal task should reflect the completed count\n        task = pbar._prog._tasks[pbar._task_id]\n        assert task.completed == len(data)\n    # After exiting the context manager, the rich Progress should be closed\n    # The _prog attribute should still exist but the task should be removed\n    assert not pbar._prog._tasks  # no remaining tasks\n\n# --------------------------------------------------------------------------- #\n# Test 2: Disable flag – GUI should not be created and no errors raised\n# --------------------------------------------------------------------------- #\ndef test_tqdm_rich_disable_flag():\n    data = [1, 2, 3]\n    # Instantiate with disable=True; no rich GUI should be created\n    pbar = tqdm_rich(data, disable=True)\n    # The _prog attribute should not exist because GUI is disabled\n    assert not hasattr(pbar, \"_prog\")\n    # Iteration should still work like a normal tqdm\n    for _ in pbar:\n        pass\n    assert pbar.n == len(data)\n    # Closing should be a no-op\n    pbar.close()\n    # No exception should have been raised during close\n\n# --------------------------------------------------------------------------- #\n# Test 3: Reset behavior – total can be changed and counter resets\n# --------------------------------------------------------------------------- #\ndef test_tqdm_rich_reset_behavior():\n    data = [1, 2, 3]\n    pbar = tqdm_rich(data, total=10, disable=False)\n    # Process two items\n    for _ in pbar:\n        if pbar.n == 2:\n            break\n    assert pbar.n == 2\n    # Reset with a new total\n    pbar.reset(total=5)\n    # After reset, counter should be zero and total updated\n    assert pbar.n == 0\n    assert pbar.total == 5\n    # Continue iterating to the new total\n    for _ in pbar:\n        pass\n    assert pbar.n == 5\n    pbar.close()\n```",
+        "reasoning": "Need tests for tqdm_rich. Use tmp_path to create dummy iterable? We can instantiate tqdm_rich with iterable and check progress updates. Since rich outputs to console, but we can test that _prog exists and task id. Use tqdm_rich with disable=True to test skip. Also test reset. Use small iterable. Ensure no network. Use pytest.raises for error? maybe passing invalid progress param? But not needed. We'll test normal: iterate over list, check that after close, _prog is exited. Use ._prog.is_running? not sure. We'll just check that after close, _prog is None? Actually _prog.__exit__ returns None. We can check that _prog is not None but task id updated. We'll test that after iteration, n equals len. Also test that disable flag prevents GUI creation. Use disable=True. Ensure no _prog attribute. Third test: reset total. Use total param. Check that after reset, n=0 and total updated."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052405098,
+    "prompt_tokens": 1336,
+    "prompt_time": 0.084764807,
+    "completion_tokens": 808,
+    "completion_time": 0.881789926,
+    "total_tokens": 2144,
+    "total_time": 0.966554733,
+    "completion_tokens_details": {
+      "reasoning_tokens": 200
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se4de1escrmy1nsdn5xkc2",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tqdm.rich import tqdm_rich\nfrom tqdm import tqdm as std_tqdm\n\n# --------------------------------------------------------------------------- #\n# Test 1: Normal operation – progress bar updates correctly for a small list\n# --------------------------------------------------------------------------- #\ndef test_tqdm_rich_progress_updates(tmp_path):\n    data = list(range(5))\n    # Instantiate tqdm_rich with a short iterable\n    with tqdm_rich(data, leave=False, disable=False) as pbar:\n        # The rich Progress instance should be created\n        assert hasattr(pbar, \"_prog\")\n        # The task id should be set\n        assert hasattr(pbar, \"_task_id\")\n        # Initially, no items processed\n        assert pbar.n == 0\n        # Iterate through the data\n        for _ in pbar:\n            pass\n        # After iteration, all items processed\n        assert pbar.n == len(data)\n        # The internal task should reflect the completed count\n        task = pbar._prog._tasks[pbar._task_id]\n        assert task.completed == len(data)\n    # After exiting the context manager, the rich Progress should be closed\n    # The _prog attribute should still exist but the task should be removed\n    assert not pbar._prog._tasks  # no remaining tasks\n\n# --------------------------------------------------------------------------- #\n# Test 2: Disable flag – GUI should not be created and no errors raised\n# --------------------------------------------------------------------------- #\ndef test_tqdm_rich_disable_flag():\n    data = [1, 2, 3]\n    # Instantiate with disable=True; no rich GUI should be created\n    pbar = tqdm_rich(data, disable=True)\n    # The _prog attribute should not exist because GUI is disabled\n    assert not hasattr(pbar, \"_prog\")\n    # Iteration should still work like a normal tqdm\n    for _ in pbar:\n        pass\n    assert pbar.n == len(data)\n    # Closing should be a no-op\n    pbar.close()\n    # No exception should have been raised during close\n\n# --------------------------------------------------------------------------- #\n# Test 3: Reset behavior – total can be changed and counter resets\n# --------------------------------------------------------------------------- #\ndef test_tqdm_rich_reset_behavior():\n    data = [1, 2, 3]\n    pbar = tqdm_rich(data, total=10, disable=False)\n    # Process two items\n    for _ in pbar:\n        if pbar.n == 2:\n            break\n    assert pbar.n == 2\n    # Reset with a new total\n    pbar.reset(total=5)\n    # After reset, counter should be zero and total updated\n    assert pbar.n == 0\n    assert pbar.total == 5\n    # Continue iterating to the new total\n    for _ in pbar:\n        pass\n    assert pbar.n == 5\n    pbar.close()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3084599430439994
+}

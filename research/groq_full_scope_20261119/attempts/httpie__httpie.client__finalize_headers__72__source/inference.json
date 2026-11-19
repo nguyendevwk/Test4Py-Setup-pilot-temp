@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-23859476-9616-482d-8a74-4ea44c951c4e",
+  "object": "chat.completion",
+  "created": 1795079591,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.client import finalize_headers\nfrom httpie.cli.dicts import HTTPHeadersDict\nfrom urllib3.util import SKIPPABLE_HEADERS, SKIP_HEADER\n\ndef test_finalize_headers_encodes_and_strips():\n    \"\"\"Headers with leading/trailing whitespace and string values are stripped and encoded.\"\"\"\n    raw = HTTPHeadersDict()\n    raw.add(\"X-Test-Header\", \"  value with spaces  \")\n    raw.add(\"X-Empty\", \"   \")\n    raw.add(\"X-Number\", 123)  # non-string, should stay unchanged\n\n    final = finalize_headers(raw)\n\n    # The header value should be stripped and encoded to bytes\n    assert final[\"X-Test-Header\"] == b\"value with spaces\"\n    # Empty string becomes b\"\" after stripping\n    assert final[\"X-Empty\"] == b\"\"\n    # Non-string values are left untouched\n    assert final[\"X-Number\"] == 123\n\ndef test_finalize_headers_skippable_headers_with_none():\n    \"\"\"Headers set to None that are skippable should be replaced with SKIP_HEADER.\"\"\"\n    raw = HTTPHeadersDict()\n    for name in SKIPPABLE_HEADERS:\n        raw.add(name, None)\n\n    final = finalize_headers(raw)\n\n    for name in SKIPPABLE_HEADERS:\n        assert final[name] == SKIP_HEADER\n\ndef test_finalize_headers_non_skippable_none_ignored():\n    \"\"\"Headers set to None that are not skippable are omitted from the result.\"\"\"\n    raw = HTTPHeadersDict()\n    raw.add(\"X-Non-Skippable\", None)\n    raw.add(\"Content-Type\", \"text/plain\")\n\n    final = finalize_headers(raw)\n\n    # Non-skippable None header should not appear\n    assert \"X-Non-Skippable\" not in final\n    # Content-Type should be preserved and encoded\n    assert final[\"Content-Type\"] == b\"text/plain\"\n```",
+        "reasoning": "We need 3 tests for finalize_headers. Use tmp_path? not needed. Just test normal, boundary, error. Edge: None values, SKIPPABLE_HEADERS. Also test that string values encoded. Use HTTPHeadersDict from httpie.cli.dicts. Let's inspect that class? Assume behaves like dict with add method. We'll import. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004945188,
+    "prompt_tokens": 618,
+    "prompt_time": 0.010152469,
+    "completion_tokens": 476,
+    "completion_time": 0.511543688,
+    "total_tokens": 1094,
+    "total_time": 0.521696157,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 72
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh9n8tevdb1r03tf03vddr",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.client import finalize_headers\nfrom httpie.cli.dicts import HTTPHeadersDict\nfrom urllib3.util import SKIPPABLE_HEADERS, SKIP_HEADER\n\ndef test_finalize_headers_encodes_and_strips():\n    \"\"\"Headers with leading/trailing whitespace and string values are stripped and encoded.\"\"\"\n    raw = HTTPHeadersDict()\n    raw.add(\"X-Test-Header\", \"  value with spaces  \")\n    raw.add(\"X-Empty\", \"   \")\n    raw.add(\"X-Number\", 123)  # non-string, should stay unchanged\n\n    final = finalize_headers(raw)\n\n    # The header value should be stripped and encoded to bytes\n    assert final[\"X-Test-Header\"] == b\"value with spaces\"\n    # Empty string becomes b\"\" after stripping\n    assert final[\"X-Empty\"] == b\"\"\n    # Non-string values are left untouched\n    assert final[\"X-Number\"] == 123\n\ndef test_finalize_headers_skippable_headers_with_none():\n    \"\"\"Headers set to None that are skippable should be replaced with SKIP_HEADER.\"\"\"\n    raw = HTTPHeadersDict()\n    for name in SKIPPABLE_HEADERS:\n        raw.add(name, None)\n\n    final = finalize_headers(raw)\n\n    for name in SKIPPABLE_HEADERS:\n        assert final[name] == SKIP_HEADER\n\ndef test_finalize_headers_non_skippable_none_ignored():\n    \"\"\"Headers set to None that are not skippable are omitted from the result.\"\"\"\n    raw = HTTPHeadersDict()\n    raw.add(\"X-Non-Skippable\", None)\n    raw.add(\"Content-Type\", \"text/plain\")\n\n    final = finalize_headers(raw)\n\n    # Non-skippable None header should not appear\n    assert \"X-Non-Skippable\" not in final\n    # Content-Type should be preserved and encoded\n    assert final[\"Content-Type\"] == b\"text/plain\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "52645b6059424c9fac7495be52b8ba1b",
+  "_api_plus_pacing_seconds": 1.5525916700134985
+}

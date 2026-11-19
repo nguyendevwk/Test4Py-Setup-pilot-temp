@@ -1,0 +1,102 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_parse_git_url_http_and_file _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/python-semantic-release__semantic_release.helpers__parse_git_url__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_git_url_http_and_fi0')
+
+    def test_parse_git_url_http_and_file(tmp_path: Path):
+        """Test parsing of a standard HTTPS URL and a local file path."""
+        # HTTPS URL
+        https_url = "https://github.com/owner/repo.git"
+        result = parse_git_url(https_url)
+        assert isinstance(result, ParsedGitUrl)
+        assert result.scheme == "https"
+        assert result.netloc == "github.com"
+        assert result.namespace == "owner"
+        assert result.repo_name == "repo"
+    
+        # Local file path (POSIX)
+        local_path = tmp_path / "repo.git"
+        local_path.touch()
+        file_url = f"file://{local_path}"
+        result_file = parse_git_url(file_url)
+        assert result_file.scheme == "file"
+        assert result_file.netloc == ""
+>       assert result_file.namespace == ""
+E       AssertionError: assert 'home/heurix/..._http_and_fi0' == ''
+E         
+E         + home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/python-semantic-release__semantic_release.helpers__parse_git_url__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_git_url_http_and_fi0
+
+test_generated.py:28: AssertionError
+______________________ test_parse_git_url_ssh_and_windows ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/python-semantic-release__semantic_release.helpers__parse_git_url__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_git_url_ssh_and_win0')
+
+    def test_parse_git_url_ssh_and_windows(tmp_path: Path):
+        """Test parsing of SSH URLs and Windows file paths."""
+        # SSH URL with explicit user and port
+        ssh_url = "ssh://git@github.com:2222/owner/repo.git"
+        result = parse_git_url(ssh_url)
+        assert result.scheme == "ssh"
+        assert result.netloc == "git@github.com:2222"
+        assert result.namespace == "owner"
+        assert result.repo_name == "repo"
+    
+        # Windows file path
+        windows_path = Path("C:/Users/Me/project.git")
+>       windows_path.touch()
+
+test_generated.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/pathlib.py:1168: in touch
+    self._accessor.touch(self, mode, exist_ok)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <pathlib._NormalAccessor object at 0x7f9b14661300>
+path = PosixPath('C:/Users/Me/project.git'), mode = 438, exist_ok = True
+
+    def touch(self, path, mode=0o666, exist_ok=True):
+        if exist_ok:
+            # First try to bump modification time
+            # Implementation note: GNU touch uses the UTIME_NOW option of
+            # the utimensat() / futimens() functions.
+            try:
+                os.utime(path, None)
+            except OSError:
+                # Avoid exception chaining
+                pass
+            else:
+                return
+        flags = os.O_CREAT | os.O_WRONLY
+        if not exist_ok:
+            flags |= os.O_EXCL
+>       fd = os.open(path, flags, mode)
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:/Users/Me/project.git'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/pathlib.py:331: FileNotFoundError
+___________________ test_parse_git_url_invalid_and_boundary ____________________
+
+    def test_parse_git_url_invalid_and_boundary():
+        """Test that invalid URLs raise ValueError and boundary cases are handled."""
+        # Missing scheme
+        with pytest.raises(ValueError, match="Cannot parse"):
+            parse_git_url("github.com/owner/repo.git")
+    
+        # Empty path after scheme
+        with pytest.raises(ValueError, match="Bad url"):
+            parse_git_url("https://github.com/")
+    
+        # URL with .git suffix missing
+        with pytest.raises(ValueError, match="Bad url"):
+            parse_git_url("https://github.com/owner/")
+    
+        # URL with unsupported scheme
+>       with pytest.raises(ValueError, match="Bad url"):
+E       Failed: DID NOT RAISE ValueError
+
+test_generated.py:68: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_git_url_http_and_file - AssertionError: ...
+FAILED test_generated.py::test_parse_git_url_ssh_and_windows - FileNotFoundEr...
+FAILED test_generated.py::test_parse_git_url_invalid_and_boundary - Failed: D...
+3 failed in 0.56s

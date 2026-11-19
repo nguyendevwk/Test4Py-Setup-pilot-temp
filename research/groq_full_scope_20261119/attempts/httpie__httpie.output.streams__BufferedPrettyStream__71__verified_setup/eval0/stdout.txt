@@ -1,0 +1,25 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_iter_body_with_converter _________________________
+
+    def test_iter_body_with_converter():
+        """Body contains a null byte but a converter is available; conversion applied."""
+        body = b"data\x00with\x00nulls"
+        msg = DummyMessage([body])
+        # Converter will replace MIME and reverse the bytes
+        converter = DummyConverter("text/reversed", lambda b: b[::-1])
+        conversion = DummyConversion({"application/octet-stream": converter})
+        stream = DummyStream(msg, conversion, "application/octet-stream", lambda b: b)
+        result = list(stream.iter_body())
+        # After conversion, MIME should be updated and body reversed
+        assert stream.mime == "text/reversed"
+>       assert result == [b"slunnw\x00atad"]
+E       AssertionError: assert [bytearray(b'...tiw\x00atad')] == [b'slunnw\x00atad']
+E         
+E         At index 0 diff: bytearray(b'sllun\x00htiw\x00atad') != b'slunnw\x00atad'
+E         Use -v to get more diff
+
+test_generated.py:74: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_iter_body_with_converter - AssertionError: ass...
+1 failed, 2 passed in 0.72s

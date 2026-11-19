@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-f29a84a1-2abd-4d3d-967c-2385567919c9",
+  "object": "chat.completion",
+  "created": 1795078500,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import parse_xforwarded\n\nclass DummyHeaders:\n    def __init__(self, mapping):\n        self._mapping = mapping\n\n    def getone(self, key, default=None):\n        return self._mapping.get(key, default)\n\n    def getall(self, key):\n        # Return list of values for the key; if not present raise KeyError\n        if key not in self._mapping:\n            raise KeyError(key)\n        val = self._mapping[key]\n        if isinstance(val, list):\n            return val\n        return [val]\n\nclass DummyConfig:\n    def __init__(self, real_ip_header=None, forwarded_for_header=None, proxies_count=0):\n        self.REAL_IP_HEADER = real_ip_header\n        self.FORWARDED_FOR_HEADER = forwarded_for_header\n        self.PROXIES_COUNT = proxies_count\n\ndef test_parse_xforwarded_no_headers_returns_none():\n    headers = DummyHeaders({})\n    config = DummyConfig()\n    assert parse_xforwarded(headers, config) is None\n\ndef test_parse_xforwarded_real_ip_header_used():\n    headers = DummyHeaders({\"X-Real-IP\": \"192.0.2.1\"})\n    config = DummyConfig(real_ip_header=\"X-Real-IP\")\n    result = parse_xforwarded(headers, config)\n    # The result should be a string containing the address\n    assert isinstance(result, str)\n    assert \"for=192.0.2.1\" in result\n\ndef test_parse_xforwarded_forwarded_for_with_proxies_count():\n    headers = DummyHeaders({\n        \"X-Forwarded-For\": [\"203.0.113.1, 198.51.100.2\", \"198.51.100.3\"]\n    })\n    config = DummyConfig(forwarded_for_header=\"X-Forwarded-For\", proxies_count=2)\n    result = parse_xforwarded(headers, config)\n    # The second proxy from the end should be used (198.51.100.2)\n    assert isinstance(result, str)\n    assert \"for=198.51.100.2\" in result\n```",
+        "reasoning": "We need to test parse_xforwarded. Need Options type? Not defined. Probably Options is alias? But we can just test return None or string. fwd_normalize likely returns something. But we can't import. Let's inspect sanic.headers. Probably Options is a type alias for list of tuples. But we can just test that returned value is string? Let's quickly assume fwd_normalize returns string of options? Hard. Maybe easier: test that when no headers, returns None. Also test when REAL_IP_HEADER present. Use simple config object with attributes. Use headers from sanic.http? But we can mock headers with simple dict with getone, getall. Implement minimal class. Let's create dummy headers with getone and getall. Test scenarios."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047986453,
+    "prompt_tokens": 543,
+    "prompt_time": 0.004969026,
+    "completion_tokens": 607,
+    "completion_time": 0.660822214,
+    "total_tokens": 1150,
+    "total_time": 0.66579124,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 154
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg8bphef19chaf1gapr3am",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import parse_xforwarded\n\nclass DummyHeaders:\n    def __init__(self, mapping):\n        self._mapping = mapping\n\n    def getone(self, key, default=None):\n        return self._mapping.get(key, default)\n\n    def getall(self, key):\n        # Return list of values for the key; if not present raise KeyError\n        if key not in self._mapping:\n            raise KeyError(key)\n        val = self._mapping[key]\n        if isinstance(val, list):\n            return val\n        return [val]\n\nclass DummyConfig:\n    def __init__(self, real_ip_header=None, forwarded_for_header=None, proxies_count=0):\n        self.REAL_IP_HEADER = real_ip_header\n        self.FORWARDED_FOR_HEADER = forwarded_for_header\n        self.PROXIES_COUNT = proxies_count\n\ndef test_parse_xforwarded_no_headers_returns_none():\n    headers = DummyHeaders({})\n    config = DummyConfig()\n    assert parse_xforwarded(headers, config) is None\n\ndef test_parse_xforwarded_real_ip_header_used():\n    headers = DummyHeaders({\"X-Real-IP\": \"192.0.2.1\"})\n    config = DummyConfig(real_ip_header=\"X-Real-IP\")\n    result = parse_xforwarded(headers, config)\n    # The result should be a string containing the address\n    assert isinstance(result, str)\n    assert \"for=192.0.2.1\" in result\n\ndef test_parse_xforwarded_forwarded_for_with_proxies_count():\n    headers = DummyHeaders({\n        \"X-Forwarded-For\": [\"203.0.113.1, 198.51.100.2\", \"198.51.100.3\"]\n    })\n    config = DummyConfig(forwarded_for_header=\"X-Forwarded-For\", proxies_count=2)\n    result = parse_xforwarded(headers, config)\n    # The second proxy from the end should be used (198.51.100.2)\n    assert isinstance(result, str)\n    assert \"for=198.51.100.2\" in result\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0602104460122064
+}

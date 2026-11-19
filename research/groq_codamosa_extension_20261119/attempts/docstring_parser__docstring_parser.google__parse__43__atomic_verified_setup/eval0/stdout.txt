@@ -1,0 +1,65 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_parse_normal_docstring __________________________
+
+    def test_parse_normal_docstring():
+        doc = """
+        Calculates the sum of two numbers.
+    
+        Args:
+            a (int): The first number.
+            b (int): The second number.
+    
+        Returns:
+            int: The sum of a and b.
+    
+        Raises:
+            ValueError: If either argument is not an integer.
+    
+        Examples:
+            >>> add(2, 3)
+            5
+        """
+        result = parse(doc)
+        # Basic description
+        assert result.description.strip() == "Calculates the sum of two numbers."
+        # Parameters
+        assert len(result.params) == 2
+        a_param = next(p for p in result.params if p.arg_name == "a")
+        assert isinstance(a_param, DocstringParam)
+        assert a_param.type_name == "int"
+        assert a_param.description == "The first number."
+        # Returns
+>       assert len(result.returns) == 1
+E       TypeError: object of type 'DocstringReturns' has no len()
+
+../../../../../../attempts/docstring_parser__docstring_parser.google__parse__43__atomic_verified_setup/eval0/test_generated.py:33: TypeError
+__________________________ test_parse_empty_docstring __________________________
+
+    def test_parse_empty_docstring():
+        # Empty string should produce a Docstring with empty fields
+        result = parse("")
+>       assert result.description == ""
+E       AssertionError: assert None == ''
+E        +  where None = <docstring_parser.common.Docstring object at 0x7f8e3c39f730>.description
+
+../../../../../../attempts/docstring_parser__docstring_parser.google__parse__43__atomic_verified_setup/eval0/test_generated.py:52: AssertionError
+__________________ test_parse_invalid_docstring_raises_error ___________________
+
+    def test_parse_invalid_docstring_raises_error():
+        # Malformed section header should raise ParseError
+        bad_doc = """
+        This is a docstring with an invalid section.
+    
+        BadSection
+            Something
+        """
+>       with pytest.raises(ParseError):
+E       Failed: DID NOT RAISE ParseError
+
+../../../../../../attempts/docstring_parser__docstring_parser.google__parse__43__atomic_verified_setup/eval0/test_generated.py:66: Failed
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.google__parse__43__atomic_verified_setup/eval0/test_generated.py::test_parse_normal_docstring
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.google__parse__43__atomic_verified_setup/eval0/test_generated.py::test_parse_empty_docstring
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.google__parse__43__atomic_verified_setup/eval0/test_generated.py::test_parse_invalid_docstring_raises_error
+3 failed in 0.17s

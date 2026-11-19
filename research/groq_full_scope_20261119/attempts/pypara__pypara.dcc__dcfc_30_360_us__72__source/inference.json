@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-e85a93c8-6a3e-46eb-8e77-c08fa9bd07aa",
+  "object": "chat.completion",
+  "created": 1795077979,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nfrom decimal import Decimal\n\nimport pytest\n\nfrom pypara.dcc import dcfc_30_360_us\n\n\ndef test_normal_fraction():\n    \"\"\"Standard case: start 2007-12-28, asof 2008-02-28.\"\"\"\n    start = datetime.date(2007, 12, 28)\n    asof = datetime.date(2008, 2, 28)\n    result = dcfc_30_360_us(start=start, asof=asof, end=asof)\n    assert isinstance(result, Decimal)\n    assert round(result, 14) == Decimal(\"0.16666666666667\")\n\n\ndef test_last_day_of_month_adjustment():\n    \"\"\"When start is last day of month, d1 should be set to 30.\"\"\"\n    start = datetime.date(2021, 1, 31)  # last day of January\n    asof = datetime.date(2021, 2, 28)   # last day of February\n    result = dcfc_30_360_us(start=start, asof=asof, end=asof)\n    # d1 becomes 30, d2 becomes 28 (not 30 because asof is not last day of month)\n    # nod = (28-30) + 30*(2-1) = -2 + 30 = 28\n    # fraction = 28/360 = 0.0777777777777778\n    assert round(result, 14) == Decimal(\"0.07777777777778\")\n\n\ndef test_day_31_adjustment():\n    \"\"\"When d2 is 31 and d1 is 30 or 31, d2 should be set to 30.\"\"\"\n    start = datetime.date(2020, 3, 30)\n    asof = datetime.date(2020, 4, 31)  # April 31 does not exist, use 30\n    # Use April 30 to trigger d2=31 logic\n    asof = datetime.date(2020, 4, 30)\n    result = dcfc_30_360_us(start=start, asof=asof, end=asof)\n    # d1=30, d2=30 -> nod = (30-30)+30*(4-3)=30\n    # fraction = 30/360 = 0.0833333333333333\n    assert round(result, 14) == Decimal(\"0.08333333333333\")\n```",
+        "reasoning": "We need 3 tests. Use datetime.date. Import function. Test normal case, boundary last day of month, error? maybe invalid dates? function expects Date type but uses .day, .month, .year. We can pass datetime.date. Test that for start Feb 28 non-leap, asof Feb 28 same year gives 0.1666. Also test last day of month adjustment: start Jan 31, asof Feb 28? compute. Also test that d2=31 case. Provide assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047292447,
+    "prompt_tokens": 932,
+    "prompt_time": 0.012439071,
+    "completion_tokens": 644,
+    "completion_time": 0.90682456,
+    "total_tokens": 1576,
+    "total_time": 0.919263631,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 109
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfreg3erst123a21eqvjb4",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nfrom decimal import Decimal\n\nimport pytest\n\nfrom pypara.dcc import dcfc_30_360_us\n\n\ndef test_normal_fraction():\n    \"\"\"Standard case: start 2007-12-28, asof 2008-02-28.\"\"\"\n    start = datetime.date(2007, 12, 28)\n    asof = datetime.date(2008, 2, 28)\n    result = dcfc_30_360_us(start=start, asof=asof, end=asof)\n    assert isinstance(result, Decimal)\n    assert round(result, 14) == Decimal(\"0.16666666666667\")\n\n\ndef test_last_day_of_month_adjustment():\n    \"\"\"When start is last day of month, d1 should be set to 30.\"\"\"\n    start = datetime.date(2021, 1, 31)  # last day of January\n    asof = datetime.date(2021, 2, 28)   # last day of February\n    result = dcfc_30_360_us(start=start, asof=asof, end=asof)\n    # d1 becomes 30, d2 becomes 28 (not 30 because asof is not last day of month)\n    # nod = (28-30) + 30*(2-1) = -2 + 30 = 28\n    # fraction = 28/360 = 0.0777777777777778\n    assert round(result, 14) == Decimal(\"0.07777777777778\")\n\n\ndef test_day_31_adjustment():\n    \"\"\"When d2 is 31 and d1 is 30 or 31, d2 should be set to 30.\"\"\"\n    start = datetime.date(2020, 3, 30)\n    asof = datetime.date(2020, 4, 31)  # April 31 does not exist, use 30\n    # Use April 30 to trigger d2=31 logic\n    asof = datetime.date(2020, 4, 30)\n    result = dcfc_30_360_us(start=start, asof=asof, end=asof)\n    # d1=30, d2=30 -> nod = (30-30)+30*(4-3)=30\n    # fraction = 30/360 = 0.0833333333333333\n    assert round(result, 14) == Decimal(\"0.08333333333333\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3055282160057686
+}

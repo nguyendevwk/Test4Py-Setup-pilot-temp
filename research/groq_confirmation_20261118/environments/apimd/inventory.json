@@ -1,0 +1,110 @@
+{
+  "candidates": [
+    {
+      "module": "apimd.loader",
+      "symbol": "walk_packages",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/loader.py",
+      "source_sha256": "b5517332ab96a0053966c11126d910501a1a3088452e102b8f6cb88a560fedd0",
+      "source": "from typing import Optional\nfrom collections.abc import Sequence, Iterator\nfrom sys import path as sys_path\nfrom os import mkdir, walk\nfrom os.path import isdir, isfile, abspath, join, sep, dirname\nfrom importlib.abc import Loader\nfrom importlib.machinery import EXTENSION_SUFFIXES\nfrom importlib.util import find_spec, spec_from_file_location, module_from_spec\nfrom .logger import logger\nfrom .parser import parent, Parser\n\ndef walk_packages(name: str, path: str) -> Iterator[tuple[str, str]]:\n    \"\"\"Walk packages without import them.\"\"\"\n    path = abspath(path) + sep\n    valid = (path + name, path + name + PEP561_SUFFIX)\n    for root, _, fs in walk(path):\n        for f in fs:\n            if not f.endswith(('.py', '.pyi')):\n                continue\n            f_path = parent(join(root, f))\n            if not f_path.startswith(valid):\n                continue\n            name = (f_path\n                    .removeprefix(path)\n                    .replace(PEP561_SUFFIX, \"\")\n                    .replace(sep, '.')\n                    .removesuffix('.__init__'))\n            yield name, f_path",
+      "source_lines": 17
+    },
+    {
+      "module": "apimd.loader",
+      "symbol": "loader",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/loader.py",
+      "source_sha256": "b5517332ab96a0053966c11126d910501a1a3088452e102b8f6cb88a560fedd0",
+      "source": "from typing import Optional\nfrom collections.abc import Sequence, Iterator\nfrom sys import path as sys_path\nfrom os import mkdir, walk\nfrom os.path import isdir, isfile, abspath, join, sep, dirname\nfrom importlib.abc import Loader\nfrom importlib.machinery import EXTENSION_SUFFIXES\nfrom importlib.util import find_spec, spec_from_file_location, module_from_spec\nfrom .logger import logger\nfrom .parser import parent, Parser\n\ndef loader(root: str, pwd: str, link: bool, level: int, toc: bool) -> str:\n    \"\"\"Package searching algorithm.\"\"\"\n    p = Parser.new(link, level, toc)\n    for name, path in walk_packages(root, pwd):\n        # Load its source or stub\n        pure_py = False\n        for ext in [\".py\", \".pyi\"]:\n            path_ext = path + ext\n            if not isfile(path_ext):\n                continue\n            logger.debug(f\"{name} <= {path_ext}\")\n            p.parse(name, _read(path_ext))\n            if ext == \".py\":\n                pure_py = True\n        if pure_py:\n            continue\n        logger.debug(f\"loading extension module for fully documented:\")\n        # Try to load module here\n        for ext in EXTENSION_SUFFIXES:\n            path_ext = path + ext\n            if not isfile(path_ext):\n                continue\n            logger.debug(f\"{name} <= {path_ext}\")\n            if _load_module(name, path_ext, p):\n                break\n        else:\n            logger.warning(f\"no module for {name} in this platform\")\n    return p.compile()",
+      "source_lines": 28
+    },
+    {
+      "module": "apimd.loader",
+      "symbol": "gen_api",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/loader.py",
+      "source_sha256": "b5517332ab96a0053966c11126d910501a1a3088452e102b8f6cb88a560fedd0",
+      "source": "from typing import Optional\nfrom collections.abc import Sequence, Iterator\nfrom sys import path as sys_path\nfrom os import mkdir, walk\nfrom os.path import isdir, isfile, abspath, join, sep, dirname\nfrom importlib.abc import Loader\nfrom importlib.machinery import EXTENSION_SUFFIXES\nfrom importlib.util import find_spec, spec_from_file_location, module_from_spec\nfrom .logger import logger\nfrom .parser import parent, Parser\n\ndef gen_api(\n    root_names: dict[str, str],\n    pwd: Optional[str] = None,\n    *,\n    prefix: str = 'docs',\n    link: bool = True,\n    level: int = 1,\n    toc: bool = False,\n    dry: bool = False\n) -> Sequence[str]:\n    \"\"\"Generate API. All rules are listed in the readme.\n\n    The path `pwd` is the current path that provided to `pkgutil`,\n    which allows the \"site-packages\" directory to be used.\n    \"\"\"\n    if pwd is not None:\n        sys_path.append(pwd)\n    if not isdir(prefix):\n        logger.info(f\"Create directory: {prefix}\")\n        mkdir(prefix)\n    docs = []\n    for title, name in root_names.items():\n        logger.info(f\"Load root: {name} ({title})\")\n        doc = loader(name, _site_path(name), link, level, toc)\n        if not doc.strip():\n            logger.warning(f\"'{name}' can not be found\")\n            continue\n        doc = '#' * level + f\" {title} API\\n\\n\" + doc\n        path = join(prefix, f\"{name.replace('_', '-')}-api.md\")\n        logger.info(f\"Write file: {path}\")\n        if dry:\n            logger.info('=' * 12)\n            logger.info(doc)\n        else:\n            _write(path, doc)\n        docs.append(doc)\n    return docs",
+      "source_lines": 37
+    },
+    {
+      "module": "apimd.parser",
+      "symbol": "is_public_family",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "source_sha256": "466704282383cf34e744e22e021563bb55745d62063e7922659d36ff9c08d4e0",
+      "source": "from typing import cast, TypeVar, Union, Optional\nfrom types import ModuleType\nfrom collections.abc import Sequence, Iterable, Iterator\nfrom itertools import chain\nfrom dataclasses import dataclass, field\nfrom inspect import getdoc\nfrom ast import (\n    parse, unparse, get_docstring, AST, FunctionDef, AsyncFunctionDef, ClassDef,\n    Assign, AnnAssign, Delete, Import, ImportFrom, Name, Expr, Subscript, BinOp,\n    BitOr, Call, If, Try, Tuple, List, Set, Dict, Constant, Load, Attribute,\n    arg, expr, stmt, arguments, NodeTransformer,\n)\nfrom .logger import logger\nfrom .pep585 import PEP585\n\ndef is_public_family(name: str) -> bool:\n    \"\"\"Check the name is come from public modules or not.\"\"\"\n    for n in name.split('.'):\n        # Magic name\n        if is_magic(n):\n            continue\n        # Local or private name\n        if n.startswith('_'):\n            return False\n    return True",
+      "source_lines": 10
+    },
+    {
+      "module": "apimd.parser",
+      "symbol": "walk_body",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "source_sha256": "466704282383cf34e744e22e021563bb55745d62063e7922659d36ff9c08d4e0",
+      "source": "from typing import cast, TypeVar, Union, Optional\nfrom types import ModuleType\nfrom collections.abc import Sequence, Iterable, Iterator\nfrom itertools import chain\nfrom dataclasses import dataclass, field\nfrom inspect import getdoc\nfrom ast import (\n    parse, unparse, get_docstring, AST, FunctionDef, AsyncFunctionDef, ClassDef,\n    Assign, AnnAssign, Delete, Import, ImportFrom, Name, Expr, Subscript, BinOp,\n    BitOr, Call, If, Try, Tuple, List, Set, Dict, Constant, Load, Attribute,\n    arg, expr, stmt, arguments, NodeTransformer,\n)\nfrom .logger import logger\nfrom .pep585 import PEP585\n\ndef walk_body(body: Sequence[stmt]) -> Iterator[stmt]:\n    \"\"\"Traverse around body and its simple definition scope.\"\"\"\n    for node in body:\n        if isinstance(node, If):\n            yield from walk_body(node.body)\n            yield from walk_body(node.orelse)\n        elif isinstance(node, Try):\n            yield from walk_body(node.body)\n            for h in node.handlers:\n                yield from walk_body(h.body)\n            yield from walk_body(node.orelse)\n            yield from walk_body(node.finalbody)\n        else:\n            yield node",
+      "source_lines": 14
+    },
+    {
+      "module": "apimd.parser",
+      "symbol": "code",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "source_sha256": "466704282383cf34e744e22e021563bb55745d62063e7922659d36ff9c08d4e0",
+      "source": "from typing import cast, TypeVar, Union, Optional\nfrom types import ModuleType\nfrom collections.abc import Sequence, Iterable, Iterator\nfrom itertools import chain\nfrom dataclasses import dataclass, field\nfrom inspect import getdoc\nfrom ast import (\n    parse, unparse, get_docstring, AST, FunctionDef, AsyncFunctionDef, ClassDef,\n    Assign, AnnAssign, Delete, Import, ImportFrom, Name, Expr, Subscript, BinOp,\n    BitOr, Call, If, Try, Tuple, List, Set, Dict, Constant, Load, Attribute,\n    arg, expr, stmt, arguments, NodeTransformer,\n)\nfrom .logger import logger\nfrom .pep585 import PEP585\n\ndef code(doc: str) -> str:\n    \"\"\"Escape Markdown charters from inline code.\"\"\"\n    doc = doc.replace('|', '&#124;')\n    if '&' in doc:\n        return f\"<code>{doc}</code>\"\n    elif doc:\n        return f\"`{doc}`\"\n    else:\n        return \" \"",
+      "source_lines": 9
+    },
+    {
+      "module": "apimd.parser",
+      "symbol": "esc_underscore",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "source_sha256": "466704282383cf34e744e22e021563bb55745d62063e7922659d36ff9c08d4e0",
+      "source": "from typing import cast, TypeVar, Union, Optional\nfrom types import ModuleType\nfrom collections.abc import Sequence, Iterable, Iterator\nfrom itertools import chain\nfrom dataclasses import dataclass, field\nfrom inspect import getdoc\nfrom ast import (\n    parse, unparse, get_docstring, AST, FunctionDef, AsyncFunctionDef, ClassDef,\n    Assign, AnnAssign, Delete, Import, ImportFrom, Name, Expr, Subscript, BinOp,\n    BitOr, Call, If, Try, Tuple, List, Set, Dict, Constant, Load, Attribute,\n    arg, expr, stmt, arguments, NodeTransformer,\n)\nfrom .logger import logger\nfrom .pep585 import PEP585\n\ndef esc_underscore(doc: str) -> str:\n    \"\"\"Escape underscore in names.\"\"\"\n    if doc.count('_') > 1:\n        return doc.replace('_', r\"\\_\")\n    else:\n        return doc",
+      "source_lines": 6
+    },
+    {
+      "module": "apimd.parser",
+      "symbol": "doctest",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "source_sha256": "466704282383cf34e744e22e021563bb55745d62063e7922659d36ff9c08d4e0",
+      "source": "from typing import cast, TypeVar, Union, Optional\nfrom types import ModuleType\nfrom collections.abc import Sequence, Iterable, Iterator\nfrom itertools import chain\nfrom dataclasses import dataclass, field\nfrom inspect import getdoc\nfrom ast import (\n    parse, unparse, get_docstring, AST, FunctionDef, AsyncFunctionDef, ClassDef,\n    Assign, AnnAssign, Delete, Import, ImportFrom, Name, Expr, Subscript, BinOp,\n    BitOr, Call, If, Try, Tuple, List, Set, Dict, Constant, Load, Attribute,\n    arg, expr, stmt, arguments, NodeTransformer,\n)\nfrom .logger import logger\nfrom .pep585 import PEP585\n\ndef doctest(doc: str) -> str:\n    \"\"\"Wrap doctest as markdown Python code.\"\"\"\n    keep = False\n    docs = []\n    lines = doc.splitlines()\n    for i, line in enumerate(lines):\n        signed = line.startswith(\">>> \")\n        if signed:\n            if not keep:\n                docs.append(\"```python\")\n                keep = True\n        elif keep:\n            docs.append(\"```\")\n            keep = False\n        docs.append(line)\n        if signed and i == len(lines) - 1:\n            docs.append(\"```\")\n            keep = False\n    return '\\n'.join(docs)",
+      "source_lines": 19
+    },
+    {
+      "module": "apimd.parser",
+      "symbol": "table",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "source_sha256": "466704282383cf34e744e22e021563bb55745d62063e7922659d36ff9c08d4e0",
+      "source": "from typing import cast, TypeVar, Union, Optional\nfrom types import ModuleType\nfrom collections.abc import Sequence, Iterable, Iterator\nfrom itertools import chain\nfrom dataclasses import dataclass, field\nfrom inspect import getdoc\nfrom ast import (\n    parse, unparse, get_docstring, AST, FunctionDef, AsyncFunctionDef, ClassDef,\n    Assign, AnnAssign, Delete, Import, ImportFrom, Name, Expr, Subscript, BinOp,\n    BitOr, Call, If, Try, Tuple, List, Set, Dict, Constant, Load, Attribute,\n    arg, expr, stmt, arguments, NodeTransformer,\n)\nfrom .logger import logger\nfrom .pep585 import PEP585\n\ndef table(*titles: str, items: Iterable[Union[str, Iterable[str]]]) -> str:\n    \"\"\"Create multi-column table with the titles.\n\n    Usage:\n    >>> table('a', 'b', [['c', 'd'], ['e', 'f']])\n    | a | b |\n    |:---:|:---:|\n    | c | d |\n    | e | f |\n    \"\"\"\n    return '\\n'.join([_table_cell(titles), _table_split(titles),\n                      '\\n'.join(_table_cell([n] if isinstance(n, str) else n)\n                                for n in items)]) + '\\n\\n'",
+      "source_lines": 13
+    },
+    {
+      "module": "apimd.parser",
+      "symbol": "const_type",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "source_sha256": "466704282383cf34e744e22e021563bb55745d62063e7922659d36ff9c08d4e0",
+      "source": "from typing import cast, TypeVar, Union, Optional\nfrom types import ModuleType\nfrom collections.abc import Sequence, Iterable, Iterator\nfrom itertools import chain\nfrom dataclasses import dataclass, field\nfrom inspect import getdoc\nfrom ast import (\n    parse, unparse, get_docstring, AST, FunctionDef, AsyncFunctionDef, ClassDef,\n    Assign, AnnAssign, Delete, Import, ImportFrom, Name, Expr, Subscript, BinOp,\n    BitOr, Call, If, Try, Tuple, List, Set, Dict, Constant, Load, Attribute,\n    arg, expr, stmt, arguments, NodeTransformer,\n)\nfrom .logger import logger\nfrom .pep585 import PEP585\n\ndef const_type(node: expr) -> str:\n    \"\"\"Constant type inference.\"\"\"\n    if isinstance(node, Constant):\n        return _type_name(node.value)\n    elif isinstance(node, (Tuple, List, Set)):\n        return _type_name(node).lower() + _e_type(node.elts)\n    elif isinstance(node, Dict):\n        return 'dict' + _e_type(node.keys, node.values)\n    elif isinstance(node, Call) and isinstance(node.func, (Name, Attribute)):\n        func = unparse(node.func)\n        if func in chain({'bool', 'int', 'float', 'complex', 'str'},\n                         PEP585.keys(), PEP585.values()):\n            return func\n    return ANY",
+      "source_lines": 14
+    },
+    {
+      "module": "apimd.parser",
+      "symbol": "Resolver",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "source_sha256": "466704282383cf34e744e22e021563bb55745d62063e7922659d36ff9c08d4e0",
+      "source": "from typing import cast, TypeVar, Union, Optional\nfrom types import ModuleType\nfrom collections.abc import Sequence, Iterable, Iterator\nfrom itertools import chain\nfrom dataclasses import dataclass, field\nfrom inspect import getdoc\nfrom ast import (\n    parse, unparse, get_docstring, AST, FunctionDef, AsyncFunctionDef, ClassDef,\n    Assign, AnnAssign, Delete, Import, ImportFrom, Name, Expr, Subscript, BinOp,\n    BitOr, Call, If, Try, Tuple, List, Set, Dict, Constant, Load, Attribute,\n    arg, expr, stmt, arguments, NodeTransformer,\n)\nfrom .logger import logger\nfrom .pep585 import PEP585\n\nclass Resolver(NodeTransformer):\n    \"\"\"Annotation resolver.\"\"\"\n\n    def __init__(self, root: str, alias: dict[str, str], self_ty: str = \"\"):\n        \"\"\"Set root module, alias and generic self name.\"\"\"\n        super(Resolver, self).__init__()\n        self.root = root\n        self.alias = alias\n        self.self_ty = self_ty\n\n    def visit_Constant(self, node: Constant) -> AST:\n        \"\"\"Check string is a name.\"\"\"\n        if not isinstance(node.value, str):\n            return node\n        try:\n            e = cast(Expr, parse(node.value).body[0])\n        except SyntaxError:\n            return node\n        else:\n            return self.visit(e.value)\n\n    def visit_Name(self, node: Name) -> AST:\n        \"\"\"Replace global names with its expression recursively.\"\"\"\n        if node.id == self.self_ty:\n            return Name(\"Self\", Load())\n        name = _m(self.root, node.id)\n        if name in self.alias and name not in self.alias[name]:\n            e = cast(Expr, parse(self.alias[name]).body[0])\n            # Support `TypeVar`\n            if isinstance(e.value, Call) and isinstance(e.value.func, Name):\n                func_name = e.value.func.id\n                idf = self.alias.get(_m(self.root, func_name), func_name)\n                if idf == 'typing.TypeVar':\n                    return node\n            return self.visit(e.value)\n        else:\n            return node\n\n    def visit_Subscript(self, node: Subscript) -> AST:\n        \"\"\"Implementation of PEP585 and PEP604.\"\"\"\n        if not isinstance(node.value, Name):\n            return node\n        name = node.value.id\n        idf = self.alias.get(_m(self.root, name), name)\n        if idf == 'typing.Union':\n            if not isinstance(node.slice, Tuple):\n                return node.slice\n            b = node.slice.elts[0]\n            for e in node.slice.elts[1:]:\n                b = BinOp(b, BitOr(), e)\n            return b\n        elif idf == 'typing.Optional':\n            return BinOp(node.slice, BitOr(), Constant(None))\n        elif idf in PEP585:\n            logger.warning(f\"{node.lineno}:{node.col_offset}: \"\n                           f\"find deprecated name {idf}, \"\n                           f\"recommended to use {PEP585[idf]}\")\n            return Subscript(Name(PEP585[idf], Load), node.slice, node.ctx)\n        else:\n            return node\n\n    def visit_Attribute(self, node: Attribute) -> AST:\n        \"\"\"Remove `typing.*` prefix of annotation.\"\"\"\n        if not isinstance(node.value, Name):\n            return node\n        if node.value.id == 'typing':\n            return Name(node.attr, Load())\n        else:\n            return node",
+      "source_lines": 69
+    }
+  ],
+  "errors": [],
+  "site": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages",
+  "version": "2.1.1",
+  "packages": {
+    "iniconfig": "2.3.1",
+    "colorlog": "6.12.0",
+    "apimd": "2.1.1",
+    "typing_extensions": "4.16.0",
+    "tomli": "2.5.0",
+    "exceptiongroup": "1.3.1",
+    "pytest-json-report": "1.5.0",
+    "pluggy": "1.7.0",
+    "packaging": "26.3",
+    "pytest-metadata": "3.1.1",
+    "coverage": "7.16.2",
+    "pytest": "9.2.0",
+    "Pygments": "2.21.0"
+  }
+}

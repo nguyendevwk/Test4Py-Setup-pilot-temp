@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-78d71101-4653-4cc7-bfab-8a35e408ad88",
+  "object": "chat.completion",
+  "created": 1795076683,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules.tsuru_not_command import get_new_command\nfrom thefuck.utils import replace_command\n\nclass DummyCommand:\n    def __init__(self, command, output):\n        self.command = command\n        self.output = output\n\ndef test_get_new_command_replaces_broken_command(monkeypatch):\n    # Arrange: mock get_all_matched_commands to return a deterministic list\n    def fake_get_all_matched_commands(output):\n        return [\"tsuru deploy\", \"tsuru status\"]\n    monkeypatch.setattr(\"thefuck.rules.tsuru_not_command.get_all_matched_commands\", fake_get_all_matched_commands)\n\n    # The broken command appears in the output\n    output = 'tsuru: \"deploy\" is not a tsuru command\\nTry: tsuru deploy\\nTry: tsuru status'\n    cmd = DummyCommand(command=\"tsuru deploy\", output=output)\n\n    # Act\n    new_cmd = get_new_command(cmd)\n\n    # Assert: the new command should be the first suggestion\n    assert new_cmd.command == \"tsuru deploy\"\n    assert new_cmd.output == output\n\ndef test_get_new_command_uses_first_suggestion(monkeypatch):\n    # Arrange: mock get_all_matched_commands to return multiple suggestions\n    def fake_get_all_matched_commands(output):\n        return [\"tsuru start\", \"tsuru stop\", \"tsuru restart\"]\n    monkeypatch.setattr(\"thefuck.rules.tsuru_not_command.get_all_matched_commands\", fake_get_all_matched_commands)\n\n    output = 'tsuru: \"run\" is not a tsuru command\\nTry: tsuru start\\nTry: tsuru stop\\nTry: tsuru restart'\n    cmd = DummyCommand(command=\"tsuru run\", output=output)\n\n    # Act\n    new_cmd = get_new_command(cmd)\n\n    # Assert: the new command should be the first suggestion\n    assert new_cmd.command == \"tsuru start\"\n\ndef test_get_new_command_raises_when_no_match_found():\n    # Arrange: output that does not contain the expected pattern\n    output = 'Some unrelated error message'\n    cmd = DummyCommand(command=\"tsuru foo\", output=output)\n\n    # Act & Assert: accessing the first element of findall should raise IndexError\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n```",
+        "reasoning": "We need to test get_new_command. We need to create a command object with output containing pattern. Use a simple object with attributes output and maybe command string. get_all_matched_commands likely returns list of suggestions. We can mock? But cannot mock target. But we can import get_all_matched_commands from thefuck.utils. But that function may rely on external. Let's inspect? Assume it returns list of commands from output. For test, we can monkeypatch get_all_matched_commands by temporarily replacing in the module? But cannot modify product code. But we can patch via monkeypatch fixture. That's allowed. Use monkeypatch to replace get_all_matched_commands to return known list. Then test replace_command behavior. replace_command likely replaces broken command in command.command string. We can test that new command string equals expected. Also test boundary: if no match raises IndexError? But pattern expects at least one. We can test error when output missing pattern: should raise IndexError. Use pytest.raises. Third test normal. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054042241,
+    "prompt_tokens": 292,
+    "prompt_time": 0.014509777,
+    "completion_tokens": 702,
+    "completion_time": 0.791670392,
+    "total_tokens": 994,
+    "total_time": 0.806180169,
+    "completion_tokens_details": {
+      "reasoning_tokens": 209
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7segwhmeq3vfm2v61xkvybr",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules.tsuru_not_command import get_new_command\nfrom thefuck.utils import replace_command\n\nclass DummyCommand:\n    def __init__(self, command, output):\n        self.command = command\n        self.output = output\n\ndef test_get_new_command_replaces_broken_command(monkeypatch):\n    # Arrange: mock get_all_matched_commands to return a deterministic list\n    def fake_get_all_matched_commands(output):\n        return [\"tsuru deploy\", \"tsuru status\"]\n    monkeypatch.setattr(\"thefuck.rules.tsuru_not_command.get_all_matched_commands\", fake_get_all_matched_commands)\n\n    # The broken command appears in the output\n    output = 'tsuru: \"deploy\" is not a tsuru command\\nTry: tsuru deploy\\nTry: tsuru status'\n    cmd = DummyCommand(command=\"tsuru deploy\", output=output)\n\n    # Act\n    new_cmd = get_new_command(cmd)\n\n    # Assert: the new command should be the first suggestion\n    assert new_cmd.command == \"tsuru deploy\"\n    assert new_cmd.output == output\n\ndef test_get_new_command_uses_first_suggestion(monkeypatch):\n    # Arrange: mock get_all_matched_commands to return multiple suggestions\n    def fake_get_all_matched_commands(output):\n        return [\"tsuru start\", \"tsuru stop\", \"tsuru restart\"]\n    monkeypatch.setattr(\"thefuck.rules.tsuru_not_command.get_all_matched_commands\", fake_get_all_matched_commands)\n\n    output = 'tsuru: \"run\" is not a tsuru command\\nTry: tsuru start\\nTry: tsuru stop\\nTry: tsuru restart'\n    cmd = DummyCommand(command=\"tsuru run\", output=output)\n\n    # Act\n    new_cmd = get_new_command(cmd)\n\n    # Assert: the new command should be the first suggestion\n    assert new_cmd.command == \"tsuru start\"\n\ndef test_get_new_command_raises_when_no_match_found():\n    # Arrange: output that does not contain the expected pattern\n    output = 'Some unrelated error message'\n    cmd = DummyCommand(command=\"tsuru foo\", output=output)\n\n    # Act & Assert: accessing the first element of findall should raise IndexError\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.158349733974319
+}

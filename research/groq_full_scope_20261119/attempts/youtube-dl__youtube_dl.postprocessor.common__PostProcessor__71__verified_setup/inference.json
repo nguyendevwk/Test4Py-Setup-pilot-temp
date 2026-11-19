@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b15f2cb7-f1f9-4fb3-935e-fd5f8d945624",
+  "object": "chat.completion",
+  "created": 1795078597,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport pytest\nfrom youtube_dl.postprocessor.common import PostProcessor, PostProcessingError\nfrom youtube_dl.utils import encodeFilename\n\nclass DummyDownloader:\n    def __init__(self, params=None):\n        self.params = params or {}\n        self.warnings = []\n\n    def report_warning(self, msg):\n        self.warnings.append(msg)\n\ndef test_default_run_returns_identity(tmp_path):\n    \"\"\"PostProcessor.run should return unchanged information and empty deletable list.\"\"\"\n    pp = PostProcessor()\n    info = {\"filepath\": str(tmp_path / \"file.txt\"), \"title\": \"test\"}\n    deletable, updated = pp.run(info)\n    assert deletable == []\n    assert updated is info  # same object returned\n\ndef test_try_utime_reports_warning_on_failure(tmp_path):\n    \"\"\"try_utime should call report_warning when os.utime fails.\"\"\"\n    downloader = DummyDownloader()\n    pp = PostProcessor(downloader)\n    # Use a non‑existent file path\n    fake_path = tmp_path / \"nonexistent.txt\"\n    pp.try_utime(fake_path, 0, 0, errnote=\"UTIME failed\")\n    assert \"UTIME failed\" in downloader.warnings\n\ndef test_configuration_args_returns_downloader_params(tmp_path):\n    \"\"\"_configuration_args should return the downloader's postprocessor_args.\"\"\"\n    params = {\"postprocessor_args\": [\"--foo\", \"--bar\"]}  # example args\n    downloader = DummyDownloader(params=params)\n    pp = PostProcessor(downloader)\n    args = pp._configuration_args(default=[\"--default\"])\n    assert args == [\"--foo\", \"--bar\"]\n```",
+        "reasoning": "We need to test PostProcessor. We'll create subclass to override run to test behavior. Test normal: run returns default. Test boundary: try_utime with non-existent file should call report_warning. Need downloader mock with report_warning. Use tmp_path. Third: _configuration_args returns list from downloader.params. We'll create dummy downloader with params dict."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047931562,
+    "prompt_tokens": 711,
+    "prompt_time": 0.060597458,
+    "completion_tokens": 413,
+    "completion_time": 0.456476852,
+    "total_tokens": 1124,
+    "total_time": 0.51707431,
+    "completion_tokens_details": {
+      "reasoning_tokens": 70
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgb9v1e8kt4mbeyvth2n83",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport pytest\nfrom youtube_dl.postprocessor.common import PostProcessor, PostProcessingError\nfrom youtube_dl.utils import encodeFilename\n\nclass DummyDownloader:\n    def __init__(self, params=None):\n        self.params = params or {}\n        self.warnings = []\n\n    def report_warning(self, msg):\n        self.warnings.append(msg)\n\ndef test_default_run_returns_identity(tmp_path):\n    \"\"\"PostProcessor.run should return unchanged information and empty deletable list.\"\"\"\n    pp = PostProcessor()\n    info = {\"filepath\": str(tmp_path / \"file.txt\"), \"title\": \"test\"}\n    deletable, updated = pp.run(info)\n    assert deletable == []\n    assert updated is info  # same object returned\n\ndef test_try_utime_reports_warning_on_failure(tmp_path):\n    \"\"\"try_utime should call report_warning when os.utime fails.\"\"\"\n    downloader = DummyDownloader()\n    pp = PostProcessor(downloader)\n    # Use a non‑existent file path\n    fake_path = tmp_path / \"nonexistent.txt\"\n    pp.try_utime(fake_path, 0, 0, errnote=\"UTIME failed\")\n    assert \"UTIME failed\" in downloader.warnings\n\ndef test_configuration_args_returns_downloader_params(tmp_path):\n    \"\"\"_configuration_args should return the downloader's postprocessor_args.\"\"\"\n    params = {\"postprocessor_args\": [\"--foo\", \"--bar\"]}  # example args\n    downloader = DummyDownloader(params=params)\n    pp = PostProcessor(downloader)\n    args = pp._configuration_args(default=[\"--default\"])\n    assert args == [\"--foo\", \"--bar\"]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9274314189678989
+}

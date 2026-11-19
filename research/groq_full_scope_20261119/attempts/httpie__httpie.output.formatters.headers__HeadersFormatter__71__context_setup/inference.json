@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-2eef0485-9d1e-4524-aefc-8bd40c5716e5",
+  "object": "chat.completion",
+  "created": 1795079371,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.formatters.headers import HeadersFormatter\n\n\ndef test_sorting_of_headers():\n    \"\"\"Headers should be sorted alphabetically by name, preserving the first line.\"\"\"\n    raw = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"b-Header: 2\\r\\n\"\n        \"a-Header: 1\\r\\n\"\n        \"c-Header: 3\\r\\n\"\n    )\n    formatter = HeadersFormatter()\n    formatted = formatter.format_headers(raw)\n    expected = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"a-Header: 1\\r\\n\"\n        \"b-Header: 2\\r\\n\"\n        \"c-Header: 3\\r\\n\"\n    )\n    assert formatted == expected\n\n\ndef test_same_name_order_preserved():\n    \"\"\"Headers with the same name should keep their relative order after sorting.\"\"\"\n    raw = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"X-Token: first\\r\\n\"\n        \"A-Header: 1\\r\\n\"\n        \"X-Token: second\\r\\n\"\n        \"B-Header: 2\\r\\n\"\n    )\n    formatter = HeadersFormatter()\n    formatted = formatter.format_headers(raw)\n    expected = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"A-Header: 1\\r\\n\"\n        \"B-Header: 2\\r\\n\"\n        \"X-Token: first\\r\\n\"\n        \"X-Token: second\\r\\n\"\n    )\n    assert formatted == expected\n\n\ndef test_empty_and_single_header_cases(tmp_path):\n    \"\"\"Formatting should handle empty header blocks and single header lines gracefully.\"\"\"\n    # Empty headers (only first line)\n    raw_empty = \"HTTP/1.1 204 No Content\\r\\n\"\n    formatter = HeadersFormatter()\n    assert formatter.format_headers(raw_empty) == raw_empty\n\n    # Single header line\n    raw_single = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"Content-Type: text/plain\\r\\n\"\n    )\n    expected_single = raw_single\n    assert formatter.format_headers(raw_single) == expected_single\n\n    # Write to a temporary file and read back to ensure no file I/O errors\n    file_path = tmp_path / \"headers.txt\"\n    file_path.write_text(raw_single)\n    file_content = file_path.read_text()\n    assert formatter.format_headers(file_content) == expected_single\n```",
+        "reasoning": "We need to test HeadersFormatter. Likely located in httpie/output/formatters/headers.py. We'll import HeadersFormatter. Need to test normal sorting, boundary (empty headers, single header), error (invalid format?). The format_headers expects headers string with first line maybe status line? It splits lines, sorts lines[1:] by header name. So test that sorting works. Also test that relative order of same name preserved. Also test that if headers empty? lines[1:] empty. Also test error: maybe passing None? But type hint str. Could test that passing string without colon? It will split and key may error? Actually h.split(':')[0] works even if no colon. So no error. Maybe test that if header lines not sorted? We'll just test behavior.\n\nWrite three test functions: test_sorting, test_same_name_order, test_empty_headers. Use tmp_path? Not needed. But requirement says temporary files must use tmp_path. We can create a temp file with headers and read? But not necessary. But we can use tmp_path to create a file with headers and read. But not required. We'll just use strings.\n\nImplement tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053682534,
+    "prompt_tokens": 338,
+    "prompt_time": 0.025609523,
+    "completion_tokens": 758,
+    "completion_time": 0.851294329,
+    "total_tokens": 1096,
+    "total_time": 0.876903852,
+    "completion_tokens_details": {
+      "reasoning_tokens": 238
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh2xsse38tt0xay3k6g61q",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.formatters.headers import HeadersFormatter\n\n\ndef test_sorting_of_headers():\n    \"\"\"Headers should be sorted alphabetically by name, preserving the first line.\"\"\"\n    raw = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"b-Header: 2\\r\\n\"\n        \"a-Header: 1\\r\\n\"\n        \"c-Header: 3\\r\\n\"\n    )\n    formatter = HeadersFormatter()\n    formatted = formatter.format_headers(raw)\n    expected = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"a-Header: 1\\r\\n\"\n        \"b-Header: 2\\r\\n\"\n        \"c-Header: 3\\r\\n\"\n    )\n    assert formatted == expected\n\n\ndef test_same_name_order_preserved():\n    \"\"\"Headers with the same name should keep their relative order after sorting.\"\"\"\n    raw = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"X-Token: first\\r\\n\"\n        \"A-Header: 1\\r\\n\"\n        \"X-Token: second\\r\\n\"\n        \"B-Header: 2\\r\\n\"\n    )\n    formatter = HeadersFormatter()\n    formatted = formatter.format_headers(raw)\n    expected = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"A-Header: 1\\r\\n\"\n        \"B-Header: 2\\r\\n\"\n        \"X-Token: first\\r\\n\"\n        \"X-Token: second\\r\\n\"\n    )\n    assert formatted == expected\n\n\ndef test_empty_and_single_header_cases(tmp_path):\n    \"\"\"Formatting should handle empty header blocks and single header lines gracefully.\"\"\"\n    # Empty headers (only first line)\n    raw_empty = \"HTTP/1.1 204 No Content\\r\\n\"\n    formatter = HeadersFormatter()\n    assert formatter.format_headers(raw_empty) == raw_empty\n\n    # Single header line\n    raw_single = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"Content-Type: text/plain\\r\\n\"\n    )\n    expected_single = raw_single\n    assert formatter.format_headers(raw_single) == expected_single\n\n    # Write to a temporary file and read back to ensure no file I/O errors\n    file_path = tmp_path / \"headers.txt\"\n    file_path.write_text(raw_single)\n    file_content = file_path.read_text()\n    assert formatter.format_headers(file_content) == expected_single\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "ec3ae082514a402d95a0a52e284d1ed7",
+  "_api_plus_pacing_seconds": 1.6565346290008165
+}

@@ -1,0 +1,40 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_reference_validates_and_serializes ____________________
+
+    def test_reference_validates_and_serializes():
+        """Reference should validate a nested schema and serialize to a dict."""
+        data = {"child": {"name": "Alice"}}
+>       parent = Parent(**data)
+E       TypeError: Schema.__init__() missing 1 required positional argument: 'fields'
+
+test_generated.py:18: TypeError
+__________________ test_reference_allows_null_when_configured __________________
+
+    def test_reference_allows_null_when_configured():
+        """Reference should allow None when allow_null is True."""
+        class NullableParent(typesystem.Schema):
+            child = Reference(
+                to="child",
+                definitions=Definitions({"child": Child}),
+                allow_null=True,
+            )
+    
+>       parent = NullableParent(child=None)
+E       TypeError: Schema.__init__() missing 1 required positional argument: 'fields'
+
+test_generated.py:34: TypeError
+___________ test_reference_raises_validation_error_on_invalid_value ____________
+
+    def test_reference_raises_validation_error_on_invalid_value():
+        """Reference should raise ValidationError when value is not a dict."""
+        with pytest.raises(ValidationError) as excinfo:
+>           Parent(child="not a dict")
+E           TypeError: Schema.__init__() missing 1 required positional argument: 'fields'
+
+test_generated.py:43: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_reference_validates_and_serializes - TypeError...
+FAILED test_generated.py::test_reference_allows_null_when_configured - TypeEr...
+FAILED test_generated.py::test_reference_raises_validation_error_on_invalid_value
+3 failed in 0.19s

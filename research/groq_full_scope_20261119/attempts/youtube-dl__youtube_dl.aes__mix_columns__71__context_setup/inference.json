@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-64225ac2-d8cf-4a68-91fd-b5c2ed36baca",
+  "object": "chat.completion",
+  "created": 1795077313,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.aes import mix_columns, MIX_COLUMN_MATRIX\n\n# Test 1: Verify that mix_columns produces the known AES mix‑columns result\ndef test_mix_columns_known_example():\n    # Input state (16 bytes) from the AES specification example\n    input_state = [\n        0x87, 0xF2, 0x4D, 0x97,\n        0x6E, 0x4C, 0x90, 0xEC,\n        0x46, 0xE7, 0x4A, 0xC3,\n        0xA6, 0x8C, 0xD8, 0x95\n    ]\n    # Expected output after mix_columns (same as AES spec)\n    expected_output = [\n        0x47, 0x58, 0x30, 0x8D,\n        0x7E, 0x9A, 0xF7, 0xA4,\n        0xF2, 0xF4, 0xD3, 0x7A,\n        0xE3, 0x4C, 0xF8, 0x78\n    ]\n    result = mix_columns(input_state)\n    assert result == expected_output, f\"Expected {expected_output}, got {result}\"\n\n# Test 2: Verify that mix_columns with a custom matrix that is all ones\n# produces the XOR of each column as each output byte\ndef test_mix_columns_identity_matrix():\n    # Create a matrix where every element is 1\n    identity_matrix = ((1, 1, 1, 1),\n                       (1, 1, 1, 1),\n                       (1, 1, 1, 1),\n                       (1, 1, 1, 1))\n    # Input state: 16 bytes with incremental values\n    input_state = list(range(16))\n    # For each column, the XOR of its four bytes should be the output\n    expected = []\n    for i in range(4):\n        column = input_state[i*4:(i+1)*4]\n        column_xor = 0\n        for b in column:\n            column_xor ^= b\n        expected.extend([column_xor]*4)\n    result = mix_columns(input_state, matrix=identity_matrix)\n    assert result == expected, f\"Expected {expected}, got {result}\"\n\n# Test 3: Verify that mix_columns correctly handles a state where all bytes are zero\ndef test_mix_columns_all_zero():\n    zero_state = [0] * 16\n    result = mix_columns(zero_state)\n    assert result == [0] * 16, f\"Expected all zeros, got {result}\"\n```",
+        "reasoning": "Need tests for mix_columns. Use known AES example. For input 16 bytes, output known. Use simple test. Also test boundary: empty list? but mix_columns expects 16? It loops 4 columns of 4 bytes each. If data length not 16, will slice beyond. But test error? maybe raise? It doesn't. So test that with 16 bytes. Also test that mix_columns with custom matrix changes output. Use identity matrix? If matrix all 1? Then mix_column will compute each output as xor of all data bytes. So test that. Use pytest.raises? Not needed. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053301632,
+    "prompt_tokens": 547,
+    "prompt_time": 0.032307135,
+    "completion_tokens": 736,
+    "completion_time": 0.824808387,
+    "total_tokens": 1283,
+    "total_time": 0.857115522,
+    "completion_tokens_details": {
+      "reasoning_tokens": 129
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sf43xse8b98xqkh6bsc98j",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.aes import mix_columns, MIX_COLUMN_MATRIX\n\n# Test 1: Verify that mix_columns produces the known AES mix‑columns result\ndef test_mix_columns_known_example():\n    # Input state (16 bytes) from the AES specification example\n    input_state = [\n        0x87, 0xF2, 0x4D, 0x97,\n        0x6E, 0x4C, 0x90, 0xEC,\n        0x46, 0xE7, 0x4A, 0xC3,\n        0xA6, 0x8C, 0xD8, 0x95\n    ]\n    # Expected output after mix_columns (same as AES spec)\n    expected_output = [\n        0x47, 0x58, 0x30, 0x8D,\n        0x7E, 0x9A, 0xF7, 0xA4,\n        0xF2, 0xF4, 0xD3, 0x7A,\n        0xE3, 0x4C, 0xF8, 0x78\n    ]\n    result = mix_columns(input_state)\n    assert result == expected_output, f\"Expected {expected_output}, got {result}\"\n\n# Test 2: Verify that mix_columns with a custom matrix that is all ones\n# produces the XOR of each column as each output byte\ndef test_mix_columns_identity_matrix():\n    # Create a matrix where every element is 1\n    identity_matrix = ((1, 1, 1, 1),\n                       (1, 1, 1, 1),\n                       (1, 1, 1, 1),\n                       (1, 1, 1, 1))\n    # Input state: 16 bytes with incremental values\n    input_state = list(range(16))\n    # For each column, the XOR of its four bytes should be the output\n    expected = []\n    for i in range(4):\n        column = input_state[i*4:(i+1)*4]\n        column_xor = 0\n        for b in column:\n            column_xor ^= b\n        expected.extend([column_xor]*4)\n    result = mix_columns(input_state, matrix=identity_matrix)\n    assert result == expected, f\"Expected {expected}, got {result}\"\n\n# Test 3: Verify that mix_columns correctly handles a state where all bytes are zero\ndef test_mix_columns_all_zero():\n    zero_state = [0] * 16\n    result = mix_columns(zero_state)\n    assert result == [0] * 16, f\"Expected all zeros, got {result}\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.247052487975452
+}

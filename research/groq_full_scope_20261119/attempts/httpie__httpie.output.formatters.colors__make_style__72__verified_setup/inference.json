@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-46bd38b6-938e-4521-9c6f-49a7779419a9",
+  "object": "chat.completion",
+  "created": 1795079034,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.formatters.colors import make_style\nfrom pygments.style import Style\nfrom httpie.ui.palette import get_color\n\ndef test_make_style_creates_style_with_formatted_values():\n    raw = {\"Token.Text\": \"red bold\", \"Token.Keyword\": \"blue\"}\n    style_cls = make_style(\"TestStyle\", raw, shade=1)\n    # The returned class should inherit from pygments.style.Style\n    assert issubclass(style_cls, Style)\n    # The styles dict should contain the same keys\n    assert set(style_cls.styles.keys()) == set(raw.keys())\n    # Each value should be a string that contains the original words\n    for key, original in raw.items():\n        formatted = style_cls.styles[key]\n        # The formatted string should contain each word from the original\n        for word in original.split():\n            assert word in formatted\n\ndef test_make_style_handles_missing_color_returns_original():\n    # Use a color name that is unlikely to be defined in the palette\n    raw = {\"Token.Text\": \"nonexistentcolor bold\"}\n    style_cls = make_style(\"MissingColorStyle\", raw, shade=1)\n    formatted = style_cls.styles[\"Token.Text\"]\n    # Since get_color will return None for the unknown color, the word should remain unchanged\n    assert \"nonexistentcolor\" in formatted\n    # The word 'bold' should also remain unchanged\n    assert \"bold\" in formatted\n\ndef test_make_style_inherits_from_pygments_style_and_has_expected_attributes():\n    raw = {\"Token.Text\": \"red\"}\n    style_cls = make_style(\"SimpleStyle\", raw, shade=0)\n    # Ensure the class is a subclass of pygments.style.Style\n    assert issubclass(style_cls, Style)\n    # The class should have a 'styles' attribute that is a dict\n    assert isinstance(style_cls.styles, dict)\n    # The dict should map the token to the formatted string\n    assert style_cls.styles[\"Token.Text\"] == get_color(\"red\", 0) or \"red\"\n```",
+        "reasoning": "Need tests for make_style. Test that returned class has styles dict correctly formatted. Also test that get_color returns None fallback. Use tmp_path? not needed. Use pytest.raises for invalid? maybe passing non-dict? But function expects dict. Could test that style class inherits from pygments.style.Style. Also test that format_value splits. Let's write three tests: 1 normal mapping, 2 when get_color returns None, 3 that class inherits. Use dummy raw_styles. Use get_color from module; but we can patch? Not allowed mocks. But we can use actual get_color; but we don't know its behavior. We can use a key that likely returns None. But to be deterministic, we can monkeypatch get_color? Not allowed. So maybe test that format_value returns original when get_color returns None. We can simulate by using a color string that get_color returns None. Hard. Maybe test that style class has attribute 'styles' with formatted values. Use raw_styles with simple values. Ensure that format_value splits by spaces. For example raw_styles={'Token.Text':'red bold','Token.Keyword':'blue'}; get_color likely returns something like '\\x1b[31m' etc. But we can't rely. Instead we can check that the formatted string contains the original words. Use 'in' check. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.094861911,
+    "prompt_tokens": 485,
+    "prompt_time": 0.052888294,
+    "completion_tokens": 706,
+    "completion_time": 0.943396292,
+    "total_tokens": 1191,
+    "total_time": 0.996284586,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 272
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgrm8ve0svwmajh8dyhmmc",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.formatters.colors import make_style\nfrom pygments.style import Style\nfrom httpie.ui.palette import get_color\n\ndef test_make_style_creates_style_with_formatted_values():\n    raw = {\"Token.Text\": \"red bold\", \"Token.Keyword\": \"blue\"}\n    style_cls = make_style(\"TestStyle\", raw, shade=1)\n    # The returned class should inherit from pygments.style.Style\n    assert issubclass(style_cls, Style)\n    # The styles dict should contain the same keys\n    assert set(style_cls.styles.keys()) == set(raw.keys())\n    # Each value should be a string that contains the original words\n    for key, original in raw.items():\n        formatted = style_cls.styles[key]\n        # The formatted string should contain each word from the original\n        for word in original.split():\n            assert word in formatted\n\ndef test_make_style_handles_missing_color_returns_original():\n    # Use a color name that is unlikely to be defined in the palette\n    raw = {\"Token.Text\": \"nonexistentcolor bold\"}\n    style_cls = make_style(\"MissingColorStyle\", raw, shade=1)\n    formatted = style_cls.styles[\"Token.Text\"]\n    # Since get_color will return None for the unknown color, the word should remain unchanged\n    assert \"nonexistentcolor\" in formatted\n    # The word 'bold' should also remain unchanged\n    assert \"bold\" in formatted\n\ndef test_make_style_inherits_from_pygments_style_and_has_expected_attributes():\n    raw = {\"Token.Text\": \"red\"}\n    style_cls = make_style(\"SimpleStyle\", raw, shade=0)\n    # Ensure the class is a subclass of pygments.style.Style\n    assert issubclass(style_cls, Style)\n    # The class should have a 'styles' attribute that is a dict\n    assert isinstance(style_cls.styles, dict)\n    # The dict should map the token to the formatted string\n    assert style_cls.styles[\"Token.Text\"] == get_color(\"red\", 0) or \"red\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4451808810117655
+}

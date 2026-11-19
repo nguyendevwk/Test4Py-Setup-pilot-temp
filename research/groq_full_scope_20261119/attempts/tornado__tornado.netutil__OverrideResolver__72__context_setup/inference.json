@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-8cbfb73a-335d-412c-b846-f4dbb537b2b1",
+  "object": "chat.completion",
+  "created": 1795079085,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport socket\nimport pytest\nfrom tornado.netutil import OverrideResolver, DefaultLoopResolver\n\n\n@pytest.mark.asyncio\nasync def test_override_resolver_simple_host_override():\n    \"\"\"Test that a simple hostname override works.\"\"\"\n    resolver = DefaultLoopResolver()\n    override = OverrideResolver()\n    override.initialize(resolver, {\"example.com\": \"127.0.0.1\"})\n    results = await override.resolve(\"example.com\", 80)\n    # All returned addresses should be for 127.0.0.1\n    for fam, addr in results:\n        assert addr[0] == \"127.0.0.1\"\n        assert addr[1] == 80\n    override.close()\n\n\n@pytest.mark.asyncio\nasync def test_override_resolver_host_port_override():\n    \"\"\"Test that a host+port override works and preserves family.\"\"\"\n    resolver = DefaultLoopResolver()\n    override = OverrideResolver()\n    override.initialize(resolver, {(\"login.example.com\", 443): (\"localhost\", 1443)})\n    results = await override.resolve(\"login.example.com\", 443, socket.AF_INET)\n    # All returned addresses should be for localhost:1443\n    for fam, addr in results:\n        assert addr[0] in (\"localhost\", \"127.0.0.1\")\n        assert addr[1] == 1443\n    override.close()\n\n\n@pytest.mark.asyncio\nasync def test_override_resolver_host_port_family_override():\n    \"\"\"Test that a host+port+family override works and returns IPv6.\"\"\"\n    resolver = DefaultLoopResolver()\n    override = OverrideResolver()\n    override.initialize(\n        resolver,\n        {(\"login.example.com\", 443, socket.AF_INET6): (\"::1\", 1443)},\n    )\n    results = await override.resolve(\"login.example.com\", 443, socket.AF_INET6)\n    # All returned addresses should be IPv6 ::1:1443\n    for fam, addr in results:\n        assert fam == socket.AF_INET6\n        assert addr[0] == \"::1\"\n        assert addr[1] == 1443\n    override.close()\n```",
+        "reasoning": "Need tests for OverrideResolver. Use DefaultLoopResolver. Test mapping overrides. Use tmp_path? not needed. Just test resolve returns expected mapping. Use asyncio.run."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046366588,
+    "prompt_tokens": 1345,
+    "prompt_time": 1.049935822,
+    "completion_tokens": 484,
+    "completion_time": 0.554684292,
+    "total_tokens": 1829,
+    "total_time": 1.604620114,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 34
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgt5z8emgaszekb7c8cek2",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport socket\nimport pytest\nfrom tornado.netutil import OverrideResolver, DefaultLoopResolver\n\n\n@pytest.mark.asyncio\nasync def test_override_resolver_simple_host_override():\n    \"\"\"Test that a simple hostname override works.\"\"\"\n    resolver = DefaultLoopResolver()\n    override = OverrideResolver()\n    override.initialize(resolver, {\"example.com\": \"127.0.0.1\"})\n    results = await override.resolve(\"example.com\", 80)\n    # All returned addresses should be for 127.0.0.1\n    for fam, addr in results:\n        assert addr[0] == \"127.0.0.1\"\n        assert addr[1] == 80\n    override.close()\n\n\n@pytest.mark.asyncio\nasync def test_override_resolver_host_port_override():\n    \"\"\"Test that a host+port override works and preserves family.\"\"\"\n    resolver = DefaultLoopResolver()\n    override = OverrideResolver()\n    override.initialize(resolver, {(\"login.example.com\", 443): (\"localhost\", 1443)})\n    results = await override.resolve(\"login.example.com\", 443, socket.AF_INET)\n    # All returned addresses should be for localhost:1443\n    for fam, addr in results:\n        assert addr[0] in (\"localhost\", \"127.0.0.1\")\n        assert addr[1] == 1443\n    override.close()\n\n\n@pytest.mark.asyncio\nasync def test_override_resolver_host_port_family_override():\n    \"\"\"Test that a host+port+family override works and returns IPv6.\"\"\"\n    resolver = DefaultLoopResolver()\n    override = OverrideResolver()\n    override.initialize(\n        resolver,\n        {(\"login.example.com\", 443, socket.AF_INET6): (\"::1\", 1443)},\n    )\n    results = await override.resolve(\"login.example.com\", 443, socket.AF_INET6)\n    # All returned addresses should be IPv6 ::1:1443\n    for fam, addr in results:\n        assert fam == socket.AF_INET6\n        assert addr[0] == \"::1\"\n        assert addr[1] == 1443\n    override.close()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.9858310199924745
+}

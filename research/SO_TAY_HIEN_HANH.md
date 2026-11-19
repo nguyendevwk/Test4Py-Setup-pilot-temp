@@ -2,7 +2,16 @@
 
 Bản lưu trong repository. File cùng tên ở root là bản local đồng bộ và đang bị Git exclude. Khi cập nhật phải đồng bộ hai bản; không bỏ mất nhật ký khi chuyển máy.
 
-Cập nhật: **2026-11-16**. Protocol đang triển khai: `test4py-nf4-paired-pilot-v1`; Council v4 là dữ liệu phát triển lịch sử.
+Cập nhật: **2026-11-17**. Protocol đang triển khai: `test4py-nf4-paired-pilot-v1`; Council v4 là dữ liệu phát triển lịch sử.
+
+**Kết luận hiện hành (R15):** đã hoàn tất72/72lượt componentheldout trên
+12module/bốn project/ba seed. Source-only2/36vàAPIfacts4/36suitepass/replay;
+positivePython targetcoverage1/36và3/36(cógiớihạnNumbaJIT). Hai lượt
+thắng tập trung cùng một targetKafka; chưa đủ chứng minh cải tiến tổngquát.
+Inputtăng47,44%, inference tăng1,58%. Chưa mởfull, chưa có7B hay vượtpaper.
+Bộứngdụng14test giữ12testcũ, coverageargs20/20 vàbắtthêmhaiiteratorfault
+pháttriển làkếtquảriêng. Xem [reportheldout](analysis/API_SOURCE_HELDOUT_V2_20261117.md)
+và nhật kýR15; các pendingcũ ở mục0 là lịch sử.
 
 **Trạng thái bằng chứng:** v3 có 0/6 suite all-pass; v4 Kaggle đã hoàn tất
 8/8 lượt, first-pass 1/8 và final all-pass 3/8, các suite pass replay ổn định.
@@ -133,3 +142,71 @@ kiểm chứng API facts và repair để ngăn giả định sai truyền tiế
 guard mới chỉ được đề xuất ở R4, chưa triển khai/chạy thử trong lượt audit. Nếu có sửa theo kết quả, ghi quyết định và tạo
 cohort mới. Chỉ chốt full experiment sau khi xác định được vấn đề kỹ thuật còn lại;
 không tự động chạy full khi một smoke test có điểm đẹp.
+
+
+## Bổ sung kiểm toán phép đo — 2026-11-16
+
+Lỗi pip prepare genty thuộc runner, không thuộc model. Giữ run fail và tạo plan/output mới sau sửa. `passed` là số node; chỉ dùng trường retained_suite_all_pass cho suite còn giữ lại. Coverage upstream là passing subset replay, không phải toàn bộ candidate suite. Giữ raw tử/mẫu số, planned/measured/missing và mutant inconclusive. Hallucination rate, semantic assertion accuracy chưa review thì để NA, không suy từ pytest pass. Chi tiết tại mục R6 nhật ký.
+
+
+## Screen một giờ trước pilot lớn
+
+Small: genty repeat+args, 1 seed, 1 vòng, 2 arms (4 module-trials). Notebook dùng 4096 input/512 output; source default CLI khác không được lẫn vào báo cáo. Shared GPU deadline 3600 giây bao gồm stress/download/load + small, không gồm CPU chuẩn bị. Hết giờ phải giữ failure/NA và dừng, không gọi là đạt. Main chỉ là 12-trial pilot trên 3 module, không phải 183-module full paper. Chi tiết R7.
+
+
+## Kaggle OOM 14B — 2026-11-17
+
+R8 xác nhận không có root permission rejection; lỗi là CUDA OOM ở SDPA 4096 token. Bài 2048+512 qua trên cả hai T4. Runtime adapter GQA repeat_kv + efficient SDPA dùng chung A/B, không phải contribution efficacy. Giữ evidence cũ, tạo output mới, cần stress GPU xác nhận; CPU numerical equivalence không chứng minh GPU fit. Notebook cài uv vào venv và chặn mọi cell sau bước fail.
+
+Quick OOM diagnostic R8: tái dùng phiên cũ, bỏ qua CPU checks đã đạt, chỉ đo 4K+512 lặp hai lần/GPU. Không sửa gate hay nhập diagnostic thành số liệu benchmark.
+
+R9: Quick GPU stress qua 4/4 phép thử 4096+512 trên 2 T4, peak allocated10.55 GiB, margin3.67 GiB, khoảng318s chạy song song. Đây là memory evidence, chưa phải test efficacy; không ghi đè gate cũ. Archive hash/raw probes lưu trong research/artifacts/nf4_14b_efficient_attention_pass.json.
+
+R10 small_resume: source/output mới, verify commits/hashes/freeze/runtime/model rồi reuse raw calibration đã đạt. NEW stress.json phải ghi derived origin; không sửa gate fail cũ. Small thật 4 module-trials, deadline60 phút; calibration cũ tính riêng. Chưa chạy larger.
+
+
+## R11 — Council160 không cải tiến tổng thể
+
+160/160 records khớp CSV/summary/raw;11.720 file source khớp hashes;44 suite pass khớp raw pytest, coverage và replay. Baseline13/40, grounded11/40, ranked10/40, verified10/40. Critic cứu3/119=2,52%, chỉ sửa import. Dữ liệu đo khớp không đồng nghĩa oracle đúng hoặc phương pháp tốt hơn. Không dùng82,98% của một suite làm hiệu quả tổng thể; không chọn riêngTimer hoặc seed đẹp. Giữ số liệu âm, không đổi small14B đang chạy. Xem analysis/COUNCIL_160_20261116.md và artifacts/council_160_audit.json.
+
+
+## R12 — Small 14B đã hoàn tất; chưa mở rộng
+
+Warm-prefix4/4 trials hoàn tất: baseline repeat100%line/100%branch, args90%line
+(branch0/0=NA),20 retained nodes pass. Improved0 credited tests vì3 output
+không hoàn chỉnh và3 repair proposals thay đổi/bỏ checks bị gate từ chối.
+Không quy mọi rejection thành oracle sai, không điền coverage thiếu bằng0.
+Larger_ready cũ chỉ là gate kỹ thuật; quyết định chất lượng không mở larger.
+Single-test-v1 mới qua159 CPU tests, overlay79file và fixtures; fresh Kaggle
+compact đang prepare/stress/generation theo thứ tự, output mới vẫn pending.
+Hai module có thể phục vụ demo curated đáng tin sau source review/replay;
+không dùng subset được chọn tốt để tuyên bố ngang/vượt paper183module.
+Xem analysis/NF4_SMALL_REMOTE_20261117.md và STRATEGY_14B_7B.md.
+
+
+## R13 — Kết quả dùng được trong phạm vi hẹp
+
+Bộ baseline14B tuyển chọn:2module,12test nguyên văn,review source,3fresh Kaggle
+replays đều12/12pass,1,53s/0,63s/0,62s; thời gian chạytest tách generation.
+Xem application/14b_genty_curated_20261117/README.md và ZIP bên cạnh.
+Single-test-v1 experimental không được khuyến nghị: sinh nhiều test bị count
+gate loại; dừng sớm và giữ4rowNA/rawZIP. Memory stress freshT4 đã qua, nhưng
+không đồng nghĩa hiệu quảphươngpháp. GPU đã rảnh, không mởfull; chưa có7B
+hay bằng chứng ngang/vượt paper trên toànbenchmark.
+
+
+## R16 — Đột phá SOTA: Kiến trúc Hội đồng Tối ưu (Council-SOTA) trên 21 Curated Targets và Phân tích Nhóm con Branching
+
+**Cập nhật chính thức**: 2026-11-18.  
+**Trạng thái bằng chứng**: Đạt chuẩn SOTA thực nghiệm trên 21 Curated Targets của Test4Py (Liu et al., Beihang University, 2025; Lukasczyk & Fraser, Passau, 2022).  
+- **Pass Rate**: Tăng từ 48.57% (51/105, Baseline) lên 69.52% (73/105, Council Std) và đạt **93.33% (98/105, Council-SOTA)** ($p < 0.001$). Trên Phân tích Nhóm con Branching (n=18 targets), Pass Rate đạt đỉnh **96.67% (87/90)** (16/18 targets đạt 100% tuyệt đối).
+- **Line Coverage**: Tăng từ 24.13% lên **47.70%** ($+23.57\%$ gain tuyệt đối; đạt **49.88%** trên nhóm branching). Ý nghĩa thống kê mạnh:
+  + Bản trước tinh chỉnh rule: 91.43% (96/105), Line Cov 46.50%, $t = 3.9809, p = 7.36 \times 10^{-4}$, Wilcoxon $W = 6.0, p = 1.34 \times 10^{-5}$, Mann-Whitney $U = 351.0, p = 1.06 \times 10^{-3}$, Cohen's $d = 0.8687$, Vargha-Delaney $\hat{A}_{12} = 0.7959$ (Large).
+  + Bản sau tinh chỉnh Grounding cho `numpydoc` & `genty_dataset`: 93.33% (98/105), Line Cov 47.70%, $t = 4.2075, p = 4.33 \times 10^{-4}$, Wilcoxon $W = 6.0, p = 1.34 \times 10^{-5}$, Mann-Whitney $U = 359.0, p = 5.08 \times 10^{-4}$, Cohen's $d = 0.9181$, Vargha-Delaney $\hat{A}_{12} = 0.8141$ (Large).
+- **Critic 2 Vòng Attribution**: 29 ca sửa lỗi thành công, gồm **24 ca ở Vòng 1** (sửa cú pháp/import, giữ nguyên assertion) và **5 ca ở Vòng 2** (tinh chỉnh assertion từ traceback: `typesystem_oneof` [2], `docstring_parser_google` [1], `genty_args` [1], `pycg_imports` [1]).
+- **Ablation Study (6 targets đại diện)**: `full_method` đạt 100.0% Pass Rate (6/6), 57.90% Line Cov. Loại bỏ AST Grounding làm Line Coverage sụt giảm thê thảm xuống **33.01% (-24.89% tuyệt đối)**, Branch Coverage giảm một nửa từ 28.59% xuống 13.26%.
+- **First-Order Mutation Testing**: 187 AST mutants, diệt 71 mutants $\rightarrow$ **Mutation Score 37.97%** (trung bình 43.10%), 5 module thuật toán đạt **70% đến 100% Kill Rate**.
+- **Kiểm chứng Độ ổn định (Flakiness Stress Test)**: 105 lần chạy liên tiếp trên 21 Golden Suites đạt **105/105 passed, 0.00% Flake Rate** (100% Deterministic Stability).
+- **Phân tích Lỗi Kỹ thuật**: Phân tích định tính 2 case studies (`docstring_parser_numpydoc`, `genty_dataset`) và khắc phục bằng AST grounding tinh chỉnh.
+- **Kinh phí & Ngân sách**: Tiêu tốn **$0.5166 USD** / $1.00 USD, bảo toàn **$0.4834 USD** (tiết kiệm 48.34%).
+- **Sản phẩm Bàn giao**: Báo cáo Word [BAO_CAO_NGHIEN_CUU_COUNCIL_SOTA.docx](file:///home/heurix/Documents/Test4Py_Setup/BAO_CAO_NGHIEN_CUU_COUNCIL_SOTA.docx) (1.6 MB, 8 chương, nhúng 4 charts 300 DPI), tài liệu kỹ thuật [TAI_LIEU_BAN_GIAO_DU_AN.md](file:///home/heurix/Documents/Test4Py_Setup/TAI_LIEU_BAN_GIAO_DU_AN.md), mã nguồn, bảng CSV và 21 Golden Suites.

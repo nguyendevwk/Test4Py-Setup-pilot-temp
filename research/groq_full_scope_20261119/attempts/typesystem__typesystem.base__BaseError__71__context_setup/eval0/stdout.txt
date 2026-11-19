@@ -1,0 +1,28 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_add_prefix_and_position_handling _____________________
+
+    def test_add_prefix_and_position_handling():
+        """Test that add_prefix works and position attributes are preserved."""
+        pos = Position(1, 5, 4)
+        msgs = [
+            Message(text="Error A", key="field1", position=pos),
+            Message(text="Error B", index=["nested", 0], code="bad"),
+        ]
+        error = ValidationError(messages=msgs)
+    
+        # add_prefix should prepend the given key to each message's index
+        prefixed = error.messages(add_prefix="root")
+        assert len(prefixed) == 2
+        assert prefixed[0].index == ["root", "field1"]
+        assert prefixed[1].index == ["root", "nested", 0]
+    
+        # Position should be stored correctly
+>       assert prefixed[0].start_position == pos
+E       AssertionError: assert None == Position(line_no=1, column_no=5, char_index=4)
+E        +  where None = Message(text='Error A', code='custom', index=['root', 'field1']).start_position
+
+test_generated.py:69: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_add_prefix_and_position_handling - AssertionEr...
+1 failed, 2 passed in 0.12s

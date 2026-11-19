@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-5ca483a9-556a-4681-a95e-199adda7d911",
+  "object": "chat.completion",
+  "created": 1795079576,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport asyncio\nfrom tornado.web import RequestHandler\nfrom tornado.auth import GoogleOAuth2Mixin\nfrom tornado.util import unicode_type\n\nclass DummyHandler(RequestHandler, GoogleOAuth2Mixin):\n    def initialize(self, settings):\n        self.settings = settings\n\n    def get_auth_http_client(self):\n        # Override to avoid real network calls\n        class DummyClient:\n            async def fetch(self, url, method, headers, body):\n                raise RuntimeError(\"Network not allowed in tests\")\n        return DummyClient()\n\ndef test_get_google_oauth_settings_returns_expected_dict():\n    settings = {\"google_oauth\": {\"key\": \"client_id\", \"secret\": \"client_secret\"}}\n    handler = DummyHandler(application=None, request=None, **settings)\n    result = handler.get_google_oauth_settings()\n    assert isinstance(result, dict)\n    assert result[\"key\"] == \"client_id\"\n    assert result[\"secret\"] == \"client_secret\"\n\ndef test_get_authenticated_user_uses_settings_when_none_provided():\n    settings = {\"google_oauth\": {\"key\": \"client_id\", \"secret\": \"client_secret\"}}\n    handler = DummyHandler(application=None, request=None, **settings)\n    async def run():\n        with pytest.raises(RuntimeError, match=\"Network not allowed in tests\"):\n            await handler.get_authenticated_user(\n                redirect_uri=\"https://example.com/callback\",\n                code=\"dummy_code\",\n            )\n    asyncio.run(run())\n\ndef test_get_authenticated_user_raises_when_settings_missing():\n    settings = {\"google_oauth\": {\"key\": \"client_id\"}}  # missing 'secret'\n    handler = DummyHandler(application=None, request=None, **settings)\n    with pytest.raises(KeyError):\n        handler.get_google_oauth_settings()[\"secret\"]\n```",
+        "reasoning": "We need tests for GoogleOAuth2Mixin.get_authenticated_user. But it makes HTTP call. We cannot mock. But we can test that it raises when missing settings? Actually it uses self.get_google_oauth_settings which accesses self.settings. We can create a dummy handler subclass with settings dict. But http.fetch will attempt network. We cannot. So maybe test that it raises ValueError if settings missing? But code doesn't raise. Maybe test that it constructs body correctly? Hard.\n\nMaybe test that get_google_oauth_settings returns dict. Use a dummy handler with settings. Also test that get_authenticated_user raises if client_id missing and settings missing key. We can monkeypatch get_auth_http_client to raise. But cannot mock target. But we can subclass and override get_auth_http_client to raise. That's allowed since not mocking target? It's subclassing.\n\nImplement three tests: 1) test_get_google_oauth_settings returns correct dict. 2) test_get_authenticated_user_uses_settings_when_none_provided: monkeypatch get_auth_http_client to raise exception, ensure it uses settings. 3) test_get_authenticated_user_raises_when_settings_missing: create handler with missing key, expect KeyError.\n\nLet's code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004995131,
+    "prompt_tokens": 1448,
+    "prompt_time": 0.013503087,
+    "completion_tokens": 612,
+    "completion_time": 0.654031608,
+    "total_tokens": 2060,
+    "total_time": 0.667534695,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 243
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh95x5e2jswxw1hjgsm9kc",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport asyncio\nfrom tornado.web import RequestHandler\nfrom tornado.auth import GoogleOAuth2Mixin\nfrom tornado.util import unicode_type\n\nclass DummyHandler(RequestHandler, GoogleOAuth2Mixin):\n    def initialize(self, settings):\n        self.settings = settings\n\n    def get_auth_http_client(self):\n        # Override to avoid real network calls\n        class DummyClient:\n            async def fetch(self, url, method, headers, body):\n                raise RuntimeError(\"Network not allowed in tests\")\n        return DummyClient()\n\ndef test_get_google_oauth_settings_returns_expected_dict():\n    settings = {\"google_oauth\": {\"key\": \"client_id\", \"secret\": \"client_secret\"}}\n    handler = DummyHandler(application=None, request=None, **settings)\n    result = handler.get_google_oauth_settings()\n    assert isinstance(result, dict)\n    assert result[\"key\"] == \"client_id\"\n    assert result[\"secret\"] == \"client_secret\"\n\ndef test_get_authenticated_user_uses_settings_when_none_provided():\n    settings = {\"google_oauth\": {\"key\": \"client_id\", \"secret\": \"client_secret\"}}\n    handler = DummyHandler(application=None, request=None, **settings)\n    async def run():\n        with pytest.raises(RuntimeError, match=\"Network not allowed in tests\"):\n            await handler.get_authenticated_user(\n                redirect_uri=\"https://example.com/callback\",\n                code=\"dummy_code\",\n            )\n    asyncio.run(run())\n\ndef test_get_authenticated_user_raises_when_settings_missing():\n    settings = {\"google_oauth\": {\"key\": \"client_id\"}}  # missing 'secret'\n    handler = DummyHandler(application=None, request=None, **settings)\n    with pytest.raises(KeyError):\n        handler.get_google_oauth_settings()[\"secret\"]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "390c098f428d46df87e3b8deba241e1a",
+  "_api_plus_pacing_seconds": 5.02177190000657
+}

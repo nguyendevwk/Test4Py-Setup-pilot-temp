@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-55e64135-59f8-4219-84c3-78ed091f712a",
+  "object": "chat.completion",
+  "created": 1795079663,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom httpie.output.processing import Conversion, is_valid_mime, MIME_RE\nfrom httpie.plugins import ConverterPlugin\nfrom httpie.plugins.registry import plugin_manager\n\n\nclass DummyConverter(ConverterPlugin):\n    \"\"\"A minimal ConverterPlugin implementation for testing.\"\"\"\n    def __init__(self, mime: str):\n        self.mime = mime\n\n    @classmethod\n    def supports(cls, mime: str) -> bool:\n        return mime == \"text/plain\"\n\n    def convert(self, data):\n        return data\n\n\ndef test_get_converter_valid_mime_returns_instance(monkeypatch):\n    \"\"\"When a valid MIME type is supported, get_converter returns an instance.\"\"\"\n    # Arrange: monkeypatch plugin_manager to return our DummyConverter\n    monkeypatch.setattr(plugin_manager, \"get_converters\", lambda: [DummyConverter])\n\n    # Act\n    converter = Conversion.get_converter(\"text/plain\")\n\n    # Assert\n    assert converter is not None\n    assert isinstance(converter, DummyConverter)\n    assert converter.mime == \"text/plain\"\n\n\ndef test_get_converter_invalid_mime_returns_none(monkeypatch):\n    \"\"\"When the MIME type is syntactically invalid, get_converter returns None.\"\"\"\n    # Arrange: monkeypatch plugin_manager to return DummyConverter (won't be used)\n    monkeypatch.setattr(plugin_manager, \"get_converters\", lambda: [DummyConverter])\n\n    # Act\n    converter = Conversion.get_converter(\"invalid-mime\")\n\n    # Assert\n    assert converter is None\n\n\ndef test_get_converter_supported_but_not_found_returns_none(monkeypatch):\n    \"\"\"When the MIME type is valid but no converter supports it, get_converter returns None.\"\"\"\n    # Arrange: monkeypatch plugin_manager to return a converter that does not support the MIME\n    class UnsupportedConverter(ConverterPlugin):\n        @classmethod\n        def supports(cls, mime: str) -> bool:\n            return False\n\n        def __init__(self, mime: str):\n            self.mime = mime\n\n        def convert(self, data):\n            return data\n\n    monkeypatch.setattr(plugin_manager, \"get_converters\", lambda: [UnsupportedConverter])\n\n    # Act\n    converter = Conversion.get_converter(\"application/json\")\n\n    # Assert\n    assert converter is None\n```",
+        "reasoning": "We need to test Conversion.get_converter. We need plugin_manager.get_converters returns classes with supports method. We can't modify product code. We can create dummy plugin classes in test? But plugin_manager is imported from product. We cannot modify product. But we can monkeypatch plugin_manager.get_converters to return our dummy classes. Use monkeypatch fixture. Three tests: valid mime returns converter instance; invalid mime returns None; mime not supported returns None. Use tmp_path? Not needed. Use pytest.raises? Not needed. We'll use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004375909,
+    "prompt_tokens": 391,
+    "prompt_time": 0.094430423,
+    "completion_tokens": 579,
+    "completion_time": 0.658854318,
+    "total_tokens": 970,
+    "total_time": 0.753284741,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 109
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7shbv86ecwt5zpbqh6k7c40",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom httpie.output.processing import Conversion, is_valid_mime, MIME_RE\nfrom httpie.plugins import ConverterPlugin\nfrom httpie.plugins.registry import plugin_manager\n\n\nclass DummyConverter(ConverterPlugin):\n    \"\"\"A minimal ConverterPlugin implementation for testing.\"\"\"\n    def __init__(self, mime: str):\n        self.mime = mime\n\n    @classmethod\n    def supports(cls, mime: str) -> bool:\n        return mime == \"text/plain\"\n\n    def convert(self, data):\n        return data\n\n\ndef test_get_converter_valid_mime_returns_instance(monkeypatch):\n    \"\"\"When a valid MIME type is supported, get_converter returns an instance.\"\"\"\n    # Arrange: monkeypatch plugin_manager to return our DummyConverter\n    monkeypatch.setattr(plugin_manager, \"get_converters\", lambda: [DummyConverter])\n\n    # Act\n    converter = Conversion.get_converter(\"text/plain\")\n\n    # Assert\n    assert converter is not None\n    assert isinstance(converter, DummyConverter)\n    assert converter.mime == \"text/plain\"\n\n\ndef test_get_converter_invalid_mime_returns_none(monkeypatch):\n    \"\"\"When the MIME type is syntactically invalid, get_converter returns None.\"\"\"\n    # Arrange: monkeypatch plugin_manager to return DummyConverter (won't be used)\n    monkeypatch.setattr(plugin_manager, \"get_converters\", lambda: [DummyConverter])\n\n    # Act\n    converter = Conversion.get_converter(\"invalid-mime\")\n\n    # Assert\n    assert converter is None\n\n\ndef test_get_converter_supported_but_not_found_returns_none(monkeypatch):\n    \"\"\"When the MIME type is valid but no converter supports it, get_converter returns None.\"\"\"\n    # Arrange: monkeypatch plugin_manager to return a converter that does not support the MIME\n    class UnsupportedConverter(ConverterPlugin):\n        @classmethod\n        def supports(cls, mime: str) -> bool:\n            return False\n\n        def __init__(self, mime: str):\n            self.mime = mime\n\n        def convert(self, data):\n            return data\n\n    monkeypatch.setattr(plugin_manager, \"get_converters\", lambda: [UnsupportedConverter])\n\n    # Act\n    converter = Conversion.get_converter(\"application/json\")\n\n    # Assert\n    assert converter is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "3abf113c114c467d8cb81f7373f8f7c8",
+  "_api_plus_pacing_seconds": 1.7083373719942756
+}

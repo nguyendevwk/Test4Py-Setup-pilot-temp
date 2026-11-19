@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-508dd83a-9017-4033-a43c-992bea1a7482",
+  "object": "chat.completion",
+  "created": 1795079642,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport threading\nimport pytest\nfrom httpie.uploads import ChunkedUploadStream\n\ndef test_chunked_upload_stream_iterates_and_calls_callback():\n    # Prepare a stream of bytes and a callback that records chunks\n    stream = [b'chunk1', b'chunk2', b'chunk3']\n    called_chunks = []\n\n    def callback(chunk):\n        called_chunks.append(chunk)\n\n    upload_stream = ChunkedUploadStream(stream, callback)\n    result_chunks = list(upload_stream)\n\n    # The iterator should yield the same chunks as the original stream\n    assert result_chunks == stream\n    # The callback should have been called with each chunk in order\n    assert called_chunks == stream\n\ndef test_chunked_upload_stream_sets_event_for_each_chunk():\n    # Prepare a stream and an event\n    stream = [b'one', b'two']\n    event = threading.Event()\n    called_chunks = []\n\n    def callback(chunk):\n        called_chunks.append(chunk)\n\n    upload_stream = ChunkedUploadStream(stream, callback, event=event)\n\n    # The event should not be set before iteration\n    assert not event.is_set()\n\n    # Iterate over the stream\n    list(upload_stream)\n\n    # After iteration, the event should be set\n    assert event.is_set()\n    # Callback should have been called for each chunk\n    assert called_chunks == stream\n\ndef test_chunked_upload_stream_propagates_callback_exception():\n    # Prepare a stream and a callback that raises an exception on a specific chunk\n    stream = [b'first', b'bad', b'last']\n    called_chunks = []\n\n    def callback(chunk):\n        called_chunks.append(chunk)\n        if chunk == b'bad':\n            raise ValueError(\"callback error\")\n\n    upload_stream = ChunkedUploadStream(stream, callback)\n\n    # Iteration should raise the exception from the callback\n    with pytest.raises(ValueError, match=\"callback error\"):\n        list(upload_stream)\n\n    # The callback should have been called for the first chunk before the error\n    assert called_chunks == [b'first']\n```",
+        "reasoning": "We need to test ChunkedUploadStream. It inherits from ChunkedStream but not defined here. But we can test iteration, callback called, event set. Use a simple stream list. Use a flag. Use tmp_path? Not needed. Just test. Three functions: normal iteration, event set, callback error? maybe callback raises exception propagate. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005255044,
+    "prompt_tokens": 402,
+    "prompt_time": 0.009714704,
+    "completion_tokens": 507,
+    "completion_time": 0.554295859,
+    "total_tokens": 909,
+    "total_time": 0.564010563,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 74
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7shb71femv90zz92tvdgkpm",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport threading\nimport pytest\nfrom httpie.uploads import ChunkedUploadStream\n\ndef test_chunked_upload_stream_iterates_and_calls_callback():\n    # Prepare a stream of bytes and a callback that records chunks\n    stream = [b'chunk1', b'chunk2', b'chunk3']\n    called_chunks = []\n\n    def callback(chunk):\n        called_chunks.append(chunk)\n\n    upload_stream = ChunkedUploadStream(stream, callback)\n    result_chunks = list(upload_stream)\n\n    # The iterator should yield the same chunks as the original stream\n    assert result_chunks == stream\n    # The callback should have been called with each chunk in order\n    assert called_chunks == stream\n\ndef test_chunked_upload_stream_sets_event_for_each_chunk():\n    # Prepare a stream and an event\n    stream = [b'one', b'two']\n    event = threading.Event()\n    called_chunks = []\n\n    def callback(chunk):\n        called_chunks.append(chunk)\n\n    upload_stream = ChunkedUploadStream(stream, callback, event=event)\n\n    # The event should not be set before iteration\n    assert not event.is_set()\n\n    # Iterate over the stream\n    list(upload_stream)\n\n    # After iteration, the event should be set\n    assert event.is_set()\n    # Callback should have been called for each chunk\n    assert called_chunks == stream\n\ndef test_chunked_upload_stream_propagates_callback_exception():\n    # Prepare a stream and a callback that raises an exception on a specific chunk\n    stream = [b'first', b'bad', b'last']\n    called_chunks = []\n\n    def callback(chunk):\n        called_chunks.append(chunk)\n        if chunk == b'bad':\n            raise ValueError(\"callback error\")\n\n    upload_stream = ChunkedUploadStream(stream, callback)\n\n    # Iteration should raise the exception from the callback\n    with pytest.raises(ValueError, match=\"callback error\"):\n        list(upload_stream)\n\n    # The callback should have been called for the first chunk before the error\n    assert called_chunks == [b'first']\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "62c01985de864210bc616b254dc88abf",
+  "_api_plus_pacing_seconds": 1.3149634940200485
+}

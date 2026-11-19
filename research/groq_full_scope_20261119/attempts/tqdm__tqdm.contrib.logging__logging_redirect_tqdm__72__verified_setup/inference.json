@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-9ddaad76-1431-458d-85f6-0c017b3b5548",
+  "object": "chat.completion",
+  "created": 1795078127,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport sys\nimport io\nimport contextlib\nimport pytest\nfrom tqdm import trange\nfrom tqdm.contrib.logging import logging_redirect_tqdm, _TqdmLoggingHandler, _get_first_found_console_logging_handler, _is_console_logging_handler\n\n# Test 1: Basic redirection of root logger to tqdm.write\ndef test_logging_redirect_basic(capsys):\n    LOG = logging.getLogger(\"test_basic\")\n    logging.basicConfig(level=logging.INFO, stream=sys.stdout, format=\"%(message)s\")\n    with logging_redirect_tqdm():\n        for i in trange(5, desc=\"test\"):\n            if i == 2:\n                LOG.info(\"redirected message\")\n    # Capture stdout after context\n    out, err = capsys.readouterr()\n    # The tqdm progress bar should be present\n    assert \"test\" in out\n    # The redirected log message should appear via tqdm.write (prefixed by a newline)\n    assert \"redirected message\" in out\n    # Ensure no duplicate handlers: only one INFO message\n    assert out.count(\"redirected message\") == 1\n\n# Test 2: Redirection with a custom logger and file handler\ndef test_logging_redirect_custom_logger(tmp_path):\n    LOG = logging.getLogger(\"test_custom\")\n    # Add a file handler that should remain unaffected\n    file_path = tmp_path / \"log.txt\"\n    file_handler = logging.FileHandler(file_path, mode=\"w\")\n    file_handler.setFormatter(logging.Formatter(\"%(levelname)s:%(message)s\"))\n    LOG.addHandler(file_handler)\n    LOG.setLevel(logging.INFO)\n\n    with logging_redirect_tqdm(loggers=[LOG]):\n        LOG.info(\"inside context\")\n    # After context, file should contain the log\n    with open(file_path, \"r\") as f:\n        content = f.read()\n    assert \"INFO:inside context\" in content\n    # The console output should contain the message via tqdm.write\n    # Capture stdout\n    out, _ = io.StringIO(), io.StringIO()\n    with contextlib.redirect_stdout(out):\n        LOG.info(\"outside context\")\n    # Outside context, message goes to original handler (file only), so stdout should be empty\n    assert out.getvalue() == \"\"\n\n# Test 3: Ensure that non-console handlers are preserved and console handlers are replaced\ndef test_logging_redirect_preserve_non_console():\n    LOG = logging.getLogger(\"test_preserve\")\n    # Add a console handler with a custom formatter\n    console_handler = logging.StreamHandler(sys.stdout)\n    console_handler.setFormatter(logging.Formatter(\">>> %(message)s\"))\n    LOG.addHandler(console_handler)\n    LOG.setLevel(logging.INFO)\n\n    # Capture stdout\n    out = io.StringIO()\n    with contextlib.redirect_stdout(out):\n        with logging_redirect_tqdm(loggers=[LOG]):\n            LOG.info(\"inside\")\n    # The message should be redirected via tqdm.write, not the original console handler\n    # tqdm.write prefixes with a newline and does not use the formatter\n    captured = out.getvalue()\n    assert \"inside\" in captured\n    assert \">>>\" not in captured  # original formatter should not appear\n    # After context, original console handler should be restored\n    out2 = io.StringIO()\n    with contextlib.redirect_stdout(out2):\n        LOG.info(\"outside\")\n    assert \">>> outside\" in out2.getvalue()\n```",
+        "reasoning": "Need tests for logging_redirect_tqdm. Use tmp_path? Not needed. Test that logs redirected to tqdm.write. Use tqdm.trange to show progress. Capture output via capsys. Use logging.basicConfig. Test that after context, handlers restored. Also test boundary: passing custom logger list. Third test error? maybe passing None loggers? Already default. Maybe test that non-console handlers unaffected. Use a file handler. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004620102,
+    "prompt_tokens": 688,
+    "prompt_time": 0.011477641,
+    "completion_tokens": 806,
+    "completion_time": 0.890514557,
+    "total_tokens": 1494,
+    "total_time": 0.901992198,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 92
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sfwz85eas8dkpm1rdnnjsj",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport sys\nimport io\nimport contextlib\nimport pytest\nfrom tqdm import trange\nfrom tqdm.contrib.logging import logging_redirect_tqdm, _TqdmLoggingHandler, _get_first_found_console_logging_handler, _is_console_logging_handler\n\n# Test 1: Basic redirection of root logger to tqdm.write\ndef test_logging_redirect_basic(capsys):\n    LOG = logging.getLogger(\"test_basic\")\n    logging.basicConfig(level=logging.INFO, stream=sys.stdout, format=\"%(message)s\")\n    with logging_redirect_tqdm():\n        for i in trange(5, desc=\"test\"):\n            if i == 2:\n                LOG.info(\"redirected message\")\n    # Capture stdout after context\n    out, err = capsys.readouterr()\n    # The tqdm progress bar should be present\n    assert \"test\" in out\n    # The redirected log message should appear via tqdm.write (prefixed by a newline)\n    assert \"redirected message\" in out\n    # Ensure no duplicate handlers: only one INFO message\n    assert out.count(\"redirected message\") == 1\n\n# Test 2: Redirection with a custom logger and file handler\ndef test_logging_redirect_custom_logger(tmp_path):\n    LOG = logging.getLogger(\"test_custom\")\n    # Add a file handler that should remain unaffected\n    file_path = tmp_path / \"log.txt\"\n    file_handler = logging.FileHandler(file_path, mode=\"w\")\n    file_handler.setFormatter(logging.Formatter(\"%(levelname)s:%(message)s\"))\n    LOG.addHandler(file_handler)\n    LOG.setLevel(logging.INFO)\n\n    with logging_redirect_tqdm(loggers=[LOG]):\n        LOG.info(\"inside context\")\n    # After context, file should contain the log\n    with open(file_path, \"r\") as f:\n        content = f.read()\n    assert \"INFO:inside context\" in content\n    # The console output should contain the message via tqdm.write\n    # Capture stdout\n    out, _ = io.StringIO(), io.StringIO()\n    with contextlib.redirect_stdout(out):\n        LOG.info(\"outside context\")\n    # Outside context, message goes to original handler (file only), so stdout should be empty\n    assert out.getvalue() == \"\"\n\n# Test 3: Ensure that non-console handlers are preserved and console handlers are replaced\ndef test_logging_redirect_preserve_non_console():\n    LOG = logging.getLogger(\"test_preserve\")\n    # Add a console handler with a custom formatter\n    console_handler = logging.StreamHandler(sys.stdout)\n    console_handler.setFormatter(logging.Formatter(\">>> %(message)s\"))\n    LOG.addHandler(console_handler)\n    LOG.setLevel(logging.INFO)\n\n    # Capture stdout\n    out = io.StringIO()\n    with contextlib.redirect_stdout(out):\n        with logging_redirect_tqdm(loggers=[LOG]):\n            LOG.info(\"inside\")\n    # The message should be redirected via tqdm.write, not the original console handler\n    # tqdm.write prefixes with a newline and does not use the formatter\n    captured = out.getvalue()\n    assert \"inside\" in captured\n    assert \">>>\" not in captured  # original formatter should not appear\n    # After context, original console handler should be restored\n    out2 = io.StringIO()\n    with contextlib.redirect_stdout(out2):\n        LOG.info(\"outside\")\n    assert \">>> outside\" in out2.getvalue()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3002946610213257
+}

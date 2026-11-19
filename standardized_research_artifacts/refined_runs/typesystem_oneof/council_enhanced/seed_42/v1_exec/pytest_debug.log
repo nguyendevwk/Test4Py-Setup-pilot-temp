@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_oneof_exact_match_and_errors _______________________
+
+    def test_oneof_exact_match_and_errors():
+        # Exactly one match: string
+        schema = OneOf([String(), Integer()])
+        val, err = schema.validate_or_error("sample_text")
+        assert err is None
+        assert val == "sample_text"
+    
+        # Exactly one match: integer
+        val, err = schema.validate_or_error(42)
+        assert err is None
+        assert val == 42
+    
+        # Multiple matches: two identical String fields
+        multi_schema = OneOf([String(), String()])
+        with pytest.raises(ValidationError) as excinfo:
+            multi_schema.validate("dup")
+>       assert excinfo.value.code == "multiple_matches"
+               ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ValidationError' object has no attribute 'code'
+
+../../standardized_research_artifacts/refined_runs/typesystem_oneof/council_enhanced/seed_42/v1_exec/test_run.py:22: AttributeError
+=========================== short test summary info ============================
+FAILED ../../standardized_research_artifacts/refined_runs/typesystem_oneof/council_enhanced/seed_42/v1_exec/test_run.py::test_oneof_exact_match_and_errors
+1 failed in 0.22s
+
+/home/heurix/.cache/uv/archive-v0/Mqfl7i_nhzmUVumj/lib/python3.12/site-packages/coverage/inorout.py:560: CoverageWarning: Module tests was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.17.3/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")

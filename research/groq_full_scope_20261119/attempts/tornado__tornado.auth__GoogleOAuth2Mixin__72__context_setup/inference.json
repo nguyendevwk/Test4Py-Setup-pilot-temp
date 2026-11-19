@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-1b780ccb-61ca-4d39-bfc9-d11d589ef9d6",
+  "object": "chat.completion",
+  "created": 1795079575,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport urllib.parse\nfrom tornado import escape\nfrom tornado.auth import GoogleOAuth2Mixin\nfrom tornado.web import RequestHandler\nfrom typing import Dict, Any\n\n\nclass DummyHTTPClient:\n    \"\"\"A dummy HTTP client that records the request body and returns a fake response.\"\"\"\n    def __init__(self):\n        self.last_body = None\n\n    async def fetch(self, url, method=None, headers=None, body=None):\n        self.last_body = body\n        # Return a minimal fake response with a JSON body\n        class Response:\n            body = b'{\"access_token\":\"dummy_token\"}'\n        return Response()\n\n\nclass DummyHandler(GoogleOAuth2Mixin, RequestHandler):\n    \"\"\"A minimal RequestHandler that supplies settings and a dummy HTTP client.\"\"\"\n    def __init__(self, settings: Dict[str, Any]):\n        self.settings = settings\n\n    def get_auth_http_client(self):\n        return DummyHTTPClient()\n\n\n@pytest.mark.asyncio\nasync def test_get_authenticated_user_uses_settings_and_returns_token():\n    \"\"\"Verify that the mixin uses the client id/secret from settings and returns the\n    access token from the HTTP response.\"\"\"\n    handler = DummyHandler(\n        {\"google_oauth\": {\"key\": \"client_id_123\", \"secret\": \"secret_abc\"}}\n    )\n    result = await handler.get_authenticated_user(\n        redirect_uri=\"https://example.com/callback\",\n        code=\"auth_code_xyz\",\n    )\n    # The dummy client returns a JSON with access_token\n    assert result == {\"access_token\": \"dummy_token\"}\n    # Inspect the body sent to the dummy HTTP client\n    body = urllib.parse.parse_qs(handler.get_auth_http_client().last_body.decode())\n    assert body[\"redirect_uri\"] == [\"https://example.com/callback\"]\n    assert body[\"code\"] == [\"auth_code_xyz\"]\n    assert body[\"client_id\"] == [\"client_id_123\"]\n    assert body[\"client_secret\"] == [\"secret_abc\"]\n    assert body[\"grant_type\"] == [\"authorization_code\"]\n\n\n@pytest.mark.asyncio\nasync def test_get_authenticated_user_allows_explicit_client_credentials():\n    \"\"\"Verify that passing explicit client_id and client_secret overrides the settings.\"\"\"\n    handler = DummyHandler(\n        {\"google_oauth\": {\"key\": \"ignored_id\", \"secret\": \"ignored_secret\"}}\n    )\n    result = await handler.get_authenticated_user(\n        redirect_uri=\"https://example.com/callback\",\n        code=\"code_456\",\n        client_id=\"explicit_id\",\n        client_secret=\"explicit_secret\",\n    )\n    assert result == {\"access_token\": \"dummy_token\"}\n    body = urllib.parse.parse_qs(handler.get_auth_http_client().last_body.decode())\n    assert body[\"client_id\"] == [\"explicit_id\"]\n    assert body[\"client_secret\"] == [\"explicit_secret\"]\n\n\ndef test_get_google_oauth_settings_missing_raises_key_error():\n    \"\"\"Verify that missing google_oauth settings raise a KeyError.\"\"\"\n    handler = DummyHandler(settings={})\n    with pytest.raises(KeyError):\n        handler.get_google_oauth_settings()\n```",
+        "reasoning": "We need tests for GoogleOAuth2Mixin.get_authenticated_user. But it makes HTTP call. We can't mock. But we can test that it raises when missing settings? Actually it uses self.get_google_oauth_settings which accesses self.settings. We can create a dummy handler subclass with settings dict. But http.fetch will try network. Can't. So maybe test that it raises ValueError when settings missing? But code doesn't raise. Maybe test that body contains correct params? We can monkeypatch get_auth_http_client to return object with fetch that records body. But cannot mock target. But we can subclass GoogleOAuth2Mixin and override get_auth_http_client to return dummy. That's allowed. So test that body contains expected fields. Also test that client_id/secret override works. Third test boundary: when client_id None and settings missing key raises KeyError. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005246433,
+    "prompt_tokens": 1448,
+    "prompt_time": 0.015379802,
+    "completion_tokens": 813,
+    "completion_time": 0.908346744,
+    "total_tokens": 2261,
+    "total_time": 0.923726546,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 173
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh94qje6a9a6ffhsg0thve",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport urllib.parse\nfrom tornado import escape\nfrom tornado.auth import GoogleOAuth2Mixin\nfrom tornado.web import RequestHandler\nfrom typing import Dict, Any\n\n\nclass DummyHTTPClient:\n    \"\"\"A dummy HTTP client that records the request body and returns a fake response.\"\"\"\n    def __init__(self):\n        self.last_body = None\n\n    async def fetch(self, url, method=None, headers=None, body=None):\n        self.last_body = body\n        # Return a minimal fake response with a JSON body\n        class Response:\n            body = b'{\"access_token\":\"dummy_token\"}'\n        return Response()\n\n\nclass DummyHandler(GoogleOAuth2Mixin, RequestHandler):\n    \"\"\"A minimal RequestHandler that supplies settings and a dummy HTTP client.\"\"\"\n    def __init__(self, settings: Dict[str, Any]):\n        self.settings = settings\n\n    def get_auth_http_client(self):\n        return DummyHTTPClient()\n\n\n@pytest.mark.asyncio\nasync def test_get_authenticated_user_uses_settings_and_returns_token():\n    \"\"\"Verify that the mixin uses the client id/secret from settings and returns the\n    access token from the HTTP response.\"\"\"\n    handler = DummyHandler(\n        {\"google_oauth\": {\"key\": \"client_id_123\", \"secret\": \"secret_abc\"}}\n    )\n    result = await handler.get_authenticated_user(\n        redirect_uri=\"https://example.com/callback\",\n        code=\"auth_code_xyz\",\n    )\n    # The dummy client returns a JSON with access_token\n    assert result == {\"access_token\": \"dummy_token\"}\n    # Inspect the body sent to the dummy HTTP client\n    body = urllib.parse.parse_qs(handler.get_auth_http_client().last_body.decode())\n    assert body[\"redirect_uri\"] == [\"https://example.com/callback\"]\n    assert body[\"code\"] == [\"auth_code_xyz\"]\n    assert body[\"client_id\"] == [\"client_id_123\"]\n    assert body[\"client_secret\"] == [\"secret_abc\"]\n    assert body[\"grant_type\"] == [\"authorization_code\"]\n\n\n@pytest.mark.asyncio\nasync def test_get_authenticated_user_allows_explicit_client_credentials():\n    \"\"\"Verify that passing explicit client_id and client_secret overrides the settings.\"\"\"\n    handler = DummyHandler(\n        {\"google_oauth\": {\"key\": \"ignored_id\", \"secret\": \"ignored_secret\"}}\n    )\n    result = await handler.get_authenticated_user(\n        redirect_uri=\"https://example.com/callback\",\n        code=\"code_456\",\n        client_id=\"explicit_id\",\n        client_secret=\"explicit_secret\",\n    )\n    assert result == {\"access_token\": \"dummy_token\"}\n    body = urllib.parse.parse_qs(handler.get_auth_http_client().last_body.decode())\n    assert body[\"client_id\"] == [\"explicit_id\"]\n    assert body[\"client_secret\"] == [\"explicit_secret\"]\n\n\ndef test_get_google_oauth_settings_missing_raises_key_error():\n    \"\"\"Verify that missing google_oauth settings raise a KeyError.\"\"\"\n    handler = DummyHandler(settings={})\n    with pytest.raises(KeyError):\n        handler.get_google_oauth_settings()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "b983c571d4554da28cfd256e8e3acd88",
+  "_api_plus_pacing_seconds": 3.010255353001412
+}

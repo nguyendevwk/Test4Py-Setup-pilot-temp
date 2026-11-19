@@ -1,0 +1,70 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_loader_parses_python_file ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__loader__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_loader_parses_python_file0')
+
+    def test_loader_parses_python_file(tmp_path):
+        """Loader should parse a normal .py file and return compiled output containing the module name."""
+        pkg = create_pkg(tmp_path, "mypkg", {"__init__.py": "x = 1\n"})
+        out = loader(str(pkg), str(tmp_path), link=False, level=0, toc=False)
+        assert isinstance(out, str)
+>       assert "mypkg" in out
+E       AssertionError: assert 'mypkg' in '\n'
+
+test_generated.py:26: AssertionError
+________________________ test_loader_handles_stub_only _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__loader__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_loader_handles_stub_only0')
+
+    def test_loader_handles_stub_only(tmp_path):
+        """Loader should process a package that only contains a .pyi stub and still return output."""
+        pkg = create_pkg(tmp_path, "stubpkg", {"__init__.pyi": "def foo() -> int: ...\n"})
+        out = loader(str(pkg), str(tmp_path), link=False, level=0, toc=False)
+        assert isinstance(out, str)
+>       assert "stubpkg" in out
+E       AssertionError: assert 'stubpkg' in '\n'
+
+test_generated.py:35: AssertionError
+_________________ test_walk_packages_filters_non_package_files _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__loader__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_filters_non0')
+
+    def test_walk_packages_filters_non_package_files(tmp_path):
+        """walk_packages should ignore files outside the package and non-.py/.pyi files."""
+>       pkg = create_pkg(tmp_path, "mypkg", {
+            "__init__.py": "pass\n",
+            "module.py": "pass\n",
+            "not_a_pkg.txt": "ignore\n",
+            "sub/__init__.py": "pass\n",
+        })
+
+test_generated.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_generated.py:18: in create_pkg
+    (pkg_path / fname).write_text(content)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/pathlib.py:1154: in write_text
+    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__loader__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_filters_non0/mypkg/sub/__init__.py')
+mode = 'w', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return self._accessor.open(self, mode, buffering, encoding, errors,
+                                   newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__loader__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_filters_non0/mypkg/sub/__init__.py'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/pathlib.py:1119: FileNotFoundError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_loader_parses_python_file - AssertionError: as...
+FAILED test_generated.py::test_loader_handles_stub_only - AssertionError: ass...
+FAILED test_generated.py::test_walk_packages_filters_non_package_files - File...
+3 failed in 0.18s

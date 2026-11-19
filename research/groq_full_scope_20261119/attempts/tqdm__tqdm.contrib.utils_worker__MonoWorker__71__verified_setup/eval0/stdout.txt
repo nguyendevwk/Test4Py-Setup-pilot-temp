@@ -1,0 +1,44 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_cancellation_of_waiting_task _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_cancellation_of_waiting_t0')
+
+    def test_cancellation_of_waiting_task(tmp_path):
+        """When a new task is submitted while one is waiting, the waiting task should be cancelled."""
+        worker = MonoWorker()
+        call_log = []
+    
+        def long_task():
+            call_log.append("long_start")
+            time.sleep(0.5)
+            call_log.append("long_end")
+            return "long"
+    
+        def quick_task():
+            call_log.append("quick")
+            return "quick"
+    
+        # Submit a long task; it will be running
+        future_long = worker.submit(long_task)
+        # Submit a quick task; it should replace the waiting slot
+        future_quick = worker.submit(quick_task)
+    
+        # The long task should still be running
+        assert future_long.done() is False
+        # The quick task should be waiting
+        assert future_quick.done() is False
+    
+        # Wait for the quick task to finish
+        assert future_quick.result(timeout=1) == "quick"
+    
+        # After quick task completes, the long task should still be running
+>       assert future_long.done() is False
+E       assert True is False
+E        +  where True = done()
+E        +    where done = <Future at 0x7ffb7c6d6fe0 state=finished returned str>.done
+
+test_generated.py:91: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_cancellation_of_waiting_task - assert True is ...
+1 failed, 2 passed in 0.81s

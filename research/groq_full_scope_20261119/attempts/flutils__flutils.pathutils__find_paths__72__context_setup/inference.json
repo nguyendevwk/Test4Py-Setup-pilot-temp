@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-01059a73-02ee-408f-9ebe-d00fb5422992",
+  "object": "chat.completion",
+  "created": 1795078067,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import find_paths, normalize_path\n\ndef test_find_paths_expands_user_and_glob(tmp_path):\n    # Create a directory structure under the user's home\n    home = Path.home()\n    target_dir = home / \"tmp_test_find\"\n    target_dir.mkdir(parents=True, exist_ok=True)\n    (target_dir / \"file1.txt\").write_text(\"a\")\n    (target_dir / \"file2.txt\").write_text(\"b\")\n    # Use a glob pattern with ~ expansion\n    pattern = f\"~{target_dir.relative_to(home)}/file*.txt\"\n    # Ensure the pattern is resolved to the correct absolute path\n    resolved = normalize_path(pattern)\n    assert resolved.is_absolute()\n    # Collect results from find_paths\n    results = list(find_paths(pattern))\n    # Expect both files to be found\n    expected = {target_dir / \"file1.txt\", target_dir / \"file2.txt\"}\n    assert set(results) == expected\n\ndef test_find_paths_no_matches(tmp_path):\n    # Create a temporary directory with no matching files\n    empty_dir = tmp_path / \"empty_dir\"\n    empty_dir.mkdir()\n    # Pattern that matches nothing\n    pattern = str(empty_dir / \"nonexistent_*.txt\")\n    # find_paths should yield nothing\n    results = list(find_paths(pattern))\n    assert results == []\n\ndef test_find_paths_invalid_pattern(tmp_path):\n    # Create a directory with a file that has a name that could be interpreted as a pattern\n    dir_with_file = tmp_path / \"dir_with_file\"\n    dir_with_file.mkdir()\n    (dir_with_file / \"file[1].txt\").write_text(\"content\")\n    # Use a pattern that is syntactically invalid for glob (e.g., unmatched bracket)\n    invalid_pattern = str(dir_with_file / \"file[.txt\")\n    # Path.glob will raise a ValueError for an invalid pattern\n    with pytest.raises(ValueError):\n        list(find_paths(invalid_pattern))\n```",
+        "reasoning": "We need 3 tests: normal glob, boundary (no matches), error (invalid pattern?). find_paths uses Path.glob; invalid pattern raises? maybe pattern with invalid syntax? We'll test that it yields nothing for no match. Also test that it expands ~. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048432436,
+    "prompt_tokens": 1178,
+    "prompt_time": 0.041472154,
+    "completion_tokens": 494,
+    "completion_time": 0.632760388,
+    "total_tokens": 1672,
+    "total_time": 0.674232542,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 57
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfv4qce8x9fsdkjck3c18y",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import find_paths, normalize_path\n\ndef test_find_paths_expands_user_and_glob(tmp_path):\n    # Create a directory structure under the user's home\n    home = Path.home()\n    target_dir = home / \"tmp_test_find\"\n    target_dir.mkdir(parents=True, exist_ok=True)\n    (target_dir / \"file1.txt\").write_text(\"a\")\n    (target_dir / \"file2.txt\").write_text(\"b\")\n    # Use a glob pattern with ~ expansion\n    pattern = f\"~{target_dir.relative_to(home)}/file*.txt\"\n    # Ensure the pattern is resolved to the correct absolute path\n    resolved = normalize_path(pattern)\n    assert resolved.is_absolute()\n    # Collect results from find_paths\n    results = list(find_paths(pattern))\n    # Expect both files to be found\n    expected = {target_dir / \"file1.txt\", target_dir / \"file2.txt\"}\n    assert set(results) == expected\n\ndef test_find_paths_no_matches(tmp_path):\n    # Create a temporary directory with no matching files\n    empty_dir = tmp_path / \"empty_dir\"\n    empty_dir.mkdir()\n    # Pattern that matches nothing\n    pattern = str(empty_dir / \"nonexistent_*.txt\")\n    # find_paths should yield nothing\n    results = list(find_paths(pattern))\n    assert results == []\n\ndef test_find_paths_invalid_pattern(tmp_path):\n    # Create a directory with a file that has a name that could be interpreted as a pattern\n    dir_with_file = tmp_path / \"dir_with_file\"\n    dir_with_file.mkdir()\n    (dir_with_file / \"file[1].txt\").write_text(\"content\")\n    # Use a pattern that is syntactically invalid for glob (e.g., unmatched bracket)\n    invalid_pattern = str(dir_with_file / \"file[.txt\")\n    # Path.glob will raise a ValueError for an invalid pattern\n    with pytest.raises(ValueError):\n        list(find_paths(invalid_pattern))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.079429509001784
+}

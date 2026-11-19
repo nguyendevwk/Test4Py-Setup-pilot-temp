@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-54a29941-90ac-4eb2-9a8b-f1e84a4d251e",
+  "object": "chat.completion",
+  "created": 1795076273,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport warnings\nimport pytest\nfrom tqdm.rich import tqdm_rich\nfrom tqdm.std import TqdmExperimentalWarning\n\ndef test_tqdm_rich_normal_progress(tmp_path):\n    \"\"\"Verify that tqdm_rich updates progress and emits the experimental warning.\"\"\"\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        bar = tqdm_rich(total=3, desc=\"test\")\n        # iterate a few steps\n        for _ in range(3):\n            bar.update(1)\n        bar.close()\n    # The warning should be emitted once\n    assert any(item.category is TqdmExperimentalWarning for item in w)\n    # After close, the bar should have completed\n    assert bar.n == 3\n    assert bar.total == 3\n\ndef test_tqdm_rich_disable_no_gui(tmp_path):\n    \"\"\"When disable=True, the GUI should not be initialized and no warning emitted.\"\"\"\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        bar = tqdm_rich(total=2, disable=True)\n        # No GUI should be created; _prog attribute should not exist\n        assert not hasattr(bar, \"_prog\")\n        # No warning should be emitted\n        assert all(item.category is not TqdmExperimentalWarning for item in w)\n        bar.close()\n    # The bar should still track progress correctly\n    assert bar.n == 0\n    assert bar.total == 2\n\ndef test_tqdm_rich_invalid_progress_type():\n    \"\"\"Passing an invalid type for the progress argument should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        tqdm_rich(progress=\"not a tuple\")\n```",
+        "reasoning": "We need 3 tests. Use tmp_path for any file? Not needed. Test normal: create tqdm_rich with total 5, iterate, ensure progress updates? We can check that after close, no exception. Use warnings to capture experimental warning. Test boundary: disable=True should skip GUI. Test error: passing invalid progress type? maybe passing progress as string should raise TypeError? But code expects tuple. Might raise TypeError when Progress(*progress). We'll test that."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.064836854,
+    "prompt_tokens": 813,
+    "prompt_time": 0.080638135,
+    "completion_tokens": 456,
+    "completion_time": 0.486131204,
+    "total_tokens": 1269,
+    "total_time": 0.566769339,
+    "completion_tokens_details": {
+      "reasoning_tokens": 97
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se4ch5e1nbj5dhe7b2xps0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport warnings\nimport pytest\nfrom tqdm.rich import tqdm_rich\nfrom tqdm.std import TqdmExperimentalWarning\n\ndef test_tqdm_rich_normal_progress(tmp_path):\n    \"\"\"Verify that tqdm_rich updates progress and emits the experimental warning.\"\"\"\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        bar = tqdm_rich(total=3, desc=\"test\")\n        # iterate a few steps\n        for _ in range(3):\n            bar.update(1)\n        bar.close()\n    # The warning should be emitted once\n    assert any(item.category is TqdmExperimentalWarning for item in w)\n    # After close, the bar should have completed\n    assert bar.n == 3\n    assert bar.total == 3\n\ndef test_tqdm_rich_disable_no_gui(tmp_path):\n    \"\"\"When disable=True, the GUI should not be initialized and no warning emitted.\"\"\"\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        bar = tqdm_rich(total=2, disable=True)\n        # No GUI should be created; _prog attribute should not exist\n        assert not hasattr(bar, \"_prog\")\n        # No warning should be emitted\n        assert all(item.category is not TqdmExperimentalWarning for item in w)\n        bar.close()\n    # The bar should still track progress correctly\n    assert bar.n == 0\n    assert bar.total == 2\n\ndef test_tqdm_rich_invalid_progress_type():\n    \"\"\"Passing an invalid type for the progress argument should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        tqdm_rich(progress=\"not a tuple\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9252907839836553
+}

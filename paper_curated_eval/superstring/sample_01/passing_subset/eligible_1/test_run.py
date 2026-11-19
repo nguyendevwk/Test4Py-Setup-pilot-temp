@@ -1,0 +1,16 @@
+import pytest
+from superstring.superstring import SuperString
+
+def test_superstring_to_printable_substring():
+    content = "Hello World"
+    s = SuperString(content)
+
+    # Default indices should return the full string
+    assert s.to_printable() == content
+    assert s.to_printable(0, None) == content
+
+    # Explicit start and end indices should slice correctly
+    assert s.to_printable(6, 11) == "World"
+
+    # Verify that end_index defaults to length when omitted
+    assert s.to_printable(0, None) == content

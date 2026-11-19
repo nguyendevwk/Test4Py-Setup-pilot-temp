@@ -1,0 +1,49 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_safari_course_suitable __________________________
+
+    def test_safari_course_suitable():
+        # URL that should match SafariCourseIE but not SafariIE or SafariApiIE
+        url = "https://www.safaribooksonline.com/library/view/hadoop-fundamentals-livelessons/9780133392838/"
+        assert SafariCourseIE.suitable(url) is True
+        # URL that matches SafariIE (e.g., a book view) should not be suitable
+        book_url = "https://www.safaribooksonline.com/library/view/learning-python/9780134685991/"
+>       assert SafariCourseIE.suitable(book_url) is False
+E       AssertionError: assert True is False
+E        +  where True = suitable('https://www.safaribooksonline.com/library/view/learning-python/9780134685991/')
+E        +    where suitable = SafariCourseIE.suitable
+
+test_generated.py:12: AssertionError
+___________________ test_safari_course_real_extract_success ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f856b4c9fc0>
+
+    def test_safari_course_real_extract_success(monkeypatch):
+        # Prepare a fake JSON response with chapters
+        fake_json = {
+            "title": "Fake Course Title",
+            "chapters": ["https://example.com/chapter1", "https://example.com/chapter2"]
+        }
+        # Monkeypatch the download method to return our fake JSON
+        monkeypatch.setattr(
+            SafariCourseIE,
+            "_download_json",
+            lambda self, url, video_id, note=None: fake_json
+        )
+        extractor = SafariCourseIE()
+        result = extractor._real_extract("https://www.safaribooksonline.com/library/view/fake/1234567890/")
+        # Verify playlist structure
+>       assert result['entries'] == [
+            extractor.url_result("https://example.com/chapter1", SafariCourseIE.ie_key()),
+            extractor.url_result("https://example.com/chapter2", SafariCourseIE.ie_key())
+        ]
+E       AssertionError: assert [{'_type': 'u... 'SafariApi'}] == [{'_type': 'u...afariCourse'}]
+E         
+E         At index 0 diff: {'_type': 'url', 'url': 'https://example.com/chapter1', 'ie_key': 'SafariApi'} != {'_type': 'url', 'url': 'https://example.com/chapter1', 'ie_key': 'SafariCourse'}
+E         Use -v to get more diff
+
+test_generated.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_safari_course_suitable - AssertionError: asser...
+FAILED test_generated.py::test_safari_course_real_extract_success - Assertion...
+2 failed, 1 passed in 1.00s

@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-92b28e5e-657b-4c91-bfa4-3d8107b4da16",
+  "object": "chat.completion",
+  "created": 1795079488,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKTVSerieBaseIE, NRKIE\nfrom youtube_dl.utils import ExtractorError\n\n# Helper to create a minimal instance of NRKTVSerieBaseIE\nclass DummyNRKIE(NRKTVSerieBaseIE):\n    def __init__(self):\n        # The base class expects a downloader; we pass None for simplicity\n        super().__init__(downloader=None)\n\n    # Override _call_api to avoid network calls during tests\n    def _call_api(self, url, display_id, note=None, fatal=True):\n        # Return None to simulate no further pages\n        return None\n\ndef test_extract_entries_normal_and_boundary():\n    ie = DummyNRKIE()\n    # Normal case: list of dicts with valid prfId strings\n    entries = ie._extract_entries([\n        {'prfId': '123', 'episodeId': 'ignored'},\n        {'episodeId': '456', 'prfId': None},\n        {'prfId': '789'},\n        {'prfId': 123},  # invalid type\n        {'other': 'no id'},\n    ])\n    # Should produce three url_results with correct video_id\n    assert len(entries) == 3\n    for entry, vid in zip(entries, ['123', '789', '456']):\n        assert entry['url'] == f'nrk:{vid}'\n        assert entry['ie_key'] == NRKIE.ie_key()\n        assert entry['video_id'] == vid\n\ndef test_extract_assets_key_and_catalog_name():\n    ie = DummyNRKIE()\n    # _extract_assets_key should return first matching key\n    assert ie._extract_assets_key({'episodes': [], 'instalments': []}) == 'episodes'\n    assert ie._extract_assets_key({'instalments': []}) == 'instalments'\n    assert ie._extract_assets_key({'other': []}) is None\n\n    # _catalog_name maps kinds correctly\n    assert ie._catalog_name('podcast') == 'podcast'\n    assert ie._catalog_name('podkast') == 'podcast'\n    assert ie._catalog_name('series') == 'series'\n    assert ie._catalog_name('unknown') == 'series'\n\ndef test_entries_pagination_and_termination():\n    ie = DummyNRKIE()\n    # Construct data with two pages of assets\n    page1 = {\n        '_embedded': {\n            'episodes': {\n                '_embedded': {\n                    'episodes': [\n                        {'prfId': 'a1'},\n                        {'prfId': 'a2'},\n                    ]\n                },\n                '_links': {\n                    'next': {'href': 'next_page'}\n                }\n            }\n        }\n    }\n    # The overridden _call_api will return None, so pagination stops after first page\n    entries = list(ie._entries(page1, display_id='test'))\n    # Should yield two entries from the first page only\n    assert len(entries) == 2\n    assert entries[0]['video_id'] == 'a1'\n    assert entries[1]['video_id'] == 'a2'\n```",
+        "reasoning": "We need to write tests for NRKTVSerieBaseIE._extract_entries, _extract_assets_key, _catalog_name, _entries. Use tmp_path? Not needed. Just test logic. Use pytest. Provide three test functions. Ensure no mocks of target. Use real class. We'll import from youtube_dl.extractor.nrk. Use real data. Test normal extraction, boundary with invalid types, and entries pagination. For _entries, we need to simulate _call_api? That method is in base class; we can't mock. But we can test that _entries stops when no next_url. We can monkeypatch _call_api on instance to return None. But that's modifying target? It's allowed to monkeypatch instance method. It's not mocking target? It's patching method. Might be okay. We'll create subclass to override _call_api to return None. Use that instance. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005669261,
+    "prompt_tokens": 768,
+    "prompt_time": 0.040729517,
+    "completion_tokens": 842,
+    "completion_time": 0.887905626,
+    "total_tokens": 1610,
+    "total_time": 0.928635143,
+    "completion_tokens_details": {
+      "reasoning_tokens": 181
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh6fqhertvpxn0kgmscjvj",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKTVSerieBaseIE, NRKIE\nfrom youtube_dl.utils import ExtractorError\n\n# Helper to create a minimal instance of NRKTVSerieBaseIE\nclass DummyNRKIE(NRKTVSerieBaseIE):\n    def __init__(self):\n        # The base class expects a downloader; we pass None for simplicity\n        super().__init__(downloader=None)\n\n    # Override _call_api to avoid network calls during tests\n    def _call_api(self, url, display_id, note=None, fatal=True):\n        # Return None to simulate no further pages\n        return None\n\ndef test_extract_entries_normal_and_boundary():\n    ie = DummyNRKIE()\n    # Normal case: list of dicts with valid prfId strings\n    entries = ie._extract_entries([\n        {'prfId': '123', 'episodeId': 'ignored'},\n        {'episodeId': '456', 'prfId': None},\n        {'prfId': '789'},\n        {'prfId': 123},  # invalid type\n        {'other': 'no id'},\n    ])\n    # Should produce three url_results with correct video_id\n    assert len(entries) == 3\n    for entry, vid in zip(entries, ['123', '789', '456']):\n        assert entry['url'] == f'nrk:{vid}'\n        assert entry['ie_key'] == NRKIE.ie_key()\n        assert entry['video_id'] == vid\n\ndef test_extract_assets_key_and_catalog_name():\n    ie = DummyNRKIE()\n    # _extract_assets_key should return first matching key\n    assert ie._extract_assets_key({'episodes': [], 'instalments': []}) == 'episodes'\n    assert ie._extract_assets_key({'instalments': []}) == 'instalments'\n    assert ie._extract_assets_key({'other': []}) is None\n\n    # _catalog_name maps kinds correctly\n    assert ie._catalog_name('podcast') == 'podcast'\n    assert ie._catalog_name('podkast') == 'podcast'\n    assert ie._catalog_name('series') == 'series'\n    assert ie._catalog_name('unknown') == 'series'\n\ndef test_entries_pagination_and_termination():\n    ie = DummyNRKIE()\n    # Construct data with two pages of assets\n    page1 = {\n        '_embedded': {\n            'episodes': {\n                '_embedded': {\n                    'episodes': [\n                        {'prfId': 'a1'},\n                        {'prfId': 'a2'},\n                    ]\n                },\n                '_links': {\n                    'next': {'href': 'next_page'}\n                }\n            }\n        }\n    }\n    # The overridden _call_api will return None, so pagination stops after first page\n    entries = list(ie._entries(page1, display_id='test'))\n    # Should yield two entries from the first page only\n    assert len(entries) == 2\n    assert entries[0]['video_id'] == 'a1'\n    assert entries[1]['video_id'] == 'a2'\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "3c0eeeb9f5be46a2b0d98d045c79460f",
+  "_api_plus_pacing_seconds": 4.491703343985137
+}

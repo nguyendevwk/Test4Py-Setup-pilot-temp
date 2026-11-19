@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-9244dd6a-ae5a-4573-abc7-67405aaa852a",
+  "object": "chat.completion",
+  "created": 1795076145,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport pytest\nfrom httpie.output.writer import write_stream\nfrom httpie.output.streams import BaseStream\n\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields predefined byte chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def __iter__(self):\n        return iter(self._chunks)\n\n\nclass FlushCounter(io.BytesIO):\n    \"\"\"BytesIO that counts flush calls.\"\"\"\n    def __init__(self):\n        super().__init__()\n        self.flush_calls = 0\n\n    def flush(self):\n        self.flush_calls += 1\n        super().flush()\n\n\ndef test_write_stream_with_buffer_and_flush():\n    \"\"\"When the outfile has a buffer attribute, data is written to it and flush is called.\"\"\"\n    stream = DummyStream([b'hello', b' ', b'world'])\n    outfile = FlushCounter()\n    write_stream(stream, outfile, flush=True)\n    # The buffer of BytesIO is the BytesIO itself\n    assert outfile.getvalue() == b'hello world'\n    # flush should have been called after each chunk (3 times)\n    assert outfile.flush_calls == 3\n\n\ndef test_write_stream_without_buffer():\n    \"\"\"When the outfile lacks a buffer attribute, write_stream writes directly to it.\"\"\"\n    class SimpleWriter:\n        def __init__(self):\n            self.data = bytearray()\n            self.flushed = False\n\n        def write(self, chunk):\n            self.data.extend(chunk)\n\n        def flush(self):\n            self.flushed = True\n\n    stream = DummyStream([b'foo', b'bar'])\n    writer = SimpleWriter()\n    write_stream(stream, writer, flush=False)\n    assert writer.data == b'foobar'\n    assert not writer.flushed\n\n\ndef test_write_stream_flush_flag_false():\n    \"\"\"When flush flag is False, outfile.flush() is never called.\"\"\"\n    stream = DummyStream([b'abc', b'def'])\n    outfile = FlushCounter()\n    write_stream(stream, outfile, flush=False)\n    assert outfile.getvalue() == b'abcdef'\n    assert outfile.flush_calls == 0\n```",
+        "reasoning": "We need tests for write_stream. We can create a dummy BaseStream that yields bytes. Use BytesIO as outfile. Test that writes correctly, flush called. Use mock to check flush? Can't mock. Instead use a custom file-like that records flush calls. Use BytesIO and subclass to add flush counter. Also test when outfile has no buffer attribute: use StringIO? But write expects bytes, so use BytesIO. For no buffer, use a custom object with write method. Also test that if stream yields multiple chunks. Also test that flush flag works. Third test maybe error: if outfile has no buffer and write expects bytes? But we can test that it writes correctly. Provide three tests: normal with buffer, normal without buffer, flush behavior."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053026291,
+    "prompt_tokens": 419,
+    "prompt_time": 0.511558987,
+    "completion_tokens": 597,
+    "completion_time": 0.690567072,
+    "total_tokens": 1016,
+    "total_time": 1.202126059,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 153
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se0fameksvhshd5qe4mkph",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport pytest\nfrom httpie.output.writer import write_stream\nfrom httpie.output.streams import BaseStream\n\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields predefined byte chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def __iter__(self):\n        return iter(self._chunks)\n\n\nclass FlushCounter(io.BytesIO):\n    \"\"\"BytesIO that counts flush calls.\"\"\"\n    def __init__(self):\n        super().__init__()\n        self.flush_calls = 0\n\n    def flush(self):\n        self.flush_calls += 1\n        super().flush()\n\n\ndef test_write_stream_with_buffer_and_flush():\n    \"\"\"When the outfile has a buffer attribute, data is written to it and flush is called.\"\"\"\n    stream = DummyStream([b'hello', b' ', b'world'])\n    outfile = FlushCounter()\n    write_stream(stream, outfile, flush=True)\n    # The buffer of BytesIO is the BytesIO itself\n    assert outfile.getvalue() == b'hello world'\n    # flush should have been called after each chunk (3 times)\n    assert outfile.flush_calls == 3\n\n\ndef test_write_stream_without_buffer():\n    \"\"\"When the outfile lacks a buffer attribute, write_stream writes directly to it.\"\"\"\n    class SimpleWriter:\n        def __init__(self):\n            self.data = bytearray()\n            self.flushed = False\n\n        def write(self, chunk):\n            self.data.extend(chunk)\n\n        def flush(self):\n            self.flushed = True\n\n    stream = DummyStream([b'foo', b'bar'])\n    writer = SimpleWriter()\n    write_stream(stream, writer, flush=False)\n    assert writer.data == b'foobar'\n    assert not writer.flushed\n\n\ndef test_write_stream_flush_flag_false():\n    \"\"\"When flush flag is False, outfile.flush() is never called.\"\"\"\n    stream = DummyStream([b'abc', b'def'])\n    outfile = FlushCounter()\n    write_stream(stream, outfile, flush=False)\n    assert outfile.getvalue() == b'abcdef'\n    assert outfile.flush_calls == 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.6523945080116391
+}

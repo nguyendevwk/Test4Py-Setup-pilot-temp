@@ -1,0 +1,87 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_walla_ie_parses_expected_fields _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.walla__WallaIE__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walla_ie_parses_expected_0')
+sample_xml = <Element 'video' at 0x7f2e39d548b0>
+
+    def test_walla_ie_parses_expected_fields(tmp_path, sample_xml):
+        """Test that WallaIE extracts all expected fields correctly."""
+        # Monkeypatch _download_xml to return our sample XML
+        def fake_download_xml(self, url, display_id):
+            return sample_xml
+    
+        WallaIE._download_xml = fake_download_xml
+    
+        url = "http://vod.walla.co.il/movie/123456/sample-title"
+        extractor = WallaIE()
+>       result = extractor._real_extract(url)
+
+test_generated.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/walla.py:75: in _real_extract
+    self._sort_formats(formats)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1446: in _sort_formats
+    formats.sort(key=_formats_key)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = {'url': 'rtmp://wafla.walla.co.il/vod', 'play_path': 'playpath_720', 'player_url': 'http://isc.walla.co.il/w9/swf/video_swf/vod/WallaMediaPlayerAvod.swf', 'page_url': 'http://vod.walla.co.il/movie/123456/sample-title', ...}
+
+    def _formats_key(f):
+        # TODO remove the following workaround
+        from ..utils import determine_ext
+        if not f.get('ext') and 'url' in f:
+            f['ext'] = determine_ext(f['url'])
+    
+        if isinstance(field_preference, (list, tuple)):
+            return tuple(
+                f.get(field)
+                if f.get(field) is not None
+                else ('' if field == 'format_id' else -1)
+                for field in field_preference)
+    
+        preference = f.get('preference')
+        if preference is None:
+            preference = 0
+            if f.get('ext') in ['f4f', 'f4m']:  # Not yet supported
+                preference -= 0.5
+    
+        protocol = f.get('protocol') or determine_protocol(f)
+        proto_preference = 0 if protocol in ['http', 'https'] else (-0.5 if protocol == 'rtsp' else -0.1)
+    
+        if f.get('vcodec') == 'none':  # audio only
+            preference -= 50
+            if self._downloader.params.get('prefer_free_formats'):
+                ORDER = ['aac', 'mp3', 'm4a', 'webm', 'ogg', 'opus']
+            else:
+                ORDER = ['webm', 'opus', 'ogg', 'mp3', 'aac', 'm4a']
+            ext_preference = 0
+            try:
+                audio_ext_preference = ORDER.index(f['ext'])
+            except ValueError:
+                audio_ext_preference = -1
+        else:
+            if f.get('acodec') == 'none':  # video only
+                preference -= 40
+>           if self._downloader.params.get('prefer_free_formats'):
+E           AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1418: AttributeError
+_______________ test_walla_ie_handles_missing_subtitle_language ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.walla__WallaIE__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walla_ie_handles_missing_0')
+sample_xml = <Element 'video' at 0x7f2e39ddc360>
+
+    def test_walla_ie_handles_missing_subtitle_language(tmp_path, sample_xml):
+        """Test that subtitles with an unmapped language are kept as-is."""
+        # Remove Hebrew subtitle to force unmapped language
+        for sub in sample_xml.findall(".//subtitle"):
+            if sub.find("title").text == "עברית":
+>               sample_xml.remove(sub)
+E               ValueError: list.remove(x): x not in list
+
+test_generated.py:91: ValueError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_walla_ie_parses_expected_fields - AttributeErr...
+FAILED test_generated.py::test_walla_ie_handles_missing_subtitle_language - V...
+2 failed, 1 passed in 1.49s

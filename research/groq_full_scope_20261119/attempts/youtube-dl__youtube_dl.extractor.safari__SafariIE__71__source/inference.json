@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-5f81cb8b-fa8a-429f-a331-2bf1f53dc2c4",
+  "object": "chat.completion",
+  "created": 1795079016,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.extractor.safari import SafariIE\nfrom youtube_dl.utils import ExtractorError\n\n@pytest.fixture\ndef extractor():\n    return SafariIE()\n\ndef test_safari_valid_extraction(extractor, monkeypatch):\n    # Patch network calls to avoid real HTTP requests\n    monkeypatch.setattr(extractor, \"_download_webpage_handle\", lambda url, video_id: (\"<html></html>\", type('Mock', (), {'geturl': lambda self: url})()))\n    monkeypatch.setattr(extractor, \"_search_regex\", lambda *args, **kwargs: \"dummy\")\n    monkeypatch.setattr(extractor, \"_download_json\", lambda *args, **kwargs: None)\n    result = extractor.extract_info(\n        \"https://www.safaribooksonline.com/library/view/hadoop-fundamentals-livelessons/9780133392838/part00.html\",\n        download=False)\n    assert result['id'] == '0_qbqx90ic'\n    assert result['ext'] == 'mp4'\n    assert result['title'] == 'Introduction to Hadoop Fundamentals LiveLessons'\n    assert result['timestamp'] == 1437758058\n    assert result['upload_date'] == '20150724'\n    assert result['uploader_id'] == 'stork'\n    assert result['_type'] == 'url_transparent'\n    assert result['ie_key'] == 'Kaltura'\n    assert result['url'].startswith('https://cdnapisec.kaltura.com/html5/html5lib/v2.37.1/mwEmbedFrame.php')\n\ndef test_safari_non_digit_course_id_only_matching(extractor):\n    url = \"https://www.safaribooksonline.com/library/view/create-a-nodejs/100000006A0210/part00.html\"\n    assert extractor.suitable(url) is True\n    with pytest.raises(ExtractorError):\n        extractor.extract_info(url, download=False)\n\ndef test_safari_invalid_url_raises(extractor):\n    url = \"https://example.com/not-a-safari-url\"\n    assert extractor.suitable(url) is False\n    with pytest.raises(ExtractorError):\n        extractor.extract_info(url, download=False)\n```",
+        "reasoning": "We need three tests: normal extraction, boundary (non-digit course id only_matching), error? maybe invalid URL raises ExtractorError. Use youtube_dl extractor? We can instantiate SafariIE and call .suitable and .extract_info? Use .suitable? Use .extract_info? In youtube_dl, use .extract_info(url, download=False). We'll test that for valid URL returns expected id. Also test that for non-digit course id only_matching returns suitable True but extract_info raises? Actually only_matching means extractor should match but not extract? In tests, only_matching indicates extractor should match but not extract? In youtube_dl, extract_info will raise ExtractorError if not supported? Actually if only_matching, the extractor should not extract. But we can test that extract_info raises ExtractorError for that URL. Third test boundary: maybe passing a URL that doesn't match should raise ExtractorError. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053316005,
+    "prompt_tokens": 1314,
+    "prompt_time": 0.076145064,
+    "completion_tokens": 647,
+    "completion_time": 0.723744096,
+    "total_tokens": 1961,
+    "total_time": 0.79988916,
+    "completion_tokens_details": {
+      "reasoning_tokens": 184
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgr3nqeravth70hyervh50",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.extractor.safari import SafariIE\nfrom youtube_dl.utils import ExtractorError\n\n@pytest.fixture\ndef extractor():\n    return SafariIE()\n\ndef test_safari_valid_extraction(extractor, monkeypatch):\n    # Patch network calls to avoid real HTTP requests\n    monkeypatch.setattr(extractor, \"_download_webpage_handle\", lambda url, video_id: (\"<html></html>\", type('Mock', (), {'geturl': lambda self: url})()))\n    monkeypatch.setattr(extractor, \"_search_regex\", lambda *args, **kwargs: \"dummy\")\n    monkeypatch.setattr(extractor, \"_download_json\", lambda *args, **kwargs: None)\n    result = extractor.extract_info(\n        \"https://www.safaribooksonline.com/library/view/hadoop-fundamentals-livelessons/9780133392838/part00.html\",\n        download=False)\n    assert result['id'] == '0_qbqx90ic'\n    assert result['ext'] == 'mp4'\n    assert result['title'] == 'Introduction to Hadoop Fundamentals LiveLessons'\n    assert result['timestamp'] == 1437758058\n    assert result['upload_date'] == '20150724'\n    assert result['uploader_id'] == 'stork'\n    assert result['_type'] == 'url_transparent'\n    assert result['ie_key'] == 'Kaltura'\n    assert result['url'].startswith('https://cdnapisec.kaltura.com/html5/html5lib/v2.37.1/mwEmbedFrame.php')\n\ndef test_safari_non_digit_course_id_only_matching(extractor):\n    url = \"https://www.safaribooksonline.com/library/view/create-a-nodejs/100000006A0210/part00.html\"\n    assert extractor.suitable(url) is True\n    with pytest.raises(ExtractorError):\n        extractor.extract_info(url, download=False)\n\ndef test_safari_invalid_url_raises(extractor):\n    url = \"https://example.com/not-a-safari-url\"\n    assert extractor.suitable(url) is False\n    with pytest.raises(ExtractorError):\n        extractor.extract_info(url, download=False)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2141689090058208
+}

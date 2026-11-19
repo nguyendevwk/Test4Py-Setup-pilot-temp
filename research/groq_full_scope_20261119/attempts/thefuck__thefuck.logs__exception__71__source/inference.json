@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-24e869a0-90a5-44f9-a21f-4822d290f761",
+  "object": "chat.completion",
+  "created": 1795079464,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport io\nimport traceback\nimport pytest\nfrom thefuck.logs import exception\n\ndef capture_stderr(func, *args, **kwargs):\n    \"\"\"Utility to capture sys.stderr output of a function.\"\"\"\n    old_stderr = sys.stderr\n    sys.stderr = io.StringIO()\n    try:\n        func(*args, **kwargs)\n        return sys.stderr.getvalue()\n    finally:\n        sys.stderr = old_stderr\n\ndef test_exception_outputs_trace_and_title():\n    \"\"\"The exception function should write the title and traceback to stderr.\"\"\"\n    exc_info = (ValueError, ValueError(\"boom\"), None)\n    output = capture_stderr(exception, \"TestTitle\", exc_info)\n    # Title should appear in the output\n    assert \"TestTitle\" in output\n    # Traceback should contain the exception message\n    assert \"ValueError: boom\" in output\n    # The separator line should be present\n    assert \"----------------------------\" in output\n\ndef test_exception_with_empty_title():\n    \"\"\"An empty title should still produce a formatted warning header.\"\"\"\n    exc_info = (RuntimeError, RuntimeError(\"oops\"), None)\n    output = capture_stderr(exception, \"\", exc_info)\n    # Even with empty title, the header line should be present\n    assert \"WARN\" in output\n    # The title placeholder should be empty but not cause errors\n    assert \"RuntimeError: oops\" in output\n\ndef test_exception_raises_on_invalid_exc_info():\n    \"\"\"Passing an invalid exc_info tuple should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        # exc_info must be a 3-tuple; passing a string triggers a TypeError\n        exception(\"Invalid\", \"not a tuple\")\n```",
+        "reasoning": "We need to test exception function. It writes to sys.stderr. We can capture stderr. Use tmp_path? Not needed. Just capture. Three tests: normal exception, boundary: empty title? error: passing non-exc_info? But function expects tuple. We can test that it writes correct format. Use contextmanager to capture stderr. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004435852,
+    "prompt_tokens": 340,
+    "prompt_time": 0.007319195,
+    "completion_tokens": 438,
+    "completion_time": 0.50270663,
+    "total_tokens": 778,
+    "total_time": 0.510025825,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 73
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh5s4ne6c87kvm9har1644",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport io\nimport traceback\nimport pytest\nfrom thefuck.logs import exception\n\ndef capture_stderr(func, *args, **kwargs):\n    \"\"\"Utility to capture sys.stderr output of a function.\"\"\"\n    old_stderr = sys.stderr\n    sys.stderr = io.StringIO()\n    try:\n        func(*args, **kwargs)\n        return sys.stderr.getvalue()\n    finally:\n        sys.stderr = old_stderr\n\ndef test_exception_outputs_trace_and_title():\n    \"\"\"The exception function should write the title and traceback to stderr.\"\"\"\n    exc_info = (ValueError, ValueError(\"boom\"), None)\n    output = capture_stderr(exception, \"TestTitle\", exc_info)\n    # Title should appear in the output\n    assert \"TestTitle\" in output\n    # Traceback should contain the exception message\n    assert \"ValueError: boom\" in output\n    # The separator line should be present\n    assert \"----------------------------\" in output\n\ndef test_exception_with_empty_title():\n    \"\"\"An empty title should still produce a formatted warning header.\"\"\"\n    exc_info = (RuntimeError, RuntimeError(\"oops\"), None)\n    output = capture_stderr(exception, \"\", exc_info)\n    # Even with empty title, the header line should be present\n    assert \"WARN\" in output\n    # The title placeholder should be empty but not cause errors\n    assert \"RuntimeError: oops\" in output\n\ndef test_exception_raises_on_invalid_exc_info():\n    \"\"\"Passing an invalid exc_info tuple should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        # exc_info must be a 3-tuple; passing a string triggers a TypeError\n        exception(\"Invalid\", \"not a tuple\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "035bab84517d42168cb67a52422f51be",
+  "_api_plus_pacing_seconds": 1.293183630972635
+}

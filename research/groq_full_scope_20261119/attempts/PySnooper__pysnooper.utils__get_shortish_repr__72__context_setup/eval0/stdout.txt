@@ -1,0 +1,44 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_get_shortish_repr_truncate ________________________
+
+    def test_get_shortish_repr_truncate():
+        long_str = "abcdefghijklmnopqrstuvwxyz"
+        # Truncate to 10 characters
+        truncated = get_shortish_repr(long_str, max_length=10)
+        # Should contain first 3 and last 3 characters with ellipsis
+>       assert truncated == "abc...xyz"
+E       assert "'ab...xyz'" == 'abc...xyz'
+E         
+E         - abc...xyz
+E         ?   -
+E         + 'ab...xyz'
+E         ? +        +
+
+test_generated.py:16: AssertionError
+_______________________ test_get_shortish_repr_normalize _______________________
+
+    def test_get_shortish_repr_normalize():
+        # Create an object with a default repr containing a memory address
+        class Dummy:
+            def __repr__(self):
+                return f"<Dummy at 0x1234abcd>"
+        dummy = Dummy()
+        # Without normalization, address remains
+        raw = get_shortish_repr(dummy)
+        assert "0x1234abcd" in raw
+        # With normalization, address is removed
+        normalized = get_shortish_repr(dummy, normalize=True)
+        assert "0x1234abcd" not in normalized
+>       assert normalized == "<Dummy >"
+E       AssertionError: assert '<Dummy>' == '<Dummy >'
+E         
+E         - <Dummy >
+E         ?       -
+E         + <Dummy>
+
+test_generated.py:32: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_shortish_repr_truncate - assert "'ab...xyz...
+FAILED test_generated.py::test_get_shortish_repr_normalize - AssertionError: ...
+2 failed, 1 passed in 0.12s

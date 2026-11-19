@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-6e511970-cb79-46e7-a189-4f74a0dcc84c",
+  "object": "chat.completion",
+  "created": 1795079182,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport typed_ast.ast3 as ast\nfrom py_backwards.transformers.python2_future import Python2FutureTransformer\n\n\ndef _parse_code(code: str) -> ast.Module:\n    \"\"\"Parse source code into a typed_ast Module node.\"\"\"\n    return ast.parse(code, mode=\"exec\")\n\n\ndef test_adds_future_imports():\n    \"\"\"The transformer should prepend the four __future__ imports.\"\"\"\n    transformer = Python2FutureTransformer()\n    module = _parse_code(\"\")  # empty module\n    transformed = transformer.visit_Module(module)\n\n    # The first four nodes should be ImportFrom from \"__future__\"\n    expected_names = [\n        \"absolute_import\",\n        \"division\",\n        \"print_function\",\n        \"unicode_literals\",\n    ]\n    actual_names = [\n        node.names[0].name for node in transformed.body[:4]\n    ]\n    assert actual_names == expected_names\n    # The rest of the body should remain unchanged (empty)\n    assert len(transformed.body) == 4\n\n\ndef test_tree_changed_flag():\n    \"\"\"The transformer should set the _tree_changed flag when visiting a module.\"\"\"\n    transformer = Python2FutureTransformer()\n    module = _parse_code(\"x = 1\")\n    transformer.visit_Module(module)\n    assert transformer._tree_changed is True\n\n\ndef test_preserves_existing_body():\n    \"\"\"Existing module body should be preserved after adding imports.\"\"\"\n    code = \"def foo():\\n    return 42\\n\"\n    transformer = Python2FutureTransformer()\n    module = _parse_code(code)\n    transformed = transformer.visit_Module(module)\n\n    # After the four imports, the original function definition should follow\n    assert isinstance(transformed.body[4], ast.FunctionDef)\n    assert transformed.body[4].name == \"foo\"\n    # The function body should contain a single Return node\n    assert isinstance(transformed.body[4].body[0], ast.Return)\n    assert transformed.body[4].body[0].value.n == 42\n```",
+        "reasoning": "We need to write tests for Python2FutureTransformer. We need to import it. Use typed_ast ast3. We can create a simple module AST, run transformer, check that imports added. Use tmp_path? Not needed. Just test AST. Use snippet to create code? snippet probably returns AST from code string. Let's inspect snippet? Not available. But we can use ast.parse from typed_ast? Use typed_ast.ast3.parse. Let's import typed_ast.ast3 as ast. Use ast.parse. Then apply transformer. Check that first nodes are ImportFrom with module '__future__' and names. Ensure order. Also test that tree_changed flag set. Also test that if module already has imports? But transformer always prepends. So test that body length increased by 4. Third test maybe error: passing non-Module? But visit_Module only. Could test that visiting other node returns unchanged. But we need three independent tests. Let's do:\n\n1. test_adds_future_imports: create empty module, transform, assert first 4 nodes are ImportFrom with names.\n\n2. test_tree_changed_flag: after transform, transformer._tree_changed True.\n\n3. test_existing_imports preserved: create module with some code, ensure body after transform has imports at top and original body after.\n\nImplement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048815935,
+    "prompt_tokens": 415,
+    "prompt_time": 0.082458145,
+    "completion_tokens": 679,
+    "completion_time": 0.780480403,
+    "total_tokens": 1094,
+    "total_time": 0.862938548,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 263
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgx53ve4mb9b54mvgm8da5",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport typed_ast.ast3 as ast\nfrom py_backwards.transformers.python2_future import Python2FutureTransformer\n\n\ndef _parse_code(code: str) -> ast.Module:\n    \"\"\"Parse source code into a typed_ast Module node.\"\"\"\n    return ast.parse(code, mode=\"exec\")\n\n\ndef test_adds_future_imports():\n    \"\"\"The transformer should prepend the four __future__ imports.\"\"\"\n    transformer = Python2FutureTransformer()\n    module = _parse_code(\"\")  # empty module\n    transformed = transformer.visit_Module(module)\n\n    # The first four nodes should be ImportFrom from \"__future__\"\n    expected_names = [\n        \"absolute_import\",\n        \"division\",\n        \"print_function\",\n        \"unicode_literals\",\n    ]\n    actual_names = [\n        node.names[0].name for node in transformed.body[:4]\n    ]\n    assert actual_names == expected_names\n    # The rest of the body should remain unchanged (empty)\n    assert len(transformed.body) == 4\n\n\ndef test_tree_changed_flag():\n    \"\"\"The transformer should set the _tree_changed flag when visiting a module.\"\"\"\n    transformer = Python2FutureTransformer()\n    module = _parse_code(\"x = 1\")\n    transformer.visit_Module(module)\n    assert transformer._tree_changed is True\n\n\ndef test_preserves_existing_body():\n    \"\"\"Existing module body should be preserved after adding imports.\"\"\"\n    code = \"def foo():\\n    return 42\\n\"\n    transformer = Python2FutureTransformer()\n    module = _parse_code(code)\n    transformed = transformer.visit_Module(module)\n\n    # After the four imports, the original function definition should follow\n    assert isinstance(transformed.body[4], ast.FunctionDef)\n    assert transformed.body[4].name == \"foo\"\n    # The function body should contain a single Return node\n    assert isinstance(transformed.body[4].body[0], ast.Return)\n    assert transformed.body[4].body[0].value.n == 42\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.294915275007952
+}

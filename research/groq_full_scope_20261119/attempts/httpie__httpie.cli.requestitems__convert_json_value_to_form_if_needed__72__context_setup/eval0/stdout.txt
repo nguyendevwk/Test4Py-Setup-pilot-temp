@@ -1,0 +1,28 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_non_json_mode_with_complex_value_or_error ________________
+
+    def test_non_json_mode_with_complex_value_or_error():
+        """When not in JSON mode, complex values or ParseError raise ParseError."""
+        # Processor that returns a complex type (dict)
+        def complex_processor(arg):
+            return {"a": 1}
+    
+        wrapped_complex = convert_json_value_to_form_if_needed(False, complex_processor)
+        with pytest.raises(ParseError, match="Cannot use complex JSON value types"):
+            wrapped_complex("ignored")
+    
+        # Processor that raises ParseError
+        def error_processor(arg):
+            raise ParseError("original error")
+    
+        wrapped_error = convert_json_value_to_form_if_needed(False, error_processor)
+>       with pytest.raises(ParseError, match="original error"):
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'original error'
+E         Actual message: 'Cannot use complex JSON value types with --form/--multipart.'
+
+test_generated.py:44: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_non_json_mode_with_complex_value_or_error - As...
+1 failed, 2 passed in 0.75s

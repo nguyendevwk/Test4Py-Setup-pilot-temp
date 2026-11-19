@@ -1,0 +1,48 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_normalize_absolute_and_relative _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__normalize_path__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_normalize_absolute_and_re0')
+
+    def test_normalize_absolute_and_relative(tmp_path):
+        # Create a nested directory structure
+        nested = tmp_path / "a" / "b" / "c"
+        nested.mkdir(parents=True)
+        # Relative path with redundant separators and up-level references
+        rel_path = os.path.join("a", "b", "c", "..", "d")
+        # Normalize and check that the result is absolute and correct
+        result = normalize_path(rel_path)
+        expected = tmp_path / "a" / "b" / "d"
+>       assert result == expected
+E       AssertionError: assert PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__normalize_path__71__verified_setup/eval0/a/b/d') == PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__normalize_path__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_normalize_absolute_and_re0/a/b/d')
+
+test_generated.py:17: AssertionError
+_______________________ test_normalize_with_user_and_env _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__normalize_path__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_normalize_with_user_and_e0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcecb0f5f30>
+
+    def test_normalize_with_user_and_env(tmp_path, monkeypatch):
+        # Set a fake home directory for the current user
+        fake_home = tmp_path / "home_user"
+        fake_home.mkdir()
+        monkeypatch.setenv("HOME", str(fake_home))
+        # Create a file in the fake home directory
+        file_in_home = fake_home / "file.txt"
+        file_in_home.touch()
+        # Set an environment variable that points to the file
+        monkeypatch.setenv("MYFILE", str(file_in_home))
+        # Path containing ~ and an env variable
+        path_with_vars = "~/file.txt:$MYFILE"
+        # Normalize and verify that both ~ and $MYFILE are expanded correctly
+        result = normalize_path(path_with_vars)
+        # The result should be the absolute path to the file in the fake home
+        expected = fake_home / "file.txt"
+>       assert result == expected
+E       AssertionError: assert PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils_...alize_path__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_normalize_with_user_and_e0/home_user/file.txt') == PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils_...alize_path__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_normalize_with_user_and_e0/home_user/file.txt')
+
+test_generated.py:38: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normalize_absolute_and_relative - AssertionErr...
+FAILED test_generated.py::test_normalize_with_user_and_env - AssertionError: ...
+2 failed, 1 passed in 0.13s

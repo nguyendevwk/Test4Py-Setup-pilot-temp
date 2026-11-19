@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-ecbad20f-d535-481d-a0e9-5dbd33ce459d",
+  "object": "chat.completion",
+  "created": 1795076600,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport warnings\nimport pytest\nfrom dataclasses import dataclass, field\nfrom typing import Optional, Union, List\nfrom datetime import datetime\nfrom uuid import UUID\nfrom dataclasses_json.mm import build_type, TYPES\nfrom marshmallow import Schema, fields\n\n# Helper dataclasses for testing\n@dataclass\nclass Inner:\n    x: int\n\n@dataclass\nclass Outer:\n    inner: Inner\n    maybe: Optional[int]\n    union: Union[int, str]\n    lst: List[int]\n\n# Dummy mixin to satisfy _issubclass_safe check\nclass DummyMixin:\n    pass\n\ndef test_nested_dataclass_field():\n    \"\"\"Test that a nested dataclass field returns a Nested field.\"\"\"\n    # Build field for Outer.inner\n    inner_field = build_type(Inner, {}, DummyMixin, field(Inner), Outer)\n    assert isinstance(inner_field, fields.Nested)\n    # Ensure that the nested schema is correctly set\n    assert inner_field.schema.__class__ == Inner.schema().__class__\n    # Check that field_many is False for a single nested object\n    assert not inner_field.field_many\n\ndef test_optional_and_list_fields():\n    \"\"\"Test that optional and list types are handled correctly.\"\"\"\n    # Optional[int] should set allow_none=True\n    opt_field = build_type(Optional[int], {}, DummyMixin, field(Optional[int]), Outer)\n    assert isinstance(opt_field, fields.Int)\n    assert opt_field.allow_none is True\n\n    # List[int] should return a List field with Int as inner\n    list_field = build_type(List[int], {}, DummyMixin, field(List[int]), Outer)\n    assert isinstance(list_field, fields.List)\n    assert isinstance(list_field.inner, fields.Int)\n\ndef test_union_field_serialization_and_deserialization():\n    \"\"\"Test that Union fields serialize and deserialize correctly.\"\"\"\n    # Build Union field for Outer.union\n    union_field = build_type(Union[int, str], {}, DummyMixin, field(Union[int, str]), Outer)\n    assert isinstance(union_field, type(TYPES[typing.Union]))\n\n    # Serialize an int value\n    serialized_int = union_field._serialize(42, 'union', Outer())\n    assert serialized_int == 42\n\n    # Serialize a str value\n    serialized_str = union_field._serialize(\"hello\", 'union', Outer())\n    assert serialized_str == \"hello\"\n\n    # Deserialize an int value\n    deserialized_int = union_field._deserialize(99, 'union', {})\n    assert deserialized_int == 99\n\n    # Deserialize a str value\n    deserialized_str = union_field._deserialize(\"world\", 'union', {})\n    assert deserialized_str == \"world\"\n```",
+        "reasoning": "We need three test functions testing build_type behavior. Use tmp_path? Not needed. We'll create simple dataclasses and use build_type. Test nested dataclass, optional, union. Use assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.15940006,
+    "prompt_tokens": 1789,
+    "prompt_time": 0.10839534,
+    "completion_tokens": 596,
+    "completion_time": 0.664300958,
+    "total_tokens": 2385,
+    "total_time": 0.772696298,
+    "completion_tokens_details": {
+      "reasoning_tokens": 40
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7seebqge0f8gdbypbmfthg9",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport warnings\nimport pytest\nfrom dataclasses import dataclass, field\nfrom typing import Optional, Union, List\nfrom datetime import datetime\nfrom uuid import UUID\nfrom dataclasses_json.mm import build_type, TYPES\nfrom marshmallow import Schema, fields\n\n# Helper dataclasses for testing\n@dataclass\nclass Inner:\n    x: int\n\n@dataclass\nclass Outer:\n    inner: Inner\n    maybe: Optional[int]\n    union: Union[int, str]\n    lst: List[int]\n\n# Dummy mixin to satisfy _issubclass_safe check\nclass DummyMixin:\n    pass\n\ndef test_nested_dataclass_field():\n    \"\"\"Test that a nested dataclass field returns a Nested field.\"\"\"\n    # Build field for Outer.inner\n    inner_field = build_type(Inner, {}, DummyMixin, field(Inner), Outer)\n    assert isinstance(inner_field, fields.Nested)\n    # Ensure that the nested schema is correctly set\n    assert inner_field.schema.__class__ == Inner.schema().__class__\n    # Check that field_many is False for a single nested object\n    assert not inner_field.field_many\n\ndef test_optional_and_list_fields():\n    \"\"\"Test that optional and list types are handled correctly.\"\"\"\n    # Optional[int] should set allow_none=True\n    opt_field = build_type(Optional[int], {}, DummyMixin, field(Optional[int]), Outer)\n    assert isinstance(opt_field, fields.Int)\n    assert opt_field.allow_none is True\n\n    # List[int] should return a List field with Int as inner\n    list_field = build_type(List[int], {}, DummyMixin, field(List[int]), Outer)\n    assert isinstance(list_field, fields.List)\n    assert isinstance(list_field.inner, fields.Int)\n\ndef test_union_field_serialization_and_deserialization():\n    \"\"\"Test that Union fields serialize and deserialize correctly.\"\"\"\n    # Build Union field for Outer.union\n    union_field = build_type(Union[int, str], {}, DummyMixin, field(Union[int, str]), Outer)\n    assert isinstance(union_field, type(TYPES[typing.Union]))\n\n    # Serialize an int value\n    serialized_int = union_field._serialize(42, 'union', Outer())\n    assert serialized_int == 42\n\n    # Serialize a str value\n    serialized_str = union_field._serialize(\"hello\", 'union', Outer())\n    assert serialized_str == \"hello\"\n\n    # Deserialize an int value\n    deserialized_int = union_field._deserialize(99, 'union', {})\n    assert deserialized_int == 99\n\n    # Deserialize a str value\n    deserialized_str = union_field._deserialize(\"world\", 'union', {})\n    assert deserialized_str == \"world\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.230588874022942
+}

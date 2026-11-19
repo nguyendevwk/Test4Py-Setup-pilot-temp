@@ -1,0 +1,36 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_real_extract_with_stubs _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.nrk__NRKPlaylistBaseIE__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_real_extract_with_stubs0')
+
+    def test_real_extract_with_stubs(tmp_path):
+        ie = NRKPlaylistBaseIE()
+    
+        # Stub the helper methods and attributes
+        ie._match_id = lambda url: "12345"
+        ie._download_webpage = lambda url, playlist_id: (
+            f'<div class="video" data-id="vid1"></div>'
+            f'<div class="video" data-id="vid2"></div>'
+        )
+        ie._ITEM_RE = r'data-id="([^"]+)"'
+        ie._extract_title = lambda webpage: "Test Playlist"
+        ie._extract_description = lambda webpage: "A description"
+    
+        # The IE key for NRKIE is not needed for the test; we just check the structure
+        result = ie._real_extract("https://example.com/playlist/12345")
+    
+        # Verify that the result is a playlist dict with expected fields
+>       assert result["entries"] == [
+            {"url": "nrk:vid1", "ie_key": "NRKIE"},
+            {"url": "nrk:vid2", "ie_key": "NRKIE"},
+        ]
+E       AssertionError: assert [{'_type': 'u..._key': 'NRK'}] == [{'url': 'nrk...ey': 'NRKIE'}]
+E         
+E         At index 0 diff: {'_type': 'url', 'url': 'nrk:vid1', 'ie_key': 'NRK'} != {'url': 'nrk:vid1', 'ie_key': 'NRKIE'}
+E         Use -v to get more diff
+
+test_generated.py:28: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_real_extract_with_stubs - AssertionError: asse...
+1 failed, 2 passed in 0.74s

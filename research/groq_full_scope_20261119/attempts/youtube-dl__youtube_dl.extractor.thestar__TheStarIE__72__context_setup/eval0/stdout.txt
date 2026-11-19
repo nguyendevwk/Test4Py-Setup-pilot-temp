@@ -1,0 +1,67 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_real_extract_success ___________________________
+
+    def test_real_extract_success():
+        """_real_extract should return a Brightcove URL when the brightcove id is present."""
+        class DummyTheStarIE(TheStarIE):
+            def _download_webpage(self, url, display_id, note=None, errnote=None, timeout=None, *, data=None, headers=None, query=None, ext=None, ie_key=None, **kw):
+                # Return a minimal webpage containing the brightcove id
+                return '<script>var mainartBrightcoveVideoId="1234567890";</script>'
+    
+        dummy = DummyTheStarIE()
+>       result = dummy._real_extract("http://www.thestar.com/example.html")
+
+test_generated.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/thestar.py:31: in _real_extract
+    brightcove_id = self._search_regex(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.test_real_extract_success.<locals>.DummyTheStarIE object at 0x7f5529419f30>
+pattern = 'mainartBrightcoveVideoId["\\\']?\\s*:\\s*["\\\']?(\\d+)'
+string = '<script>var mainartBrightcoveVideoId="1234567890";</script>'
+name = 'brightcove id', default = <object object at 0x7f552a78a060>
+fatal = True, flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+_________________________ test_real_extract_missing_id _________________________
+
+    def test_real_extract_missing_id():
+        """_real_extract should raise ExtractorError when brightcove id is not found."""
+        class DummyTheStarIE(TheStarIE):
+            def _download_webpage(self, url, display_id, note=None, errnote=None, timeout=None, *, data=None, headers=None, query=None, ext=None, ie_key=None, **kw):
+                # Return a webpage without the brightcove id
+                return "<html><body>No video here</body></html>"
+    
+        dummy = DummyTheStarIE()
+        with pytest.raises(Exception) as excinfo:
+            dummy._real_extract("http://www.thestar.com/no-video.html")
+>       assert "brightcove id" in str(excinfo.value)
+E       assert 'brightcove id' in "'NoneType' object has no attribute 'params'"
+E        +  where "'NoneType' object has no attribute 'params'" = str(AttributeError("'NoneType' object has no attribute 'params'"))
+E        +    where AttributeError("'NoneType' object has no attribute 'params'") = <ExceptionInfo AttributeError("'NoneType' object has no attribute 'params'") tblen=3>.value
+
+test_generated.py:39: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_real_extract_success - AttributeError: 'NoneTy...
+FAILED test_generated.py::test_real_extract_missing_id - assert 'brightcove i...
+2 failed, 1 passed in 1.34s

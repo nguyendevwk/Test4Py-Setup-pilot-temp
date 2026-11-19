@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-00b8fbe7-cc49-4909-a8c8-9ba126714458",
+  "object": "chat.completion",
+  "created": 1795076439,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport os\nimport importlib\nimport pytest\nfrom apimd.loader import gen_api, _site_path\n\n# Helper to create a minimal package with a single module\ndef create_pkg(tmp_path, name, content=\"\"):\n    pkg_dir = tmp_path / name\n    pkg_dir.mkdir()\n    (pkg_dir / \"__init__.py\").write_text(\"\")\n    (pkg_dir / \"module.py\").write_text(content)\n    return pkg_dir\n\ndef test_gen_api_writes_markdown(tmp_path, caplog):\n    # Create a simple package with a docstring\n    pkg_dir = create_pkg(tmp_path, \"demo_pkg\", '\"\"\"Demo package docstring.\"\"\"')\n    sys.path.insert(0, str(tmp_path))\n    try:\n        docs = gen_api({\"Demo\": \"demo_pkg\"}, prefix=str(tmp_path / \"docs\"))\n        # One markdown file should be created\n        md_path = tmp_path / \"docs\" / \"demo-pkg-api.md\"\n        assert md_path.is_file()\n        content = md_path.read_text()\n        # The content should contain the title and the docstring\n        assert \"# Demo API\" in content\n        assert \"Demo package docstring.\" in content\n        # gen_api returns the compiled docs\n        assert len(docs) == 1\n        assert \"Demo package docstring.\" in docs[0]\n    finally:\n        sys.path.pop(0)\n\ndef test_gen_api_dry_run(tmp_path, caplog):\n    # Create a package with a simple function\n    pkg_dir = create_pkg(tmp_path, \"dry_pkg\", \"def foo():\\n    '''Foo docstring.'''\\n    pass\")\n    sys.path.insert(0, str(tmp_path))\n    try:\n        docs = gen_api({\"Dry\": \"dry_pkg\"}, prefix=str(tmp_path / \"docs\"), dry=True)\n        # No file should be written\n        assert not (tmp_path / \"docs\" / \"dry-pkg-api.md\").exists()\n        # The returned docs should contain the function docstring\n        assert any(\"Foo docstring.\" in d for d in docs)\n    finally:\n        sys.path.pop(0)\n\ndef test_gen_api_missing_package(tmp_path, caplog):\n    # Call with a non-existent package name\n    with caplog.at_level(\"WARNING\"):\n        docs = gen_api({\"Missing\": \"nonexistent_pkg\"}, prefix=str(tmp_path / \"docs\"))\n    # No docs should be returned\n    assert docs == []\n    # Warning should be logged\n    assert any(\"can not be found\" in rec.message for rec in caplog.records)\n```",
+        "reasoning": "Need tests for gen_api. Use tmp_path to create dummy package with .py files. Use simple Parser? But Parser is imported from .parser. We can't modify. We can create a dummy package in tmp_path, add to sys.path. Then call gen_api with root_names pointing to that package. Expect markdown file created. Also test dry flag returns docs without writing. Third test error: non-existent package leads to warning and no doc. Use caplog to capture logs."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048361691,
+    "prompt_tokens": 1271,
+    "prompt_time": 0.063799006,
+    "completion_tokens": 646,
+    "completion_time": 0.732460526,
+    "total_tokens": 1917,
+    "total_time": 0.796259532,
+    "completion_tokens_details": {
+      "reasoning_tokens": 97
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se9f0webpt1jnaghp2x1kb",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport os\nimport importlib\nimport pytest\nfrom apimd.loader import gen_api, _site_path\n\n# Helper to create a minimal package with a single module\ndef create_pkg(tmp_path, name, content=\"\"):\n    pkg_dir = tmp_path / name\n    pkg_dir.mkdir()\n    (pkg_dir / \"__init__.py\").write_text(\"\")\n    (pkg_dir / \"module.py\").write_text(content)\n    return pkg_dir\n\ndef test_gen_api_writes_markdown(tmp_path, caplog):\n    # Create a simple package with a docstring\n    pkg_dir = create_pkg(tmp_path, \"demo_pkg\", '\"\"\"Demo package docstring.\"\"\"')\n    sys.path.insert(0, str(tmp_path))\n    try:\n        docs = gen_api({\"Demo\": \"demo_pkg\"}, prefix=str(tmp_path / \"docs\"))\n        # One markdown file should be created\n        md_path = tmp_path / \"docs\" / \"demo-pkg-api.md\"\n        assert md_path.is_file()\n        content = md_path.read_text()\n        # The content should contain the title and the docstring\n        assert \"# Demo API\" in content\n        assert \"Demo package docstring.\" in content\n        # gen_api returns the compiled docs\n        assert len(docs) == 1\n        assert \"Demo package docstring.\" in docs[0]\n    finally:\n        sys.path.pop(0)\n\ndef test_gen_api_dry_run(tmp_path, caplog):\n    # Create a package with a simple function\n    pkg_dir = create_pkg(tmp_path, \"dry_pkg\", \"def foo():\\n    '''Foo docstring.'''\\n    pass\")\n    sys.path.insert(0, str(tmp_path))\n    try:\n        docs = gen_api({\"Dry\": \"dry_pkg\"}, prefix=str(tmp_path / \"docs\"), dry=True)\n        # No file should be written\n        assert not (tmp_path / \"docs\" / \"dry-pkg-api.md\").exists()\n        # The returned docs should contain the function docstring\n        assert any(\"Foo docstring.\" in d for d in docs)\n    finally:\n        sys.path.pop(0)\n\ndef test_gen_api_missing_package(tmp_path, caplog):\n    # Call with a non-existent package name\n    with caplog.at_level(\"WARNING\"):\n        docs = gen_api({\"Missing\": \"nonexistent_pkg\"}, prefix=str(tmp_path / \"docs\"))\n    # No docs should be returned\n    assert docs == []\n    # Warning should be logged\n    assert any(\"can not be found\" in rec.message for rec in caplog.records)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.162276070972439
+}

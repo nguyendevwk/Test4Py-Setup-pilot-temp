@@ -1,0 +1,40 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_constant_string_evaluation ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.parser__Resolver__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_constant_string_evaluatio0')
+
+    def test_constant_string_evaluation(tmp_path):
+        # A string constant that is a valid expression should be replaced
+        src = "x = '1 + 2'"
+        result = transform(src, root="mymod", alias={}, self_ty="")
+>       assert result.strip() == "x = 3"
+E       AssertionError: assert 'x = 1 + 2' == 'x = 3'
+E         
+E         - x = 3
+E         + x = 1 + 2
+
+test_generated.py:17: AssertionError
+______________________ test_subscript_pep585_and_optional ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.parser__Resolver__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_subscript_pep585_and_opti0')
+
+    def test_subscript_pep585_and_optional(tmp_path):
+        # PEP585 deprecated name should be replaced with the modern equivalent
+        src = "c: typing.List[int]"
+        alias = {"mymod.typing.List": "typing.List"}
+        result = transform(src, root="mymod", alias=alias, self_ty="")
+        assert "typing.List[int]" in result  # unchanged because alias maps to same
+    
+        # Optional conversion: typing.Optional[int] -> int | None
+        src = "d: typing.Optional[int]"
+        alias = {"mymod.typing.Optional": "typing.Optional"}
+        result = transform(src, root="mymod", alias=alias, self_ty="")
+>       assert "int | None" in result
+E       AssertionError: assert 'int | None' in 'd: typing.Optional[int]'
+
+test_generated.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_constant_string_evaluation - AssertionError: a...
+FAILED test_generated.py::test_subscript_pep585_and_optional - AssertionError...
+2 failed, 1 passed in 0.16s

@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-4f993a53-9a55-45ed-8923-42ceab178c79",
+  "object": "chat.completion",
+  "created": 1795079371,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.formatters.headers import HeadersFormatter\n\n\ndef test_headers_sorting_and_stability(tmp_path):\n    \"\"\"HeadersFormatter should sort headers by name while preserving the order of\n    headers with the same name.\"\"\"\n    formatter = HeadersFormatter(format_options={\"headers\": {\"sort\": True}})\n    raw_headers = (\n        \"HTTP/1.1 200 OK\\n\"\n        \"b: second\\n\"\n        \"a: first\\n\"\n        \"b: third\\n\"\n        \"c: last\\n\"\n    )\n    expected = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"a: first\\r\\n\"\n        \"b: second\\r\\n\"\n        \"b: third\\r\\n\"\n        \"c: last\"\n    )\n    assert formatter.format_headers(raw_headers) == expected\n    assert formatter.enabled is True\n\n\ndef test_headers_empty_input(tmp_path):\n    \"\"\"An empty string should return an empty string without errors.\"\"\"\n    formatter = HeadersFormatter(format_options={\"headers\": {\"sort\": True}})\n    assert formatter.format_headers(\"\") == \"\"\n\n\ndef test_headers_invalid_input_raises_type_error(tmp_path):\n    \"\"\"Passing a non-string should raise a TypeError.\"\"\"\n    formatter = HeadersFormatter(format_options={\"headers\": {\"sort\": True}})\n    with pytest.raises(TypeError):\n        formatter.format_headers(None)\n```",
+        "reasoning": "We need to test HeadersFormatter. It inherits FormatterPlugin; but we can instantiate. Need to test normal sorting, boundary (empty headers), error (invalid format?). The format_headers expects string with first line maybe status line? It splits lines, sorts from second line. We'll test that. Also test that enabled flag set based on format_options. We need to provide format_options. Let's create instance with format_options={'headers':{'sort':True}}. Then test. Also test when sort False? But class sets enabled accordingly. But format_headers still sorts regardless? It doesn't check enabled. But we can test that enabled flag is set correctly.\n\nTest 1: normal sorting: input with unsorted header names, multiple same name. Expect sorted order but same name relative order preserved.\n\nTest 2: boundary: empty headers string? lines empty? splitlines returns []. lines[:1] empty. sorted([]) empty. join returns ''. Should be ''. Test.\n\nTest 3: error: header line missing colon? It will split and key lambda h.split(':')[0] works. But if header line empty? maybe raise? We'll test that passing header with no colon still returns unchanged? Actually sorting will use whole string. No error. Maybe test that passing None raises TypeError. But format_headers expects str. So passing None should raise TypeError. We'll test that.\n\nLet's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047162595,
+    "prompt_tokens": 338,
+    "prompt_time": 0.044430762,
+    "completion_tokens": 567,
+    "completion_time": 0.721252886,
+    "total_tokens": 905,
+    "total_time": 0.765683648,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 281
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sh2y5ye5ea1bgmwfmem3x6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.formatters.headers import HeadersFormatter\n\n\ndef test_headers_sorting_and_stability(tmp_path):\n    \"\"\"HeadersFormatter should sort headers by name while preserving the order of\n    headers with the same name.\"\"\"\n    formatter = HeadersFormatter(format_options={\"headers\": {\"sort\": True}})\n    raw_headers = (\n        \"HTTP/1.1 200 OK\\n\"\n        \"b: second\\n\"\n        \"a: first\\n\"\n        \"b: third\\n\"\n        \"c: last\\n\"\n    )\n    expected = (\n        \"HTTP/1.1 200 OK\\r\\n\"\n        \"a: first\\r\\n\"\n        \"b: second\\r\\n\"\n        \"b: third\\r\\n\"\n        \"c: last\"\n    )\n    assert formatter.format_headers(raw_headers) == expected\n    assert formatter.enabled is True\n\n\ndef test_headers_empty_input(tmp_path):\n    \"\"\"An empty string should return an empty string without errors.\"\"\"\n    formatter = HeadersFormatter(format_options={\"headers\": {\"sort\": True}})\n    assert formatter.format_headers(\"\") == \"\"\n\n\ndef test_headers_invalid_input_raises_type_error(tmp_path):\n    \"\"\"Passing a non-string should raise a TypeError.\"\"\"\n    formatter = HeadersFormatter(format_options={\"headers\": {\"sort\": True}})\n    with pytest.raises(TypeError):\n        formatter.format_headers(None)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "032cf99f50ab4a3f991cf75fe26002b1",
+  "_api_plus_pacing_seconds": 2.09378552302951
+}

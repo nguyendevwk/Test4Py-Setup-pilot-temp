@@ -1,0 +1,51 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_proxy_error_with_code_and_msg ______________________
+
+    def test_proxy_error_with_code_and_msg():
+        """ProxyError should store the provided code and message."""
+        code = 42
+        msg = "custom error message"
+        err = ProxyError(code, msg)
+        # socket.error stores args as (code, msg)
+        assert err.args == (code, msg)
+        # The string representation should include the message
+>       assert str(err) == f"{code}: {msg}"
+E       AssertionError: assert '[Errno 42] c...error message' == '42: custom error message'
+E         
+E         - 42: custom error message
+E         ?   ^
+E         + [Errno 42] custom error message
+E         ? +++++++  ^
+
+test_generated.py:14: AssertionError
+______________ test_proxy_error_code_only_uses_mapping_or_default ______________
+
+    def test_proxy_error_code_only_uses_mapping_or_default():
+        """When only a code is provided, ProxyError should use the CODES mapping
+        if present, otherwise default to 'unknown error'."""
+        # Determine if the module defines a CODES mapping
+        codes = getattr(ProxyError, "CODES", {})
+        # Pick a code that is unlikely to be in the mapping
+        test_code = 9999
+        if test_code in codes:
+            expected_msg = codes[test_code]
+        else:
+            expected_msg = "unknown error"
+>       err = ProxyError(test_code)
+
+test_generated.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ProxyError(), code = 9999, msg = None
+
+    def __init__(self, code=None, msg=None):
+        if code is not None and msg is None:
+>           msg = self.CODES.get(code) or 'unknown error'
+E           AttributeError: 'ProxyError' object has no attribute 'CODES'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/socks.py:63: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_proxy_error_with_code_and_msg - AssertionError...
+FAILED test_generated.py::test_proxy_error_code_only_uses_mapping_or_default
+2 failed, 1 passed in 0.93s

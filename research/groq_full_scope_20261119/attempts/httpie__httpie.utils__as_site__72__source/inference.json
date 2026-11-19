@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-49ec1b6f-cc1a-4653-90a3-09c6aaec1ab0",
+  "object": "chat.completion",
+  "created": 1795079381,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sysconfig\nimport pytest\nfrom pathlib import Path\nfrom httpie.utils import as_site\n\ndef test_as_site_basic(tmp_path):\n    \"\"\"as_site should return the site-packages path relative to the given base.\"\"\"\n    # Create a temporary directory to act as the base\n    base = tmp_path / \"myproject\"\n    base.mkdir()\n    # Call as_site with the base directory\n    result = as_site(base)\n    # The result should be a Path object\n    assert isinstance(result, Path)\n    # The result should be the same as sysconfig's purelib path with the base overridden\n    expected = Path(sysconfig.get_path('purelib', vars={'base': str(base)}))\n    assert result == expected\n    # The result should be inside the base directory\n    assert str(result).startswith(str(base))\n\ndef test_as_site_with_extra_vars(tmp_path):\n    \"\"\"as_site should honor extra_vars passed to sysconfig.get_path.\"\"\"\n    base = tmp_path / \"project\"\n    base.mkdir()\n    # Use an extra variable to change the layout\n    result = as_site(base, layout=\"lib\")\n    # The returned path should reflect the 'layout' variable\n    expected = Path(sysconfig.get_path('purelib', vars={'base': str(base), 'layout': 'lib'}))\n    assert result == expected\n    # Ensure that the layout variable actually changed the path\n    assert \"lib\" in str(result)\n\ndef test_as_site_invalid_input():\n    \"\"\"Passing a non-Path object should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        as_site(123)  # int is not a valid Path argument\n```",
+        "reasoning": "We need to test as_site. It uses sysconfig.get_path('purelib', vars={'base': str(path), **extra_vars}). We can test that given a path, it returns correct site-packages path. Use tmp_path. Also test that extra_vars override base? Actually vars dict passed to get_path. We can test that passing extra_vars changes result. Also test error behavior: if path not Path? But function expects Path. Could test passing string raises? It will convert to str in vars. But get_path expects base string. Might still work. But we can test that passing non-Path raises TypeError? Actually Path is used only in str conversion. So maybe test that passing Path returns Path object. Also test that returned path is inside site-packages directory. Use sysconfig.get_path('purelib') to get expected. Let's write three tests: test_as_site_basic, test_as_site_with_extra_vars, test_as_site_invalid_input. For invalid input, maybe passing None raises TypeError when converting to str? str(None) works. But get_path may error. Let's simulate by passing a Path that doesn't exist? get_path uses base to construct path. It may still return a path. Hard to error. Maybe test that passing a Path with non-existent base still returns Path. So maybe test that passing a Path that is not a directory still returns Path. Hard.\n\nMaybe test that passing a Path that is a file? It still returns path. So error scenario: passing a non-Path object like integer leads to TypeError when constructing Path? Actually Path expects string, bytes, int? Path(5) raises TypeError. So test that passing int raises TypeError. Use pytest.raises(TypeError). Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.12006396,
+    "prompt_tokens": 362,
+    "prompt_time": 0.041202229,
+    "completion_tokens": 707,
+    "completion_time": 1.004623831,
+    "total_tokens": 1069,
+    "total_time": 1.04582606,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 353
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh372keecaafyq92pm4fdy",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sysconfig\nimport pytest\nfrom pathlib import Path\nfrom httpie.utils import as_site\n\ndef test_as_site_basic(tmp_path):\n    \"\"\"as_site should return the site-packages path relative to the given base.\"\"\"\n    # Create a temporary directory to act as the base\n    base = tmp_path / \"myproject\"\n    base.mkdir()\n    # Call as_site with the base directory\n    result = as_site(base)\n    # The result should be a Path object\n    assert isinstance(result, Path)\n    # The result should be the same as sysconfig's purelib path with the base overridden\n    expected = Path(sysconfig.get_path('purelib', vars={'base': str(base)}))\n    assert result == expected\n    # The result should be inside the base directory\n    assert str(result).startswith(str(base))\n\ndef test_as_site_with_extra_vars(tmp_path):\n    \"\"\"as_site should honor extra_vars passed to sysconfig.get_path.\"\"\"\n    base = tmp_path / \"project\"\n    base.mkdir()\n    # Use an extra variable to change the layout\n    result = as_site(base, layout=\"lib\")\n    # The returned path should reflect the 'layout' variable\n    expected = Path(sysconfig.get_path('purelib', vars={'base': str(base), 'layout': 'lib'}))\n    assert result == expected\n    # Ensure that the layout variable actually changed the path\n    assert \"lib\" in str(result)\n\ndef test_as_site_invalid_input():\n    \"\"\"Passing a non-Path object should raise a TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        as_site(123)  # int is not a valid Path argument\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "aca5f733b2694e4ca78d253a8454d8ec",
+  "_api_plus_pacing_seconds": 1.6663830879842862
+}

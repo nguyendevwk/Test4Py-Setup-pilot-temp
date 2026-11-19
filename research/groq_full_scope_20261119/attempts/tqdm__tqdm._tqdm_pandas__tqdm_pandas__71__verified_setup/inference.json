@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-026b4e9a-04e0-4750-813f-32f0c18c6018",
+  "object": "chat.completion",
+  "created": 1795076698,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport warnings\nimport sys\nimport types\nimport pytest\n\nfrom tqdm._tqdm_pandas import tqdm_pandas\n\n\ndef test_tqdm_pandas_with_class_triggers_deprecation_and_calls_pandas(tmp_path):\n    \"\"\"Passing a class with a name starting with 'tqdm_' should trigger the\n    deprecation warning and call the class's pandas method.\"\"\"\n    class DummyTqdm:\n        called = False\n\n        @classmethod\n        def pandas(cls, **kwargs):\n            cls.called = True\n            cls.kwargs = kwargs\n\n    # Capture warnings\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        tqdm_pandas(DummyTqdm, desc=\"test\", file=sys.stderr)\n\n        # Verify deprecation warning was issued\n        assert any(\n            issubclass(exc.category, UserWarning) and\n            \"Please use `tqdm.pandas(...)`\" in str(exc.message)\n            for exc in w\n        ), \"Expected deprecation warning not found\"\n\n    # Verify pandas was called with the provided kwargs\n    assert DummyTqdm.called is True\n    assert DummyTqdm.kwargs == {\"desc\": \"test\", \"file\": sys.stderr}\n\n\ndef test_tqdm_pandas_with_instance_triggers_deprecation_and_calls_pandas(tmp_path):\n    \"\"\"Passing an instance with a 'fp' attribute should trigger the\n    deprecation warning and call the instance's class pandas method.\"\"\"\n    class DummyTqdm:\n        called = False\n\n        @classmethod\n        def pandas(cls, **kwargs):\n            cls.called = True\n            cls.kwargs = kwargs\n\n    instance = DummyTqdm()\n    instance.fp = sys.stderr\n\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        tqdm_pandas(instance, total=10)\n\n        # Verify deprecation warning was issued\n        assert any(\n            issubclass(exc.category, UserWarning) and\n            \"Please use `tqdm.pandas(...)`\" in str(exc.message)\n            for exc in w\n        ), \"Expected deprecation warning not found\"\n\n    # Verify pandas was called on the class of the instance\n    assert DummyTqdm.called is True\n    assert DummyTqdm.kwargs == {\"total\": 10}\n\n\ndef test_tqdm_pandas_with_nonclass_and_noninstance_raises_attribute_error():\n    \"\"\"Passing an object that is neither a class nor an instance with a 'fp'\n    attribute should raise an AttributeError when accessing 'fp'.\"\"\"\n    class Dummy:\n        pass\n\n    dummy = Dummy()\n    # dummy has no 'fp' attribute; accessing it should raise AttributeError\n    with pytest.raises(AttributeError):\n        tqdm_pandas(dummy, total=5)\n```",
+        "reasoning": "We need to test tqdm_pandas function. It uses TqdmDeprecationWarning from tqdm. We can import tqdm_pandas from tqdm._tqdm_pandas. We'll test normal case: passing a class with __name__ starting 'tqdm_' triggers first branch. We need to mock TqdmDeprecationWarning to capture message. But cannot mock target. But we can subclass? Actually TqdmDeprecationWarning is a class that when called logs warning. We can capture warnings via warnings.catch_warnings. Use warnings.simplefilter('always'). Then call tqdm_pandas with a dummy class that has pandas method. Check that pandas called. Also check warning message. For boundary: passing an instance of class with fp attribute. Use dummy instance. For error: passing something not class or instance? The function doesn't raise. Maybe test that passing a non-class triggers else branch. Use dummy instance with fp attribute. Ensure pandas called on type(tclass). We'll check that. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052248612,
+    "prompt_tokens": 450,
+    "prompt_time": 0.023186487,
+    "completion_tokens": 797,
+    "completion_time": 0.877374502,
+    "total_tokens": 1247,
+    "total_time": 0.900560989,
+    "completion_tokens_details": {
+      "reasoning_tokens": 207
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sehbfqekhtd40c8pnrbwyc",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport warnings\nimport sys\nimport types\nimport pytest\n\nfrom tqdm._tqdm_pandas import tqdm_pandas\n\n\ndef test_tqdm_pandas_with_class_triggers_deprecation_and_calls_pandas(tmp_path):\n    \"\"\"Passing a class with a name starting with 'tqdm_' should trigger the\n    deprecation warning and call the class's pandas method.\"\"\"\n    class DummyTqdm:\n        called = False\n\n        @classmethod\n        def pandas(cls, **kwargs):\n            cls.called = True\n            cls.kwargs = kwargs\n\n    # Capture warnings\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        tqdm_pandas(DummyTqdm, desc=\"test\", file=sys.stderr)\n\n        # Verify deprecation warning was issued\n        assert any(\n            issubclass(exc.category, UserWarning) and\n            \"Please use `tqdm.pandas(...)`\" in str(exc.message)\n            for exc in w\n        ), \"Expected deprecation warning not found\"\n\n    # Verify pandas was called with the provided kwargs\n    assert DummyTqdm.called is True\n    assert DummyTqdm.kwargs == {\"desc\": \"test\", \"file\": sys.stderr}\n\n\ndef test_tqdm_pandas_with_instance_triggers_deprecation_and_calls_pandas(tmp_path):\n    \"\"\"Passing an instance with a 'fp' attribute should trigger the\n    deprecation warning and call the instance's class pandas method.\"\"\"\n    class DummyTqdm:\n        called = False\n\n        @classmethod\n        def pandas(cls, **kwargs):\n            cls.called = True\n            cls.kwargs = kwargs\n\n    instance = DummyTqdm()\n    instance.fp = sys.stderr\n\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        tqdm_pandas(instance, total=10)\n\n        # Verify deprecation warning was issued\n        assert any(\n            issubclass(exc.category, UserWarning) and\n            \"Please use `tqdm.pandas(...)`\" in str(exc.message)\n            for exc in w\n        ), \"Expected deprecation warning not found\"\n\n    # Verify pandas was called on the class of the instance\n    assert DummyTqdm.called is True\n    assert DummyTqdm.kwargs == {\"total\": 10}\n\n\ndef test_tqdm_pandas_with_nonclass_and_noninstance_raises_attribute_error():\n    \"\"\"Passing an object that is neither a class nor an instance with a 'fp'\n    attribute should raise an AttributeError when accessing 'fp'.\"\"\"\n    class Dummy:\n        pass\n\n    dummy = Dummy()\n    # dummy has no 'fp' attribute; accessing it should raise AttributeError\n    with pytest.raises(AttributeError):\n        tqdm_pandas(dummy, total=5)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2667613480007276
+}

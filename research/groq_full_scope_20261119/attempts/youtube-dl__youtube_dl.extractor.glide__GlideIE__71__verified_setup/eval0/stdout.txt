@@ -1,0 +1,171 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_normal_extraction ____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f358e06bbe0>
+
+    def test_normal_extraction(monkeypatch):
+        """Test normal extraction with all fields present."""
+        # Prepare a fake webpage containing title, video source and thumbnail
+        fake_webpage = (
+            '<html><head><title>Damon\'s Glide message</title></head>'
+            '<body>'
+            '<video><source src="https://cdn.example.com/video.mp4" type="video/mp4"></video>'
+            '<img id="video-thumbnail" src="https://cdn.example.com/thumb.jpg">'
+            '</body></html>'
+        )
+    
+        # Monkeypatch the download and search helpers
+        monkeypatch.setattr(GlideIE, "_download_webpage", lambda self, url, video_id: fake_webpage)
+        monkeypatch.setattr(GlideIE, "_match_id", lambda self, url: "UZF8zlmuQbe4mr+7dCiQ0w==")
+        monkeypatch.setattr(GlideIE, "_proto_relative_url", lambda self, url: url)
+    
+        ie = GlideIE()
+>       result = ie._real_extract("http://share.glide.me/UZF8zlmuQbe4mr+7dCiQ0w==")
+
+test_generated.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/glide.py:26: in _real_extract
+    title = self._html_search_regex(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1021: in _html_search_regex
+    res = self._search_regex(pattern, string, name, default, fatal, flags, group)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.glide.GlideIE object at 0x7f358e06bf70>
+pattern = '<title>(.+?)</title>'
+string = '<html><head><title>Damon\'s Glide message</title></head><body><video><source src="https://cdn.example.com/video.mp4" type="video/mp4"></video><img id="video-thumbnail" src="https://cdn.example.com/thumb.jpg"></body></html>'
+name = 'title', default = None, fatal = True, flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+_________________________ test_missing_title_fallback __________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f358d0841c0>
+
+    def test_missing_title_fallback(monkeypatch):
+        """Test that the title falls back to og title when <title> is missing."""
+        fake_webpage = (
+            '<html><head>'
+            '<meta property="og:title" content="OG Title">'
+            '</head>'
+            '<body>'
+            '<video><source src="https://cdn.example.com/video.mp4"></video>'
+            '<img id="video-thumbnail" src="https://cdn.example.com/thumb.jpg">'
+            '</body></html>'
+        )
+    
+        monkeypatch.setattr(GlideIE, "_download_webpage", lambda self, url, video_id: fake_webpage)
+        monkeypatch.setattr(GlideIE, "_match_id", lambda self, url: "id123")
+        monkeypatch.setattr(GlideIE, "_proto_relative_url", lambda self, url: url)
+    
+        ie = GlideIE()
+>       result = ie._real_extract("http://share.glide.me/id123")
+
+test_generated.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/glide.py:26: in _real_extract
+    title = self._html_search_regex(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1021: in _html_search_regex
+    res = self._search_regex(pattern, string, name, default, fatal, flags, group)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.glide.GlideIE object at 0x7f358d084250>
+pattern = '<title>(.+?)</title>'
+string = '<html><head><meta property="og:title" content="OG Title"></head><body><video><source src="https://cdn.example.com/video.mp4"></video><img id="video-thumbnail" src="https://cdn.example.com/thumb.jpg"></body></html>'
+name = 'title', default = None, fatal = True, flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+_______________________ test_missing_video_url_fallback ________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f358cf57dc0>
+
+    def test_missing_video_url_fallback(monkeypatch):
+        """Test that the video URL falls back to og video URL when <source> is missing."""
+        fake_webpage = (
+            '<html><head>'
+            '<meta property="og:video" content="https://cdn.example.com/og_video.mp4">'
+            '</head>'
+            '<body>'
+            '<img id="video-thumbnail" src="https://cdn.example.com/thumb.jpg">'
+            '</body></html>'
+        )
+    
+        monkeypatch.setattr(GlideIE, "_download_webpage", lambda self, url, video_id: fake_webpage)
+        monkeypatch.setattr(GlideIE, "_match_id", lambda self, url: "id456")
+        monkeypatch.setattr(GlideIE, "_proto_relative_url", lambda self, url: url)
+    
+        ie = GlideIE()
+>       result = ie._real_extract("http://share.glide.me/id456")
+
+test_generated.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/glide.py:26: in _real_extract
+    title = self._html_search_regex(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1021: in _html_search_regex
+    res = self._search_regex(pattern, string, name, default, fatal, flags, group)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.glide.GlideIE object at 0x7f358cf57d30>
+pattern = '<title>(.+?)</title>'
+string = '<html><head><meta property="og:video" content="https://cdn.example.com/og_video.mp4"></head><body><img id="video-thumbnail" src="https://cdn.example.com/thumb.jpg"></body></html>'
+name = 'title', default = None, fatal = True, flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normal_extraction - AttributeError: 'NoneType'...
+FAILED test_generated.py::test_missing_title_fallback - AttributeError: 'None...
+FAILED test_generated.py::test_missing_video_url_fallback - AttributeError: '...
+3 failed in 2.01s

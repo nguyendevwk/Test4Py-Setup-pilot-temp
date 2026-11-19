@@ -1,0 +1,36 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_timedelta_parse_normal __________________________
+
+    def test_timedelta_parse_normal():
+        # Normal case with all components
+        td = timedelta_parse("2:30:15:500000")
+        assert td == datetime_module.timedelta(hours=2, minutes=30, seconds=15, microseconds=500000)
+        # Verify individual attributes
+>       assert td.total_seconds() == 2 * 3600 + 30 * 60 + 15
+E       assert 9015.5 == (((2 * 3600) + (30 * 60)) + 15)
+E        +  where 9015.5 = <built-in method total_seconds of datetime.timedelta object at 0x7f83c65d0b40>()
+E        +    where <built-in method total_seconds of datetime.timedelta object at 0x7f83c65d0b40> = datetime.timedelta(seconds=9015, microseconds=500000).total_seconds
+
+test_generated.py:10: AssertionError
+_____________________ test_timedelta_parse_boundary_values _____________________
+
+    def test_timedelta_parse_boundary_values():
+        # Boundary case: zero values
+        td_zero = timedelta_parse("0:0:0:0")
+        assert td_zero == datetime_module.timedelta(0)
+        # Large values that still fit in int
+        td_large = timedelta_parse("1000:59:59:999999")
+        assert td_large == datetime_module.timedelta(hours=1000, minutes=59, seconds=59, microseconds=999999)
+        # Check that the total seconds match expected calculation
+        expected_seconds = 1000 * 3600 + 59 * 60 + 59
+>       assert td_large.total_seconds() == expected_seconds
+E       assert 3603599.999999 == 3603599
+E        +  where 3603599.999999 = <built-in method total_seconds of datetime.timedelta object at 0x7f83c65d3cf0>()
+E        +    where <built-in method total_seconds of datetime.timedelta object at 0x7f83c65d3cf0> = datetime.timedelta(days=41, seconds=61199, microseconds=999999).total_seconds
+
+test_generated.py:22: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_timedelta_parse_normal - assert 9015.5 == (((2...
+FAILED test_generated.py::test_timedelta_parse_boundary_values - assert 36035...
+2 failed, 1 passed in 0.11s

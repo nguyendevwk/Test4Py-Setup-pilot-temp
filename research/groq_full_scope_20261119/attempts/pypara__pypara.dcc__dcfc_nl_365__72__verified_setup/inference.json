@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-cbab52f6-0747-4d53-8ae3-14b2e8da469e",
+  "object": "chat.completion",
+  "created": 1795076183,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport decimal\nimport pytest\n\nfrom pypara.dcc import dcfc_nl_365\n\n# Helper to round Decimal to a given precision for comparison\ndef round_dec(value: decimal.Decimal, places: int) -> decimal.Decimal:\n    return value.quantize(decimal.Decimal(f\"1.{'0'*places}\"))\n\ndef test_normal_examples():\n    # Example 1 from docstring\n    ex1_start = datetime.date(2007, 12, 28)\n    ex1_asof = datetime.date(2008, 2, 28)\n    result1 = dcfc_nl_365(start=ex1_start, asof=ex1_asof, end=ex1_asof)\n    assert round_dec(result1, 14) == decimal.Decimal('0.16986301369863')\n\n    # Example 2 from docstring (leap day)\n    ex2_start = datetime.date(2007, 12, 28)\n    ex2_asof = datetime.date(2008, 2, 29)\n    result2 = dcfc_nl_365(start=ex2_start, asof=ex2_asof, end=ex2_asof)\n    assert round_dec(result2, 14) == decimal.Decimal('0.16986301369863')\n\n    # Example 3 from docstring\n    ex3_start = datetime.date(2007, 10, 31)\n    ex3_asof = datetime.date(2008, 11, 30)\n    result3 = dcfc_nl_365(start=ex3_start, asof=ex3_asof, end=ex3_asof)\n    assert round_dec(result3, 14) == decimal.Decimal('1.08219178082192')\n\ndef test_boundary_leap_year_transition():\n    # Start on Feb 28 of a leap year, asof on Mar 1 of the same year\n    start = datetime.date(2020, 2, 28)\n    asof = datetime.date(2020, 3, 1)\n    # Actual days: 2, but one leap day adjustment subtracts 1 => 1 day\n    result = dcfc_nl_365(start=start, asof=asof, end=asof)\n    assert round_dec(result, 14) == decimal.Decimal('0.00273972602740')  # 1/365\n\n    # Start on Feb 28 of a non-leap year, asof on Mar 1\n    start_nonleap = datetime.date(2019, 2, 28)\n    asof_nonleap = datetime.date(2019, 3, 1)\n    # No leap day adjustment\n    result_nonleap = dcfc_nl_365(start=start_nonleap, asof=asof_nonleap, end=asof_nonleap)\n    assert round_dec(result_nonleap, 14) == decimal.Decimal('0.00547945205479')  # 2/365\n\ndef test_zero_and_invalid_inputs():\n    # asof equal to start should yield zero fraction\n    start = datetime.date(2021, 5, 15)\n    asof = start\n    result_zero = dcfc_nl_365(start=start, asof=asof, end=asof)\n    assert result_zero == decimal.Decimal('0')\n\n    # asof before start should still compute negative fraction\n    start_future = datetime.date(2022, 1, 1)\n    asof_past = datetime.date(2021, 12, 31)\n    result_negative = dcfc_nl_365(start=start_future, asof=asof_past, end=asof_past)\n    # Actual days difference is -1, no leap day adjustment\n    assert round_dec(result_negative, 14) == decimal.Decimal('-0.00273972602740')\n```",
+        "reasoning": "We need to test dcfc_nl_365. Need import. Use Date type from .commons.zeitgeist. Likely alias to datetime.date. We'll just use datetime.date. The function uses _get_actual_day_count and _has_leap_day which are internal. We can test normal, boundary, error. Error: maybe asof before start? Let's test that it handles leap day correctly. Use examples. Also test that freq param ignored. Third test: asof equal start? Should be zero. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052172169,
+    "prompt_tokens": 765,
+    "prompt_time": 0.07001845,
+    "completion_tokens": 938,
+    "completion_time": 1.073727697,
+    "total_tokens": 1703,
+    "total_time": 1.1437461469999999,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 107
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se1m90e0hv7g3yr2dxytdv",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport decimal\nimport pytest\n\nfrom pypara.dcc import dcfc_nl_365\n\n# Helper to round Decimal to a given precision for comparison\ndef round_dec(value: decimal.Decimal, places: int) -> decimal.Decimal:\n    return value.quantize(decimal.Decimal(f\"1.{'0'*places}\"))\n\ndef test_normal_examples():\n    # Example 1 from docstring\n    ex1_start = datetime.date(2007, 12, 28)\n    ex1_asof = datetime.date(2008, 2, 28)\n    result1 = dcfc_nl_365(start=ex1_start, asof=ex1_asof, end=ex1_asof)\n    assert round_dec(result1, 14) == decimal.Decimal('0.16986301369863')\n\n    # Example 2 from docstring (leap day)\n    ex2_start = datetime.date(2007, 12, 28)\n    ex2_asof = datetime.date(2008, 2, 29)\n    result2 = dcfc_nl_365(start=ex2_start, asof=ex2_asof, end=ex2_asof)\n    assert round_dec(result2, 14) == decimal.Decimal('0.16986301369863')\n\n    # Example 3 from docstring\n    ex3_start = datetime.date(2007, 10, 31)\n    ex3_asof = datetime.date(2008, 11, 30)\n    result3 = dcfc_nl_365(start=ex3_start, asof=ex3_asof, end=ex3_asof)\n    assert round_dec(result3, 14) == decimal.Decimal('1.08219178082192')\n\ndef test_boundary_leap_year_transition():\n    # Start on Feb 28 of a leap year, asof on Mar 1 of the same year\n    start = datetime.date(2020, 2, 28)\n    asof = datetime.date(2020, 3, 1)\n    # Actual days: 2, but one leap day adjustment subtracts 1 => 1 day\n    result = dcfc_nl_365(start=start, asof=asof, end=asof)\n    assert round_dec(result, 14) == decimal.Decimal('0.00273972602740')  # 1/365\n\n    # Start on Feb 28 of a non-leap year, asof on Mar 1\n    start_nonleap = datetime.date(2019, 2, 28)\n    asof_nonleap = datetime.date(2019, 3, 1)\n    # No leap day adjustment\n    result_nonleap = dcfc_nl_365(start=start_nonleap, asof=asof_nonleap, end=asof_nonleap)\n    assert round_dec(result_nonleap, 14) == decimal.Decimal('0.00547945205479')  # 2/365\n\ndef test_zero_and_invalid_inputs():\n    # asof equal to start should yield zero fraction\n    start = datetime.date(2021, 5, 15)\n    asof = start\n    result_zero = dcfc_nl_365(start=start, asof=asof, end=asof)\n    assert result_zero == decimal.Decimal('0')\n\n    # asof before start should still compute negative fraction\n    start_future = datetime.date(2022, 1, 1)\n    asof_past = datetime.date(2021, 12, 31)\n    result_negative = dcfc_nl_365(start=start_future, asof=asof_past, end=asof_past)\n    # Actual days difference is -1, no leap day adjustment\n    assert round_dec(result_negative, 14) == decimal.Decimal('-0.00273972602740')\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5455815609893762
+}

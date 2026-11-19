@@ -1,0 +1,49 @@
+import pytest
+from pycg.machinery.imports import get_custom_loader
+
+class DummyImportManager:
+    def __init__(self):
+        self.edges = []
+        self.nodes = {}
+        self.filepaths = {}
+        self.create_node_calls = 0
+
+    def create_edge(self, fullname):
+        self.edges.append(fullname)
+
+    def get_node(self, fullname):
+        return self.nodes.get(fullname)
+
+    def create_node(self, fullname):
+        self.create_node_calls += 1
+        self.nodes[fullname] = {}
+
+    def set_filepath(self, fullname, path):
+        self.filepaths[fullname] = path
+
+def test_get_custom_loader_behavior():
+    ig = DummyImportManager()
+    fullname = "pkg.module"
+    path1 = "/path/to/module.py"
+
+    Loader = get_custom_loader(ig)
+    loader1 = Loader(fullname, path1)
+
+    assert ig.edges == [fullname]
+    assert ig.nodes == {fullname: {}}
+    assert ig.filepaths[fullname] == path1
+    assert ig.create_node_calls == 1
+    assert loader1.get_filename(fullname) == path1
+    assert loader1.get_data(path1) == ""
+
+    ig2 = DummyImportManager()
+    ig2.create_node(fullname)
+    ig2.set_filepath(fullname, "/old/path")
+    Loader2 = get_custom_loader(ig2)
+    loader2 = Loader2(fullname, path1)
+
+    assert ig2.edges == [fullname]
+    assert ig2.filepaths[fullname] == path1
+    assert ig2.create_node_calls == 1
+    assert loader2.get_filename(fullname) == path1
+    assert loader2.get_data(path1) == ""

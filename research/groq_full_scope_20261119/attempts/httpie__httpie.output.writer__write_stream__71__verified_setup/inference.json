@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-16145b26-9d36-4532-9372-78500c604af9",
+  "object": "chat.completion",
+  "created": 1795076139,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport pytest\nfrom httpie.output.writer import write_stream\nfrom httpie.output.streams import BaseStream\n\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields predefined byte chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def __iter__(self):\n        return iter(self._chunks)\n\n\nclass FlushCounterBytesIO(io.BytesIO):\n    \"\"\"BytesIO that counts how many times flush() is called.\"\"\"\n    def __init__(self, *args, **kwargs):\n        super().__init__(*args, **kwargs)\n        self.flush_calls = 0\n\n    def flush(self):\n        self.flush_calls += 1\n        super().flush()\n\n\ndef test_write_stream_writes_bytes_to_buffer(tmp_path):\n    \"\"\"write_stream should write all chunks to a binary buffer.\"\"\"\n    # Prepare a stream that yields three byte chunks\n    chunks = [b'hello', b' ', b'world']\n    stream = DummyStream(chunks)\n\n    # Use a BytesIO as the output file\n    outfile = io.BytesIO()\n\n    # Call write_stream without flushing\n    write_stream(stream, outfile, flush=False)\n\n    # The buffer should contain the concatenated chunks\n    outfile.seek(0)\n    assert outfile.read() == b'hello world'\n\n\ndef test_write_stream_flushes_when_requested(tmp_path):\n    \"\"\"write_stream should call flush on the output file when flush=True.\"\"\"\n    # Prepare a stream that yields a single byte chunk\n    stream = DummyStream([b'abc'])\n\n    # Use a custom BytesIO that counts flush calls\n    outfile = FlushCounterBytesIO()\n\n    # Call write_stream with flush=True\n    write_stream(stream, outfile, flush=True)\n\n    # The buffer should contain the chunk\n    outfile.seek(0)\n    assert outfile.read() == b'abc'\n\n    # flush() should have been called exactly once\n    assert outfile.flush_calls == 1\n\n\ndef test_write_stream_raises_on_text_stream(tmp_path):\n    \"\"\"write_stream should raise a TypeError when given a text stream that cannot accept bytes.\"\"\"\n    # Prepare a stream that yields a single byte chunk\n    stream = DummyStream([b'xyz'])\n\n    # Use a StringIO which expects str, not bytes\n    outfile = io.StringIO()\n\n    # write_stream should raise a TypeError because StringIO.write expects str\n    with pytest.raises(TypeError):\n        write_stream(stream, outfile, flush=False)\n```",
+        "reasoning": "We need to test write_stream. It writes chunks from stream to outfile.buffer or outfile. We can create a dummy BaseStream that yields bytes. Use tmp_path to create file. Test that bytes written correctly. Also test when outfile has no buffer attribute (like StringIO). Also test flush behavior: when flush True, outfile.flush called. Use mock? Can't mock target. But we can create a custom file-like object that records flush calls. Use io.BytesIO for buffer. For text stream, use io.StringIO but write bytes? It will accept bytes? Actually write_stream writes bytes to buf. For StringIO, buffer attribute missing, so buf=outfile. Then buf.write(chunk) where chunk is bytes; StringIO expects str, will error. So test that passing a text stream raises TypeError. But we can test that it writes to BytesIO. Also test that flush True triggers flush. Use a custom class with flush method that records. Use BytesIO with flush? BytesIO has flush method. So we can check that flush called. Use monkeypatch? Not needed. Just check that after write_stream, BytesIO content matches. For flush, we can subclass BytesIO to count flush calls. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.069619682,
+    "prompt_tokens": 419,
+    "prompt_time": 0.029004617,
+    "completion_tokens": 767,
+    "completion_time": 0.879046053,
+    "total_tokens": 1186,
+    "total_time": 0.90805067,
+    "completion_tokens_details": {
+      "reasoning_tokens": 248
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se095fecks5wcwk541pr7a",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport pytest\nfrom httpie.output.writer import write_stream\nfrom httpie.output.streams import BaseStream\n\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields predefined byte chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def __iter__(self):\n        return iter(self._chunks)\n\n\nclass FlushCounterBytesIO(io.BytesIO):\n    \"\"\"BytesIO that counts how many times flush() is called.\"\"\"\n    def __init__(self, *args, **kwargs):\n        super().__init__(*args, **kwargs)\n        self.flush_calls = 0\n\n    def flush(self):\n        self.flush_calls += 1\n        super().flush()\n\n\ndef test_write_stream_writes_bytes_to_buffer(tmp_path):\n    \"\"\"write_stream should write all chunks to a binary buffer.\"\"\"\n    # Prepare a stream that yields three byte chunks\n    chunks = [b'hello', b' ', b'world']\n    stream = DummyStream(chunks)\n\n    # Use a BytesIO as the output file\n    outfile = io.BytesIO()\n\n    # Call write_stream without flushing\n    write_stream(stream, outfile, flush=False)\n\n    # The buffer should contain the concatenated chunks\n    outfile.seek(0)\n    assert outfile.read() == b'hello world'\n\n\ndef test_write_stream_flushes_when_requested(tmp_path):\n    \"\"\"write_stream should call flush on the output file when flush=True.\"\"\"\n    # Prepare a stream that yields a single byte chunk\n    stream = DummyStream([b'abc'])\n\n    # Use a custom BytesIO that counts flush calls\n    outfile = FlushCounterBytesIO()\n\n    # Call write_stream with flush=True\n    write_stream(stream, outfile, flush=True)\n\n    # The buffer should contain the chunk\n    outfile.seek(0)\n    assert outfile.read() == b'abc'\n\n    # flush() should have been called exactly once\n    assert outfile.flush_calls == 1\n\n\ndef test_write_stream_raises_on_text_stream(tmp_path):\n    \"\"\"write_stream should raise a TypeError when given a text stream that cannot accept bytes.\"\"\"\n    # Prepare a stream that yields a single byte chunk\n    stream = DummyStream([b'xyz'])\n\n    # Use a StringIO which expects str, not bytes\n    outfile = io.StringIO()\n\n    # write_stream should raise a TypeError because StringIO.write expects str\n    with pytest.raises(TypeError):\n        write_stream(stream, outfile, flush=False)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2455506909755059
+}

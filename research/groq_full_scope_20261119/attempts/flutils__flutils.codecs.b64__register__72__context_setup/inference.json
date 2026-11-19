@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-df62f9e5-9933-4d69-9b6a-be1f4fbf03e6",
+  "object": "chat.completion",
+  "created": 1795078461,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport codecs\nimport base64\nimport pytest\nfrom flutils.codecs.b64 import register, encode, decode, NAME\n\n\ndef test_register_and_codec_roundtrip(tmp_path):\n    # Register the codec and verify it can be retrieved\n    register()\n    codec_info = codecs.getdecoder(NAME)\n    assert codec_info is not None\n\n    # Prepare a sample byte sequence\n    original_bytes = b\"Hello, world!\"\n    # Encode using our codec\n    encoded_str, consumed = encode(original_bytes.decode('utf-8'), errors='ignore')\n    assert consumed == len(original_bytes)\n    # The encoded string should be valid base64\n    assert isinstance(encoded_str, bytes)\n    # Decode back using the codec\n    decoded_bytes, decoded_len = decode(encoded_str, errors='ignore')\n    assert decoded_len == len(encoded_str)\n    assert decoded_bytes == original_bytes\n\n\ndef test_encode_with_whitespace_and_multiline(tmp_path):\n    # Register the codec\n    register()\n    # Input with newlines and indentation\n    multiline_input = \"\"\"\n        SGVsbG8s\n        IHdvcmxkIQ==\n    \"\"\"\n    # Encode should strip whitespace and decode correctly\n    decoded_bytes, length = encode(multiline_input, errors='ignore')\n    assert length == len(multiline_input)\n    assert decoded_bytes == b\"Hello, world!\"\n\n\ndef test_encode_invalid_base64_raises_unicodeencodeerror(tmp_path):\n    register()\n    # Invalid base64 string\n    bad_input = \"!!! not base64 !!!\"\n    with pytest.raises(UnicodeEncodeError) as excinfo:\n        encode(bad_input, errors='ignore')\n    # The exception message should mention the problematic string\n    assert \"not a proper bas64 character string\" in str(excinfo.value)\n    assert bad_input in str(excinfo.value)\n```",
+        "reasoning": "Need tests for register, encode/decode. Use tmp_path for file? maybe not. Just test encode/decode. Ensure errors."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049845452,
+    "prompt_tokens": 978,
+    "prompt_time": 0.053085435,
+    "completion_tokens": 415,
+    "completion_time": 0.458433894,
+    "total_tokens": 1393,
+    "total_time": 0.511519329,
+    "completion_tokens_details": {
+      "reasoning_tokens": 28
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg75syesvtb8wns9q2dbes",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport codecs\nimport base64\nimport pytest\nfrom flutils.codecs.b64 import register, encode, decode, NAME\n\n\ndef test_register_and_codec_roundtrip(tmp_path):\n    # Register the codec and verify it can be retrieved\n    register()\n    codec_info = codecs.getdecoder(NAME)\n    assert codec_info is not None\n\n    # Prepare a sample byte sequence\n    original_bytes = b\"Hello, world!\"\n    # Encode using our codec\n    encoded_str, consumed = encode(original_bytes.decode('utf-8'), errors='ignore')\n    assert consumed == len(original_bytes)\n    # The encoded string should be valid base64\n    assert isinstance(encoded_str, bytes)\n    # Decode back using the codec\n    decoded_bytes, decoded_len = decode(encoded_str, errors='ignore')\n    assert decoded_len == len(encoded_str)\n    assert decoded_bytes == original_bytes\n\n\ndef test_encode_with_whitespace_and_multiline(tmp_path):\n    # Register the codec\n    register()\n    # Input with newlines and indentation\n    multiline_input = \"\"\"\n        SGVsbG8s\n        IHdvcmxkIQ==\n    \"\"\"\n    # Encode should strip whitespace and decode correctly\n    decoded_bytes, length = encode(multiline_input, errors='ignore')\n    assert length == len(multiline_input)\n    assert decoded_bytes == b\"Hello, world!\"\n\n\ndef test_encode_invalid_base64_raises_unicodeencodeerror(tmp_path):\n    register()\n    # Invalid base64 string\n    bad_input = \"!!! not base64 !!!\"\n    with pytest.raises(UnicodeEncodeError) as excinfo:\n        encode(bad_input, errors='ignore')\n    # The exception message should mention the problematic string\n    assert \"not a proper bas64 character string\" in str(excinfo.value)\n    assert bad_input in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9120591440005228
+}

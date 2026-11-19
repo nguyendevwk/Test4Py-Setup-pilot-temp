@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-11d7e8e6-5d24-4b7f-bb09-bb0844cf7d50",
+  "object": "chat.completion",
+  "created": 1795078753,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport pytest\nfrom tornado.log import define_logging_options\nfrom tornado.options import Options, options as global_options\n\n\ndef test_define_logging_options_with_custom_options(tmp_path):\n    \"\"\"When a custom Options instance is supplied, the logging options are added to it.\"\"\"\n    custom_opts = Options()\n    define_logging_options(custom_opts)\n\n    # All expected option names should be present\n    expected_names = {\n        \"logging\",\n        \"log_to_stderr\",\n        \"log_file_prefix\",\n        \"log_file_max_size\",\n        \"log_file_num_backups\",\n        \"log_rotate_when\",\n        \"log_rotate_interval\",\n        \"log_rotate_mode\",\n    }\n    assert expected_names.issubset(set(custom_opts._options.keys()))\n\n    # Verify that the default values are as documented\n    assert custom_opts.logging == \"info\"\n    assert custom_opts.log_to_stderr is None\n    assert custom_opts.log_file_prefix is None\n    assert custom_opts.log_file_max_size == 100 * 1000 * 1000\n    assert custom_opts.log_file_num_backups == 10\n    assert custom_opts.log_rotate_when == \"midnight\"\n    assert custom_opts.log_rotate_interval == 1\n    assert custom_opts.log_rotate_mode == \"size\"\n\n    # Ensure that the callback is registered\n    callbacks = [cb for cb in custom_opts._parse_callbacks]\n    assert any(callable(cb) for cb in callbacks)\n\n\ndef test_define_logging_options_with_none(tmp_path):\n    \"\"\"When None is passed, the global options instance is used.\"\"\"\n    # Reset global options to a fresh instance for isolation\n    global_options._options.clear()\n    global_options._parse_callbacks.clear()\n\n    define_logging_options(None)\n\n    # The global options should now contain the logging options\n    for name in (\n        \"logging\",\n        \"log_to_stderr\",\n        \"log_file_prefix\",\n        \"log_file_max_size\",\n        \"log_file_num_backups\",\n        \"log_rotate_when\",\n        \"log_rotate_interval\",\n        \"log_rotate_mode\",\n    ):\n        assert hasattr(global_options, name)\n\n    # Check that the default values are correctly set\n    assert global_options.logging == \"info\"\n    assert global_options.log_file_max_size == 100 * 1000 * 1000\n    assert global_options.log_rotate_mode == \"size\"\n\n\ndef test_define_logging_options_idempotent(tmp_path):\n    \"\"\"Calling define_logging_options twice should not overwrite existing definitions.\"\"\"\n    opts = Options()\n    define_logging_options(opts)\n    # Capture the initial values\n    initial_logging = opts.logging\n    initial_max_size = opts.log_file_max_size\n\n    # Call again\n    define_logging_options(opts)\n\n    # Values should remain unchanged\n    assert opts.logging == initial_logging\n    assert opts.log_file_max_size == initial_max_size\n\n    # No duplicate definitions should exist\n    assert len(opts._options) == 8  # exactly the 8 options defined\n```",
+        "reasoning": "Need tests for define_logging_options. Use tornado.options. We'll test that options defined correctly. Also test that calling with None uses default options. Also test that parse callback triggers enable_pretty_logging? but not needed. Just check definitions. Use tmp_path for any file? Not needed. We'll import define_logging_options. Use tornado.options.Options? We'll create new Options instance? tornado.options.Options is class. Use tornado.options.Options() and pass to function. Then check options dict. Also test that default values match. Third test error: passing invalid type? maybe passing options with existing define? but not needed. We'll test that calling with None uses global options and defines. Ensure no duplicate definitions? We'll check that options has attributes. Use hasattr. Let's write three tests: test_define_logging_options_with_custom_options, test_define_logging_options_with_none, test_define_logging_options_default_values."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052467824,
+    "prompt_tokens": 777,
+    "prompt_time": 0.047103945,
+    "completion_tokens": 791,
+    "completion_time": 0.928706138,
+    "total_tokens": 1568,
+    "total_time": 0.975810083,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 176
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgg2nxed9ag9775kb3c4k6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport pytest\nfrom tornado.log import define_logging_options\nfrom tornado.options import Options, options as global_options\n\n\ndef test_define_logging_options_with_custom_options(tmp_path):\n    \"\"\"When a custom Options instance is supplied, the logging options are added to it.\"\"\"\n    custom_opts = Options()\n    define_logging_options(custom_opts)\n\n    # All expected option names should be present\n    expected_names = {\n        \"logging\",\n        \"log_to_stderr\",\n        \"log_file_prefix\",\n        \"log_file_max_size\",\n        \"log_file_num_backups\",\n        \"log_rotate_when\",\n        \"log_rotate_interval\",\n        \"log_rotate_mode\",\n    }\n    assert expected_names.issubset(set(custom_opts._options.keys()))\n\n    # Verify that the default values are as documented\n    assert custom_opts.logging == \"info\"\n    assert custom_opts.log_to_stderr is None\n    assert custom_opts.log_file_prefix is None\n    assert custom_opts.log_file_max_size == 100 * 1000 * 1000\n    assert custom_opts.log_file_num_backups == 10\n    assert custom_opts.log_rotate_when == \"midnight\"\n    assert custom_opts.log_rotate_interval == 1\n    assert custom_opts.log_rotate_mode == \"size\"\n\n    # Ensure that the callback is registered\n    callbacks = [cb for cb in custom_opts._parse_callbacks]\n    assert any(callable(cb) for cb in callbacks)\n\n\ndef test_define_logging_options_with_none(tmp_path):\n    \"\"\"When None is passed, the global options instance is used.\"\"\"\n    # Reset global options to a fresh instance for isolation\n    global_options._options.clear()\n    global_options._parse_callbacks.clear()\n\n    define_logging_options(None)\n\n    # The global options should now contain the logging options\n    for name in (\n        \"logging\",\n        \"log_to_stderr\",\n        \"log_file_prefix\",\n        \"log_file_max_size\",\n        \"log_file_num_backups\",\n        \"log_rotate_when\",\n        \"log_rotate_interval\",\n        \"log_rotate_mode\",\n    ):\n        assert hasattr(global_options, name)\n\n    # Check that the default values are correctly set\n    assert global_options.logging == \"info\"\n    assert global_options.log_file_max_size == 100 * 1000 * 1000\n    assert global_options.log_rotate_mode == \"size\"\n\n\ndef test_define_logging_options_idempotent(tmp_path):\n    \"\"\"Calling define_logging_options twice should not overwrite existing definitions.\"\"\"\n    opts = Options()\n    define_logging_options(opts)\n    # Capture the initial values\n    initial_logging = opts.logging\n    initial_max_size = opts.log_file_max_size\n\n    # Call again\n    define_logging_options(opts)\n\n    # Values should remain unchanged\n    assert opts.logging == initial_logging\n    assert opts.log_file_max_size == initial_max_size\n\n    # No duplicate definitions should exist\n    assert len(opts._options) == 8  # exactly the 8 options defined\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3982487299945205
+}

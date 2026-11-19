@@ -1,0 +1,112 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_cached_property_on_coroutine_function __________________
+
+    def test_cached_property_on_coroutine_function():
+        class AsyncHolder:
+            @cached_property
+            async def async_value(self):
+                await asyncio.sleep(0.01)
+                return "done"
+    
+        async def run_test():
+            holder = AsyncHolder()
+            # First access returns a coroutine that schedules the task
+            coro = holder.async_value
+            assert isinstance(coro, types.CoroutineType)
+            # Await the coroutine to get the result
+            result = await coro
+            assert result == "done"
+            # After awaiting, the attribute is replaced with the Future object
+            future = holder.async_value
+            assert isinstance(future, asyncio.Future)
+            assert future.done()
+            assert future.result() == "done"
+    
+>       asyncio.run(run_test())
+
+test_generated.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/asyncio/runners.py:44: in run
+    return loop.run_until_complete(main)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/asyncio/base_events.py:649: in run_until_complete
+    return future.result()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def run_test():
+        holder = AsyncHolder()
+        # First access returns a coroutine that schedules the task
+        coro = holder.async_value
+>       assert isinstance(coro, types.CoroutineType)
+E       AssertionError: assert False
+E        +  where False = isinstance(<generator object cached_property._wrap_in_coroutine.<locals>.wrapper at 0x7fc84137e110>, <class 'coroutine'>)
+E        +    where <class 'coroutine'> = types.CoroutineType
+
+test_generated.py:43: AssertionError
+___________ test_cached_property_on_non_coroutine_and_coroutine_mix ____________
+
+    def test_cached_property_on_non_coroutine_and_coroutine_mix():
+        class Mixed:
+            def __init__(self):
+                self.counter = 0
+    
+            @cached_property
+            def sync_prop(self):
+                self.counter += 1
+                return self.counter
+    
+            @cached_property
+            async def async_prop(self):
+                await asyncio.sleep(0.01)
+                return self.counter * 10
+    
+        async def run_mix():
+            m = Mixed()
+            # Sync property
+            assert m.sync_prop == 1
+            assert m.sync_prop == 1  # cached
+            # Async property
+            async_coro = m.async_prop
+            assert isinstance(async_coro, types.CoroutineType)
+            async_result = await async_coro
+            assert async_result == 10
+            # After awaiting, async_prop is a Future
+            future = m.async_prop
+            assert isinstance(future, asyncio.Future)
+            assert future.done()
+            assert future.result() == 10
+    
+>       asyncio.run(run_mix())
+
+test_generated.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/asyncio/runners.py:44: in run
+    return loop.run_until_complete(main)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/asyncio/base_events.py:649: in run_until_complete
+    return future.result()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def run_mix():
+        m = Mixed()
+        # Sync property
+        assert m.sync_prop == 1
+        assert m.sync_prop == 1  # cached
+        # Async property
+        async_coro = m.async_prop
+>       assert isinstance(async_coro, types.CoroutineType)
+E       AssertionError: assert False
+E        +  where False = isinstance(<generator object cached_property._wrap_in_coroutine.<locals>.wrapper at 0x7fc84144c3c0>, <class 'coroutine'>)
+E        +    where <class 'coroutine'> = types.CoroutineType
+
+test_generated.py:78: AssertionError
+=============================== warnings summary ===============================
+research/groq_full_scope_20261119/attempts/flutils__flutils.decorators__cached_property__71__context_setup/eval0/test_generated.py::test_cached_property_on_coroutine_function
+research/groq_full_scope_20261119/attempts/flutils__flutils.decorators__cached_property__71__context_setup/eval0/test_generated.py::test_cached_property_on_non_coroutine_and_coroutine_mix
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/decorators.py:74: DeprecationWarning: "@coroutine" decorator is deprecated since Python 3.8, use "async def" instead
+    def wrapper():
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_cached_property_on_coroutine_function - Assert...
+FAILED test_generated.py::test_cached_property_on_non_coroutine_and_coroutine_mix
+2 failed, 1 passed, 2 warnings in 0.29s

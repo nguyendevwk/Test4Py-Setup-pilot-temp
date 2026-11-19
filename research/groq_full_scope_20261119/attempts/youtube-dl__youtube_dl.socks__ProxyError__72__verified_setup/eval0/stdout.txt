@@ -1,0 +1,58 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_proxy_error_initialization_with_code_and_msg _______________
+
+    def test_proxy_error_initialization_with_code_and_msg():
+        """ProxyError should store the provided code and message."""
+        err = ProxyError(0x01, "Custom error message")
+        assert isinstance(err, ProxyError)
+        assert isinstance(err, socket.error)
+        # The args tuple of socket.error contains (code, msg)
+        assert err.args == (0x01, "Custom error message")
+        # The message should be accessible via str()
+>       assert str(err) == "Custom error message"
+E       AssertionError: assert '[Errno 1] Cu...error message' == 'Custom error message'
+E         
+E         - Custom error message
+E         + [Errno 1] Custom error message
+E         ? ++++++++++
+
+test_generated.py:13: AssertionError
+________________ test_proxy_error_initialization_with_code_only ________________
+
+    def test_proxy_error_initialization_with_code_only():
+        """When only a code is provided, ProxyError should look up the message."""
+        # Use a known code from the CODES mapping if available; otherwise test fallback
+        # The mapping is not exposed, so we test the fallback for an unknown code.
+        unknown_code = 0xFF
+>       err = ProxyError(unknown_code)
+
+test_generated.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ProxyError(), code = 255, msg = None
+
+    def __init__(self, code=None, msg=None):
+        if code is not None and msg is None:
+>           msg = self.CODES.get(code) or 'unknown error'
+E           AttributeError: 'ProxyError' object has no attribute 'CODES'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/socks.py:63: AttributeError
+_____________ test_proxy_error_default_initialization_and_constant _____________
+
+    def test_proxy_error_default_initialization_and_constant():
+        """ProxyError with no arguments should default to ERR_SUCCESS and empty message."""
+        err = ProxyError()
+        # Default code should be None, message should be empty string
+>       assert err.args == (None, "")
+E       AssertionError: assert (None, None) == (None, '')
+E         
+E         At index 1 diff: None != ''
+E         Use -v to get more diff
+
+test_generated.py:29: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_proxy_error_initialization_with_code_and_msg
+FAILED test_generated.py::test_proxy_error_initialization_with_code_only - At...
+FAILED test_generated.py::test_proxy_error_default_initialization_and_constant
+3 failed in 0.76s

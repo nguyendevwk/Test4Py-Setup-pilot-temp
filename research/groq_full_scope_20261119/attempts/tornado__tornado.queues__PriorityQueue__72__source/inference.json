@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-389f7807-bc59-471f-b159-e6139194b2c2",
+  "object": "chat.completion",
+  "created": 1795077433,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.queues import PriorityQueue\n\n\n@pytest.mark.asyncio\nasync def test_priority_ordering():\n    \"\"\"Items are retrieved in ascending priority order.\"\"\"\n    q = PriorityQueue()\n    q.put((5, \"low\"))\n    q.put((1, \"high\"))\n    q.put((3, \"medium\"))\n\n    # qsize should reflect number of items\n    assert q.qsize() == 3\n\n    first = await q.get()\n    assert first == (1, \"high\")\n    second = await q.get()\n    assert second == (3, \"medium\")\n    third = await q.get()\n    assert third == (5, \"low\")\n\n    # After all items are consumed, queue is empty\n    assert q.qsize() == 0\n\n\n@pytest.mark.asyncio\nasync def test_equal_priority_stability():\n    \"\"\"Items with equal priority are returned in FIFO order.\"\"\"\n    q = PriorityQueue()\n    q.put((2, \"first\"))\n    q.put((2, \"second\"))\n    q.put((2, \"third\"))\n\n    assert q.qsize() == 3\n\n    first = await q.get()\n    second = await q.get()\n    third = await q.get()\n\n    assert first == (2, \"first\")\n    assert second == (2, \"second\")\n    assert third == (2, \"third\")\n\n\n@pytest.mark.asyncio\nasync def test_put_after_get():\n    \"\"\"Queue can accept new items after some have been retrieved.\"\"\"\n    q = PriorityQueue()\n    q.put((10, \"a\"))\n    q.put((5, \"b\"))\n\n    first = await q.get()\n    assert first == (5, \"b\")\n    assert q.qsize() == 1\n\n    # Put a new item with higher priority\n    q.put((1, \"c\"))\n    assert q.qsize() == 2\n\n    second = await q.get()\n    assert second == (1, \"c\")\n    third = await q.get()\n    assert third == (10, \"a\")\n```",
+        "reasoning": "We need tests for PriorityQueue. Need import from tornado.queues. Write three tests: normal ordering, boundary with equal priorities, error when get from empty? But get is async? In tornado queues, get returns awaitable. Use asyncio to run. Use pytest.mark.asyncio. Use tmp_path? Not needed. Just test behavior. Use pytest.raises for empty? In tornado, get blocks until item. Can't test error. Maybe test that putting non-tuple still works? But priority queue expects comparable. Use custom objects. We'll test that priority ordering works. Also test that after get all items, queue empty and get blocks? Hard. Maybe test that put after get works. We'll just test ordering and that queue size updates. Use queue.qsize? Not defined? In tornado.queues.Queue has qsize. We'll import. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.258491124,
+    "prompt_tokens": 504,
+    "prompt_time": 0.124733524,
+    "completion_tokens": 604,
+    "completion_time": 0.697006467,
+    "total_tokens": 1108,
+    "total_time": 0.821739991,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 171
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sf7sd8eg99wqx3hb2nrxn7",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.queues import PriorityQueue\n\n\n@pytest.mark.asyncio\nasync def test_priority_ordering():\n    \"\"\"Items are retrieved in ascending priority order.\"\"\"\n    q = PriorityQueue()\n    q.put((5, \"low\"))\n    q.put((1, \"high\"))\n    q.put((3, \"medium\"))\n\n    # qsize should reflect number of items\n    assert q.qsize() == 3\n\n    first = await q.get()\n    assert first == (1, \"high\")\n    second = await q.get()\n    assert second == (3, \"medium\")\n    third = await q.get()\n    assert third == (5, \"low\")\n\n    # After all items are consumed, queue is empty\n    assert q.qsize() == 0\n\n\n@pytest.mark.asyncio\nasync def test_equal_priority_stability():\n    \"\"\"Items with equal priority are returned in FIFO order.\"\"\"\n    q = PriorityQueue()\n    q.put((2, \"first\"))\n    q.put((2, \"second\"))\n    q.put((2, \"third\"))\n\n    assert q.qsize() == 3\n\n    first = await q.get()\n    second = await q.get()\n    third = await q.get()\n\n    assert first == (2, \"first\")\n    assert second == (2, \"second\")\n    assert third == (2, \"third\")\n\n\n@pytest.mark.asyncio\nasync def test_put_after_get():\n    \"\"\"Queue can accept new items after some have been retrieved.\"\"\"\n    q = PriorityQueue()\n    q.put((10, \"a\"))\n    q.put((5, \"b\"))\n\n    first = await q.get()\n    assert first == (5, \"b\")\n    assert q.qsize() == 1\n\n    # Put a new item with higher priority\n    q.put((1, \"c\"))\n    assert q.qsize() == 2\n\n    second = await q.get()\n    assert second == (1, \"c\")\n    third = await q.get()\n    assert third == (10, \"a\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.405342718004249
+}

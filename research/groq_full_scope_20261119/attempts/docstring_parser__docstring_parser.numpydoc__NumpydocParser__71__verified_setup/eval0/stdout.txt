@@ -1,0 +1,66 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________________ test_parse_basic _______________________________
+
+    def test_parse_basic():
+        """Verify that a simple numpydoc docstring is parsed correctly."""
+        doc = """
+        Short description.
+    
+        Long description line 1.
+        Long description line 2.
+    
+        Parameters
+        ----------
+        x : int
+            The first parameter.
+        y : str, optional
+            The second parameter.
+        """
+        parser = NumpydocParser()
+        parsed = parser.parse(doc)
+    
+        # Short description
+        assert parsed.short_description == "Short description."
+        # Long description
+        assert parsed.long_description == "Long description line 1.\nLong description line 2."
+        # Blank lines detection
+        assert parsed.blank_after_short_description is True
+>       assert parsed.blank_after_long_description is False
+E       assert True is False
+E        +  where True = <docstring_parser.common.Docstring object at 0x7fde5bc73c70>.blank_after_long_description
+
+test_generated.py:30: AssertionError
+_______________________________ test_parse_empty _______________________________
+
+    def test_parse_empty():
+        """Parsing an empty or whitespace-only docstring should return an empty Docstring."""
+        parser = NumpydocParser()
+        parsed = parser.parse("   \n  ")
+        assert parsed.style == DocstringStyle.NUMPYDOC
+>       assert parsed.short_description is None
+E       AssertionError: assert '  ' is None
+E        +  where '  ' = <docstring_parser.common.Docstring object at 0x7fde5bc249a0>.short_description
+
+test_generated.py:46: AssertionError
+__________________________ test_parse_unknown_section __________________________
+
+    def test_parse_unknown_section():
+        """A docstring containing an unknown section title should raise KeyError."""
+        doc = """
+        Short description.
+    
+        UnknownSection
+        --------------
+        Some content.
+        """
+        parser = NumpydocParser()
+>       with pytest.raises(KeyError):
+E       Failed: DID NOT RAISE KeyError
+
+test_generated.py:61: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_basic - assert True is False
+FAILED test_generated.py::test_parse_empty - AssertionError: assert '  ' is None
+FAILED test_generated.py::test_parse_unknown_section - Failed: DID NOT RAISE ...
+3 failed in 0.14s

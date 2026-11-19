@@ -1,0 +1,41 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_chunked_upload_stream_yields_chunks ___________________
+
+    def test_chunked_upload_stream_yields_chunks():
+        data = b"abcdefghijklmnopqrstuvwxyz"
+        encoder = DummyEncoder(data, chunk_size=5)
+        stream = ChunkedMultipartUploadStream(encoder)
+        chunks = list(stream)
+>       assert chunks == [b"abcde", b"fghij", b"klmno", b"pqrst", b"uvwxy", b"z"]
+E       AssertionError: assert [b'abcdefghij...opqrstuvwxyz'] == [b'abcde', b'...'uvwxy', b'z']
+E         
+E         At index 0 diff: b'abcdefghijklmnopqrstuvwxyz' != b'abcde'
+E         Right contains 5 more items, first extra item: b'fghij'
+E         Use -v to get more diff
+
+test_generated.py:25: AssertionError
+_______________ test_chunked_upload_stream_with_event_sets_event _______________
+
+    def test_chunked_upload_stream_with_event_sets_event():
+        data = b"12345"
+        encoder = DummyEncoder(data, chunk_size=2)
+        event = threading.Event()
+        stream = ChunkedMultipartUploadStream(encoder, event=event)
+        chunks = []
+        for chunk in stream:
+            chunks.append(chunk)
+            assert event.is_set(), "Event should be set after each read"
+            event.clear()
+>       assert chunks == [b"12", b"34", b"5"]
+E       AssertionError: assert [b'12345'] == [b'12', b'34', b'5']
+E         
+E         At index 0 diff: b'12345' != b'12'
+E         Right contains 2 more items, first extra item: b'34'
+E         Use -v to get more diff
+
+test_generated.py:37: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_chunked_upload_stream_yields_chunks - Assertio...
+FAILED test_generated.py::test_chunked_upload_stream_with_event_sets_event - ...
+2 failed, 1 passed in 0.38s

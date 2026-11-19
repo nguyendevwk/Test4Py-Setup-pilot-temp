@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a7803dcb-1cfe-46c1-a0f0-9f9f34028c4f",
+  "object": "chat.completion",
+  "created": 1795077793,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom typesystem.formats import DateTimeFormat\n\ndef test_valid_datetime_with_timezone_and_microseconds():\n    fmt = DateTimeFormat()\n    # ISO string with UTC timezone and 3‑digit microseconds\n    iso_str = \"2023-07-15T12:34:56.789Z\"\n    result = fmt.validate(iso_str)\n    assert isinstance(result, datetime.datetime)\n    assert result == datetime.datetime(2023, 7, 15, 12, 34, 56, 789000, tzinfo=datetime.timezone.utc)\n    # Serialization should preserve the Z suffix\n    serialized = fmt.serialize(result)\n    assert serialized == iso_str\n\ndef test_boundary_microseconds_and_negative_offset():\n    fmt = DateTimeFormat()\n    # 6‑digit microseconds and negative offset\n    iso_str = \"2024-01-01T00:00:00.123456-02:30\"\n    result = fmt.validate(iso_str)\n    assert result == datetime.datetime(2024, 1, 1, 0, 0, 0, 123456,\n                                        tzinfo=datetime.timezone(datetime.timedelta(hours=-2, minutes=-30)))\n    # Serialize back to ISO format with correct offset\n    serialized = fmt.serialize(result)\n    assert serialized == \"2024-01-01T00:00:00.123456-02:30\"\n\ndef test_invalid_datetime_raises_validation_error():\n    fmt = DateTimeFormat()\n    # Invalid month (13) should trigger ValueError in datetime constructor\n    iso_str = \"2023-13-01T00:00:00Z\"\n    with pytest.raises(Exception) as excinfo:\n        fmt.validate(iso_str)\n    # The exception should be a ValidationError with code \"invalid\"\n    assert hasattr(excinfo.value, \"code\") and excinfo.value.code == \"invalid\"\n    # The message should match the defined error text\n    assert \"Must be a real datetime.\" in str(excinfo.value)\n```",
+        "reasoning": "Need three tests: normal valid datetime, boundary microseconds, error invalid format. Use tmp_path? not needed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046978311,
+    "prompt_tokens": 970,
+    "prompt_time": 0.051975859,
+    "completion_tokens": 458,
+    "completion_time": 0.505501242,
+    "total_tokens": 1428,
+    "total_time": 0.557477101,
+    "completion_tokens_details": {
+      "reasoning_tokens": 24
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfjscee4rt8ensmj2a2gzw",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom typesystem.formats import DateTimeFormat\n\ndef test_valid_datetime_with_timezone_and_microseconds():\n    fmt = DateTimeFormat()\n    # ISO string with UTC timezone and 3‑digit microseconds\n    iso_str = \"2023-07-15T12:34:56.789Z\"\n    result = fmt.validate(iso_str)\n    assert isinstance(result, datetime.datetime)\n    assert result == datetime.datetime(2023, 7, 15, 12, 34, 56, 789000, tzinfo=datetime.timezone.utc)\n    # Serialization should preserve the Z suffix\n    serialized = fmt.serialize(result)\n    assert serialized == iso_str\n\ndef test_boundary_microseconds_and_negative_offset():\n    fmt = DateTimeFormat()\n    # 6‑digit microseconds and negative offset\n    iso_str = \"2024-01-01T00:00:00.123456-02:30\"\n    result = fmt.validate(iso_str)\n    assert result == datetime.datetime(2024, 1, 1, 0, 0, 0, 123456,\n                                        tzinfo=datetime.timezone(datetime.timedelta(hours=-2, minutes=-30)))\n    # Serialize back to ISO format with correct offset\n    serialized = fmt.serialize(result)\n    assert serialized == \"2024-01-01T00:00:00.123456-02:30\"\n\ndef test_invalid_datetime_raises_validation_error():\n    fmt = DateTimeFormat()\n    # Invalid month (13) should trigger ValueError in datetime constructor\n    iso_str = \"2023-13-01T00:00:00Z\"\n    with pytest.raises(Exception) as excinfo:\n        fmt.validate(iso_str)\n    # The exception should be a ValidationError with code \"invalid\"\n    assert hasattr(excinfo.value, \"code\") and excinfo.value.code == \"invalid\"\n    # The message should match the defined error text\n    assert \"Must be a real datetime.\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9259007080108859
+}

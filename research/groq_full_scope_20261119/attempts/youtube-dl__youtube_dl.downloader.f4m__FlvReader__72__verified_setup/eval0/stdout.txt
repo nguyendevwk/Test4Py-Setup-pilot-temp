@@ -1,0 +1,69 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_read_asrt_parsing ____________________________
+
+    def test_read_asrt_parsing():
+        # Build a minimal ASRT box:
+        # version (1 byte), flags (3 bytes), quality_entry_count (1 byte)
+        # one quality string "q" + null
+        # segment_run_count (4 bytes), one segment: first_segment (4 bytes), fragments_per_segment (4 bytes)
+        asrt_bytes = (
+            b'\x01'                      # version
+            + b'\x00\x00\x00'            # flags
+            + b'\x01'                    # quality_entry_count
+            + b'q\x00'                   # quality string
+            + struct.pack('!I', 1)       # segment_run_count
+            + struct.pack('!I I', 5, 2)  # first_segment, fragments_per_segment
+        )
+        # Wrap in a box: size = 8 + len(asrt_bytes), type 'asrt'
+        box_size = 8 + len(asrt_bytes)
+        box = struct.pack('!I', box_size) + b'asrt' + asrt_bytes
+    
+        reader = FlvReader(box)
+>       bootstrap = reader.read_bootstrap_info()
+
+test_generated.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.downloader.f4m.FlvReader object at 0x7f119ff19d00>
+
+    def read_bootstrap_info(self):
+        total_size, box_type, box_data = self.read_box_info()
+>       assert box_type == b'abst'
+E       AssertionError
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/f4m.py:180: AssertionError
+_______________________ test_read_box_info_extended_size _______________________
+
+    def test_read_box_info_extended_size():
+        # Create a box with extended size: size field = 1, then 8-byte extended size
+        # type 'abcd', data 'xyz'
+        data = b'\x00\x00\x00\x01'          # size = 1 (extended)
+        data += struct.pack('!Q', 8 + 4 + 4)  # extended size = header(8) + type(4) + data(4)
+        data += b'abcd'                      # type
+        data += b'xyz'                       # data
+        reader = FlvReader(data)
+>       size, box_type, box_data = reader.read_box_info()
+
+test_generated.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/f4m.py:70: in read_box_info
+    return real_size, box_type, self.read_bytes(real_size - header_end)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.downloader.f4m.FlvReader object at 0x7f119fd84090>
+n = 70353314644
+
+    def read_bytes(self, n):
+        data = self.read(n)
+        if len(data) < n:
+>           raise DataTruncatedError(
+                'FlvReader error: need %d bytes while only %d bytes got' % (
+                    n, len(data)))
+E           youtube_dl.downloader.f4m.DataTruncatedError: FlvReader error: need 70353314644 bytes while only 3 bytes got
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/f4m.py:36: DataTruncatedError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_read_asrt_parsing - AssertionError
+FAILED test_generated.py::test_read_box_info_extended_size - youtube_dl.downl...
+2 failed, 1 passed in 1.15s

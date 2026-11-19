@@ -8,7 +8,7 @@ import zipfile
 
 base = Path(__file__).resolve().parents[1]
 revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=base, text=True).strip()
-paths = ['council_multitarget.py', 'pilot/multitarget.py', 'pilot/grounding.py', 'tests/test_multitarget.py', 'notebooks/kaggle_multitarget_smoke_v4.ipynb']
+paths = ['council_multitarget.py', 'council/generator.py', 'pilot/multitarget.py', 'pilot/grounding.py', 'pilot/api_contract.py', 'pilot/source_prompt.py', 'tests/test_multitarget.py', 'notebooks/kaggle_multitarget_smoke_v4.ipynb']
 hashes = {name: hashlib.sha256((base/name).read_bytes()).hexdigest() for name in paths}
 buffer = io.BytesIO()
 with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as archive:

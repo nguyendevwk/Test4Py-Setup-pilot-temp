@@ -1,0 +1,159 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________________ test_program_success _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f9b32fc8a90>
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.core__program__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_program_success0')
+
+    def test_program_success(monkeypatch, tmp_path):
+        # Prepare args
+        args = make_args(
+            download=False,
+            follow=False,
+            output_file=None,
+            output_file_specified=False,
+            download_resume=False,
+            headers={},
+            output_options=set(),
+            check_status=False,
+            quiet=0,
+        )
+        env = DummyEnv()
+    
+        # Mock collect_messages to yield a request and a 200 response
+        def fake_collect_messages(env, args, request_body_read_callback=None):
+            yield DummyMessage(RequestsMessageKind.REQUEST, body=b"req")
+            yield DummyMessage(RequestsMessageKind.RESPONSE, body=b"res", status_code=200)
+        monkeypatch.setattr("httpie.core.collect_messages", fake_collect_messages)
+    
+>       status = program(args, env)
+
+test_generated.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/core.py:180: in program
+    processing_options = ProcessingOptions.from_raw_args(args)
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/output/models.py:36: in from_raw_args
+    fetched_options = {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x7f9b32fca110>
+
+    fetched_options = {
+>       option: getattr(options, option)
+        for option in cls._fields
+    }
+E   AttributeError: 'Namespace' object has no attribute 'debug'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/output/models.py:37: AttributeError
+_______________________ test_program_check_status_error ________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f9b331240a0>
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.core__program__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_program_check_status_erro0')
+
+    def test_program_check_status_error(monkeypatch, tmp_path):
+        args = make_args(
+            download=False,
+            follow=False,
+            output_file=None,
+            output_file_specified=False,
+            download_resume=False,
+            headers={},
+            output_options=set(),
+            check_status=True,
+            quiet=0,
+        )
+        env = DummyEnv()
+    
+        def fake_collect_messages(env, args, request_body_read_callback=None):
+            yield DummyMessage(RequestsMessageKind.REQUEST, body=b"req")
+            yield DummyMessage(RequestsMessageKind.RESPONSE, body=b"res", status_code=404)
+        monkeypatch.setattr("httpie.core.collect_messages", fake_collect_messages)
+    
+>       status = program(args, env)
+
+test_generated.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/core.py:180: in program
+    processing_options = ProcessingOptions.from_raw_args(args)
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/output/models.py:36: in from_raw_args
+    fetched_options = {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x7f9b331244c0>
+
+    fetched_options = {
+>       option: getattr(options, option)
+        for option in cls._fields
+    }
+E   AttributeError: 'Namespace' object has no attribute 'debug'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/output/models.py:37: AttributeError
+____________________________ test_program_download _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f9b32f6aa40>
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.core__program__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_program_download0')
+
+    def test_program_download(monkeypatch, tmp_path):
+        output_file = tmp_path / "out.txt"
+        output_file.open("wb")  # create file
+        args = make_args(
+            download=True,
+            follow=True,
+            output_file=output_file,
+            output_file_specified=True,
+            download_resume=False,
+            headers={},
+            output_options=set(),
+            check_status=False,
+            quiet=0,
+        )
+        env = DummyEnv()
+    
+        # Dummy downloader that records calls
+        class DummyDownloader:
+            def __init__(self, env, output_file, resume):
+                self.env = env
+                self.output_file = output_file
+                self.resume = resume
+                self.finished = False
+                self.interrupted = False
+            def pre_request(self, headers):
+                self.pre_requested = True
+            def start(self, initial_url, final_response):
+                self.started = True
+                return (io.BytesIO(b"downloaded"), self.output_file)
+            def finish(self):
+                self.finished = True
+            def failed(self):
+                self.failed_called = True
+        monkeypatch.setattr("httpie.core.Downloader", DummyDownloader)
+    
+        def fake_collect_messages(env, args, request_body_read_callback=None):
+            yield DummyMessage(RequestsMessageKind.REQUEST, body=b"req")
+            yield DummyMessage(RequestsMessageKind.RESPONSE, body=b"res", status_code=200)
+        monkeypatch.setattr("httpie.core.collect_messages", fake_collect_messages)
+    
+>       status = program(args, env)
+
+test_generated.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/core.py:180: in program
+    processing_options = ProcessingOptions.from_raw_args(args)
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/output/models.py:36: in from_raw_args
+    fetched_options = {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x7f9b32f6b160>
+
+    fetched_options = {
+>       option: getattr(options, option)
+        for option in cls._fields
+    }
+E   AttributeError: 'Namespace' object has no attribute 'debug'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/output/models.py:37: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_program_success - AttributeError: 'Namespace' ...
+FAILED test_generated.py::test_program_check_status_error - AttributeError: '...
+FAILED test_generated.py::test_program_download - AttributeError: 'Namespace'...
+3 failed in 0.79s

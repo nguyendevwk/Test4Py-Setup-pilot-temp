@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-dfb45230-0716-4a03-94b0-5ebfc3917eb8",
+  "object": "chat.completion",
+  "created": 1795078888,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport typed_ast.ast3 as ast\nfrom py_backwards.transformers.base import BaseTransformer\nfrom py_backwards.types import TransformationResult\n\n\ndef test_base_transformer_abstract_method():\n    \"\"\"BaseTransformer.transform is abstract and cannot be called directly.\"\"\"\n    with pytest.raises(TypeError):\n        BaseTransformer.transform(ast.parse(\"x = 1\"))\n\n\ndef test_subclass_implementation_returns_expected_result(tmp_path):\n    \"\"\"A concrete subclass correctly implements transform and returns a TransformationResult.\"\"\"\n    class DummyTransformer(BaseTransformer):\n        target = \"dummy\"\n\n        @classmethod\n        def transform(cls, tree: ast.AST) -> TransformationResult:\n            # Return a simple result containing the original tree and a dummy mapping\n            return {\"original\": tree, \"mapping\": {\"x\": \"y\"}}\n\n    tree = ast.parse(\"x = 1\")\n    result = DummyTransformer.transform(tree)\n    assert isinstance(result, dict)\n    assert result[\"original\"] is tree\n    assert result[\"mapping\"] == {\"x\": \"y\"}\n\n\ndef test_transformer_with_invalid_input_raises_type_error():\n    \"\"\"transform should raise a TypeError when called with a non-AST argument.\"\"\"\n    class DummyTransformer(BaseTransformer):\n        target = \"dummy\"\n\n        @classmethod\n        def transform(cls, tree: ast.AST) -> TransformationResult:\n            return {\"original\": tree, \"mapping\": {}}\n\n    with pytest.raises(TypeError):\n        DummyTransformer.transform(\"not an AST\")\n```",
+        "reasoning": "We need to test BaseTransformer.transform abstract method? Can't instantiate. Maybe test that subclass must implement. But we can create dummy subclass. Test that calling transform on BaseTransformer raises TypeError. Also test subclass works. Use tmp_path? Not needed. Provide three tests: 1) abstract method enforcement. 2) subclass implementation returns expected. 3) error handling: passing wrong type raises TypeError. Use ast from typed_ast. We'll create simple AST node. Use typed_ast.ast3.parse. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049420828,
+    "prompt_tokens": 318,
+    "prompt_time": 0.021061099,
+    "completion_tokens": 419,
+    "completion_time": 0.475611123,
+    "total_tokens": 737,
+    "total_time": 0.496672222,
+    "completion_tokens_details": {
+      "reasoning_tokens": 105
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgm6s8ejhtya6k9yfz6wec",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport typed_ast.ast3 as ast\nfrom py_backwards.transformers.base import BaseTransformer\nfrom py_backwards.types import TransformationResult\n\n\ndef test_base_transformer_abstract_method():\n    \"\"\"BaseTransformer.transform is abstract and cannot be called directly.\"\"\"\n    with pytest.raises(TypeError):\n        BaseTransformer.transform(ast.parse(\"x = 1\"))\n\n\ndef test_subclass_implementation_returns_expected_result(tmp_path):\n    \"\"\"A concrete subclass correctly implements transform and returns a TransformationResult.\"\"\"\n    class DummyTransformer(BaseTransformer):\n        target = \"dummy\"\n\n        @classmethod\n        def transform(cls, tree: ast.AST) -> TransformationResult:\n            # Return a simple result containing the original tree and a dummy mapping\n            return {\"original\": tree, \"mapping\": {\"x\": \"y\"}}\n\n    tree = ast.parse(\"x = 1\")\n    result = DummyTransformer.transform(tree)\n    assert isinstance(result, dict)\n    assert result[\"original\"] is tree\n    assert result[\"mapping\"] == {\"x\": \"y\"}\n\n\ndef test_transformer_with_invalid_input_raises_type_error():\n    \"\"\"transform should raise a TypeError when called with a non-AST argument.\"\"\"\n    class DummyTransformer(BaseTransformer):\n        target = \"dummy\"\n\n        @classmethod\n        def transform(cls, tree: ast.AST) -> TransformationResult:\n            return {\"original\": tree, \"mapping\": {}}\n\n    with pytest.raises(TypeError):\n        DummyTransformer.transform(\"not an AST\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9215771140297875
+}

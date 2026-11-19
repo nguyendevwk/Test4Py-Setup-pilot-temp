@@ -1,0 +1,66 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_parse_simple_docstring __________________________
+
+    def test_parse_simple_docstring():
+        doc = """This function does something.
+    
+        Args:
+            x (int): The first argument.
+            y (str): The second argument.
+    
+        Returns:
+            bool: True if successful, False otherwise.
+    
+        Raises:
+            ValueError: If x is negative.
+    
+        Examples:
+            >>> result = my_func(1, 'a')
+            >>> result
+            True
+        """
+        parsed = parse(doc)
+        assert isinstance(parsed, Docstring)
+        # Description
+        assert parsed.description.strip() == "This function does something."
+        # Params
+        assert len(parsed.params) == 2
+        param_names = {p.arg_name for p in parsed.params}
+        assert param_names == {"x", "y"}
+        x_param = next(p for p in parsed.params if p.arg_name == "x")
+        assert x_param.type_name == "int"
+        assert x_param.description.strip() == "The first argument."
+        # Returns
+>       assert len(parsed.returns) == 1
+E       TypeError: object of type 'DocstringReturns' has no len()
+
+test_generated.py:35: TypeError
+__________________________ test_parse_empty_docstring __________________________
+
+    def test_parse_empty_docstring():
+        parsed = parse("")
+        assert isinstance(parsed, Docstring)
+>       assert parsed.description == ""
+E       AssertionError: assert None == ''
+E        +  where None = <docstring_parser.common.Docstring object at 0x7f0cdae70160>.description
+
+test_generated.py:54: AssertionError
+__________________ test_parse_invalid_docstring_raises_error ___________________
+
+    def test_parse_invalid_docstring_raises_error():
+        # Missing colon after Args section header
+        bad_doc = """This function does something.
+    
+        Args
+            x (int): The first argument.
+        """
+>       with pytest.raises(ParseError):
+E       Failed: DID NOT RAISE ParseError
+
+test_generated.py:67: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_simple_docstring - TypeError: object of ...
+FAILED test_generated.py::test_parse_empty_docstring - AssertionError: assert...
+FAILED test_generated.py::test_parse_invalid_docstring_raises_error - Failed:...
+3 failed in 0.14s

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-8364d61d-6062-4b7e-a293-cc79859a1352",
+  "object": "chat.completion",
+  "created": 1795076066,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport socket\nimport pytest\nfrom tornado.netutil import Resolver, DefaultLoopResolver\n\n@pytest.mark.asyncio\nasync def test_resolve_valid_host():\n    \"\"\"Resolver should return a non‑empty list for a known host.\"\"\"\n    resolver = DefaultLoopResolver()\n    result = await resolver.resolve(\"localhost\", 80)\n    # Each entry is a tuple (family, address)\n    assert isinstance(result, list)\n    assert result, \"Result should not be empty for a valid host\"\n    for fam, addr in result:\n        assert fam in (socket.AF_INET, socket.AF_INET6)\n        # address should be a tuple suitable for socket.connect\n        assert isinstance(addr, tuple)\n        assert addr[0] == \"127.0.0.1\" or addr[0] == \"::1\"\n        assert addr[1] == 80\n\n@pytest.mark.asyncio\nasync def test_resolve_invalid_host_raises_ioerror():\n    \"\"\"Resolver should raise IOError for an unknown hostname.\"\"\"\n    resolver = DefaultLoopResolver()\n    with pytest.raises(IOError) as excinfo:\n        await resolver.resolve(\"nonexistent.host.example\", 80)\n    # The underlying exception should be a socket.gaierror\n    assert isinstance(excinfo.value.__cause__, socket.gaierror)\n\n@pytest.mark.asyncio\nasync def test_resolve_port_boundary():\n    \"\"\"Resolver should handle port 0 (any available port) without error.\"\"\"\n    resolver = DefaultLoopResolver()\n    result = await resolver.resolve(\"localhost\", 0)\n    assert isinstance(result, list)\n    # The returned addresses should have port 0\n    for _, addr in result:\n        assert addr[1] == 0\n```",
+        "reasoning": "We need 3 tests: normal resolve, boundary (invalid host), error behavior. Use tmp_path? not needed. Use asyncio. Use pytest.mark.asyncio."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04775825,
+    "prompt_tokens": 1072,
+    "prompt_time": 0.104903229,
+    "completion_tokens": 393,
+    "completion_time": 0.425969398,
+    "total_tokens": 1465,
+    "total_time": 0.530872627,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 34
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sdy321ed09srj2w3a7k670",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport socket\nimport pytest\nfrom tornado.netutil import Resolver, DefaultLoopResolver\n\n@pytest.mark.asyncio\nasync def test_resolve_valid_host():\n    \"\"\"Resolver should return a non‑empty list for a known host.\"\"\"\n    resolver = DefaultLoopResolver()\n    result = await resolver.resolve(\"localhost\", 80)\n    # Each entry is a tuple (family, address)\n    assert isinstance(result, list)\n    assert result, \"Result should not be empty for a valid host\"\n    for fam, addr in result:\n        assert fam in (socket.AF_INET, socket.AF_INET6)\n        # address should be a tuple suitable for socket.connect\n        assert isinstance(addr, tuple)\n        assert addr[0] == \"127.0.0.1\" or addr[0] == \"::1\"\n        assert addr[1] == 80\n\n@pytest.mark.asyncio\nasync def test_resolve_invalid_host_raises_ioerror():\n    \"\"\"Resolver should raise IOError for an unknown hostname.\"\"\"\n    resolver = DefaultLoopResolver()\n    with pytest.raises(IOError) as excinfo:\n        await resolver.resolve(\"nonexistent.host.example\", 80)\n    # The underlying exception should be a socket.gaierror\n    assert isinstance(excinfo.value.__cause__, socket.gaierror)\n\n@pytest.mark.asyncio\nasync def test_resolve_port_boundary():\n    \"\"\"Resolver should handle port 0 (any available port) without error.\"\"\"\n    resolver = DefaultLoopResolver()\n    result = await resolver.resolve(\"localhost\", 0)\n    assert isinstance(result, list)\n    # The returned addresses should have port 0\n    for _, addr in result:\n        assert addr[1] == 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8829472739598714
+}

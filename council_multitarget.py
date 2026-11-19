@@ -23,6 +23,7 @@ os.environ.setdefault('USE_FLAX', '0')
 
 from council.engine import CouncilEngine
 from council.critic import audit_test_quality
+from council.generator import auto_resolve_imports
 from council.runner import repair_audit
 from pilot.common import (command, checked, reserve_output, write_json, append_json,
                           package_versions)
@@ -69,7 +70,7 @@ CURATED_TARGETS = [
         "file": "typesystem/schemas.py",
         "symbol": "Schema",
         "class_name": "Schema",
-        "setup_hint": "from typesystem import Schema, String, Integer\nclass UserSchema(Schema):\n    username = String(max_length=50)\n    age = Integer()\nuser = UserSchema(username='alice', age=30)"
+        "setup_hint": "from typesystem.schemas import Schema\nfrom typesystem.fields import String, Integer\nschema = Schema(fields={'username': String(max_length=50), 'age': Integer()})"
     },
     # =========================================================================
     # TẬP NA: STATEFUL OBJECT GRAPH BASELINES (TEST4PY TABLE 1)
@@ -96,7 +97,7 @@ CURATED_TARGETS = [
         "file": "src/whale_optimization.py",
         "symbol": "WhaleOptimization",
         "class_name": "WhaleOptimization",
-        "setup_hint": "from src.whale_optimization import WhaleOptimization\nwoa = WhaleOptimization(opt_func=lambda x: sum(i**2 for i in x), constraints=[(-5, 5), (-5, 5)], nsols=5, b=1, a=2, a_step=0.1)"
+        "setup_hint": "from src.whale_optimization import WhaleOptimization\nopt_func = lambda x, y: x**2 + y**2\nconstraints = [(-5, 5), (-5, 5)]\nwoa = WhaleOptimization(opt_func, constraints, nsols=5, b=1, a=2, a_step=0.1)"
     },
     {
         "id": "superstring",
@@ -197,9 +198,11 @@ def clone_if_needed(target, repos_dir):
 
 
 OUTPUT_RULES = '''Return exactly one fenced Python block containing the COMPLETE pytest file.
-CRITICAL: Write EXACTLY ONE focused test function for ONE behavior, with at most 50 lines of Python.
-Do NOT write multiple test functions in the file, because any single failing test causes the entire suite to fail.
+CRITICAL: Write EXACTLY ONE focused test function for ONE behavior, with at most 40 lines of Python.
+Do NOT write multiple test functions or chains of multiple behaviors in the file.
 Include meaningful assertions or pytest.raises checks, grounded in source.
+Avoid flaky wall-clock assertions (e.g. strict sleep durations); test state transitions, returned types, or property values instead.
+For error handling, test that the expected exception is raised using 'with pytest.raises(...)'. Do not assume private or unverified attributes on exception instances.
 Keep the response concise: no explanation, reasoning comments or multiple blocks.
 For object state, trace which operation writes the field before asserting it.
 Distinguish returned values from logger/callback outputs; capture callbacks through
@@ -276,6 +279,7 @@ def run_single_evaluation(target, arm, sample_idx, engine, repo_root, out_dir, s
         row['initial_extraction_error'] = extraction_error
         first = None
         if initial is not None:
+            initial = auto_resolve_imports(initial, target['module'], info['source'])
             (sample_dir/'test_candidate_v1.py').write_text(initial)
             row['initial_audit'] = audit_test_quality(initial)
             first = execute_pytest_and_coverage(initial, root, target['module'], sample_dir/'v1_raw')
@@ -295,6 +299,7 @@ def run_single_evaluation(target, arm, sample_idx, engine, repo_root, out_dir, s
                               context+'\nCandidate:\n'+(initial or raw)+'\nDiagnostics:\n'+diagnostics[-6000:], stage='repair')
             try:
                 repaired = clean_code_block(repair_raw)
+                repaired = auto_resolve_imports(repaired, target['module'], info['source'])
                 (sample_dir/'test_candidate_v2_repaired.py').write_text(repaired)
                 row['repair_audit'] = repair_audit(initial or raw, repaired)
                 if row['repair_audit']['accepted'] and not row['repair_audit']['review_required']:

@@ -1,0 +1,153 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_successful_single_fragment_download ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.dash__DashSegmentsFD__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_successful_single_fragmen0')
+dummy_fd = <test_generated.DummyDashFD object at 0x7fb5ee92a590>
+
+    def test_successful_single_fragment_download(tmp_path, dummy_fd):
+        """Test that a single fragment is downloaded and appended correctly."""
+        file_path = tmp_path / "output.mp4"
+        info = {
+            'fragment_base_url': 'http://example.com/',
+            'fragments': [{'url': 'http://example.com/seg1.mp4'}],
+        }
+>       result = dummy_fd.real_download(str(file_path), info)
+
+test_generated.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyDashFD object at 0x7fb5ee92a590>
+filename = '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.dash__DashSegmentsFD__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_successful_single_fragmen0/output.mp4'
+info_dict = {'fragment_base_url': 'http://example.com/', 'fragments': [{'url': 'http://example.com/seg1.mp4'}]}
+
+    def real_download(self, filename, info_dict):
+        fragment_base_url = info_dict.get('fragment_base_url')
+        fragments = info_dict['fragments'][:1] if self.params.get(
+            'test', False) else info_dict['fragments']
+    
+        ctx = {
+            'filename': filename,
+            'total_frags': len(fragments),
+        }
+    
+        self._prepare_and_start_frag_download(ctx)
+    
+        fragment_retries = self.params.get('fragment_retries', 0)
+        skip_unavailable_fragments = self.params.get('skip_unavailable_fragments', True)
+    
+        frag_index = 0
+        for i, fragment in enumerate(fragments):
+            frag_index += 1
+>           if frag_index <= ctx['fragment_index']:
+E           KeyError: 'fragment_index'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/dash.py:36: KeyError
+___________________________ test_retry_on_http_error ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.dash__DashSegmentsFD__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_retry_on_http_error0')
+dummy_fd = <test_generated.DummyDashFD object at 0x7fb5ee690be0>
+
+    def test_retry_on_http_error(tmp_path, dummy_fd):
+        """Test that a fragment is retried on HTTPError and succeeds."""
+        file_path = tmp_path / "output.mp4"
+        info = {
+            'fragment_base_url': 'http://example.com/',
+            'fragments': [{'url': 'http://example.com/seg1.mp4'}],
+        }
+    
+        # Replace _download_fragment to raise HTTPError on first call, then succeed
+        call_counter = {'count': 0}
+        def flaky_download(ctx, url, info_dict):
+            call_counter['count'] += 1
+            if call_counter['count'] == 1:
+                raise HTTPError(url, 404, "Not Found", hdrs=None, fp=None)
+            return True, b'successful_content'
+    
+        dummy_fd._download_fragment = flaky_download
+    
+>       result = dummy_fd.real_download(str(file_path), info)
+
+test_generated.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyDashFD object at 0x7fb5ee690be0>
+filename = '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.dash__DashSegmentsFD__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_retry_on_http_error0/output.mp4'
+info_dict = {'fragment_base_url': 'http://example.com/', 'fragments': [{'url': 'http://example.com/seg1.mp4'}]}
+
+    def real_download(self, filename, info_dict):
+        fragment_base_url = info_dict.get('fragment_base_url')
+        fragments = info_dict['fragments'][:1] if self.params.get(
+            'test', False) else info_dict['fragments']
+    
+        ctx = {
+            'filename': filename,
+            'total_frags': len(fragments),
+        }
+    
+        self._prepare_and_start_frag_download(ctx)
+    
+        fragment_retries = self.params.get('fragment_retries', 0)
+        skip_unavailable_fragments = self.params.get('skip_unavailable_fragments', True)
+    
+        frag_index = 0
+        for i, fragment in enumerate(fragments):
+            frag_index += 1
+>           if frag_index <= ctx['fragment_index']:
+E           KeyError: 'fragment_index'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/dash.py:36: KeyError
+________________________ test_skip_unavailable_fragment ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.dash__DashSegmentsFD__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_skip_unavailable_fragment0')
+dummy_fd = <test_generated.DummyDashFD object at 0x7fb5ee6c7a30>
+
+    def test_skip_unavailable_fragment(tmp_path, dummy_fd):
+        """Test that a fragment with missing URL is skipped when skip_unavailable_fragments is True."""
+        file_path = tmp_path / "output.mp4"
+        info = {
+            'fragment_base_url': 'http://example.com/',
+            'fragments': [{'path': 'seg1.mp4'}],  # no 'url' key
+        }
+        # Override _download_fragment to raise DownloadError to simulate failure
+        def fail_download(ctx, url, info_dict):
+            raise DownloadError("Simulated download error")
+    
+        dummy_fd._download_fragment = fail_download
+    
+>       result = dummy_fd.real_download(str(file_path), info)
+
+test_generated.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyDashFD object at 0x7fb5ee6c7a30>
+filename = '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.dash__DashSegmentsFD__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_skip_unavailable_fragment0/output.mp4'
+info_dict = {'fragment_base_url': 'http://example.com/', 'fragments': [{'path': 'seg1.mp4'}]}
+
+    def real_download(self, filename, info_dict):
+        fragment_base_url = info_dict.get('fragment_base_url')
+        fragments = info_dict['fragments'][:1] if self.params.get(
+            'test', False) else info_dict['fragments']
+    
+        ctx = {
+            'filename': filename,
+            'total_frags': len(fragments),
+        }
+    
+        self._prepare_and_start_frag_download(ctx)
+    
+        fragment_retries = self.params.get('fragment_retries', 0)
+        skip_unavailable_fragments = self.params.get('skip_unavailable_fragments', True)
+    
+        frag_index = 0
+        for i, fragment in enumerate(fragments):
+            frag_index += 1
+>           if frag_index <= ctx['fragment_index']:
+E           KeyError: 'fragment_index'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/dash.py:36: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_successful_single_fragment_download - KeyError...
+FAILED test_generated.py::test_retry_on_http_error - KeyError: 'fragment_index'
+FAILED test_generated.py::test_skip_unavailable_fragment - KeyError: 'fragmen...
+3 failed in 0.74s

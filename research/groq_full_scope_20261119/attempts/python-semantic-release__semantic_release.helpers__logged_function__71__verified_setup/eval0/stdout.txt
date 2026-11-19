@@ -1,0 +1,45 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_logged_function_basic_return_and_logging _________________
+
+    def test_logged_function_basic_return_and_logging():
+        logger = DummyLogger()
+    
+        @logged_function(logger)
+        def add(a, b):
+            return a + b
+    
+        result = add(2, 3)
+        assert result == 5
+        # Two debug calls: one for input, one for output
+        assert len(logger.messages) == 2
+        # Input log contains function name and arguments
+        assert logger.messages[0].startswith("add(")
+        assert "2" in logger.messages[0] and "3" in logger.messages[0]
+        # Output log contains function qualname and result
+>       assert logger.messages[1].startswith("add -> 5")
+E       AssertionError: assert False
+E        +  where False = <built-in method startswith of str object at 0x7ffb285f48f0>('add -> 5')
+E        +    where <built-in method startswith of str object at 0x7ffb285f48f0> = 'test_logged_function_basic_return_and_logging.<locals>.add -> 5'.startswith
+
+test_generated.py:32: AssertionError
+________________ test_logged_function_with_kwargs_and_metadata _________________
+
+    def test_logged_function_with_kwargs_and_metadata():
+        logger = DummyLogger()
+    
+        @logged_function(logger)
+        def greet(greeting, name="World"):
+            return f"{greeting}, {name}!"
+    
+        result = greet("Hello", name="Alice")
+        assert result == "Hello, Alice!"
+        # Check that keyword argument is logged correctly
+>       assert "name=Alice" in logger.messages[0]
+E       assert 'name=Alice' in "greet('Hello', name='Alice')"
+
+test_generated.py:45: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_logged_function_basic_return_and_logging - Ass...
+FAILED test_generated.py::test_logged_function_with_kwargs_and_metadata - ass...
+2 failed, 1 passed in 0.48s

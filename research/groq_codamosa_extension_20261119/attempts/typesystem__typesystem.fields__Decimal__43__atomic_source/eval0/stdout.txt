@@ -1,0 +1,83 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________________ test_decimal_valid_input ___________________________
+
+    def test_decimal_valid_input():
+        field = Decimal()
+        # Valid decimal string
+        result = field.validate("123.45")
+        assert isinstance(result, decimal.Decimal)
+        assert result == decimal.Decimal("123.45")
+        # Valid numeric input
+        result = field.validate(678)
+        assert isinstance(result, decimal.Decimal)
+        assert result == decimal.Decimal("678")
+        # None input returns None
+>       assert field.validate(None) is None
+
+../../../../../../attempts/typesystem__typesystem.fields__Decimal__43__atomic_source/eval0/test_generated.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.fields.Decimal object at 0x7f4c71fce170>, value = None
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        if value is None and self.allow_null:
+            return None
+        elif value == "" and self.allow_null and self.coerce_types:
+            return None
+        elif value is None:
+>           raise self.validation_error("null")
+E           typesystem.base.ValidationError: May not be null.
+
+typesystem/fields.py:245: ValidationError
+______________________ test_decimal_boundary_large_value _______________________
+
+    def test_decimal_boundary_large_value():
+        field = Decimal()
+        # Very large decimal value
+        large_str = "9" * 1000 + ".123456789"
+>       result = field.validate(large_str)
+
+../../../../../../attempts/typesystem__typesystem.fields__Decimal__43__atomic_source/eval0/test_generated.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.fields.Decimal object at 0x7f4c71fce950>
+value = Decimal('9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999...99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999.123456789')
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        if value is None and self.allow_null:
+            return None
+        elif value == "" and self.allow_null and self.coerce_types:
+            return None
+        elif value is None:
+            raise self.validation_error("null")
+        elif isinstance(value, bool):
+            raise self.validation_error("type")
+        elif (
+            self.numeric_type is int
+            and isinstance(value, float)
+            and not value.is_integer()
+        ):
+            raise self.validation_error("integer")
+        elif not isinstance(value, (int, float)) and not self.coerce_types:
+            raise self.validation_error("type")
+    
+        try:
+            if isinstance(value, str):
+                # Casting to a decimal first gives more lenient parsing.
+                value = decimal.Decimal(value)
+            if self.numeric_type is not None:
+                value = self.numeric_type(value)
+        except (TypeError, ValueError, decimal.InvalidOperation):
+            raise self.validation_error("type")
+    
+        if not isfinite(value):
+            # inf, -inf, nan, are all invalid.
+>           raise self.validation_error("finite")
+E           typesystem.base.ValidationError: Must be finite.
+
+typesystem/fields.py:268: ValidationError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/typesystem__typesystem.fields__Decimal__43__atomic_source/eval0/test_generated.py::test_decimal_valid_input
+FAILED ../../../../../../attempts/typesystem__typesystem.fields__Decimal__43__atomic_source/eval0/test_generated.py::test_decimal_boundary_large_value
+2 failed, 1 passed in 0.23s

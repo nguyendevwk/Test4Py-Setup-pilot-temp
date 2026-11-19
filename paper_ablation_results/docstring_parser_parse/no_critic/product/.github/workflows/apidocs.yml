@@ -1,0 +1,42 @@
+name: apidocs
+on:
+  push:
+    branches: [main]
+
+env:
+  # Keep in sync with pydoctor_version in the justfile
+  PYDOCTOR_VERSION: 25.10.1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+    - name: Set up uv with Python 3.12
+      uses: astral-sh/setup-uv@v10.3.2
+      with:
+        python-version: 3.12
+
+    - name: Generate API documentation with pydoctor
+      run: |
+
+        # Run simple pydoctor build
+        uvx --python 3.12 --from "pydoctor==$PYDOCTOR_VERSION" pydoctor \
+            --project-name=docstring_parser \
+            --project-url=https://github.com/$GITHUB_REPOSITORY \
+            --html-viewsource-base=https://github.com/$GITHUB_REPOSITORY/tree/$GITHUB_SHA \
+            --make-html \
+            --html-output=./apidocs \
+            --project-base-dir="." \
+            --docformat=restructuredtext \
+            --privacy="HIDDEN:docstring_parser.tests" \
+            --intersphinx=https://docs.python.org/3/objects.inv \
+            ./docstring_parser
+
+    - name: Push API documentation to Github Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./apidocs
+        commit_message: "Generate API documentation"

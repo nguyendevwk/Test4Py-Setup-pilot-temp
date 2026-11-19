@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-e6912805-bad5-49a7-bfdd-e8a8d265ef93",
+  "object": "chat.completion",
+  "created": 1795076565,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import tokenize_json, ParseError\nfrom typesystem.tokenize.tokens import DictToken, ListToken, ScalarToken, Token\n\ndef test_tokenize_json_valid_object():\n    json_str = '{\"name\": \"Alice\", \"age\": 30, \"hobbies\": [\"reading\", \"hiking\"]}'\n    token = tokenize_json(json_str)\n    assert isinstance(token, Token)\n    assert isinstance(token, DictToken)\n    assert set(token.children.keys()) == {\"name\", \"age\", \"hobbies\"}\n    assert isinstance(token.children[\"name\"], ScalarToken)\n    assert token.children[\"name\"].value == \"Alice\"\n    assert isinstance(token.children[\"age\"], ScalarToken)\n    assert token.children[\"age\"].value == 30\n    assert isinstance(token.children[\"hobbies\"], ListToken)\n    assert [item.value for item in token.children[\"hobbies\"].children] == [\"reading\", \"hiking\"]\n\ndef test_tokenize_json_empty_string_raises():\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    assert err.position.column_no == 1\n    assert err.position.line_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_json_invalid_syntax_raises():\n    bad_json = '{\"missing_end\": true'\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(bad_json)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    assert \"Expecting\" in err.text or \"Expecting value\" in err.text\n    # Position should reflect the location of the error\n    assert err.position.column_no > 0\n    assert err.position.line_no > 0\n    assert err.position.char_index >= 0\n```",
+        "reasoning": "We need to test tokenize_json. We need to import it. Write three tests: normal JSON, boundary empty string, error invalid JSON. Use tmp_path? Not needed. Just test. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.056464685,
+    "prompt_tokens": 468,
+    "prompt_time": 0.115873409,
+    "completion_tokens": 446,
+    "completion_time": 0.49660607,
+    "total_tokens": 914,
+    "total_time": 0.612479479,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 43
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7seda74eectaef7nmqfgtty",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import tokenize_json, ParseError\nfrom typesystem.tokenize.tokens import DictToken, ListToken, ScalarToken, Token\n\ndef test_tokenize_json_valid_object():\n    json_str = '{\"name\": \"Alice\", \"age\": 30, \"hobbies\": [\"reading\", \"hiking\"]}'\n    token = tokenize_json(json_str)\n    assert isinstance(token, Token)\n    assert isinstance(token, DictToken)\n    assert set(token.children.keys()) == {\"name\", \"age\", \"hobbies\"}\n    assert isinstance(token.children[\"name\"], ScalarToken)\n    assert token.children[\"name\"].value == \"Alice\"\n    assert isinstance(token.children[\"age\"], ScalarToken)\n    assert token.children[\"age\"].value == 30\n    assert isinstance(token.children[\"hobbies\"], ListToken)\n    assert [item.value for item in token.children[\"hobbies\"].children] == [\"reading\", \"hiking\"]\n\ndef test_tokenize_json_empty_string_raises():\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    assert err.position.column_no == 1\n    assert err.position.line_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_json_invalid_syntax_raises():\n    bad_json = '{\"missing_end\": true'\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(bad_json)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    assert \"Expecting\" in err.text or \"Expecting value\" in err.text\n    # Position should reflect the location of the error\n    assert err.position.column_no > 0\n    assert err.position.line_no > 0\n    assert err.position.char_index >= 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9788816740037873
+}

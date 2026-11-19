@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-6d388f81-16e1-41aa-900d-fdc05ab3583b",
+  "object": "chat.completion",
+  "created": 1795079475,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport time\nimport requests\nfrom httpie.models import HTTPResponse\nfrom urllib3.util import SKIP_HEADER, SKIPPABLE_HEADERS\nfrom httpie.utils import split_cookies\n\ndef create_response(status=200, headers=None, body=b''):\n    \"\"\"Helper to create a minimal requests.Response object.\"\"\"\n    resp = requests.Response()\n    resp.status_code = status\n    resp._content = body\n    resp.headers = headers or {}\n    resp.url = 'http://example.com'\n    # simulate elapsed time\n    resp.elapsed = time.timedelta(seconds=0.01)\n    # simulate internal timestamp for metadata\n    resp._httpie_headers_parsed_at = time.monotonic()\n    return resp\n\ndef test_headers_property_excludes_set_cookie_and_splits_cookies():\n    resp = create_response(\n        headers={\n            'Content-Type': 'text/plain',\n            'Set-Cookie': 'id=123; Path=/; HttpOnly, session=abc; Path=/'\n        }\n    )\n    http_resp = HTTPResponse(resp)\n    headers_str = http_resp.headers\n    # Status line should be first\n    assert headers_str.startswith('HTTP/1.1 200 OK')\n    # Content-Type header should be present\n    assert 'Content-Type: text/plain' in headers_str\n    # Set-Cookie header should be split into two lines\n    assert headers_str.count('Set-Cookie:') == 2\n    assert 'Set-Cookie: id=123; Path=/; HttpOnly' in headers_str\n    assert 'Set-Cookie: session=abc; Path=/' in headers_str\n    # No other headers\n    assert 'Content-Length' not in headers_str\n\ndef test_metadata_includes_elapsed_time_and_is_precise():\n    resp = create_response()\n    # Wait a bit to create measurable elapsed time\n    time.sleep(0.02)\n    http_resp = HTTPResponse(resp)\n    meta = http_resp.metadata\n    # Metadata should contain a single line with elapsed time\n    assert meta.startswith('Elapsed Time: ')\n    # Extract the numeric part\n    elapsed_str = meta.split(': ')[1].rstrip('s')\n    elapsed_val = float(elapsed_str)\n    # The elapsed time should be at least the sum of elapsed and wait\n    assert elapsed_val >= 0.02\n    # Ensure the format has up to 10 decimal places\n    assert len(elapsed_str.split('.')[1]) <= 10\n\ndef test_version_fallback_and_explicit_version():\n    # Response with explicit HTTP/2.0 version\n    resp = create_response()\n    resp.raw = type('Raw', (), {'version': 20})()\n    http_resp = HTTPResponse(resp)\n    assert http_resp.version == '2.0'\n\n    # Response without raw.version attribute should fallback to 1.1\n    resp_no_raw = create_response()\n    delattr(resp_no_raw, 'raw')\n    http_resp_no_raw = HTTPResponse(resp_no_raw)\n    assert http_resp_no_raw.version == '1.1'\n```",
+        "reasoning": "Need tests for HTTPResponse. We can create a mock Response using requests.Response. Set attributes. Use tmp_path for any file? Not needed. Write three tests: normal headers property, metadata timing, version fallback. Use real requests.Response."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005690405,
+    "prompt_tokens": 837,
+    "prompt_time": 0.045702071,
+    "completion_tokens": 688,
+    "completion_time": 0.716938442,
+    "total_tokens": 1525,
+    "total_time": 0.762640513,
+    "completion_tokens_details": {
+      "reasoning_tokens": 49
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh63xge0qas20tgeg9dd7t",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport time\nimport requests\nfrom httpie.models import HTTPResponse\nfrom urllib3.util import SKIP_HEADER, SKIPPABLE_HEADERS\nfrom httpie.utils import split_cookies\n\ndef create_response(status=200, headers=None, body=b''):\n    \"\"\"Helper to create a minimal requests.Response object.\"\"\"\n    resp = requests.Response()\n    resp.status_code = status\n    resp._content = body\n    resp.headers = headers or {}\n    resp.url = 'http://example.com'\n    # simulate elapsed time\n    resp.elapsed = time.timedelta(seconds=0.01)\n    # simulate internal timestamp for metadata\n    resp._httpie_headers_parsed_at = time.monotonic()\n    return resp\n\ndef test_headers_property_excludes_set_cookie_and_splits_cookies():\n    resp = create_response(\n        headers={\n            'Content-Type': 'text/plain',\n            'Set-Cookie': 'id=123; Path=/; HttpOnly, session=abc; Path=/'\n        }\n    )\n    http_resp = HTTPResponse(resp)\n    headers_str = http_resp.headers\n    # Status line should be first\n    assert headers_str.startswith('HTTP/1.1 200 OK')\n    # Content-Type header should be present\n    assert 'Content-Type: text/plain' in headers_str\n    # Set-Cookie header should be split into two lines\n    assert headers_str.count('Set-Cookie:') == 2\n    assert 'Set-Cookie: id=123; Path=/; HttpOnly' in headers_str\n    assert 'Set-Cookie: session=abc; Path=/' in headers_str\n    # No other headers\n    assert 'Content-Length' not in headers_str\n\ndef test_metadata_includes_elapsed_time_and_is_precise():\n    resp = create_response()\n    # Wait a bit to create measurable elapsed time\n    time.sleep(0.02)\n    http_resp = HTTPResponse(resp)\n    meta = http_resp.metadata\n    # Metadata should contain a single line with elapsed time\n    assert meta.startswith('Elapsed Time: ')\n    # Extract the numeric part\n    elapsed_str = meta.split(': ')[1].rstrip('s')\n    elapsed_val = float(elapsed_str)\n    # The elapsed time should be at least the sum of elapsed and wait\n    assert elapsed_val >= 0.02\n    # Ensure the format has up to 10 decimal places\n    assert len(elapsed_str.split('.')[1]) <= 10\n\ndef test_version_fallback_and_explicit_version():\n    # Response with explicit HTTP/2.0 version\n    resp = create_response()\n    resp.raw = type('Raw', (), {'version': 20})()\n    http_resp = HTTPResponse(resp)\n    assert http_resp.version == '2.0'\n\n    # Response without raw.version attribute should fallback to 1.1\n    resp_no_raw = create_response()\n    delattr(resp_no_raw, 'raw')\n    http_resp_no_raw = HTTPResponse(resp_no_raw)\n    assert http_resp_no_raw.version == '1.1'\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "68c008e23ee64091a52a9c5129068a89",
+  "_api_plus_pacing_seconds": 1.9683114060317166
+}

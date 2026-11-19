@@ -1,0 +1,44 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_validate_or_error_success_and_failure __________________
+
+    def test_validate_or_error_success_and_failure():
+        field = DummyField()
+        # valid integer passes
+        result = field.validate_or_error(5)
+        assert isinstance(result, ValidationResult)
+        assert result.error is None
+        assert result.value == 5
+        # invalid type triggers ValidationError
+        result2 = field.validate_or_error("foo")
+        assert isinstance(result2, ValidationResult)
+        assert result2.error is not None
+        assert isinstance(result2.error, ValidationError)
+>       assert result2.error.code == "type"
+E       AttributeError: 'ValidationError' object has no attribute 'code'
+
+test_generated.py:36: AttributeError
+___________________ test_validation_error_and_get_error_text ___________________
+
+    def test_validation_error_and_get_error_text():
+        field = DummyField()
+        # trigger a validation error manually
+>       error = field.validation_error("invalid")
+
+test_generated.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:72: in validation_error
+    text = self.get_error_text(code)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyField object at 0x7fce6c6585b0>, code = 'invalid'
+
+    def get_error_text(self, code: str) -> str:
+>       return self.errors[code].format(**self.__dict__)
+E       KeyError: 'value'
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:76: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_validate_or_error_success_and_failure - Attrib...
+FAILED test_generated.py::test_validation_error_and_get_error_text - KeyError...
+2 failed, 1 passed in 0.29s

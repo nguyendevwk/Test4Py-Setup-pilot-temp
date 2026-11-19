@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-7497d6ff-d35c-465b-8a5d-9ef2f752ecd1",
+  "object": "chat.completion",
+  "created": 1795076371,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom decimal import Decimal\n\nfrom pypara.dcc import DCCRegistry, dcc, _last_payment_date, _next_payment_date, DCC, Money, Currencies\n\n\ndef test_register_duplicate_raises():\n    \"\"\"Registering a DCC with an already used name or alternative name raises TypeError.\"\"\"\n    # Define a simple day count fraction calculator\n    @dcc(\"Test/Act\", altnames={\"Test/Act Alternative\"})\n    def test_calc(start, asof, end, freq=None):\n        return Decimal(1)\n\n    # Attempt to register another DCC with the same main name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"Test/Act\")\n        def dup_calc(start, asof, end, freq=None):\n            return Decimal(1)\n\n    # Attempt to register another DCC with the same alternative name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"Another/Act\", altnames={\"Test/Act Alternative\"})\n        def dup_alt_calc(start, asof, end, freq=None):\n            return Decimal(1)\n\n\ndef test_find_case_insensitive_and_stripped():\n    \"\"\"DCCRegistry.find should locate conventions regardless of case and surrounding whitespace.\"\"\"\n    # Register a convention with mixed case and spaces\n    @dcc(\"  Mixed/Case  \")\n    def mixed_calc(start, asof, end, freq=None):\n        return Decimal(1)\n\n    # Direct lookup with exact name\n    assert DCCRegistry.find(\"  Mixed/Case  \") is not None\n\n    # Lookup with different case\n    assert DCCRegistry.find(\"mixed/case\") is not None\n\n    # Lookup with stripped and uppercased name\n    assert DCCRegistry.find(\"MIXED/CASE\") is not None\n\n    # Lookup with leading/trailing whitespace\n    assert DCCRegistry.find(\"  MIXED/CASE  \") is not None\n\n    # Ensure that a non-existent name returns None\n    assert DCCRegistry.find(\"Nonexistent/Convention\") is None\n\n\ndef test_last_payment_date_boundary_conditions():\n    \"\"\"_last_payment_date should correctly handle edge cases such as year boundaries and end-of-month.\"\"\"\n    # Case: asof before start month, should return previous year same month\n    start = datetime.date(2020, 5, 15)\n    asof = datetime.date(2021, 3, 10)  # earlier month than start\n    result = _last_payment_date(start, asof, frequency=1)\n    assert result == datetime.date(2020, 5, 15)\n\n    # Case: asof exactly on a payment month but before eom, should return same month\n    start = datetime.date(2020, 1, 31)\n    asof = datetime.date(2020, 1, 30)\n    result = _last_payment_date(start, asof, frequency=1)\n    assert result == datetime.date(2020, 1, 31)\n\n    # Case: asof on a payment month but after eom, should return previous month\n    start = datetime.date(2020, 1, 31)\n    asof = datetime.date(2020, 1, 31)\n    result = _last_payment_date(start, asof, frequency=1)\n    assert result == datetime.date(2020, 1, 31)\n\n    # Case: frequency 2 (semiannual) with asof in middle of period\n    start = datetime.date(2020, 1, 15)\n    asof = datetime.date(2020, 6, 10)\n    result = _last_payment_date(start, asof, frequency=2)\n    assert result == datetime.date(2020, 1, 15)\n\n    # Case: asof in next year, frequency 4 (quarterly)\n    start = datetime.date(2020, 7, 7)\n    asof = datetime.date(2021, 10, 6)\n    result = _last_payment_date(start, asof, frequency=4)\n    assert result == datetime.date(2021, 7, 7)\n```",
+        "reasoning": "Need tests: register duplicate raises, find case-insensitive, _last_payment_date boundary. Use tmp_path? not needed. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.115344784,
+    "prompt_tokens": 3251,
+    "prompt_time": 0.191506347,
+    "completion_tokens": 915,
+    "completion_time": 1.002833357,
+    "total_tokens": 4166,
+    "total_time": 1.194339704,
+    "completion_tokens_details": {
+      "reasoning_tokens": 30
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se7bbneant0zde2qyjetnd",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom decimal import Decimal\n\nfrom pypara.dcc import DCCRegistry, dcc, _last_payment_date, _next_payment_date, DCC, Money, Currencies\n\n\ndef test_register_duplicate_raises():\n    \"\"\"Registering a DCC with an already used name or alternative name raises TypeError.\"\"\"\n    # Define a simple day count fraction calculator\n    @dcc(\"Test/Act\", altnames={\"Test/Act Alternative\"})\n    def test_calc(start, asof, end, freq=None):\n        return Decimal(1)\n\n    # Attempt to register another DCC with the same main name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"Test/Act\")\n        def dup_calc(start, asof, end, freq=None):\n            return Decimal(1)\n\n    # Attempt to register another DCC with the same alternative name\n    with pytest.raises(TypeError, match=\"already registered\"):\n        @dcc(\"Another/Act\", altnames={\"Test/Act Alternative\"})\n        def dup_alt_calc(start, asof, end, freq=None):\n            return Decimal(1)\n\n\ndef test_find_case_insensitive_and_stripped():\n    \"\"\"DCCRegistry.find should locate conventions regardless of case and surrounding whitespace.\"\"\"\n    # Register a convention with mixed case and spaces\n    @dcc(\"  Mixed/Case  \")\n    def mixed_calc(start, asof, end, freq=None):\n        return Decimal(1)\n\n    # Direct lookup with exact name\n    assert DCCRegistry.find(\"  Mixed/Case  \") is not None\n\n    # Lookup with different case\n    assert DCCRegistry.find(\"mixed/case\") is not None\n\n    # Lookup with stripped and uppercased name\n    assert DCCRegistry.find(\"MIXED/CASE\") is not None\n\n    # Lookup with leading/trailing whitespace\n    assert DCCRegistry.find(\"  MIXED/CASE  \") is not None\n\n    # Ensure that a non-existent name returns None\n    assert DCCRegistry.find(\"Nonexistent/Convention\") is None\n\n\ndef test_last_payment_date_boundary_conditions():\n    \"\"\"_last_payment_date should correctly handle edge cases such as year boundaries and end-of-month.\"\"\"\n    # Case: asof before start month, should return previous year same month\n    start = datetime.date(2020, 5, 15)\n    asof = datetime.date(2021, 3, 10)  # earlier month than start\n    result = _last_payment_date(start, asof, frequency=1)\n    assert result == datetime.date(2020, 5, 15)\n\n    # Case: asof exactly on a payment month but before eom, should return same month\n    start = datetime.date(2020, 1, 31)\n    asof = datetime.date(2020, 1, 30)\n    result = _last_payment_date(start, asof, frequency=1)\n    assert result == datetime.date(2020, 1, 31)\n\n    # Case: asof on a payment month but after eom, should return previous month\n    start = datetime.date(2020, 1, 31)\n    asof = datetime.date(2020, 1, 31)\n    result = _last_payment_date(start, asof, frequency=1)\n    assert result == datetime.date(2020, 1, 31)\n\n    # Case: frequency 2 (semiannual) with asof in middle of period\n    start = datetime.date(2020, 1, 15)\n    asof = datetime.date(2020, 6, 10)\n    result = _last_payment_date(start, asof, frequency=2)\n    assert result == datetime.date(2020, 1, 15)\n\n    # Case: asof in next year, frequency 4 (quarterly)\n    start = datetime.date(2020, 7, 7)\n    asof = datetime.date(2021, 10, 6)\n    result = _last_payment_date(start, asof, frequency=4)\n    assert result == datetime.date(2021, 7, 7)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.6256800100090913
+}

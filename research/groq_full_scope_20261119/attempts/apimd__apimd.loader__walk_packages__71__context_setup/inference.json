@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-3c23d5a2-ebb2-4c19-b85e-a1c47de24b34",
+  "object": "chat.completion",
+  "created": 1795076302,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport importlib\nimport pytest\nfrom apimd.loader import walk_packages, PEP561_SUFFIX\n\ndef test_walk_packages_yields_expected_names(tmp_path):\n    # Create a package structure:\n    # tmp_path/\n    #   pkg/\n    #     __init__.py\n    #     module.py\n    #     subpkg/\n    #       __init__.py\n    #       submodule.py\n    pkg = tmp_path / \"pkg\"\n    pkg.mkdir()\n    (pkg / \"__init__.py\").write_text(\"\")\n    (pkg / \"module.py\").write_text(\"\")\n    subpkg = pkg / \"subpkg\"\n    subpkg.mkdir()\n    (subpkg / \"__init__.py\").write_text(\"\")\n    (subpkg / \"submodule.py\").write_text(\"\")\n\n    # Walk packages\n    results = list(walk_packages(\"pkg\", str(tmp_path)))\n    # Expected names: pkg, pkg.module, pkg.subpkg, pkg.subpkg.submodule\n    expected = {\n        (\"pkg\", str(pkg)),\n        (\"pkg.module\", str(pkg / \"module.py\")),\n        (\"pkg.subpkg\", str(subpkg)),\n        (\"pkg.subpkg.submodule\", str(subpkg / \"submodule.py\")),\n    }\n    assert set(results) == expected\n\ndef test_walk_packages_skips_non_py_files(tmp_path):\n    # Create a directory with various files\n    pkg = tmp_path / \"pkg\"\n    pkg.mkdir()\n    (pkg / \"__init__.py\").write_text(\"\")\n    (pkg / \"module.py\").write_text(\"\")\n    (pkg / \"data.txt\").write_text(\"not a python file\")\n    (pkg / \"script.sh\").write_text(\"#!/bin/bash\")\n    (pkg / \"module.pyi\").write_text(\"\")\n\n    results = list(walk_packages(\"pkg\", str(tmp_path)))\n    # Should only include .py and .pyi files\n    names = {name for name, _ in results}\n    assert names == {\"pkg\", \"pkg.module\", \"pkg.module\"}  # duplicate due to same name? actually module.py and module.pyi produce same name\n    # Ensure data.txt and script.sh are not present\n    for _, path in results:\n        assert not path.endswith((\".txt\", \".sh\"))\n\ndef test_walk_packages_raises_on_nonexistent_path(tmp_path):\n    # Provide a path that does not exist\n    nonexistent = tmp_path / \"does_not_exist\"\n    with pytest.raises(FileNotFoundError):\n        list(walk_packages(\"pkg\", str(nonexistent)))\n```",
+        "reasoning": "We need to test walk_packages. We need to create temporary directories with .py and .pyi files, ensure it yields correct names. Also test boundary: files not ending .py/.pyi are ignored. Also test error: maybe path not existing? walk will handle. But we can test that it raises if path not dir? walk will raise? Actually os.walk will raise if path not exist? It will raise FileNotFoundError. So test that. Write three tests: normal, boundary, error. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054350586,
+    "prompt_tokens": 561,
+    "prompt_time": 0.034839914,
+    "completion_tokens": 648,
+    "completion_time": 0.699067981,
+    "total_tokens": 1209,
+    "total_time": 0.733907895,
+    "completion_tokens_details": {
+      "reasoning_tokens": 109
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7se58eje29athsd82pt4n0q",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport importlib\nimport pytest\nfrom apimd.loader import walk_packages, PEP561_SUFFIX\n\ndef test_walk_packages_yields_expected_names(tmp_path):\n    # Create a package structure:\n    # tmp_path/\n    #   pkg/\n    #     __init__.py\n    #     module.py\n    #     subpkg/\n    #       __init__.py\n    #       submodule.py\n    pkg = tmp_path / \"pkg\"\n    pkg.mkdir()\n    (pkg / \"__init__.py\").write_text(\"\")\n    (pkg / \"module.py\").write_text(\"\")\n    subpkg = pkg / \"subpkg\"\n    subpkg.mkdir()\n    (subpkg / \"__init__.py\").write_text(\"\")\n    (subpkg / \"submodule.py\").write_text(\"\")\n\n    # Walk packages\n    results = list(walk_packages(\"pkg\", str(tmp_path)))\n    # Expected names: pkg, pkg.module, pkg.subpkg, pkg.subpkg.submodule\n    expected = {\n        (\"pkg\", str(pkg)),\n        (\"pkg.module\", str(pkg / \"module.py\")),\n        (\"pkg.subpkg\", str(subpkg)),\n        (\"pkg.subpkg.submodule\", str(subpkg / \"submodule.py\")),\n    }\n    assert set(results) == expected\n\ndef test_walk_packages_skips_non_py_files(tmp_path):\n    # Create a directory with various files\n    pkg = tmp_path / \"pkg\"\n    pkg.mkdir()\n    (pkg / \"__init__.py\").write_text(\"\")\n    (pkg / \"module.py\").write_text(\"\")\n    (pkg / \"data.txt\").write_text(\"not a python file\")\n    (pkg / \"script.sh\").write_text(\"#!/bin/bash\")\n    (pkg / \"module.pyi\").write_text(\"\")\n\n    results = list(walk_packages(\"pkg\", str(tmp_path)))\n    # Should only include .py and .pyi files\n    names = {name for name, _ in results}\n    assert names == {\"pkg\", \"pkg.module\", \"pkg.module\"}  # duplicate due to same name? actually module.py and module.pyi produce same name\n    # Ensure data.txt and script.sh are not present\n    for _, path in results:\n        assert not path.endswith((\".txt\", \".sh\"))\n\ndef test_walk_packages_raises_on_nonexistent_path(tmp_path):\n    # Provide a path that does not exist\n    nonexistent = tmp_path / \"does_not_exist\"\n    with pytest.raises(FileNotFoundError):\n        list(walk_packages(\"pkg\", str(nonexistent)))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0774571909569204
+}

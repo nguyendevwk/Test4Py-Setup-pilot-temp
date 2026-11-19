@@ -1,0 +1,71 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______ test_tqdm_pandas_with_class_triggers_deprecation_and_pandas_call _______
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm._tqdm_pandas__tqdm_pandas__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_tqdm_pandas_with_class_tr0')
+
+    def test_tqdm_pandas_with_class_triggers_deprecation_and_pandas_call(tmp_path):
+        # Dummy class that mimics a tqdm class with a pandas method
+        class DummyTqdm:
+            called = False
+    
+            @classmethod
+            def pandas(cls, **kwargs):
+                cls.called = True
+                cls.kwargs = kwargs
+    
+        # Capture warnings
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always", TqdmDeprecationWarning)
+            tqdm_pandas(DummyTqdm, desc="test", total=10)
+    
+            # Verify deprecation warning was issued
+>           assert any(
+                issubclass(exc.category, TqdmDeprecationWarning)
+                and "Please use `tqdm.pandas(...)" in str(exc.message)
+                for exc in w
+            )
+E           assert False
+E            +  where False = any(<generator object test_tqdm_pandas_with_class_triggers_deprecation_and_pandas_call.<locals>.<genexpr> at 0x7f3c96e2b140>)
+
+test_generated.py:23: AssertionError
+----------------------------- Captured stderr call -----------------------------
+
+TqdmDeprecationWarning: Please use `tqdm.pandas(...)` instead of `tqdm_pandas(tqdm, ...)`.
+_____ test_tqdm_pandas_with_instance_triggers_deprecation_and_pandas_call ______
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm._tqdm_pandas__tqdm_pandas__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_tqdm_pandas_with_instance0')
+
+    def test_tqdm_pandas_with_instance_triggers_deprecation_and_pandas_call(tmp_path):
+        # Dummy instance with fp attribute having write method
+        class DummyFP:
+            def write(self, msg):
+                self.last_msg = msg
+    
+        class DummyInstance:
+            fp = DummyFP()
+    
+            @classmethod
+            def pandas(cls, deprecated_t=None):
+                cls.called = True
+                cls.deprecated_t = deprecated_t
+    
+        # Capture warnings
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always", TqdmDeprecationWarning)
+            tqdm_pandas(DummyInstance(), bar_format="{}")
+    
+            # Verify deprecation warning was issued
+>           assert any(
+                issubclass(exc.category, TqdmDeprecationWarning)
+                and "Please use `tqdm.pandas(...)" in str(exc.message)
+                for exc in w
+            )
+E           assert False
+E            +  where False = any(<generator object test_tqdm_pandas_with_instance_triggers_deprecation_and_pandas_call.<locals>.<genexpr> at 0x7f3c96d1c430>)
+
+test_generated.py:54: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_tqdm_pandas_with_class_triggers_deprecation_and_pandas_call
+FAILED test_generated.py::test_tqdm_pandas_with_instance_triggers_deprecation_and_pandas_call
+2 failed, 1 passed in 0.13s

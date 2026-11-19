@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-4ed28e17-8f68-4d8a-966d-e6f80908ccdb",
+  "object": "chat.completion",
+  "created": 1795079637,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport os\nimport pytest\nfrom pathlib import Path\nfrom contextlib import nullcontext\n\nfrom httpie.plugins.manager import enable_plugins, _load_directories\n\n\ndef test_enable_plugins_none_returns_nullcontext():\n    \"\"\"When plugins_dir is None, enable_plugins should return a nullcontext.\"\"\"\n    ctx = enable_plugins(None)\n    assert ctx is nullcontext()\n    # Using the context manager should not alter sys.path\n    original_sys_path = list(sys.path)\n    with ctx:\n        assert sys.path == original_sys_path\n\n\ndef test_enable_plugins_adds_and_removes_path(tmp_path: Path):\n    \"\"\"enable_plugins should add the given directory to sys.path during the context\n    and remove it afterwards.\"\"\"\n    # Create a dummy plugin directory\n    plugin_dir = tmp_path / \"plugins\"\n    plugin_dir.mkdir()\n    # Ensure the directory is not already in sys.path\n    assert str(plugin_dir) not in sys.path\n\n    with enable_plugins(plugin_dir) as ctx:\n        # Inside the context, the directory should be present\n        assert str(plugin_dir) in sys.path\n        # The context manager should yield None\n        assert ctx is None\n\n    # After exiting the context, the directory should be removed\n    assert str(plugin_dir) not in sys.path\n\n\ndef test_load_directories_yields_and_restores_sys_path(tmp_path: Path):\n    \"\"\"_load_directories should yield control and restore sys.path after exit.\"\"\"\n    # Create two dummy directories\n    dir1 = tmp_path / \"dir1\"\n    dir2 = tmp_path / \"dir2\"\n    dir1.mkdir()\n    dir2.mkdir()\n\n    # Capture original sys.path\n    original_sys_path = list(sys.path)\n\n    # Use the generator directly\n    gen = _load_directories([dir1, dir2])\n    # Before first yield, sys.path should be unchanged\n    assert list(sys.path) == original_sys_path\n\n    # Advance to the yield\n    next(gen)\n    # During the context, both directories should be in sys.path\n    assert str(dir1) in sys.path\n    assert str(dir2) in sys.path\n\n    # Close the generator to trigger finally block\n    gen.close()\n    # After cleanup, sys.path should be restored\n    assert list(sys.path) == original_sys_path\n```",
+        "reasoning": "We need three test functions for enable_plugins. Test when plugins_dir None returns nullcontext. Test when given a path, it adds to sys.path and removes after exit. Use tmp_path to create dummy dir. Also test that context manager yields None. Also test that if plugin dir not exist? It still adds? But get_site_paths may handle. We'll just test normal."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004760622,
+    "prompt_tokens": 505,
+    "prompt_time": 0.044602065,
+    "completion_tokens": 564,
+    "completion_time": 0.702159577,
+    "total_tokens": 1069,
+    "total_time": 0.746761642,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 76
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7shb1h1ebr8rvey2jh950f6",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport os\nimport pytest\nfrom pathlib import Path\nfrom contextlib import nullcontext\n\nfrom httpie.plugins.manager import enable_plugins, _load_directories\n\n\ndef test_enable_plugins_none_returns_nullcontext():\n    \"\"\"When plugins_dir is None, enable_plugins should return a nullcontext.\"\"\"\n    ctx = enable_plugins(None)\n    assert ctx is nullcontext()\n    # Using the context manager should not alter sys.path\n    original_sys_path = list(sys.path)\n    with ctx:\n        assert sys.path == original_sys_path\n\n\ndef test_enable_plugins_adds_and_removes_path(tmp_path: Path):\n    \"\"\"enable_plugins should add the given directory to sys.path during the context\n    and remove it afterwards.\"\"\"\n    # Create a dummy plugin directory\n    plugin_dir = tmp_path / \"plugins\"\n    plugin_dir.mkdir()\n    # Ensure the directory is not already in sys.path\n    assert str(plugin_dir) not in sys.path\n\n    with enable_plugins(plugin_dir) as ctx:\n        # Inside the context, the directory should be present\n        assert str(plugin_dir) in sys.path\n        # The context manager should yield None\n        assert ctx is None\n\n    # After exiting the context, the directory should be removed\n    assert str(plugin_dir) not in sys.path\n\n\ndef test_load_directories_yields_and_restores_sys_path(tmp_path: Path):\n    \"\"\"_load_directories should yield control and restore sys.path after exit.\"\"\"\n    # Create two dummy directories\n    dir1 = tmp_path / \"dir1\"\n    dir2 = tmp_path / \"dir2\"\n    dir1.mkdir()\n    dir2.mkdir()\n\n    # Capture original sys.path\n    original_sys_path = list(sys.path)\n\n    # Use the generator directly\n    gen = _load_directories([dir1, dir2])\n    # Before first yield, sys.path should be unchanged\n    assert list(sys.path) == original_sys_path\n\n    # Advance to the yield\n    next(gen)\n    # During the context, both directories should be in sys.path\n    assert str(dir1) in sys.path\n    assert str(dir2) in sys.path\n\n    # Close the generator to trigger finally block\n    gen.close()\n    # After cleanup, sys.path should be restored\n    assert list(sys.path) == original_sys_path\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "b5245f8ba4de4097bd4e253499fb1814",
+  "_api_plus_pacing_seconds": 1.7368915599654429
+}

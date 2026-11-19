@@ -1,0 +1,206 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_itvie_normal_extraction _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.itv__ITVIE__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_itvie_normal_extraction0')
+
+    def test_itvie_normal_extraction(tmp_path):
+        # Sample webpage containing required attributes and JSON-LD
+        webpage = """
+        <html>
+        <head>
+            <meta property="og:title" content="Test Episode Title"/>
+        </head>
+        <body>
+            <div id="video" data-video-playlist="https://api.itv.com/playlist" data-video-id="12345" data-video-hmac="abcd1234"></div>
+            <div class="episode-info__synopsis">This is a <b>test</b> synopsis.</div>
+            <script type="application/ld+json">
+            {
+                "@context": "http://schema.org",
+                "@type": "TVEpisode",
+                "name": "Test Episode Title",
+                "description": "Test description",
+                "episodeNumber": 1,
+                "seasonNumber": 1,
+                "series": "Test Series"
+            }
+            </script>
+        </body>
+        </html>
+        """
+        # Sample playlist JSON returned by _download_json
+        playlist_json = {
+            "Playlist": {
+                "Video": {
+                    "Base": "https://cdn.itv.com/",
+                    "MediaFiles": [
+                        {"Href": "/video1.mp4"},
+                        {"Href": "/video2.m3u8"}
+                    ],
+                    "Subtitles": [
+                        {"Href": "https://cdn.itv.com/subs_en.vtt"}
+                    ],
+                    "Duration": "PT1H30M"
+                }
+            }
+        }
+        extractor = DummyITVIE(webpage, playlist_json)
+>       result = extractor._real_extract("https://www.itv.com/hub/test/12345")
+
+test_generated.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/itv.py:57: in _real_extract
+    params = extract_attributes(self._search_regex(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyITVIE object at 0x7fe71d4f62c0>
+pattern = '(?s)(<[^>]+id="video"[^>]*>)'
+string = '\n    <html>\n    <head>\n        <meta property="og:title" content="Test Episode Title"/>\n    </head>\n    <body>\n... "seasonNumber": 1,\n            "series": "Test Series"\n        }\n        </script>\n    </body>\n    </html>\n    '
+name = 'params', default = <object object at 0x7fe72c5ae330>, fatal = True
+flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+__________________________ test_itvie_no_media_files ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.itv__ITVIE__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_itvie_no_media_files0')
+
+    def test_itvie_no_media_files(tmp_path):
+        # Webpage with attributes but no MediaFiles
+        webpage = """
+        <html>
+        <body>
+            <div id="video" data-video-playlist="https://api.itv.com/playlist" data-video-id="12345" data-video-hmac="abcd1234"></div>
+        </body>
+        </html>
+        """
+        playlist_json = {
+            "Playlist": {
+                "Video": {
+                    "Base": "https://cdn.itv.com/",
+                    "MediaFiles": [],
+                    "Subtitles": [],
+                    "Duration": "PT0M"
+                }
+            }
+        }
+        extractor = DummyITVIE(webpage, playlist_json)
+>       result = extractor._real_extract("https://www.itv.com/hub/test/12345")
+
+test_generated.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/itv.py:57: in _real_extract
+    params = extract_attributes(self._search_regex(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyITVIE object at 0x7fe71c0004c0>
+pattern = '(?s)(<[^>]+id="video"[^>]*>)'
+string = '\n    <html>\n    <body>\n        <div id="video" data-video-playlist="https://api.itv.com/playlist" data-video-id="12345" data-video-hmac="abcd1234"></div>\n    </body>\n    </html>\n    '
+name = 'params', default = <object object at 0x7fe72c5ae330>, fatal = True
+flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+____________________ test_itvie_invalid_href_and_subtitles _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.itv__ITVIE__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_itvie_invalid_href_and_su0')
+
+    def test_itvie_invalid_href_and_subtitles(tmp_path):
+        # Webpage with invalid hrefs and non-dict subtitles
+        webpage = """
+        <html>
+        <body>
+            <div id="video" data-video-playlist="https://api.itv.com/playlist" data-video-id="12345" data-video-hmac="abcd1234"></div>
+        </body>
+        </html>
+        """
+        playlist_json = {
+            "Playlist": {
+                "Video": {
+                    "Base": None,
+                    "MediaFiles": [
+                        {"Href": None},
+                        {"Href": "invalid://path"}
+                    ],
+                    "Subtitles": [
+                        {"Href": None},
+                        "not a dict",
+                        {"Href": "https://cdn.itv.com/subs_en.vtt"}
+                    ],
+                    "Duration": "PT5M"
+                }
+            }
+        }
+        extractor = DummyITVIE(webpage, playlist_json)
+>       result = extractor._real_extract("https://www.itv.com/hub/test/12345")
+
+test_generated.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/itv.py:57: in _real_extract
+    params = extract_attributes(self._search_regex(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyITVIE object at 0x7fe71c005ea0>
+pattern = '(?s)(<[^>]+id="video"[^>]*>)'
+string = '\n    <html>\n    <body>\n        <div id="video" data-video-playlist="https://api.itv.com/playlist" data-video-id="12345" data-video-hmac="abcd1234"></div>\n    </body>\n    </html>\n    '
+name = 'params', default = <object object at 0x7fe72c5ae330>, fatal = True
+flags = 0, group = None
+
+    def _search_regex(self, pattern, string, name, default=NO_DEFAULT, fatal=True, flags=0, group=None):
+        """
+        Perform a regex search on the given string, using a single or a list of
+        patterns returning the first matching group.
+        In case of failure return a default value or raise a WARNING or a
+        RegexNotFoundError, depending on fatal, specifying the field name.
+        """
+        if isinstance(pattern, (str, compat_str, compiled_regex_type)):
+            mobj = re.search(pattern, string, flags)
+        else:
+            for p in pattern:
+                mobj = re.search(p, string, flags)
+                if mobj:
+                    break
+    
+>       if not self._downloader.params.get('no_color') and compat_os_name != 'nt' and sys.stderr.isatty():
+E       AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:998: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_itvie_normal_extraction - AttributeError: 'Non...
+FAILED test_generated.py::test_itvie_no_media_files - AttributeError: 'NoneTy...
+FAILED test_generated.py::test_itvie_invalid_href_and_subtitles - AttributeEr...
+3 failed in 1.05s

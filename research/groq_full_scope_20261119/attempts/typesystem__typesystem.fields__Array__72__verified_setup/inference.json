@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-d7e307b8-ecfc-4efe-a513-243248f90d18",
+  "object": "chat.completion",
+  "created": 1795077306,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.fields import Array\nfrom typesystem.base import ValidationError\nfrom typesystem import fields\n\n# Test 1: Normal validation with a homogeneous array of integers\ndef test_array_homogeneous_integers():\n    arr_field = Array(items=fields.Integer())\n    result = arr_field.validate([1, 2, 3])\n    assert result == [1, 2, 3]  # values are unchanged\n    # Ensure that the field accepts a single integer when min_items is 1\n    single_result = arr_field.validate([42])\n    assert single_result == [42]\n\n# Test 2: Boundary conditions for min_items and max_items\ndef test_array_min_max_boundary():\n    arr_field = Array(items=fields.String(), min_items=2, max_items=4)\n    # Exactly at min boundary\n    assert arr_field.validate([\"a\", \"b\"]) == [\"a\", \"b\"]\n    # Exactly at max boundary\n    assert arr_field.validate([\"a\", \"b\", \"c\", \"d\"]) == [\"a\", \"b\", \"c\", \"d\"]\n    # Below min should raise ValidationError\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([\"only_one\"])\n    assert \"Must have at least 2 items.\" in str(excinfo.value)\n    # Above max should raise ValidationError\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([\"a\", \"b\", \"c\", \"d\", \"e\"])\n    assert \"Must have no more than 4 items.\" in str(excinfo.value)\n\n# Test 3: Unique items constraint\ndef test_array_unique_items():\n    arr_field = Array(items=fields.Integer(), unique_items=True)\n    # Valid unique array\n    assert arr_field.validate([1, 2, 3]) == [1, 2, 3]\n    # Duplicate should raise ValidationError with correct code\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([1, 2, 1])\n    errors = excinfo.value.messages\n    assert any(err.code == \"unique_items\" for err in errors)\n    # Ensure the error message mentions the duplicate position\n    duplicate_error = next(err for err in errors if err.code == \"unique_items\")\n    assert duplicate_error.key == 2  # duplicate at index 2\n```",
+        "reasoning": "Need tests for Array field. Use typesystem library. We'll import Array from typesystem.fields. Write three tests: normal validation, boundary min/max, error unique. Use tmp_path? not needed. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048066623,
+    "prompt_tokens": 1248,
+    "prompt_time": 0.162027466,
+    "completion_tokens": 555,
+    "completion_time": 0.621536016,
+    "total_tokens": 1803,
+    "total_time": 0.783563482,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 45
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sf3x8hej4rzdnbex134b20",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.fields import Array\nfrom typesystem.base import ValidationError\nfrom typesystem import fields\n\n# Test 1: Normal validation with a homogeneous array of integers\ndef test_array_homogeneous_integers():\n    arr_field = Array(items=fields.Integer())\n    result = arr_field.validate([1, 2, 3])\n    assert result == [1, 2, 3]  # values are unchanged\n    # Ensure that the field accepts a single integer when min_items is 1\n    single_result = arr_field.validate([42])\n    assert single_result == [42]\n\n# Test 2: Boundary conditions for min_items and max_items\ndef test_array_min_max_boundary():\n    arr_field = Array(items=fields.String(), min_items=2, max_items=4)\n    # Exactly at min boundary\n    assert arr_field.validate([\"a\", \"b\"]) == [\"a\", \"b\"]\n    # Exactly at max boundary\n    assert arr_field.validate([\"a\", \"b\", \"c\", \"d\"]) == [\"a\", \"b\", \"c\", \"d\"]\n    # Below min should raise ValidationError\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([\"only_one\"])\n    assert \"Must have at least 2 items.\" in str(excinfo.value)\n    # Above max should raise ValidationError\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([\"a\", \"b\", \"c\", \"d\", \"e\"])\n    assert \"Must have no more than 4 items.\" in str(excinfo.value)\n\n# Test 3: Unique items constraint\ndef test_array_unique_items():\n    arr_field = Array(items=fields.Integer(), unique_items=True)\n    # Valid unique array\n    assert arr_field.validate([1, 2, 3]) == [1, 2, 3]\n    # Duplicate should raise ValidationError with correct code\n    with pytest.raises(ValidationError) as excinfo:\n        arr_field.validate([1, 2, 1])\n    errors = excinfo.value.messages\n    assert any(err.code == \"unique_items\" for err in errors)\n    # Ensure the error message mentions the duplicate position\n    duplicate_error = next(err for err in errors if err.code == \"unique_items\")\n    assert duplicate_error.key == 2  # duplicate at index 2\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.150266513985116
+}

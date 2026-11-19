@@ -1,0 +1,68 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_protocol_structural_compatibility ____________________
+
+    def test_protocol_structural_compatibility():
+        """
+        A class that implements the __call__ signature should be considered an instance
+        of GeneralLedgerProgram due to structural typing.
+        """
+        class DummyProgram:
+            def __call__(self, period: DateRange) -> GeneralLedger:
+                # Return a minimal stub of GeneralLedger for the test
+                return GeneralLedger(period)
+    
+        dummy = DummyProgram()
+        # Structural typing: isinstance should succeed
+>       assert isinstance(dummy, GeneralLedgerProgram)
+
+test_generated.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'pypara.accounting.ledger.GeneralLedgerProgram'>
+instance = <test_generated.test_protocol_structural_compatibility.<locals>.DummyProgram object at 0x7f38f1f28dc0>
+
+    def __instancecheck__(cls, instance):
+        # We need this method for situations where attributes are
+        # assigned in __init__.
+        if (
+            getattr(cls, '_is_protocol', False) and
+            not getattr(cls, '_is_runtime_protocol', False) and
+            not _allow_reckless_class_checks(depth=2)
+        ):
+>           raise TypeError("Instance and class checks can only be used with"
+                            " @runtime_checkable protocols")
+E           TypeError: Instance and class checks can only be used with @runtime_checkable protocols
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/typing.py:1498: TypeError
+_________ test_general_ledger_program_call_returns_expected_structure __________
+
+    def test_general_ledger_program_call_returns_expected_structure():
+        """
+        Ensure that a concrete implementation of GeneralLedgerProgram returns a
+        GeneralLedger with the correct period and that its internal structures
+        are initialized properly.
+        """
+        class ConcreteProgram:
+            def __call__(self, period: DateRange) -> GeneralLedger:
+                return GeneralLedger(period)
+    
+        program = ConcreteProgram()
+        period = DateRange(datetime(2024, 1, 1), datetime(2024, 12, 31))
+>       ledger = program(period)
+
+test_generated.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.test_general_ledger_program_call_returns_expected_structure.<locals>.ConcreteProgram object at 0x7f38f1ddc430>
+period = DateRange(since=datetime.datetime(2024, 1, 1, 0, 0), until=datetime.datetime(2024, 12, 31, 0, 0))
+
+    def __call__(self, period: DateRange) -> GeneralLedger:
+>       return GeneralLedger(period)
+E       TypeError: GeneralLedger.__init__() missing 1 required positional argument: 'ledgers'
+
+test_generated.py:52: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_protocol_structural_compatibility - TypeError:...
+FAILED test_generated.py::test_general_ledger_program_call_returns_expected_structure
+2 failed, 1 passed in 0.20s

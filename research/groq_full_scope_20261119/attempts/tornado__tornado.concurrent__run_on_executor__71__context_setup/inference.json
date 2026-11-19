@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-95566c74-730e-45bb-871c-7f81a2669ea5",
+  "object": "chat.completion",
+  "created": 1795078668,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import run_on_executor, Future, chain_future\n\n\nclass Dummy:\n    def __init__(self):\n        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n    @run_on_executor\n    def add(self, a, b):\n        return a + b\n\n    @run_on_executor(executor=\"executor\")\n    def multiply(self, a, b):\n        return a * b\n\n    @run_on_executor\n    def raise_error(self):\n        raise ValueError(\"boom\")\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_normal():\n    d = Dummy()\n    fut = d.add(2, 3)\n    assert isinstance(fut, Future)\n    result = await fut\n    assert result == 5\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_boundary_missing_executor():\n    class NoExec:\n        @run_on_executor\n        def foo(self):\n            return 42\n\n    obj = NoExec()\n    with pytest.raises(AttributeError):\n        obj.foo()\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_error_propagation():\n    d = Dummy()\n    fut = d.raise_error()\n    with pytest.raises(ValueError, match=\"boom\"):\n        await fut\n```",
+        "reasoning": "We need three tests: normal, boundary, error. Use tmp_path? not needed. Test decorator usage. Create class with executor ThreadPoolExecutor. Test that method returns asyncio.Future and result. Boundary: executor attribute missing? Should raise AttributeError. Error: method raises exception propagate. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051740787,
+    "prompt_tokens": 1466,
+    "prompt_time": 0.099053682,
+    "completion_tokens": 334,
+    "completion_time": 0.375039558,
+    "total_tokens": 1800,
+    "total_time": 0.47409324,
+    "completion_tokens_details": {
+      "reasoning_tokens": 61
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgdfwae9t8g1spqre2skm4",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import run_on_executor, Future, chain_future\n\n\nclass Dummy:\n    def __init__(self):\n        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n    @run_on_executor\n    def add(self, a, b):\n        return a + b\n\n    @run_on_executor(executor=\"executor\")\n    def multiply(self, a, b):\n        return a * b\n\n    @run_on_executor\n    def raise_error(self):\n        raise ValueError(\"boom\")\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_normal():\n    d = Dummy()\n    fut = d.add(2, 3)\n    assert isinstance(fut, Future)\n    result = await fut\n    assert result == 5\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_boundary_missing_executor():\n    class NoExec:\n        @run_on_executor\n        def foo(self):\n            return 42\n\n    obj = NoExec()\n    with pytest.raises(AttributeError):\n        obj.foo()\n\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_error_propagation():\n    d = Dummy()\n    fut = d.raise_error()\n    with pytest.raises(ValueError, match=\"boom\"):\n        await fut\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8741036219871603
+}

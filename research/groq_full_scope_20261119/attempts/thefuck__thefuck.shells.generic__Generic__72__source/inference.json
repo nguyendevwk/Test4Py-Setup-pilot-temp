@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-e7ab2497-dbbb-405a-90a4-9432a67fe394",
+  "object": "chat.completion",
+  "created": 1795078112,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport pytest\nfrom thefuck.shells.generic import Generic\nfrom thefuck.logs import warn\n\nclass DummyGeneric(Generic):\n    \"\"\"Subclass to override history file handling for testing.\"\"\"\n    def __init__(self, history_lines):\n        super().__init__()\n        self._history_lines = history_lines\n\n    def _get_history_file_name(self):\n        return ''\n\n    def _get_history_lines(self):\n        for line in self._history_lines:\n            yield line\n\ndef test_expand_aliases_replaces_only_first_occurrence():\n    g = Generic()\n    # monkeypatch get_aliases to return a mapping\n    g.get_aliases = lambda: {'ls': 'list'}\n    # command with multiple occurrences of the alias\n    cmd = 'ls -l && ls -a'\n    expanded = g._expand_aliases(cmd)\n    # only the first 'ls' should be replaced\n    assert expanded == 'list -l && ls -a'\n    # command without alias should remain unchanged\n    assert g._expand_aliases('echo hello') == 'echo hello'\n\ndef test_split_command_handles_escaped_spaces_and_unicode():\n    g = Generic()\n    # command with escaped space and unicode character\n    cmd = r'echo \"Hello\\ World\" \\u2603'\n    parts = g.split_command(cmd)\n    # shlex should split into ['echo', 'Hello World', '☃']\n    assert parts == ['echo', 'Hello World', '☃']\n    # ensure that a simple command splits correctly\n    assert g.split_command('ls -la') == ['ls', '-la']\n\ndef test_info_handles_exception_from_get_version(monkeypatch):\n    g = Generic()\n    # monkeypatch _get_version to raise an exception\n    def raise_exc():\n        raise RuntimeError('version not found')\n    monkeypatch.setattr(g, '_get_version', raise_exc)\n    # capture warn output\n    messages = []\n    def fake_warn(msg):\n        messages.append(msg)\n    monkeypatch.setattr(warn, '__call__', fake_warn)\n    # call info and verify it returns only friendly_name\n    result = g.info()\n    assert result == 'Generic Shell'\n    # verify that warn was called with the expected message\n    assert any('Could not determine shell version' in m for m in messages)\n```",
+        "reasoning": "Need tests for Generic. Three functions. Test alias expansion, split_command handling spaces, and info with exception. Use tmp_path for history file? But history methods rely on _get_history_file_name returning ''. So get_history returns empty. We can subclass Generic to override _get_history_file_name and _get_history_lines to test get_history. But tests should use target directly. We can monkeypatch methods. Use pytest monkeypatch fixture. Test _expand_aliases: set get_aliases to return dict. Test split_command with escaped space. Test info when _get_version raises. Use monkeypatch to set _get_version to raise. Use warn from logs? ignore. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005531986,
+    "prompt_tokens": 1270,
+    "prompt_time": 0.051628144,
+    "completion_tokens": 632,
+    "completion_time": 0.715621995,
+    "total_tokens": 1902,
+    "total_time": 0.767250139,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 138
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sfwgvpezst4t9bcj4myrqs",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport pytest\nfrom thefuck.shells.generic import Generic\nfrom thefuck.logs import warn\n\nclass DummyGeneric(Generic):\n    \"\"\"Subclass to override history file handling for testing.\"\"\"\n    def __init__(self, history_lines):\n        super().__init__()\n        self._history_lines = history_lines\n\n    def _get_history_file_name(self):\n        return ''\n\n    def _get_history_lines(self):\n        for line in self._history_lines:\n            yield line\n\ndef test_expand_aliases_replaces_only_first_occurrence():\n    g = Generic()\n    # monkeypatch get_aliases to return a mapping\n    g.get_aliases = lambda: {'ls': 'list'}\n    # command with multiple occurrences of the alias\n    cmd = 'ls -l && ls -a'\n    expanded = g._expand_aliases(cmd)\n    # only the first 'ls' should be replaced\n    assert expanded == 'list -l && ls -a'\n    # command without alias should remain unchanged\n    assert g._expand_aliases('echo hello') == 'echo hello'\n\ndef test_split_command_handles_escaped_spaces_and_unicode():\n    g = Generic()\n    # command with escaped space and unicode character\n    cmd = r'echo \"Hello\\ World\" \\u2603'\n    parts = g.split_command(cmd)\n    # shlex should split into ['echo', 'Hello World', '☃']\n    assert parts == ['echo', 'Hello World', '☃']\n    # ensure that a simple command splits correctly\n    assert g.split_command('ls -la') == ['ls', '-la']\n\ndef test_info_handles_exception_from_get_version(monkeypatch):\n    g = Generic()\n    # monkeypatch _get_version to raise an exception\n    def raise_exc():\n        raise RuntimeError('version not found')\n    monkeypatch.setattr(g, '_get_version', raise_exc)\n    # capture warn output\n    messages = []\n    def fake_warn(msg):\n        messages.append(msg)\n    monkeypatch.setattr(warn, '__call__', fake_warn)\n    # call info and verify it returns only friendly_name\n    result = g.info()\n    assert result == 'Generic Shell'\n    # verify that warn was called with the expected message\n    assert any('Could not determine shell version' in m for m in messages)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.162951926002279
+}

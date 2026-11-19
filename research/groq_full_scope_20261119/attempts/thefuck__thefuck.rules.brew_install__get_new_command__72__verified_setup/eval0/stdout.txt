@@ -1,0 +1,76 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_get_new_command_replaces_missing_formula _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb3bf462980>
+
+    def test_get_new_command_replaces_missing_formula(monkeypatch):
+        # Simulate a brew error message for a missing formula
+        cmd = Command(
+            script="brew install foo",
+            output="Error: No available formula for foo\n"
+        )
+        # Monkeypatch get_closest to return a known similar formula
+        monkeypatch.setattr(
+            "thefuck.rules.brew_install.get_closest",
+            lambda x, y: "bar"
+        )
+>       new_cmd = get_new_command(cmd)
+
+test_generated.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/brew_install.py:40: in get_new_command
+    exist_formula = _get_similar_formula(not_exist_formula)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+formula_name = 'foo'
+
+    def _get_similar_formula(formula_name):
+>       return get_closest(formula_name, _get_formulas(), cutoff=0.85)
+E       TypeError: test_get_new_command_replaces_missing_formula.<locals>.<lambda>() got an unexpected keyword argument 'cutoff'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/brew_install.py:23: TypeError
+______________ test_get_new_command_handles_multiple_occurrences _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb3bf463a90>
+
+    def test_get_new_command_handles_multiple_occurrences(monkeypatch):
+        # Simulate a command with the missing formula appearing twice
+        cmd = Command(
+            script="brew install foo && brew install foo",
+            output="Error: No available formula for foo\n"
+        )
+        # get_closest returns 'baz'
+        monkeypatch.setattr(
+            "thefuck.rules.brew_install.get_closest",
+            lambda x, y: "baz"
+        )
+>       new_cmd = get_new_command(cmd)
+
+test_generated.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/brew_install.py:40: in get_new_command
+    exist_formula = _get_similar_formula(not_exist_formula)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+formula_name = 'foo'
+
+    def _get_similar_formula(formula_name):
+>       return get_closest(formula_name, _get_formulas(), cutoff=0.85)
+E       TypeError: test_get_new_command_handles_multiple_occurrences.<locals>.<lambda>() got an unexpected keyword argument 'cutoff'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/brew_install.py:23: TypeError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_new_command_replaces_missing_formula - Typ...
+FAILED test_generated.py::test_get_new_command_handles_multiple_occurrences
+2 failed, 1 passed, 2 warnings in 0.13s

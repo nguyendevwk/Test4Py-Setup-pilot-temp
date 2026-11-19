@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-f755a20e-2628-4375-a4fc-0585627fb7f4",
+  "object": "chat.completion",
+  "created": 1795076357,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom mimesis.providers.base import ProviderRegistry\n\n\nclass DummyProvider:\n    \"\"\"Simple dummy provider for testing purposes.\"\"\"\n    pass\n\n\n@pytest.fixture(autouse=True)\ndef reset_registry():\n    \"\"\"Ensure the registry is empty before each test.\"\"\"\n    ProviderRegistry._providers.clear()\n    yield\n    ProviderRegistry._providers.clear()\n\n\ndef test_register_and_get():\n    \"\"\"Register a provider and retrieve it by name.\"\"\"\n    ProviderRegistry.register(\"dummy\", DummyProvider)\n    retrieved = ProviderRegistry.get(\"dummy\")\n    assert retrieved is DummyProvider, \"ProviderRegistry.get should return the registered class\"\n    assert ProviderRegistry.get(\"nonexistent\") is None, \"Unknown provider should return None\"\n\n\ndef test_get_all_returns_copy_and_is_independent():\n    \"\"\"get_all should return a shallow copy that does not affect the registry.\"\"\"\n    ProviderRegistry.register(\"dummy\", DummyProvider)\n    all_providers = ProviderRegistry.get_all()\n    assert \"dummy\" in all_providers\n    assert all_providers[\"dummy\"] is DummyProvider\n\n    # Modify the returned dict and ensure the registry is unchanged\n    all_providers.pop(\"dummy\")\n    assert \"dummy\" in ProviderRegistry.get_all(), \"Registry should not be affected by modifications to the copy\"\n\n\ndef test_registry_is_isolated_between_tests():\n    \"\"\"Each test should see an empty registry due to the fixture.\"\"\"\n    # The fixture clears the registry before this test runs\n    assert ProviderRegistry.get_all() == {}, \"Registry should be empty at test start\"\n    ProviderRegistry.register(\"dummy\", DummyProvider)\n    assert ProviderRegistry.get_all() == {\"dummy\": DummyProvider}\n```",
+        "reasoning": "We need three test functions for ProviderRegistry. Test register, get_all, get. Use tmp_path? not needed. Just test behavior. Ensure registry is global; tests independent: we should clear registry between tests? Since registry is class var, tests may interfere. We can use monkeypatch to reset _providers. Use fixture. We'll write tests that register dummy provider classes. Use simple class. Ensure get returns correct. Also test that get_all returns copy not same dict. Also test that modifying returned dict doesn't affect registry. Also test that get returns None for unknown. Ensure no side effects. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05367598,
+    "prompt_tokens": 560,
+    "prompt_time": 0.038058488,
+    "completion_tokens": 466,
+    "completion_time": 0.517638863,
+    "total_tokens": 1026,
+    "total_time": 0.555697351,
+    "completion_tokens_details": {
+      "reasoning_tokens": 123
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se6ysqea5txd38js5pprys",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom mimesis.providers.base import ProviderRegistry\n\n\nclass DummyProvider:\n    \"\"\"Simple dummy provider for testing purposes.\"\"\"\n    pass\n\n\n@pytest.fixture(autouse=True)\ndef reset_registry():\n    \"\"\"Ensure the registry is empty before each test.\"\"\"\n    ProviderRegistry._providers.clear()\n    yield\n    ProviderRegistry._providers.clear()\n\n\ndef test_register_and_get():\n    \"\"\"Register a provider and retrieve it by name.\"\"\"\n    ProviderRegistry.register(\"dummy\", DummyProvider)\n    retrieved = ProviderRegistry.get(\"dummy\")\n    assert retrieved is DummyProvider, \"ProviderRegistry.get should return the registered class\"\n    assert ProviderRegistry.get(\"nonexistent\") is None, \"Unknown provider should return None\"\n\n\ndef test_get_all_returns_copy_and_is_independent():\n    \"\"\"get_all should return a shallow copy that does not affect the registry.\"\"\"\n    ProviderRegistry.register(\"dummy\", DummyProvider)\n    all_providers = ProviderRegistry.get_all()\n    assert \"dummy\" in all_providers\n    assert all_providers[\"dummy\"] is DummyProvider\n\n    # Modify the returned dict and ensure the registry is unchanged\n    all_providers.pop(\"dummy\")\n    assert \"dummy\" in ProviderRegistry.get_all(), \"Registry should not be affected by modifications to the copy\"\n\n\ndef test_registry_is_isolated_between_tests():\n    \"\"\"Each test should see an empty registry due to the fixture.\"\"\"\n    # The fixture clears the registry before this test runs\n    assert ProviderRegistry.get_all() == {}, \"Registry should be empty at test start\"\n    ProviderRegistry.register(\"dummy\", DummyProvider)\n    assert ProviderRegistry.get_all() == {\"dummy\": DummyProvider}\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8797570639871992
+}

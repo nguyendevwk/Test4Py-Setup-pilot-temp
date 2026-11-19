@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-0be93998-ef7d-4cbc-8f5f-c356a6e8c637",
+  "object": "chat.completion",
+  "created": 1795079356,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom typesystem.fields import String\nfrom typesystem import ValidationError\n\ndef test_string_valid_and_trim_and_null_coercion():\n    # allow_blank True, trim_whitespace True, coerce_types True\n    field = String(allow_blank=True, trim_whitespace=True, coerce_types=True)\n    # Leading/trailing whitespace should be stripped\n    assert field.validate(\"  hello  \") == \"hello\"\n    # Null should be coerced to empty string because allow_blank\n    assert field.validate(None) == \"\"\n    # Empty string should be allowed because allow_blank\n    assert field.validate(\"\") == \"\"\n    # Non-string should raise type error\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(123)\n    assert \"type\" in str(excinfo.value)\n\ndef test_string_length_constraints():\n    # max_length 5, min_length 3\n    field = String(max_length=5, min_length=3)\n    # Valid length\n    assert field.validate(\"abc\") == \"abc\"\n    # Too short\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"ab\")\n    assert \"min_length\" in str(excinfo.value)\n    # Too long\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"abcdef\")\n    assert \"max_length\" in str(excinfo.value)\n\ndef test_string_pattern_and_format():\n    # pattern must match digits only\n    field = String(pattern=r\"^\\d+$\")\n    # Valid pattern\n    assert field.validate(\"12345\") == \"12345\"\n    # Invalid pattern\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"abc\")\n    assert \"pattern\" in str(excinfo.value)\n    # Format email: should validate using built-in format\n    email_field = String(format=\"email\")\n    assert email_field.validate(\"user@example.com\") == \"user@example.com\"\n    with pytest.raises(ValidationError) as excinfo:\n        email_field.validate(\"not-an-email\")\n    assert \"format\" in str(excinfo.value)\n```",
+        "reasoning": "We need tests for String field. Use typesystem library. Write three tests: normal valid, boundary length, error pattern. Use tmp_path? not needed. Just instantiate String and call validate. Ensure correct behavior."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052102354,
+    "prompt_tokens": 970,
+    "prompt_time": 0.053833115,
+    "completion_tokens": 490,
+    "completion_time": 0.559646574,
+    "total_tokens": 1460,
+    "total_time": 0.613479689,
+    "completion_tokens_details": {
+      "reasoning_tokens": 44
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh2fjseact15nq0ncnjwa0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom typesystem.fields import String\nfrom typesystem import ValidationError\n\ndef test_string_valid_and_trim_and_null_coercion():\n    # allow_blank True, trim_whitespace True, coerce_types True\n    field = String(allow_blank=True, trim_whitespace=True, coerce_types=True)\n    # Leading/trailing whitespace should be stripped\n    assert field.validate(\"  hello  \") == \"hello\"\n    # Null should be coerced to empty string because allow_blank\n    assert field.validate(None) == \"\"\n    # Empty string should be allowed because allow_blank\n    assert field.validate(\"\") == \"\"\n    # Non-string should raise type error\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(123)\n    assert \"type\" in str(excinfo.value)\n\ndef test_string_length_constraints():\n    # max_length 5, min_length 3\n    field = String(max_length=5, min_length=3)\n    # Valid length\n    assert field.validate(\"abc\") == \"abc\"\n    # Too short\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"ab\")\n    assert \"min_length\" in str(excinfo.value)\n    # Too long\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"abcdef\")\n    assert \"max_length\" in str(excinfo.value)\n\ndef test_string_pattern_and_format():\n    # pattern must match digits only\n    field = String(pattern=r\"^\\d+$\")\n    # Valid pattern\n    assert field.validate(\"12345\") == \"12345\"\n    # Invalid pattern\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"abc\")\n    assert \"pattern\" in str(excinfo.value)\n    # Format email: should validate using built-in format\n    email_field = String(format=\"email\")\n    assert email_field.validate(\"user@example.com\") == \"user@example.com\"\n    with pytest.raises(ValidationError) as excinfo:\n        email_field.validate(\"not-an-email\")\n    assert \"format\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.035710474010557
+}

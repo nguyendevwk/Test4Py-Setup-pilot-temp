@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-1115e456-2136-47e0-a91d-ae51d355034e",
+  "object": "chat.completion",
+  "created": 1795079459,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport tty\nimport termios\nimport pytest\nfrom thefuck.system.unix import getch\n\ndef test_getch_reads_single_character(tmp_path):\n    # Create a pipe to simulate stdin\n    r_fd, w_fd = os.pipe()\n    try:\n        # Write a single byte to the write end\n        os.write(w_fd, b'x')\n        # Replace sys.stdin with a file object from the read end\n        sys.stdin = os.fdopen(r_fd, 'rb', buffering=0)\n        # Call getch and verify it returns the written byte\n        result = getch()\n        assert result == 'x'\n        # After reading, the pipe should be empty\n        assert sys.stdin.read(1) == ''\n    finally:\n        # Restore original stdin\n        sys.stdin = sys.__stdin__\n        os.close(w_fd)\n\ndef test_getch_restores_terminal_attributes(tmp_path):\n    # Create a pipe to simulate stdin\n    r_fd, w_fd = os.pipe()\n    try:\n        # Write a byte to ensure getch can read\n        os.write(w_fd, b'y')\n        # Replace sys.stdin with a file object from the read end\n        sys.stdin = os.fdopen(r_fd, 'rb', buffering=0)\n        # Capture the original terminal attributes\n        original_attrs = termios.tcgetattr(r_fd)\n        # Call getch\n        _ = getch()\n        # After getch, attributes should be restored to original\n        restored_attrs = termios.tcgetattr(r_fd)\n        assert restored_attrs == original_attrs\n    finally:\n        sys.stdin = sys.__stdin__\n        os.close(w_fd)\n\ndef test_getch_raises_on_non_tty_input(tmp_path):\n    # Create a pipe to simulate stdin (not a tty)\n    r_fd, w_fd = os.pipe()\n    try:\n        os.write(w_fd, b'z')\n        sys.stdin = os.fdopen(r_fd, 'rb', buffering=0)\n        # termios.tcgetattr on a pipe raises termios.error\n        with pytest.raises(termios.error):\n            getch()\n    finally:\n        sys.stdin = sys.__stdin__\n        os.close(w_fd)\n```",
+        "reasoning": "We need to test getch. It reads from stdin. We can simulate by temporarily replacing sys.stdin with a StringIO. But getch uses sys.stdin.fileno() which StringIO doesn't have. We can use a temporary file descriptor. Use os.pipe to create a pipe, write a byte, set sys.stdin to file object from read end. But fileno works. Also need to restore. Use monkeypatch. Test that getch returns the byte. Also test that terminal attributes restored. Hard to check. Maybe test that after getch, reading again returns nothing. Use tmp_path to create file? Use os.fdopen. We'll write to write end before calling getch. Ensure that getch reads the byte. Also test that if no input, getch blocks? Can't test blocking. Maybe test that getch raises if fileno invalid? Use a dummy object with fileno raising. But getch will call termios.tcgetattr on fd, which will error. We can test that exception propagates. Use a dummy file descriptor that is not a tty? But termios may error. Use os.pipe, but pipe is not a tty, termios.tcgetattr may raise error. So test that getch raises termios.error. We'll create a pipe, set sys.stdin to read end, call getch, expect termios.error. Use pytest.raises. Ensure cleanup."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00486711,
+    "prompt_tokens": 307,
+    "prompt_time": 0.00691241,
+    "completion_tokens": 750,
+    "completion_time": 0.798846434,
+    "total_tokens": 1057,
+    "total_time": 0.805758844,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 281
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh5khmecj9pvjet1ny7h7m",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport tty\nimport termios\nimport pytest\nfrom thefuck.system.unix import getch\n\ndef test_getch_reads_single_character(tmp_path):\n    # Create a pipe to simulate stdin\n    r_fd, w_fd = os.pipe()\n    try:\n        # Write a single byte to the write end\n        os.write(w_fd, b'x')\n        # Replace sys.stdin with a file object from the read end\n        sys.stdin = os.fdopen(r_fd, 'rb', buffering=0)\n        # Call getch and verify it returns the written byte\n        result = getch()\n        assert result == 'x'\n        # After reading, the pipe should be empty\n        assert sys.stdin.read(1) == ''\n    finally:\n        # Restore original stdin\n        sys.stdin = sys.__stdin__\n        os.close(w_fd)\n\ndef test_getch_restores_terminal_attributes(tmp_path):\n    # Create a pipe to simulate stdin\n    r_fd, w_fd = os.pipe()\n    try:\n        # Write a byte to ensure getch can read\n        os.write(w_fd, b'y')\n        # Replace sys.stdin with a file object from the read end\n        sys.stdin = os.fdopen(r_fd, 'rb', buffering=0)\n        # Capture the original terminal attributes\n        original_attrs = termios.tcgetattr(r_fd)\n        # Call getch\n        _ = getch()\n        # After getch, attributes should be restored to original\n        restored_attrs = termios.tcgetattr(r_fd)\n        assert restored_attrs == original_attrs\n    finally:\n        sys.stdin = sys.__stdin__\n        os.close(w_fd)\n\ndef test_getch_raises_on_non_tty_input(tmp_path):\n    # Create a pipe to simulate stdin (not a tty)\n    r_fd, w_fd = os.pipe()\n    try:\n        os.write(w_fd, b'z')\n        sys.stdin = os.fdopen(r_fd, 'rb', buffering=0)\n        # termios.tcgetattr on a pipe raises termios.error\n        with pytest.raises(termios.error):\n            getch()\n    finally:\n        sys.stdin = sys.__stdin__\n        os.close(w_fd)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "6c2eb040024745a68e085f359b49f278",
+  "_api_plus_pacing_seconds": 1.605654699029401
+}

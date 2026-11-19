@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-37105dd7-dc14-41b6-88f2-7d066fbd6749",
+  "object": "chat.completion",
+  "created": 1795077656,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport os\nimport pytest\nfrom thefuck.rules.brew_install import get_new_command, _get_similar_formula, _get_formulas\nfrom thefuck.utils import replace_argument\nfrom thefuck.specific.brew import get_brew_path_prefix, brew_available\n\nclass DummyCommand:\n    def __init__(self, script, output):\n        self.script = script\n        self.output = output\n\ndef test_get_new_command_replaces_formula(monkeypatch):\n    # Arrange: mock get_closest to return a predictable similar formula\n    monkeypatch.setattr(\n        'thefuck.rules.brew_install.get_closest',\n        lambda name, formulas, cutoff: 'bar'\n    )\n    cmd = DummyCommand(script='brew install foo', output='Error: No available formula for foo')\n    # Act\n    new_cmd = get_new_command(cmd)\n    # Assert: the script should have 'foo' replaced with 'bar'\n    assert new_cmd == 'brew install bar'\n\ndef test_get_new_command_no_match_raises(monkeypatch):\n    # Arrange: command output without the expected pattern\n    cmd = DummyCommand(script='brew install foo', output='Some other error message')\n    # Act & Assert: should raise IndexError due to regex match failure\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n\ndef test_get_new_command_brew_path_prefix_error(monkeypatch):\n    # Arrange: make get_brew_path_prefix raise an exception to simulate missing brew\n    monkeypatch.setattr(\n        'thefuck.specific.brew.get_brew_path_prefix',\n        lambda: (_ for _ in ()).throw(RuntimeError('brew not found'))\n    )\n    # Also mock get_closest to avoid side effects\n    monkeypatch.setattr(\n        'thefuck.rules.brew_install.get_closest',\n        lambda name, formulas, cutoff: 'bar'\n    )\n    cmd = DummyCommand(script='brew install foo', output='Error: No available formula for foo')\n    # Act & Assert: the underlying exception should propagate\n    with pytest.raises(RuntimeError, match='brew not found'):\n        get_new_command(cmd)\n```",
+        "reasoning": "We need to test get_new_command. It uses command.output regex to find formula name. Then _get_similar_formula uses get_closest from thefuck.utils. We can't mock. But we can simulate by creating a dummy command object with script and output. We need to control get_closest and get_brew_path_prefix? They are imported from thefuck.utils and thefuck.specific.brew. We cannot modify product code, but we can monkeypatch these functions in test to return predictable values. But instruction says no mocks of the target. But we can monkeypatch imported functions? It's not mocking the target function itself. It's allowed? It says no mocks of the target. We can patch get_closest to return a known similar formula. That is acceptable. We'll use monkeypatch fixture.\n\nTest 1: normal: command output contains \"Error: No available formula for foo\". Suppose get_closest returns \"bar\". Then replace_argument should replace \"foo\" with \"bar\" in script. We need to import replace_argument from thefuck.utils. We can patch get_closest.\n\nTest 2: boundary: if no match? But regex expects at least one. Could test that it raises IndexError? But we can test that if output doesn't match, it raises. Use pytest.raises.\n\nTest 3: error: if get_closest raises? But we can test that if get_closest returns None? But get_closest likely returns string. We'll test that if get_brew_path_prefix raises, _get_formulas yields nothing, get_closest may return None? But we can patch get_brew_path_prefix to raise, then _get_formulas yields nothing, get_closest called with empty list? Might raise. We'll test that get_new_command raises ValueError? Actually get_closest may raise ValueError. We'll patch get_brew_path_prefix to raise, then call get_new_command and expect it to raise ValueError.\n\nImplement tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052968338,
+    "prompt_tokens": 438,
+    "prompt_time": 0.021686721,
+    "completion_tokens": 847,
+    "completion_time": 0.969898361,
+    "total_tokens": 1285,
+    "total_time": 0.991585082,
+    "completion_tokens_details": {
+      "reasoning_tokens": 395
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfejseeyy8satx1cg412qh",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport os\nimport pytest\nfrom thefuck.rules.brew_install import get_new_command, _get_similar_formula, _get_formulas\nfrom thefuck.utils import replace_argument\nfrom thefuck.specific.brew import get_brew_path_prefix, brew_available\n\nclass DummyCommand:\n    def __init__(self, script, output):\n        self.script = script\n        self.output = output\n\ndef test_get_new_command_replaces_formula(monkeypatch):\n    # Arrange: mock get_closest to return a predictable similar formula\n    monkeypatch.setattr(\n        'thefuck.rules.brew_install.get_closest',\n        lambda name, formulas, cutoff: 'bar'\n    )\n    cmd = DummyCommand(script='brew install foo', output='Error: No available formula for foo')\n    # Act\n    new_cmd = get_new_command(cmd)\n    # Assert: the script should have 'foo' replaced with 'bar'\n    assert new_cmd == 'brew install bar'\n\ndef test_get_new_command_no_match_raises(monkeypatch):\n    # Arrange: command output without the expected pattern\n    cmd = DummyCommand(script='brew install foo', output='Some other error message')\n    # Act & Assert: should raise IndexError due to regex match failure\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n\ndef test_get_new_command_brew_path_prefix_error(monkeypatch):\n    # Arrange: make get_brew_path_prefix raise an exception to simulate missing brew\n    monkeypatch.setattr(\n        'thefuck.specific.brew.get_brew_path_prefix',\n        lambda: (_ for _ in ()).throw(RuntimeError('brew not found'))\n    )\n    # Also mock get_closest to avoid side effects\n    monkeypatch.setattr(\n        'thefuck.rules.brew_install.get_closest',\n        lambda name, formulas, cutoff: 'bar'\n    )\n    cmd = DummyCommand(script='brew install foo', output='Error: No available formula for foo')\n    # Act & Assert: the underlying exception should propagate\n    with pytest.raises(RuntimeError, match='brew not found'):\n        get_new_command(cmd)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3786454710061662
+}

@@ -1,0 +1,43 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_chown_glob_with_parent __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chown__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_chown_glob_with_parent0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fe6bc728610>
+
+    def test_chown_glob_with_parent(tmp_path, monkeypatch):
+        """When a glob pattern matches multiple files, chown should be called for each
+        and optionally for the parent directory when include_parent is True."""
+        dir_path = _create_path(tmp_path, "dir", is_dir=True)
+        file1 = _create_path(dir_path, "a.txt")
+        file2 = _create_path(dir_path, "b.txt")
+        uid = pwd.getpwuid(os.getuid()).pw_uid
+        gid = grp.getgrgid(os.getgid()).gr_gid
+        calls = []
+    
+        def fake_chown(path, uid_arg, gid_arg):
+            calls.append((Path(path).resolve(), uid_arg, gid_arg))
+    
+        monkeypatch.setattr(os, "chown", fake_chown)
+        # Use glob pattern to match all files in dir
+        glob_path = normalize_path(dir_path / "*")
+        chown(glob_path, user=str(pwd.getpwuid(os.getuid()).pw_name),
+              group=str(grp.getgrgid(os.getgid()).gr_name),
+              include_parent=True)
+        # Expect two file calls and one parent call
+        expected_paths = {file1.resolve(), file2.resolve(), dir_path.resolve()}
+        actual_paths = {call[0] for call in calls}
+>       assert expected_paths == actual_paths
+E       AssertionError: assert {PosixPath('/...0/dir/b.txt')} == set()
+E         
+E         Extra items in the left set:
+E         PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chown__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_chown_glob_with_parent0/dir/a.txt')
+E         PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chown__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_chown_glob_with_parent0/dir/b.txt')
+E         PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__chown__71__v...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+test_generated.py:75: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_chown_glob_with_parent - AssertionError: asser...
+1 failed, 2 passed in 0.13s

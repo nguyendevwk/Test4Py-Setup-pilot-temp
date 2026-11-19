@@ -1,0 +1,11 @@
+import pytest
+from docstring_parser.parser import parse
+from docstring_parser.common import BaseParser, SectionSpec, Kind
+
+def test_parse_raises_value_error_when_sections_provided_with_baseparser():
+    """parse should raise ValueError if a BaseParser is given with non‑None sections."""
+    dummy_parser = BaseParser()
+    dummy_section = SectionSpec(titles="param", kind=Kind.PARAM)
+    with pytest.raises(ValueError) as excinfo:
+        parse("dummy text", style=dummy_parser, sections=[dummy_section])
+    assert "A parser has its sections" in str(excinfo.value)

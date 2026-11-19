@@ -1,0 +1,38 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_padding_and_block_count _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.aes__aes_cbc_encrypt__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_padding_and_block_count0')
+
+    def test_padding_and_block_count(tmp_path):
+        # 10 bytes of data, 16-byte block size -> padded to 16 bytes
+        data = list(range(10))
+        key = [0x00] * 16
+        iv = [0x00] * 16
+        encrypted = aes_cbc_encrypt(data, key, iv)
+        # Output length must be a multiple of block size
+        assert len(encrypted) % BLOCK_SIZE_BYTES == 0
+        # For 10 bytes input, we expect exactly one block (16 bytes)
+        assert len(encrypted) == BLOCK_SIZE_BYTES
+        # The padding byte should be 6 (16-10)
+>       assert encrypted[-6:] == [6] * 6
+E       assert [127, 197, 237, 131, 238, 192] == [6, 6, 6, 6, 6, 6]
+E         
+E         At index 0 diff: 127 != 6
+E         Use -v to get more diff
+
+test_generated.py:15: AssertionError
+________________________ test_invalid_key_length_raises ________________________
+
+    def test_invalid_key_length_raises():
+        data = [0] * 16
+        iv = [0] * 16
+        # key must be 16, 24, or 32 bytes
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE ValueError
+
+test_generated.py:34: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_padding_and_block_count - assert [127, 197, 23...
+FAILED test_generated.py::test_invalid_key_length_raises - Failed: DID NOT RA...
+2 failed, 1 passed in 1.23s

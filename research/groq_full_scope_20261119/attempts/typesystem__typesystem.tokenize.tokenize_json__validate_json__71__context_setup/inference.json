@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-258121cb-956b-4083-bb5a-c135a9601057",
+  "object": "chat.completion",
+  "created": 1795076848,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import validate_json, tokenize_json\nfrom typesystem.fields import String\nfrom typesystem.schemas import Schema\nfrom typesystem.base import ParseError, Position\n\nclass SimpleSchema(Schema):\n    name = String(required=True)\n\ndef test_validate_json_success():\n    # Valid JSON string should return the parsed value and no errors\n    json_str = '{\"name\": \"Alice\"}'\n    value, errors = validate_json(json_str, SimpleSchema)\n    assert value == {\"name\": \"Alice\"}\n    assert errors is None\n\ndef test_validate_json_empty_string_raises_parse_error():\n    # Empty string should raise ParseError with specific code and position\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert isinstance(err.position, Position)\n    assert err.position.column_no == 1\n    assert err.position.line_no == 1\n    assert err.position.char_index == 0\n\ndef test_validate_json_invalid_syntax_raises_parse_error():\n    # Malformed JSON should raise ParseError with correct position info\n    bad_json = '{\"name\": \"Bob\",}'  # trailing comma causes parse error\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(bad_json)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    # The error should point to the position of the trailing comma\n    assert err.position.column_no == 18\n    assert err.position.line_no == 1\n    assert err.position.char_index == 17\n```",
+        "reasoning": "We need three test functions for validate_json. We can test normal valid JSON, boundary empty string, and error parsing. Use tmp_path for file? not needed. Use pytest.raises for ParseError. Use actual validate_json. Need import. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005318137,
+    "prompt_tokens": 656,
+    "prompt_time": 0.046411508,
+    "completion_tokens": 397,
+    "completion_time": 0.43048361,
+    "total_tokens": 1053,
+    "total_time": 0.476895118,
+    "completion_tokens_details": {
+      "reasoning_tokens": 52
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7senyh2eyqbcfmc6b2gydap",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import validate_json, tokenize_json\nfrom typesystem.fields import String\nfrom typesystem.schemas import Schema\nfrom typesystem.base import ParseError, Position\n\nclass SimpleSchema(Schema):\n    name = String(required=True)\n\ndef test_validate_json_success():\n    # Valid JSON string should return the parsed value and no errors\n    json_str = '{\"name\": \"Alice\"}'\n    value, errors = validate_json(json_str, SimpleSchema)\n    assert value == {\"name\": \"Alice\"}\n    assert errors is None\n\ndef test_validate_json_empty_string_raises_parse_error():\n    # Empty string should raise ParseError with specific code and position\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert isinstance(err.position, Position)\n    assert err.position.column_no == 1\n    assert err.position.line_no == 1\n    assert err.position.char_index == 0\n\ndef test_validate_json_invalid_syntax_raises_parse_error():\n    # Malformed JSON should raise ParseError with correct position info\n    bad_json = '{\"name\": \"Bob\",}'  # trailing comma causes parse error\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(bad_json)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    # The error should point to the position of the trailing comma\n    assert err.position.column_no == 18\n    assert err.position.line_no == 1\n    assert err.position.char_index == 17\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8226375840022229
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-37f581cc-650d-4dfb-837e-eec04ad35256",
+  "object": "chat.completion",
+  "created": 1795077629,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast as py_ast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.transformers.base import BaseNodeTransformer\nfrom py_backwards.types import TransformationResult\n\n# Helper to create a simple AST from source code\ndef parse_source(src: str) -> ast.AST:\n    return ast.parse(src)\n\ndef test_transform_no_changes():\n    \"\"\"BaseNodeTransformer.transform should return unchanged tree and flag False.\"\"\"\n    src = \"x = 1\"\n    tree = parse_source(src)\n    result: TransformationResult = BaseNodeTransformer.transform(tree)\n    # The tree returned should be the same object\n    assert result.tree is tree\n    # No changes should be detected\n    assert result.changed is False\n    # Dependencies list should be empty by default\n    assert result.dependencies == []\n\ndef test_transform_with_subclass_modification():\n    \"\"\"Subclass that modifies the tree should set changed flag True.\"\"\"\n    class IncrementTransformer(BaseNodeTransformer):\n        def visit_Name(self, node: ast.Name):\n            # Replace any name 'x' with 'y'\n            if node.id == \"x\":\n                new_node = ast.Name(id=\"y\", ctx=node.ctx)\n                self._tree_changed = True\n                return new_node\n            return node\n\n    src = \"x = 1\"\n    tree = parse_source(src)\n    result: TransformationResult = IncrementTransformer.transform(tree)\n    # The tree should be modified\n    assert result.changed is True\n    # The modified tree should reflect the change\n    new_src = ast.unparse(result.tree)\n    assert new_src == \"y = 1\"\n\ndef test_transform_with_multiple_nodes_and_dependencies():\n    \"\"\"Ensure that dependencies are propagated and multiple nodes are processed.\"\"\"\n    class DummyTransformer(BaseNodeTransformer):\n        dependencies = [\"dummy_dep\"]\n\n        def visit_Num(self, node: ast.Num):\n            # Increment all numeric literals\n            new_node = ast.Num(n=node.n + 1)\n            self._tree_changed = True\n            return new_node\n\n    src = \"a = 2\\nb = 3\"\n    tree = parse_source(src)\n    result: TransformationResult = DummyTransformer.transform(tree)\n    # Changed flag should be True\n    assert result.changed is True\n    # Dependencies should be propagated\n    assert result.dependencies == [\"dummy_dep\"]\n    # Verify that all numbers were incremented\n    new_src = ast.unparse(result.tree)\n    assert new_src == \"a = 3\\nb = 4\"\n```",
+        "reasoning": "We need to test BaseNodeTransformer.transform. It returns TransformationResult. We need to import. Let's inspect TransformationResult. Probably simple dataclass. We'll create a simple AST node using typed_ast. Use ast.parse? typed_ast.ast3 has parse? Use ast.parse from typed_ast? Let's try. We'll create a simple function node. Then test that transform returns unchanged tree and _tree_changed False. Also test that dependencies list is empty. Third test maybe subclass with overriding visit to set _tree_changed. But BaseNodeTransformer doesn't override visit. But we can create subclass that sets _tree_changed in visit. But BaseNodeTransformer inherits BaseTransformer and ast.NodeTransformer. BaseTransformer has abstract transform. Our subclass will implement transform via super? Actually BaseNodeTransformer already implements transform. So we can subclass to override visit to modify tree. For example, replace a Name node. Then test that _tree_changed True. Also test that transform returns correct tree. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.166241378,
+    "prompt_tokens": 489,
+    "prompt_time": 0.029506061,
+    "completion_tokens": 718,
+    "completion_time": 0.761018269,
+    "total_tokens": 1207,
+    "total_time": 0.79052433,
+    "completion_tokens_details": {
+      "reasoning_tokens": 196
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sfdr4vezcvm0ytzyy2bjty",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast as py_ast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.transformers.base import BaseNodeTransformer\nfrom py_backwards.types import TransformationResult\n\n# Helper to create a simple AST from source code\ndef parse_source(src: str) -> ast.AST:\n    return ast.parse(src)\n\ndef test_transform_no_changes():\n    \"\"\"BaseNodeTransformer.transform should return unchanged tree and flag False.\"\"\"\n    src = \"x = 1\"\n    tree = parse_source(src)\n    result: TransformationResult = BaseNodeTransformer.transform(tree)\n    # The tree returned should be the same object\n    assert result.tree is tree\n    # No changes should be detected\n    assert result.changed is False\n    # Dependencies list should be empty by default\n    assert result.dependencies == []\n\ndef test_transform_with_subclass_modification():\n    \"\"\"Subclass that modifies the tree should set changed flag True.\"\"\"\n    class IncrementTransformer(BaseNodeTransformer):\n        def visit_Name(self, node: ast.Name):\n            # Replace any name 'x' with 'y'\n            if node.id == \"x\":\n                new_node = ast.Name(id=\"y\", ctx=node.ctx)\n                self._tree_changed = True\n                return new_node\n            return node\n\n    src = \"x = 1\"\n    tree = parse_source(src)\n    result: TransformationResult = IncrementTransformer.transform(tree)\n    # The tree should be modified\n    assert result.changed is True\n    # The modified tree should reflect the change\n    new_src = ast.unparse(result.tree)\n    assert new_src == \"y = 1\"\n\ndef test_transform_with_multiple_nodes_and_dependencies():\n    \"\"\"Ensure that dependencies are propagated and multiple nodes are processed.\"\"\"\n    class DummyTransformer(BaseNodeTransformer):\n        dependencies = [\"dummy_dep\"]\n\n        def visit_Num(self, node: ast.Num):\n            # Increment all numeric literals\n            new_node = ast.Num(n=node.n + 1)\n            self._tree_changed = True\n            return new_node\n\n    src = \"a = 2\\nb = 3\"\n    tree = parse_source(src)\n    result: TransformationResult = DummyTransformer.transform(tree)\n    # Changed flag should be True\n    assert result.changed is True\n    # Dependencies should be propagated\n    assert result.dependencies == [\"dummy_dep\"]\n    # Verify that all numbers were incremented\n    new_src = ast.unparse(result.tree)\n    assert new_src == \"a = 3\\nb = 4\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2807208730373532
+}

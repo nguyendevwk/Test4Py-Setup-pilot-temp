@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-89c1dfb8-8c07-474a-a979-5c2ac0ebcec3",
+  "object": "chat.completion",
+  "created": 1795077580,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport types\nimport pytest\nfrom pysnooper.variables import BaseVariable, needs_parentheses\n\n\nclass DummyVar(BaseVariable):\n    \"\"\"Concrete implementation of BaseVariable for testing.\"\"\"\n\n    def _items(self, key, normalize=False):\n        # Return a simple list containing the key twice for visibility.\n        return [(key, key)]\n\n\ndef test_items_evaluates_and_returns_correct_tuple():\n    \"\"\"Test that items evaluates the source and returns the expected tuple.\"\"\"\n    # Prepare a frame with a local variable `x`.\n    local_vars = {\"x\": 42}\n    frame = types.FrameType(\n        None, None, None, None, None, None, None, None, None, None, None, None, None, None, None\n    )\n    # Monkey‑patch the frame's locals and globals.\n    frame.f_locals = local_vars\n    frame.f_globals = {}\n\n    var = DummyVar(\"x\")\n    result = var.items(frame)\n    assert result == [(42, 42)], \"items should return a tuple with the evaluated value\"\n\n\ndef test_unambiguous_source_and_needs_parentheses():\n    \"\"\"Test that unambiguous_source is set correctly based on needs_parentheses.\"\"\"\n    # Source that does not need parentheses.\n    var_simple = DummyVar(\"x\")\n    assert var_simple.unambiguous_source == \"x\"\n    assert not needs_parentheses(\"x\")\n\n    # Source that does need parentheses.\n    var_attr = DummyVar(\"x.y\")\n    assert var_attr.unambiguous_source == \"(x.y)\"\n    assert needs_parentheses(\"x.y\")\n\n\ndef test_items_handles_evaluation_error_and_exclude():\n    \"\"\"Test that items returns an empty tuple on eval error and exclude is stored.\"\"\"\n    # Source that will raise ZeroDivisionError when evaluated.\n    var_error = DummyVar(\"1/0\", exclude=(\"x\",))\n    # Create a dummy frame; the eval will raise, so items should return empty tuple.\n    frame = types.FrameType(\n        None, None, None, None, None, None, None, None, None, None, None, None, None, None, None\n    )\n    frame.f_locals = {}\n    frame.f_globals = {}\n\n    assert var_error.items(frame) == (), \"items should return empty tuple on eval error\"\n    # Verify that exclude was stored as a tuple.\n    assert var_error.exclude == (\"x\",), \"exclude should be stored as a tuple\"\n```",
+        "reasoning": "We need to test BaseVariable. But it's abstract. We need a concrete subclass. We can create a simple subclass in test that implements _items. For example, return list of (key, value). Use simple variable like 'x' that refers to local variable. Test items returns correct. Also test fingerprint equality and hash. Also test that exclude tuple works. Also test that needs_parentheses logic. Use tmp_path? Not needed. Provide three test functions.\n\nLet's write subclass:\n\nclass DummyVar(BaseVariable):\n    def _items(self, key, normalize=False):\n        return [(key, key)]\n\nTest1: normal evaluation: define frame with local x=5, variable source 'x', exclude empty. items returns [(5,5)].\n\nTest2: boundary: source 'x.y' where x is object with attribute y. Use simple class. Also test needs_parentheses: source 'x' should not need parentheses? Let's test that unambiguous_source is correct. For source 'x', needs_parentheses returns False, so unambiguous_source == 'x'. For source 'x.y', needs_parentheses True, so unambiguous_source == '(x.y)'.\n\nTest3: error behavior: source that raises exception when eval, e.g., '1/0'. items should return empty tuple. Also test that exclude works: if exclude contains 'x', but we don't use exclude in DummyVar. But BaseVariable stores exclude. We can assert exclude tuple.\n\nImplement tests accordingly."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047947194,
+    "prompt_tokens": 521,
+    "prompt_time": 0.042501493,
+    "completion_tokens": 820,
+    "completion_time": 0.878458856,
+    "total_tokens": 1341,
+    "total_time": 0.920960349,
+    "completion_tokens_details": {
+      "reasoning_tokens": 305
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfc8w4epevnhav6xx21vp8",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport types\nimport pytest\nfrom pysnooper.variables import BaseVariable, needs_parentheses\n\n\nclass DummyVar(BaseVariable):\n    \"\"\"Concrete implementation of BaseVariable for testing.\"\"\"\n\n    def _items(self, key, normalize=False):\n        # Return a simple list containing the key twice for visibility.\n        return [(key, key)]\n\n\ndef test_items_evaluates_and_returns_correct_tuple():\n    \"\"\"Test that items evaluates the source and returns the expected tuple.\"\"\"\n    # Prepare a frame with a local variable `x`.\n    local_vars = {\"x\": 42}\n    frame = types.FrameType(\n        None, None, None, None, None, None, None, None, None, None, None, None, None, None, None\n    )\n    # Monkey‑patch the frame's locals and globals.\n    frame.f_locals = local_vars\n    frame.f_globals = {}\n\n    var = DummyVar(\"x\")\n    result = var.items(frame)\n    assert result == [(42, 42)], \"items should return a tuple with the evaluated value\"\n\n\ndef test_unambiguous_source_and_needs_parentheses():\n    \"\"\"Test that unambiguous_source is set correctly based on needs_parentheses.\"\"\"\n    # Source that does not need parentheses.\n    var_simple = DummyVar(\"x\")\n    assert var_simple.unambiguous_source == \"x\"\n    assert not needs_parentheses(\"x\")\n\n    # Source that does need parentheses.\n    var_attr = DummyVar(\"x.y\")\n    assert var_attr.unambiguous_source == \"(x.y)\"\n    assert needs_parentheses(\"x.y\")\n\n\ndef test_items_handles_evaluation_error_and_exclude():\n    \"\"\"Test that items returns an empty tuple on eval error and exclude is stored.\"\"\"\n    # Source that will raise ZeroDivisionError when evaluated.\n    var_error = DummyVar(\"1/0\", exclude=(\"x\",))\n    # Create a dummy frame; the eval will raise, so items should return empty tuple.\n    frame = types.FrameType(\n        None, None, None, None, None, None, None, None, None, None, None, None, None, None, None\n    )\n    frame.f_locals = {}\n    frame.f_globals = {}\n\n    assert var_error.items(frame) == (), \"items should return empty tuple on eval error\"\n    # Verify that exclude was stored as a tuple.\n    assert var_error.exclude == (\"x\",), \"exclude should be stored as a tuple\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2972889009979554
+}

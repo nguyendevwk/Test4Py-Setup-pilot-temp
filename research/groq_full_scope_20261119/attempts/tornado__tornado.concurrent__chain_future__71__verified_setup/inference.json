@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-837b4da0-5659-44ea-96a6-a7bbfda52ae7",
+  "object": "chat.completion",
+  "created": 1795079385,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import chain_future\nfrom tornado.ioloop import IOLoop\nfrom tornado import gen\n\n\n@pytest.mark.asyncio\nasync def test_chain_future_success():\n    \"\"\"When future `a` succeeds, `b` receives the same result.\"\"\"\n    loop = asyncio.get_running_loop()\n    a = loop.create_future()\n    b = loop.create_future()\n\n    chain_future(a, b)\n\n    # Resolve `a` with a value\n    a.set_result(42)\n\n    # Wait for `b` to be resolved\n    result = await b\n    assert result == 42, \"b should have the same result as a\"\n\n\n@pytest.mark.asyncio\nasync def test_chain_future_exception():\n    \"\"\"When future `a` raises an exception, `b` receives the same exception.\"\"\"\n    loop = asyncio.get_running_loop()\n    a = loop.create_future()\n    b = loop.create_future()\n\n    chain_future(a, b)\n\n    # Resolve `a` with an exception\n    exc = ValueError(\"boom\")\n    a.set_exception(exc)\n\n    # Awaiting `b` should raise the same exception\n    with pytest.raises(ValueError) as e:\n        await b\n    assert str(e.value) == \"boom\", \"b should propagate the exception from a\"\n\n\ndef test_chain_future_b_already_done():\n    \"\"\"If `b` is already completed before `a` finishes, its value should not be overwritten.\"\"\"\n    # Use concurrent.futures.Future for `a` and asyncio.Future for `b`\n    a = concurrent.futures.Future()\n    b = asyncio.get_event_loop().create_future()\n\n    # Pre-complete `b` with a specific value\n    b.set_result(\"pre-completed\")\n\n    # Chain them\n    chain_future(a, b)\n\n    # Resolve `a` after a short delay\n    def resolve_a():\n        a.set_result(\"new value\")\n\n    IOLoop.current().add_timeout(0, resolve_a)\n\n    # Run the IOLoop briefly to allow callbacks to execute\n    IOLoop.current().add_timeout(0.01, IOLoop.current().stop)\n    IOLoop.current().start()\n\n    # Verify that `b` still holds the original value\n    assert b.result() == \"pre-completed\", \"b should not be overwritten if already done\"\n```",
+        "reasoning": "Need tests for chain_future. Use asyncio futures and concurrent futures. Test normal chaining, error propagation, and that if b already done, no copy. Use tmp_path? not needed. Provide three test functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046756275,
+    "prompt_tokens": 535,
+    "prompt_time": 0.035812042,
+    "completion_tokens": 544,
+    "completion_time": 0.607469297,
+    "total_tokens": 1079,
+    "total_time": 0.643281339,
+    "completion_tokens_details": {
+      "reasoning_tokens": 43
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sh3bz8etkth4rssjcc3bx2",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import chain_future\nfrom tornado.ioloop import IOLoop\nfrom tornado import gen\n\n\n@pytest.mark.asyncio\nasync def test_chain_future_success():\n    \"\"\"When future `a` succeeds, `b` receives the same result.\"\"\"\n    loop = asyncio.get_running_loop()\n    a = loop.create_future()\n    b = loop.create_future()\n\n    chain_future(a, b)\n\n    # Resolve `a` with a value\n    a.set_result(42)\n\n    # Wait for `b` to be resolved\n    result = await b\n    assert result == 42, \"b should have the same result as a\"\n\n\n@pytest.mark.asyncio\nasync def test_chain_future_exception():\n    \"\"\"When future `a` raises an exception, `b` receives the same exception.\"\"\"\n    loop = asyncio.get_running_loop()\n    a = loop.create_future()\n    b = loop.create_future()\n\n    chain_future(a, b)\n\n    # Resolve `a` with an exception\n    exc = ValueError(\"boom\")\n    a.set_exception(exc)\n\n    # Awaiting `b` should raise the same exception\n    with pytest.raises(ValueError) as e:\n        await b\n    assert str(e.value) == \"boom\", \"b should propagate the exception from a\"\n\n\ndef test_chain_future_b_already_done():\n    \"\"\"If `b` is already completed before `a` finishes, its value should not be overwritten.\"\"\"\n    # Use concurrent.futures.Future for `a` and asyncio.Future for `b`\n    a = concurrent.futures.Future()\n    b = asyncio.get_event_loop().create_future()\n\n    # Pre-complete `b` with a specific value\n    b.set_result(\"pre-completed\")\n\n    # Chain them\n    chain_future(a, b)\n\n    # Resolve `a` after a short delay\n    def resolve_a():\n        a.set_result(\"new value\")\n\n    IOLoop.current().add_timeout(0, resolve_a)\n\n    # Run the IOLoop briefly to allow callbacks to execute\n    IOLoop.current().add_timeout(0.01, IOLoop.current().stop)\n    IOLoop.current().start()\n\n    # Verify that `b` still holds the original value\n    assert b.result() == \"pre-completed\", \"b should not be overwritten if already done\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "cf55f835723a45939a989f01862d8d54",
+  "_api_plus_pacing_seconds": 1.1548711500363424
+}

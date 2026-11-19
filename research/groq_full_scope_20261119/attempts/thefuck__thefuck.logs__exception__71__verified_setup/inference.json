@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-b8b80026-be96-4781-b3c4-41f179d29134",
+  "object": "chat.completion",
+  "created": 1795079464,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport io\nimport pytest\nfrom contextlib import redirect_stderr\nfrom thefuck.logs import exception\nfrom traceback import TracebackException, format_exception\n\ndef test_exception_writes_expected_format(tmp_path):\n    # Create a simple exception and capture its exc_info\n    try:\n        1 / 0\n    except ZeroDivisionError:\n        exc_info = sys.exc_info()\n    # Capture stderr output\n    stderr = io.StringIO()\n    with redirect_stderr(stderr):\n        exception(\"Test Title\", exc_info)\n    output = stderr.getvalue()\n    # Assert that the title and trace are present\n    assert \"Test Title\" in output\n    assert \"ZeroDivisionError\" in output\n    # Assert that the warning header and separator are present\n    assert \"WARN\" in output\n    assert \"----------------------------\" in output\n\ndef test_exception_with_custom_exception(tmp_path):\n    # Use a custom exception with a message\n    class MyError(Exception):\n        pass\n    try:\n        raise MyError(\"custom message\")\n    except MyError:\n        exc_info = sys.exc_info()\n    stderr = io.StringIO()\n    with redirect_stderr(stderr):\n        exception(\"Custom Error\", exc_info)\n    output = stderr.getvalue()\n    # Check that the custom message appears in the trace\n    assert \"custom message\" in output\n    # Ensure the title is correctly formatted\n    assert \"Custom Error\" in output\n\ndef test_exception_invalid_exc_info_raises_type_error():\n    # Pass an invalid exc_info tuple (missing elements)\n    invalid_exc_info = (None, None)  # missing traceback\n    with pytest.raises(TypeError):\n        exception(\"Invalid\", invalid_exc_info)\n```",
+        "reasoning": "We need to test exception function. It writes to sys.stderr. We can capture stderr. Use tmp_path? not needed. Write three tests: normal exception formatting, boundary: empty exc_info? but function expects tuple. error: passing wrong type raises? maybe TypeError. We'll test that it writes correct prefix and trace. Use contextmanager to capture stderr. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004906724,
+    "prompt_tokens": 340,
+    "prompt_time": 0.024591755,
+    "completion_tokens": 440,
+    "completion_time": 0.465213685,
+    "total_tokens": 780,
+    "total_time": 0.48980544,
+    "completion_tokens_details": {
+      "reasoning_tokens": 77
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh5rzye40sgsz0p2r8ezzy",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport io\nimport pytest\nfrom contextlib import redirect_stderr\nfrom thefuck.logs import exception\nfrom traceback import TracebackException, format_exception\n\ndef test_exception_writes_expected_format(tmp_path):\n    # Create a simple exception and capture its exc_info\n    try:\n        1 / 0\n    except ZeroDivisionError:\n        exc_info = sys.exc_info()\n    # Capture stderr output\n    stderr = io.StringIO()\n    with redirect_stderr(stderr):\n        exception(\"Test Title\", exc_info)\n    output = stderr.getvalue()\n    # Assert that the title and trace are present\n    assert \"Test Title\" in output\n    assert \"ZeroDivisionError\" in output\n    # Assert that the warning header and separator are present\n    assert \"WARN\" in output\n    assert \"----------------------------\" in output\n\ndef test_exception_with_custom_exception(tmp_path):\n    # Use a custom exception with a message\n    class MyError(Exception):\n        pass\n    try:\n        raise MyError(\"custom message\")\n    except MyError:\n        exc_info = sys.exc_info()\n    stderr = io.StringIO()\n    with redirect_stderr(stderr):\n        exception(\"Custom Error\", exc_info)\n    output = stderr.getvalue()\n    # Check that the custom message appears in the trace\n    assert \"custom message\" in output\n    # Ensure the title is correctly formatted\n    assert \"Custom Error\" in output\n\ndef test_exception_invalid_exc_info_raises_type_error():\n    # Pass an invalid exc_info tuple (missing elements)\n    invalid_exc_info = (None, None)  # missing traceback\n    with pytest.raises(TypeError):\n        exception(\"Invalid\", invalid_exc_info)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "0c506e56c9cd402e91cb6e6ee5190054",
+  "_api_plus_pacing_seconds": 1.598996660031844
+}

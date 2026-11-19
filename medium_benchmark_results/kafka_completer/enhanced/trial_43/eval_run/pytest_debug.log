@@ -1,0 +1,29 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________________ test_yield_commands_display_meta _______________________
+
+    def test_yield_commands_display_meta():
+        # Setup settings with two commands and help enabled
+        commands = {
+            "create-topic": {"description": "Create a topic"},
+            "delete-topic": {"description": "Delete a topic"},
+        }
+        settings = DummySettings(commands, enable_help=True, enable_fuzzy_search=False)
+        completer = KafkaCompleter(settings)
+    
+        # Capture completions for partial word 'cre'
+        completions = list(completer.yield_commands("cre"))
+        assert len(completions) == 1
+        comp = completions[0]
+        assert isinstance(comp, Completion)
+        assert comp.text == "create-topic"
+        assert comp.start_position == -3
+>       assert comp.display_meta == "Create a topic"
+E       AssertionError: assert FormattedText([('', 'Create a topic')]) == 'Create a topic'
+E        +  where FormattedText([('', 'Create a topic')]) = Completion(text='create-topic', start_position=-3, display=FormattedText([('', 'create-topic')])).display_meta
+
+../eval_run/test_run.py:28: AssertionError
+=========================== short test summary info ============================
+FAILED ../eval_run/test_run.py::test_yield_commands_display_meta - AssertionE...
+1 failed in 1.54s
+

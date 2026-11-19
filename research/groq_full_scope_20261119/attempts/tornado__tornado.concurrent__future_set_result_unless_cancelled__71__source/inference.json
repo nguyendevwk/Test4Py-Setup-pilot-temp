@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-fc4d2fd4-3a37-4508-9dfd-57fdc63f030c",
+  "object": "chat.completion",
+  "created": 1795076405,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import future_set_result_unless_cancelled\n\n\ndef test_set_result_on_active_future():\n    \"\"\"When the future is not cancelled, the value is set as its result.\"\"\"\n    fut = asyncio.Future()\n    future_set_result_unless_cancelled(fut, 42)\n    assert fut.done()\n    assert fut.result() == 42\n\n\ndef test_no_result_on_cancelled_future():\n    \"\"\"If the future is cancelled, the function does nothing and does not raise.\"\"\"\n    fut = asyncio.Future()\n    fut.cancel()\n    future_set_result_unless_cancelled(fut, \"ignored\")\n    assert fut.cancelled()\n    with pytest.raises(asyncio.InvalidStateError):\n        fut.result()\n\n\ndef test_invalid_state_when_future_already_done():\n    \"\"\"If the future already has a result, set_result raises InvalidStateError.\"\"\"\n    fut = asyncio.Future()\n    fut.set_result(\"original\")\n    with pytest.raises(asyncio.InvalidStateError):\n        future_set_result_unless_cancelled(fut, \"new\")\n```",
+        "reasoning": "We need to test this function. It accepts a future from concurrent.futures or asyncio.Future. We need to test normal, boundary, error. Cases: future not cancelled -> set_result called. future cancelled -> no exception. Also test that if future already has result? set_result will raise InvalidStateError. But function only checks cancelled, not done. So if future already done, set_result will raise. We can test that it raises. But spec says avoid InvalidStateError when cancelled; but if already done, still error. So test that. Use asyncio.Future. Use tmp_path not needed. Write three tests: 1) normal future, set result. 2) cancelled future, no exception. 3) already done future, raises InvalidStateError. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05295807,
+    "prompt_tokens": 366,
+    "prompt_time": 0.020524629,
+    "completion_tokens": 389,
+    "completion_time": 0.446822646,
+    "total_tokens": 755,
+    "total_time": 0.467347275,
+    "completion_tokens_details": {
+      "reasoning_tokens": 160
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se8dz8en99rjme7cef5az1",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import future_set_result_unless_cancelled\n\n\ndef test_set_result_on_active_future():\n    \"\"\"When the future is not cancelled, the value is set as its result.\"\"\"\n    fut = asyncio.Future()\n    future_set_result_unless_cancelled(fut, 42)\n    assert fut.done()\n    assert fut.result() == 42\n\n\ndef test_no_result_on_cancelled_future():\n    \"\"\"If the future is cancelled, the function does nothing and does not raise.\"\"\"\n    fut = asyncio.Future()\n    fut.cancel()\n    future_set_result_unless_cancelled(fut, \"ignored\")\n    assert fut.cancelled()\n    with pytest.raises(asyncio.InvalidStateError):\n        fut.result()\n\n\ndef test_invalid_state_when_future_already_done():\n    \"\"\"If the future already has a result, set_result raises InvalidStateError.\"\"\"\n    fut = asyncio.Future()\n    fut.set_result(\"original\")\n    with pytest.raises(asyncio.InvalidStateError):\n        future_set_result_unless_cancelled(fut, \"new\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8394008179893717
+}

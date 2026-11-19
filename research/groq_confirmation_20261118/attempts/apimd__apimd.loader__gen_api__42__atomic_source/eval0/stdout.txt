@@ -1,0 +1,103 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_gen_api_creates_markdown _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-54/test_gen_api_creates_markdown0')
+
+    def test_gen_api_creates_markdown(tmp_path):
+        """Normal case: a simple module with a function should produce a markdown file."""
+        # Create a simple module
+        mod_code = """
+    def hello(name: str) -> str:
+        \"\"\"Return greeting.\"\"\"
+        return f"Hello, {name}!"
+    """
+        mod_path = _create_module(tmp_path, "greet", mod_code)
+    
+        # Ensure module is importable
+        _import_module_from_path("greet", mod_path)
+    
+        # Run gen_api
+        docs = gen_api({"Greeting": "greet"}, pwd=str(tmp_path), prefix=str(tmp_path / "docs"))
+    
+        # There should be one doc returned
+>       assert len(docs) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+../../../../../../attempts/apimd__apimd.loader__gen_api__42__atomic_source/eval0/test_generated.py:46: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-54/test_gen_api_creates_markdown0/docs[0m
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-54/test_gen_api_creates_markdown0/docs[0m
+[32mLoad root: greet (Greeting)[0m
+[32mLoad root: greet (Greeting)[0m
+[33m'greet' can not be found[0m
+[33m'greet' can not be found[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:127 Create directory: /tmp/pytest-of-heurix/pytest-54/test_gen_api_creates_markdown0/docs
+INFO     root:loader.py:131 Load root: greet (Greeting)
+WARNING  root:loader.py:134 'greet' can not be found
+________________________ test_gen_api_empty_root_names _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-54/test_gen_api_empty_root_names0')
+
+    def test_gen_api_empty_root_names(tmp_path):
+        """Boundary case: empty root_names should return an empty list and create no files."""
+        docs = gen_api({}, pwd=str(tmp_path), prefix=str(tmp_path / "docs"))
+        assert docs == []
+        # No docs directory should be created because nothing was written
+>       assert not (tmp_path / "docs").exists()
+E       AssertionError: assert not True
+E        +  where True = exists()
+E        +    where exists = (PosixPath('/tmp/pytest-of-heurix/pytest-54/test_gen_api_empty_root_names0') / 'docs').exists
+
+../../../../../../attempts/apimd__apimd.loader__gen_api__42__atomic_source/eval0/test_generated.py:62: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-54/test_gen_api_empty_root_names0/docs[0m
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-54/test_gen_api_empty_root_names0/docs[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:127 Create directory: /tmp/pytest-of-heurix/pytest-54/test_gen_api_empty_root_names0/docs
+_________________________ test_gen_api_missing_module __________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-54/test_gen_api_missing_module0')
+
+    def test_gen_api_missing_module(tmp_path):
+        """Error case: a non-existent module name should be skipped and not produce a file."""
+        # Create a dummy module that will be referenced
+        _create_module(tmp_path, "existing", "def foo(): pass")
+    
+        # Run gen_api with one existing and one missing module
+        docs = gen_api(
+            {"Existing": "existing", "Missing": "nonexistent"},
+            pwd=str(tmp_path),
+            prefix=str(tmp_path / "docs"),
+        )
+    
+        # Only the existing module should produce a doc
+>       assert len(docs) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+../../../../../../attempts/apimd__apimd.loader__gen_api__42__atomic_source/eval0/test_generated.py:78: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-54/test_gen_api_missing_module0/docs[0m
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-54/test_gen_api_missing_module0/docs[0m
+[32mLoad root: existing (Existing)[0m
+[32mLoad root: existing (Existing)[0m
+[33m'existing' can not be found[0m
+[33m'existing' can not be found[0m
+[32mLoad root: nonexistent (Missing)[0m
+[32mLoad root: nonexistent (Missing)[0m
+[33m'nonexistent' can not be found[0m
+[33m'nonexistent' can not be found[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:127 Create directory: /tmp/pytest-of-heurix/pytest-54/test_gen_api_missing_module0/docs
+INFO     root:loader.py:131 Load root: existing (Existing)
+WARNING  root:loader.py:134 'existing' can not be found
+INFO     root:loader.py:131 Load root: nonexistent (Missing)
+WARNING  root:loader.py:134 'nonexistent' can not be found
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/apimd__apimd.loader__gen_api__42__atomic_source/eval0/test_generated.py::test_gen_api_creates_markdown
+FAILED ../../../../../../attempts/apimd__apimd.loader__gen_api__42__atomic_source/eval0/test_generated.py::test_gen_api_empty_root_names
+FAILED ../../../../../../attempts/apimd__apimd.loader__gen_api__42__atomic_source/eval0/test_generated.py::test_gen_api_missing_module
+3 failed in 0.18s

@@ -1,0 +1,44 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_proxy_error_initialization_with_code_and_message _____________
+
+    def test_proxy_error_initialization_with_code_and_message():
+        """Initializing with a code and a custom message should set the args correctly."""
+        code = 42
+        message = "Custom error message"
+        err = ProxyError(code, message)
+        # socket.error stores the arguments in the .args tuple
+        assert err.args == (code, message)
+        # The string representation should include the message
+>       assert str(err) == f"{code}: {message}"
+E       AssertionError: assert '[Errno 42] C...error message' == '42: Custom error message'
+E         
+E         - 42: Custom error message
+E         ?   ^
+E         + [Errno 42] Custom error message
+E         ? +++++++  ^
+
+test_generated.py:20: AssertionError
+_ test_proxy_error_initialization_with_code_only_uses_coded_message_or_unknown _
+
+    def test_proxy_error_initialization_with_code_only_uses_coded_message_or_unknown():
+        """If only a code is provided, the message should come from CODES or default to 'unknown error'."""
+        # Use a code that is unlikely to be in CODES
+        code = 9999
+>       err = ProxyError(code)
+
+test_generated.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ProxyError(), code = 9999, msg = None
+
+    def __init__(self, code=None, msg=None):
+        if code is not None and msg is None:
+>           msg = self.CODES.get(code) or 'unknown error'
+E           AttributeError: 'ProxyError' object has no attribute 'CODES'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/socks.py:63: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_proxy_error_initialization_with_code_and_message
+FAILED test_generated.py::test_proxy_error_initialization_with_code_only_uses_coded_message_or_unknown
+2 failed, 1 passed in 0.81s

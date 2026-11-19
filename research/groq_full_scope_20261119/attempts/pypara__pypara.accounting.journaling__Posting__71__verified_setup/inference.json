@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-ddf817b2-d291-4255-b5b9-533a7f104a01",
+  "object": "chat.completion",
+  "created": 1795078093,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom pypara.accounting.journaling import Posting, Direction, _debit_mapping\nfrom pypara.accounting.accounts import Account, AccountType\nfrom pypara.commons.numbers import Amount\n\n\ndef test_posting_debit_and_credit_flags():\n    \"\"\"Posting should correctly report debit/credit status based on account type and direction.\"\"\"\n    # Pick an account type that is known to be debit for a debit direction\n    account = Account(name=\"Cash\", type=AccountType.ASSET)\n    # Create a dummy journal entry placeholder (any object works for the type hint)\n    dummy_journal = object()\n    posting = Posting(\n        journal=dummy_journal,\n        date=datetime.date.today(),\n        account=account,\n        direction=Direction.DEBIT,\n        amount=Amount(100.0),\n    )\n    # The account type should be in the mapping for a debit direction\n    assert posting.is_debit is True\n    assert posting.is_credit is False\n\n    # Now test the opposite direction\n    posting_credit = Posting(\n        journal=dummy_journal,\n        date=datetime.date.today(),\n        account=account,\n        direction=Direction.CREDIT,\n        amount=Amount(50.0),\n    )\n    # For a credit direction the same account type should not be considered debit\n    assert posting_credit.is_debit is False\n    assert posting_credit.is_credit is True\n\n\ndef test_posting_amount_and_date_storage():\n    \"\"\"Posting should store the provided amount and date unchanged.\"\"\"\n    account = Account(name=\"Revenue\", type=AccountType.REVENUE)\n    dummy_journal = object()\n    test_date = datetime.date(2024, 1, 15)\n    test_amount = Amount(1234.56)\n    posting = Posting(\n        journal=dummy_journal,\n        date=test_date,\n        account=account,\n        direction=Direction.CREDIT,\n        amount=test_amount,\n    )\n    assert posting.date == test_date\n    assert posting.amount == test_amount\n    # Ensure the amount is stored as an absolute value (non-negative)\n    assert posting.amount >= 0\n\n\ndef test_posting_invalid_direction_raises():\n    \"\"\"Providing an invalid direction should raise a TypeError during initialization.\"\"\"\n    account = Account(name=\"Liability\", type=AccountType.LIABILITY)\n    dummy_journal = object()\n    # Direction is expected to be an enum member; passing a string should fail\n    with pytest.raises(TypeError):\n        Posting(\n            journal=dummy_journal,\n            date=datetime.date.today(),\n            account=account,\n            direction=\"INVALID_DIRECTION\",  # type: ignore[arg-type]\n            amount=Amount(200.0),\n        )\n```",
+        "reasoning": "We need to write tests for Posting. Need to import Posting, Direction, Account, etc. Let's inspect other modules? But we can assume Direction enum exists. We need to test is_debit and is_credit behavior. Also test initialization. Use tmp_path? Not needed. Just create dummy objects. But need Account with type. AccountType enum. Let's inspect accounts module? Not provided. We'll assume Account has attribute type. We can create a simple mock? But cannot mock target. But we can create real Account instance. Let's assume Account is dataclass with type field. We need to import it. We'll write tests that create accounts with types that map to debit/credit via _debit_mapping. But _debit_mapping is internal. We can infer: Direction likely has values like DEBIT, CREDIT. Let's just test that is_debit returns True for a debit direction and account type that is in mapping. We can introspect _debit_mapping via getattr? It's internal variable. We can import module and access it. Use from pypara.accounting.journaling import Posting, Direction, _debit_mapping. Then create account with type that is in mapping. Use AccountType enum. Let's import AccountType. Then create account = Account(name=\"Cash\", type=AccountType.ASSET). Then create posting with direction=Direction.DEBIT. Assert is_debit True. Also test credit direction returns False. Also test that is_credit is opposite. Third test: boundary: amount zero? amount type Amount maybe numeric. Just test that amount stored correctly. Use datetime.date. Use tmp_path? Not needed. We'll create three test functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004922165,
+    "prompt_tokens": 564,
+    "prompt_time": 0.00536596,
+    "completion_tokens": 898,
+    "completion_time": 1.046540621,
+    "total_tokens": 1462,
+    "total_time": 1.051906581,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 334
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sfvy2tes4rva08fj872y5g",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom pypara.accounting.journaling import Posting, Direction, _debit_mapping\nfrom pypara.accounting.accounts import Account, AccountType\nfrom pypara.commons.numbers import Amount\n\n\ndef test_posting_debit_and_credit_flags():\n    \"\"\"Posting should correctly report debit/credit status based on account type and direction.\"\"\"\n    # Pick an account type that is known to be debit for a debit direction\n    account = Account(name=\"Cash\", type=AccountType.ASSET)\n    # Create a dummy journal entry placeholder (any object works for the type hint)\n    dummy_journal = object()\n    posting = Posting(\n        journal=dummy_journal,\n        date=datetime.date.today(),\n        account=account,\n        direction=Direction.DEBIT,\n        amount=Amount(100.0),\n    )\n    # The account type should be in the mapping for a debit direction\n    assert posting.is_debit is True\n    assert posting.is_credit is False\n\n    # Now test the opposite direction\n    posting_credit = Posting(\n        journal=dummy_journal,\n        date=datetime.date.today(),\n        account=account,\n        direction=Direction.CREDIT,\n        amount=Amount(50.0),\n    )\n    # For a credit direction the same account type should not be considered debit\n    assert posting_credit.is_debit is False\n    assert posting_credit.is_credit is True\n\n\ndef test_posting_amount_and_date_storage():\n    \"\"\"Posting should store the provided amount and date unchanged.\"\"\"\n    account = Account(name=\"Revenue\", type=AccountType.REVENUE)\n    dummy_journal = object()\n    test_date = datetime.date(2024, 1, 15)\n    test_amount = Amount(1234.56)\n    posting = Posting(\n        journal=dummy_journal,\n        date=test_date,\n        account=account,\n        direction=Direction.CREDIT,\n        amount=test_amount,\n    )\n    assert posting.date == test_date\n    assert posting.amount == test_amount\n    # Ensure the amount is stored as an absolute value (non-negative)\n    assert posting.amount >= 0\n\n\ndef test_posting_invalid_direction_raises():\n    \"\"\"Providing an invalid direction should raise a TypeError during initialization.\"\"\"\n    account = Account(name=\"Liability\", type=AccountType.LIABILITY)\n    dummy_journal = object()\n    # Direction is expected to be an enum member; passing a string should fail\n    with pytest.raises(TypeError):\n        Posting(\n            journal=dummy_journal,\n            date=datetime.date.today(),\n            account=account,\n            direction=\"INVALID_DIRECTION\",  # type: ignore[arg-type]\n            amount=Amount(200.0),\n        )\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.6213226119871251
+}

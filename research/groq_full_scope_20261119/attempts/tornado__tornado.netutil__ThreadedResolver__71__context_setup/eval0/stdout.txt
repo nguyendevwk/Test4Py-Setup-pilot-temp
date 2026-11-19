@@ -1,0 +1,43 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_threadpool_singleton_and_pid_behavior __________________
+
+    def test_threadpool_singleton_and_pid_behavior():
+        # Create first resolver with 2 threads
+        resolver1 = ThreadedResolver()
+        resolver1.initialize(num_threads=2)
+        pool1 = resolver1.executor
+        assert isinstance(pool1, concurrent.futures.ThreadPoolExecutor)
+>       assert pool1._max_workers == 2
+E       assert 10 == 2
+E        +  where 10 = <concurrent.futures.thread.ThreadPoolExecutor object at 0x7fccc7d657b0>._max_workers
+
+test_generated.py:13: AssertionError
+_________________ test_resolve_localhost_returns_ipv4_and_ipv6 _________________
+
+    def test_resolve_localhost_returns_ipv4_and_ipv6():
+        resolver = ThreadedResolver()
+        resolver.initialize(num_threads=1)
+        # Resolve localhost on a common port (e.g., 80)
+        results = resolver.resolve("localhost", 80, socket.AF_UNSPEC)
+        # Resolve returns a Future-like awaitable; get result synchronously
+>       resolved = results.result()
+E       asyncio.exceptions.InvalidStateError: Result is not set.
+
+test_generated.py:39: InvalidStateError
+___________________ test_resolve_invalid_host_raises_ioerror ___________________
+
+    def test_resolve_invalid_host_raises_ioerror():
+        resolver = ThreadedResolver()
+        resolver.initialize(num_threads=1)
+        # Resolve an obviously invalid hostname; should raise IOError
+        with pytest.raises(IOError):
+>           resolver.resolve("nonexistent.host.example", 80).result()
+E           asyncio.exceptions.InvalidStateError: Result is not set.
+
+test_generated.py:58: InvalidStateError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_threadpool_singleton_and_pid_behavior - assert...
+FAILED test_generated.py::test_resolve_localhost_returns_ipv4_and_ipv6 - asyn...
+FAILED test_generated.py::test_resolve_invalid_host_raises_ioerror - asyncio....
+3 failed in 0.21s

@@ -1,0 +1,39 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_walk_body_simple_sequence ________________________
+
+    def test_walk_body_simple_sequence():
+        # Parse a simple function body with an if and a try
+        source = """
+    def foo():
+        if True:
+            x = 1
+        else:
+            x = 2
+        try:
+            y = 3
+        except Exception:
+            y = 4
+        finally:
+            z = 5
+    """
+        module = ast.parse(source)
+        # Extract the function body
+        func = next(node for node in module.body if isinstance(node, ast.FunctionDef))
+        body = func.body
+    
+        # Collect the nodes yielded by walk_body
+        yielded = list(walk_body(body))
+    
+        # The order should be: If node, its body nodes, its orelse nodes,
+        # Try node, its body nodes, handler body nodes, finally body nodes
+        # We check that the first node is the If statement
+>       assert isinstance(yielded[0], ast.If)
+E       AssertionError: assert False
+E        +  where False = isinstance(<ast.Assign object at 0x7f28396d9360>, <class 'ast.If'>)
+E        +    where <class 'ast.If'> = ast.If
+
+test_generated.py:31: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_walk_body_simple_sequence - AssertionError: as...
+1 failed, 2 passed in 0.10s

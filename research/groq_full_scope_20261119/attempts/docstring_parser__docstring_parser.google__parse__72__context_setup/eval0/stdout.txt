@@ -1,0 +1,78 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_parse_simple_google_docstring ______________________
+
+    def test_parse_simple_google_docstring():
+        doc = """
+        Adds two numbers together.
+    
+        Args:
+            a (int): The first number.
+            b (int): The second number.
+    
+        Returns:
+            int: The sum of a and b.
+    
+        Raises:
+            ValueError: If either argument is negative.
+    
+        Examples:
+            >>> add(2, 3)
+            5
+        """
+        parsed = parse(doc)
+        assert isinstance(parsed, Docstring)
+        assert parsed.description.strip() == "Adds two numbers together."
+        assert len(parsed.params) == 2
+>       names = {p.name for p in parsed.params}
+
+test_generated.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x7f330da3fca0>
+
+>   names = {p.name for p in parsed.params}
+E   AttributeError: 'DocstringParam' object has no attribute 'name'
+
+test_generated.py:27: AttributeError
+______________ test_parse_empty_docstring_returns_empty_docstring ______________
+
+    def test_parse_empty_docstring_returns_empty_docstring():
+        parsed = parse("")
+        assert isinstance(parsed, Docstring)
+>       assert parsed.description == ""
+E       AssertionError: assert None == ''
+E        +  where None = <docstring_parser.common.Docstring object at 0x7f330da3c2b0>.description
+
+test_generated.py:51: AssertionError
+__________________ test_parse_invalid_input_raises_type_error __________________
+
+    def test_parse_invalid_input_raises_type_error():
+        with pytest.raises(TypeError):
+>           parse(42)  # non-string input should raise TypeError
+
+test_generated.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/google.py:301: in parse
+    return GoogleParser().parse(text)
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/google.py:215: in parse
+    text = inspect.cleandoc(text)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+doc = 42
+
+    def cleandoc(doc):
+        """Clean up indentation from docstrings.
+    
+        Any whitespace that can be uniformly removed from the second line
+        onwards is removed."""
+        try:
+>           lines = doc.expandtabs().split('\n')
+E           AttributeError: 'int' object has no attribute 'expandtabs'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:750: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_simple_google_docstring - AttributeError...
+FAILED test_generated.py::test_parse_empty_docstring_returns_empty_docstring
+FAILED test_generated.py::test_parse_invalid_input_raises_type_error - Attrib...
+3 failed in 0.26s

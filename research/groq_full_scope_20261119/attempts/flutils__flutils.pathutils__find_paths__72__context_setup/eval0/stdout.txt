@@ -1,0 +1,51 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_find_paths_expands_user_and_glob _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__find_paths__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_find_paths_expands_user_a0')
+
+    def test_find_paths_expands_user_and_glob(tmp_path):
+        # Create a directory structure under the user's home
+        home = Path.home()
+        target_dir = home / "tmp_test_find"
+        target_dir.mkdir(parents=True, exist_ok=True)
+        (target_dir / "file1.txt").write_text("a")
+        (target_dir / "file2.txt").write_text("b")
+        # Use a glob pattern with ~ expansion
+        pattern = f"~{target_dir.relative_to(home)}/file*.txt"
+        # Ensure the pattern is resolved to the correct absolute path
+        resolved = normalize_path(pattern)
+        assert resolved.is_absolute()
+        # Collect results from find_paths
+        results = list(find_paths(pattern))
+        # Expect both files to be found
+        expected = {target_dir / "file1.txt", target_dir / "file2.txt"}
+>       assert set(results) == expected
+E       AssertionError: assert set() == {PosixPath('/...d/file2.txt')}
+E         
+E         Extra items in the right set:
+E         PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__find_paths__72__context_setup/eval0/tmp_test_find/file2.txt')
+E         PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__find_paths__72__context_setup/eval0/tmp_test_find/file1.txt')
+E         Use -v to get more diff
+
+test_generated.py:23: AssertionError
+_______________________ test_find_paths_invalid_pattern ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/flutils__flutils.pathutils__find_paths__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_find_paths_invalid_patter0')
+
+    def test_find_paths_invalid_pattern(tmp_path):
+        # Create a directory with a file that has a name that could be interpreted as a pattern
+        dir_with_file = tmp_path / "dir_with_file"
+        dir_with_file.mkdir()
+        (dir_with_file / "file[1].txt").write_text("content")
+        # Use a pattern that is syntactically invalid for glob (e.g., unmatched bracket)
+        invalid_pattern = str(dir_with_file / "file[.txt")
+        # Path.glob will raise a ValueError for an invalid pattern
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE ValueError
+
+test_generated.py:43: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_find_paths_expands_user_and_glob - AssertionEr...
+FAILED test_generated.py::test_find_paths_invalid_pattern - Failed: DID NOT R...
+2 failed, 1 passed in 0.12s

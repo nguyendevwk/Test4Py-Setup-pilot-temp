@@ -1,0 +1,30 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________ test_schema_validate_required_and_default ___________________
+
+    def test_schema_validate_required_and_default():
+        # Define a schema with a required field `a` and a field `b` that has a default.
+        schema = Schema(fields={"a": String(), "b": String(default="hello")})
+    
+        # Valid input: `a` provided, `b` omitted -> default should be applied.
+        result = schema.validate({"a": "test"})
+        assert result == {"a": "test", "b": "hello"}
+    
+        # Invalid input: missing required field `a` -> ValidationError with code "required".
+        with pytest.raises(ValidationError) as excinfo:
+            schema.validate({})
+        # The error should contain a Message with code "required" and index ["a"].
+        messages = excinfo.value.messages
+>       assert any(
+            isinstance(msg, Message) and msg.code == "required" and msg.index == ["a"]
+            for msg in messages
+        )
+E       TypeError: 'method' object is not iterable
+
+../eval_run/test_run.py:19: TypeError
+=========================== short test summary info ============================
+FAILED ../eval_run/test_run.py::test_schema_validate_required_and_default - T...
+1 failed in 0.12s
+
+/home/heurix/Documents/Test4Py_Setup/.venv/lib/python3.10/site-packages/coverage/inorout.py:558: CoverageWarning: Module tests was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.16.2/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")

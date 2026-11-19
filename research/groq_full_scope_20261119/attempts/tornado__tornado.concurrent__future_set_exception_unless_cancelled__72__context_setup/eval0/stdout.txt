@@ -1,0 +1,24 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_future_set_exception_on_cancelled_future _________________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7f57bd9c62f0>
+
+    def test_future_set_exception_on_cancelled_future(caplog):
+        fut = asyncio.Future()
+        fut.cancel()
+        exc = RuntimeError("cancelled error")
+        with caplog.at_level(logging.ERROR, logger="tornado"):
+            future_set_exception_unless_cancelled(fut, exc)
+        # Future should remain cancelled and have no exception
+        assert fut.cancelled()
+>       assert fut.exception() is None
+E       asyncio.exceptions.CancelledError
+
+test_generated.py:24: CancelledError
+------------------------------ Captured log call -------------------------------
+ERROR    tornado.application:concurrent.py:218 Exception after Future was cancelled
+RuntimeError: cancelled error
+=========================== short test summary info ============================
+FAILED test_generated.py::test_future_set_exception_on_cancelled_future - asy...
+1 failed, 2 passed in 0.21s

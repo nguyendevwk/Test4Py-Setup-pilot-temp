@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-e5daf2fe-8192-42ad-afb0-06dfce6368b3",
+  "object": "chat.completion",
+  "created": 1795077631,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport typed_ast.ast3 as ast\nfrom py_backwards.transformers.base import BaseNodeTransformer\nfrom py_backwards.types import TransformationResult\n\n\nclass DummyTransformer(BaseNodeTransformer):\n    \"\"\"A minimal transformer that marks the tree as changed when visiting an Assign node.\"\"\"\n    def visit_Assign(self, node: ast.Assign):\n        self._tree_changed = True\n        return node\n\n\ndef test_transform_changes_flag(tmp_path):\n    \"\"\"Verify that visiting an Assign node sets the changed flag.\"\"\"\n    source = \"x = 1\\n\"\n    tree = ast.parse(source)\n    result: TransformationResult = DummyTransformer.transform(tree)\n    assert result.changed is True\n    assert result.dependencies == []  # no dependencies declared\n    # The tree should remain structurally identical\n    assert isinstance(result.tree, ast.Module)\n    assert len(result.tree.body) == 1\n    assert isinstance(result.tree.body[0], ast.Assign)\n\n\ndef test_transform_no_change(tmp_path):\n    \"\"\"Verify that when no relevant nodes are visited, the changed flag remains False.\"\"\"\n    class NoChangeTransformer(BaseNodeTransformer):\n        def visit_Expr(self, node: ast.Expr):\n            return node\n\n    source = \"print('hello')\\n\"\n    tree = ast.parse(source)\n    result: TransformationResult = NoChangeTransformer.transform(tree)\n    assert result.changed is False\n    assert result.dependencies == []\n    assert isinstance(result.tree, ast.Module)\n    assert len(result.tree.body) == 1\n    assert isinstance(result.tree.body[0], ast.Expr)\n\n\ndef test_transform_invalid_input():\n    \"\"\"Passing a non-AST object should raise a TypeError during visit.\"\"\"\n    with pytest.raises(TypeError):\n        DummyTransformer.transform(None)\n```",
+        "reasoning": "We need to test BaseNodeTransformer.transform. We need a simple subclass that overrides visit to change tree. Use typed_ast ast3. Create a simple AST: e.g., ast.parse(\"x=1\")? typed_ast? Use typed_ast.parse? Let's import typed_ast.ast3.parse. Then create subclass that sets _tree_changed True when visiting Assign. Test that result changed flag true and dependencies empty. Also test that if no changes, flag false. Third test error: passing non-AST raises? But transform expects AST. We can pass None and expect TypeError? Actually visit will error. Use pytest.raises(TypeError). Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054476441,
+    "prompt_tokens": 427,
+    "prompt_time": 0.031305207,
+    "completion_tokens": 495,
+    "completion_time": 0.530897685,
+    "total_tokens": 922,
+    "total_time": 0.562202892,
+    "completion_tokens_details": {
+      "reasoning_tokens": 132
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfdtdse74az8s7yxxx3scn",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport typed_ast.ast3 as ast\nfrom py_backwards.transformers.base import BaseNodeTransformer\nfrom py_backwards.types import TransformationResult\n\n\nclass DummyTransformer(BaseNodeTransformer):\n    \"\"\"A minimal transformer that marks the tree as changed when visiting an Assign node.\"\"\"\n    def visit_Assign(self, node: ast.Assign):\n        self._tree_changed = True\n        return node\n\n\ndef test_transform_changes_flag(tmp_path):\n    \"\"\"Verify that visiting an Assign node sets the changed flag.\"\"\"\n    source = \"x = 1\\n\"\n    tree = ast.parse(source)\n    result: TransformationResult = DummyTransformer.transform(tree)\n    assert result.changed is True\n    assert result.dependencies == []  # no dependencies declared\n    # The tree should remain structurally identical\n    assert isinstance(result.tree, ast.Module)\n    assert len(result.tree.body) == 1\n    assert isinstance(result.tree.body[0], ast.Assign)\n\n\ndef test_transform_no_change(tmp_path):\n    \"\"\"Verify that when no relevant nodes are visited, the changed flag remains False.\"\"\"\n    class NoChangeTransformer(BaseNodeTransformer):\n        def visit_Expr(self, node: ast.Expr):\n            return node\n\n    source = \"print('hello')\\n\"\n    tree = ast.parse(source)\n    result: TransformationResult = NoChangeTransformer.transform(tree)\n    assert result.changed is False\n    assert result.dependencies == []\n    assert isinstance(result.tree, ast.Module)\n    assert len(result.tree.body) == 1\n    assert isinstance(result.tree.body[0], ast.Expr)\n\n\ndef test_transform_invalid_input():\n    \"\"\"Passing a non-AST object should raise a TypeError during visit.\"\"\"\n    with pytest.raises(TypeError):\n        DummyTransformer.transform(None)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9587076010066085
+}

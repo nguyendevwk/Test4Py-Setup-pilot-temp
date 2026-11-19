@@ -1,0 +1,65 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_import_rewrite_calls_previous ______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4054f50f70>
+
+    def test_import_rewrite_calls_previous(monkeypatch):
+        called = {"prev": False, "curr": False}
+    
+        def fake_extend(arg):
+            if arg == "prev":
+                called["prev"] = True
+            elif arg == "curr":
+                called["curr"] = True
+            else:
+                raise ValueError("Unexpected argument")
+    
+        replace_extend(monkeypatch, fake_extend)
+    
+>       import_rewrite("prev", "curr")
+E       TypeError: 'snippet' object is not callable
+
+test_generated.py:21: TypeError
+________________ test_import_rewrite_falls_back_on_importerror _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4054f51930>
+
+    def test_import_rewrite_falls_back_on_importerror(monkeypatch):
+        called = {"prev": False, "curr": False}
+    
+        def fake_extend(arg):
+            if arg == "prev":
+                called["prev"] = True
+                raise ImportError("Simulated import error")
+            elif arg == "curr":
+                called["curr"] = True
+            else:
+                raise ValueError("Unexpected argument")
+    
+        replace_extend(monkeypatch, fake_extend)
+    
+>       import_rewrite("prev", "curr")
+E       TypeError: 'snippet' object is not callable
+
+test_generated.py:40: TypeError
+_______________ test_import_rewrite_propagates_other_exceptions ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f40547a36a0>
+
+    def test_import_rewrite_propagates_other_exceptions(monkeypatch):
+        def fake_extend(arg):
+            raise RuntimeError("Unexpected error")
+    
+        replace_extend(monkeypatch, fake_extend)
+    
+        with pytest.raises(RuntimeError, match="Unexpected error"):
+>           import_rewrite("prev", "curr")
+E           TypeError: 'snippet' object is not callable
+
+test_generated.py:52: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_import_rewrite_calls_previous - TypeError: 'sn...
+FAILED test_generated.py::test_import_rewrite_falls_back_on_importerror - Typ...
+FAILED test_generated.py::test_import_rewrite_propagates_other_exceptions - T...
+3 failed in 0.12s

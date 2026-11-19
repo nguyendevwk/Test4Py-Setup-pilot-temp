@@ -1,0 +1,22 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_visit_name_replaces_alias_and_self ____________________
+
+    def test_visit_name_replaces_alias_and_self():
+        # Alias mapping for a name that should be replaced
+        alias = {"mymodule.foo": "typing.List[int]"}
+        # The resolver should replace 'foo' with the parsed expression
+        node = ast.Name(id="foo", ctx=ast.Load())
+        resolved = resolve(node, root="mymodule", alias=alias)
+        # After resolution, the node should be a Subscript representing List[int]
+        assert isinstance(resolved, ast.Subscript)
+>       assert isinstance(resolved.value, ast.Name) and resolved.value.id == "List"
+E       AssertionError: assert (False)
+E        +  where False = isinstance(<ast.Attribute object at 0x7f722b32b430>, <class 'ast.Name'>)
+E        +    where <ast.Attribute object at 0x7f722b32b430> = <ast.Subscript object at 0x7f722b32b670>.value
+E        +    and   <class 'ast.Name'> = ast.Name
+
+test_generated.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_visit_name_replaces_alias_and_self - Assertion...
+1 failed, 2 passed in 0.14s

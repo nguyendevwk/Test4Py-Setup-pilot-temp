@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-6be09b55-c586-44cd-8cc9-f1f973ea42a0",
+  "object": "chat.completion",
+  "created": 1795077478,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom docstring_parser.numpydoc import Section\nfrom docstring_parser.common import DocstringMeta\n\ndef test_title_pattern_matches_and_non_matches():\n    \"\"\"The title_pattern property should match the exact header format.\"\"\"\n    sec = Section(\"Parameters\", \"parameters\")\n    pattern = sec.title_pattern\n    # Should match a correct header\n    header = \"Parameters\\n----------\"\n    assert re.match(pattern, header)\n    # Should not match if dashes are missing or title differs\n    assert not re.match(pattern, \"Parameters\\n-----\")\n    assert not re.match(pattern, \"Params\\n-----\")\n    # Should not match if there is trailing whitespace after dashes\n    assert not re.match(pattern, \"Parameters\\n----------   \")\n\ndef test_parse_returns_docstringmeta_with_cleaned_description():\n    \"\"\"parse should yield a DocstringMeta with the key and cleaned description.\"\"\"\n    sec = Section(\"Returns\", \"returns\")\n    raw_text = \"   This function returns a value.\\n   It may raise errors.\"\n    # cleandoc would strip leading indentation; we simulate that\n    cleaned = \"This function returns a value.\\nIt may raise errors.\"\n    meta_iter = sec.parse(cleaned)\n    meta = next(meta_iter)\n    assert isinstance(meta, DocstringMeta)\n    assert meta.args == [\"returns\"]\n    assert meta.description == cleaned\n    # No more items\n    with pytest.raises(StopIteration):\n        next(meta_iter)\n\ndef test_parse_with_empty_text_yields_empty_description():\n    \"\"\"When the section body is empty, description should be an empty string.\"\"\"\n    sec = Section(\"Notes\", \"notes\")\n    meta_iter = sec.parse(\"\")\n    meta = next(meta_iter)\n    assert meta.args == [\"notes\"]\n    assert meta.description == \"\"\n    with pytest.raises(StopIteration):\n        next(meta_iter)\n```",
+        "reasoning": "We need to write tests for Section class. Use tmp_path? Not needed. Three tests: test_title_pattern, test_parse_returns_correct, test_parse_with_empty_text. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.061395608,
+    "prompt_tokens": 620,
+    "prompt_time": 0.044831071,
+    "completion_tokens": 430,
+    "completion_time": 0.498132072,
+    "total_tokens": 1050,
+    "total_time": 0.542963143,
+    "completion_tokens_details": {
+      "reasoning_tokens": 38
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sf951we71t9yy2sq2jeq0b",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom docstring_parser.numpydoc import Section\nfrom docstring_parser.common import DocstringMeta\n\ndef test_title_pattern_matches_and_non_matches():\n    \"\"\"The title_pattern property should match the exact header format.\"\"\"\n    sec = Section(\"Parameters\", \"parameters\")\n    pattern = sec.title_pattern\n    # Should match a correct header\n    header = \"Parameters\\n----------\"\n    assert re.match(pattern, header)\n    # Should not match if dashes are missing or title differs\n    assert not re.match(pattern, \"Parameters\\n-----\")\n    assert not re.match(pattern, \"Params\\n-----\")\n    # Should not match if there is trailing whitespace after dashes\n    assert not re.match(pattern, \"Parameters\\n----------   \")\n\ndef test_parse_returns_docstringmeta_with_cleaned_description():\n    \"\"\"parse should yield a DocstringMeta with the key and cleaned description.\"\"\"\n    sec = Section(\"Returns\", \"returns\")\n    raw_text = \"   This function returns a value.\\n   It may raise errors.\"\n    # cleandoc would strip leading indentation; we simulate that\n    cleaned = \"This function returns a value.\\nIt may raise errors.\"\n    meta_iter = sec.parse(cleaned)\n    meta = next(meta_iter)\n    assert isinstance(meta, DocstringMeta)\n    assert meta.args == [\"returns\"]\n    assert meta.description == cleaned\n    # No more items\n    with pytest.raises(StopIteration):\n        next(meta_iter)\n\ndef test_parse_with_empty_text_yields_empty_description():\n    \"\"\"When the section body is empty, description should be an empty string.\"\"\"\n    sec = Section(\"Notes\", \"notes\")\n    meta_iter = sec.parse(\"\")\n    meta = next(meta_iter)\n    assert meta.args == [\"notes\"]\n    assert meta.description == \"\"\n    with pytest.raises(StopIteration):\n        next(meta_iter)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9261336990166456
+}

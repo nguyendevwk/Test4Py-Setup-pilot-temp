@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-c62ad19c-21b2-4026-90eb-ee9c3d16bee7",
+  "object": "chat.completion",
+  "created": 1795079615,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport os\nimport sys\nimport tempfile\nimport types\nimport pytest\nfrom tornado.log import enable_pretty_logging\nfrom tornado.log import LogFormatter\n\n# Helper to create a minimal options object\ndef make_options(**kwargs):\n    opts = types.SimpleNamespace()\n    for k, v in kwargs.items():\n        setattr(opts, k, v)\n    return opts\n\ndef test_enable_pretty_logging_stderr_and_file(tmp_path):\n    # Create a temporary file prefix\n    log_file = tmp_path / \"log.txt\"\n    # Options: log to stderr and to a file with size rotation\n    opts = make_options(\n        logging=\"debug\",\n        log_file_prefix=str(log_file),\n        log_rotate_mode=\"size\",\n        log_file_max_size=1024,\n        log_file_num_backups=1,\n        log_to_stderr=True,\n    )\n    logger = logging.getLogger(\"test_logger\")\n    logger.handlers = []  # clear any existing handlers\n    enable_pretty_logging(opts, logger)\n\n    # Check that the logger level is set to DEBUG\n    assert logger.level == logging.DEBUG\n\n    # There should be two handlers: one StreamHandler and one RotatingFileHandler\n    handlers = logger.handlers\n    assert len(handlers) == 2\n    stream_handler = next(h for h in handlers if isinstance(h, logging.StreamHandler))\n    file_handler = next(h for h in handlers if isinstance(h, logging.handlers.RotatingFileHandler))\n\n    # Verify stream handler uses LogFormatter with color\n    assert isinstance(stream_handler.formatter, LogFormatter)\n    assert stream_handler.formatter.color is True\n\n    # Verify file handler uses LogFormatter without color\n    assert isinstance(file_handler.formatter, LogFormatter)\n    assert file_handler.formatter.color is False\n\n    # Emit a log record and ensure it is written to both destinations\n    logger.debug(\"test message\")\n    # Check stderr output\n    # (We cannot capture stderr easily without redirecting, so skip that part)\n    # Check file content\n    with open(log_file, \"r\", encoding=\"utf-8\") as f:\n        content = f.read()\n    assert \"test message\" in content\n\ndef test_enable_pretty_logging_invalid_rotate_mode():\n    # Options with an invalid rotate mode should raise ValueError\n    opts = make_options(\n        logging=\"info\",\n        log_file_prefix=\"dummy.log\",\n        log_rotate_mode=\"invalid_mode\",\n        log_file_max_size=1024,\n        log_file_num_backups=1,\n    )\n    with pytest.raises(ValueError) as excinfo:\n        enable_pretty_logging(opts)\n    assert \"The value of log_rotate_mode option should be\" in str(excinfo.value)\n\ndef test_enable_pretty_logging_no_logging_option():\n    # When options.logging is None or \"none\", the function should return without adding handlers\n    opts = make_options(\n        logging=None,\n        log_file_prefix=\"dummy.log\",\n        log_rotate_mode=\"size\",\n        log_file_max_size=1024,\n        log_file_num_backups=1,\n        log_to_stderr=True,\n    )\n    logger = logging.getLogger(\"test_logger_no_logging\")\n    logger.handlers = []\n    enable_pretty_logging(opts, logger)\n    # No handlers should be added\n    assert logger.handlers == []\n```",
+        "reasoning": "Need tests for enable_pretty_logging. Use tmp_path for file. Use options object with attributes. Test normal: logging level set, handler added. Boundary: rotate_mode invalid raises ValueError. Error: options.logging None returns. Write three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005403074,
+    "prompt_tokens": 642,
+    "prompt_time": 0.033545745,
+    "completion_tokens": 742,
+    "completion_time": 0.790544908,
+    "total_tokens": 1384,
+    "total_time": 0.824090653,
+    "completion_tokens_details": {
+      "reasoning_tokens": 51
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7shac81eajta4tf31bpjjd5",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport os\nimport sys\nimport tempfile\nimport types\nimport pytest\nfrom tornado.log import enable_pretty_logging\nfrom tornado.log import LogFormatter\n\n# Helper to create a minimal options object\ndef make_options(**kwargs):\n    opts = types.SimpleNamespace()\n    for k, v in kwargs.items():\n        setattr(opts, k, v)\n    return opts\n\ndef test_enable_pretty_logging_stderr_and_file(tmp_path):\n    # Create a temporary file prefix\n    log_file = tmp_path / \"log.txt\"\n    # Options: log to stderr and to a file with size rotation\n    opts = make_options(\n        logging=\"debug\",\n        log_file_prefix=str(log_file),\n        log_rotate_mode=\"size\",\n        log_file_max_size=1024,\n        log_file_num_backups=1,\n        log_to_stderr=True,\n    )\n    logger = logging.getLogger(\"test_logger\")\n    logger.handlers = []  # clear any existing handlers\n    enable_pretty_logging(opts, logger)\n\n    # Check that the logger level is set to DEBUG\n    assert logger.level == logging.DEBUG\n\n    # There should be two handlers: one StreamHandler and one RotatingFileHandler\n    handlers = logger.handlers\n    assert len(handlers) == 2\n    stream_handler = next(h for h in handlers if isinstance(h, logging.StreamHandler))\n    file_handler = next(h for h in handlers if isinstance(h, logging.handlers.RotatingFileHandler))\n\n    # Verify stream handler uses LogFormatter with color\n    assert isinstance(stream_handler.formatter, LogFormatter)\n    assert stream_handler.formatter.color is True\n\n    # Verify file handler uses LogFormatter without color\n    assert isinstance(file_handler.formatter, LogFormatter)\n    assert file_handler.formatter.color is False\n\n    # Emit a log record and ensure it is written to both destinations\n    logger.debug(\"test message\")\n    # Check stderr output\n    # (We cannot capture stderr easily without redirecting, so skip that part)\n    # Check file content\n    with open(log_file, \"r\", encoding=\"utf-8\") as f:\n        content = f.read()\n    assert \"test message\" in content\n\ndef test_enable_pretty_logging_invalid_rotate_mode():\n    # Options with an invalid rotate mode should raise ValueError\n    opts = make_options(\n        logging=\"info\",\n        log_file_prefix=\"dummy.log\",\n        log_rotate_mode=\"invalid_mode\",\n        log_file_max_size=1024,\n        log_file_num_backups=1,\n    )\n    with pytest.raises(ValueError) as excinfo:\n        enable_pretty_logging(opts)\n    assert \"The value of log_rotate_mode option should be\" in str(excinfo.value)\n\ndef test_enable_pretty_logging_no_logging_option():\n    # When options.logging is None or \"none\", the function should return without adding handlers\n    opts = make_options(\n        logging=None,\n        log_file_prefix=\"dummy.log\",\n        log_rotate_mode=\"size\",\n        log_file_max_size=1024,\n        log_file_num_backups=1,\n        log_to_stderr=True,\n    )\n    logger = logging.getLogger(\"test_logger_no_logging\")\n    logger.handlers = []\n    enable_pretty_logging(opts, logger)\n    # No handlers should be added\n    assert logger.handlers == []\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "3fe15ec2dac24baeab1cc2b64135aa0a",
+  "_api_plus_pacing_seconds": 1.6897529569687322
+}

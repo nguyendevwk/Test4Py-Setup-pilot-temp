@@ -1,0 +1,45 @@
+.F..                                                                     [100%]
+=================================== FAILURES ===================================
+______________ test_lazyperclassproperty_inheritance_and_override ______________
+
+    def test_lazyperclassproperty_inheritance_and_override():
+        """Subclasses should not share cached values unless they override the property."""
+        call_log = []
+    
+        def compute(cls):
+            call_log.append(cls.__name__)
+            return f"cached_{cls.__name__}"
+    
+        @lazyperclassproperty
+        def prop(cls):
+            return compute(cls)
+    
+        class Parent:
+            lazy_prop = prop
+    
+        class Child(Parent):
+            pass
+    
+        # Access on Parent and Child
+        assert Parent.lazy_prop == "cached_Parent"
+        assert Child.lazy_prop == "cached_Child"
+        assert call_log == ["Parent", "Child"]
+    
+        # Override property in Child
+        @lazyperclassproperty
+        def prop(cls):
+            return f"overridden_{cls.__name__}"
+    
+        Child.lazy_prop = prop
+    
+        # Access after override
+>       assert Child.lazy_prop == "overridden_Child"
+E       AssertionError: assert 'cached_Child' == 'overridden_Child'
+E         
+E         - overridden_Child
+E         + cached_Child
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyperclassproperty__43__source_only/eval0/test_generated.py:87: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_study_20261118_v2/attempts/pytutils__pytutils.props__lazyperclassproperty__43__source_only/eval0/test_generated.py::test_lazyperclassproperty_inheritance_and_override
+1 failed, 3 passed in 0.10s

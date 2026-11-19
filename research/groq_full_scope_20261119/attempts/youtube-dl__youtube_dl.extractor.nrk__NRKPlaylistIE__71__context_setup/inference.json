@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-399d7a11-0978-432d-846d-71bb6b68a5ee",
+  "object": "chat.completion",
+  "created": 1795079549,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKPlaylistIE\n\n# Helper to create a fake extractor instance with overridden download method\ndef make_extractor(webpage_content):\n    class DummyExtractor(NRKPlaylistIE):\n        def _download_webpage(self, url, playlist_id, *args, **kwargs):\n            return webpage_content\n    return DummyExtractor()\n\ndef test_normal_extraction(tmp_path):\n    # A minimal fake webpage containing two video items and metadata\n    webpage = '''\n        <html>\n        <head>\n            <meta property=\"og:title\" content=\"Sample Playlist\" />\n            <meta property=\"og:description\" content=\"A test playlist.\" />\n        </head>\n        <body>\n            <div class=\"rich\" data-video-id=\"vid123\"></div>\n            <div class=\"rich\" data-video-id=\"vid456\"></div>\n        </body>\n        </html>\n    '''\n    extractor = make_extractor(webpage)\n    result = extractor._real_extract('http://www.nrk.no/test/playlist-1')\n    assert result['entries'] == [\n        extractor.url_result('nrk:vid123', 'NRKIE'),\n        extractor.url_result('nrk:vid456', 'NRKIE')\n    ]\n    assert result['id'] == 'playlist-1'\n    assert result['title'] == 'Sample Playlist'\n    assert result['description'] == 'A test playlist.'\n\ndef test_no_items(tmp_path):\n    # Webpage with no matching items should yield empty playlist\n    webpage = '''\n        <html><head><meta property=\"og:title\" content=\"Empty\" /></head>\n        <body><p>No videos here.</p></body></html>\n    '''\n    extractor = make_extractor(webpage)\n    result = extractor._real_extract('http://www.nrk.no/test/empty-1')\n    assert result['entries'] == []\n    assert result['id'] == 'empty-1'\n    assert result['title'] == 'Empty'\n    assert result['description'] is None\n\ndef test_missing_title_raises_error(tmp_path):\n    # Webpage missing og:title should trigger fatal error in _extract_title\n    webpage = '''\n        <html><head><meta property=\"og:description\" content=\"Desc\" /></head>\n        <body><div class=\"rich\" data-video-id=\"vid789\"></div></body></html>\n    '''\n    extractor = make_extractor(webpage)\n    with pytest.raises(Exception) as excinfo:\n        extractor._real_extract('http://www.nrk.no/test/no-title-1')\n    assert 'Unable to find title' in str(excinfo.value)\n```",
+        "reasoning": "Need tests for NRKPlaylistIE. We can instantiate and call _real_extract with a mock URL? But need real webpage download; can't network. But we can monkeypatch _download_webpage to return a crafted string. Use pytest fixture. Three tests: normal extraction, boundary with no items, error when missing title? Use monkeypatch."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005171908,
+    "prompt_tokens": 848,
+    "prompt_time": 0.045592556,
+    "completion_tokens": 633,
+    "completion_time": 0.670604197,
+    "total_tokens": 1481,
+    "total_time": 0.716196753,
+    "completion_tokens_details": {
+      "reasoning_tokens": 70
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh8c5vemwrpvshj7rx6qxj",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKPlaylistIE\n\n# Helper to create a fake extractor instance with overridden download method\ndef make_extractor(webpage_content):\n    class DummyExtractor(NRKPlaylistIE):\n        def _download_webpage(self, url, playlist_id, *args, **kwargs):\n            return webpage_content\n    return DummyExtractor()\n\ndef test_normal_extraction(tmp_path):\n    # A minimal fake webpage containing two video items and metadata\n    webpage = '''\n        <html>\n        <head>\n            <meta property=\"og:title\" content=\"Sample Playlist\" />\n            <meta property=\"og:description\" content=\"A test playlist.\" />\n        </head>\n        <body>\n            <div class=\"rich\" data-video-id=\"vid123\"></div>\n            <div class=\"rich\" data-video-id=\"vid456\"></div>\n        </body>\n        </html>\n    '''\n    extractor = make_extractor(webpage)\n    result = extractor._real_extract('http://www.nrk.no/test/playlist-1')\n    assert result['entries'] == [\n        extractor.url_result('nrk:vid123', 'NRKIE'),\n        extractor.url_result('nrk:vid456', 'NRKIE')\n    ]\n    assert result['id'] == 'playlist-1'\n    assert result['title'] == 'Sample Playlist'\n    assert result['description'] == 'A test playlist.'\n\ndef test_no_items(tmp_path):\n    # Webpage with no matching items should yield empty playlist\n    webpage = '''\n        <html><head><meta property=\"og:title\" content=\"Empty\" /></head>\n        <body><p>No videos here.</p></body></html>\n    '''\n    extractor = make_extractor(webpage)\n    result = extractor._real_extract('http://www.nrk.no/test/empty-1')\n    assert result['entries'] == []\n    assert result['id'] == 'empty-1'\n    assert result['title'] == 'Empty'\n    assert result['description'] is None\n\ndef test_missing_title_raises_error(tmp_path):\n    # Webpage missing og:title should trigger fatal error in _extract_title\n    webpage = '''\n        <html><head><meta property=\"og:description\" content=\"Desc\" /></head>\n        <body><div class=\"rich\" data-video-id=\"vid789\"></div></body></html>\n    '''\n    extractor = make_extractor(webpage)\n    with pytest.raises(Exception) as excinfo:\n        extractor._real_extract('http://www.nrk.no/test/no-title-1')\n    assert 'Unable to find title' in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "b768e87d81d04685abd84cc12ed7997c",
+  "_api_plus_pacing_seconds": 1.308289740991313
+}

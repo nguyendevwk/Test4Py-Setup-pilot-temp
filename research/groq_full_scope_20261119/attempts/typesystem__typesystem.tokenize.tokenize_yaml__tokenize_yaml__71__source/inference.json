@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-6c33d29b-3c53-434d-81a0-a3e90442b5e2",
+  "object": "chat.completion",
+  "created": 1795079387,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_yaml import tokenize_yaml\nfrom typesystem.base import ParseError, Position\nfrom typesystem.tokenize.tokens import DictToken, ListToken, ScalarToken\n\ndef test_tokenize_yaml_normal_mapping():\n    yaml_content = \"\"\"\n    name: Alice\n    age: 30\n    hobbies:\n      - reading\n      - hiking\n    \"\"\"\n    token = tokenize_yaml(yaml_content)\n    assert isinstance(token, DictToken)\n    assert token.mapping == {\n        \"name\": ScalarToken(\"Alice\", 8, 12, content=yaml_content),\n        \"age\": ScalarToken(30, 20, 22, content=yaml_content),\n        \"hobbies\": ListToken(\n            [\n                ScalarToken(\"reading\", 35, 42, content=yaml_content),\n                ScalarToken(\"hiking\", 47, 53, content=yaml_content),\n            ],\n            28,\n            55,\n            content=yaml_content,\n        ),\n    }\n\ndef test_tokenize_yaml_empty_string_raises():\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_yaml(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    assert isinstance(err.position, Position)\n    assert err.position.line_no == 1\n    assert err.position.column_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_yaml_parse_error_raises():\n    bad_yaml = \"key: [unclosed list\"\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_yaml(bad_yaml)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    assert \"unclosed list\" in err.text\n    assert isinstance(err.position, Position)\n    # Position should point to the start of the error (index of '[')\n    assert err.position.char_index == bad_yaml.index(\"[\")\n```",
+        "reasoning": "We need tests for tokenize_yaml. We need import yaml? It's used. Assume pyyaml installed. Write tests: normal mapping, empty string error, parse error. Use tmp_path? not needed. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048301502,
+    "prompt_tokens": 1094,
+    "prompt_time": 0.010587088,
+    "completion_tokens": 456,
+    "completion_time": 0.542959399,
+    "total_tokens": 1550,
+    "total_time": 0.553546487,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 46
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh3df6ervac6jw96t5nfs4",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_yaml import tokenize_yaml\nfrom typesystem.base import ParseError, Position\nfrom typesystem.tokenize.tokens import DictToken, ListToken, ScalarToken\n\ndef test_tokenize_yaml_normal_mapping():\n    yaml_content = \"\"\"\n    name: Alice\n    age: 30\n    hobbies:\n      - reading\n      - hiking\n    \"\"\"\n    token = tokenize_yaml(yaml_content)\n    assert isinstance(token, DictToken)\n    assert token.mapping == {\n        \"name\": ScalarToken(\"Alice\", 8, 12, content=yaml_content),\n        \"age\": ScalarToken(30, 20, 22, content=yaml_content),\n        \"hobbies\": ListToken(\n            [\n                ScalarToken(\"reading\", 35, 42, content=yaml_content),\n                ScalarToken(\"hiking\", 47, 53, content=yaml_content),\n            ],\n            28,\n            55,\n            content=yaml_content,\n        ),\n    }\n\ndef test_tokenize_yaml_empty_string_raises():\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_yaml(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    assert isinstance(err.position, Position)\n    assert err.position.line_no == 1\n    assert err.position.column_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_yaml_parse_error_raises():\n    bad_yaml = \"key: [unclosed list\"\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_yaml(bad_yaml)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    assert \"unclosed list\" in err.text\n    assert isinstance(err.position, Position)\n    # Position should point to the start of the error (index of '[')\n    assert err.position.char_index == bad_yaml.index(\"[\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "1d958bdf23914097b5a464ae720943b2",
+  "_api_plus_pacing_seconds": 1.455452508002054
+}

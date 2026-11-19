@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-4d5a58eb-0892-4cd6-b84b-36796dfd6aea",
+  "object": "chat.completion",
+  "created": 1795077671,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom types import SimpleNamespace\n\n# Import the target class\nfrom tqdm.notebook import TqdmHBox\n\n# Helper class mimicking a tqdm progress bar\nclass DummyBar:\n    def __init__(self, total, desc=\"\"):\n        self.format_dict = {\n            \"n\": 0,\n            \"total\": total,\n            \"desc\": desc,\n            \"ascii\": True,\n        }\n\n    def format_meter(self, **kwargs):\n        # Return a deterministic string based on format_dict and kwargs\n        return f\"{kwargs.get('desc', '')} {kwargs.get('n', 0)}/{kwargs.get('total', 0)}\"\n\ndef test_repr_without_pbar_returns_super_repr():\n    \"\"\"When no pbar is attached, __repr__ falls back to HBox's representation.\"\"\"\n    hbox = TqdmHBox()\n    # Ensure pbar is None\n    assert getattr(hbox, \"pbar\", None) is None\n    # The repr should contain the class name of the parent (ipywidgets.HBox)\n    rep = repr(hbox)\n    assert \"HBox\" in rep or \"ipywidgets\" in rep\n\ndef test_repr_with_pbar_returns_formatted_meter():\n    \"\"\"When a pbar is attached, __repr__ returns the formatted meter string.\"\"\"\n    hbox = TqdmHBox()\n    dummy = DummyBar(total=10, desc=\"Test\")\n    hbox.pbar = dummy\n    # Update format_dict to reflect progress\n    dummy.format_dict.update({\"n\": 3, \"total\": 10, \"desc\": \"Test\"})\n    rep = hbox.__repr__(pretty=False)\n    # The representation should match DummyBar.format_meter output\n    expected = dummy.format_meter(**dummy.format_dict)\n    assert rep == expected\n\ndef test_json_pretty_flag_modifies_ascii_key():\n    \"\"\"The _json_ method should toggle the 'ascii' key based on the pretty flag.\"\"\"\n    hbox = TqdmHBox()\n    dummy = DummyBar(total=5)\n    hbox.pbar = dummy\n    # Default ascii is True\n    json_default = hbox._json_()\n    assert json_default[\"ascii\"] is True\n    # When pretty=True, ascii should be False\n    json_pretty = hbox._json_(pretty=True)\n    assert json_pretty[\"ascii\"] is False\n    # When pretty=False, ascii should remain True\n    json_not_pretty = hbox._json_(pretty=False)\n    assert json_not_pretty[\"ascii\"] is True\n```",
+        "reasoning": "We need to write tests for TqdmHBox. But we don't have full context: HBox class? It's from ipywidgets. We cannot import ipywidgets? But maybe available. We need to test normal, boundary, error. We can create a dummy pbar with format_dict and format_meter. But TqdmHBox expects pbar attribute. We can instantiate TqdmHBox and set pbar to a mock object. But cannot use mocks? It says no mocks of target. But we can create a simple object with required attributes. That's fine.\n\nTest 1: when pbar is None, __repr__ returns super().__repr__ which is HBox's repr. We can check that it's string containing class name.\n\nTest 2: when pbar present, __repr__ returns formatted string. We need format_meter method. We can create a simple class with format_dict and format_meter that returns known string.\n\nTest 3: _json_ with pretty flag changes ascii key.\n\nImplement tests. Use tmp_path? Not needed. Ensure independence."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052394872,
+    "prompt_tokens": 437,
+    "prompt_time": 0.026197478,
+    "completion_tokens": 755,
+    "completion_time": 0.801958061,
+    "total_tokens": 1192,
+    "total_time": 0.828155539,
+    "completion_tokens_details": {
+      "reasoning_tokens": 217
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sff1gfehba9134x0j3fw6w",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom types import SimpleNamespace\n\n# Import the target class\nfrom tqdm.notebook import TqdmHBox\n\n# Helper class mimicking a tqdm progress bar\nclass DummyBar:\n    def __init__(self, total, desc=\"\"):\n        self.format_dict = {\n            \"n\": 0,\n            \"total\": total,\n            \"desc\": desc,\n            \"ascii\": True,\n        }\n\n    def format_meter(self, **kwargs):\n        # Return a deterministic string based on format_dict and kwargs\n        return f\"{kwargs.get('desc', '')} {kwargs.get('n', 0)}/{kwargs.get('total', 0)}\"\n\ndef test_repr_without_pbar_returns_super_repr():\n    \"\"\"When no pbar is attached, __repr__ falls back to HBox's representation.\"\"\"\n    hbox = TqdmHBox()\n    # Ensure pbar is None\n    assert getattr(hbox, \"pbar\", None) is None\n    # The repr should contain the class name of the parent (ipywidgets.HBox)\n    rep = repr(hbox)\n    assert \"HBox\" in rep or \"ipywidgets\" in rep\n\ndef test_repr_with_pbar_returns_formatted_meter():\n    \"\"\"When a pbar is attached, __repr__ returns the formatted meter string.\"\"\"\n    hbox = TqdmHBox()\n    dummy = DummyBar(total=10, desc=\"Test\")\n    hbox.pbar = dummy\n    # Update format_dict to reflect progress\n    dummy.format_dict.update({\"n\": 3, \"total\": 10, \"desc\": \"Test\"})\n    rep = hbox.__repr__(pretty=False)\n    # The representation should match DummyBar.format_meter output\n    expected = dummy.format_meter(**dummy.format_dict)\n    assert rep == expected\n\ndef test_json_pretty_flag_modifies_ascii_key():\n    \"\"\"The _json_ method should toggle the 'ascii' key based on the pretty flag.\"\"\"\n    hbox = TqdmHBox()\n    dummy = DummyBar(total=5)\n    hbox.pbar = dummy\n    # Default ascii is True\n    json_default = hbox._json_()\n    assert json_default[\"ascii\"] is True\n    # When pretty=True, ascii should be False\n    json_pretty = hbox._json_(pretty=True)\n    assert json_pretty[\"ascii\"] is False\n    # When pretty=False, ascii should remain True\n    json_not_pretty = hbox._json_(pretty=False)\n    assert json_not_pretty[\"ascii\"] is True\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2028097840375267
+}

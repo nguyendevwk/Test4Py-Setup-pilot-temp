@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b38e5d0e-7e2b-4902-aedb-33b1672ed738",
+  "object": "chat.completion",
+  "created": 1795077245,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport os\nimport pytest\nfrom mimesis.providers.base import BaseProvider, ProviderRegistry\nfrom mimesis.exceptions import NonEnumerableError\nfrom mimesis.random import Random\nfrom mimesis.types import MissingSeed\n\n\ndef test_custom_random_initialization(tmp_path):\n    \"\"\"BaseProvider should accept a custom Random instance and use it.\"\"\"\n    # Create a custom Random instance with a fixed seed\n    custom_random = Random(seed=123)\n    provider = BaseProvider(random=custom_random)\n    # The provider's random should be the same instance\n    assert provider.random is custom_random\n    # The provider should produce deterministic values\n    first = provider.random.randint(1, 10)\n    provider.reseed(123)\n    second = provider.random.randint(1, 10)\n    assert first == second, \"Re-seeding with the same seed should produce the same sequence\"\n\n\ndef test_validate_enum_raises_nonenumerable_error():\n    \"\"\"validate_enum should raise NonEnumerableError when item is invalid.\"\"\"\n    provider = BaseProvider()\n    # Define a simple enum-like class for testing\n    class DummyEnum:\n        class Item:\n            value = \"valid\"\n\n    # Passing None should choose a random enum item (no error)\n    result = provider.validate_enum(None, DummyEnum)\n    assert result == \"valid\"\n\n    # Passing an instance of the enum should return its value\n    instance = DummyEnum.Item()\n    result = provider.validate_enum(instance, DummyEnum)\n    assert result == \"valid\"\n\n    # Passing an invalid type should raise NonEnumerableError\n    with pytest.raises(NonEnumerableError):\n        provider.validate_enum(\"invalid\", DummyEnum)\n\n\ndef test_read_global_file_not_found(tmp_path):\n    \"\"\"_read_global_file should raise FileNotFoundError for missing files.\"\"\"\n    provider = BaseProvider()\n    # Use a filename that is highly unlikely to exist\n    missing_file = \"this_file_does_not_exist.json\"\n    with pytest.raises(FileNotFoundError):\n        provider._read_global_file(missing_file)\n\n\ndef test_provider_registry_auto_registration():\n    \"\"\"Subclassing BaseProvider should auto-register the provider.\"\"\"\n    # Ensure the registry is empty before the test\n    ProviderRegistry._providers.clear()\n\n    class TestProvider(BaseProvider):\n        class Meta:\n            name = \"test_provider\"\n\n    # After definition, the provider should be registered\n    registered = ProviderRegistry.get(\"test_provider\")\n    assert registered is TestProvider, \"Provider should be auto-registered with its Meta.name\"\n\n    # The registry should contain exactly one provider\n    all_providers = ProviderRegistry.get_all()\n    assert len(all_providers) == 1\n    assert \"test_provider\" in all_providers\n```",
+        "reasoning": "Need tests: 1) test that BaseProvider __init__ with custom random works. 2) test validate_enum raises NonEnumerableError. 3) test _read_global_file raises FileNotFoundError. Use tmp_path? For file test, create a file in DATADIR/global? Can't modify. Instead test that reading nonexistent file raises. Use a name unlikely. Third test: provider registry auto registration. Create dummy provider subclass. Ensure registered."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047310977,
+    "prompt_tokens": 1461,
+    "prompt_time": 0.087279872,
+    "completion_tokens": 660,
+    "completion_time": 0.743240203,
+    "total_tokens": 2121,
+    "total_time": 0.830520075,
+    "completion_tokens_details": {
+      "reasoning_tokens": 93
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sf222benmr2wc0nerbgnb8",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport os\nimport pytest\nfrom mimesis.providers.base import BaseProvider, ProviderRegistry\nfrom mimesis.exceptions import NonEnumerableError\nfrom mimesis.random import Random\nfrom mimesis.types import MissingSeed\n\n\ndef test_custom_random_initialization(tmp_path):\n    \"\"\"BaseProvider should accept a custom Random instance and use it.\"\"\"\n    # Create a custom Random instance with a fixed seed\n    custom_random = Random(seed=123)\n    provider = BaseProvider(random=custom_random)\n    # The provider's random should be the same instance\n    assert provider.random is custom_random\n    # The provider should produce deterministic values\n    first = provider.random.randint(1, 10)\n    provider.reseed(123)\n    second = provider.random.randint(1, 10)\n    assert first == second, \"Re-seeding with the same seed should produce the same sequence\"\n\n\ndef test_validate_enum_raises_nonenumerable_error():\n    \"\"\"validate_enum should raise NonEnumerableError when item is invalid.\"\"\"\n    provider = BaseProvider()\n    # Define a simple enum-like class for testing\n    class DummyEnum:\n        class Item:\n            value = \"valid\"\n\n    # Passing None should choose a random enum item (no error)\n    result = provider.validate_enum(None, DummyEnum)\n    assert result == \"valid\"\n\n    # Passing an instance of the enum should return its value\n    instance = DummyEnum.Item()\n    result = provider.validate_enum(instance, DummyEnum)\n    assert result == \"valid\"\n\n    # Passing an invalid type should raise NonEnumerableError\n    with pytest.raises(NonEnumerableError):\n        provider.validate_enum(\"invalid\", DummyEnum)\n\n\ndef test_read_global_file_not_found(tmp_path):\n    \"\"\"_read_global_file should raise FileNotFoundError for missing files.\"\"\"\n    provider = BaseProvider()\n    # Use a filename that is highly unlikely to exist\n    missing_file = \"this_file_does_not_exist.json\"\n    with pytest.raises(FileNotFoundError):\n        provider._read_global_file(missing_file)\n\n\ndef test_provider_registry_auto_registration():\n    \"\"\"Subclassing BaseProvider should auto-register the provider.\"\"\"\n    # Ensure the registry is empty before the test\n    ProviderRegistry._providers.clear()\n\n    class TestProvider(BaseProvider):\n        class Meta:\n            name = \"test_provider\"\n\n    # After definition, the provider should be registered\n    registered = ProviderRegistry.get(\"test_provider\")\n    assert registered is TestProvider, \"Provider should be auto-registered with its Meta.name\"\n\n    # The registry should contain exactly one provider\n    all_providers = ProviderRegistry.get_all()\n    assert len(all_providers) == 1\n    assert \"test_provider\" in all_providers\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1849443149985746
+}

@@ -1,0 +1,46 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_whale_optimization_optimize_updates_and_constraints ___________
+
+    def test_whale_optimization_optimize_updates_and_constraints():
+        # deterministic random seed
+        np.random.seed(0)
+    
+        # simple objective: sum of squares (minimization)
+        opt_func = lambda x, y: x**2 + y**2
+        constraints = [(0.0, 1.0), (0.0, 1.0)]
+        nsols = 5
+        b, a, a_step = 1.0, 2.0, 0.5
+    
+        optimizer = WhaleOptimization(opt_func, constraints, nsols, b, a, a_step, maximize=False)
+    
+        # Capture initial state
+        initial_sols = optimizer.get_solutions().copy()
+        len_before = len(optimizer._best_solutions)
+    
+        # Get best solution before optimization
+        best_sol = optimizer._rank_solutions()[0]
+    
+        # Run one optimization step
+        optimizer.optimize()
+    
+        # After optimization, number of solutions should remain unchanged
+        assert optimizer.get_solutions().shape == initial_sols.shape
+    
+        # Parameter 'a' should have decreased by a_step
+        assert optimizer._a == a - a_step
+    
+        # The first solution in the new generation should be the previous best solution
+        assert np.allclose(optimizer.get_solutions()[0], best_sol)
+    
+        # Best solutions history should have grown by one entry
+>       assert len(optimizer._best_solutions) == len_before + 1
+E       assert 2 == (0 + 1)
+E        +  where 2 = len([(np.float64(0.3265107873623069), array([0.4236548 , 0.38344152])), (np.float64(0.3265107873623069), array([0.4236548 , 0.38344152]))])
+E        +    where [(np.float64(0.3265107873623069), array([0.4236548 , 0.38344152])), (np.float64(0.3265107873623069), array([0.4236548 , 0.38344152]))] = <src.whale_optimization.WhaleOptimization object at 0x7f0aca19fe30>._best_solutions
+
+../../expanded_120_results/woa_whale_opt/baseline/seed_46/v1_exec/test_run.py:37: AssertionError
+=========================== short test summary info ============================
+FAILED ../../expanded_120_results/woa_whale_opt/baseline/seed_46/v1_exec/test_run.py::test_whale_optimization_optimize_updates_and_constraints
+1 failed in 0.39s
+

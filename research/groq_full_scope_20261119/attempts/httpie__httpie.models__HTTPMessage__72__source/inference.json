@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-f20746cd-7c93-4488-925e-4d086c06927f",
+  "object": "chat.completion",
+  "created": 1795078634,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport requests\nfrom httpie.models import HTTPMessage\nfrom urllib.parse import urlsplit\n\n\nclass DummyHTTPMessage(HTTPMessage):\n    \"\"\"Concrete implementation of HTTPMessage for testing purposes.\"\"\"\n\n    def iter_body(self, chunk_size: int):\n        return iter([b\"chunk1\", b\"chunk2\"])\n\n    def iter_lines(self, chunk_size: int):\n        return iter([(b\"line1\", b\"\\n\"), (b\"line2\", b\"\\n\")])\n\n    @property\n    def headers(self) -> str:\n        return \"\\r\\n\".join(f\"{k}: {v}\" for k, v in self._orig.headers.items())\n\n    @property\n    def metadata(self) -> str:\n        return f\"URL: {self._orig.url}\"\n\n\ndef _make_response(content_type: str):\n    \"\"\"Helper to create a requests.Response with a given Content-Type header.\"\"\"\n    resp = requests.Response()\n    resp.status_code = 200\n    resp.url = \"http://example.com\"\n    resp._content = b\"test\"\n    resp.headers[\"Content-Type\"] = content_type\n    return resp\n\n\ndef test_encoding_with_charset():\n    \"\"\"When Content-Type includes a charset, encoding property returns it.\"\"\"\n    resp = _make_response(\"text/plain; charset=utf-8\")\n    msg = DummyHTTPMessage(resp)\n    assert msg.encoding == \"utf-8\"\n\n\ndef test_encoding_without_charset():\n    \"\"\"When Content-Type has no charset, encoding property returns empty string.\"\"\"\n    resp = _make_response(\"application/json\")\n    msg = DummyHTTPMessage(resp)\n    assert msg.encoding == \"\"\n\n\ndef test_content_type_bytes():\n    \"\"\"Content-Type header may be bytes; property decodes it correctly.\"\"\"\n    resp = _make_response(b\"application/xml; charset=iso-8859-1\")\n    msg = DummyHTTPMessage(resp)\n    assert msg.content_type == \"application/xml; charset=iso-8859-1\"\n```",
+        "reasoning": "Need tests for HTTPMessage? But it's abstract. Maybe subclass? But target is HTTPMessage. We can create a simple subclass that implements abstract methods using requests.Response? Use requests.Response object. Let's create a dummy subclass that wraps a requests.Response. Test encoding property, content_type, headers, metadata? metadata abstract. We can test encoding extraction. Use a response with content-type header. Also test that encoding returns empty if no charset. Also test that content_type handles bytes. Use requests.Response. Use tmp_path? Not needed. Provide three tests: test_encoding_with_charset, test_encoding_without_charset, test_content_type_bytes. Use real requests.Response."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05420014,
+    "prompt_tokens": 556,
+    "prompt_time": 0.006319539,
+    "completion_tokens": 545,
+    "completion_time": 0.597198174,
+    "total_tokens": 1101,
+    "total_time": 0.603517713,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 131
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgce2wextaqrkbjq8k74kw",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport requests\nfrom httpie.models import HTTPMessage\nfrom urllib.parse import urlsplit\n\n\nclass DummyHTTPMessage(HTTPMessage):\n    \"\"\"Concrete implementation of HTTPMessage for testing purposes.\"\"\"\n\n    def iter_body(self, chunk_size: int):\n        return iter([b\"chunk1\", b\"chunk2\"])\n\n    def iter_lines(self, chunk_size: int):\n        return iter([(b\"line1\", b\"\\n\"), (b\"line2\", b\"\\n\")])\n\n    @property\n    def headers(self) -> str:\n        return \"\\r\\n\".join(f\"{k}: {v}\" for k, v in self._orig.headers.items())\n\n    @property\n    def metadata(self) -> str:\n        return f\"URL: {self._orig.url}\"\n\n\ndef _make_response(content_type: str):\n    \"\"\"Helper to create a requests.Response with a given Content-Type header.\"\"\"\n    resp = requests.Response()\n    resp.status_code = 200\n    resp.url = \"http://example.com\"\n    resp._content = b\"test\"\n    resp.headers[\"Content-Type\"] = content_type\n    return resp\n\n\ndef test_encoding_with_charset():\n    \"\"\"When Content-Type includes a charset, encoding property returns it.\"\"\"\n    resp = _make_response(\"text/plain; charset=utf-8\")\n    msg = DummyHTTPMessage(resp)\n    assert msg.encoding == \"utf-8\"\n\n\ndef test_encoding_without_charset():\n    \"\"\"When Content-Type has no charset, encoding property returns empty string.\"\"\"\n    resp = _make_response(\"application/json\")\n    msg = DummyHTTPMessage(resp)\n    assert msg.encoding == \"\"\n\n\ndef test_content_type_bytes():\n    \"\"\"Content-Type header may be bytes; property decodes it correctly.\"\"\"\n    resp = _make_response(b\"application/xml; charset=iso-8859-1\")\n    msg = DummyHTTPMessage(resp)\n    assert msg.content_type == \"application/xml; charset=iso-8859-1\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0209144600084983
+}

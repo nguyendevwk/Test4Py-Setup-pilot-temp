@@ -1,0 +1,57 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_log_and_no_exception_when_future_cancelled ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.concurrent...et_exception_unless_cancelled__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_log_and_no_exception_when0')
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7f9cd4206110>
+
+    def test_log_and_no_exception_when_future_cancelled(tmp_path, caplog):
+        """If the future is cancelled, the exception is logged and not set."""
+        fut = asyncio.Future()
+        fut.cancel()
+        exc = RuntimeError("cancelled error")
+        with caplog.at_level(logging.ERROR, logger=app_log.name):
+            future_set_exception_unless_cancelled(fut, exc)
+        # The future remains cancelled and has no exception
+        assert fut.cancelled()
+>       assert fut.exception() is None
+E       asyncio.exceptions.CancelledError
+
+test_generated.py:28: CancelledError
+------------------------------ Captured log call -------------------------------
+ERROR    tornado.application:concurrent.py:218 Exception after Future was cancelled
+RuntimeError: cancelled error
+___________________ test_invalid_state_error_on_done_future ____________________
+
+    def test_invalid_state_error_on_done_future():
+        """If the future is already done with a result, set_exception raises."""
+        fut = futures.Future()
+        fut.set_result(42)
+        exc = KeyError("already done")
+        with pytest.raises(asyncio.InvalidStateError):
+>           future_set_exception_unless_cancelled(fut, exc)
+
+test_generated.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/concurrent.py:216: in future_set_exception_unless_cancelled
+    future.set_exception(exc)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Future at 0x7f9cd425e170 state=finished returned int>
+exception = KeyError('already done')
+
+    def set_exception(self, exception):
+        """Sets the result of the future as being the given exception.
+    
+        Should only be used by Executor implementations and unit tests.
+        """
+        with self._condition:
+            if self._state in {CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED}:
+>               raise InvalidStateError('{}: {!r}'.format(self._state, self))
+E               concurrent.futures._base.InvalidStateError: FINISHED: <Future at 0x7f9cd425e170 state=finished returned int>
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/concurrent/futures/_base.py:561: InvalidStateError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_log_and_no_exception_when_future_cancelled - a...
+FAILED test_generated.py::test_invalid_state_error_on_done_future - concurren...
+2 failed, 1 passed in 0.25s

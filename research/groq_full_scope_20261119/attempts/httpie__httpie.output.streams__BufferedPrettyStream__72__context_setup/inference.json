@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-f987ac27-8fad-4c75-a919-d47df1d177f6",
+  "object": "chat.completion",
+  "created": 1795079668,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.streams import BufferedPrettyStream, BinarySuppressedError\nfrom httpie.encoding import UTF8\nfrom httpie.context import Environment\nfrom httpie.models import HTTPMessage, OutputOptions\nfrom httpie.processing import Conversion, Formatting\n\n\nclass DummyMessage(HTTPMessage):\n    def __init__(self, body_chunks, content_type=\"text/plain\"):\n        self._body_chunks = body_chunks\n        self.content_type = content_type\n        self.headers = {}\n        self.metadata = {}\n\n    def iter_body(self, chunk_size):\n        for chunk in self._body_chunks:\n            yield chunk\n\n    def iter_lines(self, chunk_size):\n        for chunk in self._body_chunks:\n            yield chunk, b\"\\n\"\n\n\nclass DummyConverter:\n    def __init__(self, new_mime=\"text/plain\"):\n        self.new_mime = new_mime\n\n    def convert(self, body_bytes):\n        # pretend to decode bytes to a string\n        return self.new_mime, body_bytes.decode(\"utf-8\")\n\n\nclass DummyFormatting(Formatting):\n    def format_headers(self, headers):\n        return \"\"\n\n    def format_metadata(self, metadata):\n        return \"\"\n\n    def format_body(self, content, mime):\n        # identity formatting\n        return content\n\n\nclass DummyConversion(Conversion):\n    def __init__(self, converter=None):\n        self._converter = converter\n\n    def get_converter(self, mime):\n        return self._converter\n\n\ndef test_buffered_pretty_stream_normal_text(tmp_path):\n    body = [b\"hello \", b\"world\"]\n    msg = DummyMessage(body)\n    conv = DummyConversion()\n    fmt = DummyFormatting()\n    stream = BufferedPrettyStream(\n        conversion=conv,\n        formatting=fmt,\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n        output_encoding=UTF8,\n    )\n    result = b\"\".join(stream.iter_body())\n    assert result == b\"hello world\"\n\n\ndef test_buffered_pretty_stream_binary_raises():\n    body = [b\"binary\\x00data\"]\n    msg = DummyMessage(body)\n    conv = DummyConversion()\n    fmt = DummyFormatting()\n    stream = BufferedPrettyStream(\n        conversion=conv,\n        formatting=fmt,\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n        output_encoding=UTF8,\n    )\n    with pytest.raises(BinarySuppressedError):\n        list(stream.iter_body())\n\n\ndef test_buffered_pretty_stream_conversion_on_binary(tmp_path):\n    body = [b\"binary\\x00data\"]\n    msg = DummyMessage(body)\n    conv = DummyConversion(DummyConverter(new_mime=\"text/plain\"))\n    fmt = DummyFormatting()\n    stream = BufferedPrettyStream(\n        conversion=conv,\n        formatting=fmt,\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n        output_encoding=UTF8,\n    )\n    result = b\"\".join(stream.iter_body())\n    assert result == b\"binarydata\"\n```",
+        "reasoning": "Need tests for BufferedPrettyStream iter_body normal, binary, conversion. Use dummy HTTPMessage with iter_body returning chunks. Create minimal Conversion with get_converter returning converter that converts bytes to str and mime. Use Formatting that returns same. Use Environment with stdout_isatty False. Test that normal text yields processed body. Test binary detection raises BinarySuppressedError. Test conversion when binary detected."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004701989,
+    "prompt_tokens": 1438,
+    "prompt_time": 0.072776866,
+    "completion_tokens": 700,
+    "completion_time": 0.852188376,
+    "total_tokens": 2138,
+    "total_time": 0.924965242,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 79
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7shbzt1ezw92w6a3sbqaskk",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.streams import BufferedPrettyStream, BinarySuppressedError\nfrom httpie.encoding import UTF8\nfrom httpie.context import Environment\nfrom httpie.models import HTTPMessage, OutputOptions\nfrom httpie.processing import Conversion, Formatting\n\n\nclass DummyMessage(HTTPMessage):\n    def __init__(self, body_chunks, content_type=\"text/plain\"):\n        self._body_chunks = body_chunks\n        self.content_type = content_type\n        self.headers = {}\n        self.metadata = {}\n\n    def iter_body(self, chunk_size):\n        for chunk in self._body_chunks:\n            yield chunk\n\n    def iter_lines(self, chunk_size):\n        for chunk in self._body_chunks:\n            yield chunk, b\"\\n\"\n\n\nclass DummyConverter:\n    def __init__(self, new_mime=\"text/plain\"):\n        self.new_mime = new_mime\n\n    def convert(self, body_bytes):\n        # pretend to decode bytes to a string\n        return self.new_mime, body_bytes.decode(\"utf-8\")\n\n\nclass DummyFormatting(Formatting):\n    def format_headers(self, headers):\n        return \"\"\n\n    def format_metadata(self, metadata):\n        return \"\"\n\n    def format_body(self, content, mime):\n        # identity formatting\n        return content\n\n\nclass DummyConversion(Conversion):\n    def __init__(self, converter=None):\n        self._converter = converter\n\n    def get_converter(self, mime):\n        return self._converter\n\n\ndef test_buffered_pretty_stream_normal_text(tmp_path):\n    body = [b\"hello \", b\"world\"]\n    msg = DummyMessage(body)\n    conv = DummyConversion()\n    fmt = DummyFormatting()\n    stream = BufferedPrettyStream(\n        conversion=conv,\n        formatting=fmt,\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n        output_encoding=UTF8,\n    )\n    result = b\"\".join(stream.iter_body())\n    assert result == b\"hello world\"\n\n\ndef test_buffered_pretty_stream_binary_raises():\n    body = [b\"binary\\x00data\"]\n    msg = DummyMessage(body)\n    conv = DummyConversion()\n    fmt = DummyFormatting()\n    stream = BufferedPrettyStream(\n        conversion=conv,\n        formatting=fmt,\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n        output_encoding=UTF8,\n    )\n    with pytest.raises(BinarySuppressedError):\n        list(stream.iter_body())\n\n\ndef test_buffered_pretty_stream_conversion_on_binary(tmp_path):\n    body = [b\"binary\\x00data\"]\n    msg = DummyMessage(body)\n    conv = DummyConversion(DummyConverter(new_mime=\"text/plain\"))\n    fmt = DummyFormatting()\n    stream = BufferedPrettyStream(\n        conversion=conv,\n        formatting=fmt,\n        msg=msg,\n        env=Environment(stdout_isatty=False),\n        output_encoding=UTF8,\n    )\n    result = b\"\".join(stream.iter_body())\n    assert result == b\"binarydata\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "f7e0fcfcb55e4ea6b1f92124eab94cc7",
+  "_api_plus_pacing_seconds": 2.9233991319779307
+}

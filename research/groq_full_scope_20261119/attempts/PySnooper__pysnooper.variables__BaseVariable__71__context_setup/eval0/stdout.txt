@@ -1,0 +1,63 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_items_evaluates_and_returns_correct_tuple ________________
+
+    def test_items_evaluates_and_returns_correct_tuple():
+        """Test that items evaluates the source and returns the expected tuple."""
+        # Prepare a frame with a local variable `x`.
+        local_vars = {"x": 42}
+>       frame = types.FrameType(
+            None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
+        )
+E       TypeError: cannot create 'frame' instances
+
+test_generated.py:18: TypeError
+________________ test_unambiguous_source_and_needs_parentheses _________________
+
+    def test_unambiguous_source_and_needs_parentheses():
+        """Test that unambiguous_source is set correctly based on needs_parentheses."""
+        # Source that does not need parentheses.
+        var_simple = DummyVar("x")
+        assert var_simple.unambiguous_source == "x"
+        assert not needs_parentheses("x")
+    
+        # Source that does need parentheses.
+        var_attr = DummyVar("x.y")
+>       assert var_attr.unambiguous_source == "(x.y)"
+E       AssertionError: assert 'x.y' == '(x.y)'
+E         
+E         - (x.y)
+E         ? -   -
+E         + x.y
+
+test_generated.py:39: AssertionError
+_______________ test_items_handles_evaluation_error_and_exclude ________________
+
+    def test_items_handles_evaluation_error_and_exclude():
+        """Test that items returns an empty tuple on eval error and exclude is stored."""
+        # Source that will raise ZeroDivisionError when evaluated.
+>       var_error = DummyVar("1/0", exclude=("x",))
+
+test_generated.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/variables.py:25: in __init__
+    if needs_parentheses(source):
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/variables.py:17: in needs_parentheses
+    return code('{}.x'.format(source)) != code('({}).x'.format(source))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '1/0.x'
+
+    def code(s):
+>       return compile(s, '<variable>', 'eval').co_code
+E         File "<variable>", line 1
+E           1/0.x
+E              ^
+E       SyntaxError: invalid decimal literal
+
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/variables.py:15: SyntaxError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_items_evaluates_and_returns_correct_tuple - Ty...
+FAILED test_generated.py::test_unambiguous_source_and_needs_parentheses - Ass...
+FAILED test_generated.py::test_items_handles_evaluation_error_and_exclude -  ...
+3 failed in 0.11s

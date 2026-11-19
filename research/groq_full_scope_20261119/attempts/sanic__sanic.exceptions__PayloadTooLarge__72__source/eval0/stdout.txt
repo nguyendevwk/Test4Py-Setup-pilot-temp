@@ -1,0 +1,37 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_payload_too_large_default_attributes ___________________
+
+    def test_payload_too_large_default_attributes():
+        """Verify default status code, quiet flag and default message handling."""
+        exc = PayloadTooLarge()
+        # Status code should match the HTTP 413 code
+        assert exc.status_code == 413
+        # Quiet flag should be True by default
+        assert exc.quiet is True
+        # Default message should be None, resulting in the generic status text
+>       assert exc.message is None
+E       AssertionError: assert 'Request Entity Too Large' is None
+E        +  where 'Request Entity Too Large' = PayloadTooLarge('Request Entity Too Large').message
+
+test_generated.py:14: AssertionError
+___________________ test_payload_too_large_context_and_extra ___________________
+
+    def test_payload_too_large_context_and_extra():
+        """Check that context and extra data are stored and not exposed in the client response."""
+        context = {"user_id": 42}
+        extra = {"internal_id": "abc123"}
+        exc = PayloadTooLarge(context=context, extra=extra)
+        # Context should be stored in the exception
+        assert exc.context == context
+        # Extra should be stored but not part of the client-facing data
+        assert exc.extra == extra
+        # The client-facing data should not contain the 'internal_id' key
+>       client_data = exc.to_dict()
+E       AttributeError: 'PayloadTooLarge' object has no attribute 'to_dict'
+
+test_generated.py:42: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_payload_too_large_default_attributes - Asserti...
+FAILED test_generated.py::test_payload_too_large_context_and_extra - Attribut...
+2 failed, 1 passed in 0.33s

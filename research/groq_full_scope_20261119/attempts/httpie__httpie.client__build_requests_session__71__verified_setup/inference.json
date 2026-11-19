@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-c7610be7-27ae-4886-82b4-f9689c2d6817",
+  "object": "chat.completion",
+  "created": 1795078070,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport requests\nfrom httpie.client import build_requests_session\nfrom httpie.adapters import HTTPieHTTPAdapter, HTTPieHTTPSAdapter\nfrom httpie.plugins.registry import plugin_manager\n\n\ndef test_build_session_default_adapters():\n    \"\"\"Verify that the default HTTP and HTTPS adapters are mounted.\"\"\"\n    session = build_requests_session(verify=True)\n    # The session should have our custom adapters for http:// and https://\n    http_adapter = session.adapters.get('http://')\n    https_adapter = session.adapters.get('https://')\n    assert isinstance(http_adapter, HTTPieHTTPAdapter)\n    assert isinstance(https_adapter, HTTPieHTTPSAdapter)\n    # The HTTPS adapter should be configured with verify=True\n    assert https_adapter.verify is True\n    # No ciphers or ssl_version should be set\n    assert https_adapter.ciphers is None\n    assert https_adapter.ssl_version is None\n\n\ndef test_build_session_with_ssl_and_ciphers(monkeypatch):\n    \"\"\"Verify that passing ssl_version and ciphers correctly configures the HTTPS adapter.\"\"\"\n    # Use a known SSL version key from AVAILABLE_SSL_VERSION_ARG_MAPPING\n    from httpie.ssl_ import AVAILABLE_SSL_VERSION_ARG_MAPPING\n    ssl_key = next(iter(AVAILABLE_SSL_VERSION_ARG_MAPPING))\n    session = build_requests_session(verify=False, ssl_version=ssl_key, ciphers=\"ECDHE-RSA-AES128-GCM-SHA256\")\n    https_adapter = session.adapters.get('https://')\n    assert isinstance(https_adapter, HTTPieHTTPSAdapter)\n    # The adapter should have the mapped ssl_version value\n    expected_ssl_version = AVAILABLE_SSL_VERSION_ARG_MAPPING[ssl_key]\n    assert https_adapter.ssl_version == expected_ssl_version\n    # The adapter should have the ciphers string we passed\n    assert https_adapter.ciphers == \"ECDHE-RSA-AES128-GCM-SHA256\"\n    # Verify flag should be False\n    assert https_adapter.verify is False\n\n\ndef test_build_session_with_plugins(monkeypatch):\n    \"\"\"Verify that transport plugins are mounted on the session.\"\"\"\n    # Create a dummy plugin class with required attributes\n    class DummyPlugin:\n        prefix = \"ftp://\"\n        def get_adapter(self):\n            return requests.adapters.HTTPAdapter()\n\n    # Monkeypatch the plugin manager to return our dummy plugin\n    monkeypatch.setattr(plugin_manager, \"get_transport_plugins\", lambda: [DummyPlugin])\n    session = build_requests_session(verify=True)\n    # The dummy plugin's adapter should be mounted under its prefix\n    ftp_adapter = session.adapters.get(\"ftp://\")\n    assert ftp_adapter is not None\n    assert isinstance(ftp_adapter, requests.adapters.HTTPAdapter)\n```",
+        "reasoning": "We need to test build_requests_session. We can test that adapters mounted correctly. Use tmp_path? Not needed. We'll import function. Test that session has adapters for http and https. Also test plugin mounting: we can create a dummy plugin by monkeypatching plugin_manager.get_transport_plugins to return list with a dummy class that has prefix and get_adapter. But cannot modify product code; but we can monkeypatch plugin_manager in test. Use import. Ensure independent. Three tests: 1 normal verify True, no ssl_version, no ciphers. Check adapters types. 2 boundary: ssl_version invalid? but mapping only if provided. We can test that passing ssl_version string maps correctly. 3 error: passing non-boolean verify? but function expects bool; but we can test that passing string raises? Actually requests.Session will accept any. But we can test that passing None for ssl_version results in None. Use assert. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052631101,
+    "prompt_tokens": 662,
+    "prompt_time": 0.041944116,
+    "completion_tokens": 743,
+    "completion_time": 0.806955096,
+    "total_tokens": 1405,
+    "total_time": 0.848899212,
+    "completion_tokens_details": {
+      "reasoning_tokens": 191
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfv7ace23r2nxt1vn45pje",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport requests\nfrom httpie.client import build_requests_session\nfrom httpie.adapters import HTTPieHTTPAdapter, HTTPieHTTPSAdapter\nfrom httpie.plugins.registry import plugin_manager\n\n\ndef test_build_session_default_adapters():\n    \"\"\"Verify that the default HTTP and HTTPS adapters are mounted.\"\"\"\n    session = build_requests_session(verify=True)\n    # The session should have our custom adapters for http:// and https://\n    http_adapter = session.adapters.get('http://')\n    https_adapter = session.adapters.get('https://')\n    assert isinstance(http_adapter, HTTPieHTTPAdapter)\n    assert isinstance(https_adapter, HTTPieHTTPSAdapter)\n    # The HTTPS adapter should be configured with verify=True\n    assert https_adapter.verify is True\n    # No ciphers or ssl_version should be set\n    assert https_adapter.ciphers is None\n    assert https_adapter.ssl_version is None\n\n\ndef test_build_session_with_ssl_and_ciphers(monkeypatch):\n    \"\"\"Verify that passing ssl_version and ciphers correctly configures the HTTPS adapter.\"\"\"\n    # Use a known SSL version key from AVAILABLE_SSL_VERSION_ARG_MAPPING\n    from httpie.ssl_ import AVAILABLE_SSL_VERSION_ARG_MAPPING\n    ssl_key = next(iter(AVAILABLE_SSL_VERSION_ARG_MAPPING))\n    session = build_requests_session(verify=False, ssl_version=ssl_key, ciphers=\"ECDHE-RSA-AES128-GCM-SHA256\")\n    https_adapter = session.adapters.get('https://')\n    assert isinstance(https_adapter, HTTPieHTTPSAdapter)\n    # The adapter should have the mapped ssl_version value\n    expected_ssl_version = AVAILABLE_SSL_VERSION_ARG_MAPPING[ssl_key]\n    assert https_adapter.ssl_version == expected_ssl_version\n    # The adapter should have the ciphers string we passed\n    assert https_adapter.ciphers == \"ECDHE-RSA-AES128-GCM-SHA256\"\n    # Verify flag should be False\n    assert https_adapter.verify is False\n\n\ndef test_build_session_with_plugins(monkeypatch):\n    \"\"\"Verify that transport plugins are mounted on the session.\"\"\"\n    # Create a dummy plugin class with required attributes\n    class DummyPlugin:\n        prefix = \"ftp://\"\n        def get_adapter(self):\n            return requests.adapters.HTTPAdapter()\n\n    # Monkeypatch the plugin manager to return our dummy plugin\n    monkeypatch.setattr(plugin_manager, \"get_transport_plugins\", lambda: [DummyPlugin])\n    session = build_requests_session(verify=True)\n    # The dummy plugin's adapter should be mounted under its prefix\n    ftp_adapter = session.adapters.get(\"ftp://\")\n    assert ftp_adapter is not None\n    assert isinstance(ftp_adapter, requests.adapters.HTTPAdapter)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2311193880159408
+}

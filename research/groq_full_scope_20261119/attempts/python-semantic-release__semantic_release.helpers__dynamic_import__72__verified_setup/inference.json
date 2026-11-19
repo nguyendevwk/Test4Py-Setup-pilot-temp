@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-8d4c5fd9-441b-4eff-ba6e-5c57649b0c92",
+  "object": "chat.completion",
+  "created": 1795076809,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport importlib\nimport sys\nimport types\nimport os\nimport pytest\nfrom pathlib import Path\n\nfrom semantic_release.helpers import dynamic_import\n\n\ndef test_dynamic_import_from_module():\n    \"\"\"Import a standard library attribute via module:attribute syntax.\"\"\"\n    # Import the 'pathlib' module and its 'Path' class\n    PathCls = dynamic_import(\"pathlib:Path\")\n    assert PathCls is Path\n    # Ensure the returned object behaves like pathlib.Path\n    p = PathCls(\"test.txt\")\n    assert isinstance(p, Path)\n    assert p.name == \"test.txt\"\n\n\ndef test_dynamic_import_from_file(tmp_path):\n    \"\"\"Import a function defined in a temporary file using a file path.\"\"\"\n    # Create a temporary Python file with a simple function\n    file_path = tmp_path / \"mymodule.py\"\n    file_path.write_text(\n        \"\"\"\ndef hello(name: str) -> str:\n    return f\"Hello, {name}!\"\n\"\"\"\n    )\n    # Import the function via the file path\n    hello_func = dynamic_import(f\"{file_path}:hello\")\n    assert callable(hello_func)\n    assert hello_func(\"World\") == \"Hello, World!\"\n    # Ensure the module is cached in sys.modules\n    module_name = file_path.stem\n    assert module_name in sys.modules\n    assert sys.modules[module_name].hello is hello_func\n\n\ndef test_dynamic_import_invalid_format():\n    \"\"\"Importing with an invalid format should raise ValueError.\"\"\"\n    with pytest.raises(ValueError) as excinfo:\n        dynamic_import(\"invalidformat\")\n    assert \"must use 'module:Class'\" in str(excinfo.value)\n```",
+        "reasoning": "Need 3 tests: normal import from module, import from file path, error on invalid format. Use tmp_path to create a file with a function. Use pytest.raises for error."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054785148,
+    "prompt_tokens": 732,
+    "prompt_time": 0.036455351,
+    "completion_tokens": 387,
+    "completion_time": 0.416972182,
+    "total_tokens": 1119,
+    "total_time": 0.453427533,
+    "completion_tokens_details": {
+      "reasoning_tokens": 38
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7semqx6e85r9bz9y3g3byy3",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport importlib\nimport sys\nimport types\nimport os\nimport pytest\nfrom pathlib import Path\n\nfrom semantic_release.helpers import dynamic_import\n\n\ndef test_dynamic_import_from_module():\n    \"\"\"Import a standard library attribute via module:attribute syntax.\"\"\"\n    # Import the 'pathlib' module and its 'Path' class\n    PathCls = dynamic_import(\"pathlib:Path\")\n    assert PathCls is Path\n    # Ensure the returned object behaves like pathlib.Path\n    p = PathCls(\"test.txt\")\n    assert isinstance(p, Path)\n    assert p.name == \"test.txt\"\n\n\ndef test_dynamic_import_from_file(tmp_path):\n    \"\"\"Import a function defined in a temporary file using a file path.\"\"\"\n    # Create a temporary Python file with a simple function\n    file_path = tmp_path / \"mymodule.py\"\n    file_path.write_text(\n        \"\"\"\ndef hello(name: str) -> str:\n    return f\"Hello, {name}!\"\n\"\"\"\n    )\n    # Import the function via the file path\n    hello_func = dynamic_import(f\"{file_path}:hello\")\n    assert callable(hello_func)\n    assert hello_func(\"World\") == \"Hello, World!\"\n    # Ensure the module is cached in sys.modules\n    module_name = file_path.stem\n    assert module_name in sys.modules\n    assert sys.modules[module_name].hello is hello_func\n\n\ndef test_dynamic_import_invalid_format():\n    \"\"\"Importing with an invalid format should raise ValueError.\"\"\"\n    with pytest.raises(ValueError) as excinfo:\n        dynamic_import(\"invalidformat\")\n    assert \"must use 'module:Class'\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.784283128043171
+}

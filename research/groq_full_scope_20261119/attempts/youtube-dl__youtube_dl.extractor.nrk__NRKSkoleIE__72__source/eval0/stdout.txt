@@ -1,0 +1,34 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_real_extract_success ___________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcac61643a0>
+ie = <youtube_dl.extractor.nrk.NRKSkoleIE object at 0x7fcac4c31840>
+
+    def test_real_extract_success(monkeypatch, ie):
+        # Simulate a successful JSON response with a psId
+        def fake_download_json(url, video_id):
+            assert url == f'https://nrkno-skole-prod.kube.nrk.no/skole/api/media/{video_id}'
+            assert video_id == '14099'
+            return {'psId': '6021'}
+        monkeypatch.setattr(ie, '_download_json', fake_download_json)
+    
+        result = ie._real_extract('https://www.nrk.no/skole/?page=search&q=&mediaId=14099')
+>       assert result.url == 'nrk:6021'
+E       AttributeError: 'dict' object has no attribute 'url'
+
+test_generated.py:17: AttributeError
+________________________ test_real_extract_invalid_url _________________________
+
+ie = <youtube_dl.extractor.nrk.NRKSkoleIE object at 0x7fcac4c33a00>
+
+    def test_real_extract_invalid_url(ie):
+        # URL that does not match the pattern should raise ExtractorError
+>       with pytest.raises(ie.IEError):
+E       AttributeError: 'NRKSkoleIE' object has no attribute 'IEError'
+
+test_generated.py:31: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_real_extract_success - AttributeError: 'dict' ...
+FAILED test_generated.py::test_real_extract_invalid_url - AttributeError: 'NR...
+2 failed, 1 passed in 1.28s

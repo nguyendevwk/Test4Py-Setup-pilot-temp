@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-d428297a-a9f0-42fd-acfa-66ed458e2074",
+  "object": "chat.completion",
+  "created": 1795077173,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.composites import OneOf\nfrom typesystem.fields import Int, String, Field\n\n# Helper field that validates against a specific type\nclass TypeField(Field):\n    def __init__(self, typ, **kwargs):\n        super().__init__(**kwargs)\n        self.typ = typ\n\n    def validate(self, value):\n        if isinstance(value, self.typ):\n            return value\n        raise ValueError(f\"Expected {self.typ.__name__}\")\n\n    def validate_or_error(self, value):\n        try:\n            return self.validate(value), None\n        except Exception as e:\n            return None, e\n\ndef test_oneof_exact_match():\n    \"\"\"Value matches exactly one of the child fields.\"\"\"\n    one_of = OneOf([TypeField(int), TypeField(str)])\n    result = one_of.validate(42)\n    assert result == 42\n\ndef test_oneof_multiple_matches():\n    \"\"\"Value matches more than one child field, should raise validation error.\"\"\"\n    one_of = OneOf([TypeField(int), TypeField(int)])\n    with pytest.raises(Exception) as exc:\n        one_of.validate(10)\n    assert \"multiple_matches\" in str(exc.value)\n\ndef test_oneof_no_match():\n    \"\"\"Value matches none of the child fields, should raise validation error.\"\"\"\n    one_of = OneOf([TypeField(int), TypeField(str)])\n    with pytest.raises(Exception) as exc:\n        one_of.validate(3.14)\n    assert \"no_match\" in str(exc.value)\n```",
+        "reasoning": "We need to test OneOf. Need to import typesystem.fields.Any? Let's inspect fields.Any. But we can create simple Field subclasses that validate. Use typesystem.fields.Any? Probably Any is a Field that accepts any value. But we need fields that validate specific types. Maybe use typesystem.fields.Int? Let's assume typesystem has fields.Int. We'll import typesystem.fields.Int. We'll test OneOf with list of Int and String. Use tmp_path? Not needed. Just test validation. Write three tests: one matches exactly one, one matches multiple, one matches none. Use pytest.raises for errors."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.092798273,
+    "prompt_tokens": 456,
+    "prompt_time": 0.027180106,
+    "completion_tokens": 445,
+    "completion_time": 0.569124449,
+    "total_tokens": 901,
+    "total_time": 0.596304555,
+    "completion_tokens_details": {
+      "reasoning_tokens": 123
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sezvcbe5japrhk787bk0cd",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.composites import OneOf\nfrom typesystem.fields import Int, String, Field\n\n# Helper field that validates against a specific type\nclass TypeField(Field):\n    def __init__(self, typ, **kwargs):\n        super().__init__(**kwargs)\n        self.typ = typ\n\n    def validate(self, value):\n        if isinstance(value, self.typ):\n            return value\n        raise ValueError(f\"Expected {self.typ.__name__}\")\n\n    def validate_or_error(self, value):\n        try:\n            return self.validate(value), None\n        except Exception as e:\n            return None, e\n\ndef test_oneof_exact_match():\n    \"\"\"Value matches exactly one of the child fields.\"\"\"\n    one_of = OneOf([TypeField(int), TypeField(str)])\n    result = one_of.validate(42)\n    assert result == 42\n\ndef test_oneof_multiple_matches():\n    \"\"\"Value matches more than one child field, should raise validation error.\"\"\"\n    one_of = OneOf([TypeField(int), TypeField(int)])\n    with pytest.raises(Exception) as exc:\n        one_of.validate(10)\n    assert \"multiple_matches\" in str(exc.value)\n\ndef test_oneof_no_match():\n    \"\"\"Value matches none of the child fields, should raise validation error.\"\"\"\n    one_of = OneOf([TypeField(int), TypeField(str)])\n    with pytest.raises(Exception) as exc:\n        one_of.validate(3.14)\n    assert \"no_match\" in str(exc.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0167851640144363
+}

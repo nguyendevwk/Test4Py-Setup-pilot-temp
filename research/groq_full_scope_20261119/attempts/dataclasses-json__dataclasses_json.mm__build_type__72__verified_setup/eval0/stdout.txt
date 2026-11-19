@@ -1,0 +1,52 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_nested_dataclass_field __________________________
+
+    def test_nested_dataclass_field():
+        # Build field for Outer.inner
+        field_obj = build_type(Outer.__annotations__['inner'], {}, Mixin, Outer.__dataclass_fields__['inner'], Outer)
+        # Should be a Nested field pointing to Inner.schema()
+        assert isinstance(field_obj, fields.Nested)
+>       assert field_obj.schema_class == Inner.schema()
+E       AttributeError: 'Nested' object has no attribute 'schema_class'
+
+test_generated.py:30: AttributeError
+________________________ test_optional_and_tuple_fields ________________________
+
+    def test_optional_and_tuple_fields():
+        # Optional[int]
+        opt_field = build_type(TupleHolder.__annotations__['opt'], {}, Mixin, TupleHolder.__dataclass_fields__['opt'], TupleHolder)
+        assert isinstance(opt_field, fields.Field)
+>       assert opt_field.metadata.get('allow_none', False) is True
+E       AssertionError: assert False is True
+E        +  where False = <built-in method get of dict object at 0x7f38a6baf500>('allow_none', False)
+E        +    where <built-in method get of dict object at 0x7f38a6baf500> = {}.get
+E        +      where {} = <fields._UnionField(dump_default=<marshmallow.missing>, attribute=None, validate=None, required=False, load_only=False...equired': 'Missing data for required field.', 'null': 'Field may not be null.', 'validator_failed': 'Invalid value.'})>.metadata
+
+test_generated.py:45: AssertionError
+__________________________ test_enum_and_union_fields __________________________
+
+    def test_enum_and_union_fields():
+        # Enum field
+        enum_field = build_type(UnionHolder.__annotations__['color'], {}, Mixin, UnionHolder.__dataclass_fields__['color'], UnionHolder)
+        assert isinstance(enum_field, fields.Enum)
+        assert enum_field.enum == Color
+        assert enum_field.by_value is True
+    
+        # Union field should warn about unknown type
+>       with pytest.warns(UserWarning) as record:
+E       Failed: DID NOT WARN. No warnings of type (<class 'UserWarning'>,) were emitted.
+E        Emitted warnings: [].
+
+test_generated.py:75: Failed
+=============================== warnings summary ===============================
+research/groq_full_scope_20261119/attempts/dataclasses-json__dataclasses_json.mm__build_type__72__verified_setup/eval0/test_generated.py::test_nested_dataclass_field
+  /home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/dataclasses-json/venv/lib/python3.10/site-packages/marshmallow/fields.py:582: RemovedInMarshmallow4Warning: Passing field metadata as keyword arguments is deprecated. Use the explicit `metadata=...` argument instead. Additional metadata: {'field_many': False}
+    super().__init__(default=default, dump_default=dump_default, **kwargs)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_nested_dataclass_field - AttributeError: 'Nest...
+FAILED test_generated.py::test_optional_and_tuple_fields - AssertionError: as...
+FAILED test_generated.py::test_enum_and_union_fields - Failed: DID NOT WARN. ...
+3 failed, 1 warning in 0.19s

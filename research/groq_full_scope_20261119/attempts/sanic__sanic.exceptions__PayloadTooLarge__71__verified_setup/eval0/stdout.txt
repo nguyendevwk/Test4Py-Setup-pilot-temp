@@ -1,0 +1,57 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_payload_too_large_default_attributes ___________________
+
+    def test_payload_too_large_default_attributes():
+        """PayloadTooLarge should expose the correct default status and quiet flag."""
+        exc = PayloadTooLarge()
+        # status_code is defined on the class
+        assert exc.status_code == 413
+        # quiet flag is set to True by default
+        assert exc.quiet is True
+        # message defaults to None
+>       assert exc.message is None
+E       AssertionError: assert 'Request Entity Too Large' is None
+E        +  where 'Request Entity Too Large' = PayloadTooLarge('Request Entity Too Large').message
+
+test_generated.py:13: AssertionError
+____________ test_payload_too_large_with_custom_message_and_headers ____________
+
+    def test_payload_too_large_with_custom_message_and_headers():
+        """Providing a custom message and headers should store them correctly."""
+        custom_msg = "Payload exceeds limit"
+        custom_headers = {"Retry-After": "120", "X-Custom": "value"}
+        exc = PayloadTooLarge(custom_msg, headers=custom_headers)
+        # message should be stored as provided
+        assert exc.message == custom_msg
+        # headers should reflect the custom dict
+        assert exc.headers == custom_headers
+        # quiet flag remains True unless explicitly overridden
+        assert exc.quiet is True
+        # context and extra remain empty
+>       assert exc.context == {}
+E       AssertionError: assert None == {}
+E        +  where None = PayloadTooLarge('Payload exceeds limit').context
+
+test_generated.py:32: AssertionError
+___________________ test_payload_too_large_context_and_extra ___________________
+
+    def test_payload_too_large_context_and_extra():
+        """Context and extra mappings should be stored and accessible."""
+        ctx = {"user_id": 42, "attempt": 3}
+        extra = {"debug": True}
+        exc = PayloadTooLarge(context=ctx, extra=extra)
+        # context and extra should match the provided dictionaries
+        assert exc.context == ctx
+        assert exc.extra == extra
+        # message defaults to None
+>       assert exc.message is None
+E       AssertionError: assert 'Request Entity Too Large' is None
+E        +  where 'Request Entity Too Large' = PayloadTooLarge('Request Entity Too Large').message
+
+test_generated.py:45: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_payload_too_large_default_attributes - Asserti...
+FAILED test_generated.py::test_payload_too_large_with_custom_message_and_headers
+FAILED test_generated.py::test_payload_too_large_context_and_extra - Assertio...
+3 failed in 0.35s

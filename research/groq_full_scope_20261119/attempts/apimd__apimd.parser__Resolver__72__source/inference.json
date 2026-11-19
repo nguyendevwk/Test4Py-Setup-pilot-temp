@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-0cdb58eb-6dd6-4ead-bdcf-fdcf85291463",
+  "object": "chat.completion",
+  "created": 1795075962,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import Resolver\n\n# Helper to apply the resolver to an AST node\ndef resolve(node, root=\"mymodule\", alias=None, self_ty=\"\"):\n    if alias is None:\n        alias = {}\n    resolver = Resolver(root, alias, self_ty)\n    return resolver.visit(node)\n\ndef test_visit_constant_parses_and_resolves_string():\n    # A constant string that is a valid expression should be parsed and resolved\n    node = ast.Constant(value=\"1 + 2\")\n    resolved = resolve(node)\n    # The resolved node should be a BinOp representing 1 + 2\n    assert isinstance(resolved, ast.BinOp)\n    assert isinstance(resolved.left, ast.Constant) and resolved.left.value == 1\n    assert isinstance(resolved.right, ast.Constant) and resolved.right.value == 2\n    assert isinstance(resolved.op, ast.Add)\n\ndef test_visit_name_replaces_alias_and_self():\n    # Alias mapping for a name that should be replaced\n    alias = {\"mymodule.foo\": \"typing.List[int]\"}\n    # The resolver should replace 'foo' with the parsed expression\n    node = ast.Name(id=\"foo\", ctx=ast.Load())\n    resolved = resolve(node, root=\"mymodule\", alias=alias)\n    # After resolution, the node should be a Subscript representing List[int]\n    assert isinstance(resolved, ast.Subscript)\n    assert isinstance(resolved.value, ast.Name) and resolved.value.id == \"List\"\n    assert isinstance(resolved.slice, ast.Index)\n    assert isinstance(resolved.slice.value, ast.Constant) and resolved.slice.value.value == 1\n\n    # Self type replacement\n    node_self = ast.Name(id=\"T\", ctx=ast.Load())\n    resolved_self = resolve(node_self, root=\"mymodule\", alias={}, self_ty=\"T\")\n    assert isinstance(resolved_self, ast.Name) and resolved_self.id == \"Self\"\n\ndef test_visit_subscript_converts_union_and_optional():\n    # Union conversion: typing.Union[int, str] -> int | str\n    node_union = ast.Subscript(\n        value=ast.Name(id=\"Union\", ctx=ast.Load()),\n        slice=ast.Tuple(elts=[ast.Constant(value=1), ast.Constant(value=2)], ctx=ast.Load()),\n        ctx=ast.Load()\n    )\n    resolved_union = resolve(node_union, root=\"mymodule\", alias={\"mymodule.Union\": \"typing.Union\"})\n    assert isinstance(resolved_union, ast.BinOp)\n    assert isinstance(resolved_union.op, ast.BitOr)\n    assert isinstance(resolved_union.left, ast.Constant) and resolved_union.left.value == 1\n    assert isinstance(resolved_union.right, ast.Constant) and resolved_union.right.value == 2\n\n    # Optional conversion: typing.Optional[int] -> int | None\n    node_opt = ast.Subscript(\n        value=ast.Name(id=\"Optional\", ctx=ast.Load()),\n        slice=ast.Constant(value=1),\n        ctx=ast.Load()\n    )\n    resolved_opt = resolve(node_opt, root=\"mymodule\", alias={\"mymodule.Optional\": \"typing.Optional\"})\n    assert isinstance(resolved_opt, ast.BinOp)\n    assert isinstance(resolved_opt.op, ast.BitOr)\n    assert isinstance(resolved_opt.left, ast.Constant) and resolved_opt.left.value == 1\n    assert isinstance(resolved_opt.right, ast.Constant) and resolved_opt.right.value is None\n```",
+        "reasoning": "We need three tests for Resolver. Use tmp_path to create a file? We can instantiate Resolver and apply to AST. Test visit_Constant string parsing. Test visit_Name alias replacement. Test visit_Subscript union conversion. Use ast.parse and transformer."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046735188,
+    "prompt_tokens": 953,
+    "prompt_time": 0.048390751,
+    "completion_tokens": 781,
+    "completion_time": 0.876723078,
+    "total_tokens": 1734,
+    "total_time": 0.925113829,
+    "completion_tokens_details": {
+      "reasoning_tokens": 51
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdtw6te2g9mjay8agrr0j6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import Resolver\n\n# Helper to apply the resolver to an AST node\ndef resolve(node, root=\"mymodule\", alias=None, self_ty=\"\"):\n    if alias is None:\n        alias = {}\n    resolver = Resolver(root, alias, self_ty)\n    return resolver.visit(node)\n\ndef test_visit_constant_parses_and_resolves_string():\n    # A constant string that is a valid expression should be parsed and resolved\n    node = ast.Constant(value=\"1 + 2\")\n    resolved = resolve(node)\n    # The resolved node should be a BinOp representing 1 + 2\n    assert isinstance(resolved, ast.BinOp)\n    assert isinstance(resolved.left, ast.Constant) and resolved.left.value == 1\n    assert isinstance(resolved.right, ast.Constant) and resolved.right.value == 2\n    assert isinstance(resolved.op, ast.Add)\n\ndef test_visit_name_replaces_alias_and_self():\n    # Alias mapping for a name that should be replaced\n    alias = {\"mymodule.foo\": \"typing.List[int]\"}\n    # The resolver should replace 'foo' with the parsed expression\n    node = ast.Name(id=\"foo\", ctx=ast.Load())\n    resolved = resolve(node, root=\"mymodule\", alias=alias)\n    # After resolution, the node should be a Subscript representing List[int]\n    assert isinstance(resolved, ast.Subscript)\n    assert isinstance(resolved.value, ast.Name) and resolved.value.id == \"List\"\n    assert isinstance(resolved.slice, ast.Index)\n    assert isinstance(resolved.slice.value, ast.Constant) and resolved.slice.value.value == 1\n\n    # Self type replacement\n    node_self = ast.Name(id=\"T\", ctx=ast.Load())\n    resolved_self = resolve(node_self, root=\"mymodule\", alias={}, self_ty=\"T\")\n    assert isinstance(resolved_self, ast.Name) and resolved_self.id == \"Self\"\n\ndef test_visit_subscript_converts_union_and_optional():\n    # Union conversion: typing.Union[int, str] -> int | str\n    node_union = ast.Subscript(\n        value=ast.Name(id=\"Union\", ctx=ast.Load()),\n        slice=ast.Tuple(elts=[ast.Constant(value=1), ast.Constant(value=2)], ctx=ast.Load()),\n        ctx=ast.Load()\n    )\n    resolved_union = resolve(node_union, root=\"mymodule\", alias={\"mymodule.Union\": \"typing.Union\"})\n    assert isinstance(resolved_union, ast.BinOp)\n    assert isinstance(resolved_union.op, ast.BitOr)\n    assert isinstance(resolved_union.left, ast.Constant) and resolved_union.left.value == 1\n    assert isinstance(resolved_union.right, ast.Constant) and resolved_union.right.value == 2\n\n    # Optional conversion: typing.Optional[int] -> int | None\n    node_opt = ast.Subscript(\n        value=ast.Name(id=\"Optional\", ctx=ast.Load()),\n        slice=ast.Constant(value=1),\n        ctx=ast.Load()\n    )\n    resolved_opt = resolve(node_opt, root=\"mymodule\", alias={\"mymodule.Optional\": \"typing.Optional\"})\n    assert isinstance(resolved_opt, ast.BinOp)\n    assert isinstance(resolved_opt.op, ast.BitOr)\n    assert isinstance(resolved_opt.left, ast.Constant) and resolved_opt.left.value == 1\n    assert isinstance(resolved_opt.right, ast.Constant) and resolved_opt.right.value is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.259936527989339
+}

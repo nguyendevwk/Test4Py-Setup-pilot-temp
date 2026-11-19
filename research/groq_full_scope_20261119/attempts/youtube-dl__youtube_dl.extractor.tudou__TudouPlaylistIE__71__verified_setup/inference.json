@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-a7608382-0dde-49f0-94bf-31aa81a9ea22",
+  "object": "chat.completion",
+  "created": 1795079406,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport pytest\nfrom youtube_dl.extractor.tudou import TudouPlaylistIE\n\n\nclass DummyDownloader:\n    \"\"\"A minimal downloader that returns predefined JSON data.\"\"\"\n    def __init__(self, data):\n        self.data = data\n\n    def _download_json(self, url, video_id, note=None, errnote=None, headers=None, data=None, timeout=None, check_status=True):\n        # Return the predefined data regardless of the URL\n        return self.data\n\n\ndef test_playlist_minimum_entries(tmp_path):\n    \"\"\"Verify that the playlist contains at least the expected number of entries.\"\"\"\n    # Prepare dummy playlist data with 209 items\n    dummy_items = [{'icode': f'id{i}', 'kw': f'kw{i}'} for i in range(209)]\n    dummy_json = {'items': dummy_items}\n    downloader = DummyDownloader(dummy_json)\n\n    ie = TudouPlaylistIE()\n    ie.downloader = downloader\n\n    result = ie.extract('http://www.tudou.com/listplay/zzdE77v6Mmo.html')\n    assert result['entries'] is not None\n    assert len(result['entries']) == 209\n    assert all(entry['url'] == f'http://www.tudou.com/programs/view/{item[\"icode\"]}' for entry, item in zip(result['entries'], dummy_items))\n\n\ndef test_single_item_playlist(tmp_path):\n    \"\"\"Test extraction when the playlist contains a single item.\"\"\"\n    dummy_items = [{'icode': 'single123', 'kw': 'singlekw'}]\n    dummy_json = {'items': dummy_items}\n    downloader = DummyDownloader(dummy_json)\n\n    ie = TudouPlaylistIE()\n    ie.downloader = downloader\n\n    result = ie.extract('http://www.tudou.com/listplay/abcd1234xyz.html')\n    assert result['entries'] == [\n        {\n            'url': 'http://www.tudou.com/programs/view/single123',\n            'ie_key': 'Tudou',\n            'id': 'single123',\n            'title': 'singlekw',\n        }\n    ]\n\n\ndef test_invalid_url_raises_error(tmp_path):\n    \"\"\"Ensure that an invalid URL raises a ValueError.\"\"\"\n    ie = TudouPlaylistIE()\n    with pytest.raises(ValueError):\n        ie.extract('http://www.invalid.com/not_a_tudou_playlist.html')\n```",
+        "reasoning": "We need to write tests for TudouPlaylistIE. We cannot access network. But we can simulate by monkeypatching _download_json to return dummy data. But cannot mock target? Instruction: no mocks of the target. But we can monkeypatch method on instance? That's still mocking. But maybe allowed? It says no mocks of the target. But monkeypatching is mocking. So we need to test real behavior but cannot hit network. Maybe we can use a local file? But _download_json uses downloader. We can create a subclass that overrides _download_json to return test data. But that's mocking. However it's not mocking the target class itself, just subclass. Might be acceptable. We'll create a dummy downloader that returns JSON. Use InfoExtractor base? Might be complex. Maybe easier: use youtube_dl's InfoExtractor? But we cannot import youtube_dl? It's available. We'll instantiate TudouPlaylistIE with a dummy downloader that has _download_json method. Actually InfoExtractor expects a downloader attribute. We can set it manually. Provide a dummy downloader with _download_json returning our data. That is mocking but not of target. I'll proceed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.055131291,
+    "prompt_tokens": 513,
+    "prompt_time": 8.1739e-05,
+    "completion_tokens": 732,
+    "completion_time": 1.021060313,
+    "total_tokens": 1245,
+    "total_time": 1.021142052,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 232
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh3zk6e9r9x1dzr3v6cef7",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport pytest\nfrom youtube_dl.extractor.tudou import TudouPlaylistIE\n\n\nclass DummyDownloader:\n    \"\"\"A minimal downloader that returns predefined JSON data.\"\"\"\n    def __init__(self, data):\n        self.data = data\n\n    def _download_json(self, url, video_id, note=None, errnote=None, headers=None, data=None, timeout=None, check_status=True):\n        # Return the predefined data regardless of the URL\n        return self.data\n\n\ndef test_playlist_minimum_entries(tmp_path):\n    \"\"\"Verify that the playlist contains at least the expected number of entries.\"\"\"\n    # Prepare dummy playlist data with 209 items\n    dummy_items = [{'icode': f'id{i}', 'kw': f'kw{i}'} for i in range(209)]\n    dummy_json = {'items': dummy_items}\n    downloader = DummyDownloader(dummy_json)\n\n    ie = TudouPlaylistIE()\n    ie.downloader = downloader\n\n    result = ie.extract('http://www.tudou.com/listplay/zzdE77v6Mmo.html')\n    assert result['entries'] is not None\n    assert len(result['entries']) == 209\n    assert all(entry['url'] == f'http://www.tudou.com/programs/view/{item[\"icode\"]}' for entry, item in zip(result['entries'], dummy_items))\n\n\ndef test_single_item_playlist(tmp_path):\n    \"\"\"Test extraction when the playlist contains a single item.\"\"\"\n    dummy_items = [{'icode': 'single123', 'kw': 'singlekw'}]\n    dummy_json = {'items': dummy_items}\n    downloader = DummyDownloader(dummy_json)\n\n    ie = TudouPlaylistIE()\n    ie.downloader = downloader\n\n    result = ie.extract('http://www.tudou.com/listplay/abcd1234xyz.html')\n    assert result['entries'] == [\n        {\n            'url': 'http://www.tudou.com/programs/view/single123',\n            'ie_key': 'Tudou',\n            'id': 'single123',\n            'title': 'singlekw',\n        }\n    ]\n\n\ndef test_invalid_url_raises_error(tmp_path):\n    \"\"\"Ensure that an invalid URL raises a ValueError.\"\"\"\n    ie = TudouPlaylistIE()\n    with pytest.raises(ValueError):\n        ie.extract('http://www.invalid.com/not_a_tudou_playlist.html')\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "1dcaad10eebb4720913a4c64a2ccdb3b",
+  "_api_plus_pacing_seconds": 1.5995148819638416
+}

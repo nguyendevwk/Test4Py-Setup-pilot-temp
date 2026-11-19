@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-cf37eba3-27c0-46e7-89ee-ddd80f7f3dc6",
+  "object": "chat.completion",
+  "created": 1795076662,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom semantic_release.helpers import parse_git_url, ParsedGitUrl\n\ndef test_parse_http_and_https_urls():\n    # Normal HTTP/HTTPS URLs should be parsed correctly\n    url = \"https://github.com/owner/repo.git\"\n    result = parse_git_url(url)\n    assert isinstance(result, ParsedGitUrl)\n    assert result.scheme == \"https\"\n    assert result.netloc == \"github.com\"\n    assert result.namespace == \"owner\"\n    assert result.repo_name == \"repo\"\n\n    # URL without .git suffix should still work\n    url_no_git = \"http://git.mycompany.com/username/myproject\"\n    result_no_git = parse_git_url(url_no_git)\n    assert result_no_git.scheme == \"http\"\n    assert result_no_git.netloc == \"git.mycompany.com\"\n    assert result_no_git.namespace == \"username\"\n    assert result_no_git.repo_name == \"myproject\"\n\ndef test_parse_file_and_windows_paths(tmp_path: Path):\n    # Posix file path\n    posix_path = tmp_path / \"repo.git\"\n    posix_path.touch()\n    posix_url = f\"file://{posix_path}\"\n    result_posix = parse_git_url(posix_url)\n    assert result_posix.scheme == \"file\"\n    assert result_posix.netloc == \"\"\n    assert result_posix.namespace == \"\"\n    assert result_posix.repo_name == \"repo\"\n\n    # Windows file path (simulate by using a drive letter)\n    if sys.platform.startswith(\"win\"):\n        win_path = Path(f\"C:/Users/Dev/{posix_path.name}\")\n        win_path.touch()\n        win_url = f\"file:///{win_path}\"\n        result_win = parse_git_url(win_url)\n        assert result_win.scheme == \"file\"\n        assert result_win.netloc == \"\"\n        assert result_win.namespace == \"\"\n        assert result_win.repo_name == \"repo\"\n    else:\n        # On non‑Windows platforms we skip the Windows‑specific check\n        pytest.skip(\"Windows path test only applicable on Windows\")\n\ndef test_parse_invalid_and_boundary_urls():\n    # URL missing scheme should raise ValueError\n    with pytest.raises(ValueError, match=\"Cannot parse\"):\n        parse_git_url(\"git@github.com:owner/repo.git\")\n\n    # URL with empty netloc for non‑file scheme should raise ValueError\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"ssh:///owner/repo.git\")\n\n    # URL with missing namespace should raise ValueError\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"https://github.com/.git\")\n\n    # URL with missing repo name should raise ValueError\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"https://github.com/owner/\")\n\n    # URL with unsupported scheme should still parse but not raise\n    # (the function does not validate scheme, only checks presence)\n    result = parse_git_url(\"custom://host/owner/repo.git\")\n    assert result.scheme == \"custom\"\n    assert result.netloc == \"host\"\n    assert result.namespace == \"owner\"\n    assert result.repo_name == \"repo\"\n```",
+        "reasoning": "Need 3 tests: normal, boundary, error. Use tmp_path for file path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.060299473,
+    "prompt_tokens": 1280,
+    "prompt_time": 0.124603667,
+    "completion_tokens": 696,
+    "completion_time": 0.790561282,
+    "total_tokens": 1976,
+    "total_time": 0.915164949,
+    "completion_tokens_details": {
+      "reasoning_tokens": 19
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7seg8j1ec8bpp0grrc0w85k",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom semantic_release.helpers import parse_git_url, ParsedGitUrl\n\ndef test_parse_http_and_https_urls():\n    # Normal HTTP/HTTPS URLs should be parsed correctly\n    url = \"https://github.com/owner/repo.git\"\n    result = parse_git_url(url)\n    assert isinstance(result, ParsedGitUrl)\n    assert result.scheme == \"https\"\n    assert result.netloc == \"github.com\"\n    assert result.namespace == \"owner\"\n    assert result.repo_name == \"repo\"\n\n    # URL without .git suffix should still work\n    url_no_git = \"http://git.mycompany.com/username/myproject\"\n    result_no_git = parse_git_url(url_no_git)\n    assert result_no_git.scheme == \"http\"\n    assert result_no_git.netloc == \"git.mycompany.com\"\n    assert result_no_git.namespace == \"username\"\n    assert result_no_git.repo_name == \"myproject\"\n\ndef test_parse_file_and_windows_paths(tmp_path: Path):\n    # Posix file path\n    posix_path = tmp_path / \"repo.git\"\n    posix_path.touch()\n    posix_url = f\"file://{posix_path}\"\n    result_posix = parse_git_url(posix_url)\n    assert result_posix.scheme == \"file\"\n    assert result_posix.netloc == \"\"\n    assert result_posix.namespace == \"\"\n    assert result_posix.repo_name == \"repo\"\n\n    # Windows file path (simulate by using a drive letter)\n    if sys.platform.startswith(\"win\"):\n        win_path = Path(f\"C:/Users/Dev/{posix_path.name}\")\n        win_path.touch()\n        win_url = f\"file:///{win_path}\"\n        result_win = parse_git_url(win_url)\n        assert result_win.scheme == \"file\"\n        assert result_win.netloc == \"\"\n        assert result_win.namespace == \"\"\n        assert result_win.repo_name == \"repo\"\n    else:\n        # On non‑Windows platforms we skip the Windows‑specific check\n        pytest.skip(\"Windows path test only applicable on Windows\")\n\ndef test_parse_invalid_and_boundary_urls():\n    # URL missing scheme should raise ValueError\n    with pytest.raises(ValueError, match=\"Cannot parse\"):\n        parse_git_url(\"git@github.com:owner/repo.git\")\n\n    # URL with empty netloc for non‑file scheme should raise ValueError\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"ssh:///owner/repo.git\")\n\n    # URL with missing namespace should raise ValueError\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"https://github.com/.git\")\n\n    # URL with missing repo name should raise ValueError\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"https://github.com/owner/\")\n\n    # URL with unsupported scheme should still parse but not raise\n    # (the function does not validate scheme, only checks presence)\n    result = parse_git_url(\"custom://host/owner/repo.git\")\n    assert result.scheme == \"custom\"\n    assert result.netloc == \"host\"\n    assert result.namespace == \"owner\"\n    assert result.repo_name == \"repo\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.291358050017152
+}

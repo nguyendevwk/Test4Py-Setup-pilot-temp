@@ -1,0 +1,52 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_parse_google_style_docstring _______________________
+
+    def test_parse_google_style_docstring():
+        """Verify that a Google style docstring is parsed correctly."""
+        doc = """
+        Short summary.
+    
+        Args:
+            x (int): The first number.
+            y (int): The second number.
+    
+        Returns:
+            int: The sum of x and y.
+        """
+        result = parse(doc, style=DocstringStyle.GOOGLE)
+        assert isinstance(result, Docstring)
+        assert result.short_description == "Short summary."
+        assert len(result.params) == 2
+        assert result.params[0].arg_name == "x"
+        assert result.params[0].type_name == "int"
+        assert result.params[0].description == "The first number."
+>       assert result.returns[0].type_name == "int"
+E       TypeError: 'DocstringReturns' object is not subscriptable
+
+test_generated.py:24: TypeError
+__________________ test_parse_empty_string_returns_docstring ___________________
+
+    def test_parse_empty_string_returns_docstring():
+        """Parsing an empty string should return an empty Docstring object."""
+        result = parse("", style=DocstringStyle.AUTO)
+        assert isinstance(result, Docstring)
+>       assert result.short_description == ""
+E       AssertionError: assert None == ''
+E        +  where None = <docstring_parser.common.Docstring object at 0x7f7dba679ea0>.short_description
+
+test_generated.py:31: AssertionError
+___________________ test_parse_unparsable_raises_parse_error ___________________
+
+    def test_parse_unparsable_raises_parse_error():
+        """A string that cannot be parsed by any style should raise ParseError."""
+        bad_doc = "<<< not a docstring >>>"
+>       with pytest.raises(ParseError):
+E       Failed: DID NOT RAISE ParseError
+
+test_generated.py:39: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_google_style_docstring - TypeError: 'Doc...
+FAILED test_generated.py::test_parse_empty_string_returns_docstring - Asserti...
+FAILED test_generated.py::test_parse_unparsable_raises_parse_error - Failed: ...
+3 failed in 0.13s

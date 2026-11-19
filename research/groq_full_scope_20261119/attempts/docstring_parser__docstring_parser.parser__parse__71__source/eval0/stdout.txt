@@ -1,0 +1,67 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________________ test_parse_google_style ____________________________
+
+    def test_parse_google_style():
+        """Verify that a Google‑style docstring is parsed correctly."""
+        google_doc = """
+        This function does something.
+    
+        Args:
+            x (int): The first number.
+            y (int): The second number.
+    
+        Returns:
+            int: The sum of x and y.
+        """
+        result: Docstring = parse(google_doc, style=DocstringStyle.GOOGLE)
+    
+        # Basic structure
+        assert result.description.strip() == "This function does something."
+        assert len(result.params) == 2
+>       assert len(result.returns) == 1
+E       TypeError: object of type 'DocstringReturns' has no len()
+
+test_generated.py:23: TypeError
+____________________ test_parse_auto_fallback_to_best_match ____________________
+
+    def test_parse_auto_fallback_to_best_match():
+        """When style is AUTO, the parser should return the best match."""
+        ambiguous_doc = """
+        This function does something.
+    
+        Parameters
+        ----------
+        x : int
+            The first number.
+        y : int
+            The second number.
+    
+        Returns
+        -------
+        int
+            The sum of x and y.
+        """
+        result: Docstring = parse(ambiguous_doc, style=DocstringStyle.AUTO)
+    
+        # The NumPy style parser should match best
+        assert result.description.strip() == "This function does something."
+        assert len(result.params) == 2
+>       assert len(result.returns) == 1
+E       TypeError: object of type 'DocstringReturns' has no len()
+
+test_generated.py:62: TypeError
+_______________________ test_parse_invalid_style_raises ________________________
+
+    def test_parse_invalid_style_raises():
+        """Parsing with an unsupported style should raise ParseError."""
+        bad_doc = "Just a plain string with no docstring structure."
+>       with pytest.raises(ParseError):
+E       Failed: DID NOT RAISE ParseError
+
+test_generated.py:71: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_google_style - TypeError: object of type...
+FAILED test_generated.py::test_parse_auto_fallback_to_best_match - TypeError:...
+FAILED test_generated.py::test_parse_invalid_style_raises - Failed: DID NOT R...
+3 failed in 0.15s

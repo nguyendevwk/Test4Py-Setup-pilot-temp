@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-1b53af93-ac04-4d77-967b-897710442afb",
+  "object": "chat.completion",
+  "created": 1795079610,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport time\nimport pytest\nfrom httpie.utils import get_expired_cookies\n\ndef test_get_expired_cookies_returns_only_expired(tmp_path):\n    # Create a cookie string with two cookies:\n    # - one expired (expires 1 second ago)\n    # - one still valid (expires 10 seconds in the future)\n    now = time.time()\n    expired_cookie = f\"sessionid=abc123; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(now - 1))}\"\n    valid_cookie = f\"userid=42; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(now + 10))}\"\n    cookie_header = f\"{expired_cookie}, {valid_cookie}\"\n\n    result = get_expired_cookies(cookie_header, now=now)\n\n    # Only the expired cookie should be returned\n    assert len(result) == 1\n    assert result[0][\"name\"] == \"sessionid\"\n    assert result[0][\"path\"] == \"/\"  # default path\n\ndef test_get_expired_cookies_with_max_age(tmp_path):\n    # Cookie with max-age that should be translated to expires\n    now = time.time()\n    cookie_header = \"token=xyz; Max-Age=5\"\n    # The cookie should be considered expired after 5 seconds\n    result_before = get_expired_cookies(cookie_header, now=now)\n    assert result_before == []  # not yet expired\n\n    # After 6 seconds, it should be expired\n    result_after = get_expired_cookies(cookie_header, now=now + 6)\n    assert len(result_after) == 1\n    assert result_after[0][\"name\"] == \"token\"\n\ndef test_get_expired_cookies_handles_missing_expires_and_max_age(tmp_path):\n    # Cookie without Expires or Max-Age should never be considered expired\n    now = time.time()\n    cookie_header = \"foo=bar; Path=/; HttpOnly\"\n    result = get_expired_cookies(cookie_header, now=now)\n    assert result == []  # no expiration info, so not expired\n```",
+        "reasoning": "We need 3 test functions for get_expired_cookies. Test normal: cookie with expires past. boundary: expires exactly now? error: invalid format? maybe cookie without expires? But function returns only expired. test that non-expired not returned. Use tmp_path? not needed. Use time. Use now param. Let's craft."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005396321,
+    "prompt_tokens": 721,
+    "prompt_time": 0.054142984,
+    "completion_tokens": 541,
+    "completion_time": 1.047857992,
+    "total_tokens": 1262,
+    "total_time": 1.102000976,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 69
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sha6yyed19qnhh6gnzgwpy",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport time\nimport pytest\nfrom httpie.utils import get_expired_cookies\n\ndef test_get_expired_cookies_returns_only_expired(tmp_path):\n    # Create a cookie string with two cookies:\n    # - one expired (expires 1 second ago)\n    # - one still valid (expires 10 seconds in the future)\n    now = time.time()\n    expired_cookie = f\"sessionid=abc123; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(now - 1))}\"\n    valid_cookie = f\"userid=42; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(now + 10))}\"\n    cookie_header = f\"{expired_cookie}, {valid_cookie}\"\n\n    result = get_expired_cookies(cookie_header, now=now)\n\n    # Only the expired cookie should be returned\n    assert len(result) == 1\n    assert result[0][\"name\"] == \"sessionid\"\n    assert result[0][\"path\"] == \"/\"  # default path\n\ndef test_get_expired_cookies_with_max_age(tmp_path):\n    # Cookie with max-age that should be translated to expires\n    now = time.time()\n    cookie_header = \"token=xyz; Max-Age=5\"\n    # The cookie should be considered expired after 5 seconds\n    result_before = get_expired_cookies(cookie_header, now=now)\n    assert result_before == []  # not yet expired\n\n    # After 6 seconds, it should be expired\n    result_after = get_expired_cookies(cookie_header, now=now + 6)\n    assert len(result_after) == 1\n    assert result_after[0][\"name\"] == \"token\"\n\ndef test_get_expired_cookies_handles_missing_expires_and_max_age(tmp_path):\n    # Cookie without Expires or Max-Age should never be considered expired\n    now = time.time()\n    cookie_header = \"foo=bar; Path=/; HttpOnly\"\n    result = get_expired_cookies(cookie_header, now=now)\n    assert result == []  # no expiration info, so not expired\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "760f7f829a934e8b94b70fde7dd0a791",
+  "_api_plus_pacing_seconds": 1.8451864689704962
+}

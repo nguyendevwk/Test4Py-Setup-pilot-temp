@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a96691cd-77f2-4367-babe-917aa0af0ac0",
+  "object": "chat.completion",
+  "created": 1795076334,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport tempfile\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import normalize_path\n\ndef test_normalize_with_home_and_env(tmp_path: Path, monkeypatch):\n    # Setup environment variable and home directory\n    monkeypatch.setenv(\"TEST_VAR\", \"value\")\n    user_home = tmp_path / \"home_user\"\n    user_home.mkdir()\n    monkeypatch.setattr(Path, \"home\", lambda: user_home)\n\n    # Create a path that uses ~ and an env var\n    raw_path = \"~/folder/${TEST_VAR}/file.txt\"\n    # Normalize\n    result = normalize_path(raw_path)\n\n    # Expected path: home_user/folder/value/file.txt\n    expected = user_home / \"folder\" / \"value\" / \"file.txt\"\n    assert result == expected\n    assert isinstance(result, Path)\n\ndef test_normalize_relative_path(tmp_path: Path, monkeypatch):\n    # Change current working directory to a known location\n    cwd = tmp_path / \"cwd\"\n    cwd.mkdir()\n    monkeypatch.chdir(cwd)\n\n    # Relative path with redundant separators and up-level references\n    raw_path = \"subdir//file.txt/../another.txt\"\n    result = normalize_path(raw_path)\n\n    # Expected: cwd/subdir/another.txt\n    expected = cwd / \"subdir\" / \"another.txt\"\n    assert result == expected\n    assert isinstance(result, Path)\n\ndef test_normalize_bytes_input(tmp_path: Path, monkeypatch):\n    # Create a file in a temporary directory\n    file_path = tmp_path / \"sample.txt\"\n    file_path.write_text(\"content\")\n\n    # Use bytes input\n    raw_bytes = str(file_path).encode(sys.getfilesystemencoding())\n    result = normalize_path(raw_bytes)\n\n    # Result should be the same Path object as file_path\n    assert result == file_path\n    assert isinstance(result, Path)\n```",
+        "reasoning": "We need three tests. Test normal path with ~ and env var. Test relative path. Test error? maybe passing bytes? but function accepts bytes. test that bytes decoded. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048116477,
+    "prompt_tokens": 845,
+    "prompt_time": 0.059211673,
+    "completion_tokens": 445,
+    "completion_time": 0.473588693,
+    "total_tokens": 1290,
+    "total_time": 0.532800366,
+    "completion_tokens_details": {
+      "reasoning_tokens": 40
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se68j3eq1tvvp76992w4ay",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport tempfile\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import normalize_path\n\ndef test_normalize_with_home_and_env(tmp_path: Path, monkeypatch):\n    # Setup environment variable and home directory\n    monkeypatch.setenv(\"TEST_VAR\", \"value\")\n    user_home = tmp_path / \"home_user\"\n    user_home.mkdir()\n    monkeypatch.setattr(Path, \"home\", lambda: user_home)\n\n    # Create a path that uses ~ and an env var\n    raw_path = \"~/folder/${TEST_VAR}/file.txt\"\n    # Normalize\n    result = normalize_path(raw_path)\n\n    # Expected path: home_user/folder/value/file.txt\n    expected = user_home / \"folder\" / \"value\" / \"file.txt\"\n    assert result == expected\n    assert isinstance(result, Path)\n\ndef test_normalize_relative_path(tmp_path: Path, monkeypatch):\n    # Change current working directory to a known location\n    cwd = tmp_path / \"cwd\"\n    cwd.mkdir()\n    monkeypatch.chdir(cwd)\n\n    # Relative path with redundant separators and up-level references\n    raw_path = \"subdir//file.txt/../another.txt\"\n    result = normalize_path(raw_path)\n\n    # Expected: cwd/subdir/another.txt\n    expected = cwd / \"subdir\" / \"another.txt\"\n    assert result == expected\n    assert isinstance(result, Path)\n\ndef test_normalize_bytes_input(tmp_path: Path, monkeypatch):\n    # Create a file in a temporary directory\n    file_path = tmp_path / \"sample.txt\"\n    file_path.write_text(\"content\")\n\n    # Use bytes input\n    raw_bytes = str(file_path).encode(sys.getfilesystemencoding())\n    result = normalize_path(raw_bytes)\n\n    # Result should be the same Path object as file_path\n    assert result == file_path\n    assert isinstance(result, Path)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8709667709772475
+}

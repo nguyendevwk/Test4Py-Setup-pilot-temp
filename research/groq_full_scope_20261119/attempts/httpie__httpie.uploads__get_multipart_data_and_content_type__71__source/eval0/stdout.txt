@@ -1,0 +1,54 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_normal_multipart_with_file ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.uploads__get_multipart_data_and_content_type__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_normal_multipart_with_fil0')
+
+    def test_normal_multipart_with_file(tmp_path):
+        # Create a temporary file to upload
+        file_path = tmp_path / "test.txt"
+        file_path.write_text("hello world")
+        # Prepare multipart data: a text field and a file field
+        data = {
+            "field1": "value1",
+            "file1": ("test.txt", open(file_path, "rb"), "text/plain"),
+        }
+        encoder, content_type = get_multipart_data_and_content_type(data)
+        # The encoder should be a MultipartEncoder instance
+>       assert hasattr(encoder, "fields") and encoder.fields == data
+E       AssertionError: assert (True and dict_items([(...ext/plain'))]) == {'field1': 'v...'text/plain')}
+E        +  where True = hasattr(<MultipartEncoder: dict_items([('field1', 'value1'), ('file1', ('test.txt', <_io.BufferedReader name='/home/heurix/Doc...tent_type__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_normal_multipart_with_fil0/test.txt'>, 'text/plain'))])>, 'fields')
+E         
+E         Use -v to get more diff)
+
+test_generated.py:17: AssertionError
+_____________________ test_invalid_input_raises_type_error _____________________
+
+    def test_invalid_input_raises_type_error():
+        # Passing a non-dict (e.g., a list) should raise a TypeError
+        with pytest.raises(TypeError):
+>           get_multipart_data_and_content_type(["not", "a", "dict"])
+
+test_generated.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = ['not', 'a', 'dict'], boundary = None, content_type = None
+
+    def get_multipart_data_and_content_type(
+        data: MultipartRequestDataDict,
+        boundary: str = None,
+        content_type: str = None,
+    ) -> Tuple['MultipartEncoder', str]:
+        from requests_toolbelt import MultipartEncoder
+    
+        encoder = MultipartEncoder(
+>           fields=data.items(),
+            boundary=boundary,
+        )
+E       AttributeError: 'list' object has no attribute 'items'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/uploads.py:238: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normal_multipart_with_file - AssertionError: a...
+FAILED test_generated.py::test_invalid_input_raises_type_error - AttributeErr...
+2 failed, 1 passed in 0.36s

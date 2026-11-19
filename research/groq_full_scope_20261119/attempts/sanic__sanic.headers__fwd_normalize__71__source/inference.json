@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-123b5db3-cfff-4b65-8c8c-43ccbf9e21a0",
+  "object": "chat.completion",
+  "created": 1795079335,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import fwd_normalize\nfrom sanic.exceptions import InvalidHeader\n\n# Helper to simulate the address normalization function used internally\n# (the real implementation is not exposed, but we can infer its behavior\n# from the tests that exercise fwd_normalize).\ndef _normalize_address(value: str) -> str:\n    # The real function likely strips quotes and resolves IPv6 brackets.\n    # For testing purposes, we just return the value unchanged.\n    return value\n\ndef test_fwd_normalize_basic_types(tmp_path):\n    \"\"\"Test normal conversion of each supported key type.\"\"\"\n    input_data = [\n        (\"by\", \"192.0.2.1\"),\n        (\"for\", \"2001:db8::1\"),\n        (\"host\", \"Example.COM\"),\n        (\"proto\", \"HTTPS\"),\n        (\"port\", \"443\"),\n        (\"path\", \"/some%20path\"),\n        (\"custom\", \"value\"),\n    ]\n    result = fwd_normalize(input_data)\n    assert result[\"by\"] == _normalize_address(\"192.0.2.1\")\n    assert result[\"for\"] == _normalize_address(\"2001:db8::1\")\n    assert result[\"host\"] == \"example.com\"\n    assert result[\"proto\"] == \"https\"\n    assert result[\"port\"] == 443\n    assert result[\"path\"] == \"/some path\"\n    assert result[\"custom\"] == \"value\"\n\ndef test_fwd_normalize_boundary_and_none(tmp_path):\n    \"\"\"Test handling of boundary values and None inputs.\"\"\"\n    input_data = [\n        (\"port\", \"0\"),          # lowest valid port\n        (\"port\", \"65535\"),      # highest valid port\n        (\"port\", None),         # None should be ignored\n        (\"path\", \"\"),           # empty path should be unquoted to empty\n        (\"host\", \"\"),           # empty host should be lowercased to empty\n        (\"proto\", \"\"),          # empty proto should be lowercased to empty\n    ]\n    result = fwd_normalize(input_data)\n    assert result[\"port\"] == 65535  # last valid port wins\n    assert result[\"path\"] == \"\"\n    assert result[\"host\"] == \"\"\n    assert result[\"proto\"] == \"\"\n\ndef test_fwd_normalize_invalid_values(tmp_path):\n    \"\"\"Test that invalid values are ignored and do not raise.\"\"\"\n    input_data = [\n        (\"port\", \"not_a_number\"),   # ValueError on int conversion\n        (\"by\", None),               # None value should be ignored\n        (\"for\", \"invalid_address\"), # Assume address normalization may raise\n        (\"unknown\", \"value\"),       # Unknown key should be preserved\n    ]\n    result = fwd_normalize(input_data)\n    # Invalid port should be omitted\n    assert \"port\" not in result\n    # None value should be omitted\n    assert \"by\" not in result\n    # Unknown key should be preserved\n    assert result[\"unknown\"] == \"value\"\n    # For key with invalid address, we expect it to be omitted\n    assert \"for\" not in result\n```",
+        "reasoning": "Need to test fwd_normalize. Provide OptionsIterable type? Not defined. But we can pass list of tuples. Test normal, boundary, error. Use tmp_path? Not needed. Provide three test functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005034653,
+    "prompt_tokens": 443,
+    "prompt_time": 0.026355525,
+    "completion_tokens": 701,
+    "completion_time": 0.729112358,
+    "total_tokens": 1144,
+    "total_time": 0.755467883,
+    "completion_tokens_details": {
+      "reasoning_tokens": 44
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh1v20edp8qtem02fsg546",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import fwd_normalize\nfrom sanic.exceptions import InvalidHeader\n\n# Helper to simulate the address normalization function used internally\n# (the real implementation is not exposed, but we can infer its behavior\n# from the tests that exercise fwd_normalize).\ndef _normalize_address(value: str) -> str:\n    # The real function likely strips quotes and resolves IPv6 brackets.\n    # For testing purposes, we just return the value unchanged.\n    return value\n\ndef test_fwd_normalize_basic_types(tmp_path):\n    \"\"\"Test normal conversion of each supported key type.\"\"\"\n    input_data = [\n        (\"by\", \"192.0.2.1\"),\n        (\"for\", \"2001:db8::1\"),\n        (\"host\", \"Example.COM\"),\n        (\"proto\", \"HTTPS\"),\n        (\"port\", \"443\"),\n        (\"path\", \"/some%20path\"),\n        (\"custom\", \"value\"),\n    ]\n    result = fwd_normalize(input_data)\n    assert result[\"by\"] == _normalize_address(\"192.0.2.1\")\n    assert result[\"for\"] == _normalize_address(\"2001:db8::1\")\n    assert result[\"host\"] == \"example.com\"\n    assert result[\"proto\"] == \"https\"\n    assert result[\"port\"] == 443\n    assert result[\"path\"] == \"/some path\"\n    assert result[\"custom\"] == \"value\"\n\ndef test_fwd_normalize_boundary_and_none(tmp_path):\n    \"\"\"Test handling of boundary values and None inputs.\"\"\"\n    input_data = [\n        (\"port\", \"0\"),          # lowest valid port\n        (\"port\", \"65535\"),      # highest valid port\n        (\"port\", None),         # None should be ignored\n        (\"path\", \"\"),           # empty path should be unquoted to empty\n        (\"host\", \"\"),           # empty host should be lowercased to empty\n        (\"proto\", \"\"),          # empty proto should be lowercased to empty\n    ]\n    result = fwd_normalize(input_data)\n    assert result[\"port\"] == 65535  # last valid port wins\n    assert result[\"path\"] == \"\"\n    assert result[\"host\"] == \"\"\n    assert result[\"proto\"] == \"\"\n\ndef test_fwd_normalize_invalid_values(tmp_path):\n    \"\"\"Test that invalid values are ignored and do not raise.\"\"\"\n    input_data = [\n        (\"port\", \"not_a_number\"),   # ValueError on int conversion\n        (\"by\", None),               # None value should be ignored\n        (\"for\", \"invalid_address\"), # Assume address normalization may raise\n        (\"unknown\", \"value\"),       # Unknown key should be preserved\n    ]\n    result = fwd_normalize(input_data)\n    # Invalid port should be omitted\n    assert \"port\" not in result\n    # None value should be omitted\n    assert \"by\" not in result\n    # Unknown key should be preserved\n    assert result[\"unknown\"] == \"value\"\n    # For key with invalid address, we expect it to be omitted\n    assert \"for\" not in result\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2001234790077433
+}

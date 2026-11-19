@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-192d6ac2-1925-4ebe-9ff2-86d39689e2f6",
+  "object": "chat.completion",
+  "created": 1795079649,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport argparse\nimport json\nimport os\nimport tempfile\nimport pytest\nfrom httpie.client import make_request_kwargs\nfrom httpie.context import Environment\nfrom httpie.cli.dicts import HTTPHeadersDict\n\n# Helper to create a minimal Environment\ndef create_env(tmp_path):\n    env = Environment()\n    env.tmp_path = tmp_path\n    return env\n\ndef test_json_serialization_and_headers(tmp_path):\n    env = create_env(tmp_path)\n    args = argparse.Namespace(\n        method=\"POST\",\n        url=\"http://example.com/api\",\n        data={\"key\": \"value\"},\n        json=True,\n        form=False,\n        files=None,\n        multipart=False,\n        boundary=None,\n        headers=HTTPHeadersDict(),\n        offline=False,\n        chunked=False,\n        auth=None,\n        params=HTTPHeadersDict(),\n        multipart_data=None,\n    )\n    kwargs = make_request_kwargs(env, args)\n    # Body should be JSON string\n    assert kwargs[\"data\"] == json.dumps({\"key\": \"value\"}).encode(\"utf-8\")\n    # Method lowercased\n    assert kwargs[\"method\"] == \"post\"\n    # URL unchanged\n    assert kwargs[\"url\"] == \"http://example.com/api\"\n    # No Content-Type header added by default\n    assert \"Content-Type\" not in kwargs[\"headers\"]\n\ndef test_multipart_with_file(tmp_path):\n    env = create_env(tmp_path)\n    # Create a temporary file to upload\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"content\")\n    args = argparse.Namespace(\n        method=\"PUT\",\n        url=\"http://example.com/upload\",\n        data=None,\n        json=False,\n        form=False,\n        files=[str(file_path)],\n        multipart=True,\n        boundary=\"myboundary\",\n        headers=HTTPHeadersDict(),\n        offline=False,\n        chunked=False,\n        auth=None,\n        params=HTTPHeadersDict(),\n        multipart_data=None,\n    )\n    kwargs = make_request_kwargs(env, args)\n    # Body should be multipart encoded\n    body = kwargs[\"data\"]\n    assert isinstance(body, bytes)\n    assert b\"Content-Disposition: form-data; name=\\\"file\\\"; filename=\\\"test.txt\\\"\" in body\n    # Content-Type header should be set\n    assert kwargs[\"headers\"][\"Content-Type\"].startswith(\"multipart/form-data; boundary=myboundary\")\n\ndef test_form_and_json_precedence(tmp_path):\n    env = create_env(tmp_path)\n    args = argparse.Namespace(\n        method=\"POST\",\n        url=\"http://example.com/form\",\n        data={\"a\": \"b\"},\n        json=False,\n        form=True,\n        files=None,\n        multipart=False,\n        boundary=None,\n        headers=HTTPHeadersDict(),\n        offline=False,\n        chunked=False,\n        auth=None,\n        params=HTTPHeadersDict(),\n        multipart_data=None,\n    )\n    kwargs = make_request_kwargs(env, args)\n    # When form=True, data should not be JSON serialized\n    assert kwargs[\"data\"] == b\"a=b\"\n    # No JSON header added\n    assert \"Content-Type\" not in kwargs[\"headers\"]\n```",
+        "reasoning": "Need tests for make_request_kwargs. Use tmp_path for any file. We'll create dummy Environment minimal. Use simple args via argparse.Namespace. Test normal JSON serialization, headers merging, multipart. Use real functions. Let's craft three tests: 1) JSON data dict with args.json True. 2) Multipart with files. 3) Error: data dict with form True should not json. Use assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.006521368,
+    "prompt_tokens": 777,
+    "prompt_time": 0.040389857,
+    "completion_tokens": 730,
+    "completion_time": 0.766420929,
+    "total_tokens": 1507,
+    "total_time": 0.806810786,
+    "completion_tokens_details": {
+      "reasoning_tokens": 82
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7shbddaebksq2wvn80syhth",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport argparse\nimport json\nimport os\nimport tempfile\nimport pytest\nfrom httpie.client import make_request_kwargs\nfrom httpie.context import Environment\nfrom httpie.cli.dicts import HTTPHeadersDict\n\n# Helper to create a minimal Environment\ndef create_env(tmp_path):\n    env = Environment()\n    env.tmp_path = tmp_path\n    return env\n\ndef test_json_serialization_and_headers(tmp_path):\n    env = create_env(tmp_path)\n    args = argparse.Namespace(\n        method=\"POST\",\n        url=\"http://example.com/api\",\n        data={\"key\": \"value\"},\n        json=True,\n        form=False,\n        files=None,\n        multipart=False,\n        boundary=None,\n        headers=HTTPHeadersDict(),\n        offline=False,\n        chunked=False,\n        auth=None,\n        params=HTTPHeadersDict(),\n        multipart_data=None,\n    )\n    kwargs = make_request_kwargs(env, args)\n    # Body should be JSON string\n    assert kwargs[\"data\"] == json.dumps({\"key\": \"value\"}).encode(\"utf-8\")\n    # Method lowercased\n    assert kwargs[\"method\"] == \"post\"\n    # URL unchanged\n    assert kwargs[\"url\"] == \"http://example.com/api\"\n    # No Content-Type header added by default\n    assert \"Content-Type\" not in kwargs[\"headers\"]\n\ndef test_multipart_with_file(tmp_path):\n    env = create_env(tmp_path)\n    # Create a temporary file to upload\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"content\")\n    args = argparse.Namespace(\n        method=\"PUT\",\n        url=\"http://example.com/upload\",\n        data=None,\n        json=False,\n        form=False,\n        files=[str(file_path)],\n        multipart=True,\n        boundary=\"myboundary\",\n        headers=HTTPHeadersDict(),\n        offline=False,\n        chunked=False,\n        auth=None,\n        params=HTTPHeadersDict(),\n        multipart_data=None,\n    )\n    kwargs = make_request_kwargs(env, args)\n    # Body should be multipart encoded\n    body = kwargs[\"data\"]\n    assert isinstance(body, bytes)\n    assert b\"Content-Disposition: form-data; name=\\\"file\\\"; filename=\\\"test.txt\\\"\" in body\n    # Content-Type header should be set\n    assert kwargs[\"headers\"][\"Content-Type\"].startswith(\"multipart/form-data; boundary=myboundary\")\n\ndef test_form_and_json_precedence(tmp_path):\n    env = create_env(tmp_path)\n    args = argparse.Namespace(\n        method=\"POST\",\n        url=\"http://example.com/form\",\n        data={\"a\": \"b\"},\n        json=False,\n        form=True,\n        files=None,\n        multipart=False,\n        boundary=None,\n        headers=HTTPHeadersDict(),\n        offline=False,\n        chunked=False,\n        auth=None,\n        params=HTTPHeadersDict(),\n        multipart_data=None,\n    )\n    kwargs = make_request_kwargs(env, args)\n    # When form=True, data should not be JSON serialized\n    assert kwargs[\"data\"] == b\"a=b\"\n    # No JSON header added\n    assert \"Content-Type\" not in kwargs[\"headers\"]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "d02f34fd222a495b92f3be1b80018a4b",
+  "_api_plus_pacing_seconds": 1.7605349970399402
+}

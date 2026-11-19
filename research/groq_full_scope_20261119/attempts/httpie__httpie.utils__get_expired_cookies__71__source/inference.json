@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-d9188395-682b-441c-b36d-fa4bed416b09",
+  "object": "chat.completion",
+  "created": 1795079608,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport time\nimport pytest\nfrom httpie.utils import get_expired_cookies\n\n\ndef test_get_expired_cookies_with_expired_and_nonexpired(tmp_path):\n    # Create a cookie string with two cookies: one expired, one not.\n    now = time.time()\n    expired_time = now - 10  # 10 seconds ago\n    future_time = now + 1000  # 1000 seconds in the future\n\n    # Cookie format: name=value; Expires=...\n    cookie_str = (\n        f\"sessionid=abc123; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(expired_time))}; \"\n        f\"path=/; \"\n        f\"userid=42; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(future_time))}; \"\n        f\"path=/profile\"\n    )\n\n    expired = get_expired_cookies(cookie_str, now=now)\n\n    # Only the expired cookie should be returned\n    assert len(expired) == 1\n    assert expired[0]['name'] == 'sessionid'\n    assert expired[0]['path'] == '/'\n\n\ndef test_get_expired_cookies_boundary_expiration(tmp_path):\n    # Cookie expires exactly at the current time should be considered expired.\n    now = time.time()\n    expire_at_now = now\n\n    cookie_str = (\n        f\"token=xyz; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(expire_at_now))}; \"\n        f\"path=/\"\n    )\n\n    expired = get_expired_cookies(cookie_str, now=now)\n\n    assert len(expired) == 1\n    assert expired[0]['name'] == 'token'\n    assert expired[0]['path'] == '/'\n\n\ndef test_get_expired_cookies_no_expires_and_empty_input(tmp_path):\n    # Cookie without Expires attribute should never be considered expired.\n    cookie_str = \"user=alice; path=/dashboard\"\n    expired = get_expired_cookies(cookie_str, now=time.time())\n    assert expired == []\n\n    # Empty input should return an empty list without error.\n    assert get_expired_cookies(\"\", now=time.time()) == []\n```",
+        "reasoning": "Need tests for get_expired_cookies. Use tmp_path? Not needed. Test normal: cookie with expires past. Boundary: expires equal now? is_expired returns expires <= now, so equal counts expired. Error: invalid cookie string? parse_ns_headers may raise? Let's test that passing empty string returns empty list. Also test that cookie with no expires not expired. Use time.time. Use monkeypatch to set now. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004645176,
+    "prompt_tokens": 500,
+    "prompt_time": 0.025742465,
+    "completion_tokens": 588,
+    "completion_time": 0.639585629,
+    "total_tokens": 1088,
+    "total_time": 0.665328094,
+    "completion_tokens_details": {
+      "reasoning_tokens": 91
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sha5mfe95taq2kt9djwx9d",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport time\nimport pytest\nfrom httpie.utils import get_expired_cookies\n\n\ndef test_get_expired_cookies_with_expired_and_nonexpired(tmp_path):\n    # Create a cookie string with two cookies: one expired, one not.\n    now = time.time()\n    expired_time = now - 10  # 10 seconds ago\n    future_time = now + 1000  # 1000 seconds in the future\n\n    # Cookie format: name=value; Expires=...\n    cookie_str = (\n        f\"sessionid=abc123; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(expired_time))}; \"\n        f\"path=/; \"\n        f\"userid=42; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(future_time))}; \"\n        f\"path=/profile\"\n    )\n\n    expired = get_expired_cookies(cookie_str, now=now)\n\n    # Only the expired cookie should be returned\n    assert len(expired) == 1\n    assert expired[0]['name'] == 'sessionid'\n    assert expired[0]['path'] == '/'\n\n\ndef test_get_expired_cookies_boundary_expiration(tmp_path):\n    # Cookie expires exactly at the current time should be considered expired.\n    now = time.time()\n    expire_at_now = now\n\n    cookie_str = (\n        f\"token=xyz; Expires={time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(expire_at_now))}; \"\n        f\"path=/\"\n    )\n\n    expired = get_expired_cookies(cookie_str, now=now)\n\n    assert len(expired) == 1\n    assert expired[0]['name'] == 'token'\n    assert expired[0]['path'] == '/'\n\n\ndef test_get_expired_cookies_no_expires_and_empty_input(tmp_path):\n    # Cookie without Expires attribute should never be considered expired.\n    cookie_str = \"user=alice; path=/dashboard\"\n    expired = get_expired_cookies(cookie_str, now=time.time())\n    assert expired == []\n\n    # Empty input should return an empty list without error.\n    assert get_expired_cookies(\"\", now=time.time()) == []\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "f957237dcb9c4d9599e883497924a1ab",
+  "_api_plus_pacing_seconds": 1.315773792041
+}

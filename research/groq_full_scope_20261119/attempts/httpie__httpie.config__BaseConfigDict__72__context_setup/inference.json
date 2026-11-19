@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-4594bfe4-20ea-4a88-b000-68277f58c784",
+  "object": "chat.completion",
+  "created": 1795079660,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport os\nimport pytest\nfrom pathlib import Path\nfrom httpie.config import BaseConfigDict, read_raw_config, ConfigFileError, __version__\n\nclass TestBaseConfigDict:\n    def test_save_and_load_roundtrip(self, tmp_path):\n        \"\"\"Verify that a config can be saved and loaded correctly.\"\"\"\n        cfg_path = tmp_path / \"config.json\"\n        cfg = BaseConfigDict(cfg_path)\n        cfg.update({\"foo\": \"bar\", \"number\": 42})\n        cfg.helpurl = \"https://example.com\"\n        cfg.about = \"Test config\"\n        cfg.save(bump_version=True)\n\n        # The file should exist and contain JSON\n        assert cfg_path.exists()\n        with cfg_path.open(encoding=\"utf-8\") as f:\n            data = json.load(f)\n        # Meta information must be present\n        assert \"__meta__\" in data\n        assert data[\"__meta__\"][\"httpie\"] == __version__\n        assert data[\"__meta__\"][\"help\"] == \"https://example.com\"\n        assert data[\"__meta__\"][\"about\"] == \"Test config\"\n        # Original keys preserved\n        assert data[\"foo\"] == \"bar\"\n        assert data[\"number\"] == 42\n\n        # Load into a new instance\n        new_cfg = BaseConfigDict(cfg_path)\n        new_cfg.load()\n        assert new_cfg[\"foo\"] == \"bar\"\n        assert new_cfg[\"number\"] == 42\n        assert new_cfg[\"__meta__\"][\"httpie\"] == __version__\n\n    def test_is_new_and_directory_creation(self, tmp_path):\n        \"\"\"Ensure that a new config reports as new and creates its directory.\"\"\"\n        subdir = tmp_path / \"nested\" / \"dir\"\n        cfg_path = subdir / \"config.json\"\n        cfg = BaseConfigDict(cfg_path)\n        # Before any file exists, is_new should be True\n        assert cfg.is_new()\n        # After saving, the directory should be created\n        cfg.update({\"key\": \"value\"})\n        cfg.save()\n        assert cfg_path.exists()\n        assert subdir.exists()\n        # Now is_new should be False\n        assert not cfg.is_new()\n\n    def test_load_invalid_json_raises(self, tmp_path):\n        \"\"\"Loading a file with malformed JSON should raise ConfigFileError.\"\"\"\n        cfg_path = tmp_path / \"bad.json\"\n        # Write invalid JSON\n        cfg_path.write_text(\"{invalid json}\", encoding=\"utf-8\")\n        # Attempt to load should raise\n        with pytest.raises(ConfigFileError) as excinfo:\n            read_raw_config(\"baseconfigdict\", cfg_path)\n        assert \"invalid baseconfigdict file\" in str(excinfo.value)\n```",
+        "reasoning": "Need three tests: normal load/save, boundary new file, error on invalid json. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004773569,
+    "prompt_tokens": 807,
+    "prompt_time": 0.043755124,
+    "completion_tokens": 591,
+    "completion_time": 0.626020628,
+    "total_tokens": 1398,
+    "total_time": 0.669775752,
+    "completion_tokens_details": {
+      "reasoning_tokens": 22
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7shbqzcecesqdage69tktb5",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport os\nimport pytest\nfrom pathlib import Path\nfrom httpie.config import BaseConfigDict, read_raw_config, ConfigFileError, __version__\n\nclass TestBaseConfigDict:\n    def test_save_and_load_roundtrip(self, tmp_path):\n        \"\"\"Verify that a config can be saved and loaded correctly.\"\"\"\n        cfg_path = tmp_path / \"config.json\"\n        cfg = BaseConfigDict(cfg_path)\n        cfg.update({\"foo\": \"bar\", \"number\": 42})\n        cfg.helpurl = \"https://example.com\"\n        cfg.about = \"Test config\"\n        cfg.save(bump_version=True)\n\n        # The file should exist and contain JSON\n        assert cfg_path.exists()\n        with cfg_path.open(encoding=\"utf-8\") as f:\n            data = json.load(f)\n        # Meta information must be present\n        assert \"__meta__\" in data\n        assert data[\"__meta__\"][\"httpie\"] == __version__\n        assert data[\"__meta__\"][\"help\"] == \"https://example.com\"\n        assert data[\"__meta__\"][\"about\"] == \"Test config\"\n        # Original keys preserved\n        assert data[\"foo\"] == \"bar\"\n        assert data[\"number\"] == 42\n\n        # Load into a new instance\n        new_cfg = BaseConfigDict(cfg_path)\n        new_cfg.load()\n        assert new_cfg[\"foo\"] == \"bar\"\n        assert new_cfg[\"number\"] == 42\n        assert new_cfg[\"__meta__\"][\"httpie\"] == __version__\n\n    def test_is_new_and_directory_creation(self, tmp_path):\n        \"\"\"Ensure that a new config reports as new and creates its directory.\"\"\"\n        subdir = tmp_path / \"nested\" / \"dir\"\n        cfg_path = subdir / \"config.json\"\n        cfg = BaseConfigDict(cfg_path)\n        # Before any file exists, is_new should be True\n        assert cfg.is_new()\n        # After saving, the directory should be created\n        cfg.update({\"key\": \"value\"})\n        cfg.save()\n        assert cfg_path.exists()\n        assert subdir.exists()\n        # Now is_new should be False\n        assert not cfg.is_new()\n\n    def test_load_invalid_json_raises(self, tmp_path):\n        \"\"\"Loading a file with malformed JSON should raise ConfigFileError.\"\"\"\n        cfg_path = tmp_path / \"bad.json\"\n        # Write invalid JSON\n        cfg_path.write_text(\"{invalid json}\", encoding=\"utf-8\")\n        # Attempt to load should raise\n        with pytest.raises(ConfigFileError) as excinfo:\n            read_raw_config(\"baseconfigdict\", cfg_path)\n        assert \"invalid baseconfigdict file\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "479d77c0bf764774972fff5c34f98bc0",
+  "_api_plus_pacing_seconds": 2.284416873997543
+}

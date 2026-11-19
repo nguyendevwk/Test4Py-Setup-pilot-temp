@@ -1,0 +1,75 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________________ test_sorting_of_headers ____________________________
+
+    def test_sorting_of_headers():
+        """Headers should be sorted alphabetically by name."""
+        formatter = HeadersFormatter(format_options={"headers": {"sort": True}})
+        raw = (
+            "HTTP/1.1 200 OK\r\n"
+            "z-Header: last\r\n"
+            "a-Header: first\r\n"
+            "m-Header: middle\r\n"
+        )
+        expected = (
+            "HTTP/1.1 200 OK\r\n"
+            "a-Header: first\r\n"
+            "m-Header: middle\r\n"
+            "z-Header: last\r\n"
+        )
+>       assert formatter.format_headers(raw) == expected
+E       AssertionError: assert 'HTTP/1.1 200...-Header: last' == 'HTTP/1.1 200...der: last\r\n'
+E         
+E         Skipping 55 identical leading characters in diff, use -v to show
+E         - eader: last
+E         ?            --
+E         + eader: last
+
+test_generated.py:20: AssertionError
+__________________ test_order_of_same_name_headers_preserved ___________________
+
+    def test_order_of_same_name_headers_preserved():
+        """Headers with the same name should keep their relative order."""
+        formatter = HeadersFormatter(format_options={"headers": {"sort": True}})
+        raw = (
+            "HTTP/1.1 200 OK\r\n"
+            "Set-Cookie: a=1\r\n"
+            "Set-Cookie: b=2\r\n"
+            "Set-Cookie: c=3\r\n"
+            "Content-Type: text/plain\r\n"
+        )
+        expected = (
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Type: text/plain\r\n"
+            "Set-Cookie: a=1\r\n"
+            "Set-Cookie: b=2\r\n"
+            "Set-Cookie: c=3\r\n"
+        )
+>       assert formatter.format_headers(raw) == expected
+E       AssertionError: assert 'HTTP/1.1 200...t-Cookie: c=3' == 'HTTP/1.1 200...okie: c=3\r\n'
+E         
+E         Skipping 81 identical leading characters in diff, use -v to show
+E         - Cookie: c=3
+E         ?            --
+E         + Cookie: c=3
+
+test_generated.py:40: AssertionError
+__________________ test_single_header_line_no_sorting_needed ___________________
+
+    def test_single_header_line_no_sorting_needed():
+        """If only the status line is present, the output should be unchanged."""
+        formatter = HeadersFormatter(format_options={"headers": {"sort": True}})
+        raw = "HTTP/1.1 204 No Content\r\n"
+>       assert formatter.format_headers(raw) == raw
+E       AssertionError: assert 'HTTP/1.1 204 No Content' == 'HTTP/1.1 204 No Content\r\n'
+E         
+E         - HTTP/1.1 204 No Content
+E         ?                        --
+E         + HTTP/1.1 204 No Content
+
+test_generated.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_sorting_of_headers - AssertionError: assert 'H...
+FAILED test_generated.py::test_order_of_same_name_headers_preserved - Asserti...
+FAILED test_generated.py::test_single_header_line_no_sorting_needed - Asserti...
+3 failed in 0.19s

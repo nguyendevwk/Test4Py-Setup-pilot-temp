@@ -1,0 +1,52 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_humanize_bytes_basic_units ________________________
+
+    def test_humanize_bytes_basic_units():
+        # Test that small values are represented in bytes and larger values in kB, MB, GB
+        assert humanize_bytes(1) == "1 B"
+        assert humanize_bytes(512) == "512.00 B"
+        assert humanize_bytes(1024) == "1.00 kB"
+        assert humanize_bytes(1024 * 123) == "123.00 kB"
+>       assert humanize_bytes(1024 * 12342) == "12.10 MB"
+E       AssertionError: assert '12.05 MB' == '12.10 MB'
+E         
+E         - 12.10 MB
+E         ?    -
+E         + 12.05 MB
+E         ?     +
+
+test_generated.py:10: AssertionError
+___________________ test_humanize_bytes_precision_and_suffix ___________________
+
+    def test_humanize_bytes_precision_and_suffix():
+        # Verify that the precision argument controls the number of decimal places
+        assert humanize_bytes(1024 * 123, precision=1) == "123.0 kB"
+        assert humanize_bytes(1024 * 123, precision=3) == "123.000 kB"
+        # Check that the suffix changes correctly at the boundary of 1 TB
+        assert humanize_bytes(1 << 40) == "1.00 TB"
+>       assert humanize_bytes((1 << 40) - 1) == "1023.99 GB"
+E       AssertionError: assert '1024.00 GB' == '1023.99 GB'
+E         
+E         - 1023.99 GB
+E         + 1024.00 GB
+
+test_generated.py:20: AssertionError
+____________________ test_humanize_bytes_negative_and_zero _____________________
+
+    def test_humanize_bytes_negative_and_zero():
+        # The function does not explicitly handle negative values; it should still return a string
+>       assert humanize_bytes(-1024) == "-1.00 kB"
+E       AssertionError: assert '-1024.00 B' == '-1.00 kB'
+E         
+E         - -1.00 kB
+E         ?       -
+E         + -1024.00 B
+E         ?   +++
+
+test_generated.py:24: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_humanize_bytes_basic_units - AssertionError: a...
+FAILED test_generated.py::test_humanize_bytes_precision_and_suffix - Assertio...
+FAILED test_generated.py::test_humanize_bytes_negative_and_zero - AssertionEr...
+3 failed in 0.38s

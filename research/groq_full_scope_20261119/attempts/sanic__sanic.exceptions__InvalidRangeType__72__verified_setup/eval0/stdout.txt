@@ -1,0 +1,65 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_invalid_range_type_with_content_range_and_headers ____________
+
+    def test_invalid_range_type_with_content_range_and_headers():
+        """Providing a Range and custom headers should store them on the instance."""
+>       rng = Range(0, 100)
+
+test_generated.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sanic.models.protocol_types.Range object at 0x7f30697c8580>
+args = (0, 100), kwargs = {}
+
+    def _no_init_or_replace_init(self, *args, **kwargs):
+        cls = type(self)
+    
+        if cls._is_protocol:
+>           raise TypeError('Protocols cannot be instantiated')
+E           TypeError: Protocols cannot be instantiated
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/typing.py:1434: TypeError
+______________ test_invalid_range_type_invalid_content_range_type ______________
+
+    def test_invalid_range_type_invalid_content_range_type():
+        """Passing a non-Range object for content_range should raise a TypeError."""
+        with pytest.raises(TypeError):
+>           InvalidRangeType(message="Bad range", content_range="not a Range")
+
+test_generated.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = InvalidRangeType('Bad range'), message = 'Bad range'
+content_range = 'not a Range', quiet = None, context = None, extra = None
+headers = None
+
+    def __init__(
+        self,
+        message: str | bytes | None = None,
+        content_range: Range | None = None,
+        *,
+        quiet: bool | None = None,
+        context: dict[str, Any] | None = None,
+        extra: dict[str, Any] | None = None,
+        headers: dict[str, Any] | None = None,
+    ):
+        super().__init__(
+            message,
+            quiet=quiet,
+            context=context,
+            extra=extra,
+            headers=headers,
+        )
+        if content_range is not None:
+            self.headers = {
+                **self.headers,
+>               "Content-Range": f"bytes */{content_range.total}",
+            }
+E           AttributeError: 'str' object has no attribute 'total'
+
+../../../../groq_codamosa_extension_20261119/environments/sanic/venv/lib/python3.10/site-packages/sanic/exceptions.py:482: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_invalid_range_type_with_content_range_and_headers
+FAILED test_generated.py::test_invalid_range_type_invalid_content_range_type
+2 failed, 1 passed in 0.43s

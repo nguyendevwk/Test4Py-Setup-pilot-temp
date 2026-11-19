@@ -1,0 +1,47 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_transform_returns_original_tree_and_no_change ______________
+
+    def test_transform_returns_original_tree_and_no_change():
+        tree = make_simple_tree()
+        result = BaseNodeTransformer.transform(tree)
+        # The returned tree should be the same object
+        assert result.tree is tree
+        # No changes should be reported
+>       assert result.changed is False
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:17: AttributeError
+___________ test_transform_with_modified_subclass_sets_changed_flag ____________
+
+    def test_transform_with_modified_subclass_sets_changed_flag():
+        class ModifyingTransformer(BaseNodeTransformer):
+            def visit_Assign(self, node):
+                # Mark the tree as changed
+                self._tree_changed = True
+                return node
+    
+        tree = make_simple_tree()
+        result = ModifyingTransformer.transform(tree)
+>       assert result.changed is True
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:30: AttributeError
+_____________________ test_transform_with_dependency_list ______________________
+
+    def test_transform_with_dependency_list():
+        class DependentTransformer(BaseNodeTransformer):
+            dependencies = ["dep1", "dep2"]
+    
+        tree = make_simple_tree()
+        result = DependentTransformer.transform(tree)
+        assert result.dependencies == ["dep1", "dep2"]
+>       assert result.changed is False
+E       AttributeError: 'TransformationResult' object has no attribute 'changed'
+
+test_generated.py:40: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_transform_returns_original_tree_and_no_change
+FAILED test_generated.py::test_transform_with_modified_subclass_sets_changed_flag
+FAILED test_generated.py::test_transform_with_dependency_list - AttributeErro...
+3 failed in 0.15s

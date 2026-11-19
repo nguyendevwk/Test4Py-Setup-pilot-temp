@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-89276a3e-ae20-4755-941e-937142970e0a",
+  "object": "chat.completion",
+  "created": 1795077878,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport sys\nimport types\nimport pytest\n\n# Import the target class\nfrom thefuck.types import CorrectedCommand\n# Import settings and shell for monkeypatching\nfrom thefuck import settings, shell\nfrom thefuck import logs\n\n# Helper to capture stdout\n@pytest.fixture\ndef captured_stdout():\n    old_stdout = sys.stdout\n    sys.stdout = io.StringIO()\n    yield sys.stdout\n    sys.stdout = old_stdout\n\n# 1. Test equality and hashing ignore priority\ndef test_eq_and_hash_ignore_priority():\n    cmd1 = CorrectedCommand(\"ls\", None, 10)\n    cmd2 = CorrectedCommand(\"ls\", None, 20)\n    assert cmd1 == cmd2\n    assert hash(cmd1) == hash(cmd2)\n\n    # Different script\n    cmd3 = CorrectedCommand(\"pwd\", None, 10)\n    assert cmd1 != cmd3\n\n    # Different side_effect\n    def side_effect1(old_cmd, script): pass\n    def side_effect2(old_cmd, script): pass\n    cmd4 = CorrectedCommand(\"ls\", side_effect1, 10)\n    cmd5 = CorrectedCommand(\"ls\", side_effect2, 10)\n    assert cmd4 != cmd5\n\n# 2. Test run writes script to stdout and records history\ndef test_run_writes_stdout_and_history(monkeypatch, captured_stdout):\n    # Prepare a dummy side_effect that records its call\n    called = {}\n    def dummy_side_effect(old_cmd, script):\n        called['old_cmd'] = old_cmd\n        called['script'] = script\n\n    # Monkeypatch settings to disable repeat and history alteration\n    monkeypatch.setattr(settings, \"repeat\", False)\n    monkeypatch.setattr(settings, \"alter_history\", True)\n    monkeypatch.setattr(settings, \"debug\", False)\n\n    # Capture history writes\n    history_calls = []\n    def fake_put_to_history(cmd):\n        history_calls.append(cmd)\n    monkeypatch.setattr(shell, \"put_to_history\", fake_put_to_history)\n\n    # Create command and run\n    corr = CorrectedCommand(\"echo hello\", dummy_side_effect, 5)\n    old_cmd = types.SimpleNamespace(command=\"wrong\")\n    corr.run(old_cmd)\n\n    # Assert side_effect called correctly\n    assert called['old_cmd'] is old_cmd\n    assert called['script'] == \"echo hello\"\n\n    # Assert stdout contains the script\n    assert captured_stdout.getvalue() == \"echo hello\"\n\n    # Assert history was updated\n    assert history_calls == [\"echo hello\"]\n\n# 3. Test _get_script with repeat enabled\ndef test_get_script_repeat(monkeypatch):\n    # Enable repeat and debug\n    monkeypatch.setattr(settings, \"repeat\", True)\n    monkeypatch.setattr(settings, \"debug\", True)\n\n    # Mock get_alias to return a fake alias\n    monkeypatch.setattr(\"thefuck.types.get_alias\", lambda: \"thefuck\")\n\n    # Mock shell.quote to return quoted script\n    monkeypatch.setattr(shell, \"quote\", lambda s: f\"'{s}'\")\n\n    # Mock shell.or_ to concatenate with \"||\"\n    monkeypatch.setattr(shell, \"or_\", lambda a, b: f\"{a} || {b}\")\n\n    # Create command\n    corr = CorrectedCommand(\"ls -l\", None, 1)\n\n    # Expected repeat command\n    repeat_fuck = \"thefuck --repeat --force-command 'ls -l'\"\n    expected = f\"ls -l || {repeat_fuck}\"\n\n    assert corr._get_script() == expected\n```",
+        "reasoning": "Need tests for CorrectedCommand. Use tmp_path for history? shell.put_to_history writes to history file? We can mock side_effect by simple function. Test equality ignoring priority. Test run writes to stdout and history. Use monkeypatch to set settings attributes. Use io.StringIO to capture stdout. Use a dummy shell that doesn't actually run. But we cannot modify product code. We can monkeypatch shell.put_to_history to record. Also shell.quote and shell.or_ need real functions; but we can set settings.repeat False to avoid complex. Use side_effect None. Test _get_script with repeat True. Need to monkeypatch settings.repeat, settings.debug, get_alias, shell.quote, shell.or_. Use monkeypatch. Let's write three tests: test_eq_hash, test_run_writes_stdout, test_get_script_repeat."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053591725,
+    "prompt_tokens": 706,
+    "prompt_time": 0.039873702,
+    "completion_tokens": 926,
+    "completion_time": 1.010796155,
+    "total_tokens": 1632,
+    "total_time": 1.050669857,
+    "completion_tokens_details": {
+      "reasoning_tokens": 166
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfnc27emqaz029k65ghjty",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport sys\nimport types\nimport pytest\n\n# Import the target class\nfrom thefuck.types import CorrectedCommand\n# Import settings and shell for monkeypatching\nfrom thefuck import settings, shell\nfrom thefuck import logs\n\n# Helper to capture stdout\n@pytest.fixture\ndef captured_stdout():\n    old_stdout = sys.stdout\n    sys.stdout = io.StringIO()\n    yield sys.stdout\n    sys.stdout = old_stdout\n\n# 1. Test equality and hashing ignore priority\ndef test_eq_and_hash_ignore_priority():\n    cmd1 = CorrectedCommand(\"ls\", None, 10)\n    cmd2 = CorrectedCommand(\"ls\", None, 20)\n    assert cmd1 == cmd2\n    assert hash(cmd1) == hash(cmd2)\n\n    # Different script\n    cmd3 = CorrectedCommand(\"pwd\", None, 10)\n    assert cmd1 != cmd3\n\n    # Different side_effect\n    def side_effect1(old_cmd, script): pass\n    def side_effect2(old_cmd, script): pass\n    cmd4 = CorrectedCommand(\"ls\", side_effect1, 10)\n    cmd5 = CorrectedCommand(\"ls\", side_effect2, 10)\n    assert cmd4 != cmd5\n\n# 2. Test run writes script to stdout and records history\ndef test_run_writes_stdout_and_history(monkeypatch, captured_stdout):\n    # Prepare a dummy side_effect that records its call\n    called = {}\n    def dummy_side_effect(old_cmd, script):\n        called['old_cmd'] = old_cmd\n        called['script'] = script\n\n    # Monkeypatch settings to disable repeat and history alteration\n    monkeypatch.setattr(settings, \"repeat\", False)\n    monkeypatch.setattr(settings, \"alter_history\", True)\n    monkeypatch.setattr(settings, \"debug\", False)\n\n    # Capture history writes\n    history_calls = []\n    def fake_put_to_history(cmd):\n        history_calls.append(cmd)\n    monkeypatch.setattr(shell, \"put_to_history\", fake_put_to_history)\n\n    # Create command and run\n    corr = CorrectedCommand(\"echo hello\", dummy_side_effect, 5)\n    old_cmd = types.SimpleNamespace(command=\"wrong\")\n    corr.run(old_cmd)\n\n    # Assert side_effect called correctly\n    assert called['old_cmd'] is old_cmd\n    assert called['script'] == \"echo hello\"\n\n    # Assert stdout contains the script\n    assert captured_stdout.getvalue() == \"echo hello\"\n\n    # Assert history was updated\n    assert history_calls == [\"echo hello\"]\n\n# 3. Test _get_script with repeat enabled\ndef test_get_script_repeat(monkeypatch):\n    # Enable repeat and debug\n    monkeypatch.setattr(settings, \"repeat\", True)\n    monkeypatch.setattr(settings, \"debug\", True)\n\n    # Mock get_alias to return a fake alias\n    monkeypatch.setattr(\"thefuck.types.get_alias\", lambda: \"thefuck\")\n\n    # Mock shell.quote to return quoted script\n    monkeypatch.setattr(shell, \"quote\", lambda s: f\"'{s}'\")\n\n    # Mock shell.or_ to concatenate with \"||\"\n    monkeypatch.setattr(shell, \"or_\", lambda a, b: f\"{a} || {b}\")\n\n    # Create command\n    corr = CorrectedCommand(\"ls -l\", None, 1)\n\n    # Expected repeat command\n    repeat_fuck = \"thefuck --repeat --force-command 'ls -l'\"\n    expected = f\"ls -l || {repeat_fuck}\"\n\n    assert corr._get_script() == expected\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4434065640089102
+}

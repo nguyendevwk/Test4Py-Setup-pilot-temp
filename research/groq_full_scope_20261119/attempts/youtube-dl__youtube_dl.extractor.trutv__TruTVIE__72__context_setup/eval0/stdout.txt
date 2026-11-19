@@ -1,0 +1,95 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________________ test_clip_extraction _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4af5ca0610>
+
+    def test_clip_extraction(monkeypatch):
+        # Fake JSON response for a clip
+        fake_json = {
+            'info': {
+                'mediaId': 'clip123',
+                'title': '  Clip Title  ',
+                'description': 'A short clip.',
+                'images': [
+                    {'srcUrl': 'http://example.com/thumb1.jpg', 'width': '200', 'height': '100'},
+                    {'srcUrl': None, 'width': '100', 'height': '50'},  # should be skipped
+                ],
+                'publicationDate': '2023-01-01T12:00:00Z',
+                'showTitle': 'Show Name',
+                'seasonNum': '2',
+                'episodeNum': '5',
+            }
+        }
+        downloader = FakeDownloader(fake_json)
+        ie = TruTVIE(downloader=downloader)
+        url = 'https://www.trutv.com/shows/show-name/videos/clip-slug'
+>       info = ie._real_extract(url)
+
+test_generated.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/trutv.py:39: in _real_extract
+    data = self._download_json(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:895: in _download_json
+    res = self._download_json_handle(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:874: in _download_json_handle
+    res = self._download_webpage_handle(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/adobepass.py:1333: in _download_webpage_handle
+    headers = self.geo_verification_headers()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.trutv.TruTVIE object at 0x7f4af5aa6770>
+
+    def geo_verification_headers(self):
+        headers = {}
+>       geo_verification_proxy = self._downloader.params.get('geo_verification_proxy')
+E       AttributeError: 'FakeDownloader' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:3011: AttributeError
+___________________________ test_episode_extraction ____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4af481bd60>
+
+    def test_episode_extraction(monkeypatch):
+        # Fake JSON response for an episode
+        fake_json = {
+            'episode': {
+                'mediaId': 'ep456',
+                'title': 'Episode Title',
+                'description': 'Full episode description.',
+                'images': [],
+                'publicationDate': '2022-12-31T23:59:59Z',
+                'showTitle': 'Another Show',
+                'seasonNum': None,
+                'episodeNum': '10',
+            }
+        }
+        downloader = FakeDownloader(fake_json)
+        ie = TruTVIE(downloader=downloader)
+        url = 'https://www.trutv.com/shows/another-show/12345'
+>       info = ie._real_extract(url)
+
+test_generated.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/trutv.py:39: in _real_extract
+    data = self._download_json(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:895: in _download_json
+    res = self._download_json_handle(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:874: in _download_json_handle
+    res = self._download_webpage_handle(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/adobepass.py:1333: in _download_webpage_handle
+    headers = self.geo_verification_headers()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.trutv.TruTVIE object at 0x7f4af481bc70>
+
+    def geo_verification_headers(self):
+        headers = {}
+>       geo_verification_proxy = self._downloader.params.get('geo_verification_proxy')
+E       AttributeError: 'FakeDownloader' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:3011: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_clip_extraction - AttributeError: 'FakeDownloa...
+FAILED test_generated.py::test_episode_extraction - AttributeError: 'FakeDown...
+2 failed, 1 passed in 1.71s

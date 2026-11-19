@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-670d5537-ed49-49ec-83c3-6a5101ed4e77",
+  "object": "chat.completion",
+  "created": 1795079458,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport io\nimport tty\nimport termios\nimport pytest\nfrom thefuck.system.unix import getch\n\n# Helper to replace termios and tty functions with no-ops\ndef noop(*args, **kwargs):\n    return None\n\n@pytest.fixture\ndef patched_termios(monkeypatch):\n    monkeypatch.setattr(termios, \"tcgetattr\", lambda fd: [0] * 19)\n    monkeypatch.setattr(termios, \"tcsetattr\", noop)\n    monkeypatch.setattr(tty, \"setraw\", noop)\n\ndef test_getch_single_char(tmp_path, patched_termios):\n    r_fd, w_fd = os.pipe()\n    try:\n        # Write a single character to the write end\n        os.write(w_fd, b\"a\")\n        # Replace sys.stdin with a file object from the read end\n        sys.stdin = os.fdopen(r_fd, \"r\", closefd=False)\n        # Call getch and verify it returns the character\n        result = getch()\n        assert result == \"a\"\n    finally:\n        os.close(w_fd)\n\ndef test_getch_multiple_chars(tmp_path, patched_termios):\n    r_fd, w_fd = os.pipe()\n    try:\n        # Write multiple characters\n        os.write(w_fd, b\"hello\")\n        sys.stdin = os.fdopen(r_fd, \"r\", closefd=False)\n        # First call should return 'h'\n        assert getch() == \"h\"\n        # Subsequent calls return next characters\n        assert getch() == \"e\"\n        assert getch() == \"l\"\n    finally:\n        os.close(w_fd)\n\ndef test_getch_raises_on_tcgetattr_error(monkeypatch):\n    # Simulate tcgetattr raising an exception\n    monkeypatch.setattr(termios, \"tcgetattr\", lambda fd: (_ for _ in ()).throw(OSError(\"fail\")))\n    r_fd, w_fd = os.pipe()\n    try:\n        os.write(w_fd, b\"x\")\n        sys.stdin = os.fdopen(r_fd, \"r\", closefd=False)\n        with pytest.raises(OSError, match=\"fail\"):\n            getch()\n    finally:\n        os.close(w_fd)\n```",
+        "reasoning": "We need to test getch. It reads from stdin. We can simulate by patching sys.stdin to a StringIO. But getch uses fileno and termios functions. We can monkeypatch termios.tcgetattr, tty.setraw, termios.tcsetattr to no-ops. Use tmp_path? Not needed. We'll write three tests: normal single char, multiple chars, error when stdin not a tty? But getch expects fileno. We can simulate by providing a file descriptor that supports fileno. Use io.BytesIO? But fileno not available. Use os.pipe to get a real fd. Write to write end, set stdin to read end via os.fdopen. Then patch termios functions. Test that getch returns first char and restores attributes. Use monkeypatch fixture. We'll create three tests: test_getch_single_char, test_getch_multiple_chars, test_getch_error_on_non_tty? But getch will still work. Maybe test that it raises if termios.tcgetattr fails? We can patch to raise OSError and ensure getch propagates. Use pytest.raises. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004702756,
+    "prompt_tokens": 307,
+    "prompt_time": 0.006692794,
+    "completion_tokens": 703,
+    "completion_time": 0.757262273,
+    "total_tokens": 1010,
+    "total_time": 0.763955067,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 231
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh5k6yeptv2wp1fshqgdxa",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport io\nimport tty\nimport termios\nimport pytest\nfrom thefuck.system.unix import getch\n\n# Helper to replace termios and tty functions with no-ops\ndef noop(*args, **kwargs):\n    return None\n\n@pytest.fixture\ndef patched_termios(monkeypatch):\n    monkeypatch.setattr(termios, \"tcgetattr\", lambda fd: [0] * 19)\n    monkeypatch.setattr(termios, \"tcsetattr\", noop)\n    monkeypatch.setattr(tty, \"setraw\", noop)\n\ndef test_getch_single_char(tmp_path, patched_termios):\n    r_fd, w_fd = os.pipe()\n    try:\n        # Write a single character to the write end\n        os.write(w_fd, b\"a\")\n        # Replace sys.stdin with a file object from the read end\n        sys.stdin = os.fdopen(r_fd, \"r\", closefd=False)\n        # Call getch and verify it returns the character\n        result = getch()\n        assert result == \"a\"\n    finally:\n        os.close(w_fd)\n\ndef test_getch_multiple_chars(tmp_path, patched_termios):\n    r_fd, w_fd = os.pipe()\n    try:\n        # Write multiple characters\n        os.write(w_fd, b\"hello\")\n        sys.stdin = os.fdopen(r_fd, \"r\", closefd=False)\n        # First call should return 'h'\n        assert getch() == \"h\"\n        # Subsequent calls return next characters\n        assert getch() == \"e\"\n        assert getch() == \"l\"\n    finally:\n        os.close(w_fd)\n\ndef test_getch_raises_on_tcgetattr_error(monkeypatch):\n    # Simulate tcgetattr raising an exception\n    monkeypatch.setattr(termios, \"tcgetattr\", lambda fd: (_ for _ in ()).throw(OSError(\"fail\")))\n    r_fd, w_fd = os.pipe()\n    try:\n        os.write(w_fd, b\"x\")\n        sys.stdin = os.fdopen(r_fd, \"r\", closefd=False)\n        with pytest.raises(OSError, match=\"fail\"):\n            getch()\n    finally:\n        os.close(w_fd)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "25c861af98c144669015c8aafaf60c21",
+  "_api_plus_pacing_seconds": 1.4572176769725047
+}

@@ -1,0 +1,62 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_parse_basic_docstring __________________________
+
+    def test_parse_basic_docstring():
+        doc = """
+        Short description.
+    
+        Long description spanning
+        multiple lines.
+    
+        :param a: description of a
+        :type a: int
+        :return: result
+        :rtype: str
+        """
+        result = parse(doc)
+        assert result.style.name == "REST"
+        assert result.short_description == "Short description."
+        assert result.long_description == "Long description spanning\nmultiple lines."
+        assert result.blank_after_short_description is True
+>       assert result.blank_after_long_description is False
+E       assert True is False
+E        +  where True = <docstring_parser.common.Docstring object at 0x7fb8555afee0>.blank_after_long_description
+
+test_generated.py:27: AssertionError
+___________________ test_parse_missing_meta_and_blank_lines ____________________
+
+    def test_parse_missing_meta_and_blank_lines():
+        doc = """
+        Only short description.
+    
+        :param b: param without type
+        :raises ValueError: if something
+        """
+        result = parse(doc)
+        assert result.short_description == "Only short description."
+        assert result.long_description is None
+>       assert result.blank_after_short_description is False
+E       assert True is False
+E        +  where True = <docstring_parser.common.Docstring object at 0x7fb8555af700>.blank_after_short_description
+
+test_generated.py:53: AssertionError
+_____________________ test_parse_invalid_meta_raises_error _____________________
+
+    def test_parse_invalid_meta_raises_error():
+        doc = """
+        :param: missing argument name
+        """
+        with pytest.raises(ParseError) as excinfo:
+            parse(doc)
+>       assert 'Error parsing meta information' in str(excinfo.value)
+E       AssertionError: assert 'Error parsing meta information' in 'Expected one or two arguments for a param keyword.'
+E        +  where 'Expected one or two arguments for a param keyword.' = str(ParseError('Expected one or two arguments for a param keyword.'))
+E        +    where ParseError('Expected one or two arguments for a param keyword.') = <ExceptionInfo ParseError('Expected one or two arguments for a param keyword.') tblen=3>.value
+
+test_generated.py:65: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_basic_docstring - assert True is False
+FAILED test_generated.py::test_parse_missing_meta_and_blank_lines - assert Tr...
+FAILED test_generated.py::test_parse_invalid_meta_raises_error - AssertionErr...
+3 failed in 0.14s

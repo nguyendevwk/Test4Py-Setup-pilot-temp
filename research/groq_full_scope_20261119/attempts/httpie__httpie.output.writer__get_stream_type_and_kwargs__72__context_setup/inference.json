@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-8ac04ea5-2481-49d6-a5ea-3e66efa32367",
+  "object": "chat.completion",
+  "created": 1795079623,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.writer import get_stream_type_and_kwargs\nfrom httpie.output.streams import (\n    RawStream, EncodedStream, PrettyStream, BufferedPrettyStream\n)\nfrom httpie.models import HTTPResponse, HTTPMessage\nfrom httpie.cli.dicts import HTTPHeadersDict\n\n\nclass DummyEnv:\n    def __init__(self, stdout_isatty: bool):\n        self.stdout_isatty = stdout_isatty\n        self.encoding = \"utf-8\"\n        self.color_scheme = \"default\"\n\n\nclass DummyProcessingOptions:\n    def __init__(\n        self,\n        stream: bool = False,\n        prettify_groups=None,\n        response_mime=None,\n        response_charset=None,\n        style=None,\n        json=False,\n        format_options=None,\n    ):\n        self.stream = stream\n        self._prettify_groups = prettify_groups or []\n        self.response_mime = response_mime\n        self.response_charset = response_charset\n        self.style = style\n        self.json = json\n        self.format_options = format_options or {}\n\n    def get_prettify(self, env):\n        return self._prettify_groups\n\n\ndef test_raw_stream_non_tty_event_stream():\n    env = DummyEnv(stdout_isatty=False)\n    opts = DummyProcessingOptions(stream=False)\n    headers = HTTPHeadersDict({\"Content-Type\": \"text/event-stream\"})\n    stream_cls, kwargs = get_stream_type_and_kwargs(\n        env, opts, HTTPResponse, headers\n    )\n    assert stream_cls is RawStream\n    assert kwargs[\"chunk_size\"] == RawStream.CHUNK_SIZE_BY_LINE\n\n\ndef test_pretty_stream_tty_with_prettify():\n    env = DummyEnv(stdout_isatty=True)\n    opts = DummyProcessingOptions(\n        stream=False,\n        prettify_groups=[\"json\"],\n        response_mime=\"application/json\",\n        response_charset=\"utf-8\",\n        style=\"monokai\",\n        json=True,\n        format_options={\"indent\": 2},\n    )\n    headers = HTTPHeadersDict()\n    stream_cls, kwargs = get_stream_type_and_kwargs(\n        env, opts, HTTPResponse, headers\n    )\n    assert stream_cls is PrettyStream\n    assert kwargs[\"env\"] is env\n    assert kwargs[\"mime_overwrite\"] == \"application/json\"\n    assert kwargs[\"encoding_overwrite\"] == \"utf-8\"\n    assert \"conversion\" in kwargs\n    assert \"formatting\" in kwargs\n    assert kwargs[\"formatting\"].color_scheme == \"monokai\"\n    assert kwargs[\"formatting\"].explicit_json is True\n    assert kwargs[\"formatting\"].format_options[\"indent\"] == 2\n\n\ndef test_raw_stream_non_tty_no_event_stream():\n    env = DummyEnv(stdout_isatty=False)\n    opts = DummyProcessingOptions(stream=False)\n    headers = HTTPHeadersDict({\"Content-Type\": \"application/json\"})\n    stream_cls, kwargs = get_stream_type_and_kwargs(\n        env, opts, HTTPMessage, headers\n    )\n    assert stream_cls is RawStream\n    assert kwargs[\"chunk_size\"] == RawStream.CHUNK_SIZE\n```",
+        "reasoning": "We need three tests covering normal, boundary, error. Use tmp_path? Not needed. Use Environment mock? We cannot modify product code. But we can create dummy Environment with attributes stdout_isatty, etc. Use simple class. Also need HTTPHeadersDict; can use dict. ProcessingOptions: need to instantiate? It's from .processing import ProcessingOptions. We can import it. Use minimal attributes: stream, get_prettify, response_mime, response_charset, style, json, format_options. We'll create a simple subclass or use namedtuple? But it's a class; we can instantiate with defaults? Let's inspect its signature? Not available. We can create a simple mock class with required attributes. Since we cannot import private. But we can create a simple class with same interface. Use dataclass. Tests independent.\n\nTest1: non-tty, no prettify, message_type HTTPResponse, headers with Content-Type text/event-stream => is_stream true, RawStream with chunk_size CHUNK_SIZE_BY_LINE. Assert class and kwargs.\n\nTest2: tty true, prettify groups present, message_type HTTPResponse, stream flag false, expect PrettyStream with conversion, formatting etc. Check that stream_kwargs contains env, mime_overwrite etc.\n\nTest3: error: message_type not HTTPResponse, env not tty, no prettify, headers empty => RawStream with CHUNK_SIZE. Ensure no is_stream.\n\nImplement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004279518,
+    "prompt_tokens": 720,
+    "prompt_time": 0.013448339,
+    "completion_tokens": 936,
+    "completion_time": 1.004750469,
+    "total_tokens": 1656,
+    "total_time": 1.018198808,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 288
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7shaknresmte0hkne0yy0w6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.writer import get_stream_type_and_kwargs\nfrom httpie.output.streams import (\n    RawStream, EncodedStream, PrettyStream, BufferedPrettyStream\n)\nfrom httpie.models import HTTPResponse, HTTPMessage\nfrom httpie.cli.dicts import HTTPHeadersDict\n\n\nclass DummyEnv:\n    def __init__(self, stdout_isatty: bool):\n        self.stdout_isatty = stdout_isatty\n        self.encoding = \"utf-8\"\n        self.color_scheme = \"default\"\n\n\nclass DummyProcessingOptions:\n    def __init__(\n        self,\n        stream: bool = False,\n        prettify_groups=None,\n        response_mime=None,\n        response_charset=None,\n        style=None,\n        json=False,\n        format_options=None,\n    ):\n        self.stream = stream\n        self._prettify_groups = prettify_groups or []\n        self.response_mime = response_mime\n        self.response_charset = response_charset\n        self.style = style\n        self.json = json\n        self.format_options = format_options or {}\n\n    def get_prettify(self, env):\n        return self._prettify_groups\n\n\ndef test_raw_stream_non_tty_event_stream():\n    env = DummyEnv(stdout_isatty=False)\n    opts = DummyProcessingOptions(stream=False)\n    headers = HTTPHeadersDict({\"Content-Type\": \"text/event-stream\"})\n    stream_cls, kwargs = get_stream_type_and_kwargs(\n        env, opts, HTTPResponse, headers\n    )\n    assert stream_cls is RawStream\n    assert kwargs[\"chunk_size\"] == RawStream.CHUNK_SIZE_BY_LINE\n\n\ndef test_pretty_stream_tty_with_prettify():\n    env = DummyEnv(stdout_isatty=True)\n    opts = DummyProcessingOptions(\n        stream=False,\n        prettify_groups=[\"json\"],\n        response_mime=\"application/json\",\n        response_charset=\"utf-8\",\n        style=\"monokai\",\n        json=True,\n        format_options={\"indent\": 2},\n    )\n    headers = HTTPHeadersDict()\n    stream_cls, kwargs = get_stream_type_and_kwargs(\n        env, opts, HTTPResponse, headers\n    )\n    assert stream_cls is PrettyStream\n    assert kwargs[\"env\"] is env\n    assert kwargs[\"mime_overwrite\"] == \"application/json\"\n    assert kwargs[\"encoding_overwrite\"] == \"utf-8\"\n    assert \"conversion\" in kwargs\n    assert \"formatting\" in kwargs\n    assert kwargs[\"formatting\"].color_scheme == \"monokai\"\n    assert kwargs[\"formatting\"].explicit_json is True\n    assert kwargs[\"formatting\"].format_options[\"indent\"] == 2\n\n\ndef test_raw_stream_non_tty_no_event_stream():\n    env = DummyEnv(stdout_isatty=False)\n    opts = DummyProcessingOptions(stream=False)\n    headers = HTTPHeadersDict({\"Content-Type\": \"application/json\"})\n    stream_cls, kwargs = get_stream_type_and_kwargs(\n        env, opts, HTTPMessage, headers\n    )\n    assert stream_cls is RawStream\n    assert kwargs[\"chunk_size\"] == RawStream.CHUNK_SIZE\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "5b0a905b53d148c5bb6b2aa1fca2a59f",
+  "_api_plus_pacing_seconds": 4.519447373982985
+}

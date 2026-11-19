@@ -1,0 +1,70 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_auto_register_subclass __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/mimesis__mimesis.providers.base__BaseProvider__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_auto_register_subclass0')
+
+    def test_auto_register_subclass(tmp_path):
+        """
+        Verify that a subclass of BaseProvider with Meta.name is automatically
+        registered in ProviderRegistry when auto_register is True.
+        """
+        # Create a dummy registry module with a register function
+        registry = types.SimpleNamespace()
+        registry.registered = {}
+        def register(name, cls):
+            registry.registered[name] = cls
+        registry.register = register
+    
+        # Monkeypatch the global ProviderRegistry
+        original_registry = BaseProvider.__dict__.get('ProviderRegistry', None)
+        BaseProvider.ProviderRegistry = registry
+    
+        class MyProvider(BaseProvider):
+            class Meta:
+                name = "my_provider"
+    
+        # The subclass should have been registered during class creation
+>       assert "my_provider" in registry.registered
+E       AssertionError: assert 'my_provider' in {}
+E        +  where {} = namespace(registered={}, register=<function test_auto_register_subclass.<locals>.register at 0x7fe49ad59a20>).registered
+
+test_generated.py:41: AssertionError
+__________________ test_validate_enum_raises_on_invalid_item ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/mimesis__mimesis.providers.base__BaseProvider__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_validate_enum_raises_on_i0')
+
+    def test_validate_enum_raises_on_invalid_item(tmp_path):
+        """
+        Verify that validate_enum raises NonEnumerableError when the item is
+        not part of the enum and not None.
+        """
+        provider = BaseProvider()
+        # Passing an invalid item (e.g., a string) should raise
+        with pytest.raises(NonEnumerableError):
+>           provider.validate_enum("invalid", DummyEnum)
+
+test_generated.py:88: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/providers/base.py:136: in validate_enum
+    raise NonEnumerableError(enum)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = NonEnumerableError(<class 'test_generated.DummyEnum'>)
+enum_obj = <class 'test_generated.DummyEnum'>
+
+    def __init__(self, enum_obj: t.Any) -> None:
+        """Initialize attributes for informative output.
+    
+        :param enum_obj: Enum object.
+        """
+        if enum_obj:
+            self.name = enum_obj
+>           self.items = ", ".join(map(str, enum_obj))
+E           TypeError: 'type' object is not iterable
+
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/exceptions.py:39: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_auto_register_subclass - AssertionError: asser...
+FAILED test_generated.py::test_validate_enum_raises_on_invalid_item - TypeErr...
+2 failed, 1 passed in 0.18s

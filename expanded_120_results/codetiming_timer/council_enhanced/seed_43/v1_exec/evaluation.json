@@ -1,0 +1,16 @@
+{
+  "status": "test_failure",
+  "exit_code": 1,
+  "timeout": false,
+  "total_nodes": 1,
+  "collected": 1,
+  "collection_errors": 0,
+  "passing_nodes": [],
+  "pass_count": 0,
+  "suite_pass": false,
+  "line_pct": null,
+  "branch_pct": null,
+  "coverage_status": "not_measured: suite not all-pass",
+  "stdout": "F                                                                        [100%]\n=================================== FAILURES ===================================\n______________________ test_timer_start_stop_and_logging _______________________\n\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff89542d970>\n\n    def test_timer_start_stop_and_logging(monkeypatch):\n        logs = []\n    \n        def logger(msg): logs.append(msg)\n    \n        # Mock perf_counter to produce deterministic elapsed time\n        times = iter([100.0, 100.5])\n        monkeypatch.setattr(time, \"perf_counter\", lambda: next(times))\n    \n        t = Timer(\n            name=\"perf\",\n            text=lambda secs: f\"Elapsed: {secs:.2f}s\",\n            initial_text=True,\n            logger=logger,\n        )\n    \n        t.start()\n        assert logs == [\"Timer perf started\"]\n    \n        elapsed = t.stop()\n        assert elapsed == 0.5\n        assert logs[-1] == \"Elapsed: 0.50s\"\n        assert Timer.timers.data[\"perf\"] == 0.5\n    \n        # Second timing\n        times = iter([200.0, 200.3])\n        monkeypatch.setattr(time, \"perf_counter\", lambda: next(times))\n    \n        t.start()\n        with pytest.raises(TimerError):\n            t.start()\n        t.stop()\n>       assert Timer.timers.data[\"perf\"] == 0.8\nE       assert 0.8000000000000114 == 0.8\n\n../../expanded_120_results/codetiming_timer/council_enhanced/seed_43/v1_exec/test_run.py:37: AssertionError\n=========================== short test summary info ============================\nFAILED ../../expanded_120_results/codetiming_timer/council_enhanced/seed_43/v1_exec/test_run.py::test_timer_start_stop_and_logging\n1 failed in 0.12s\n",
+  "stderr": ""
+}

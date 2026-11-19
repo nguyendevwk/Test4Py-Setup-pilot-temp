@@ -2,6 +2,35 @@
 
 Date: 2026-11-16. These are CPU/source checks, NOT real Qwen 14B or VRAM results.
 
+## Preparation correction and measurement audit
+
+The Kaggle preparation log exposed a runner bug: project pip commands passed
+`requirements-paired.txt` as a bare package operand. Both editable-project and
+requirements-only commands now omit that erroneous operand. Paired requirements
+are installed separately with `-r`. Existing venvs also undergo dependency checks;
+their presence is not evidence of a completed install. Failed commands have a
+machine-readable process record and the exact log path in console output.
+
+The corrected suite passed 126 CPU tests before the measurement additions below.
+Two added tests exercise both project command branches through real, offline pip
+metadata/dry-run resolution and ensure a failed dependency install cannot be
+marked prepared. These checks do not establish Kaggle preparation success.
+
+Measurement exports now distinguish retained module suites from passing nodes,
+include raw coverage denominators, mutant counts/inconclusives and peak GPU/RSS.
+`*-measurement-summary.json` retains planned trials in the observed-success
+denominator and labels coverage means as conditional on available measurements.
+Coverage remains a replay of original-passing retained nodes. It is NOT full
+candidate-suite coverage or first-attempt correctness. Upstream reductions are
+audited separately. Hallucination rates and semantic assertion accuracy remain
+unmeasured until a common, source-based review is performed; they are never
+inferred from successful execution.
+
+After these additions, all **129 CPU tests passed** (75.124 s). Both real pinned
+upstream fixture arms also completed with the new counts/coverage/mutant fields.
+Their LLM and embedding are scripted doubles: this remains engineering evidence,
+not a measured 14B result or an assertion-accuracy score.
+
 - Final full suite on Python 3.12.13: **124 tests passed**, including **22 paired
   runtime/guard/planning tests**. These use CPU fixtures, not real Qwen outputs.
 - Fresh Git base plus the final shipped overlay passed all 22 paired unit tests and both real
@@ -27,6 +56,13 @@ Date: 2026-11-16. These are CPU/source checks, NOT real Qwen 14B or VRAM results
   Unknown framework exceptions and resource-budget errors block larger readiness.
 
 ## GPU status
+
+The subsequent one-hour-screen revision passed **131 CPU tests** (73.267 s).
+The exact notebook overlay passed its 26 paired tests and both real upstream
+scripted fixture arms in a fresh Git checkout. Added checks cover concurrent GPU
+probe scheduling, one shared screen deadline, no download/worker launch after
+expiry and retention of every planned small trial. No GPU model timing was
+measured locally. The notebook defaults to stopping before the larger stage.
 
 Local `nvidia-smi` could not communicate with a driver; no usable NVIDIA GPU is
 available to run this model here. NF4 14B fit, 6K+1K forced decode, 1.5 GiB margin,

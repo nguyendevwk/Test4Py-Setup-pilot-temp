@@ -1,0 +1,82 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_read_asrt_parsing ____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.f4m__FlvReader__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_read_asrt_parsing0')
+
+    def test_read_asrt_parsing(tmp_path):
+        # Construct an asrt box with 1 quality entry and 1 segment
+        quality = b'quality\x00'
+        seg_payload = struct.pack('!I I', 5, 3)  # first_segment=5, fragments_per_segment=3
+        payload = struct.pack('!B', 1) + quality + struct.pack('!I', 1) + seg_payload
+        box = build_box(b'asrt', payload)
+        reader = FlvReader(box)
+>       result = reader.read_asrt()
+
+test_generated.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/f4m.py:80: in read_asrt
+    self.read_string()
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/f4m.py:54: in read_string
+    char = self.read_bytes(1)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.downloader.f4m.FlvReader object at 0x7f32631725c0>, n = 1
+
+    def read_bytes(self, n):
+        data = self.read(n)
+        if len(data) < n:
+>           raise DataTruncatedError(
+                'FlvReader error: need %d bytes while only %d bytes got' % (
+                    n, len(data)))
+E           youtube_dl.downloader.f4m.DataTruncatedError: FlvReader error: need 1 bytes while only 0 bytes got
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/f4m.py:36: DataTruncatedError
+___________________________ test_read_afrt_and_abst ____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.f4m__FlvReader__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_read_afrt_and_abst0')
+
+    def test_read_afrt_and_abst(tmp_path):
+        # Build afrt box: 1 fragment with duration 0 (discontinuity)
+        frag_payload = (
+            struct.pack('!I', 10) +                # first
+            struct.pack('!Q', 123456789) +         # first_ts
+            struct.pack('!I', 0) +                # duration
+            struct.pack('!B', 2)                  # discontinuity_indicator
+        )
+        afrt_payload = struct.pack('!B', 1) + struct.pack('!I', 1) + frag_payload
+        afrt_box = build_box(b'afrt', afrt_payload)
+    
+        # Build abst box containing the afrt box
+        abst_payload = (
+            struct.pack('!B', 1) +                # version
+            b'\x00\x00\x00' +                    # flags
+            struct.pack('!I', 1) +                # BootstrapinfoVersion
+            struct.pack('!B', 0x20) +             # flags with live bit set
+            struct.pack('!I', 1000) +             # time scale
+            struct.pack('!Q', 0) +                # CurrentMediaTime
+            struct.pack('!Q', 0) +                # SmpteTimeCodeOffset
+            b'movie\x00' +                        # MovieIdentifier
+            struct.pack('!B', 0) +                # server_count
+            struct.pack('!B', 0) +                # quality_count
+            b'' +                                 # DrmData
+            b'' +                                 # MetaData
+            struct.pack('!B', 0) +                # segments_count
+            struct.pack('!B', 1) +                # fragments_run_count
+            afrt_box
+        )
+        abst_box = build_box(b'abst', abst_payload)
+    
+        # Read bootstrap info
+        reader = FlvReader(abst_box)
+        result = reader.read_bootstrap_info()
+        assert result['live'] is True
+>       assert len(result['fragments']) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+test_generated.py:64: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_read_asrt_parsing - youtube_dl.downloader.f4m....
+FAILED test_generated.py::test_read_afrt_and_abst - assert 0 == 1
+2 failed, 1 passed in 0.90s

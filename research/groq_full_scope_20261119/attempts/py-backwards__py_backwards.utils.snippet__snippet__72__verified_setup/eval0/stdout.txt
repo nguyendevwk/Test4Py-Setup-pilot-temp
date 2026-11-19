@@ -1,0 +1,106 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_snippet_basic_returns_constant ______________________
+
+    def test_snippet_basic_returns_constant():
+        # A simple function that returns a constant
+        def f():
+            return 42
+    
+        snip = snippet(f)
+        body = snip.get_body()
+        # body should contain a single Return node
+        assert len(body) == 1
+        node = body[0]
+        assert isinstance(node, typed_ast.Return)
+>       assert isinstance(node.value, typed_ast.Constant)
+E       AssertionError: assert False
+E        +  where False = isinstance(<typed_ast._ast3.Num object at 0x7f2dafb22f80>, <class 'typed_ast._ast3.Constant'>)
+E        +    where <typed_ast._ast3.Num object at 0x7f2dafb22f80> = <typed_ast._ast3.Return object at 0x7f2dafb230a0>.value
+E        +    and   <class 'typed_ast._ast3.Constant'> = typed_ast.Constant
+
+test_generated.py:19: AssertionError
+_________________ test_snippet_variable_replacement_with_value _________________
+
+    def test_snippet_variable_replacement_with_value():
+        # Function that uses a variable in its return expression
+        def g():
+            return x + 1
+    
+        snip = snippet(g)
+        # Replace variable `x` with a concrete value
+>       body = snip.get_body(x=10)
+
+test_generated.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py:128: in get_body
+    VariablesReplacer.replace(tree, variables)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py:89: in replace
+    inst.visit(tree)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:279: in visit
+    return visitor(node)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:334: in generic_visit
+    value = self.visit(value)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:279: in visit
+    return visitor(node)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py:44: in visit_FunctionDef
+    return self.generic_visit(node)  # type: ignore
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:334: in generic_visit
+    value = self.visit(value)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:279: in visit
+    return visitor(node)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:343: in generic_visit
+    new_node = self.visit(old_value)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:279: in visit
+    return visitor(node)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:343: in generic_visit
+    new_node = self.visit(old_value)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:279: in visit
+    return visitor(node)
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/snippet.py:40: in visit_Name
+    return self.generic_visit(node)  # type: ignore
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:329: in generic_visit
+    for field, old_value in iter_fields(node):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = 10
+
+    def iter_fields(node):
+        """
+        Yield a tuple of ``(fieldname, value)`` for each field in ``node._fields``
+        that is present on *node*.
+        """
+>       for field in node._fields:
+E       AttributeError: 'int' object has no attribute '_fields'
+
+../../../../groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/typed_ast/ast3.py:197: AttributeError
+_______________ test_snippet_variable_replacement_with_ast_name ________________
+
+    def test_snippet_variable_replacement_with_ast_name():
+        # Function that uses a variable in its return expression
+        def h():
+            return y * 2
+    
+        snip = snippet(h)
+        # Replace variable `y` with an AST Name node
+        body = snip.get_body(y=typed_ast.Name(id='z', ctx=typed_ast.Load()))
+        node = body[0]
+        assert isinstance(node, typed_ast.Return)
+        assert isinstance(node.value, typed_ast.BinOp)
+        # The left side should now be a Name node with id 'z'
+        left = node.value.left
+        assert isinstance(left, typed_ast.Name)
+        assert left.id == 'z'
+        # The right side should be the constant 2
+        right = node.value.right
+>       assert isinstance(right, typed_ast.Constant)
+E       AssertionError: assert False
+E        +  where False = isinstance(<typed_ast._ast3.Num object at 0x7f2daf43bdc0>, <class 'typed_ast._ast3.Constant'>)
+E        +    where <class 'typed_ast._ast3.Constant'> = typed_ast.Constant
+
+test_generated.py:60: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_snippet_basic_returns_constant - AssertionErro...
+FAILED test_generated.py::test_snippet_variable_replacement_with_value - Attr...
+FAILED test_generated.py::test_snippet_variable_replacement_with_ast_name - A...
+3 failed in 0.18s

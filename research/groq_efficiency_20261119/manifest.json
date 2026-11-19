@@ -1,0 +1,591 @@
+{
+  "status": "output_cap_engineering_screen_on_previously_observed_targets",
+  "design": "ten projects fixed before installation; source-only eligibility and deterministic hash selection; no model outcome selection",
+  "model": "openai/gpt-oss-20b",
+  "seed_values": [
+    45
+  ],
+  "arms": [
+    "atomic_source",
+    "atomic_verified_setup"
+  ],
+  "rules": "Write a complete pytest module testing the real imported target.\nUse production source as evidence. Test normal, boundary and error behavior.\nUse precise assertions, pytest.raises or unittest assertions; no tautologies,\nskips, xfail, suppression of unexpected exceptions or mocks of the target.\nDo not modify product code, install packages, access network or real user files.\nTemporary files must use tmp_path. Keep suites independent and deterministic.\nReturn exactly one complete Python code block. Do not output explanations.\nWrite exactly THREE independent test functions. Each tests one scenario with concrete observable assertions. Prefer small representative tests over sprawling suites. Do not use private APIs unless the target itself is private.",
+  "repair_rounds": 0,
+  "max_completion_tokens": 2048,
+  "temperature": 0.2,
+  "budget_shared_usd": 2,
+  "targets": [
+    {
+      "module": "apimd.loader",
+      "symbol": "gen_api",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/loader.py",
+      "source_sha256": "b5517332ab96a0053966c11126d910501a1a3088452e102b8f6cb88a560fedd0",
+      "source": "from typing import Optional\nfrom collections.abc import Sequence, Iterator\nfrom sys import path as sys_path\nfrom os import mkdir, walk\nfrom os.path import isdir, isfile, abspath, join, sep, dirname\nfrom importlib.abc import Loader\nfrom importlib.machinery import EXTENSION_SUFFIXES\nfrom importlib.util import find_spec, spec_from_file_location, module_from_spec\nfrom .logger import logger\nfrom .parser import parent, Parser\n\ndef gen_api(\n    root_names: dict[str, str],\n    pwd: Optional[str] = None,\n    *,\n    prefix: str = 'docs',\n    link: bool = True,\n    level: int = 1,\n    toc: bool = False,\n    dry: bool = False\n) -> Sequence[str]:\n    \"\"\"Generate API. All rules are listed in the readme.\n\n    The path `pwd` is the current path that provided to `pkgutil`,\n    which allows the \"site-packages\" directory to be used.\n    \"\"\"\n    if pwd is not None:\n        sys_path.append(pwd)\n    if not isdir(prefix):\n        logger.info(f\"Create directory: {prefix}\")\n        mkdir(prefix)\n    docs = []\n    for title, name in root_names.items():\n        logger.info(f\"Load root: {name} ({title})\")\n        doc = loader(name, _site_path(name), link, level, toc)\n        if not doc.strip():\n            logger.warning(f\"'{name}' can not be found\")\n            continue\n        doc = '#' * level + f\" {title} API\\n\\n\" + doc\n        path = join(prefix, f\"{name.replace('_', '-')}-api.md\")\n        logger.info(f\"Write file: {path}\")\n        if dry:\n            logger.info('=' * 12)\n            logger.info(doc)\n        else:\n            _write(path, doc)\n        docs.append(doc)\n    return docs",
+      "source_lines": 37,
+      "project": "apimd",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages",
+      "id": "apimd__apimd.loader__gen_api",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/loader.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Create directory: docs\nTraceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/loader.py\", line 130, in gen_api\n    for title, name in root_names.items():\nAttributeError: 'int' object has no attribute 'items'\n",
+        "returncode": 1
+      }
+    },
+    {
+      "module": "apimd.parser",
+      "symbol": "const_type",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "source_sha256": "466704282383cf34e744e22e021563bb55745d62063e7922659d36ff9c08d4e0",
+      "source": "from typing import cast, TypeVar, Union, Optional\nfrom types import ModuleType\nfrom collections.abc import Sequence, Iterable, Iterator\nfrom itertools import chain\nfrom dataclasses import dataclass, field\nfrom inspect import getdoc\nfrom ast import (\n    parse, unparse, get_docstring, AST, FunctionDef, AsyncFunctionDef, ClassDef,\n    Assign, AnnAssign, Delete, Import, ImportFrom, Name, Expr, Subscript, BinOp,\n    BitOr, Call, If, Try, Tuple, List, Set, Dict, Constant, Load, Attribute,\n    arg, expr, stmt, arguments, NodeTransformer,\n)\nfrom .logger import logger\nfrom .pep585 import PEP585\n\ndef const_type(node: expr) -> str:\n    \"\"\"Constant type inference.\"\"\"\n    if isinstance(node, Constant):\n        return _type_name(node.value)\n    elif isinstance(node, (Tuple, List, Set)):\n        return _type_name(node).lower() + _e_type(node.elts)\n    elif isinstance(node, Dict):\n        return 'dict' + _e_type(node.keys, node.values)\n    elif isinstance(node, Call) and isinstance(node.func, (Name, Attribute)):\n        func = unparse(node.func)\n        if func in chain({'bool', 'int', 'float', 'complex', 'str'},\n                         PEP585.keys(), PEP585.values()):\n            return func\n    return ANY",
+      "source_lines": 14,
+      "project": "apimd",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages",
+      "id": "apimd__apimd.parser__const_type",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(node: ast.expr) -> str\", \"arguments\": {\"node\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "apimd.parser",
+      "symbol": "code",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "source_sha256": "466704282383cf34e744e22e021563bb55745d62063e7922659d36ff9c08d4e0",
+      "source": "from typing import cast, TypeVar, Union, Optional\nfrom types import ModuleType\nfrom collections.abc import Sequence, Iterable, Iterator\nfrom itertools import chain\nfrom dataclasses import dataclass, field\nfrom inspect import getdoc\nfrom ast import (\n    parse, unparse, get_docstring, AST, FunctionDef, AsyncFunctionDef, ClassDef,\n    Assign, AnnAssign, Delete, Import, ImportFrom, Name, Expr, Subscript, BinOp,\n    BitOr, Call, If, Try, Tuple, List, Set, Dict, Constant, Load, Attribute,\n    arg, expr, stmt, arguments, NodeTransformer,\n)\nfrom .logger import logger\nfrom .pep585 import PEP585\n\ndef code(doc: str) -> str:\n    \"\"\"Escape Markdown charters from inline code.\"\"\"\n    doc = doc.replace('|', '&#124;')\n    if '&' in doc:\n        return f\"<code>{doc}</code>\"\n    elif doc:\n        return f\"`{doc}`\"\n    else:\n        return \" \"",
+      "source_lines": 9,
+      "project": "apimd",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages",
+      "id": "apimd__apimd.parser__code",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/apimd/venv/lib/python3.10/site-packages/apimd/parser.py\", line 92, in code\n    doc = doc.replace('|', '&#124;')\nAttributeError: 'int' object has no attribute 'replace'\n",
+        "returncode": 1
+      }
+    },
+    {
+      "module": "dataclasses_json.cfg",
+      "symbol": "LetterCase",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/dataclasses-json/venv/lib/python3.10/site-packages/dataclasses_json/cfg.py",
+      "source_sha256": "211444148e2839395610d5db3b3a7ce97dffded469111fb76d796406832aab29",
+      "source": "import functools\nfrom enum import Enum\nfrom typing import Callable, Dict, Optional, TypeVar, Union\nfrom marshmallow.fields import Field as MarshmallowField\nfrom dataclasses_json.stringcase import (camelcase, pascalcase, snakecase,\n                                         spinalcase)\nfrom dataclasses_json.undefined import Undefined, UndefinedParameterError\n\nclass LetterCase(Enum):\n    CAMEL = camelcase\n    KEBAB = spinalcase\n    SNAKE = snakecase\n    PASCAL = pascalcase",
+      "source_lines": 5,
+      "project": "dataclasses-json",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/dataclasses-json/venv/lib/python3.10/site-packages",
+      "id": "dataclasses-json__dataclasses_json.cfg__LetterCase",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/dataclasses-json/venv/lib/python3.10/site-packages/dataclasses_json/cfg.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/enum.py\", line 385, in __call__\n    return cls.__new__(cls, value)\n  File \"/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/enum.py\", line 710, in __new__\n    raise ve_exc\nValueError: 1 is not a valid LetterCase\n",
+        "returncode": 1
+      }
+    },
+    {
+      "module": "dataclasses_json.mm",
+      "symbol": "build_schema",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/dataclasses-json/venv/lib/python3.10/site-packages/dataclasses_json/mm.py",
+      "source_sha256": "4cac12227d8e5de1c5d84e27fd485ce4c85ed4b05000aab49e6a390f885cfea4",
+      "source": "import typing\nimport warnings\nimport sys\nfrom copy import deepcopy\nfrom dataclasses import MISSING, is_dataclass, fields as dc_fields\nfrom datetime import datetime\nfrom decimal import Decimal\nfrom uuid import UUID\nfrom enum import Enum\nfrom typing_inspect import is_union_type\nfrom marshmallow import fields, Schema, post_load\nfrom marshmallow.exceptions import ValidationError\nfrom dataclasses_json.core import (_is_supported_generic, _decode_dataclass,\n                                   _ExtendedEncoder, _user_overrides_or_exts)\nfrom dataclasses_json.utils import (_is_collection, _is_optional,\n                                    _issubclass_safe, _timestamp_to_dt_aware,\n                                    _is_new_type, _get_type_origin,\n                                    _handle_undefined_parameters_safe,\n                                    CatchAllVar)\n\ndef build_schema(cls: typing.Type[A],\n                 mixin,\n                 infer_missing,\n                 partial) -> typing.Type[\"SchemaType[A]\"]:\n    Meta = type('Meta',\n                (),\n                {'fields': tuple(field.name for field in dc_fields(cls)  # type: ignore\n                                 if\n                                 field.name != 'dataclass_json_config' and field.type !=\n                                 typing.Optional[CatchAllVar]),\n                 # TODO #180\n                 # 'render_module': global_config.json_module\n                 })\n\n    @post_load\n    def make_instance(self, kvs, **kwargs):\n        return _decode_dataclass(cls, kvs, partial)\n\n    def dumps(self, *args, **kwargs):\n        if 'cls' not in kwargs:\n            kwargs['cls'] = _ExtendedEncoder\n\n        return Schema.dumps(self, *args, **kwargs)\n\n    def dump(self, obj, *, many=None):\n        many = self.many if many is None else bool(many)\n        dumped = Schema.dump(self, obj, many=many)\n        # TODO This is hacky, but the other option I can think of is to generate a different schema\n        #  depending on dump and load, which is even more hacky\n\n        # The only problem is the catch-all field, we can't statically create a schema for it,\n        # so we just update the dumped dict\n        if many:\n            for i, _obj in enumerate(obj):\n                dumped[i].update(\n                    _handle_undefined_parameters_safe(cls=_obj, kvs={},\n                                                      usage=\"dump\"))\n        else:\n            dumped.update(_handle_undefined_parameters_safe(cls=obj, kvs={},\n                                                            usage=\"dump\"))\n        return dumped\n\n    schema_ = schema(cls, mixin, infer_missing)\n    DataClassSchema: typing.Type[\"SchemaType[A]\"] = type(\n        f'{cls.__name__.capitalize()}Schema',\n        (Schema,),\n        {'Meta': Meta,\n         f'make_{cls.__name__.lower()}': make_instance,\n         'dumps': dumps,\n         'dump': dump,\n         **schema_})\n\n    return DataClassSchema",
+      "source_lines": 53,
+      "project": "dataclasses-json",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/dataclasses-json/venv/lib/python3.10/site-packages",
+      "id": "dataclasses-json__dataclasses_json.mm__build_schema",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/dataclasses-json/venv/lib/python3.10/site-packages/dataclasses_json/mm.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/dataclasses-json/venv/lib/python3.10/site-packages/dataclasses_json/mm.py\", line 353, in build_schema\n    {'fields': tuple(field.name for field in dc_fields(cls)  # type: ignore\n  File \"/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/dataclasses.py\", line 1198, in fields\n    raise TypeError('must be called with a dataclass type or instance') from None\nTypeError: must be called with a dataclass type or instance\n",
+        "returncode": 1
+      }
+    },
+    {
+      "module": "dataclasses_json.undefined",
+      "symbol": "UndefinedParameterError",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/dataclasses-json/venv/lib/python3.10/site-packages/dataclasses_json/undefined.py",
+      "source_sha256": "19a37f2c2c07a6c7f356a011daebfb019c94d880f9b6a2d56a87fcd58f558ccd",
+      "source": "import abc\nimport dataclasses\nimport functools\nimport inspect\nimport sys\nfrom dataclasses import Field, fields\nfrom typing import Any, Callable, Dict, Optional, Tuple, Union, Type, get_type_hints\nfrom enum import Enum\nfrom marshmallow.exceptions import ValidationError\nfrom dataclasses_json.utils import CatchAllVar\n\nclass UndefinedParameterError(ValidationError):\n    \"\"\"\n    Raised when something has gone wrong handling undefined parameters.\n    \"\"\"\n    pass",
+      "source_lines": 5,
+      "project": "dataclasses-json",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/dataclasses-json/venv/lib/python3.10/site-packages",
+      "id": "dataclasses-json__dataclasses_json.undefined__UndefinedParameterError",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/dataclasses-json/venv/lib/python3.10/site-packages/dataclasses_json/undefined.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(message: 'str | list | dict', field_name: 'str' = '_schema', data: 'typing.Mapping[str, typing.Any] | typing.Iterable[typing.Mapping[str, typing.Any]] | None' = None, valid_data: 'list[dict[str, typing.Any]] | dict[str, typing.Any] | None' = None, **kwargs)\", \"arguments\": {\"message\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "flutes.structure",
+      "symbol": "no_map_instance",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/structure.py",
+      "source_sha256": "72cdf395789909e3c9f2cd35b9fe2eed4f2b6eb871bd44c285013d4dc51478f3",
+      "source": "from functools import lru_cache\nfrom typing import Callable, Collection, Dict, List, Sequence, Set, Type, TypeVar, no_type_check\n\ndef no_map_instance(instance: T) -> T:\n    r\"\"\"Register a container instance as `non-mappable`, i.e., it will be treated as a singleton object in\n    :func:`map_structure` and :func:`map_structure_zip`, its contents will not be traversed.\n\n    :param instance: The container instance.\n    \"\"\"\n    try:\n        setattr(instance, _NO_MAP_INSTANCE_ATTR, True)\n        return instance\n    except AttributeError:\n        return _no_map_type(type(instance))(instance)",
+      "source_lines": 11,
+      "project": "flutes",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages",
+      "id": "flutes__flutes.structure__no_map_instance",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/structure.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(instance: ~T) -> ~T\", \"arguments\": {\"instance\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "flutes.timing",
+      "symbol": "work_in_progress",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/timing.py",
+      "source_sha256": "d5e8b51e7d65da8e554fc9386ba6b1f4efe2ddcabfa6e82e1ecebdc2aac4b3e7",
+      "source": "import contextlib\nimport time\n\ndef work_in_progress(desc: str = \"Work in progress\"):\n    r\"\"\"Time the execution time of a code block or function.\n\n    .. code:: python\n\n        >>> @work_in_progress(\"Loading file\")\n        ... def load_file(path):\n        ...     with open(path, \"rb\") as f:\n        ...         return pickle.load(f)\n        ...\n        ... obj = load_file(\"/path/to/some/file\")\n        Loading file... done. (3.52s)\n\n        >>> with work_in_progress(\"Saving file\"):\n        ...     with open(path, \"wb\") as f:\n        ...         pickle.dump(obj, f)\n        Saving file... done. (3.78s)\n\n    :param desc: Description of the task performed.\n    \"\"\"\n    print(desc + \"... \", end='', flush=True)\n    begin_time = time.time()\n    yield\n    time_consumed = time.time() - begin_time\n    print(f\"done. ({time_consumed:.2f}s)\")",
+      "source_lines": 25,
+      "project": "flutes",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages",
+      "id": "flutes__flutes.timing__work_in_progress",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/timing.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(desc: str = 'Work in progress')\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "flutes.iterator",
+      "symbol": "chunk",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "source_sha256": "ce52005942e2abddd15e6e736baa524a6873f0dae37cc1b7a9d0307d6c01f6e2",
+      "source": "import weakref\nfrom typing import Callable, Generic, Iterable, Iterator, List, Optional, Sequence, TypeVar, overload\n\ndef chunk(n: int, iterable: Iterable[T]) -> Iterator[List[T]]:\n    r\"\"\"Split the iterable into chunks, with each chunk containing no more than ``n`` elements.\n\n    .. code:: python\n\n        >>> list(chunk(3, range(10)))\n        [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]\n\n    :param n: The maximum number of elements in one chunk.\n    :param iterable: The iterable.\n    :return: An iterator over chunks.\n    \"\"\"\n    if n <= 0:\n        raise ValueError(\"`n` should be positive\")\n    group = []\n    for x in iterable:\n        group.append(x)\n        if len(group) == n:\n            yield group\n            group = []\n    if len(group) > 0:\n        yield group",
+      "source_lines": 22,
+      "project": "flutes",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages",
+      "id": "flutes__flutes.iterator__chunk",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/flutes/venv/lib/python3.10/site-packages/flutes/iterator.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(n: int, iterable: Iterable[~T]) -> Iterator[List[~T]]\", \"arguments\": {\"n\": \"1\", \"iterable\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "httpie.models",
+      "symbol": "infer_requests_message_kind",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/models.py",
+      "source_sha256": "17e8043ee24adc466893ecf612d5938ae78d2d1c3a9d402a4e6d7d18ef1e57ee",
+      "source": "from time import monotonic\nimport requests\nfrom urllib3.util import SKIP_HEADER, SKIPPABLE_HEADERS\nfrom enum import Enum, auto\nfrom typing import Iterable, Union, NamedTuple\nfrom urllib.parse import urlsplit\nfrom .cli.constants import (\n    OUT_REQ_BODY,\n    OUT_REQ_HEAD,\n    OUT_RESP_BODY,\n    OUT_RESP_HEAD,\n    OUT_RESP_META\n)\nfrom .compat import cached_property\nfrom .utils import split_cookies, parse_content_type_header\n\ndef infer_requests_message_kind(message: RequestsMessage) -> RequestsMessageKind:\n    if isinstance(message, requests.PreparedRequest):\n        return RequestsMessageKind.REQUEST\n    elif isinstance(message, requests.Response):\n        return RequestsMessageKind.RESPONSE\n    else:\n        raise TypeError(f\"Unexpected message type: {type(message).__name__}\")",
+      "source_lines": 7,
+      "project": "httpie",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages",
+      "id": "httpie__httpie.models__infer_requests_message_kind",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/models.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/models.py\", line 186, in infer_requests_message_kind\n    raise TypeError(f\"Unexpected message type: {type(message).__name__}\")\nTypeError: Unexpected message type: int\n",
+        "returncode": 1
+      }
+    },
+    {
+      "module": "httpie.utils",
+      "symbol": "as_site",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/utils.py",
+      "source_sha256": "3c6b1fed010e8e895324ca03d9966e638e42418a7810b9908d9d5ceab959db86",
+      "source": "import os\nimport base64\nimport json\nimport mimetypes\nimport re\nimport sys\nimport time\nimport tempfile\nimport sysconfig\nfrom collections import OrderedDict\nfrom contextlib import contextmanager\nfrom http.cookiejar import parse_ns_headers\nfrom pathlib import Path\nfrom pprint import pformat\nfrom urllib.parse import urlsplit\nfrom typing import Any, List, Optional, Tuple, Generator, Callable, Iterable, IO, TypeVar\nimport requests.auth\n\ndef as_site(path: Path, **extra_vars) -> Path:\n    site_packages_path = sysconfig.get_path(\n        'purelib',\n        vars={'base': str(path), **extra_vars}\n    )\n    return Path(site_packages_path)",
+      "source_lines": 6,
+      "project": "httpie",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages",
+      "id": "httpie__httpie.utils__as_site",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/utils.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(path: pathlib.Path, **extra_vars) -> pathlib.Path\", \"arguments\": {\"path\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "httpie.plugins.base",
+      "symbol": "TransportPlugin",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/plugins/base.py",
+      "source_sha256": "ab62592dad351b45cc95a0952d4fdd69a8d3491f86643fe0d1abaf5de5adea37",
+      "source": "from typing import Tuple\n\nclass TransportPlugin(BasePlugin):\n    \"\"\"\n    Requests transport adapter docs:\n\n        <https://requests.readthedocs.io/en/latest/user/advanced/#transport-adapters>\n\n    See httpie-unixsocket for an example transport plugin:\n\n        <https://github.com/httpie/httpie-unixsocket>\n\n    \"\"\"\n\n    # The URL prefix the adapter should be mount to.\n    prefix = None\n\n    def get_adapter(self):\n        \"\"\"\n        Return a ``requests.adapters.BaseAdapter`` subclass instance to be\n        mounted to ``self.prefix``.\n\n        \"\"\"\n        raise NotImplementedError()",
+      "source_lines": 22,
+      "project": "httpie",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages",
+      "id": "httpie__httpie.plugins.base__TransportPlugin",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/plugins/base.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"()\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "isort.exceptions",
+      "symbol": "MissingSection",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/isort/venv/lib/python3.10/site-packages/isort/exceptions.py",
+      "source_sha256": "494673a0c4516df1332b5936104f03befcb78f18e9f934d8f83c73cc0c1186d0",
+      "source": "from __future__ import annotations\nfrom functools import partial\nfrom pathlib import Path\nfrom .profiles import profiles\n\nclass MissingSection(ISortError):\n    \"\"\"Raised when isort encounters an import that matches a section that is not defined\"\"\"\n\n    def __init__(self, import_module: str, section: str):\n        super().__init__(\n            f\"Found {import_module} import while parsing, but {section} was not included \"\n            \"in the `sections` setting of your config. Please add it before continuing\\n\"\n            \"See https://isort.readthedocs.io/en/latest/index.html#custom-sections-and-ordering \"\n            \"for more info.\"\n        )",
+      "source_lines": 10,
+      "project": "isort",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/isort/venv/lib/python3.10/site-packages",
+      "id": "isort__isort.exceptions__MissingSection",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/isort/venv/lib/python3.10/site-packages/isort/exceptions.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(import_module: 'str', section: 'str')\", \"arguments\": {\"import_module\": \"1\", \"section\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "isort.exceptions",
+      "symbol": "FileSkipComment",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/isort/venv/lib/python3.10/site-packages/isort/exceptions.py",
+      "source_sha256": "494673a0c4516df1332b5936104f03befcb78f18e9f934d8f83c73cc0c1186d0",
+      "source": "from __future__ import annotations\nfrom functools import partial\nfrom pathlib import Path\nfrom .profiles import profiles\n\nclass FileSkipComment(FileSkipped):\n    \"\"\"Raised when an entire file is skipped due to a isort skip file comment\"\"\"\n\n    def __init__(self, file_path: str, **kwargs: str):\n        super().__init__(\n            f\"{file_path} contains a file skip comment and was skipped.\", file_path=file_path\n        )",
+      "source_lines": 7,
+      "project": "isort",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/isort/venv/lib/python3.10/site-packages",
+      "id": "isort__isort.exceptions__FileSkipComment",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/isort/venv/lib/python3.10/site-packages/isort/exceptions.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(file_path: 'str', **kwargs: 'str')\", \"arguments\": {\"file_path\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "isort.exceptions",
+      "symbol": "LiteralSortTypeMismatch",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/isort/venv/lib/python3.10/site-packages/isort/exceptions.py",
+      "source_sha256": "494673a0c4516df1332b5936104f03befcb78f18e9f934d8f83c73cc0c1186d0",
+      "source": "from __future__ import annotations\nfrom functools import partial\nfrom pathlib import Path\nfrom .profiles import profiles\n\nclass LiteralSortTypeMismatch(ISortError):\n    \"\"\"Raised when an isort literal sorting comment is used, with a type that doesn't match the\n    supplied data structure's type.\n    \"\"\"\n\n    def __init__(self, kind: type, expected_kind: type):\n        super().__init__(\n            f\"isort was told to sort a literal of type {expected_kind} but was given \"\n            f\"a literal of type {kind}.\"\n        )\n        self.kind = kind\n        self.expected_kind = expected_kind",
+      "source_lines": 12,
+      "project": "isort",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/isort/venv/lib/python3.10/site-packages",
+      "id": "isort__isort.exceptions__LiteralSortTypeMismatch",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/isort/venv/lib/python3.10/site-packages/isort/exceptions.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(kind: 'type', expected_kind: 'type')\", \"arguments\": {\"kind\": \"1\", \"expected_kind\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "mimesis.random",
+      "symbol": "Random",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/random.py",
+      "source_sha256": "1dac6f92029d8b89db82e2755224bdf9b0e12f699cc1f1db32fca556ece3e379",
+      "source": "import random as random_module\nimport typing as t\nfrom mimesis.types import MissingSeed, Seed\n\nclass Random(random_module.Random):\n    \"\"\"A custom random class.\n\n    It is a subclass of the :py:class:`random.Random` class from the standard\n    library's random module. The class incorporates additional custom methods.\n\n    This class can be extended according to specific requirements.\n    \"\"\"\n\n    def randints(self, n: int = 3, a: int = 1, b: int = 100) -> list[int]:\n        \"\"\"Generate a list of random integers.\n\n        :param n: Number of elements.\n        :param a: Minimum value of range.\n        :param b: Maximum value of range.\n        :return: List of random integers.\n        :raises ValueError: if n is less than or equal to zero.\n        \"\"\"\n        if n <= 0:\n            raise ValueError(\"n must be greater than 0\")\n\n        return [int(self.random() * (b - a)) + a for _ in range(n)]\n\n    def _generate_string(self, str_seq: str, length: int = 10) -> str:\n        \"\"\"Generate random string created from a string sequence.\n\n        :param str_seq: String sequence of letters or digits.\n        :param length: Max value.\n        :return: Single string.\n        \"\"\"\n        return \"\".join(self.choices(str_seq, k=length))\n\n    def generate_string_by_mask(\n        self,\n        mask: str = \"@###\",\n        char: str = \"@\",\n        digit: str = \"#\",\n    ) -> str:\n        \"\"\"Generate custom code using ascii uppercase and random integers.\n\n        :param mask: Mask of code.\n        :param char: Placeholder for characters.\n        :param digit: Placeholder for digits.\n        :return: Custom code.\n        \"\"\"\n        char_code = ord(char)\n        digit_code = ord(digit)\n\n        if char_code == digit_code:\n            raise ValueError(\n                \"The same placeholder cannot be used for both numbers and characters.\"\n            )\n\n        _mask = mask.encode()\n        code = bytearray(len(_mask))\n        rand_fn = self.random\n        for i, p in enumerate(_mask):\n            if p == char_code:\n                code[i] = int(rand_fn() * 26) + 65  # A-Z\n            elif p == digit_code:\n                code[i] = int(rand_fn() * 10) + 48  # 0-9\n            else:\n                code[i] = p\n        return code.decode()\n\n    def uniform(self, a: float, b: float, precision: int = 15) -> float:\n        \"\"\"Get a random number in the range [a, b) or [a, b] depending on rounding.\n\n        :param a: Minimum value.\n        :param b: Maximum value.\n        :param precision: Round a number to a given\n            precision in decimal digits, default is 15.\n        \"\"\"\n        return round(a + (b - a) * self.random(), precision)\n\n    def randbytes(self, n: int = 16) -> bytes:\n        \"\"\"Generate n random bytes.\"\"\"\n        return self.getrandbits(n * 8).to_bytes(n, \"little\")\n\n    def weighted_choice(self, choices: dict[t.Any, float]) -> t.Any:\n        \"\"\"Returns a random element according to the specified weights.\n\n        :param choices: A dictionary where keys are choices and values are weights.\n        :raises ValueError: If choices are empty.\n        :return: Random key from dictionary.\n        \"\"\"\n        if not choices:\n            raise ValueError(\"Choices cannot be empty.\")\n\n        population = list(choices.keys())\n        weights = list(choices.values())\n        return self.choices(population, weights=weights, k=1)[0]\n\n    def choice_enum_item(self, enum: t.Any) -> t.Any:\n        \"\"\"Get random value of enum object.\n\n        :param enum: Enum object.\n        :return: Random value of enum.\n        \"\"\"\n        return self.choice(list(enum))",
+      "source_lines": 100,
+      "project": "mimesis",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages",
+      "id": "mimesis__mimesis.random__Random",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/random.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(x=None)\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "mimesis.schema",
+      "symbol": "Fieldset",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py",
+      "source_sha256": "0216ffc7bfd02b179eb5959a2b621ab5f5b66a11184ac462ddbbbb1763e0febe",
+      "source": "import csv\nimport inspect\nimport json\nimport pickle\nimport re\nfrom collections.abc import Callable, Iterator, Sequence\nfrom pathlib import Path\nfrom typing import Any\nfrom mimesis.exceptions import (\n    AliasesTypeError,\n    FieldArityError,\n    FieldError,\n    FieldNameError,\n    FieldsetError,\n    SchemaError,\n)\nfrom mimesis.keys import _call_key_func\nfrom mimesis.locales import Locale\nfrom mimesis.providers.base import BaseProvider\nfrom mimesis.providers.generic import Generic\nfrom mimesis.random import Random\nfrom mimesis.types import JSON, CallableSchema, Key, MissingSeed, Seed\n\nclass Fieldset(BaseField):\n    \"\"\"Greedy fieldset (evaluates immediately).\n\n    Works like a field, but returns a list of values.\n\n    Here is an example:\n\n        >>> fieldset = Fieldset(i=100)\n        >>> fieldset(\"username\")\n        ['pot_1821', 'vhs_1915', ..., 'reviewed_1849']\n\n    You may also specify the number of iterations by passing the **i** keyword\n    argument to the callable instance of fieldset:\n\n        >>> fieldset = Fieldset()\n        >>> fieldset(\"username\", i=2)\n        ['pot_1821', 'vhs_1915']\n\n    When **i** is not specified, the reasonable default is used — **10**.\n\n    See \"Field vs Fieldset\" section of documentation for more details.\n\n    :cvar fieldset_default_iterations: Default iterations. Default is **10**.\n    :cvar fieldset_iterations_kwarg: Keyword argument for iterations. Default is **i**.\n    \"\"\"\n\n    fieldset_default_iterations: int = 10\n    fieldset_iterations_kwarg: str = \"i\"\n\n    def __init__(\n        self,\n        locale: Locale = Locale.DEFAULT,\n        seed: Seed = MissingSeed,\n        **kwargs: Any,\n    ) -> None:\n        \"\"\"Initialize fieldset.\n\n        Accepts additional keyword argument **i** which is used\n        to specify the number of iterations.\n\n        The name of the keyword argument can be changed by\n        overriding **fieldset_iterations_kwarg** attribute of this class.\n        \"\"\"\n        self._iterations = kwargs.pop(\n            self.fieldset_iterations_kwarg,\n            self.fieldset_default_iterations,\n        )\n        super().__init__(locale=locale, seed=seed)\n\n    def __call__(\n        self,\n        name: str | None = None,\n        key: Key = None,\n        **kwargs: Any,\n    ) -> list[Any]:\n        \"\"\"Perform fieldset.\n\n        :param name: Name of the field.\n        :param key: A key function applied to each result.\n        :param kwargs: Keyword arguments for field.\n        :raises FieldsetError: If parameter **i** is less than 1.\n        :return: List of values.\n        \"\"\"\n        min_iterations = 1\n        iterations = kwargs.pop(\n            self.fieldset_iterations_kwarg,\n            self._iterations,\n        )\n\n        if iterations < min_iterations:\n            raise FieldsetError\n\n        return [self.perform(name, key=key, **kwargs) for _ in range(iterations)]",
+      "source_lines": 73,
+      "project": "mimesis",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages",
+      "id": "mimesis__mimesis.schema__Fieldset",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(locale: mimesis.enums.Locale = <Locale.EN: 'en'>, seed: None | int | float | str | bytes | bytearray | mimesis.types._MissingSeed = <mimesis.types._MissingSeed object at 0x7f43cf90b7c0>, **kwargs: Any) -> None\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "mimesis.providers.base",
+      "symbol": "BaseProvider",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/providers/base.py",
+      "source_sha256": "3a3446255dcc752cc75621756f2cdc25d57909b5e96c127b237e238623f25475",
+      "source": "import contextlib\nimport json\nimport operator\nimport typing as t\nfrom functools import reduce\nfrom mimesis import random as _random\nfrom mimesis.constants import DATADIR, LOCALE_SEP\nfrom mimesis.exceptions import NonEnumerableError\nfrom mimesis.locales import Locale, validate_locale\nfrom mimesis.types import JSON, MissingSeed, Seed\n\nclass BaseProvider:\n    \"\"\"This is a base class for all providers.\n\n    :ivar random: An instance of :class:`mimesis.random.Random`.\n    :ivar seed: Seed for random.\n    \"\"\"\n\n    class Meta:\n        name: str\n        auto_register: bool = True\n\n    def __init_subclass__(cls, **kwargs: t.Any) -> None:\n        \"\"\"Automatically register providers when they are defined.\n\n        This hook is called when a class inherits from BaseProvider.\n        It automatically registers the provider in the global registry\n        unless auto_register is explicitly set to False in Meta.\n        \"\"\"\n        super().__init_subclass__(**kwargs)\n\n        if hasattr(cls, \"Meta\") and hasattr(cls.Meta, \"name\"):\n            should_register = getattr(cls.Meta, \"auto_register\", True)\n            if should_register:\n                ProviderRegistry.register(cls.Meta.name, cls)\n\n    def __init__(\n        self,\n        *,\n        seed: Seed = MissingSeed,\n        random: _random.Random | None = None,\n    ) -> None:\n        \"\"\"Initialize attributes.\n\n        Keep in mind that locale-independent data providers will work\n        only with keyword-only arguments.\n\n        :param seed: Seed for random.\n            When set to `None` the current system time is used.\n        :param random: Custom random.\n            See https://github.com/lk-geimfari/mimesis/issues/1313 for details.\n        \"\"\"\n        if random is not None:\n            if not isinstance(random, _random.Random):\n                raise TypeError(\"random must be an instance of mimesis.random.Random\")\n            self.random = random\n        else:\n            self.random = _random.Random()\n        self.seed = seed\n        self.reseed(seed)\n\n    def reseed(self, seed: Seed = MissingSeed) -> None:\n        \"\"\"Reseeds the internal random generator.\n\n        In case we use the default seed, we need to create a per instance\n        random generator. In this case, two providers with the same seed\n        will always return the same values.\n\n        :param seed: Seed for random.\n            When set to `None` the current system time is used.\n        \"\"\"\n        self.seed = seed\n        if seed is MissingSeed:\n            # Remove casts after mypy will fix this inference:\n            if _random.global_seed is not MissingSeed:\n                self.random.seed(t.cast(\"t.Any\", _random.global_seed))\n        else:\n            self.random.seed(t.cast(\"t.Any\", seed))\n\n    def validate_enum(self, item: t.Any, enum: t.Any) -> t.Any:\n        \"\"\"Validates various enum objects that are used as arguments for methods.\n\n        :param item: Item of an enum object.\n        :param enum: Enum object.\n        :return: Value of item.\n        :raises NonEnumerableError: If the enum does not have such an item.\n        \"\"\"\n        if item is None:\n            result = self.random.choice_enum_item(enum)\n        elif item and isinstance(item, enum):\n            result = item\n        else:\n            raise NonEnumerableError(enum)\n\n        return result.value\n\n    def _read_global_file(self, file_name: str) -> t.Any:\n        \"\"\"Reads a JSON file and returns a dict.\n\n        Reads JSON file from mimesis/data/global/ directory.\n\n        :param file_name: Path to file.\n        :raises FileNotFoundError: If the file was not found.\n        :return: JSON data.\n        \"\"\"\n        with DATADIR.joinpath(\"global\", file_name).open() as f:\n            return json.load(f)\n\n    def _has_seed(self) -> bool:\n        \"\"\"Internal API to check if seed is set.\"\"\"\n        return (self.seed is not None and self.seed is not MissingSeed) or (\n            _random.global_seed is not None and _random.global_seed is not MissingSeed\n        )\n\n    def __str__(self) -> str:\n        \"\"\"Human-readable representation of locale.\"\"\"\n        return self.__class__.__name__",
+      "source_lines": 106,
+      "project": "mimesis",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages",
+      "id": "mimesis__mimesis.providers.base__BaseProvider",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/providers/base.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(*, seed: None | int | float | str | bytes | bytearray | mimesis.types._MissingSeed = <mimesis.types._MissingSeed object at 0x7fd87e4bb5b0>, random: mimesis.random.Random | None = None) -> None\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "py_backwards.utils.helpers",
+      "symbol": "eager",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/helpers.py",
+      "source_sha256": "0b59a0955d2924460b1f1141718483d6780383ebf95227cba7018bf32769f5c7",
+      "source": "from inspect import getsource\nimport re\nimport sys\nfrom typing import Any, Callable, Iterable, List, TypeVar\nfrom functools import wraps\nfrom ..conf import settings\nfrom .. import messages\n\ndef eager(fn: Callable[..., Iterable[T]]) -> Callable[..., List[T]]:\n    @wraps(fn)\n    def wrapped(*args: Any, **kwargs: Any) -> List[T]:\n        return list(fn(*args, **kwargs))\n\n    return wrapped",
+      "source_lines": 6,
+      "project": "py-backwards",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages",
+      "id": "py-backwards__py_backwards.utils.helpers__eager",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/utils/helpers.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(fn: Callable[..., Iterable[~T]]) -> Callable[..., List[~T]]\", \"arguments\": {\"fn\": \"lambda *args: 1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "py_backwards.transformers.starred_unpacking",
+      "symbol": "StarredUnpackingTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/starred_unpacking.py",
+      "source_sha256": "766d082f588cd9374799892a3a333e0d94c7edcd993821abda67ad7dad5c4b55",
+      "source": "from typing import Union, Iterable, List\nfrom typed_ast import ast3 as ast\nfrom .base import BaseNodeTransformer\n\nclass StarredUnpackingTransformer(BaseNodeTransformer):\n    \"\"\"Compiles:\n        [2, *range(10), 1]\n        print(*range(1), *range(3))\n    To:\n        [2] + list(range(10)) + [1]\n        print(*(list(range(1)) + list(range(3))))\n        \n    \"\"\"\n    target = (3, 4)\n\n    def _has_starred(self, xs: List[ast.expr]) -> bool:\n        for x in xs:\n            if isinstance(x, ast.Starred):\n                return True\n\n        return False\n\n    def _split_by_starred(self, xs: Iterable[ast.expr]) -> List[Splitted]:\n        \"\"\"Split `xs` to separate list by Starred.\"\"\"\n        lists = [[]]  # type: List[Splitted]\n        for x in xs:\n            if isinstance(x, ast.Starred):\n                lists.append(x)\n                lists.append([])\n            else:\n                assert isinstance(lists[-1], list)\n                lists[-1].append(x)\n        return lists\n\n    def _prepare_lists(self, xs: List[Splitted]) -> Iterable[ListEntry]:\n        \"\"\"Wrap starred in list call and list elts to just List.\"\"\"\n        for x in xs:\n            if isinstance(x, ast.Starred):\n                yield ast.Call(\n                    func=ast.Name(id='list'),\n                    args=[x.value],\n                    keywords=[])\n            elif x:\n                yield ast.List(elts=x)\n\n    def _merge_lists(self, xs: List[ListEntry]) -> Union[ast.BinOp, ListEntry]:\n        \"\"\"Merge lists by summing them.\"\"\"\n        if len(xs) == 1:\n            return xs[0]\n\n        result = ast.BinOp(left=xs[0], right=xs[1], op=ast.Add())\n        for x in xs[2:]:\n            result = ast.BinOp(left=result, right=x, op=ast.Add())\n        return result\n\n    def _to_sum_of_lists(self, xs: List[ast.expr]) -> Union[ast.BinOp, ListEntry]:\n        \"\"\"Convert list of arguments / list to sum of lists.\"\"\"\n        splitted = self._split_by_starred(xs)\n        prepared = list(self._prepare_lists(splitted))\n        return self._merge_lists(prepared)\n\n    def visit_List(self, node: ast.List) -> ast.List:\n        if not self._has_starred(node.elts):\n            return self.generic_visit(node)  # type: ignore\n\n        self._tree_changed = True\n\n        return self.generic_visit(self._to_sum_of_lists(node.elts))  # type: ignore\n\n    def visit_Call(self, node: ast.Call) -> ast.Call:\n        if not self._has_starred(node.args):\n            return self.generic_visit(self.generic_visit(node))  # type: ignore\n\n        self._tree_changed = True\n\n        args = self._to_sum_of_lists(node.args)\n        node.args = [ast.Starred(value=args)]\n        return self.generic_visit(node)",
+      "source_lines": 74,
+      "project": "py-backwards",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages",
+      "id": "py-backwards__py_backwards.transformers.starred_unpacking__StarredUnpackingTransformer",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/starred_unpacking.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(tree: typed_ast._ast3.AST) -> None\", \"arguments\": {\"tree\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "py_backwards.transformers.dict_unpacking",
+      "symbol": "DictUnpackingTransformer",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/dict_unpacking.py",
+      "source_sha256": "08cff85a531481a97b8fbaf3093f90b10aeb05491017d10466c59583cf705b1f",
+      "source": "from typing import Union, Iterable, Optional, List, Tuple\nfrom typed_ast import ast3 as ast\nfrom ..utils.tree import insert_at\nfrom ..utils.snippet import snippet\nfrom .base import BaseNodeTransformer\n\nclass DictUnpackingTransformer(BaseNodeTransformer):\n    \"\"\"Compiles:\n    \n        {1: 1, **dict_a}\n        \n    To:\n    \n        _py_backwards_merge_dicts([{1: 1}], dict_a})\n    \n    \"\"\"\n    target = (3, 4)\n\n    def _split_by_None(self, pairs: Iterable[Pair]) -> Splitted:\n        \"\"\"Splits pairs to lists separated by dict unpacking statements.\"\"\"\n        result = [[]]  # type: Splitted\n        for key, value in pairs:\n            if key is None:\n                result.append(value)\n                result.append([])\n            else:\n                assert isinstance(result[-1], list)\n                result[-1].append((key, value))\n\n        return result\n\n    def _prepare_splitted(self, splitted: Splitted) \\\n            -> Iterable[Union[ast.Call, ast.Dict]]:\n        \"\"\"Wraps splitted in Call or Dict.\"\"\"\n        for group in splitted:\n            if not isinstance(group, list):\n                yield ast.Call(\n                    func=ast.Name(id='dict'),\n                    args=[group],\n                    keywords=[])\n            elif group:\n                yield ast.Dict(keys=[key for key, _ in group],\n                               values=[value for _, value in group])\n\n    def _merge_dicts(self, xs: Iterable[Union[ast.Call, ast.Dict]]) \\\n            -> ast.Call:\n        \"\"\"Creates call of function for merging dicts.\"\"\"\n        return ast.Call(\n            func=ast.Name(id='_py_backwards_merge_dicts'),\n            args=[ast.List(elts=list(xs))],\n            keywords=[])\n\n    def visit_Module(self, node: ast.Module) -> ast.Module:\n        insert_at(0, node, merge_dicts.get_body())  # type: ignore\n        return self.generic_visit(node)  # type: ignore\n\n    def visit_Dict(self, node: ast.Dict) -> Union[ast.Dict, ast.Call]:\n        if None not in node.keys:\n            return self.generic_visit(node)  # type: ignore\n\n        self._tree_changed = True\n        pairs = zip(node.keys, node.values)\n        splitted = self._split_by_None(pairs)\n        prepared = self._prepare_splitted(splitted)\n        return self._merge_dicts(prepared)",
+      "source_lines": 59,
+      "project": "py-backwards",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages",
+      "id": "py-backwards__py_backwards.transformers.dict_unpacking__DictUnpackingTransformer",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/py-backwards/venv/lib/python3.10/site-packages/py_backwards/transformers/dict_unpacking.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(tree: typed_ast._ast3.AST) -> None\", \"arguments\": {\"tree\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "pypara.dcc",
+      "symbol": "dcfc_nl_365",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/dcc.py",
+      "source_sha256": "1101763094f59f6ce2f8cce519415ab5c417291066c9f208ff276cf82edb1c3f",
+      "source": "import calendar\nimport datetime\nfrom decimal import Decimal\nfrom itertools import chain\nfrom typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Set, Union\nfrom dateutil.relativedelta import relativedelta\nfrom .commons.numbers import ONE, ZERO\nfrom .commons.zeitgeist import Date\nfrom .currencies import Currencies, Currency\nfrom .monetary import Money\n\ndef dcfc_nl_365(start: Date, asof: Date, end: Date, freq: Optional[Decimal] = None) -> Decimal:\n    \"\"\"\n    Computes the day count fraction for the \"NL/365\" convention.\n\n    :param start: The start date of the period.\n    :param asof: The date which the day count fraction to be calculated as of.\n    :param end: The end date of the period (a.k.a. termination date).\n    :return: Day count fraction.\n\n    >>> ex1_start, ex1_asof = datetime.date(2007, 12, 28), datetime.date(2008, 2, 28)\n    >>> ex2_start, ex2_asof = datetime.date(2007, 12, 28), datetime.date(2008, 2, 29)\n    >>> ex3_start, ex3_asof = datetime.date(2007, 10, 31), datetime.date(2008, 11, 30)\n    >>> ex4_start, ex4_asof = datetime.date(2008, 2, 1), datetime.date(2009, 5, 31)\n    >>> round(dcfc_nl_365(start=ex1_start, asof=ex1_asof, end=ex1_asof), 14)\n    Decimal('0.16986301369863')\n    >>> round(dcfc_nl_365(start=ex2_start, asof=ex2_asof, end=ex2_asof), 14)\n    Decimal('0.16986301369863')\n    >>> round(dcfc_nl_365(start=ex3_start, asof=ex3_asof, end=ex3_asof), 14)\n    Decimal('1.08219178082192')\n    >>> round(dcfc_nl_365(start=ex4_start, asof=ex4_asof, end=ex4_asof), 14)\n    Decimal('1.32602739726027')\n    \"\"\"\n    return (_get_actual_day_count(start, asof) - (1 if _has_leap_day(start, asof) else 0)) / Decimal(365)",
+      "source_lines": 23,
+      "project": "pypara",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages",
+      "id": "pypara__pypara.dcc__dcfc_nl_365",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/dcc.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/dcc.py\", line 637, in dcfc_nl_365\n    return (_get_actual_day_count(start, asof) - (1 if _has_leap_day(start, asof) else 0)) / Decimal(365)\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/dcc.py\", line 56, in _get_actual_day_count\n    return (end - start).days\nAttributeError: 'int' object has no attribute 'days'\n",
+        "returncode": 1
+      }
+    },
+    {
+      "module": "pypara.monetary",
+      "symbol": "NonePrice",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/monetary.py",
+      "source_sha256": "e4bd0f8f7bc831cb4070ad56334b60b502c7030b809cc2d8dafdcdcc67f1e22e",
+      "source": "from abc import ABC, abstractmethod\nfrom decimal import Decimal, DivisionByZero, InvalidOperation\nfrom typing import TYPE_CHECKING, Any, Callable, NamedTuple, Optional, TypeVar, Union, overload\nfrom .commons.errors import ProgrammingError\nfrom .commons.numbers import ZERO, Numeric\nfrom .commons.zeitgeist import Date\nfrom .currencies import Currency\nfrom .exchange import FXRateLookupError, FXRateService\n\nclass NonePrice(Price):\n    __slots__ = ()\n\n    @property\n    def defined(self) -> bool:\n        return False\n\n    @property\n    def undefined(self) -> bool:\n        return True\n\n    def as_boolean(self) -> bool:\n        return False\n\n    def is_equal(self, other: Any) -> bool:\n        return other.__class__ is NonePrice\n\n    def abs(self) -> \"Price\":\n        return self\n\n    def as_float(self) -> float:\n        raise TypeError(\"Undefined monetary values do not have quantity information.\")\n\n    def as_integer(self) -> int:\n        raise TypeError(\"Undefined monetary values do not have quantity information.\")\n\n    def round(self, ndigits: int = 0) -> \"Price\":\n        return self\n\n    def negative(self) -> \"Price\":\n        return self\n\n    def positive(self) -> \"Price\":\n        return self\n\n    def add(self, other: \"Price\") -> \"Price\":\n        return other\n\n    def scalar_add(self, other: Numeric) -> \"Price\":\n        return self\n\n    def subtract(self, other: \"Price\") -> \"Price\":\n        return -other\n\n    def scalar_subtract(self, other: Numeric) -> \"Price\":\n        return self\n\n    def multiply(self, other: Numeric) -> \"Price\":\n        return self\n\n    def times(self, other: Numeric) -> \"Money\":\n        return NoMoney\n\n    def divide(self, other: Numeric) -> \"Price\":\n        return self\n\n    def floor_divide(self, other: Numeric) -> \"Price\":\n        return self\n\n    def lt(self, other: \"Price\") -> bool:\n        return other.defined\n\n    def lte(self, other: \"Price\") -> bool:\n        return True\n\n    def gt(self, other: \"Price\") -> bool:\n        return False\n\n    def gte(self, other: \"Price\") -> bool:\n        return other.undefined\n\n    def or_else(self, e: Callable[[], \"Price\"]) -> \"Price\":\n        return e()\n\n    def fmap(self, f: Callable[[\"SomePrice\"], \"Price\"]) -> \"Price\":\n        return self\n\n    def dimap(self, f: Callable[[\"SomePrice\"], _T], e: Callable[[], _T]) -> _T:\n        return e()\n\n    def with_ccy(self, ccy: Currency) -> \"Price\":\n        return self\n\n    def with_qty(self, qty: Decimal) -> \"Price\":\n        return self\n\n    def with_dov(self, dov: Date) -> \"Price\":\n        return self\n\n    def ccy_or(self, default: Currency) -> Currency:\n        return default\n\n    def ccy_or_none(self) -> Optional[Currency]:\n        return None\n\n    def qty_or(self, default: Decimal) -> Decimal:\n        return default\n\n    def qty_or_zero(self) -> Decimal:\n        return ZERO\n\n    def qty_or_none(self) -> Optional[Decimal]:\n        return None\n\n    def qty_or_else(self, e: Callable[[], _T]) -> Union[Decimal, _T]:\n        return e()\n\n    def qty_map(self, f: Callable[[Decimal], _T], e: Callable[[], _T]) -> _T:\n        return e()\n\n    def dov_or(self, default: Date) -> Date:\n        return default\n\n    def dov_or_none(self) -> Optional[Date]:\n        return None\n\n    def convert(self, to: Currency, asof: Optional[Date] = None, strict: bool = False) -> \"Price\":\n        return self\n\n    @property\n    def money(self) -> Money:\n        return NoMoney\n\n    __bool__ = as_boolean\n\n    __eq__ = is_equal\n\n    __abs__ = abs\n\n    __float__ = as_float\n\n    __int__ = as_integer\n\n    __neg__ = negative\n\n    __pos__ = positive\n\n    __add__ = add\n\n    __sub__ = subtract\n\n    __mul__ = multiply\n\n    __truediv__ = divide\n\n    __floordiv__ = floor_divide\n\n    __lt__ = lt\n\n    __le__ = lte\n\n    __gt__ = gt\n\n    __ge__ = gte",
+      "source_lines": 154,
+      "project": "pypara",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages",
+      "id": "pypara__pypara.monetary__NonePrice",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/monetary.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"()\", \"arguments\": {}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "pypara.accounting.journaling",
+      "symbol": "ReadJournalEntries",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/accounting/journaling.py",
+      "source_sha256": "03dcebb0bddf93f2cef461fa92f7fea6109ab6ba3587ec9c8c92907b74a09aa3",
+      "source": "import datetime\nfrom dataclasses import dataclass, field\nfrom enum import Enum\nfrom typing import Dict, Generic, Iterable, List, Protocol, Set, TypeVar\nfrom ..commons.guid import Guid, makeguid\nfrom ..commons.numbers import Amount, Quantity, isum\nfrom ..commons.zeitgeist import DateRange\nfrom .accounts import Account, AccountType\n\nclass ReadJournalEntries(Protocol[_T]):\n    \"\"\"\n    Type of functions which read journal entries from a source.\n    \"\"\"\n\n    def __call__(self, period: DateRange) -> Iterable[JournalEntry[_T]]:\n        ...",
+      "source_lines": 7,
+      "project": "pypara",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages",
+      "id": "pypara__pypara.accounting.journaling__ReadJournalEntries",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/accounting/journaling.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/typing.py\", line 1434, in _no_init_or_replace_init\n    raise TypeError('Protocols cannot be instantiated')\nTypeError: Protocols cannot be instantiated\n",
+        "returncode": 1
+      }
+    },
+    {
+      "module": "semantic_release.helpers",
+      "symbol": "check_tag_format",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/python-semantic-release/venv/lib/python3.10/site-packages/semantic_release/helpers.py",
+      "source_sha256": "9bececea71a312b202b27580b1d394316ef43298e17a89df9617416c1dd8fff9",
+      "source": "from __future__ import annotations\nimport importlib.util\nimport os\nimport re\nimport string\nimport sys\nfrom functools import lru_cache, reduce, wraps\nfrom pathlib import Path, PurePosixPath\nfrom re import IGNORECASE, compile as regexp\nfrom typing import TYPE_CHECKING, Any, Callable, NamedTuple, Sequence, TypeVar\nfrom urllib.parse import urlsplit, urlunsplit\nfrom semantic_release.globals import logger\n\ndef check_tag_format(tag_format: str) -> None:\n    if \"version\" not in (f[1] for f in string.Formatter().parse(tag_format)):\n        raise ValueError(\n            f\"Invalid tag_format {tag_format!r}, must use 'version' as a format key\"\n        )",
+      "source_lines": 5,
+      "project": "python-semantic-release",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/python-semantic-release/venv/lib/python3.10/site-packages",
+      "id": "python-semantic-release__semantic_release.helpers__check_tag_format",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/python-semantic-release/venv/lib/python3.10/site-packages/semantic_release/helpers.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/python-semantic-release/venv/lib/python3.10/site-packages/semantic_release/helpers.py\", line 111, in check_tag_format\n    if \"version\" not in (f[1] for f in string.Formatter().parse(tag_format)):\n  File \"/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/string.py\", line 259, in parse\n    return _string.formatter_parser(format_string)\nTypeError: expected str, got int\n",
+        "returncode": 1
+      }
+    },
+    {
+      "module": "semantic_release.helpers",
+      "symbol": "format_arg",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/python-semantic-release/venv/lib/python3.10/site-packages/semantic_release/helpers.py",
+      "source_sha256": "9bececea71a312b202b27580b1d394316ef43298e17a89df9617416c1dd8fff9",
+      "source": "from __future__ import annotations\nimport importlib.util\nimport os\nimport re\nimport string\nimport sys\nfrom functools import lru_cache, reduce, wraps\nfrom pathlib import Path, PurePosixPath\nfrom re import IGNORECASE, compile as regexp\nfrom typing import TYPE_CHECKING, Any, Callable, NamedTuple, Sequence, TypeVar\nfrom urllib.parse import urlsplit, urlunsplit\nfrom semantic_release.globals import logger\n\ndef format_arg(value: Any) -> str:\n    \"\"\"Helper to format an argument an argument for logging\"\"\"\n    if type(value) == str:\n        return f\"'{value.strip()}'\"\n    return str(value)",
+      "source_lines": 5,
+      "project": "python-semantic-release",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/python-semantic-release/venv/lib/python3.10/site-packages",
+      "id": "python-semantic-release__semantic_release.helpers__format_arg",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/python-semantic-release/venv/lib/python3.10/site-packages/semantic_release/helpers.py",
+      "setup_probe": {
+        "accepted": true,
+        "stdout": "{\"signature\": \"(value: 'Any') -> 'str'\", \"arguments\": {\"value\": \"1\"}, \"scope\": \"call completed; no method precondition or oracle guarantee\"}\n",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    {
+      "module": "semantic_release.helpers",
+      "symbol": "validate_types_in_sequence",
+      "file": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/python-semantic-release/venv/lib/python3.10/site-packages/semantic_release/helpers.py",
+      "source_sha256": "9bececea71a312b202b27580b1d394316ef43298e17a89df9617416c1dd8fff9",
+      "source": "from __future__ import annotations\nimport importlib.util\nimport os\nimport re\nimport string\nimport sys\nfrom functools import lru_cache, reduce, wraps\nfrom pathlib import Path, PurePosixPath\nfrom re import IGNORECASE, compile as regexp\nfrom typing import TYPE_CHECKING, Any, Callable, NamedTuple, Sequence, TypeVar\nfrom urllib.parse import urlsplit, urlunsplit\nfrom semantic_release.globals import logger\n\ndef validate_types_in_sequence(\n    sequence: Sequence[Any], types: type | tuple[type, ...]\n) -> bool:\n    \"\"\"Validate that all elements in a sequence are of a specific type\"\"\"\n    return all(isinstance(item, types) for item in sequence)",
+      "source_lines": 5,
+      "project": "python-semantic-release",
+      "root": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/python-semantic-release/venv/lib/python3.10/site-packages",
+      "id": "python-semantic-release__semantic_release.helpers__validate_types_in_sequence",
+      "source_file_absolute": "/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/python-semantic-release/venv/lib/python3.10/site-packages/semantic_release/helpers.py",
+      "setup_probe": {
+        "accepted": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\n  File \"/home/heurix/Documents/Test4Py_Setup/research/groq_confirmation_20261118/environments/python-semantic-release/venv/lib/python3.10/site-packages/semantic_release/helpers.py\", line 100, in validate_types_in_sequence\n    return all(isinstance(item, types) for item in sequence)\nTypeError: 'int' object is not iterable\n",
+        "returncode": 1
+      }
+    }
+  ],
+  "projects": [
+    {
+      "project": "apimd",
+      "package": "apimd",
+      "install_returncode": 0,
+      "version": "2.1.1",
+      "candidate_count": 11
+    },
+    {
+      "project": "black",
+      "package": "black",
+      "install_returncode": 0,
+      "version": "26.10.1",
+      "candidate_count": 0
+    },
+    {
+      "project": "dataclasses-json",
+      "package": "dataclasses-json",
+      "install_returncode": 0,
+      "version": "0.6.7",
+      "candidate_count": 8
+    },
+    {
+      "project": "flutes",
+      "package": "flutes",
+      "install_returncode": 0,
+      "version": "0.3.0",
+      "candidate_count": 16
+    },
+    {
+      "project": "httpie",
+      "package": "httpie",
+      "install_returncode": 0,
+      "version": "3.2.4",
+      "candidate_count": 90
+    },
+    {
+      "project": "isort",
+      "package": "isort",
+      "install_returncode": 0,
+      "version": "9.0.2",
+      "candidate_count": 16
+    },
+    {
+      "project": "mimesis",
+      "package": "mimesis",
+      "install_returncode": 0,
+      "version": "22.2.0",
+      "candidate_count": 11
+    },
+    {
+      "project": "py-backwards",
+      "package": "py-backwards",
+      "install_returncode": 0,
+      "version": "0.7",
+      "candidate_count": 30
+    },
+    {
+      "project": "pypara",
+      "package": "pypara",
+      "install_returncode": 0,
+      "version": "0.1.1",
+      "candidate_count": 34
+    },
+    {
+      "project": "python-semantic-release",
+      "package": "python-semantic-release",
+      "install_returncode": 0,
+      "version": "10.7.0",
+      "candidate_count": 10
+    }
+  ],
+  "planned": 108,
+  "expected_target_slots": 30,
+  "missing_target_slots": 3,
+  "primary": "all-pass + positive module coverage + replay + quality gate",
+  "source_versions": "Current PyPI versions pinned by resolved metadata; not original paper commits",
+  "preparation_time": 1795021186.6362429,
+  "output_caps": [
+    1536,
+    2048
+  ],
+  "source_manifest_sha256": "f5c18504a3094a30c9c11c33dfaa0a18873b890ff1a573b80d124cd59cf5913e",
+  "runner_sha256": "f9d48c2eede3a91921e9bf0186d2db9ff10d6664db8ca156a2fe0236341ef39c",
+  "rationale": "Compare cap cost/latency and operational acceptance; no pooling with prior efficacy cohorts or paper superiority claim.",
+  "current_authorized_cumulative_budget_usd": 3
+}

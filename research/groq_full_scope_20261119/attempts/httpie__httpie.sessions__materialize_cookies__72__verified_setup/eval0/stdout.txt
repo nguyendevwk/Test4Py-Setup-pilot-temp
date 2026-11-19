@@ -1,0 +1,67 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_materialize_cookies_single_cookie ____________________
+
+    def test_materialize_cookies_single_cookie():
+        """materialize_cookies should correctly serialize a single cookie."""
+        jar = RequestsCookieJar()
+        # Create a cookie with various attributes
+        cookie = Cookie(
+            version=0,
+            name="sessionid",
+            value="abc123",
+            port=None,
+            port_specified=False,
+            domain="example.com",
+            domain_specified=True,
+            domain_initial_dot=False,
+            path="/",
+            path_specified=True,
+            secure=False,
+            expires=1700000000,
+            discard=False,
+            comment=None,
+            comment_url=None,
+            rest={"HttpOnly": None},
+            rfc2109=False,
+        )
+        jar.set_cookie(cookie)
+    
+        result = materialize_cookies(jar)
+        assert len(result) == 1
+        serialized = result[0]
+        # Basic attributes
+        assert serialized["name"] == "sessionid"
+        assert serialized["value"] == "abc123"
+        assert serialized["domain"] == "example.com"
+        assert serialized["path"] == "/"
+        # Optional attributes
+        assert serialized["expires"] == 1700000000
+        assert serialized["secure"] is False
+>       assert serialized["httpOnly"] is True
+E       KeyError: 'httpOnly'
+
+test_generated.py:52: KeyError
+__________________ test_materialize_cookies_multiple_cookies ___________________
+
+    def test_materialize_cookies_multiple_cookies():
+        """materialize_cookies should preserve order and serialize all cookies."""
+        jar = RequestsCookieJar()
+        # Add multiple cookies
+        for i in range(3):
+>           cookie = Cookie(
+                version=0,
+                name=f"cookie{i}",
+                value=f"value{i}",
+                domain="example.com",
+                path="/",
+                secure=bool(i % 2),
+                rest={"HttpOnly": None} if i % 2 == 0 else {},
+            )
+E           TypeError: Cookie.__init__() missing 9 required positional arguments: 'port', 'port_specified', 'domain_specified', 'domain_initial_dot', 'path_specified', 'expires', 'discard', 'comment', and 'comment_url'
+
+test_generated.py:68: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_materialize_cookies_single_cookie - KeyError: ...
+FAILED test_generated.py::test_materialize_cookies_multiple_cookies - TypeErr...
+2 failed, 1 passed in 0.77s

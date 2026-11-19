@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-c77ec00e-4224-4a83-8836-5fd5158cc71a",
+  "object": "chat.completion",
+  "created": 1795078930,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado.httpclient import HTTPClient, HTTPResponse, HTTPError\nfrom tornado.ioloop import IOLoop\nfrom tornado.concurrent import Future\nfrom tornado import gen\nfrom typing import Any, Dict, Optional, Type\n\n\nclass DummyAsyncClient:\n    \"\"\"A minimal async client that mimics AsyncHTTPClient for testing.\"\"\"\n    def __init__(self, **kwargs: Any) -> None:\n        self.closed = False\n        self.fetch_calls: list = []\n\n    async def fetch(self, request: Any, **kwargs: Any) -> HTTPResponse:\n        self.fetch_calls.append((request, kwargs))\n        # Return a simple HTTPResponse with status 200 and body \"ok\"\n        return HTTPResponse(\n            request=request,\n            code=200,\n            reason=\"OK\",\n            headers={},\n            buffer=bytes(\"ok\", \"utf-8\"),\n            request_time=0.0,\n            connection_time=0.0,\n            time_info={},\n        )\n\n    def close(self) -> None:\n        self.closed = True\n\n\ndef test_httpclient_fetch_delegates_to_async_client(tmp_path: Any) -> None:\n    \"\"\"HTTPClient.fetch should delegate to the async client and return its response.\"\"\"\n    client = HTTPClient(async_client_class=DummyAsyncClient)\n    response = client.fetch(\"http://example.com\")\n    assert isinstance(response, HTTPResponse)\n    assert response.code == 200\n    assert response.body == b\"ok\"\n    # Ensure the async client recorded the call\n    assert client._async_client.fetch_calls == [(\"http://example.com\", {})]\n    client.close()\n    assert client._async_client.closed is True\n    assert client._closed is True\n\n\ndef test_httpclient_close_is_idempotent(tmp_path: Any) -> None:\n    \"\"\"Calling close multiple times should not raise and should close resources once.\"\"\"\n    client = HTTPClient(async_client_class=DummyAsyncClient)\n    client.close()\n    # Second close should be harmless\n    client.close()\n    assert client._async_client.closed is True\n    assert client._closed is True\n    # IOLoop should be closed; attempting to run_sync should raise\n    with pytest.raises(RuntimeError):\n        client._io_loop.run_sync(lambda: None)\n\n\ndef test_httpclient_fetch_raises_http_error_on_non_200(tmp_path: Any) -> None:\n    \"\"\"If the async client returns a non-200 response, HTTPClient.fetch should raise HTTPError.\"\"\"\n    class Non200AsyncClient:\n        async def fetch(self, request: Any, **kwargs: Any) -> HTTPResponse:\n            return HTTPResponse(\n                request=request,\n                code=404,\n                reason=\"Not Found\",\n                headers={},\n                buffer=bytes(\"not found\", \"utf-8\"),\n                request_time=0.0,\n                connection_time=0.0,\n                time_info={},\n            )\n        def close(self) -> None: ...\n\n    client = HTTPClient(async_client_class=Non200AsyncClient)\n    with pytest.raises(HTTPError) as excinfo:\n        client.fetch(\"http://example.com\")\n    assert excinfo.value.response.code == 404\n    assert excinfo.value.response.body == b\"not found\"\n    client.close()\n```",
+        "reasoning": "We need tests for HTTPClient. But AsyncHTTPClient not defined here. Likely in tornado.httpclient. We can import HTTPClient from tornado.httpclient. Write tests: 1) normal fetch to http://httpbin.org/get? but no network. Can't. Instead use local server? Can't. Maybe use httpclient with a dummy async client class that we pass. We can create a mock async client class that has fetch returning a dummy response. Test that fetch delegates. Also test close idempotent. Third test error handling: async_client.fetch raises exception, ensure HTTPClient.fetch propagates. Use custom async client. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051710641,
+    "prompt_tokens": 1007,
+    "prompt_time": 0.050526958,
+    "completion_tokens": 806,
+    "completion_time": 0.89727085,
+    "total_tokens": 1813,
+    "total_time": 0.947797808,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 131
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgnf1ceg3vsy9gt3pfmvfm",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado.httpclient import HTTPClient, HTTPResponse, HTTPError\nfrom tornado.ioloop import IOLoop\nfrom tornado.concurrent import Future\nfrom tornado import gen\nfrom typing import Any, Dict, Optional, Type\n\n\nclass DummyAsyncClient:\n    \"\"\"A minimal async client that mimics AsyncHTTPClient for testing.\"\"\"\n    def __init__(self, **kwargs: Any) -> None:\n        self.closed = False\n        self.fetch_calls: list = []\n\n    async def fetch(self, request: Any, **kwargs: Any) -> HTTPResponse:\n        self.fetch_calls.append((request, kwargs))\n        # Return a simple HTTPResponse with status 200 and body \"ok\"\n        return HTTPResponse(\n            request=request,\n            code=200,\n            reason=\"OK\",\n            headers={},\n            buffer=bytes(\"ok\", \"utf-8\"),\n            request_time=0.0,\n            connection_time=0.0,\n            time_info={},\n        )\n\n    def close(self) -> None:\n        self.closed = True\n\n\ndef test_httpclient_fetch_delegates_to_async_client(tmp_path: Any) -> None:\n    \"\"\"HTTPClient.fetch should delegate to the async client and return its response.\"\"\"\n    client = HTTPClient(async_client_class=DummyAsyncClient)\n    response = client.fetch(\"http://example.com\")\n    assert isinstance(response, HTTPResponse)\n    assert response.code == 200\n    assert response.body == b\"ok\"\n    # Ensure the async client recorded the call\n    assert client._async_client.fetch_calls == [(\"http://example.com\", {})]\n    client.close()\n    assert client._async_client.closed is True\n    assert client._closed is True\n\n\ndef test_httpclient_close_is_idempotent(tmp_path: Any) -> None:\n    \"\"\"Calling close multiple times should not raise and should close resources once.\"\"\"\n    client = HTTPClient(async_client_class=DummyAsyncClient)\n    client.close()\n    # Second close should be harmless\n    client.close()\n    assert client._async_client.closed is True\n    assert client._closed is True\n    # IOLoop should be closed; attempting to run_sync should raise\n    with pytest.raises(RuntimeError):\n        client._io_loop.run_sync(lambda: None)\n\n\ndef test_httpclient_fetch_raises_http_error_on_non_200(tmp_path: Any) -> None:\n    \"\"\"If the async client returns a non-200 response, HTTPClient.fetch should raise HTTPError.\"\"\"\n    class Non200AsyncClient:\n        async def fetch(self, request: Any, **kwargs: Any) -> HTTPResponse:\n            return HTTPResponse(\n                request=request,\n                code=404,\n                reason=\"Not Found\",\n                headers={},\n                buffer=bytes(\"not found\", \"utf-8\"),\n                request_time=0.0,\n                connection_time=0.0,\n                time_info={},\n            )\n        def close(self) -> None: ...\n\n    client = HTTPClient(async_client_class=Non200AsyncClient)\n    with pytest.raises(HTTPError) as excinfo:\n        client.fetch(\"http://example.com\")\n    assert excinfo.value.response.code == 404\n    assert excinfo.value.response.body == b\"not found\"\n    client.close()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.353935346007347
+}

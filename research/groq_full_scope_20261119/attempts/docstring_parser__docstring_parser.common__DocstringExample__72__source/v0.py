@@ -1,0 +1,30 @@
+import pytest
+from docstring_parser.common import DocstringExample
+
+def test_docstring_example_basic_initialization():
+    """Verify that a DocstringExample stores its arguments correctly."""
+    args = ["param1", "param2"]
+    snippet = ">>> print('hello')"
+    description = "Example description."
+    example = DocstringExample(args, snippet, description)
+
+    assert example.args == args
+    assert example.snippet == snippet
+    assert example.description == description
+    # The base class should also store the description
+    assert example._description == description  # type: ignore[attr-defined]
+
+def test_docstring_example_with_empty_and_none_values():
+    """Test boundary conditions: empty args list and None values for snippet and description."""
+    example = DocstringExample([], None, None)
+
+    assert example.args == []
+    assert example.snippet is None
+    assert example.description is None
+    assert example._description is None  # type: ignore[attr-defined]
+
+def test_docstring_example_invalid_argument_type():
+    """Passing a non-list to args should raise a TypeError due to list indexing in the base class."""
+    with pytest.raises(TypeError):
+        # The base class expects a list and will attempt to iterate over it
+        DocstringExample("not a list", "snippet", "description")

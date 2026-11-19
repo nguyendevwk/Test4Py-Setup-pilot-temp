@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-3f312450-439a-4510-b666-869af8662687",
+  "object": "chat.completion",
+  "created": 1795079052,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nfrom decimal import Decimal\n\nimport pytest\n\nfrom pypara.dcc import dcfc_30_360_isda\n\n\ndef test_normal_fraction():\n    \"\"\"Standard case where no day adjustments are required.\"\"\"\n    start = datetime.date(2023, 1, 15)\n    asof = datetime.date(2023, 4, 15)\n    end = asof  # end is unused in calculation but required by signature\n    result = dcfc_30_360_isda(start=start, asof=asof, end=end)\n    # 30 days per month, 3 months difference => 90 days / 360 = 0.25\n    assert result == Decimal(\"0.25\")\n\n\ndef test_start_day_31_adjustment():\n    \"\"\"When the start day is 31, it should be adjusted to 30.\"\"\"\n    start = datetime.date(2023, 1, 31)\n    asof = datetime.date(2023, 3, 31)\n    end = asof\n    result = dcfc_30_360_isda(start=start, asof=asof, end=end)\n    # Adjusted start: 2023-01-30, asof: 2023-03-31\n    # nod = (31-30) + 30*(3-1) + 360*(0) = 1 + 60 = 61\n    # fraction = 61/360\n    assert result == Decimal(61) / Decimal(360)\n\n\ndef test_asof_day_31_with_start_30_adjustment():\n    \"\"\"When start day is 30 and asof day is 31, asof should be adjusted to 30.\"\"\"\n    start = datetime.date(2023, 2, 30)  # already 30\n    asof = datetime.date(2023, 3, 31)\n    end = asof\n    result = dcfc_30_360_isda(start=start, asof=asof, end=end)\n    # asof adjusted to 2023-03-30\n    # nod = (30-30) + 30*(3-2) + 360*0 = 30\n    # fraction = 30/360 = 0.083333...\n    assert result == Decimal(30) / Decimal(360)\n```",
+        "reasoning": "We need three tests. Use datetime.date. Test normal, boundary (31 day). Error? maybe negative? but function doesn't error. Could test when start day 31 adjustment. Also test when asof day 31 with start 30. Third test maybe freq unused. Just test fraction."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053643672,
+    "prompt_tokens": 883,
+    "prompt_time": 0.216503399,
+    "completion_tokens": 561,
+    "completion_time": 0.756987845,
+    "total_tokens": 1444,
+    "total_time": 0.973491244,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 60
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgs679e699hzkq4jy9h1dd",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nfrom decimal import Decimal\n\nimport pytest\n\nfrom pypara.dcc import dcfc_30_360_isda\n\n\ndef test_normal_fraction():\n    \"\"\"Standard case where no day adjustments are required.\"\"\"\n    start = datetime.date(2023, 1, 15)\n    asof = datetime.date(2023, 4, 15)\n    end = asof  # end is unused in calculation but required by signature\n    result = dcfc_30_360_isda(start=start, asof=asof, end=end)\n    # 30 days per month, 3 months difference => 90 days / 360 = 0.25\n    assert result == Decimal(\"0.25\")\n\n\ndef test_start_day_31_adjustment():\n    \"\"\"When the start day is 31, it should be adjusted to 30.\"\"\"\n    start = datetime.date(2023, 1, 31)\n    asof = datetime.date(2023, 3, 31)\n    end = asof\n    result = dcfc_30_360_isda(start=start, asof=asof, end=end)\n    # Adjusted start: 2023-01-30, asof: 2023-03-31\n    # nod = (31-30) + 30*(3-1) + 360*(0) = 1 + 60 = 61\n    # fraction = 61/360\n    assert result == Decimal(61) / Decimal(360)\n\n\ndef test_asof_day_31_with_start_30_adjustment():\n    \"\"\"When start day is 30 and asof day is 31, asof should be adjusted to 30.\"\"\"\n    start = datetime.date(2023, 2, 30)  # already 30\n    asof = datetime.date(2023, 3, 31)\n    end = asof\n    result = dcfc_30_360_isda(start=start, asof=asof, end=end)\n    # asof adjusted to 2023-03-30\n    # nod = (30-30) + 30*(3-2) + 360*0 = 30\n    # fraction = 30/360 = 0.083333...\n    assert result == Decimal(30) / Decimal(360)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.37102376105031
+}

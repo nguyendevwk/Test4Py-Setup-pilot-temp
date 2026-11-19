@@ -1,0 +1,24 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_make_send_kwargs_normal_behavior _____________________
+
+    def test_make_send_kwargs_normal_behavior():
+        ns = argparse.Namespace(
+            cert="client.pem",
+            cert_key="key.pem",
+            cert_key_pass=DummyPass("passphrase"),
+            proxy=[argparse.Namespace(key="http", value="http://proxy.example")],
+            verify="yes",
+        )
+        kwargs = make_send_kwargs_mergeable_from_env(ns)
+        assert kwargs["stream"] is True
+        assert kwargs["proxies"] == {"http": "http://proxy.example"}
+        assert kwargs["verify"] is True
+        assert isinstance(kwargs["cert"], HTTPieCertificate)
+>       assert kwargs["cert"].cert == "client.pem"
+E       AttributeError: 'HTTPieCertificate' object has no attribute 'cert'
+
+test_generated.py:23: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_make_send_kwargs_normal_behavior - AttributeEr...
+1 failed, 2 passed in 0.77s

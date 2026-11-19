@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b639ae34-9941-4698-9683-0e16d6312a85",
+  "object": "chat.completion",
+  "created": 1795076699,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport pytest\nfrom tqdm._tqdm_pandas import tqdm_pandas\nfrom tqdm import TqdmDeprecationWarning\n\nclass DummyTqdmType:\n    def __init__(self):\n        self.pandas_called_with = None\n\n    @classmethod\n    def pandas(cls, **kwargs):\n        cls.pandas_called_with = kwargs\n\nclass DummyInstance:\n    def __init__(self):\n        self.pandas_called_with = None\n\n    def pandas(self, **kwargs):\n        self.pandas_called_with = kwargs\n\ndef test_tqdm_pandas_with_type(tmp_path):\n    \"\"\"When tclass is a type, pandas is called on the class with kwargs.\"\"\"\n    dummy_file = tmp_path / \"log.txt\"\n    dummy_file.write_text(\"\")\n    kwargs = {\"file\": dummy_file.open(\"w\"), \"desc\": \"test\"}\n    with pytest.warns(TqdmDeprecationWarning) as record:\n        tqdm_pandas(DummyTqdmType, **kwargs)\n    # Ensure warning message is correct\n    assert any(\"Please use `tqdm.pandas(...)\" in str(w.message) for w in record)\n    # Verify pandas was called on the class with the same kwargs\n    assert DummyTqdmType.pandas_called_with == kwargs\n    # Ensure the file write function used in warning is the same as provided\n    assert record[0].fp_write == kwargs[\"file\"].write\n\ndef test_tqdm_pandas_with_instance(tmp_path):\n    \"\"\"When tclass is an instance, pandas is called on the instance with kwargs.\"\"\"\n    dummy_file = tmp_path / \"log2.txt\"\n    dummy_file.write_text(\"\")\n    kwargs = {\"file\": dummy_file.open(\"w\"), \"desc\": \"instance\"}\n    instance = DummyInstance()\n    with pytest.warns(TqdmDeprecationWarning) as record:\n        tqdm_pandas(instance, **kwargs)\n    # Ensure warning message is correct\n    assert any(\"Please use `tqdm.pandas(...)\" in str(w.message) for w in record)\n    # Verify pandas was called on the instance with the same kwargs\n    assert instance.pandas_called_with == kwargs\n    # Ensure the file write function used in warning is the same as provided\n    assert record[0].fp_write == kwargs[\"file\"].write\n\ndef test_tqdm_pandas_missing_pandas():\n    \"\"\"If tclass lacks a pandas method, AttributeError is raised.\"\"\"\n    class NoPandas:\n        pass\n    with pytest.raises(AttributeError):\n        tqdm_pandas(NoPandas())\n```",
+        "reasoning": "We need to test tqdm_pandas function. It uses TqdmDeprecationWarning from tqdm. We can import tqdm_pandas. We need to test normal, boundary, error. Cases: tclass is type or has name startswith 'tqdm_': triggers first branch. else triggers second. We can create dummy class with pandas method. Also check that warning is issued. Use pytest.warns. Also test that file write used. Use tmp_path for file. Third test maybe error when tclass has no pandas? But function will call tclass.pandas. If missing, AttributeError. We can test that. Let's write three tests: 1) tclass is type with pandas method, passes kwargs. 2) tclass instance with pandas method, triggers else. 3) tclass missing pandas raises AttributeError. Use pytest.warns to capture TqdmDeprecationWarning. Need to import TqdmDeprecationWarning. Let's code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.057691258,
+    "prompt_tokens": 450,
+    "prompt_time": 0.138489493,
+    "completion_tokens": 744,
+    "completion_time": 0.844209304,
+    "total_tokens": 1194,
+    "total_time": 0.982698797,
+    "completion_tokens_details": {
+      "reasoning_tokens": 200
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sehcqper59xxw3t18vmmz9",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport pytest\nfrom tqdm._tqdm_pandas import tqdm_pandas\nfrom tqdm import TqdmDeprecationWarning\n\nclass DummyTqdmType:\n    def __init__(self):\n        self.pandas_called_with = None\n\n    @classmethod\n    def pandas(cls, **kwargs):\n        cls.pandas_called_with = kwargs\n\nclass DummyInstance:\n    def __init__(self):\n        self.pandas_called_with = None\n\n    def pandas(self, **kwargs):\n        self.pandas_called_with = kwargs\n\ndef test_tqdm_pandas_with_type(tmp_path):\n    \"\"\"When tclass is a type, pandas is called on the class with kwargs.\"\"\"\n    dummy_file = tmp_path / \"log.txt\"\n    dummy_file.write_text(\"\")\n    kwargs = {\"file\": dummy_file.open(\"w\"), \"desc\": \"test\"}\n    with pytest.warns(TqdmDeprecationWarning) as record:\n        tqdm_pandas(DummyTqdmType, **kwargs)\n    # Ensure warning message is correct\n    assert any(\"Please use `tqdm.pandas(...)\" in str(w.message) for w in record)\n    # Verify pandas was called on the class with the same kwargs\n    assert DummyTqdmType.pandas_called_with == kwargs\n    # Ensure the file write function used in warning is the same as provided\n    assert record[0].fp_write == kwargs[\"file\"].write\n\ndef test_tqdm_pandas_with_instance(tmp_path):\n    \"\"\"When tclass is an instance, pandas is called on the instance with kwargs.\"\"\"\n    dummy_file = tmp_path / \"log2.txt\"\n    dummy_file.write_text(\"\")\n    kwargs = {\"file\": dummy_file.open(\"w\"), \"desc\": \"instance\"}\n    instance = DummyInstance()\n    with pytest.warns(TqdmDeprecationWarning) as record:\n        tqdm_pandas(instance, **kwargs)\n    # Ensure warning message is correct\n    assert any(\"Please use `tqdm.pandas(...)\" in str(w.message) for w in record)\n    # Verify pandas was called on the instance with the same kwargs\n    assert instance.pandas_called_with == kwargs\n    # Ensure the file write function used in warning is the same as provided\n    assert record[0].fp_write == kwargs[\"file\"].write\n\ndef test_tqdm_pandas_missing_pandas():\n    \"\"\"If tclass lacks a pandas method, AttributeError is raised.\"\"\"\n    class NoPandas:\n        pass\n    with pytest.raises(AttributeError):\n        tqdm_pandas(NoPandas())\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3606627380358987
+}

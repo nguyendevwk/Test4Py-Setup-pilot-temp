@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-cb63854d-321d-43d5-b925-0a55e21a6210",
+  "object": "chat.completion",
+  "created": 1795076786,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport sys\nimport pytest\nfrom mimesis.providers.path import Path\n\n# Helper to create a provider with a fixed seed for deterministic random choices\ndef make_provider(platform: str = \"linux\") -> Path:\n    provider = Path(platform=platform)\n    provider.random.seed(0)\n    return provider\n\ndef test_root_and_home_consistency():\n    \"\"\"Root should be the parent directory of home.\"\"\"\n    provider = make_provider()\n    root = provider.root()\n    home = provider.home()\n    # root should be the parent of home\n    assert root == str(Path(root).parent) or root == \"/\"\n    assert home.startswith(root)\n    # On POSIX, root should be '/' and home should be '/home' or similar\n    assert root == \"/\"\n    assert home == \"/home\"\n\ndef test_user_path_case_on_windows_and_unix():\n    \"\"\"User path should be capitalized on Windows and lowercased on Unix.\"\"\"\n    # Windows platform\n    win_provider = make_provider(platform=\"win32\")\n    win_user = win_provider.user()\n    # The username part should be capitalized\n    win_username = win_user.split(\"/\")[-1]\n    assert win_username[0].isupper()\n    # Unix platform\n    unix_provider = make_provider(platform=\"linux\")\n    unix_user = unix_provider.user()\n    unix_username = unix_user.split(\"/\")[-1]\n    assert unix_username.islower()\n\ndef test_dev_dir_contains_expected_components():\n    \"\"\"Development directory should contain a valid folder and programming language.\"\"\"\n    provider = make_provider()\n    dev_dir = provider.dev_dir()\n    # Split the path into components\n    parts = dev_dir.split(\"/\")\n    # The path should have at least 5 parts: ['', 'home', 'username', 'folder', 'lang']\n    assert len(parts) >= 5\n    # The folder should be either 'Development' or 'Dev'\n    assert parts[-2] in (\"Development\", \"Dev\")\n    # The programming language should be a known language from PROGRAMMING_LANGS\n    # Since we cannot import the dataset directly, we check that the language part\n    # is alphabetic and not empty\n    lang = parts[-1]\n    assert lang.isalpha() and len(lang) > 0\n```",
+        "reasoning": "We need 3 test functions for Path provider. Use tmp_path? Not needed. Just test behavior. Test root, home, user. Also test platform handling. Use assert types and patterns. Use pytest.raises for invalid platform? Not implemented. Maybe test that platform 'win' capitalizes user. Use deterministic random? random.choice uses self.random from BaseProvider; likely seeded. But we can set seed to make deterministic. BaseProvider likely has random attribute. We can set provider.random.seed(0). Then predict outputs. But we don't know dataset values. But we can test that user path ends with capitalized username for win. Use regex. Also test that root is parent of home. Third test: dev_dir path contains 'Development' or 'Dev' and programming language. Use regex. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051722287,
+    "prompt_tokens": 910,
+    "prompt_time": 0.020651721,
+    "completion_tokens": 642,
+    "completion_time": 0.761614764,
+    "total_tokens": 1552,
+    "total_time": 0.782266485,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 164
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sem1k9e529hwrdy1xrsdyh",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport sys\nimport pytest\nfrom mimesis.providers.path import Path\n\n# Helper to create a provider with a fixed seed for deterministic random choices\ndef make_provider(platform: str = \"linux\") -> Path:\n    provider = Path(platform=platform)\n    provider.random.seed(0)\n    return provider\n\ndef test_root_and_home_consistency():\n    \"\"\"Root should be the parent directory of home.\"\"\"\n    provider = make_provider()\n    root = provider.root()\n    home = provider.home()\n    # root should be the parent of home\n    assert root == str(Path(root).parent) or root == \"/\"\n    assert home.startswith(root)\n    # On POSIX, root should be '/' and home should be '/home' or similar\n    assert root == \"/\"\n    assert home == \"/home\"\n\ndef test_user_path_case_on_windows_and_unix():\n    \"\"\"User path should be capitalized on Windows and lowercased on Unix.\"\"\"\n    # Windows platform\n    win_provider = make_provider(platform=\"win32\")\n    win_user = win_provider.user()\n    # The username part should be capitalized\n    win_username = win_user.split(\"/\")[-1]\n    assert win_username[0].isupper()\n    # Unix platform\n    unix_provider = make_provider(platform=\"linux\")\n    unix_user = unix_provider.user()\n    unix_username = unix_user.split(\"/\")[-1]\n    assert unix_username.islower()\n\ndef test_dev_dir_contains_expected_components():\n    \"\"\"Development directory should contain a valid folder and programming language.\"\"\"\n    provider = make_provider()\n    dev_dir = provider.dev_dir()\n    # Split the path into components\n    parts = dev_dir.split(\"/\")\n    # The path should have at least 5 parts: ['', 'home', 'username', 'folder', 'lang']\n    assert len(parts) >= 5\n    # The folder should be either 'Development' or 'Dev'\n    assert parts[-2] in (\"Development\", \"Dev\")\n    # The programming language should be a known language from PROGRAMMING_LANGS\n    # Since we cannot import the dataset directly, we check that the language part\n    # is alphabetic and not empty\n    lang = parts[-1]\n    assert lang.isalpha() and len(lang) > 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1571553790126927
+}

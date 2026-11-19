@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-8825d895-0a58-41b9-907f-7ec062aebd6c",
+  "object": "chat.completion",
+  "created": 1795077966,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.utils.snippet import find_variables\nfrom py_backwards.utils.tree import find, get_non_exp_parent_and_index, replace_at\n\ndef test_find_variables_removes_and_yields_single_let():\n    source = \"\"\"\ndef foo():\n    let x = 1\n    return x\n\"\"\"\n    tree = ast.parse(source)\n    vars_found = list(find_variables(tree))\n    assert vars_found == [\"x\"]\n    # The let call should be removed from the function body\n    func_body = tree.body[0].body\n    assert all(not isinstance(node, ast.Call) or not (isinstance(node.func, ast.Name) and node.func.id == 'let')\n               for node in func_body)\n    # The remaining body should contain only the return statement\n    assert len(func_body) == 1\n    assert isinstance(func_body[0], ast.Return)\n\ndef test_find_variables_handles_multiple_lets_and_other_calls():\n    source = \"\"\"\ndef bar():\n    let a = 2\n    print(a)\n    let b = 3\n    return a + b\n\"\"\"\n    tree = ast.parse(source)\n    vars_found = list(find_variables(tree))\n    assert vars_found == [\"a\", \"b\"]\n    func_body = tree.body[0].body\n    # After removal, only the print and return should remain\n    assert len(func_body) == 2\n    assert isinstance(func_body[0], ast.Expr) and isinstance(func_body[0].value, ast.Call)\n    assert isinstance(func_body[1], ast.Return)\n\ndef test_find_variables_raises_on_invalid_let_argument():\n    source = \"\"\"\ndef baz():\n    let (x, y) = (1, 2)\n    return x\n\"\"\"\n    tree = ast.parse(source)\n    # The first argument to let is a Tuple, not a Name, so accessing .id should raise AttributeError\n    with pytest.raises(AttributeError):\n        list(find_variables(tree))\n```",
+        "reasoning": "We need tests for find_variables. We need to create AST from source using typed_ast? Use ast.parse? typed_ast.ast3. We'll import find_variables. Test normal: let call removed and variable yielded. Boundary: multiple let calls. Error: let with non-name arg? But function expects node.args[0].id. If not Name, AttributeError. We can test that it raises. Use tmp_path to write file? Not needed. Use ast.parse. Ensure tree modification. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053926179,
+    "prompt_tokens": 360,
+    "prompt_time": 0.023343809,
+    "completion_tokens": 533,
+    "completion_time": 0.625529275,
+    "total_tokens": 893,
+    "total_time": 0.648873084,
+    "completion_tokens_details": {
+      "reasoning_tokens": 103
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfr1whe7hvcyrhq3m6srxy",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast as pyast\nimport typed_ast.ast3 as ast\nimport pytest\nfrom py_backwards.utils.snippet import find_variables\nfrom py_backwards.utils.tree import find, get_non_exp_parent_and_index, replace_at\n\ndef test_find_variables_removes_and_yields_single_let():\n    source = \"\"\"\ndef foo():\n    let x = 1\n    return x\n\"\"\"\n    tree = ast.parse(source)\n    vars_found = list(find_variables(tree))\n    assert vars_found == [\"x\"]\n    # The let call should be removed from the function body\n    func_body = tree.body[0].body\n    assert all(not isinstance(node, ast.Call) or not (isinstance(node.func, ast.Name) and node.func.id == 'let')\n               for node in func_body)\n    # The remaining body should contain only the return statement\n    assert len(func_body) == 1\n    assert isinstance(func_body[0], ast.Return)\n\ndef test_find_variables_handles_multiple_lets_and_other_calls():\n    source = \"\"\"\ndef bar():\n    let a = 2\n    print(a)\n    let b = 3\n    return a + b\n\"\"\"\n    tree = ast.parse(source)\n    vars_found = list(find_variables(tree))\n    assert vars_found == [\"a\", \"b\"]\n    func_body = tree.body[0].body\n    # After removal, only the print and return should remain\n    assert len(func_body) == 2\n    assert isinstance(func_body[0], ast.Expr) and isinstance(func_body[0].value, ast.Call)\n    assert isinstance(func_body[1], ast.Return)\n\ndef test_find_variables_raises_on_invalid_let_argument():\n    source = \"\"\"\ndef baz():\n    let (x, y) = (1, 2)\n    return x\n\"\"\"\n    tree = ast.parse(source)\n    # The first argument to let is a Tuple, not a Name, so accessing .id should raise AttributeError\n    with pytest.raises(AttributeError):\n        list(find_variables(tree))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0716487710014917
+}

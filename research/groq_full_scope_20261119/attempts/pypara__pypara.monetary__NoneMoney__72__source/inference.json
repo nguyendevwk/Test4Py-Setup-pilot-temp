@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-75a41b29-4d3e-49b1-b17a-da9c2fc32dae",
+  "object": "chat.completion",
+  "created": 1795078645,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom decimal import Decimal\nfrom pypara.monetary import NoneMoney\nfrom pypara.currencies import Currency\nfrom pypara.commons.zeitgeist import Date\n\ndef test_none_money_comparisons():\n    nm = NoneMoney()\n    # defined/undefined flags\n    assert not nm.defined\n    assert nm.undefined\n    # comparisons with defined money (using a dummy Money subclass)\n    class DummyMoney:\n        def __init__(self, defined=True):\n            self._defined = defined\n        @property\n        def defined(self):\n            return self._defined\n        @property\n        def undefined(self):\n            return not self._defined\n    defined = DummyMoney(True)\n    undefined = DummyMoney(False)\n    # lt: NoneMoney < defined is True, < undefined is False\n    assert nm < defined\n    assert not (nm < undefined)\n    # lte: always True\n    assert nm <= defined\n    assert nm <= undefined\n    # gt: always False\n    assert not (nm > defined)\n    assert not (nm > undefined)\n    # gte: True if other is undefined\n    assert nm >= undefined\n    assert not (nm >= defined)\n\ndef test_none_money_or_else_and_mapping():\n    nm = NoneMoney()\n    # or_else should call the provided function\n    called = False\n    def factory():\n        nonlocal called\n        called = True\n        return NoneMoney()\n    result = nm.or_else(factory)\n    assert called\n    assert isinstance(result, NoneMoney)\n    # fmap should return self unchanged\n    assert nm.fmap(lambda x: x) is nm\n    # dimap should call the second function\n    called_e = False\n    def e_func():\n        nonlocal called_e\n        called_e = True\n        return 42\n    assert nm.dimap(lambda x: x, e_func) == 42\n    assert called_e\n\ndef test_none_money_quantity_and_currency_defaults():\n    nm = NoneMoney()\n    # qty_or returns default\n    default_qty = Decimal(\"123.45\")\n    assert nm.qty_or(default_qty) == default_qty\n    # qty_or_zero returns ZERO\n    from pypara.commons.numbers import ZERO\n    assert nm.qty_or_zero() == ZERO\n    # qty_or_none returns None\n    assert nm.qty_or_none() is None\n    # qty_or_else calls provided function\n    called = False\n    def alt():\n        nonlocal called\n        called = True\n        return Decimal(\"9.99\")\n    assert nm.qty_or_else(alt) == Decimal(\"9.99\")\n    assert called\n    # ccy_or returns default currency\n    default_ccy = Currency(\"USD\")\n    assert nm.ccy_or(default_ccy) == default_ccy\n    # ccy_or_none returns None\n    assert nm.ccy_or_none() is None\n    # dov_or returns default date\n    default_date = Date(2023, 1, 1)\n    assert nm.dov_or(default_date) == default_date\n    # dov_or_none returns None\n    assert nm.dov_or_none() is None\n```",
+        "reasoning": "We need three tests. Use NoneMoney instance. Test comparison, or_else, and conversion? Use assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051942694,
+    "prompt_tokens": 1176,
+    "prompt_time": 0.016200594,
+    "completion_tokens": 687,
+    "completion_time": 0.761002049,
+    "total_tokens": 1863,
+    "total_time": 0.777202643,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 23
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgcrg6ekmt0x819wbfzyph",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom decimal import Decimal\nfrom pypara.monetary import NoneMoney\nfrom pypara.currencies import Currency\nfrom pypara.commons.zeitgeist import Date\n\ndef test_none_money_comparisons():\n    nm = NoneMoney()\n    # defined/undefined flags\n    assert not nm.defined\n    assert nm.undefined\n    # comparisons with defined money (using a dummy Money subclass)\n    class DummyMoney:\n        def __init__(self, defined=True):\n            self._defined = defined\n        @property\n        def defined(self):\n            return self._defined\n        @property\n        def undefined(self):\n            return not self._defined\n    defined = DummyMoney(True)\n    undefined = DummyMoney(False)\n    # lt: NoneMoney < defined is True, < undefined is False\n    assert nm < defined\n    assert not (nm < undefined)\n    # lte: always True\n    assert nm <= defined\n    assert nm <= undefined\n    # gt: always False\n    assert not (nm > defined)\n    assert not (nm > undefined)\n    # gte: True if other is undefined\n    assert nm >= undefined\n    assert not (nm >= defined)\n\ndef test_none_money_or_else_and_mapping():\n    nm = NoneMoney()\n    # or_else should call the provided function\n    called = False\n    def factory():\n        nonlocal called\n        called = True\n        return NoneMoney()\n    result = nm.or_else(factory)\n    assert called\n    assert isinstance(result, NoneMoney)\n    # fmap should return self unchanged\n    assert nm.fmap(lambda x: x) is nm\n    # dimap should call the second function\n    called_e = False\n    def e_func():\n        nonlocal called_e\n        called_e = True\n        return 42\n    assert nm.dimap(lambda x: x, e_func) == 42\n    assert called_e\n\ndef test_none_money_quantity_and_currency_defaults():\n    nm = NoneMoney()\n    # qty_or returns default\n    default_qty = Decimal(\"123.45\")\n    assert nm.qty_or(default_qty) == default_qty\n    # qty_or_zero returns ZERO\n    from pypara.commons.numbers import ZERO\n    assert nm.qty_or_zero() == ZERO\n    # qty_or_none returns None\n    assert nm.qty_or_none() is None\n    # qty_or_else calls provided function\n    called = False\n    def alt():\n        nonlocal called\n        called = True\n        return Decimal(\"9.99\")\n    assert nm.qty_or_else(alt) == Decimal(\"9.99\")\n    assert called\n    # ccy_or returns default currency\n    default_ccy = Currency(\"USD\")\n    assert nm.ccy_or(default_ccy) == default_ccy\n    # ccy_or_none returns None\n    assert nm.ccy_or_none() is None\n    # dov_or returns default date\n    default_date = Date(2023, 1, 1)\n    assert nm.dov_or(default_date) == default_date\n    # dov_or_none returns None\n    assert nm.dov_or_none() is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1909235669882037
+}

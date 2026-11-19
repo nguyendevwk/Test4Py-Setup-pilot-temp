@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-697c35a7-60f6-42a9-961f-5b9ad62400c9",
+  "object": "chat.completion",
+  "created": 1795077038,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.formats import BaseFormat\nfrom typesystem.base import ValidationError\n\n\nclass DummyFormat(BaseFormat):\n    errors = {\"not_int\": \"Value {value} is not an integer\"}\n\n    def is_native_type(self, value):\n        return isinstance(value, int)\n\n    def validate(self, value):\n        if not self.is_native_type(value):\n            return self.validation_error(\"not_int\")\n        return value\n\n    def serialize(self, obj):\n        if not self.is_native_type(obj):\n            return None\n        return str(obj)\n\n\ndef test_validation_error_message_and_code():\n    fmt = DummyFormat()\n    fmt.value = 3.14  # set attribute used in error formatting\n    error = fmt.validation_error(\"not_int\")\n    assert isinstance(error, ValidationError)\n    assert error.code == \"not_int\"\n    assert error.text == \"Value 3.14 is not an integer\"\n\n\ndef test_validate_returns_value_or_error():\n    fmt = DummyFormat()\n    # Valid integer\n    result = fmt.validate(42)\n    assert result == 42\n    # Invalid type triggers ValidationError\n    result = fmt.validate(\"not an int\")\n    assert isinstance(result, ValidationError)\n    assert result.code == \"not_int\"\n    assert result.text == \"Value not an int is not an integer\"\n\n\ndef test_serialize_returns_string_or_none():\n    fmt = DummyFormat()\n    # Serialize valid integer\n    assert fmt.serialize(7) == \"7\"\n    # Serialize invalid type returns None\n    assert fmt.serialize(3.14) is None\n```",
+        "reasoning": "We need to test BaseFormat. But it's abstract. We can create a concrete subclass for testing. Use simple implementation. Test validation_error, is_native_type, validate, serialize. But abstract methods raise NotImplemented. So we need subclass that implements them. We'll test that validation_error uses errors dict. We'll create subclass with errors mapping. Use tmp_path? Not needed. Just test. Provide three test functions. Each independent. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052800815,
+    "prompt_tokens": 384,
+    "prompt_time": 0.025734643,
+    "completion_tokens": 425,
+    "completion_time": 0.476598415,
+    "total_tokens": 809,
+    "total_time": 0.502333058,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 89
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sevr0be83racemv1r859sg",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.formats import BaseFormat\nfrom typesystem.base import ValidationError\n\n\nclass DummyFormat(BaseFormat):\n    errors = {\"not_int\": \"Value {value} is not an integer\"}\n\n    def is_native_type(self, value):\n        return isinstance(value, int)\n\n    def validate(self, value):\n        if not self.is_native_type(value):\n            return self.validation_error(\"not_int\")\n        return value\n\n    def serialize(self, obj):\n        if not self.is_native_type(obj):\n            return None\n        return str(obj)\n\n\ndef test_validation_error_message_and_code():\n    fmt = DummyFormat()\n    fmt.value = 3.14  # set attribute used in error formatting\n    error = fmt.validation_error(\"not_int\")\n    assert isinstance(error, ValidationError)\n    assert error.code == \"not_int\"\n    assert error.text == \"Value 3.14 is not an integer\"\n\n\ndef test_validate_returns_value_or_error():\n    fmt = DummyFormat()\n    # Valid integer\n    result = fmt.validate(42)\n    assert result == 42\n    # Invalid type triggers ValidationError\n    result = fmt.validate(\"not an int\")\n    assert isinstance(result, ValidationError)\n    assert result.code == \"not_int\"\n    assert result.text == \"Value not an int is not an integer\"\n\n\ndef test_serialize_returns_string_or_none():\n    fmt = DummyFormat()\n    # Serialize valid integer\n    assert fmt.serialize(7) == \"7\"\n    # Serialize invalid type returns None\n    assert fmt.serialize(3.14) is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8659282110165805
+}

@@ -1,0 +1,46 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_len_without_ansi_empty_and_non_string_input _______________
+
+    def test_len_without_ansi_empty_and_non_string_input():
+        # Empty string should return 0
+        assert len_without_ansi("") == 0
+        # Passing a list of empty strings should also return 0
+        assert len_without_ansi(["", ""]) == 0
+        # Passing a non-string sequence that contains no ANSI codes
+>       assert len_without_ansi([123, 45]) == 2  # each element counted as length 1
+
+test_generated.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+seq = [123, 45]
+
+    def len_without_ansi(seq: Sequence) -> int:
+        """Return the character length of the given
+        :obj:`Sequence <typing.Sequence>` without counting any ANSI codes.
+    
+        *New in version 0.6*
+    
+        Args:
+             seq (:obj:`Sequence <typing.Sequence>`): A string or a list/tuple
+                 of strings.
+    
+        :rtype:
+            :obj:`int`
+    
+        Example:
+            >>> from flutils.txtutils import len_without_ansi
+            >>> text = '\\x1b[38;5;209mfoobar\\x1b[0m'
+            >>> len_without_ansi(text)
+            6
+        """
+        if hasattr(seq, 'capitalize'):
+            _text: str = cast(str, seq)
+            seq = [c for c in _ANSI_RE.split(_text) if c]
+>       seq = [c for c in chain(*map(_ANSI_RE.split, seq)) if c]
+E       TypeError: expected string or bytes-like object
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/txtutils.py:47: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_len_without_ansi_empty_and_non_string_input - ...
+1 failed, 2 passed in 0.11s

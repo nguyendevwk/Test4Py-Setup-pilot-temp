@@ -1,0 +1,64 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_duplicate_keys_order_and_json_dump ____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__JsonDictPreservingDuplicateKeys__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_duplicate_keys_order_and_0')
+
+    def test_duplicate_keys_order_and_json_dump(tmp_path):
+        # Create a dict with duplicate keys
+        items = [("a", 1), ("b", 2), ("a", 3), ("c", 4)]
+        jd = JsonDictPreservingDuplicateKeys(items)
+    
+        # The items method should return the original list including duplicates
+        assert list(jd.items()) == items
+    
+        # json.dumps should preserve the order of duplicate keys
+        dumped = json.dumps(jd, separators=(",", ":"))
+        # The hack key is added, so we expect it at the end
+        expected = '{"a":1,"b":2,"a":3,"c":4,"__hack__":"__hack__"}'
+>       assert dumped == expected
+E       assert '{"a":1,"b":2,"a":3,"c":4}' == '{"a":1,"b":2...":"__hack__"}'
+E         
+E         - {"a":1,"b":2,"a":3,"c":4,"__hack__":"__hack__"}
+E         + {"a":1,"b":2,"a":3,"c":4}
+
+test_generated.py:19: AssertionError
+________________________ test_empty_items_adds_hack_key ________________________
+
+    def test_empty_items_adds_hack_key():
+        # When no items are provided, the hack key should still be added
+        jd = JsonDictPreservingDuplicateKeys([])
+>       assert list(jd.items()) == [("__hack__", "__hack__")]
+E       AssertionError: assert [] == [('__hack__', '__hack__')]
+E         
+E         Right contains one more item: ('__hack__', '__hack__')
+E         Use -v to get more diff
+
+test_generated.py:29: AssertionError
+_____________________ test_supports_sorting_flag_behavior ______________________
+
+    def test_supports_sorting_flag_behavior():
+        # The SUPPORTS_SORTING flag depends on the Python version
+        if sys.version_info >= (3, 8):
+            assert JsonDictPreservingDuplicateKeys.SUPPORTS_SORTING is True
+        else:
+            assert JsonDictPreservingDuplicateKeys.SUPPORTS_SORTING is False
+    
+        # When sorting is supported, json.dumps with sort_keys=True should sort unique keys
+        items = [("b", 2), ("a", 1), ("b", 3)]
+        jd = JsonDictPreservingDuplicateKeys(items)
+        dumped = json.dumps(jd, sort_keys=True, separators=(",", ":"))
+        # The hack key is added and sorted last because of its name
+        expected = '{"__hack__":"__hack__","a":1,"b":2,"b":3}'
+>       assert dumped == expected
+E       assert '{"a":1,"b":2,"b":3}' == '{"__hack__":...,"b":2,"b":3}'
+E         
+E         - {"__hack__":"__hack__","a":1,"b":2,"b":3}
+E         + {"a":1,"b":2,"b":3}
+
+test_generated.py:51: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_duplicate_keys_order_and_json_dump - assert '{...
+FAILED test_generated.py::test_empty_items_adds_hack_key - AssertionError: as...
+FAILED test_generated.py::test_supports_sorting_flag_behavior - assert '{"a":...
+3 failed in 0.30s

@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-fcb27f6b-1337-43d5-95a0-7848f56397a3",
+  "object": "chat.completion",
+  "created": 1795079394,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport pytest\nfrom concurrent import futures\nfrom tornado.concurrent import Future as TornadoFuture\nfrom tornado.concurrent import future_add_done_callback\n\n\ndef test_callback_invoked_when_future_completes():\n    \"\"\"The callback should be called when a concurrent Future completes.\"\"\"\n    loop = asyncio.new_event_loop()\n    future = futures.Future()\n    called = []\n\n    def cb(fut):\n        called.append(fut)\n\n    future_add_done_callback(future, cb)\n    future.set_result(42)\n\n    assert called == [future]\n    assert called[0].result() == 42\n\n\ndef test_callback_called_immediately_if_future_already_done():\n    \"\"\"If the future is already done, the callback should be invoked immediately.\"\"\"\n    future = futures.Future()\n    future.set_result(\"done\")\n    called = []\n\n    def cb(fut):\n        called.append(fut)\n\n    future_add_done_callback(future, cb)\n\n    assert called == [future]\n    assert called[0].result() == \"done\"\n\n\ndef test_callback_with_tornado_future_and_exception():\n    \"\"\"The function should work with Tornado's Future and propagate exceptions.\"\"\"\n    future = TornadoFuture()\n    called = []\n\n    def cb(fut):\n        called.append(fut)\n\n    future_add_done_callback(future, cb)\n    future.set_exception(ValueError(\"boom\"))\n\n    assert called == [future]\n    with pytest.raises(ValueError, match=\"boom\"):\n        future.result()\n```",
+        "reasoning": "We need tests for this function. It accepts either concurrent.futures.Future or tornado.concurrent.Future? The code imports Future from tornado.concurrent? Not shown but likely. We'll test normal: create concurrent Future, add callback, set result, ensure callback called. Also test already done: create future, set result, call function, callback called immediately. Also test error: passing non-future? maybe TypeError? But function doesn't check type. Maybe test that callback receives future. We'll use tmp_path not needed. Use pytest. Three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.059926408,
+    "prompt_tokens": 394,
+    "prompt_time": 0.11855135,
+    "completion_tokens": 416,
+    "completion_time": 0.449730633,
+    "total_tokens": 810,
+    "total_time": 0.568281983,
+    "completion_tokens_details": {
+      "reasoning_tokens": 108
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sh3n1feept27pt4dqravf0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport pytest\nfrom concurrent import futures\nfrom tornado.concurrent import Future as TornadoFuture\nfrom tornado.concurrent import future_add_done_callback\n\n\ndef test_callback_invoked_when_future_completes():\n    \"\"\"The callback should be called when a concurrent Future completes.\"\"\"\n    loop = asyncio.new_event_loop()\n    future = futures.Future()\n    called = []\n\n    def cb(fut):\n        called.append(fut)\n\n    future_add_done_callback(future, cb)\n    future.set_result(42)\n\n    assert called == [future]\n    assert called[0].result() == 42\n\n\ndef test_callback_called_immediately_if_future_already_done():\n    \"\"\"If the future is already done, the callback should be invoked immediately.\"\"\"\n    future = futures.Future()\n    future.set_result(\"done\")\n    called = []\n\n    def cb(fut):\n        called.append(fut)\n\n    future_add_done_callback(future, cb)\n\n    assert called == [future]\n    assert called[0].result() == \"done\"\n\n\ndef test_callback_with_tornado_future_and_exception():\n    \"\"\"The function should work with Tornado's Future and propagate exceptions.\"\"\"\n    future = TornadoFuture()\n    called = []\n\n    def cb(fut):\n        called.append(fut)\n\n    future_add_done_callback(future, cb)\n    future.set_exception(ValueError(\"boom\"))\n\n    assert called == [future]\n    with pytest.raises(ValueError, match=\"boom\"):\n        future.result()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "95879d6843ab4f3a97cef5dd2bb0f419",
+  "_api_plus_pacing_seconds": 1.3501632880070247
+}

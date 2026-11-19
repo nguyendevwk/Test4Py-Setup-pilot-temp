@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-428fed3f-684e-4f93-97bd-38d24c0ce3f5",
+  "object": "chat.completion",
+  "created": 1795076393,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport types\nimport pytest\nfrom pathlib import Path\nfrom sanic.utils import load_module_from_file_location, LoadFileException, PyFileError\n\n\ndef test_load_python_module_from_file(tmp_path):\n    \"\"\"Test loading a .py file and accessing its attributes.\"\"\"\n    # Create a simple Python module file\n    module_path = tmp_path / \"sample.py\"\n    module_path.write_text(\"value = 42\\n\", encoding=\"utf8\")\n\n    # Load the module\n    mod = load_module_from_file_location(str(module_path))\n\n    # Verify that the module is a types.ModuleType and contains the expected attribute\n    assert isinstance(mod, types.ModuleType)\n    assert hasattr(mod, \"value\")\n    assert mod.value == 42\n\n\ndef test_load_config_with_env_var(tmp_path):\n    \"\"\"Test that environment variables in the path are substituted correctly.\"\"\"\n    # Set an environment variable\n    os.environ[\"TEST_ENV\"] = \"env_value\"\n\n    # Create a config file that will be loaded as a module\n    config_path = tmp_path / \"config.cfg\"\n    config_path.write_text(\"config_value = 'ok'\\n\", encoding=\"utf8\")\n\n    # Path with environment variable placeholder\n    path_with_env = f\"{tmp_path}/${{TEST_ENV}}/config.cfg\"\n    # Create the directory referenced by the env var\n    (tmp_path / \"env_value\").mkdir()\n    # Copy the config file into the env directory\n    (tmp_path / \"env_value\" / \"config.cfg\").write_text(\"config_value = 'ok'\\n\", encoding=\"utf8\")\n\n    # Load the module using the path with the env variable\n    mod = load_module_from_file_location(path_with_env)\n\n    # Verify that the module was loaded from the substituted path\n    assert isinstance(mod, types.ModuleType)\n    assert hasattr(mod, \"config_value\")\n    assert mod.config_value == \"ok\"\n\n\ndef test_load_nonexistent_file_raises_pyfileerror(tmp_path):\n    \"\"\"Test that loading a non‑existent file raises PyFileError.\"\"\"\n    nonexistent_path = tmp_path / \"does_not_exist.cfg\"\n\n    with pytest.raises(PyFileError) as excinfo:\n        load_module_from_file_location(str(nonexistent_path))\n\n    # The exception should reference the path that was attempted\n    assert str(nonexistent_path) in str(excinfo.value)\n```",
+        "reasoning": "Need 3 tests: normal file .py, env var substitution, error raising. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.091361812,
+    "prompt_tokens": 948,
+    "prompt_time": 0.111547062,
+    "completion_tokens": 519,
+    "completion_time": 0.586947881,
+    "total_tokens": 1467,
+    "total_time": 0.698494943,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 22
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se81zheq3rfn7vjkp47qge",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport types\nimport pytest\nfrom pathlib import Path\nfrom sanic.utils import load_module_from_file_location, LoadFileException, PyFileError\n\n\ndef test_load_python_module_from_file(tmp_path):\n    \"\"\"Test loading a .py file and accessing its attributes.\"\"\"\n    # Create a simple Python module file\n    module_path = tmp_path / \"sample.py\"\n    module_path.write_text(\"value = 42\\n\", encoding=\"utf8\")\n\n    # Load the module\n    mod = load_module_from_file_location(str(module_path))\n\n    # Verify that the module is a types.ModuleType and contains the expected attribute\n    assert isinstance(mod, types.ModuleType)\n    assert hasattr(mod, \"value\")\n    assert mod.value == 42\n\n\ndef test_load_config_with_env_var(tmp_path):\n    \"\"\"Test that environment variables in the path are substituted correctly.\"\"\"\n    # Set an environment variable\n    os.environ[\"TEST_ENV\"] = \"env_value\"\n\n    # Create a config file that will be loaded as a module\n    config_path = tmp_path / \"config.cfg\"\n    config_path.write_text(\"config_value = 'ok'\\n\", encoding=\"utf8\")\n\n    # Path with environment variable placeholder\n    path_with_env = f\"{tmp_path}/${{TEST_ENV}}/config.cfg\"\n    # Create the directory referenced by the env var\n    (tmp_path / \"env_value\").mkdir()\n    # Copy the config file into the env directory\n    (tmp_path / \"env_value\" / \"config.cfg\").write_text(\"config_value = 'ok'\\n\", encoding=\"utf8\")\n\n    # Load the module using the path with the env variable\n    mod = load_module_from_file_location(path_with_env)\n\n    # Verify that the module was loaded from the substituted path\n    assert isinstance(mod, types.ModuleType)\n    assert hasattr(mod, \"config_value\")\n    assert mod.config_value == \"ok\"\n\n\ndef test_load_nonexistent_file_raises_pyfileerror(tmp_path):\n    \"\"\"Test that loading a non‑existent file raises PyFileError.\"\"\"\n    nonexistent_path = tmp_path / \"does_not_exist.cfg\"\n\n    with pytest.raises(PyFileError) as excinfo:\n        load_module_from_file_location(str(nonexistent_path))\n\n    # The exception should reference the path that was attempted\n    assert str(nonexistent_path) in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0595563119859435
+}

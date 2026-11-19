@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-216138bf-e5bb-4111-acd9-c2647ebe06a8",
+  "object": "chat.completion",
+  "created": 1795076921,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport typed_ast.ast3 as ast\nfrom py_backwards.transformers.yield_from import YieldFromTransformer\n\n\ndef create_module_with_assign_yield_from():\n    \"\"\"Return an ast.Module whose body contains a single Assign with a YieldFrom.\"\"\"\n    assign = ast.Assign(\n        targets=[ast.Name(id=\"x\", ctx=ast.Store())],\n        value=ast.YieldFrom(value=ast.Name(id=\"gen\", ctx=ast.Load())),\n    )\n    return ast.Module(body=[assign], type_ignores=[])\n\n\ndef create_module_with_expr_yield_from():\n    \"\"\"Return an ast.Module whose body contains a single Expr with a YieldFrom.\"\"\"\n    expr = ast.Expr(\n        value=ast.YieldFrom(value=ast.Name(id=\"gen\", ctx=ast.Load())),\n    )\n    return ast.Module(body=[expr], type_ignores=[])\n\n\ndef test_get_yield_from_index_returns_correct_index():\n    \"\"\"_get_yield_from_index should return the index of the first Assign with a YieldFrom.\"\"\"\n    module = create_module_with_assign_yield_from()\n    transformer = YieldFromTransformer()\n    index = transformer._get_yield_from_index(module, ast.Assign)\n    assert index == 0, \"Expected the Assign with YieldFrom to be at index 0\"\n\n\ndef test_handle_assignments_replaces_assign_with_yield_from_body():\n    \"\"\"_handle_assignments should replace an Assign containing YieldFrom with the body returned by _emulate_yield_from.\"\"\"\n    module = create_module_with_assign_yield_from()\n    transformer = YieldFromTransformer()\n    transformed = transformer._handle_assignments(module)\n    # After handling, the body should no longer contain an Assign node\n    assert all(not isinstance(node, ast.Assign) for node in transformed.body), \\\n        \"Assign node with YieldFrom should have been replaced\"\n    # The tree_changed flag should be set to True\n    assert transformer._tree_changed is True, \"Tree change flag should be True after replacement\"\n\n\ndef test_handle_expressions_replaces_expr_with_yield_from_body():\n    \"\"\"_handle_expressions should replace an Expr containing YieldFrom with the body returned by _emulate_yield_from.\"\"\"\n    module = create_module_with_expr_yield_from()\n    transformer = YieldFromTransformer()\n    transformed = transformer._handle_expressions(module)\n    # After handling, the body should no longer contain an Expr node\n    assert all(not isinstance(node, ast.Expr) for node in transformed.body), \\\n        \"Expr node with YieldFrom should have been replaced\"\n    # The tree_changed flag should be set to True\n    assert transformer._tree_changed is True, \"Tree change flag should be True after replacement\"\n```",
+        "reasoning": "We need to write tests for YieldFromTransformer. We need to import it. Use typed_ast ast3. We need to create a small AST with yield from. Use ast.parse? typed_ast? We can use typed_ast.parse? Let's import typed_ast.ast3 as ast. Use ast.parse? typed_ast has parse? I think typed_ast.parse is available. We'll create code string with yield from. Then transform. We need to check that yield_from is replaced. But we don't know implementation of yield_from.get_body etc. Hard. Maybe test that _get_yield_from_index returns correct index. Use a node with body list. Create dummy node with body containing Assign with YieldFrom. Use ast.Assign and ast.YieldFrom. Use VariablesGenerator? Hard.\n\nMaybe test that _get_yield_from_index returns None when no match. Also test that _handle_assignments loops until none. We can create a simple node with body list of Assign with YieldFrom. Use dummy target. Use YieldFromTransformer()._handle_assignments. But need to import internal functions. They are not public but we can access.\n\nLet's write tests that create a simple ast.Module with body containing Assign(targets=[ast.Name(id='x', ctx=ast.Store())], value=ast.YieldFrom(value=ast.Name(id='gen', ctx=ast.Load()))). Then call transformer._handle_assignments on module. Check that body replaced with something not Assign. We don't know what yield_from.get_body returns but likely a list of statements. We can assert that body no longer contains Assign. Also that _tree_changed set True.\n\nSimilarly test _get_yield_from_index returns correct index.\n\nThird test: _handle_expressions with Expr node containing YieldFrom.\n\nLet's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049652768,
+    "prompt_tokens": 791,
+    "prompt_time": 0.050131181,
+    "completion_tokens": 915,
+    "completion_time": 1.01952019,
+    "total_tokens": 1706,
+    "total_time": 1.069651371,
+    "completion_tokens_details": {
+      "reasoning_tokens": 356
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7ser5feefz857gk1njgk7da",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport typed_ast.ast3 as ast\nfrom py_backwards.transformers.yield_from import YieldFromTransformer\n\n\ndef create_module_with_assign_yield_from():\n    \"\"\"Return an ast.Module whose body contains a single Assign with a YieldFrom.\"\"\"\n    assign = ast.Assign(\n        targets=[ast.Name(id=\"x\", ctx=ast.Store())],\n        value=ast.YieldFrom(value=ast.Name(id=\"gen\", ctx=ast.Load())),\n    )\n    return ast.Module(body=[assign], type_ignores=[])\n\n\ndef create_module_with_expr_yield_from():\n    \"\"\"Return an ast.Module whose body contains a single Expr with a YieldFrom.\"\"\"\n    expr = ast.Expr(\n        value=ast.YieldFrom(value=ast.Name(id=\"gen\", ctx=ast.Load())),\n    )\n    return ast.Module(body=[expr], type_ignores=[])\n\n\ndef test_get_yield_from_index_returns_correct_index():\n    \"\"\"_get_yield_from_index should return the index of the first Assign with a YieldFrom.\"\"\"\n    module = create_module_with_assign_yield_from()\n    transformer = YieldFromTransformer()\n    index = transformer._get_yield_from_index(module, ast.Assign)\n    assert index == 0, \"Expected the Assign with YieldFrom to be at index 0\"\n\n\ndef test_handle_assignments_replaces_assign_with_yield_from_body():\n    \"\"\"_handle_assignments should replace an Assign containing YieldFrom with the body returned by _emulate_yield_from.\"\"\"\n    module = create_module_with_assign_yield_from()\n    transformer = YieldFromTransformer()\n    transformed = transformer._handle_assignments(module)\n    # After handling, the body should no longer contain an Assign node\n    assert all(not isinstance(node, ast.Assign) for node in transformed.body), \\\n        \"Assign node with YieldFrom should have been replaced\"\n    # The tree_changed flag should be set to True\n    assert transformer._tree_changed is True, \"Tree change flag should be True after replacement\"\n\n\ndef test_handle_expressions_replaces_expr_with_yield_from_body():\n    \"\"\"_handle_expressions should replace an Expr containing YieldFrom with the body returned by _emulate_yield_from.\"\"\"\n    module = create_module_with_expr_yield_from()\n    transformer = YieldFromTransformer()\n    transformed = transformer._handle_expressions(module)\n    # After handling, the body should no longer contain an Expr node\n    assert all(not isinstance(node, ast.Expr) for node in transformed.body), \\\n        \"Expr node with YieldFrom should have been replaced\"\n    # The tree_changed flag should be set to True\n    assert transformer._tree_changed is True, \"Tree change flag should be True after replacement\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4234105870127678
+}

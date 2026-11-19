@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-f27c75c5-ffb9-4584-bd2c-0750ad6af709",
+  "object": "chat.completion",
+  "created": 1795077840,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport textwrap\nimport pytest\nfrom httpie.cli.definition import format_auth_help\nfrom httpie.plugins.builtin import BuiltinAuthPlugin\n\nclass DummyAuthPlugin:\n    auth_type = \"dummy\"\n    name = \"Dummy Auth\"\n    package_name = \"dummy_pkg\"\n    description = \"A dummy authentication plugin used for testing.\"\n\nclass AnotherAuthPlugin:\n    auth_type = \"another\"\n    name = \"Another Auth\"\n    package_name = \"another_pkg\"\n    description = \"Another plugin with a longer description that should wrap properly when displayed in the help text.\"\n\nclass BuiltinDummyAuthPlugin(BuiltinAuthPlugin):\n    auth_type = \"builtin\"\n    name = \"Builtin Auth\"\n    package_name = \"builtin_pkg\"\n    description = \"Builtin authentication plugin.\"\n\n@pytest.fixture\ndef auth_mapping():\n    return {\n        \"dummy\": DummyAuthPlugin,\n        \"another\": AnotherAuthPlugin,\n        \"builtin\": BuiltinDummyAuthPlugin,\n    }\n\ndef test_format_auth_help_includes_all_plugins_and_wraps_description(auth_mapping):\n    help_text = format_auth_help(auth_mapping, isolation_mode=False)\n    # Default auth type should be the first plugin in the mapping\n    assert 'Defaults to \"dummy\".' in help_text\n    # All plugin types should be listed\n    assert '\"dummy\": Dummy Auth' in help_text\n    assert '\"another\": Another Auth' in help_text\n    assert '\"builtin\": Builtin Auth' in help_text\n    # Descriptions should be wrapped and indented\n    wrapped = textwrap.wrap(AnotherAuthPlugin.description, width=70)\n    for line in wrapped:\n        assert line in help_text\n    # No isolation message should be present\n    assert \"To see all available auth types\" not in help_text\n\ndef test_format_auth_help_isolation_mode_excludes_non_builtin(auth_mapping):\n    help_text = format_auth_help(auth_mapping, isolation_mode=True)\n    # Only builtin plugins should appear\n    assert '\"builtin\": Builtin Auth' in help_text\n    assert '\"dummy\": Dummy Auth' not in help_text\n    assert '\"another\": Another Auth' not in help_text\n    # Isolation message should be present\n    assert \"To see all available auth types\" in help_text\n    # Default auth type should be the first builtin plugin\n    assert 'Defaults to \"builtin\".' in help_text\n\ndef test_format_auth_help_handles_empty_mapping():\n    with pytest.raises(IndexError):\n        format_auth_help({}, isolation_mode=False)\n```",
+        "reasoning": "Need tests for format_auth_help. Use dummy plugins. Create simple classes with attributes. Test normal and isolation_mode. Ensure output contains expected strings."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052288902,
+    "prompt_tokens": 725,
+    "prompt_time": 0.019999147,
+    "completion_tokens": 553,
+    "completion_time": 0.637508458,
+    "total_tokens": 1278,
+    "total_time": 0.657507605,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 30
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfm6yke46a5wgn8wsrvday",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport textwrap\nimport pytest\nfrom httpie.cli.definition import format_auth_help\nfrom httpie.plugins.builtin import BuiltinAuthPlugin\n\nclass DummyAuthPlugin:\n    auth_type = \"dummy\"\n    name = \"Dummy Auth\"\n    package_name = \"dummy_pkg\"\n    description = \"A dummy authentication plugin used for testing.\"\n\nclass AnotherAuthPlugin:\n    auth_type = \"another\"\n    name = \"Another Auth\"\n    package_name = \"another_pkg\"\n    description = \"Another plugin with a longer description that should wrap properly when displayed in the help text.\"\n\nclass BuiltinDummyAuthPlugin(BuiltinAuthPlugin):\n    auth_type = \"builtin\"\n    name = \"Builtin Auth\"\n    package_name = \"builtin_pkg\"\n    description = \"Builtin authentication plugin.\"\n\n@pytest.fixture\ndef auth_mapping():\n    return {\n        \"dummy\": DummyAuthPlugin,\n        \"another\": AnotherAuthPlugin,\n        \"builtin\": BuiltinDummyAuthPlugin,\n    }\n\ndef test_format_auth_help_includes_all_plugins_and_wraps_description(auth_mapping):\n    help_text = format_auth_help(auth_mapping, isolation_mode=False)\n    # Default auth type should be the first plugin in the mapping\n    assert 'Defaults to \"dummy\".' in help_text\n    # All plugin types should be listed\n    assert '\"dummy\": Dummy Auth' in help_text\n    assert '\"another\": Another Auth' in help_text\n    assert '\"builtin\": Builtin Auth' in help_text\n    # Descriptions should be wrapped and indented\n    wrapped = textwrap.wrap(AnotherAuthPlugin.description, width=70)\n    for line in wrapped:\n        assert line in help_text\n    # No isolation message should be present\n    assert \"To see all available auth types\" not in help_text\n\ndef test_format_auth_help_isolation_mode_excludes_non_builtin(auth_mapping):\n    help_text = format_auth_help(auth_mapping, isolation_mode=True)\n    # Only builtin plugins should appear\n    assert '\"builtin\": Builtin Auth' in help_text\n    assert '\"dummy\": Dummy Auth' not in help_text\n    assert '\"another\": Another Auth' not in help_text\n    # Isolation message should be present\n    assert \"To see all available auth types\" in help_text\n    # Default auth type should be the first builtin plugin\n    assert 'Defaults to \"builtin\".' in help_text\n\ndef test_format_auth_help_handles_empty_mapping():\n    with pytest.raises(IndexError):\n        format_auth_help({}, isolation_mode=False)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0134262170176953
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-97338b47-90a8-40ca-8cfd-1cb927a5e3e4",
+  "object": "chat.completion",
+  "created": 1795077438,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport time\nimport threading\nimport pytest\nfrom tqdm.contrib.utils_worker import MonoWorker\n\n\ndef test_single_task_runs_and_completes():\n    worker = MonoWorker()\n    result = []\n\n    def task():\n        result.append(\"started\")\n        time.sleep(0.05)\n        result.append(\"finished\")\n\n    future = worker.submit(task)\n    assert future is not None\n    future.result()  # wait for completion\n    assert result == [\"started\", \"finished\"]\n\n\ndef test_waiting_task_replaced_by_new_submission():\n    worker = MonoWorker()\n    lock = threading.Lock()\n    order = []\n\n    def long_task():\n        with lock:\n            order.append(\"long_start\")\n        time.sleep(0.1)\n        with lock:\n            order.append(\"long_end\")\n\n    def short_task():\n        with lock:\n            order.append(\"short_start\")\n        time.sleep(0.01)\n        with lock:\n            order.append(\"short_end\")\n\n    # Submit long task first\n    long_future = worker.submit(long_task)\n    # Immediately submit short task, which should replace the waiting slot\n    short_future = worker.submit(short_task)\n\n    # Wait for both to finish\n    long_future.result()\n    short_future.result()\n\n    # The long task should run to completion, short task should also run\n    # but the order should reflect that short started after long started\n    assert order == [\"long_start\", \"short_start\", \"long_end\", \"short_end\"]\n\n\ndef test_cancellation_of_waiting_task_and_execution_of_new_one():\n    worker = MonoWorker()\n    lock = threading.Lock()\n    events = {\"first\": threading.Event(), \"second\": threading.Event()}\n\n    def first_task():\n        with lock:\n            events[\"first\"].set()\n        time.sleep(0.2)  # long running\n\n    def second_task():\n        with lock:\n            events[\"second\"].set()\n        time.sleep(0.05)\n\n    # Submit first long task\n    first_future = worker.submit(first_task)\n    # Wait until first task has started\n    events[\"first\"].wait(0.1)\n\n    # Submit second task which should replace the waiting slot\n    second_future = worker.submit(second_task)\n\n    # Wait for both to finish\n    first_future.result()\n    second_future.result()\n\n    # The second task should have started after the first started\n    # and the first task should have completed after the second\n    assert events[\"first\"].is_set()\n    assert events[\"second\"].is_set()\n    assert first_future.done()\n    assert second_future.done()\n```",
+        "reasoning": "We need tests for MonoWorker. Test normal submit, replacement of waiting, cancellation. Use tmp_path? Not needed. Use simple functions. Use time.sleep to simulate. Use futures. Test that only one running. Use executor shutdown? We'll just use worker. Ensure waiting task cancelled. Use a function that records start and end. Use threading.Event. Let's write three tests: 1) submit single task runs. 2) submit two tasks quickly: first runs, second replaces waiting, ensure only one running. 3) submit two tasks, second is long, then submit third quickly, ensure second cancelled and third runs. Use futures.done. Use assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.064360141,
+    "prompt_tokens": 437,
+    "prompt_time": 0.043868389,
+    "completion_tokens": 675,
+    "completion_time": 0.765482741,
+    "total_tokens": 1112,
+    "total_time": 0.80935113,
+    "completion_tokens_details": {
+      "reasoning_tokens": 134
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sf7xxaej2981wbngwkxvqh",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport time\nimport threading\nimport pytest\nfrom tqdm.contrib.utils_worker import MonoWorker\n\n\ndef test_single_task_runs_and_completes():\n    worker = MonoWorker()\n    result = []\n\n    def task():\n        result.append(\"started\")\n        time.sleep(0.05)\n        result.append(\"finished\")\n\n    future = worker.submit(task)\n    assert future is not None\n    future.result()  # wait for completion\n    assert result == [\"started\", \"finished\"]\n\n\ndef test_waiting_task_replaced_by_new_submission():\n    worker = MonoWorker()\n    lock = threading.Lock()\n    order = []\n\n    def long_task():\n        with lock:\n            order.append(\"long_start\")\n        time.sleep(0.1)\n        with lock:\n            order.append(\"long_end\")\n\n    def short_task():\n        with lock:\n            order.append(\"short_start\")\n        time.sleep(0.01)\n        with lock:\n            order.append(\"short_end\")\n\n    # Submit long task first\n    long_future = worker.submit(long_task)\n    # Immediately submit short task, which should replace the waiting slot\n    short_future = worker.submit(short_task)\n\n    # Wait for both to finish\n    long_future.result()\n    short_future.result()\n\n    # The long task should run to completion, short task should also run\n    # but the order should reflect that short started after long started\n    assert order == [\"long_start\", \"short_start\", \"long_end\", \"short_end\"]\n\n\ndef test_cancellation_of_waiting_task_and_execution_of_new_one():\n    worker = MonoWorker()\n    lock = threading.Lock()\n    events = {\"first\": threading.Event(), \"second\": threading.Event()}\n\n    def first_task():\n        with lock:\n            events[\"first\"].set()\n        time.sleep(0.2)  # long running\n\n    def second_task():\n        with lock:\n            events[\"second\"].set()\n        time.sleep(0.05)\n\n    # Submit first long task\n    first_future = worker.submit(first_task)\n    # Wait until first task has started\n    events[\"first\"].wait(0.1)\n\n    # Submit second task which should replace the waiting slot\n    second_future = worker.submit(second_task)\n\n    # Wait for both to finish\n    first_future.result()\n    second_future.result()\n\n    # The second task should have started after the first started\n    # and the first task should have completed after the second\n    assert events[\"first\"].is_set()\n    assert events[\"second\"].is_set()\n    assert first_future.done()\n    assert second_future.done()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2060814289725386
+}

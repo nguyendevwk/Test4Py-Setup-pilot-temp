@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-04eea90d-9e28-45a3-ad3f-52c86a5d9fa0",
+  "object": "chat.completion",
+  "created": 1795076732,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom cookiecutter.prompt import read_user_variable\nfrom rich.prompt import Prompt\n\n@pytest.fixture\ndef fake_ask(monkeypatch):\n    \"\"\"Replace Prompt.ask with a function that records its arguments and returns a fixed value.\"\"\"\n    calls = []\n\n    def fake_ask(message, default=None):\n        calls.append((message, default))\n        return \"fixed_value\"\n\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n    return calls\n\ndef test_default_value_used_when_no_prompt_provided(fake_ask):\n    # No prompts dict provided, default should be used in the message\n    result = read_user_variable(\"project_name\", default_value=\"my_project\")\n    assert result == \"fixed_value\"\n    # The message should contain the variable name\n    assert fake_ask[0][0] == \"project_name\"\n    # The default passed to Prompt.ask should be the default_value\n    assert fake_ask[0][1] == \"my_project\"\n\ndef test_custom_prompt_overrides_variable_name(fake_ask):\n    # Provide a custom prompt for the variable\n    prompts = {\"project_name\": \"What is the project name?\"}\n    result = read_user_variable(\"project_name\", default_value=\"my_project\", prompts=prompts)\n    assert result == \"fixed_value\"\n    # The message should use the custom prompt\n    assert fake_ask[0][0] == \"What is the project name?\"\n    # The default passed to Prompt.ask should still be the default_value\n    assert fake_ask[0][1] == \"my_project\"\n\ndef test_prefix_is_prepended_to_prompt(fake_ask):\n    # Provide a prefix that should be added to the prompt message\n    prompts = {\"project_name\": \"Project name:\"}\n    result = read_user_variable(\"project_name\", default_value=\"my_project\", prompts=prompts, prefix=\">>> \")\n    assert result == \"fixed_value\"\n    # The message should start with the prefix\n    assert fake_ask[0][0].startswith(\">>> \")\n    # The rest of the message should be the custom prompt\n    assert fake_ask[0][0] == \">>> Project name:\"\n    # The default passed to Prompt.ask should be the default_value\n    assert fake_ask[0][1] == \"my_project\"\n```",
+        "reasoning": "We need 3 tests for read_user_variable. It uses Prompt.ask from rich.prompt. We cannot mock? We cannot mock target. But we can simulate by monkeypatching Prompt.ask? But that's mocking target. Not allowed. But we can test behavior with default and prompts. But Prompt.ask will block. We can't. Maybe we can patch environment variable? Actually Prompt.ask uses input. We can't provide input. So maybe we can test that function returns default when default provided and no prompts? But it will still call Prompt.ask which will block. So cannot run. Maybe we can test that function raises error if prompts missing? But still calls Prompt.ask. So impossible.\n\nMaybe we can test that function uses correct question string by inspecting variable? But still need to call Prompt.ask.\n\nThus maybe we can skip tests? But requirement no skips. So maybe we can test that function raises TypeError when var_name not string? But still calls Prompt.ask.\n\nThus impossible. Probably cannot test. Maybe we can test that function returns default when default is None? But still call Prompt.ask.\n\nThus maybe we can test that function raises ValueError if prompts is not dict? But still call Prompt.ask.\n\nThus maybe we can test that function raises AssertionError if var_name not in prompts and prompts provided? But still call Prompt.ask.\n\nThus cannot avoid Prompt.ask. So maybe we can monkeypatch Prompt.ask but that's mocking target. But maybe allowed? It says no mocks of the target. But monkeypatching Prompt.ask is mocking external library, not target. So allowed. So we can patch Prompt.ask to return a value. That is not mocking target. So we can patch Prompt.ask to return predetermined. Use monkeypatch fixture. So tests.\n\nImplement three tests: default value, custom prompt, prefix. Use monkeypatch to replace Prompt.ask."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.199943703,
+    "prompt_tokens": 453,
+    "prompt_time": 0.02845467,
+    "completion_tokens": 862,
+    "completion_time": 0.984429796,
+    "total_tokens": 1315,
+    "total_time": 1.012884466,
+    "completion_tokens_details": {
+      "reasoning_tokens": 369
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sejcseexw8fpangz25rkkf",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom cookiecutter.prompt import read_user_variable\nfrom rich.prompt import Prompt\n\n@pytest.fixture\ndef fake_ask(monkeypatch):\n    \"\"\"Replace Prompt.ask with a function that records its arguments and returns a fixed value.\"\"\"\n    calls = []\n\n    def fake_ask(message, default=None):\n        calls.append((message, default))\n        return \"fixed_value\"\n\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n    return calls\n\ndef test_default_value_used_when_no_prompt_provided(fake_ask):\n    # No prompts dict provided, default should be used in the message\n    result = read_user_variable(\"project_name\", default_value=\"my_project\")\n    assert result == \"fixed_value\"\n    # The message should contain the variable name\n    assert fake_ask[0][0] == \"project_name\"\n    # The default passed to Prompt.ask should be the default_value\n    assert fake_ask[0][1] == \"my_project\"\n\ndef test_custom_prompt_overrides_variable_name(fake_ask):\n    # Provide a custom prompt for the variable\n    prompts = {\"project_name\": \"What is the project name?\"}\n    result = read_user_variable(\"project_name\", default_value=\"my_project\", prompts=prompts)\n    assert result == \"fixed_value\"\n    # The message should use the custom prompt\n    assert fake_ask[0][0] == \"What is the project name?\"\n    # The default passed to Prompt.ask should still be the default_value\n    assert fake_ask[0][1] == \"my_project\"\n\ndef test_prefix_is_prepended_to_prompt(fake_ask):\n    # Provide a prefix that should be added to the prompt message\n    prompts = {\"project_name\": \"Project name:\"}\n    result = read_user_variable(\"project_name\", default_value=\"my_project\", prompts=prompts, prefix=\">>> \")\n    assert result == \"fixed_value\"\n    # The message should start with the prefix\n    assert fake_ask[0][0].startswith(\">>> \")\n    # The rest of the message should be the custom prompt\n    assert fake_ask[0][0] == \">>> Project name:\"\n    # The default passed to Prompt.ask should be the default_value\n    assert fake_ask[0][1] == \"my_project\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5300638069747947
+}

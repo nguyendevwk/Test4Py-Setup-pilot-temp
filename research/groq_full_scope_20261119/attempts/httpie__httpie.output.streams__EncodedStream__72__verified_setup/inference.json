@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-3974a2a3-cc15-408e-ae7e-db1091d318d6",
+  "object": "chat.completion",
+  "created": 1795079492,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.streams import EncodedStream\nfrom httpie.models import HTTPMessage, OutputOptions\nfrom httpie.context import Environment\nfrom httpie.encoding import UTF8\n\n# Helper HTTPMessage that yields lines from a given byte string\nclass DummyMessage(HTTPMessage):\n    def __init__(self, body: bytes, content_type: str = \"text/plain\", encoding: str = None):\n        self.body = body\n        self.content_type = content_type\n        self.encoding = encoding\n\n    def iter_lines(self, chunk_size=1):\n        # Yield each line with its linefeed\n        for line in self.body.splitlines(True):\n            yield line, b\"\\n\"\n\ndef test_normal_decoding_and_encoding(tmp_path):\n    body = b\"Hello, world!\\nSecond line.\"\n    msg = DummyMessage(body, encoding=\"utf-8\")\n    env = Environment(stdout_isatty=False, stdout_encoding=\"utf-8\")\n    stream = EncodedStream(env=env, msg=msg)\n    result = b\"\".join(stream.iter_body())\n    assert result == body + b\"\\n\"  # original body with added newline after each line\n\ndef test_binary_suppression_raises_error(tmp_path):\n    body = b\"Valid text\\x00with null byte\"\n    msg = DummyMessage(body, encoding=\"utf-8\")\n    env = Environment(stdout_isatty=False, stdout_encoding=\"utf-8\")\n    stream = EncodedStream(env=env, msg=msg)\n    with pytest.raises(Exception) as excinfo:\n        list(stream.iter_body())\n    assert \"BinarySuppressedError\" in str(excinfo.value)\n\ndef test_encoding_guess_and_update(tmp_path):\n    # Two lines with same guessed encoding 'latin-1'\n    body = b\"\\xC3\\xA9\\n\\xC3\\xA9\"  # bytes that decode as 'é' in latin-1\n    msg = DummyMessage(body, encoding=None)\n    env = Environment(stdout_isatty=False, stdout_encoding=\"utf-8\")\n    stream = EncodedStream(env=env, msg=msg)\n    # First iteration: no encoding guessed yet\n    first = next(stream.iter_body())\n    assert stream.encoding is None\n    # Second iteration: same guess appears twice, encoding should be set\n    second = next(stream.iter_body())\n    assert stream.encoding == \"latin-1\"\n    # Subsequent iteration should use the set encoding\n    third = next(stream.iter_body())\n    assert stream.encoding == \"latin-1\"\n```",
+        "reasoning": "We need to test EncodedStream. Need to create dummy HTTPMessage with iter_lines etc. Probably use simple class. We'll test normal decoding, binary suppression, encoding guess. Use tmp_path? not needed. Provide minimal HTTPMessage. Let's craft."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00550208,
+    "prompt_tokens": 756,
+    "prompt_time": 0.047108097,
+    "completion_tokens": 590,
+    "completion_time": 0.643936997,
+    "total_tokens": 1346,
+    "total_time": 0.691045094,
+    "completion_tokens_details": {
+      "reasoning_tokens": 51
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh6m6pe8waqhe5whsbak7d",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.streams import EncodedStream\nfrom httpie.models import HTTPMessage, OutputOptions\nfrom httpie.context import Environment\nfrom httpie.encoding import UTF8\n\n# Helper HTTPMessage that yields lines from a given byte string\nclass DummyMessage(HTTPMessage):\n    def __init__(self, body: bytes, content_type: str = \"text/plain\", encoding: str = None):\n        self.body = body\n        self.content_type = content_type\n        self.encoding = encoding\n\n    def iter_lines(self, chunk_size=1):\n        # Yield each line with its linefeed\n        for line in self.body.splitlines(True):\n            yield line, b\"\\n\"\n\ndef test_normal_decoding_and_encoding(tmp_path):\n    body = b\"Hello, world!\\nSecond line.\"\n    msg = DummyMessage(body, encoding=\"utf-8\")\n    env = Environment(stdout_isatty=False, stdout_encoding=\"utf-8\")\n    stream = EncodedStream(env=env, msg=msg)\n    result = b\"\".join(stream.iter_body())\n    assert result == body + b\"\\n\"  # original body with added newline after each line\n\ndef test_binary_suppression_raises_error(tmp_path):\n    body = b\"Valid text\\x00with null byte\"\n    msg = DummyMessage(body, encoding=\"utf-8\")\n    env = Environment(stdout_isatty=False, stdout_encoding=\"utf-8\")\n    stream = EncodedStream(env=env, msg=msg)\n    with pytest.raises(Exception) as excinfo:\n        list(stream.iter_body())\n    assert \"BinarySuppressedError\" in str(excinfo.value)\n\ndef test_encoding_guess_and_update(tmp_path):\n    # Two lines with same guessed encoding 'latin-1'\n    body = b\"\\xC3\\xA9\\n\\xC3\\xA9\"  # bytes that decode as 'é' in latin-1\n    msg = DummyMessage(body, encoding=None)\n    env = Environment(stdout_isatty=False, stdout_encoding=\"utf-8\")\n    stream = EncodedStream(env=env, msg=msg)\n    # First iteration: no encoding guessed yet\n    first = next(stream.iter_body())\n    assert stream.encoding is None\n    # Second iteration: same guess appears twice, encoding should be set\n    second = next(stream.iter_body())\n    assert stream.encoding == \"latin-1\"\n    # Subsequent iteration should use the set encoding\n    third = next(stream.iter_body())\n    assert stream.encoding == \"latin-1\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "6287a67d84844710b5795c1ea9cf9edc",
+  "_api_plus_pacing_seconds": 4.340243242972065
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b06476dc-0229-4124-b1ef-9a7a6b70379e",
+  "object": "chat.completion",
+  "created": 1795077244,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport enum\nimport json\nimport os\nimport tempfile\nimport types\nimport pytest\n\nfrom mimesis.providers.base import BaseProvider\nfrom mimesis import random as _random\nfrom mimesis.exceptions import NonEnumerableError\n\n\nclass DummyProvider(BaseProvider):\n    class Meta:\n        name = \"dummy\"\n        auto_register = True\n\n\ndef test_auto_register_registry():\n    \"\"\"Provider should be automatically registered in the registry.\"\"\"\n    # The registry is a global dict in mimesis.providers.registry\n    from mimesis.providers.registry import ProviderRegistry\n    assert \"dummy\" in ProviderRegistry._registry\n    assert ProviderRegistry._registry[\"dummy\"] is DummyProvider\n\n\ndef test_reseed_with_missing_seed_uses_global_seed(tmp_path):\n    \"\"\"When seed is MissingSeed, reseed uses the global seed.\"\"\"\n    # Create a temporary file to act as a seed source\n    seed_file = tmp_path / \"seed.txt\"\n    seed_file.write_text(\"12345\")\n\n    # Set global seed\n    _random.global_seed = 98765\n    provider = DummyProvider(seed=MissingSeed)\n    # The provider's internal random should be seeded with global seed\n    assert provider.random.randint(0, 100) == provider.random.randint(0, 100)\n\n    # Now reseed with a specific seed\n    provider.reseed(42)\n    assert provider.random.randint(0, 100) != provider.random.randint(0, 100)\n\n\ndef test_validate_enum_raises_on_invalid_item():\n    \"\"\"validate_enum should raise NonEnumerableError for invalid items.\"\"\"\n    class Color(enum.Enum):\n        RED = 1\n        GREEN = 2\n\n    provider = DummyProvider()\n    with pytest.raises(NonEnumerableError):\n        provider.validate_enum(\"BLUE\", Color)\n```",
+        "reasoning": "Need 3 tests: test_auto_register, test_reseed behavior, test_validate_enum error. Use tmp_path for file? _read_global_file uses DATADIR; can't modify. Just test validate_enum with enum from enum module. Use simple enum. Also test that reseed with MissingSeed uses global seed. We can set _random.global_seed. Let's import _random. Use provider subclass."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047930352,
+    "prompt_tokens": 1121,
+    "prompt_time": 0.078762124,
+    "completion_tokens": 457,
+    "completion_time": 0.50998904,
+    "total_tokens": 1578,
+    "total_time": 0.588751164,
+    "completion_tokens_details": {
+      "reasoning_tokens": 81
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sf2159e21rnegp6m6wk60s",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport enum\nimport json\nimport os\nimport tempfile\nimport types\nimport pytest\n\nfrom mimesis.providers.base import BaseProvider\nfrom mimesis import random as _random\nfrom mimesis.exceptions import NonEnumerableError\n\n\nclass DummyProvider(BaseProvider):\n    class Meta:\n        name = \"dummy\"\n        auto_register = True\n\n\ndef test_auto_register_registry():\n    \"\"\"Provider should be automatically registered in the registry.\"\"\"\n    # The registry is a global dict in mimesis.providers.registry\n    from mimesis.providers.registry import ProviderRegistry\n    assert \"dummy\" in ProviderRegistry._registry\n    assert ProviderRegistry._registry[\"dummy\"] is DummyProvider\n\n\ndef test_reseed_with_missing_seed_uses_global_seed(tmp_path):\n    \"\"\"When seed is MissingSeed, reseed uses the global seed.\"\"\"\n    # Create a temporary file to act as a seed source\n    seed_file = tmp_path / \"seed.txt\"\n    seed_file.write_text(\"12345\")\n\n    # Set global seed\n    _random.global_seed = 98765\n    provider = DummyProvider(seed=MissingSeed)\n    # The provider's internal random should be seeded with global seed\n    assert provider.random.randint(0, 100) == provider.random.randint(0, 100)\n\n    # Now reseed with a specific seed\n    provider.reseed(42)\n    assert provider.random.randint(0, 100) != provider.random.randint(0, 100)\n\n\ndef test_validate_enum_raises_on_invalid_item():\n    \"\"\"validate_enum should raise NonEnumerableError for invalid items.\"\"\"\n    class Color(enum.Enum):\n        RED = 1\n        GREEN = 2\n\n    provider = DummyProvider()\n    with pytest.raises(NonEnumerableError):\n        provider.validate_enum(\"BLUE\", Color)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9479458290152252
+}

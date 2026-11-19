@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-b5235449-558f-4d6c-9e66-a7a0068a8a28",
+  "object": "chat.completion",
+  "created": 1795079338,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import fwd_normalize, fwd_normalize_address, InvalidHeader\n\ndef test_fwd_normalize_basic_types():\n    # Basic header values should be converted appropriately\n    input_headers = [\n        (\"host\", \"Example.COM\"),\n        (\"proto\", \"HTTPS\"),\n        (\"port\", \"443\"),\n        (\"path\", \"/some%20path\"),\n        (\"by\", \"192.168.1.1\"),\n        (\"for\", \"2001:db8::1\"),\n        (\"custom\", \"value\"),\n    ]\n    result = fwd_normalize(input_headers)\n    assert result == {\n        \"host\": \"example.com\",\n        \"proto\": \"https\",\n        \"port\": 443,\n        \"path\": \"/some path\",\n        \"by\": \"192.168.1.1\",\n        \"for\": \"[2001:db8::1]\",\n        \"custom\": \"value\",\n    }\n\ndef test_fwd_normalize_address_edge_cases():\n    # Addresses that should raise ValueError or be left unchanged\n    input_headers = [\n        (\"by\", \"unknown\"),          # should be omitted\n        (\"for\", \"_obfuscated\"),     # should remain unchanged\n        (\"by\", \"2001:db8::2\"),      # IPv6 should be bracketed\n        (\"by\", \"10.0.0.1\"),         # IPv4 should stay as is\n    ]\n    result = fwd_normalize(input_headers)\n    assert \"by\" not in result or result[\"by\"] == \"10.0.0.1\"  # unknown omitted\n    assert result.get(\"for\") == \"_obfuscated\"\n    assert result.get(\"by\") == \"[2001:db8::2]\" or result.get(\"by\") == \"10.0.0.1\"\n\ndef test_fwd_normalize_invalid_values():\n    # Invalid numeric or unparsable values should be ignored\n    input_headers = [\n        (\"port\", \"not_a_number\"),\n        (\"path\", None),          # None values are skipped\n        (\"proto\", \"HTTP/1.1\"),   # lowercased but contains slash\n        (\"by\", \"unknown\"),       # omitted\n    ]\n    result = fwd_normalize(input_headers)\n    assert \"port\" not in result\n    assert result[\"proto\"] == \"http/1.1\"\n    assert \"by\" not in result\n```",
+        "reasoning": "We need three test functions for fwd_normalize. Test normal behavior, boundary, error. Use tmp_path? Not needed. Just test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00499099,
+    "prompt_tokens": 603,
+    "prompt_time": 0.005760902,
+    "completion_tokens": 544,
+    "completion_time": 0.582420642,
+    "total_tokens": 1147,
+    "total_time": 0.588181544,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 30
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh1xfgea397hwddswjn83y",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import fwd_normalize, fwd_normalize_address, InvalidHeader\n\ndef test_fwd_normalize_basic_types():\n    # Basic header values should be converted appropriately\n    input_headers = [\n        (\"host\", \"Example.COM\"),\n        (\"proto\", \"HTTPS\"),\n        (\"port\", \"443\"),\n        (\"path\", \"/some%20path\"),\n        (\"by\", \"192.168.1.1\"),\n        (\"for\", \"2001:db8::1\"),\n        (\"custom\", \"value\"),\n    ]\n    result = fwd_normalize(input_headers)\n    assert result == {\n        \"host\": \"example.com\",\n        \"proto\": \"https\",\n        \"port\": 443,\n        \"path\": \"/some path\",\n        \"by\": \"192.168.1.1\",\n        \"for\": \"[2001:db8::1]\",\n        \"custom\": \"value\",\n    }\n\ndef test_fwd_normalize_address_edge_cases():\n    # Addresses that should raise ValueError or be left unchanged\n    input_headers = [\n        (\"by\", \"unknown\"),          # should be omitted\n        (\"for\", \"_obfuscated\"),     # should remain unchanged\n        (\"by\", \"2001:db8::2\"),      # IPv6 should be bracketed\n        (\"by\", \"10.0.0.1\"),         # IPv4 should stay as is\n    ]\n    result = fwd_normalize(input_headers)\n    assert \"by\" not in result or result[\"by\"] == \"10.0.0.1\"  # unknown omitted\n    assert result.get(\"for\") == \"_obfuscated\"\n    assert result.get(\"by\") == \"[2001:db8::2]\" or result.get(\"by\") == \"10.0.0.1\"\n\ndef test_fwd_normalize_invalid_values():\n    # Invalid numeric or unparsable values should be ignored\n    input_headers = [\n        (\"port\", \"not_a_number\"),\n        (\"path\", None),          # None values are skipped\n        (\"proto\", \"HTTP/1.1\"),   # lowercased but contains slash\n        (\"by\", \"unknown\"),       # omitted\n    ]\n    result = fwd_normalize(input_headers)\n    assert \"port\" not in result\n    assert result[\"proto\"] == \"http/1.1\"\n    assert \"by\" not in result\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0450342849944718
+}

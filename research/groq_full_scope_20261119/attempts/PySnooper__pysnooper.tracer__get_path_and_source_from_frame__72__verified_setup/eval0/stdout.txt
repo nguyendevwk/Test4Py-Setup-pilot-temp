@@ -1,0 +1,42 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_get_path_and_source_from_frame_reads_file ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_path_and_source_from_frame__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_path_and_source_from_0')
+
+    def test_get_path_and_source_from_frame_reads_file(tmp_path):
+        """Normal case: source read from a real file."""
+        file_path = tmp_path / "sample.py"
+        file_path.write_text("def foo():\n    return 42\n")
+        func = _make_function_from_source("def foo():\n    return 42\n")
+        frame = func.__code__.co_firstlineno
+        # Get the frame object for the function
+>       frame_obj = inspect.getframeinfo(inspect.currentframe()).frame
+E       AttributeError: 'Traceback' object has no attribute 'frame'
+
+test_generated.py:35: AttributeError
+_____________ test_get_path_and_source_from_frame_handles_encoding _____________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_path_and_source_from_frame__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_path_and_source_from_1')
+
+    def test_get_path_and_source_from_frame_handles_encoding(tmp_path):
+        """Boundary case: file with encoding header."""
+        file_path = tmp_path / "encoded.py"
+        content = "# coding: latin-1\n" + "def bar():\n    return 'á'\n"
+        file_path.write_text(content, encoding="latin-1")
+        func = _make_function_from_source("def bar():\n    return 'á'\n")
+        wrapper_func = _make_function_from_source(
+            "def wrapper():\n    return inspect.currentframe()", {"inspect": inspect}
+        )
+        wrapper_frame = wrapper_func()
+        path, source = get_path_and_source_from_frame(wrapper_frame)
+        assert path == wrapper_frame.f_code.co_filename
+        assert isinstance(source[0], str)
+>       assert "def wrapper()" in source[0]
+E       AssertionError: assert 'def wrapper()' in 'SOURCE IS UNAVAILABLE'
+
+test_generated.py:67: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_path_and_source_from_frame_reads_file - At...
+FAILED test_generated.py::test_get_path_and_source_from_frame_handles_encoding
+2 failed, 1 passed in 0.13s

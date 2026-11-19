@@ -1,0 +1,272 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_viafree_normal_extraction ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.tvplay__ViafreeIE__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_viafree_normal_extraction0')
+
+    def test_viafree_normal_extraction(tmp_path):
+        ie = ViafreeIE(DummyDownloader())
+        # Prepare fake JSON responses
+        ie._json_response = {
+            "_embedded": {
+                "viafreeBlocks": [
+                    {
+                        "_embedded": {
+                            "program": {
+                                "guid": "12345",
+                                "title": "Test Title",
+                                "episode": {
+                                    "seriesTitle": "Test Series",
+                                    "episodeNumber": "7",
+                                    "seasonNumber": "2"
+                                },
+                                "video": {
+                                    "duration": {"milliseconds": 60000}
+                                },
+                                "availability": {"start": "2021-01-01T00:00:00Z"},
+                                "_links": {
+                                    "streamLink": {
+                                        "href": "https://stream.example.com/link"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "meta": {
+                "title": "Test Title",
+                "image": "https://example.com/thumb.jpg",
+                "description": "Test description"
+            }
+        }
+        # Mock stream link JSON
+        def mock_download_json(url, name, headers=None):
+            if "stream.example.com" in url:
+                return {
+                    "embedded": {
+                        "prioritizedStreams": [
+                            {
+                                "links": {"stream": {"href": "https://cdn.example.com/video.m3u8"}}
+                            }
+                        ]
+                    }
+                }
+            return ie._json_response
+        ie._download_json = mock_download_json
+    
+>       result = ie.extract('http://www.viafree.no/programmer/underholdning/det-beste-vorspielet/sesong-2/episode-1')
+
+test_generated.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:533: in extract
+    self.initialize()
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:432: in initialize
+    self._initialize_geo_bypass({
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.tvplay.ViafreeIE object at 0x7fc0f973c0a0>
+geo_bypass_context = {'countries': None, 'ip_blocks': None}
+
+    def _initialize_geo_bypass(self, geo_bypass_context):
+        """
+        Initialize geo restriction bypass mechanism.
+    
+        This method is used to initialize geo bypass mechanism based on faking
+        X-Forwarded-For HTTP header. A random country from provided country list
+        is selected and a random IP belonging to this country is generated. This
+        IP will be passed as X-Forwarded-For HTTP header in all subsequent
+        HTTP requests.
+    
+        This method will be used for initial geo bypass mechanism initialization
+        during the instance initialization with _GEO_COUNTRIES and
+        _GEO_IP_BLOCKS.
+    
+        You may also manually call it from extractor's code if geo bypass
+        information is not available beforehand (e.g. obtained during
+        extraction) or due to some other reason. In this case you should pass
+        this information in geo bypass context passed as first argument. It may
+        contain following fields:
+    
+        countries:  List of geo unrestricted countries (similar
+                    to _GEO_COUNTRIES)
+        ip_blocks:  List of geo unrestricted IP blocks in CIDR notation
+                    (similar to _GEO_IP_BLOCKS)
+    
+        """
+        if not self._x_forwarded_for_ip:
+    
+            # Geo bypass mechanism is explicitly disabled by user
+>           if not self._downloader.params.get('geo_bypass', True):
+E           AttributeError: 'DummyDownloader' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:469: AttributeError
+_________________________ test_viafree_geo_restriction _________________________
+
+    def test_viafree_geo_restriction():
+        ie = ViafreeIE(DummyDownloader())
+        ie._json_response = {
+            "_embedded": {
+                "viafreeBlocks": [
+                    {
+                        "_embedded": {
+                            "program": {
+                                "guid": "12345",
+                                "title": "Test Title",
+                                "_links": {
+                                    "streamLink": {
+                                        "href": "https://stream.example.com/link"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "meta": {"title": "Test Title"}
+        }
+        def mock_download_json(url, name, headers=None):
+            if "stream.example.com" in url:
+                raise ExtractorError('geo', cause=compat_HTTPError(403, 'Forbidden'))
+            return ie._json_response
+        ie._download_json = mock_download_json
+    
+        with pytest.raises(ExtractorError) as excinfo:
+>           ie.extract('http://www.viafree.dk/programmer/reality/paradise-hotel/saeson-7/episode-5')
+
+test_generated.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:533: in extract
+    self.initialize()
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:432: in initialize
+    self._initialize_geo_bypass({
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.tvplay.ViafreeIE object at 0x7fc0f8554a00>
+geo_bypass_context = {'countries': None, 'ip_blocks': None}
+
+    def _initialize_geo_bypass(self, geo_bypass_context):
+        """
+        Initialize geo restriction bypass mechanism.
+    
+        This method is used to initialize geo bypass mechanism based on faking
+        X-Forwarded-For HTTP header. A random country from provided country list
+        is selected and a random IP belonging to this country is generated. This
+        IP will be passed as X-Forwarded-For HTTP header in all subsequent
+        HTTP requests.
+    
+        This method will be used for initial geo bypass mechanism initialization
+        during the instance initialization with _GEO_COUNTRIES and
+        _GEO_IP_BLOCKS.
+    
+        You may also manually call it from extractor's code if geo bypass
+        information is not available beforehand (e.g. obtained during
+        extraction) or due to some other reason. In this case you should pass
+        this information in geo bypass context passed as first argument. It may
+        contain following fields:
+    
+        countries:  List of geo unrestricted countries (similar
+                    to _GEO_COUNTRIES)
+        ip_blocks:  List of geo unrestricted IP blocks in CIDR notation
+                    (similar to _GEO_IP_BLOCKS)
+    
+        """
+        if not self._x_forwarded_for_ip:
+    
+            # Geo bypass mechanism is explicitly disabled by user
+>           if not self._downloader.params.get('geo_bypass', True):
+E           AttributeError: 'DummyDownloader' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:469: AttributeError
+_____________________ test_viafree_missing_optional_fields _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.tvplay__ViafreeIE__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_viafree_missing_optional_0')
+
+    def test_viafree_missing_optional_fields(tmp_path):
+        ie = ViafreeIE(DummyDownloader())
+        ie._json_response = {
+            "_embedded": {
+                "viafreeBlocks": [
+                    {
+                        "_embedded": {
+                            "program": {
+                                "guid": "12345",
+                                "title": "Test Title",
+                                "episode": {},
+                                "video": {},
+                                "availability": {},
+                                "_links": {
+                                    "streamLink": {
+                                        "href": "https://stream.example.com/link"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "meta": {"title": "Test Title"}
+        }
+        def mock_download_json(url, name, headers=None):
+            if "stream.example.com" in url:
+                return {
+                    "embedded": {
+                        "prioritizedStreams": [
+                            {"links": {"stream": {"href": "https://cdn.example.com/video.m3u8"}}}
+                        ]
+                    }
+                }
+            return ie._json_response
+        ie._download_json = mock_download_json
+    
+>       result = ie.extract('http://www.viafree.se/program/reality/sommaren-med-youtube-stjarnorna/sasong-1/avsnitt-1')
+
+test_generated.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:533: in extract
+    self.initialize()
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:432: in initialize
+    self._initialize_geo_bypass({
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.tvplay.ViafreeIE object at 0x7fc0f836bb80>
+geo_bypass_context = {'countries': None, 'ip_blocks': None}
+
+    def _initialize_geo_bypass(self, geo_bypass_context):
+        """
+        Initialize geo restriction bypass mechanism.
+    
+        This method is used to initialize geo bypass mechanism based on faking
+        X-Forwarded-For HTTP header. A random country from provided country list
+        is selected and a random IP belonging to this country is generated. This
+        IP will be passed as X-Forwarded-For HTTP header in all subsequent
+        HTTP requests.
+    
+        This method will be used for initial geo bypass mechanism initialization
+        during the instance initialization with _GEO_COUNTRIES and
+        _GEO_IP_BLOCKS.
+    
+        You may also manually call it from extractor's code if geo bypass
+        information is not available beforehand (e.g. obtained during
+        extraction) or due to some other reason. In this case you should pass
+        this information in geo bypass context passed as first argument. It may
+        contain following fields:
+    
+        countries:  List of geo unrestricted countries (similar
+                    to _GEO_COUNTRIES)
+        ip_blocks:  List of geo unrestricted IP blocks in CIDR notation
+                    (similar to _GEO_IP_BLOCKS)
+    
+        """
+        if not self._x_forwarded_for_ip:
+    
+            # Geo bypass mechanism is explicitly disabled by user
+>           if not self._downloader.params.get('geo_bypass', True):
+E           AttributeError: 'DummyDownloader' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:469: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_viafree_normal_extraction - AttributeError: 'D...
+FAILED test_generated.py::test_viafree_geo_restriction - AttributeError: 'Dum...
+FAILED test_generated.py::test_viafree_missing_optional_fields - AttributeErr...
+3 failed in 1.63s

@@ -1,0 +1,64 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________________ test_episode_extract _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f07ad204310>
+ie = <youtube_dl.extractor.trutv.TruTVIE object at 0x7f07ad19fe20>
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.trutv__TruTVIE__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_episode_extract0')
+
+    def test_episode_extract(monkeypatch, ie, tmp_path):
+        # Prepare mock data for an episode
+        mock_json = {
+            'episode': {
+                'mediaId': '12345',
+                'title': '  Episode Title  ',
+                'description': 'Desc',
+                'images': [
+                    {'srcUrl': 'http://img1.jpg', 'width': '640', 'height': '360'},
+                    {'srcUrl': None, 'width': '320', 'height': '180'},
+                ],
+                'publicationDate': '2023-01-01T12:00:00Z',
+                'showTitle': 'Show',
+                'seasonNum': '2',
+                'episodeNum': '5',
+            }
+        }
+        # Mock _download_json to return mock_json
+        def mock_download_json(url, display_id):
+            assert url == 'https://api.trutv.com/v2/web/episode/the-carbonaro-effect/12345'
+            assert display_id == '12345'
+            return mock_json
+        monkeypatch.setattr(ie, "_download_json", mock_download_json)
+    
+        # Mock _extract_ngtv_info to return a base dict
+        def mock_extract_ngtv_info(media_id, _, meta):
+            assert media_id == '12345'
+            assert meta['url'] == 'https://www.trutv.com/shows/the-carbonaro-effect/videos/sunlight-activated-flower.html'
+            assert meta['site_name'] == 'truTV'
+            return {'dummy': 'value'}
+    
+        monkeypatch.setattr(ie, "_extract_ngtv_info", mock_extract_ngtv_info)
+    
+        url = 'https://www.trutv.com/shows/the-carbonaro-effect/videos/sunlight-activated-flower.html'
+>       info = ie._real_extract(url)
+
+test_generated.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/trutv.py:39: in _real_extract
+    data = self._download_json(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+url = 'https://api.trutv.com/v2/web/series/clip/the-carbonaro-effect/sunlight-activated-flower'
+display_id = 'sunlight-activated-flower'
+
+    def mock_download_json(url, display_id):
+>       assert url == 'https://api.trutv.com/v2/web/episode/the-carbonaro-effect/12345'
+E       AssertionError: assert 'https://api....ivated-flower' == 'https://api....-effect/12345'
+E         
+E         - https://api.trutv.com/v2/web/episode/the-carbonaro-effect/12345
+E         + https://api.trutv.com/v2/web/series/clip/the-carbonaro-effect/sunlight-activated-flower
+
+test_generated.py:28: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_episode_extract - AssertionError: assert 'http...
+1 failed, 2 passed in 1.34s

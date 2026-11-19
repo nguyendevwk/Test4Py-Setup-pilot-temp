@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-594974a1-5b0d-4cbd-a793-73f112c07c30",
+  "object": "chat.completion",
+  "created": 1795078589,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport datetime\nimport pytest\nfrom tornado.locks import Event\nfrom tornado.util import TimeoutError\n\n\n@pytest.mark.asyncio\nasync def test_event_set_and_wait():\n    \"\"\"Event wakes all waiters when set.\"\"\"\n    event = Event()\n    results = []\n\n    async def waiter(name):\n        await event.wait()\n        results.append(name)\n\n    # Start two waiters that will block until the event is set\n    task1 = asyncio.create_task(waiter(\"first\"))\n    task2 = asyncio.create_task(waiter(\"second\"))\n\n    # Give the event loop a moment to schedule the waiters\n    await asyncio.sleep(0.01)\n\n    # Set the event; both waiters should resume\n    event.set()\n\n    # Wait for both tasks to finish\n    await asyncio.gather(task1, task2)\n\n    # The order of completion is not guaranteed, but both names must be present\n    assert set(results) == {\"first\", \"second\"}\n\n\n@pytest.mark.asyncio\nasync def test_event_timeout_raises():\n    \"\"\"Event.wait raises TimeoutError when timeout expires.\"\"\"\n    event = Event()\n\n    async def waiter():\n        await event.wait(timeout=0.01)\n\n    # The waiter should raise TimeoutError after the timeout\n    with pytest.raises(TimeoutError):\n        await waiter()\n\n\n@pytest.mark.asyncio\nasync def test_event_clear_resets_behavior():\n    \"\"\"Clearing the event causes subsequent waiters to block again.\"\"\"\n    event = Event()\n    event.set()  # Initially set\n\n    # First waiter should not block\n    await event.wait()\n\n    # Clear the event\n    event.clear()\n    assert not event.is_set()\n\n    # Start a waiter that should block until the event is set again\n    waiter_task = asyncio.create_task(event.wait())\n\n    # Give the loop a moment; the task should still be pending\n    await asyncio.sleep(0.01)\n    assert not waiter_task.done()\n\n    # Set the event again; waiter should resume\n    event.set()\n    await waiter_task\n    assert waiter_task.done()\n```",
+        "reasoning": "Need tests using asyncio. Use pytest.mark.asyncio. Three tests: normal wait set, timeout raises TimeoutError, and clear resets. Use tmp_path not needed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052414971,
+    "prompt_tokens": 889,
+    "prompt_time": 0.050188458,
+    "completion_tokens": 468,
+    "completion_time": 0.515913357,
+    "total_tokens": 1357,
+    "total_time": 0.566101815,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 34
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgb2jfe788yq1gb4ewgp2b",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport datetime\nimport pytest\nfrom tornado.locks import Event\nfrom tornado.util import TimeoutError\n\n\n@pytest.mark.asyncio\nasync def test_event_set_and_wait():\n    \"\"\"Event wakes all waiters when set.\"\"\"\n    event = Event()\n    results = []\n\n    async def waiter(name):\n        await event.wait()\n        results.append(name)\n\n    # Start two waiters that will block until the event is set\n    task1 = asyncio.create_task(waiter(\"first\"))\n    task2 = asyncio.create_task(waiter(\"second\"))\n\n    # Give the event loop a moment to schedule the waiters\n    await asyncio.sleep(0.01)\n\n    # Set the event; both waiters should resume\n    event.set()\n\n    # Wait for both tasks to finish\n    await asyncio.gather(task1, task2)\n\n    # The order of completion is not guaranteed, but both names must be present\n    assert set(results) == {\"first\", \"second\"}\n\n\n@pytest.mark.asyncio\nasync def test_event_timeout_raises():\n    \"\"\"Event.wait raises TimeoutError when timeout expires.\"\"\"\n    event = Event()\n\n    async def waiter():\n        await event.wait(timeout=0.01)\n\n    # The waiter should raise TimeoutError after the timeout\n    with pytest.raises(TimeoutError):\n        await waiter()\n\n\n@pytest.mark.asyncio\nasync def test_event_clear_resets_behavior():\n    \"\"\"Clearing the event causes subsequent waiters to block again.\"\"\"\n    event = Event()\n    event.set()  # Initially set\n\n    # First waiter should not block\n    await event.wait()\n\n    # Clear the event\n    event.clear()\n    assert not event.is_set()\n\n    # Start a waiter that should block until the event is set again\n    waiter_task = asyncio.create_task(event.wait())\n\n    # Give the loop a moment; the task should still be pending\n    await asyncio.sleep(0.01)\n    assert not waiter_task.done()\n\n    # Set the event again; waiter should resume\n    event.set()\n    await waiter_task\n    assert waiter_task.done()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9808008419931866
+}

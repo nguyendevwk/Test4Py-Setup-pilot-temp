@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-deaa2756-b264-4bbb-a517-bfd5d0345920",
+  "object": "chat.completion",
+  "created": 1795077031,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport sys\nimport pytest\nfrom tqdm.contrib.logging import tqdm_logging_redirect\nfrom tqdm import tqdm as std_tqdm\n\n\ndef test_tqdm_logging_redirect_basic(capfd):\n    \"\"\"Verify that log messages are redirected to the tqdm progress bar.\"\"\"\n    logger = logging.getLogger(\"tqdm_test\")\n    logger.setLevel(logging.INFO)\n    # Ensure logger has no handlers to avoid duplicate output\n    logger.handlers = []\n\n    with tqdm_logging_redirect(total=3, desc=\"test\") as pbar:\n        for i in range(3):\n            logger.info(f\"step {i}\")\n            pbar.update(1)\n\n    out, err = capfd.readouterr()\n    # The output should contain the tqdm bar and the log messages\n    assert \"test\" in out\n    assert \"step 0\" in out\n    assert \"step 1\" in out\n    assert \"step 2\" in out\n    # The bar should reach 100% at the end\n    assert \"100%\" in out or \"100%\" in out.splitlines()[-1]\n\n\ndef test_tqdm_logging_redirect_no_loggers(capfd):\n    \"\"\"When no loggers are provided, tqdm_logging_redirect should still work.\"\"\"\n    with tqdm_logging_redirect(total=2, desc=\"no_loggers\") as pbar:\n        for i in range(2):\n            # Emit a log to the root logger; it should be ignored but not crash\n            logging.getLogger().info(f\"root log {i}\")\n            pbar.update(1)\n\n    out, err = capfd.readouterr()\n    assert \"no_loggers\" in out\n    assert \"100%\" in out or \"100%\" in out.splitlines()[-1]\n\n\ndef test_tqdm_logging_redirect_invalid_tqdm_class():\n    \"\"\"Passing an invalid tqdm_class should raise a TypeError.\"\"\"\n    class BadTqdm:\n        def __init__(self, *_, **__):\n            raise TypeError(\"BadTqdm cannot be instantiated\")\n\n    with pytest.raises(TypeError, match=\"BadTqdm cannot be instantiated\"):\n        with tqdm_logging_redirect(total=1, tqdm_class=BadTqdm):\n            pass\n```",
+        "reasoning": "Need tests for tqdm_logging_redirect. Use tmp_path to capture logs. Use logging to emit messages and check that tqdm updates. Use tqdm.contrib.logging.logging_redirect_tqdm? Actually function uses logging_redirect_tqdm context manager. We can test that logs are redirected to tqdm. Use a simple tqdm instance with total 5, and log messages inside loop. Check that progress bar updates. Hard to capture output. Use capsys to capture stdout. Use logging to emit messages. Ensure that tqdm bar shows progress. Use capsys to check that bar lines contain \"0%\" etc. Use small total. Also test boundary: when loggers None default. Also error: passing invalid tqdm_class? maybe raise TypeError. But function expects tqdm_class to be callable. We can pass a dummy that raises. But that would raise inside context. Use pytest.raises. Let's write three tests: normal behavior, boundary with no loggers, error with invalid tqdm_class."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054141451,
+    "prompt_tokens": 482,
+    "prompt_time": 0.028680077,
+    "completion_tokens": 660,
+    "completion_time": 0.754076242,
+    "total_tokens": 1142,
+    "total_time": 0.782756319,
+    "completion_tokens_details": {
+      "reasoning_tokens": 193
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sevgh6epasv65nbx1vjy9g",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport sys\nimport pytest\nfrom tqdm.contrib.logging import tqdm_logging_redirect\nfrom tqdm import tqdm as std_tqdm\n\n\ndef test_tqdm_logging_redirect_basic(capfd):\n    \"\"\"Verify that log messages are redirected to the tqdm progress bar.\"\"\"\n    logger = logging.getLogger(\"tqdm_test\")\n    logger.setLevel(logging.INFO)\n    # Ensure logger has no handlers to avoid duplicate output\n    logger.handlers = []\n\n    with tqdm_logging_redirect(total=3, desc=\"test\") as pbar:\n        for i in range(3):\n            logger.info(f\"step {i}\")\n            pbar.update(1)\n\n    out, err = capfd.readouterr()\n    # The output should contain the tqdm bar and the log messages\n    assert \"test\" in out\n    assert \"step 0\" in out\n    assert \"step 1\" in out\n    assert \"step 2\" in out\n    # The bar should reach 100% at the end\n    assert \"100%\" in out or \"100%\" in out.splitlines()[-1]\n\n\ndef test_tqdm_logging_redirect_no_loggers(capfd):\n    \"\"\"When no loggers are provided, tqdm_logging_redirect should still work.\"\"\"\n    with tqdm_logging_redirect(total=2, desc=\"no_loggers\") as pbar:\n        for i in range(2):\n            # Emit a log to the root logger; it should be ignored but not crash\n            logging.getLogger().info(f\"root log {i}\")\n            pbar.update(1)\n\n    out, err = capfd.readouterr()\n    assert \"no_loggers\" in out\n    assert \"100%\" in out or \"100%\" in out.splitlines()[-1]\n\n\ndef test_tqdm_logging_redirect_invalid_tqdm_class():\n    \"\"\"Passing an invalid tqdm_class should raise a TypeError.\"\"\"\n    class BadTqdm:\n        def __init__(self, *_, **__):\n            raise TypeError(\"BadTqdm cannot be instantiated\")\n\n    with pytest.raises(TypeError, match=\"BadTqdm cannot be instantiated\"):\n        with tqdm_logging_redirect(total=1, tqdm_class=BadTqdm):\n            pass\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.160447906004265
+}

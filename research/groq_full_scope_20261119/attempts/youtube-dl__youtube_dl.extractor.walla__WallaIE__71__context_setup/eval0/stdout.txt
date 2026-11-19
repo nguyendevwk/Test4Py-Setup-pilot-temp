@@ -1,0 +1,175 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_normal_extraction ____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.walla__WallaIE__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_normal_extraction0')
+
+    def test_normal_extraction(tmp_path):
+        """Test normal extraction with all fields present."""
+        xml_root = build_xml(
+            title="Test Video",
+            synopsis="A test description",
+            preview_pic="http://example.com/thumb.jpg",
+            duration="120",
+            subtitles=[("עברית", "http://example.com/sub_heb.srt")],
+            qualities=[("720p", "playpath_720"), ("480p", "playpath_480")],
+        )
+        extractor = DummyWallaIE(xml_root)
+    
+        url = "http://vod.walla.co.il/movie/123456/test-video"
+>       result = extractor._real_extract(url)
+
+test_generated.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/walla.py:75: in _real_extract
+    self._sort_formats(formats)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1446: in _sort_formats
+    formats.sort(key=_formats_key)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = {'url': 'rtmp://wafla.walla.co.il/vod', 'play_path': 'playpath_720', 'player_url': 'http://isc.walla.co.il/w9/swf/video_swf/vod/WallaMediaPlayerAvod.swf', 'page_url': 'http://vod.walla.co.il/movie/123456/test-video', ...}
+
+    def _formats_key(f):
+        # TODO remove the following workaround
+        from ..utils import determine_ext
+        if not f.get('ext') and 'url' in f:
+            f['ext'] = determine_ext(f['url'])
+    
+        if isinstance(field_preference, (list, tuple)):
+            return tuple(
+                f.get(field)
+                if f.get(field) is not None
+                else ('' if field == 'format_id' else -1)
+                for field in field_preference)
+    
+        preference = f.get('preference')
+        if preference is None:
+            preference = 0
+            if f.get('ext') in ['f4f', 'f4m']:  # Not yet supported
+                preference -= 0.5
+    
+        protocol = f.get('protocol') or determine_protocol(f)
+        proto_preference = 0 if protocol in ['http', 'https'] else (-0.5 if protocol == 'rtsp' else -0.1)
+    
+        if f.get('vcodec') == 'none':  # audio only
+            preference -= 50
+            if self._downloader.params.get('prefer_free_formats'):
+                ORDER = ['aac', 'mp3', 'm4a', 'webm', 'ogg', 'opus']
+            else:
+                ORDER = ['webm', 'opus', 'ogg', 'mp3', 'aac', 'm4a']
+            ext_preference = 0
+            try:
+                audio_ext_preference = ORDER.index(f['ext'])
+            except ValueError:
+                audio_ext_preference = -1
+        else:
+            if f.get('acodec') == 'none':  # video only
+                preference -= 40
+>           if self._downloader.params.get('prefer_free_formats'):
+E           AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1418: AttributeError
+______________________ test_missing_subtitle_and_quality _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.walla__WallaIE__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_missing_subtitle_and_qual0')
+
+    def test_missing_subtitle_and_quality(tmp_path):
+        """Test extraction when subtitles or qualities are missing."""
+        xml_root = build_xml(
+            title="No Subtitles",
+            synopsis="No subtitles here",
+            preview_pic="http://example.com/no_sub.jpg",
+            duration="60",
+            subtitles=[],  # No subtitles
+            qualities=[("360p", "playpath_360")],  # Single quality
+        )
+        extractor = DummyWallaIE(xml_root)
+    
+        url = "http://vod.walla.co.il/movie/654321/no-subtitles"
+>       result = extractor._real_extract(url)
+
+test_generated.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/walla.py:75: in _real_extract
+    self._sort_formats(formats)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1446: in _sort_formats
+    formats.sort(key=_formats_key)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+f = {'url': 'rtmp://wafla.walla.co.il/vod', 'play_path': 'playpath_360', 'player_url': 'http://isc.walla.co.il/w9/swf/video_swf/vod/WallaMediaPlayerAvod.swf', 'page_url': 'http://vod.walla.co.il/movie/654321/no-subtitles', ...}
+
+    def _formats_key(f):
+        # TODO remove the following workaround
+        from ..utils import determine_ext
+        if not f.get('ext') and 'url' in f:
+            f['ext'] = determine_ext(f['url'])
+    
+        if isinstance(field_preference, (list, tuple)):
+            return tuple(
+                f.get(field)
+                if f.get(field) is not None
+                else ('' if field == 'format_id' else -1)
+                for field in field_preference)
+    
+        preference = f.get('preference')
+        if preference is None:
+            preference = 0
+            if f.get('ext') in ['f4f', 'f4m']:  # Not yet supported
+                preference -= 0.5
+    
+        protocol = f.get('protocol') or determine_protocol(f)
+        proto_preference = 0 if protocol in ['http', 'https'] else (-0.5 if protocol == 'rtsp' else -0.1)
+    
+        if f.get('vcodec') == 'none':  # audio only
+            preference -= 50
+            if self._downloader.params.get('prefer_free_formats'):
+                ORDER = ['aac', 'mp3', 'm4a', 'webm', 'ogg', 'opus']
+            else:
+                ORDER = ['webm', 'opus', 'ogg', 'mp3', 'aac', 'm4a']
+            ext_preference = 0
+            try:
+                audio_ext_preference = ORDER.index(f['ext'])
+            except ValueError:
+                audio_ext_preference = -1
+        else:
+            if f.get('acodec') == 'none':  # video only
+                preference -= 40
+>           if self._downloader.params.get('prefer_free_formats'):
+E           AttributeError: 'NoneType' object has no attribute 'params'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1418: AttributeError
+___________________________ test_invalid_url_raises ____________________________
+
+    def test_invalid_url_raises():
+        """Test that an invalid URL raises a ValueError."""
+        xml_root = build_xml(
+            title="Dummy",
+            synopsis="Dummy",
+            preview_pic="http://example.com/dummy.jpg",
+            duration="30",
+            subtitles=[],
+            qualities=[],
+        )
+        extractor = DummyWallaIE(xml_root)
+    
+        invalid_url = "http://invalid.com/notmatching/123"
+        with pytest.raises(ValueError):
+>           extractor._real_extract(invalid_url)
+
+test_generated.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyWallaIE object at 0x7f7b4e79fb50>
+url = 'http://invalid.com/notmatching/123'
+
+    def _real_extract(self, url):
+        mobj = re.match(self._VALID_URL, url)
+>       video_id = mobj.group('id')
+E       AttributeError: 'NoneType' object has no attribute 'group'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/walla.py:38: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normal_extraction - AttributeError: 'NoneType'...
+FAILED test_generated.py::test_missing_subtitle_and_quality - AttributeError:...
+FAILED test_generated.py::test_invalid_url_raises - AttributeError: 'NoneType...
+3 failed in 1.83s

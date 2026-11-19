@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-5d1ae5f7-4ab0-4563-9fed-1e353df15788",
+  "object": "chat.completion",
+  "created": 1795076904,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport sys\nimport argparse\nimport pytest\nfrom httpie.cli.argparser import BaseHTTPieArgumentParser\n\n# Minimal Environment mock used by BaseHTTPieArgumentParser\nclass DummyEnvironment:\n    def __init__(self, stdin=None, stdin_isatty=True, stdout=None, stderr=None, stdout_encoding=\"utf-8\"):\n        self.stdin = stdin\n        self.stdin_isatty = stdin_isatty\n        self.stdout = stdout or io.StringIO()\n        self.stderr = stderr or io.StringIO()\n        self.stdout_encoding = stdout_encoding\n\ndef test_parse_args_sets_debug_and_traceback():\n    env = DummyEnvironment()\n    parser = BaseHTTPieArgumentParser()\n    # Pass --debug flag\n    ns = parser.parse_args(env, args=[\"--debug\"])\n    assert ns.debug is True\n    # debug flag should enable traceback\n    assert ns.traceback is True\n\ndef test_parse_args_detects_stdin_data():\n    # Simulate non-tty stdin with data\n    stdin = io.BytesIO(b\"data\")\n    env = DummyEnvironment(stdin=stdin, stdin_isatty=False)\n    parser = BaseHTTPieArgumentParser()\n    ns = parser.parse_args(env, args=[])\n    assert ns.ignore_stdin is False\n    assert parser.has_stdin_data is True\n    assert parser.has_input_data is True\n\ndef test_print_message_routes_to_correct_stream():\n    stdout = io.StringIO()\n    stderr = io.StringIO()\n    env = DummyEnvironment(stdout=stdout, stderr=stderr)\n    parser = BaseHTTPieArgumentParser()\n    parser.env = env\n    # Test message to stdout\n    parser._print_message(\"hello stdout\", file=sys.stdout)\n    assert stdout.getvalue().strip() == \"hello stdout\"\n    # Test message to stderr\n    parser._print_message(\"hello stderr\", file=sys.stderr)\n    assert stderr.getvalue().strip() == \"hello stderr\"\n    # Test message with default (None) goes to stderr\n    parser._print_message(\"default stderr\")\n    assert stderr.getvalue().strip().endswith(\"default stderr\")\n```",
+        "reasoning": "Need tests for BaseHTTPieArgumentParser. We can instantiate with dummy Environment. Use tmp_path for stdin? Environment likely has attributes. Let's inspect Environment? Not provided. But we can create a simple mock Environment with needed attributes: stdin, stdin_isatty, stdout, stderr, stdout_encoding. Use io.StringIO. Test parse_args sets has_stdin_data correctly. Also test debug flag sets traceback. Third test: _print_message writes to correct stream. Let's create minimal Environment class. Use argparse. We'll test that parse_args returns namespace with attributes. Use args list."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053477643,
+    "prompt_tokens": 760,
+    "prompt_time": 0.015737335,
+    "completion_tokens": 561,
+    "completion_time": 0.747250242,
+    "total_tokens": 1321,
+    "total_time": 0.762987577,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 117
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7seqmggebd9rd09bh99ggrb",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport sys\nimport argparse\nimport pytest\nfrom httpie.cli.argparser import BaseHTTPieArgumentParser\n\n# Minimal Environment mock used by BaseHTTPieArgumentParser\nclass DummyEnvironment:\n    def __init__(self, stdin=None, stdin_isatty=True, stdout=None, stderr=None, stdout_encoding=\"utf-8\"):\n        self.stdin = stdin\n        self.stdin_isatty = stdin_isatty\n        self.stdout = stdout or io.StringIO()\n        self.stderr = stderr or io.StringIO()\n        self.stdout_encoding = stdout_encoding\n\ndef test_parse_args_sets_debug_and_traceback():\n    env = DummyEnvironment()\n    parser = BaseHTTPieArgumentParser()\n    # Pass --debug flag\n    ns = parser.parse_args(env, args=[\"--debug\"])\n    assert ns.debug is True\n    # debug flag should enable traceback\n    assert ns.traceback is True\n\ndef test_parse_args_detects_stdin_data():\n    # Simulate non-tty stdin with data\n    stdin = io.BytesIO(b\"data\")\n    env = DummyEnvironment(stdin=stdin, stdin_isatty=False)\n    parser = BaseHTTPieArgumentParser()\n    ns = parser.parse_args(env, args=[])\n    assert ns.ignore_stdin is False\n    assert parser.has_stdin_data is True\n    assert parser.has_input_data is True\n\ndef test_print_message_routes_to_correct_stream():\n    stdout = io.StringIO()\n    stderr = io.StringIO()\n    env = DummyEnvironment(stdout=stdout, stderr=stderr)\n    parser = BaseHTTPieArgumentParser()\n    parser.env = env\n    # Test message to stdout\n    parser._print_message(\"hello stdout\", file=sys.stdout)\n    assert stdout.getvalue().strip() == \"hello stdout\"\n    # Test message to stderr\n    parser._print_message(\"hello stderr\", file=sys.stderr)\n    assert stderr.getvalue().strip() == \"hello stderr\"\n    # Test message with default (None) goes to stderr\n    parser._print_message(\"default stderr\")\n    assert stderr.getvalue().strip().endswith(\"default stderr\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1308745939750224
+}

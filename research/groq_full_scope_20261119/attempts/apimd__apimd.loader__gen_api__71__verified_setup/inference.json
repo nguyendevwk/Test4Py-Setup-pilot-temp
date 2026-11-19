@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-32c992ce-5914-4c37-a2dd-8f2803351db4",
+  "object": "chat.completion",
+  "created": 1795076442,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport importlib\nimport os\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\nfrom apimd.loader import gen_api\n\n\n@pytest.fixture\ndef module_dir(tmp_path):\n    \"\"\"Create a temporary directory with a simple Python module.\"\"\"\n    mod_dir = tmp_path / \"pkg\"\n    mod_dir.mkdir()\n    (mod_dir / \"__init__.py\").write_text(\"\")\n    (mod_dir / \"mymodule.py\").write_text(\n        \"\"\"\ndef hello():\n    return \"world\"\n\"\"\"\n    )\n    # Make the directory importable\n    sys.path.insert(0, str(mod_dir))\n    yield mod_dir\n    sys.path.pop(0)\n\n\ndef test_gen_api_creates_markdown_file(module_dir, tmp_path):\n    \"\"\"Normal generation: a markdown file is created with expected content.\"\"\"\n    root_names = {\"My Module\": \"mymodule\"}\n    prefix = tmp_path / \"docs\"\n    docs = gen_api(root_names, prefix=str(prefix), level=2, dry=False)\n\n    # One document should be returned\n    assert len(docs) == 1\n    doc = docs[0]\n    # Header should match level\n    assert doc.startswith(\"## My Module API\\n\\n\")\n    # The module's function should appear in the doc\n    assert \"def hello\" in doc\n\n    # File should exist\n    expected_file = prefix / \"mymodule-api.md\"\n    assert expected_file.is_file()\n    file_content = expected_file.read_text()\n    assert file_content == doc\n\n\ndef test_gen_api_dry_run(module_dir, tmp_path):\n    \"\"\"Dry run: no files are written, but docs are returned.\"\"\"\n    root_names = {\"My Module\": \"mymodule\"}\n    prefix = tmp_path / \"docs\"\n    docs = gen_api(root_names, prefix=str(prefix), level=1, dry=True)\n\n    # One document should be returned\n    assert len(docs) == 1\n    doc = docs[0]\n    assert doc.startswith(\"# My Module API\\n\\n\")\n\n    # No file should be created\n    expected_file = prefix / \"mymodule-api.md\"\n    assert not expected_file.exists()\n\n\ndef test_gen_api_missing_module(tmp_path):\n    \"\"\"If a module cannot be found, it is skipped and no file is created.\"\"\"\n    root_names = {\"Missing\": \"nonexistent_module\"}\n    prefix = tmp_path / \"docs\"\n    docs = gen_api(root_names, prefix=str(prefix), level=1, dry=False)\n\n    # No documents should be returned\n    assert docs == []\n\n    # No file should be created\n    expected_file = prefix / \"nonexistent_module-api.md\"\n    assert not expected_file.exists()\n```",
+        "reasoning": "We need to test gen_api. We need to create temporary modules to load. loader function not shown; but we can test that it creates files and returns docs. Use tmp_path for prefix. Provide root_names mapping to module names that exist. We need to create a simple module in tmp_path and add to sys.path. Use importlib to create spec. We'll create a module file with a function. Then call gen_api with that module. It should create markdown file. We can check file content. Also test that if module not found, it warns and skips. But we can't capture logger easily. But we can test that docs list excludes missing. Also test dry run returns docs without writing file. Use three tests: normal generation, dry run, missing module.\n\nImplement loader? It's imported from same package; we assume it works. We'll rely on actual implementation. We'll create a dummy module in tmp_path. Use sys.path insertion. Use gen_api. Ensure file created. Use tmp_path fixture. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053022787,
+    "prompt_tokens": 613,
+    "prompt_time": 0.010154681,
+    "completion_tokens": 770,
+    "completion_time": 0.85346464,
+    "total_tokens": 1383,
+    "total_time": 0.863619321,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 206
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se9hkje2frcwmfrwhy2epn",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport importlib\nimport os\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\nfrom apimd.loader import gen_api\n\n\n@pytest.fixture\ndef module_dir(tmp_path):\n    \"\"\"Create a temporary directory with a simple Python module.\"\"\"\n    mod_dir = tmp_path / \"pkg\"\n    mod_dir.mkdir()\n    (mod_dir / \"__init__.py\").write_text(\"\")\n    (mod_dir / \"mymodule.py\").write_text(\n        \"\"\"\ndef hello():\n    return \"world\"\n\"\"\"\n    )\n    # Make the directory importable\n    sys.path.insert(0, str(mod_dir))\n    yield mod_dir\n    sys.path.pop(0)\n\n\ndef test_gen_api_creates_markdown_file(module_dir, tmp_path):\n    \"\"\"Normal generation: a markdown file is created with expected content.\"\"\"\n    root_names = {\"My Module\": \"mymodule\"}\n    prefix = tmp_path / \"docs\"\n    docs = gen_api(root_names, prefix=str(prefix), level=2, dry=False)\n\n    # One document should be returned\n    assert len(docs) == 1\n    doc = docs[0]\n    # Header should match level\n    assert doc.startswith(\"## My Module API\\n\\n\")\n    # The module's function should appear in the doc\n    assert \"def hello\" in doc\n\n    # File should exist\n    expected_file = prefix / \"mymodule-api.md\"\n    assert expected_file.is_file()\n    file_content = expected_file.read_text()\n    assert file_content == doc\n\n\ndef test_gen_api_dry_run(module_dir, tmp_path):\n    \"\"\"Dry run: no files are written, but docs are returned.\"\"\"\n    root_names = {\"My Module\": \"mymodule\"}\n    prefix = tmp_path / \"docs\"\n    docs = gen_api(root_names, prefix=str(prefix), level=1, dry=True)\n\n    # One document should be returned\n    assert len(docs) == 1\n    doc = docs[0]\n    assert doc.startswith(\"# My Module API\\n\\n\")\n\n    # No file should be created\n    expected_file = prefix / \"mymodule-api.md\"\n    assert not expected_file.exists()\n\n\ndef test_gen_api_missing_module(tmp_path):\n    \"\"\"If a module cannot be found, it is skipped and no file is created.\"\"\"\n    root_names = {\"Missing\": \"nonexistent_module\"}\n    prefix = tmp_path / \"docs\"\n    docs = gen_api(root_names, prefix=str(prefix), level=1, dry=False)\n\n    # No documents should be returned\n    assert docs == []\n\n    # No file should be created\n    expected_file = prefix / \"nonexistent_module-api.md\"\n    assert not expected_file.exists()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.225837711011991
+}

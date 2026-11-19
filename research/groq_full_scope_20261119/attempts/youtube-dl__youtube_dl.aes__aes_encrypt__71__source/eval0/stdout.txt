@@ -1,0 +1,54 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_aes_encrypt_all_zero ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.aes__aes_encrypt__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_aes_encrypt_all_zero0')
+
+    def test_aes_encrypt_all_zero(tmp_path):
+        data = [0] * 16
+        expanded_key = [0] * 176  # 128‑bit key expanded to 176 bytes
+        result = aes_encrypt(data, expanded_key)
+        assert isinstance(result, list)
+        assert len(result) == 16
+>       assert all(v == 0 for v in result)
+E       assert False
+E        +  where False = all(<generator object test_aes_encrypt_all_zero.<locals>.<genexpr> at 0x7ffa48505460>)
+
+test_generated.py:15: AssertionError
+______________________ test_aes_encrypt_valid_key_length _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.aes__aes_encrypt__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_aes_encrypt_valid_key_len0')
+
+    def test_aes_encrypt_valid_key_length(tmp_path):
+        # Use a known 128‑bit key and plaintext
+        plaintext_hex = "00112233445566778899aabbccddeeff"
+        key_hex = "000102030405060708090a0b0c0d0e0f"
+        data = hex_to_intlist(plaintext_hex)
+        # Expand the key manually using the same algorithm as youtube_dl (simplified for test)
+        # For the purpose of this test we use a pre‑computed expanded key for the given key
+        expanded_key_hex = (
+            "000102030405060708090a0b0c0d0e0f"
+            "f2c295f27a96b9435935807a7359f67f"
+            "3d80477d4716fe3e1e237e446d7a883b"
+            "ef44a541a8525b7fb671253bdb0bad00"
+            "d4d1c46f8e7d2b3e5d4f1a2b3c4d5e6f"
+            "1234567890abcdef1234567890abcdef"
+        )
+        expanded_key = hex_to_intlist(expanded_key_hex)
+        result = aes_encrypt(data, expanded_key)
+        assert isinstance(result, list)
+        assert len(result) == 16
+        # The result should match the known AES‑128 test vector
+        expected_cipher_hex = "69c4e0d86a7b0430d8cdb78070b4c55a"
+        expected = hex_to_intlist(expected_cipher_hex)
+>       assert result == expected
+E       assert [91, 81, 127,... 226, 80, ...] == [105, 196, 22...106, 123, ...]
+E         
+E         At index 0 diff: 91 != 105
+E         Use -v to get more diff
+
+test_generated.py:51: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_aes_encrypt_all_zero - assert False
+FAILED test_generated.py::test_aes_encrypt_valid_key_length - assert [91, 81,...
+2 failed, 1 passed in 0.72s

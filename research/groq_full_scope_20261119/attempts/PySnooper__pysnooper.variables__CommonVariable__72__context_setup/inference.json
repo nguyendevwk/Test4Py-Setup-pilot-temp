@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-0059466b-e2dd-47d1-be18-872b8c07a124",
+  "object": "chat.completion",
+  "created": 1795076298,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport builtins\nimport types\nimport pytest\nfrom pysnooper.variables import CommonVariable, BaseVariable, utils, pycompat\n\n# Helper subclass that exposes the abstract methods for testing\nclass DummyVariable(CommonVariable):\n    def __init__(self, source, exclude=()):\n        super().__init__(source, exclude)\n\n    def _keys(self, main_value):\n        # For a dict, return its keys; for other types, return empty\n        if isinstance(main_value, dict):\n            return main_value.keys()\n        return ()\n\n    def _format_key(self, key):\n        return f\"[{repr(key)}]\"\n\n    def _get_value(self, main_value, key):\n        return main_value[key]\n\n\ndef test_common_variable_normal(tmp_path):\n    \"\"\"Test normal extraction of items from a dictionary.\"\"\"\n    # Create a simple dictionary\n    data = {\"a\": 1, \"b\": 2}\n    # Prepare a frame with locals containing the dictionary\n    frame = types.FrameType(\n        None, None, None, None, {\"data\": data}, None, None, None, None\n    )\n    var = DummyVariable(\"data\")\n    items = var.items(frame)\n    # Expected items: source repr and each key/value pair\n    expected = [\n        (\"data\", utils.get_shortish_repr(data)),\n        (\"data[a]\", utils.get_shortish_repr(1)),\n        (\"data[b]\", utils.get_shortish_repr(2)),\n    ]\n    assert items == expected\n\n\ndef test_common_variable_exclude(tmp_path):\n    \"\"\"Test that excluded keys are omitted from the result.\"\"\"\n    data = {\"x\": 10, \"y\": 20}\n    frame = types.FrameType(\n        None, None, None, None, {\"data\": data}, None, None, None, None\n    )\n    var = DummyVariable(\"data\", exclude=(\"y\",))\n    items = var.items(frame)\n    # Only key 'x' should appear\n    expected = [\n        (\"data\", utils.get_shortish_repr(data)),\n        (\"data[x]\", utils.get_shortish_repr(10)),\n    ]\n    assert items == expected\n    # Ensure 'y' is not present\n    assert all(\"y\" not in key for key, _ in items)\n\n\ndef test_common_variable_error_handling(tmp_path):\n    \"\"\"Test that errors during key access are gracefully skipped.\"\"\"\n    class FaultyDict(dict):\n        def __getitem__(self, key):\n            if key == \"bad\":\n                raise ValueError(\"bad key\")\n            return super().__getitem__(key)\n\n    data = FaultyDict({\"good\": 1, \"bad\": 2})\n    frame = types.FrameType(\n        None, None, None, None, {\"data\": data}, None, None, None, None\n    )\n    var = DummyVariable(\"data\")\n    items = var.items(frame)\n    # 'bad' key should be skipped, only 'good' appears\n    expected = [\n        (\"data\", utils.get_shortish_repr(data)),\n        (\"data[good]\", utils.get_shortish_repr(1)),\n    ]\n    assert items == expected\n    # Ensure no entry for 'bad'\n    assert all(\"bad\" not in key for key, _ in items)\n```",
+        "reasoning": "We need to test CommonVariable. But it's abstract; need subclass implementing _keys, _format_key, _get_value. We can create a dummy subclass in test. Test normal: simple dict. boundary: exclude key. error: key access raises. Use tmp_path? not needed. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.063742524,
+    "prompt_tokens": 715,
+    "prompt_time": 0.054349525,
+    "completion_tokens": 743,
+    "completion_time": 0.822339132,
+    "total_tokens": 1458,
+    "total_time": 0.876688657,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 63
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se557benzs2jxt1jqb0qrd",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport builtins\nimport types\nimport pytest\nfrom pysnooper.variables import CommonVariable, BaseVariable, utils, pycompat\n\n# Helper subclass that exposes the abstract methods for testing\nclass DummyVariable(CommonVariable):\n    def __init__(self, source, exclude=()):\n        super().__init__(source, exclude)\n\n    def _keys(self, main_value):\n        # For a dict, return its keys; for other types, return empty\n        if isinstance(main_value, dict):\n            return main_value.keys()\n        return ()\n\n    def _format_key(self, key):\n        return f\"[{repr(key)}]\"\n\n    def _get_value(self, main_value, key):\n        return main_value[key]\n\n\ndef test_common_variable_normal(tmp_path):\n    \"\"\"Test normal extraction of items from a dictionary.\"\"\"\n    # Create a simple dictionary\n    data = {\"a\": 1, \"b\": 2}\n    # Prepare a frame with locals containing the dictionary\n    frame = types.FrameType(\n        None, None, None, None, {\"data\": data}, None, None, None, None\n    )\n    var = DummyVariable(\"data\")\n    items = var.items(frame)\n    # Expected items: source repr and each key/value pair\n    expected = [\n        (\"data\", utils.get_shortish_repr(data)),\n        (\"data[a]\", utils.get_shortish_repr(1)),\n        (\"data[b]\", utils.get_shortish_repr(2)),\n    ]\n    assert items == expected\n\n\ndef test_common_variable_exclude(tmp_path):\n    \"\"\"Test that excluded keys are omitted from the result.\"\"\"\n    data = {\"x\": 10, \"y\": 20}\n    frame = types.FrameType(\n        None, None, None, None, {\"data\": data}, None, None, None, None\n    )\n    var = DummyVariable(\"data\", exclude=(\"y\",))\n    items = var.items(frame)\n    # Only key 'x' should appear\n    expected = [\n        (\"data\", utils.get_shortish_repr(data)),\n        (\"data[x]\", utils.get_shortish_repr(10)),\n    ]\n    assert items == expected\n    # Ensure 'y' is not present\n    assert all(\"y\" not in key for key, _ in items)\n\n\ndef test_common_variable_error_handling(tmp_path):\n    \"\"\"Test that errors during key access are gracefully skipped.\"\"\"\n    class FaultyDict(dict):\n        def __getitem__(self, key):\n            if key == \"bad\":\n                raise ValueError(\"bad key\")\n            return super().__getitem__(key)\n\n    data = FaultyDict({\"good\": 1, \"bad\": 2})\n    frame = types.FrameType(\n        None, None, None, None, {\"data\": data}, None, None, None, None\n    )\n    var = DummyVariable(\"data\")\n    items = var.items(frame)\n    # 'bad' key should be skipped, only 'good' appears\n    expected = [\n        (\"data\", utils.get_shortish_repr(data)),\n        (\"data[good]\", utils.get_shortish_repr(1)),\n    ]\n    assert items == expected\n    # Ensure no entry for 'bad'\n    assert all(\"bad\" not in key for key, _ in items)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2328676549950615
+}

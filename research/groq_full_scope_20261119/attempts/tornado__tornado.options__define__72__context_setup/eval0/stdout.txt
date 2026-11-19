@@ -1,0 +1,88 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_define_basic_and_default _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.options__define__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_define_basic_and_default0')
+
+    def test_define_basic_and_default(tmp_path):
+        """Define a simple option and verify default value and help text."""
+        # Ensure the option name is unique for this test
+        opt_name = "test_basic_option"
+        # Remove any existing option with the same name
+        if opt_name in options._options:
+            del options._options[opt_name]
+    
+        define(
+            name=opt_name,
+            default="hello",
+            help="A simple test option",
+            metavar="VALUE",
+        )
+    
+        # The option should be registered in the global options
+>       assert opt_name in options._options
+E       AssertionError: assert 'test_basic_option' in {'help': <tornado.options._Option object at 0x7f0537e25b40>, 'logging': <tornado.options._Option object at 0x7f0537e25....options._Option object at 0x7f0537e26140>, 'log-file-prefix': <tornado.options._Option object at 0x7f0537e25ba0>, ...}
+E        +  where {'help': <tornado.options._Option object at 0x7f0537e25b40>, 'logging': <tornado.options._Option object at 0x7f0537e25....options._Option object at 0x7f0537e26140>, 'log-file-prefix': <tornado.options._Option object at 0x7f0537e25ba0>, ...} = <tornado.options.OptionParser object at 0x7f0537e25ae0>._options
+
+test_generated.py:22: AssertionError
+____________________________ test_define_type_error ____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.options__define__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_define_type_error0')
+
+    def test_define_type_error(tmp_path):
+        """Defining an option with a type and passing an invalid value should raise."""
+        opt_name = "test_type_option"
+        if opt_name in options._options:
+            del options._options[opt_name]
+    
+        define(
+            name=opt_name,
+            default=10,
+            type=int,
+            help="An integer option",
+        )
+    
+        # Setting a valid integer should work
+        options[opt_name] = 42
+        assert options[opt_name] == 42
+    
+        # Setting a non-integer should raise a ValueError
+        with pytest.raises(ValueError):
+>           options[opt_name] = "not an int"
+
+test_generated.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/options.py:177: in __setitem__
+    return self.__setattr__(name, value)
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/options.py:163: in __setattr__
+    return self._options[name].set(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tornado.options._Option object at 0x7f0537c97ac0>, value = 'not an int'
+
+    def set(self, value: Any) -> None:
+        if self.multiple:
+            if not isinstance(value, list):
+                raise Error(
+                    "Option %r is required to be a list of %s"
+                    % (self.name, self.type.__name__)
+                )
+            for item in value:
+                if item is not None and not isinstance(item, self.type):
+                    raise Error(
+                        "Option %r is required to be a list of %s"
+                        % (self.name, self.type.__name__)
+                    )
+        else:
+            if value is not None and not isinstance(value, self.type):
+>               raise Error(
+                    "Option %r is required to be a %s (%s given)"
+                    % (self.name, self.type.__name__, type(value))
+                )
+E               tornado.options.Error: Option 'test_type_option' is required to be a int (<class 'str'> given)
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/options.py:604: Error
+=========================== short test summary info ============================
+FAILED test_generated.py::test_define_basic_and_default - AssertionError: ass...
+FAILED test_generated.py::test_define_type_error - tornado.options.Error: Opt...
+2 failed, 1 passed in 0.19s

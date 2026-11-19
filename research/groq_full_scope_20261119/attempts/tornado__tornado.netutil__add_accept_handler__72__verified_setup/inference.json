@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-38377c9f-86ea-42b4-9587-8799bdcfa551",
+  "object": "chat.completion",
+  "created": 1795078998,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport socket\nimport time\nimport threading\n\nimport pytest\nfrom tornado.ioloop import IOLoop\nfrom tornado.netutil import add_accept_handler\n\n\ndef _run_loop(loop, stop_after: float):\n    \"\"\"Run the given IOLoop for a short time and then stop it.\"\"\"\n    def stop():\n        loop.stop()\n    loop.add_timeout(loop.time() + stop_after, stop)\n    loop.start()\n\n\ndef test_add_accept_handler_accepts_connection(tmp_path):\n    \"\"\"The callback is invoked with a new connection and its address.\"\"\"\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setblocking(False)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen(1)\n\n    received = []\n\n    def callback(conn, addr):\n        received.append((conn, addr))\n        conn.close()\n\n    remove = add_accept_handler(server, callback)\n\n    loop = IOLoop.current()\n    thread = threading.Thread(target=_run_loop, args=(loop, 0.5))\n    thread.start()\n\n    # Connect a client to trigger the accept handler\n    client = socket.create_connection(server.getsockname())\n    client.close()\n\n    thread.join()\n    remove()\n    server.close()\n\n    assert len(received) == 1\n    conn, addr = received[0]\n    assert isinstance(conn, socket.socket)\n    assert addr == server.getsockname()\n\n\ndef test_add_accept_handler_removal(tmp_path):\n    \"\"\"Removing the handler stops further callbacks.\"\"\"\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setblocking(False)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen(1)\n\n    call_count = 0\n\n    def callback(conn, addr):\n        nonlocal call_count\n        call_count += 1\n        conn.close()\n\n    remove = add_accept_handler(server, callback)\n\n    loop = IOLoop.current()\n    thread = threading.Thread(target=_run_loop, args=(loop, 0.5))\n    thread.start()\n\n    # First connection should be accepted\n    client1 = socket.create_connection(server.getsockname())\n    client1.close()\n\n    # Remove handler before second connection\n    remove()\n\n    # Second connection should not trigger callback\n    client2 = socket.create_connection(server.getsockname())\n    client2.close()\n\n    thread.join()\n    server.close()\n\n    assert call_count == 1\n\n\ndef test_add_accept_handler_no_connection(tmp_path):\n    \"\"\"If no connections arrive, the callback is never called and no exception occurs.\"\"\"\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setblocking(False)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen(1)\n\n    called = False\n\n    def callback(conn, addr):\n        nonlocal called\n        called = True\n        conn.close()\n\n    remove = add_accept_handler(server, callback)\n\n    loop = IOLoop.current()\n    thread = threading.Thread(target=_run_loop, args=(loop, 0.5))\n    thread.start()\n\n    # Do not connect any client\n    thread.join()\n    remove()\n    server.close()\n\n    assert not called\n```",
+        "reasoning": "We need tests for add_accept_handler. Use tmp_path to create server socket, client connect, ensure callback called. Also test removal stops. Third test error? maybe when socket closed? We'll test that after remove_handler, no more callbacks. Use asyncio event loop? IOLoop is tornado's. We'll use IOLoop.current(). Use IOLoop.instance? We'll run in test. Ensure callback receives connection and address. Use list to record. Use socket.socketpair? For TCP, bind to localhost. Use non-blocking. Let's write three tests: 1 normal accept. 2 removal stops. 3 error handling: when accept raises BlockingIOError? Hard. Maybe test that callback not called when no connection. Use timeout. We'll just test that no exception when no connections. Use small sleep. Use IOLoop.start? We can use IOLoop.current().start() in separate thread? Simpler: use IOLoop.current().add_timeout to stop after short. Use IOLoop.current().start() in test. We'll run loop in thread. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053379609,
+    "prompt_tokens": 912,
+    "prompt_time": 0.034215941,
+    "completion_tokens": 889,
+    "completion_time": 1.1358572630000001,
+    "total_tokens": 1801,
+    "total_time": 1.170073204,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 220
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgqgv1e259qyxnbznp7dmb",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport socket\nimport time\nimport threading\n\nimport pytest\nfrom tornado.ioloop import IOLoop\nfrom tornado.netutil import add_accept_handler\n\n\ndef _run_loop(loop, stop_after: float):\n    \"\"\"Run the given IOLoop for a short time and then stop it.\"\"\"\n    def stop():\n        loop.stop()\n    loop.add_timeout(loop.time() + stop_after, stop)\n    loop.start()\n\n\ndef test_add_accept_handler_accepts_connection(tmp_path):\n    \"\"\"The callback is invoked with a new connection and its address.\"\"\"\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setblocking(False)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen(1)\n\n    received = []\n\n    def callback(conn, addr):\n        received.append((conn, addr))\n        conn.close()\n\n    remove = add_accept_handler(server, callback)\n\n    loop = IOLoop.current()\n    thread = threading.Thread(target=_run_loop, args=(loop, 0.5))\n    thread.start()\n\n    # Connect a client to trigger the accept handler\n    client = socket.create_connection(server.getsockname())\n    client.close()\n\n    thread.join()\n    remove()\n    server.close()\n\n    assert len(received) == 1\n    conn, addr = received[0]\n    assert isinstance(conn, socket.socket)\n    assert addr == server.getsockname()\n\n\ndef test_add_accept_handler_removal(tmp_path):\n    \"\"\"Removing the handler stops further callbacks.\"\"\"\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setblocking(False)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen(1)\n\n    call_count = 0\n\n    def callback(conn, addr):\n        nonlocal call_count\n        call_count += 1\n        conn.close()\n\n    remove = add_accept_handler(server, callback)\n\n    loop = IOLoop.current()\n    thread = threading.Thread(target=_run_loop, args=(loop, 0.5))\n    thread.start()\n\n    # First connection should be accepted\n    client1 = socket.create_connection(server.getsockname())\n    client1.close()\n\n    # Remove handler before second connection\n    remove()\n\n    # Second connection should not trigger callback\n    client2 = socket.create_connection(server.getsockname())\n    client2.close()\n\n    thread.join()\n    server.close()\n\n    assert call_count == 1\n\n\ndef test_add_accept_handler_no_connection(tmp_path):\n    \"\"\"If no connections arrive, the callback is never called and no exception occurs.\"\"\"\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    server.setblocking(False)\n    server.bind((\"127.0.0.1\", 0))\n    server.listen(1)\n\n    called = False\n\n    def callback(conn, addr):\n        nonlocal called\n        called = True\n        conn.close()\n\n    remove = add_accept_handler(server, callback)\n\n    loop = IOLoop.current()\n    thread = threading.Thread(target=_run_loop, args=(loop, 0.5))\n    thread.start()\n\n    # Do not connect any client\n    thread.join()\n    remove()\n    server.close()\n\n    assert not called\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5696286120219156
+}

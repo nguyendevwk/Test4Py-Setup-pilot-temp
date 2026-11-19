@@ -1,0 +1,80 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________________ test_parse_full_numpydoc ___________________________
+
+    def test_parse_full_numpydoc():
+        doc = """
+        Short summary.
+    
+        Parameters
+        ----------
+        x : int
+            The first parameter.
+        y : str, optional
+            The second parameter.
+    
+        Returns
+        -------
+        bool
+            True if successful.
+    
+        Raises
+        ------
+        ValueError
+            If an error occurs.
+        """
+        parsed = parse(doc)
+        assert isinstance(parsed, Docstring)
+        # Parameters
+        assert len(parsed.params) == 2
+        x_param = next(p for p in parsed.params if p.arg_name == "x")
+        assert x_param.type_name == "int"
+        assert x_param.description.strip() == "The first parameter."
+        y_param = next(p for p in parsed.params if p.arg_name == "y")
+>       assert y_param.type_name == "str, optional"
+E       AssertionError: assert 'str' == 'str, optional'
+E         
+E         - str, optional
+E         + str
+
+test_generated.py:34: AssertionError
+_________________________ test_parse_partial_numpydoc __________________________
+
+    def test_parse_partial_numpydoc():
+        doc = """
+        Short summary.
+    
+        Parameters
+        ----------
+        a : float
+            A value.
+    
+        """
+        parsed = parse(doc)
+        assert isinstance(parsed, Docstring)
+        assert len(parsed.params) == 1
+        assert parsed.params[0].arg_name == "a"
+        assert parsed.params[0].type_name == "float"
+        assert parsed.params[0].description.strip() == "A value."
+        # No returns or raises
+>       assert parsed.returns == []
+E       assert None == []
+E        +  where None = <docstring_parser.common.Docstring object at 0x7fdeec623550>.returns
+
+test_generated.py:66: AssertionError
+___________________ test_parse_none_returns_empty_docstring ____________________
+
+    def test_parse_none_returns_empty_docstring():
+        parsed = parse(None)
+        assert isinstance(parsed, Docstring)
+        assert parsed.params == []
+>       assert parsed.returns == []
+E       assert None == []
+E        +  where None = <docstring_parser.common.Docstring object at 0x7fdeec5a7dc0>.returns
+
+test_generated.py:73: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_full_numpydoc - AssertionError: assert '...
+FAILED test_generated.py::test_parse_partial_numpydoc - assert None == []
+FAILED test_generated.py::test_parse_none_returns_empty_docstring - assert No...
+3 failed in 0.16s

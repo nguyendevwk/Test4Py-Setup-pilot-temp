@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-b6540357-5e6c-424f-9a0d-bb25d60b6f57",
+  "object": "chat.completion",
+  "created": 1795079393,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import parse_forwarded\n\nclass DummyHeaders:\n    def __init__(self, values):\n        self._values = values\n\n    def getall(self, name, default=None):\n        return self._values.get(name.lower(), default)\n\nclass DummyConfig:\n    def __init__(self, secret):\n        self.FORWARDED_SECRET = secret\n\ndef test_parse_forwarded_success_single_line():\n    headers = DummyHeaders({\"forwarded\": ['by=example.com; secret=\"mysecret\"']})\n    config = DummyConfig(\"mysecret\")\n    result = parse_forwarded(headers, config)\n    assert result is not None\n    # The returned dict should contain the matching key/value pairs\n    assert result[\"by\"] == \"example.com\"\n    assert result[\"secret\"] == \"mysecret\"\n\ndef test_parse_forwarded_multiple_lines_and_quotes():\n    headers = DummyHeaders({\n        \"forwarded\": [\n            'for=192.0.2.60; proto=http',\n            'by=proxy1; secret=\"mysecret\"'\n        ]\n    })\n    config = DummyConfig(\"mysecret\")\n    result = parse_forwarded(headers, config)\n    assert result is not None\n    # The order should be preserved from left to right\n    assert list(result.keys()) == [\"by\", \"secret\"]\n    assert result[\"by\"] == \"proxy1\"\n    assert result[\"secret\"] == \"mysecret\"\n\ndef test_parse_forwarded_no_secret_returns_none():\n    headers = DummyHeaders({\"forwarded\": ['by=example.com; secret=\"wrong\"']})\n    config = DummyConfig(\"mysecret\")\n    result = parse_forwarded(headers, config)\n    assert result is None\n```",
+        "reasoning": "We need tests for parse_forwarded. Need to import function. Use tmp_path? Not needed. Use config object with FORWARDED_SECRET attribute. Use headers object with getall method. We can create simple class. Test normal: header contains secret and by. Test boundary: header with multiple lines, ensure join. Test error: secret not present returns None. Also test that when secret present but not matching by? It still returns? It returns if key in (\"secret\",\"by\") and val==secret. So if secret appears in other key? test that. We'll create config with secret. Use headers with getall returning list. Use simple class. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048692737,
+    "prompt_tokens": 645,
+    "prompt_time": 0.020189393,
+    "completion_tokens": 503,
+    "completion_time": 0.590340363,
+    "total_tokens": 1148,
+    "total_time": 0.610529756,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 138
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh3kjpebkssyd82hxf043w",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import parse_forwarded\n\nclass DummyHeaders:\n    def __init__(self, values):\n        self._values = values\n\n    def getall(self, name, default=None):\n        return self._values.get(name.lower(), default)\n\nclass DummyConfig:\n    def __init__(self, secret):\n        self.FORWARDED_SECRET = secret\n\ndef test_parse_forwarded_success_single_line():\n    headers = DummyHeaders({\"forwarded\": ['by=example.com; secret=\"mysecret\"']})\n    config = DummyConfig(\"mysecret\")\n    result = parse_forwarded(headers, config)\n    assert result is not None\n    # The returned dict should contain the matching key/value pairs\n    assert result[\"by\"] == \"example.com\"\n    assert result[\"secret\"] == \"mysecret\"\n\ndef test_parse_forwarded_multiple_lines_and_quotes():\n    headers = DummyHeaders({\n        \"forwarded\": [\n            'for=192.0.2.60; proto=http',\n            'by=proxy1; secret=\"mysecret\"'\n        ]\n    })\n    config = DummyConfig(\"mysecret\")\n    result = parse_forwarded(headers, config)\n    assert result is not None\n    # The order should be preserved from left to right\n    assert list(result.keys()) == [\"by\", \"secret\"]\n    assert result[\"by\"] == \"proxy1\"\n    assert result[\"secret\"] == \"mysecret\"\n\ndef test_parse_forwarded_no_secret_returns_none():\n    headers = DummyHeaders({\"forwarded\": ['by=example.com; secret=\"wrong\"']})\n    config = DummyConfig(\"mysecret\")\n    result = parse_forwarded(headers, config)\n    assert result is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "1b92b1715534496f8e2cf4345bb13781",
+  "_api_plus_pacing_seconds": 1.2820409430423751
+}

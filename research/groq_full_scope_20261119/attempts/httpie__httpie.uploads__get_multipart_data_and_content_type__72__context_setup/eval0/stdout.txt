@@ -1,0 +1,105 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________________ test_basic_string_field ____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.uploads__get_multipart_data_and_content_type__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_basic_string_field0')
+
+    def test_basic_string_field(tmp_path):
+        # Prepare a simple multipart data dict with a string field
+        data = {"field1": "value1"}
+        encoder, content_type = get_multipart_data_and_content_type(data)
+    
+        # The encoder should be a MultipartEncoder instance
+        assert hasattr(encoder, "fields")
+>       assert encoder.fields == data
+E       AssertionError: assert dict_items([(...', 'value1')]) == {'field1': 'value1'}
+E         
+E         Use -v to get more diff
+
+test_generated.py:13: AssertionError
+_____________________________ test_custom_boundary _____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.uploads__get_multipart_data_and_content_type__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_custom_boundary0')
+
+    def test_custom_boundary(tmp_path):
+        # Prepare a multipart data dict with a file field
+        file_path = tmp_path / "test.txt"
+        file_path.write_text("hello")
+        with open(file_path, "rb") as f:
+            data = {"file": ("test.txt", f, "text/plain")}
+    
+        custom_boundary = "my-custom-boundary-12345"
+>       encoder, content_type = get_multipart_data_and_content_type(
+            data, boundary=custom_boundary
+        )
+
+test_generated.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/uploads.py:237: in get_multipart_data_and_content_type
+    encoder = MultipartEncoder(
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/requests_toolbelt/multipart/encoder.py:125: in __init__
+    self._prepare_parts()
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/requests_toolbelt/multipart/encoder.py:246: in _prepare_parts
+    self.parts = [Part.from_field(f, enc) for f in self._iter_fields()]
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/requests_toolbelt/multipart/encoder.py:246: in <listcomp>
+    self.parts = [Part.from_field(f, enc) for f in self._iter_fields()]
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/requests_toolbelt/multipart/encoder.py:495: in from_field
+    return cls(headers, body)
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/requests_toolbelt/multipart/encoder.py:488: in __init__
+    self.len = len(self.headers) + total_len(self.body)
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/requests_toolbelt/multipart/encoder.py:432: in total_len
+    if hasattr(o, 'len'):
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/requests_toolbelt/multipart/encoder.py:573: in len
+    return total_len(self.fd) - self.fd.tell()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+o = <_io.BufferedReader name='/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__http...multipart_data_and_content_type__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_custom_boundary0/test.txt'>
+
+    def total_len(o):
+        if hasattr(o, '__len__'):
+            return len(o)
+    
+        if hasattr(o, 'len'):
+            return o.len
+    
+        if hasattr(o, 'fileno'):
+            try:
+>               fileno = o.fileno()
+E               ValueError: I/O operation on closed file
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/requests_toolbelt/multipart/encoder.py:437: ValueError
+__________________________ test_content_type_handling __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.uploads__get_multipart_data_and_content_type__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_content_type_handling0')
+
+    def test_content_type_handling(tmp_path):
+        # Prepare a multipart data dict with a string field
+        data = {"field2": "value2"}
+    
+        # Case 1: content_type without boundary
+        ct_no_boundary = "multipart/form-data"
+        encoder1, content_type1 = get_multipart_data_and_content_type(
+            data, content_type=ct_no_boundary
+        )
+        assert content_type1.startswith(ct_no_boundary)
+        assert "boundary=" in content_type1
+        assert content_type1.endswith(encoder1.boundary_value)
+    
+        # Case 2: content_type with boundary already present
+        ct_with_boundary = f"multipart/form-data; boundary={encoder1.boundary_value}"
+        encoder2, content_type2 = get_multipart_data_and_content_type(
+            data, content_type=ct_with_boundary
+        )
+        assert content_type2 == ct_with_boundary
+>       assert encoder2.boundary_value == encoder1.boundary_value
+E       AssertionError: assert 'b2a7e440bec8...7efe2ec09795c' == '5d679f27bb01...a2c18767120c1'
+E         
+E         - 5d679f27bb0149ccb3ea2c18767120c1
+E         + b2a7e440bec84b8ca447efe2ec09795c
+
+test_generated.py:55: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_basic_string_field - AssertionError: assert di...
+FAILED test_generated.py::test_custom_boundary - ValueError: I/O operation on...
+FAILED test_generated.py::test_content_type_handling - AssertionError: assert...
+3 failed in 0.40s

@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-6e9ebe68-b808-4025-a6fa-1e5a380f90b8",
+  "object": "chat.completion",
+  "created": 1795079460,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport typesystem\nfrom typesystem.tokenize.tokenize_yaml import validate_yaml\nfrom typesystem.fields import String, Integer\nfrom typesystem.schemas import Schema\n\n\nclass Person(Schema):\n    name = String()\n    age = Integer()\n\n\ndef test_validate_yaml_success(tmp_path):\n    yaml_content = \"\"\"\n    name: Alice\n    age: 30\n    \"\"\"\n    value, errors = validate_yaml(yaml_content, Person)\n    assert errors == []\n    assert isinstance(value, Person)\n    assert value.name == \"Alice\"\n    assert value.age == 30\n\n\ndef test_validate_yaml_syntax_error(tmp_path):\n    yaml_content = \"\"\"\n    name: Alice\n    age: 30\n    - invalid\n    \"\"\"\n    value, errors = validate_yaml(yaml_content, Person)\n    assert value is None\n    assert errors\n    # The first error should mention a syntax issue near the dash\n    assert any(\"syntax\" in e.lower() or \"error\" in e.lower() for e in errors)\n\n\ndef test_validate_yaml_validation_error(tmp_path):\n    yaml_content = \"\"\"\n    name: Bob\n    age: \"not a number\"\n    \"\"\"\n    value, errors = validate_yaml(yaml_content, Person)\n    assert value is None\n    assert errors\n    # The error should indicate a type mismatch for the age field\n    assert any(\"age\" in e.lower() and (\"int\" in e.lower() or \"integer\" in e.lower()) for e in errors)\n```",
+        "reasoning": "We need to write tests for validate_yaml. Need to import it. Use tmp_path for files? content is string. We need to test normal, boundary, error. We can test that valid yaml returns value and empty errors. Test invalid yaml syntax returns error. Test validation error when validator fails. Use typesystem library. Let's assume typesystem is installed. We'll write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005099145,
+    "prompt_tokens": 404,
+    "prompt_time": 0.021107765,
+    "completion_tokens": 396,
+    "completion_time": 0.427147027,
+    "total_tokens": 800,
+    "total_time": 0.448254792,
+    "completion_tokens_details": {
+      "reasoning_tokens": 77
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh5mq7e1j8q6h279cetrew",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport typesystem\nfrom typesystem.tokenize.tokenize_yaml import validate_yaml\nfrom typesystem.fields import String, Integer\nfrom typesystem.schemas import Schema\n\n\nclass Person(Schema):\n    name = String()\n    age = Integer()\n\n\ndef test_validate_yaml_success(tmp_path):\n    yaml_content = \"\"\"\n    name: Alice\n    age: 30\n    \"\"\"\n    value, errors = validate_yaml(yaml_content, Person)\n    assert errors == []\n    assert isinstance(value, Person)\n    assert value.name == \"Alice\"\n    assert value.age == 30\n\n\ndef test_validate_yaml_syntax_error(tmp_path):\n    yaml_content = \"\"\"\n    name: Alice\n    age: 30\n    - invalid\n    \"\"\"\n    value, errors = validate_yaml(yaml_content, Person)\n    assert value is None\n    assert errors\n    # The first error should mention a syntax issue near the dash\n    assert any(\"syntax\" in e.lower() or \"error\" in e.lower() for e in errors)\n\n\ndef test_validate_yaml_validation_error(tmp_path):\n    yaml_content = \"\"\"\n    name: Bob\n    age: \"not a number\"\n    \"\"\"\n    value, errors = validate_yaml(yaml_content, Person)\n    assert value is None\n    assert errors\n    # The error should indicate a type mismatch for the age field\n    assert any(\"age\" in e.lower() and (\"int\" in e.lower() or \"integer\" in e.lower()) for e in errors)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "c40d6ec5b9c04cdc8b7f5c703516d473",
+  "_api_plus_pacing_seconds": 1.6695110690197907
+}

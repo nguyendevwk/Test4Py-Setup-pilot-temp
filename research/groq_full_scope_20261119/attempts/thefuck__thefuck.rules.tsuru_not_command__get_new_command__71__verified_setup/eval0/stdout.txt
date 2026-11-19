@@ -1,0 +1,79 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_get_new_command_replaces_broken_command _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f355ae195d0>
+
+    def test_get_new_command_replaces_broken_command(monkeypatch):
+        # Arrange: mock get_all_matched_commands to return a deterministic list
+        def fake_get_all_matched_commands(output):
+            return ["tsuru deploy", "tsuru status"]
+        monkeypatch.setattr("thefuck.rules.tsuru_not_command.get_all_matched_commands", fake_get_all_matched_commands)
+    
+        # The broken command appears in the output
+        output = 'tsuru: "deploy" is not a tsuru command\nTry: tsuru deploy\nTry: tsuru status'
+        cmd = DummyCommand(command="tsuru deploy", output=output)
+    
+        # Act
+>       new_cmd = get_new_command(cmd)
+
+test_generated.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/tsuru_not_command.py:14: in get_new_command
+    return replace_command(command, broken_cmd,
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/utils.py:170: in replace_command
+    return [replace_argument(command.script, broken, new_cmd.strip())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x7f355ae19780>
+
+>   return [replace_argument(command.script, broken, new_cmd.strip())
+            for new_cmd in new_cmds]
+E   AttributeError: 'DummyCommand' object has no attribute 'script'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/utils.py:170: AttributeError
+__________________ test_get_new_command_uses_first_suggestion __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f355ae9b460>
+
+    def test_get_new_command_uses_first_suggestion(monkeypatch):
+        # Arrange: mock get_all_matched_commands to return multiple suggestions
+        def fake_get_all_matched_commands(output):
+            return ["tsuru start", "tsuru stop", "tsuru restart"]
+        monkeypatch.setattr("thefuck.rules.tsuru_not_command.get_all_matched_commands", fake_get_all_matched_commands)
+    
+        output = 'tsuru: "run" is not a tsuru command\nTry: tsuru start\nTry: tsuru stop\nTry: tsuru restart'
+        cmd = DummyCommand(command="tsuru run", output=output)
+    
+        # Act
+>       new_cmd = get_new_command(cmd)
+
+test_generated.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/tsuru_not_command.py:14: in get_new_command
+    return replace_command(command, broken_cmd,
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/utils.py:170: in replace_command
+    return [replace_argument(command.script, broken, new_cmd.strip())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x7f355ae9b520>
+
+>   return [replace_argument(command.script, broken, new_cmd.strip())
+            for new_cmd in new_cmds]
+E   AttributeError: 'DummyCommand' object has no attribute 'script'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/utils.py:170: AttributeError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_new_command_replaces_broken_command - Attr...
+FAILED test_generated.py::test_get_new_command_uses_first_suggestion - Attrib...
+2 failed, 1 passed, 2 warnings in 0.16s

@@ -1,0 +1,39 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________________ test_callgraph_add_node_behavior _______________________
+
+    def test_callgraph_add_node_behavior():
+        cg = CallGraph()
+    
+        # Adding a non‑string node name raises an error
+        with pytest.raises(CallGraphError, match="Only string node names allowed"):
+            cg.add_node(123)
+    
+        # Adding an empty string node name raises an error
+        with pytest.raises(CallGraphError, match="Empty node name"):
+            cg.add_node("")
+    
+        # Valid node addition creates an entry with an empty set and stores the modname
+        cg.add_node("module.func", modname="module")
+        assert "module.func" in cg.get()
+        assert cg.get()["module.func"] == set()
+        assert cg.get_modules()["module.func"] == "module"
+    
+        # Adding the same node again with an empty modname does not overwrite the existing modname
+        cg.add_node("module.func", modname="")
+        assert cg.get_modules()["module.func"] == "module"
+    
+        # Adding the same node again with a new modname when the previous modname is empty updates it
+        cg.add_node("new.module", modname="old")
+        cg.add_node("new.module", modname="new")
+>       assert cg.get_modules()["new.module"] == "new"
+E       AssertionError: assert 'old' == 'new'
+E         
+E         - new
+E         + old
+
+../../expanded_120_results/pycg_callgraph/council_enhanced/seed_44/v1_exec/test_run.py:28: AssertionError
+=========================== short test summary info ============================
+FAILED ../../expanded_120_results/pycg_callgraph/council_enhanced/seed_44/v1_exec/test_run.py::test_callgraph_add_node_behavior
+1 failed in 0.10s
+

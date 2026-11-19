@@ -1,0 +1,63 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_parse_single_example_with_description __________________
+
+    def test_parse_single_example_with_description():
+        """Normal case: one snippet followed by a description."""
+        section = ExamplesSection(title="Examples", key="examples")
+        raw = """\
+            >>> import numpy as np
+            >>> np.arange(3)
+            array([0, 1, 2])
+            This returns an array of integers."""
+        # cleandoc removes common indentation
+        cleaned = inspect.cleandoc(raw)
+        parsed = list(section.parse(cleaned))
+        assert len(parsed) == 1
+        example = parsed[0]
+        assert isinstance(example, DocstringExample)
+        assert example.args == ["examples"]
+        expected_snippet = """\
+    >>> import numpy as np
+    >>> np.arange(3)
+    array([0, 1, 2])"""
+>       assert example.snippet == expected_snippet
+E       AssertionError: assert '>>> import n... np.arange(3)' == '>>> import n...ay([0, 1, 2])'
+E         
+E           >>> import numpy as np
+E         - >>> np.arange(3)
+E         ?                 -
+E         + >>> np.arange(3)
+E         - array([0, 1, 2])
+
+test_generated.py:24: AssertionError
+________________ test_parse_multiple_examples_and_descriptions _________________
+
+    def test_parse_multiple_examples_and_descriptions():
+        """Boundary case: multiple snippets separated by descriptions."""
+        section = ExamplesSection(title="Examples", key="examples")
+        raw = """\
+            >>> print('first')
+            first
+            First example description.
+            >>> print('second')
+            second
+            Second example description."""
+        cleaned = inspect.cleandoc(raw)
+        parsed = list(section.parse(cleaned))
+        assert len(parsed) == 2
+        first, second = parsed
+>       assert first.snippet == ">>> print('first')\n>>> print('first')\nfirst"
+E       assert ">>> print('first')" == ">>> print('f...irst')\nfirst"
+E         
+E         - >>> print('first')
+E         ?                   -
+E         + >>> print('first')
+E         - >>> print('first')
+E         - first
+
+test_generated.py:41: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_single_example_with_description - Assert...
+FAILED test_generated.py::test_parse_multiple_examples_and_descriptions - ass...
+2 failed, 1 passed in 0.11s

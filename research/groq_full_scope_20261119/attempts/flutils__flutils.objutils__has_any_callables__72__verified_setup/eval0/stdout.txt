@@ -1,0 +1,53 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_has_any_callables_with_callable_attrs __________________
+
+    def test_has_any_callables_with_callable_attrs():
+        """Object has at least one callable attribute among the given names."""
+        class Dummy:
+            def method(self):  # callable
+                pass
+    
+            attr = 42  # non-callable
+    
+        dummy = Dummy()
+        # 'method' is callable, 'attr' is not; function should return True
+        assert has_any_callables(dummy, "method", "attr") is True
+        # If we ask for a non-existent attribute, still True because 'method' exists
+>       assert has_any_callables(dummy, "nonexistent", "method") is True
+
+test_generated.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+obj = <test_generated.test_has_any_callables_with_callable_attrs.<locals>.Dummy object at 0x7f15cf8b8e80>
+attrs = ('nonexistent', 'method')
+
+    def has_any_callables(obj: _Any, *attrs: str) -> bool:
+        """Check if the given ``obj`` has **ANY** of the given ``attrs`` and are
+        callable.
+    
+        Args:
+            obj (:obj:`Any <typing.Any>`): The object to check.
+            *attrs (:obj:`str`): The names of the attributes to check.
+    
+        :rtype:
+            :obj:`bool`
+    
+            * :obj:`True` if ANY of the given ``*attrs`` exist on the given ``obj``
+              and ANY are callable;
+            * :obj:`False` otherwise.
+    
+        Example:
+            >>> from flutils.objutils import has_any_callables
+            >>> has_any_callables(dict(),'get','keys','items','values','foo')
+            True
+        """
+        if has_any_attrs(obj, *attrs) is True:
+            for attr in attrs:
+>               if callable(getattr(obj, attr)) is True:
+E               AttributeError: 'Dummy' object has no attribute 'nonexistent'
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/objutils.py:83: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_has_any_callables_with_callable_attrs - Attrib...
+1 failed, 2 passed in 0.11s

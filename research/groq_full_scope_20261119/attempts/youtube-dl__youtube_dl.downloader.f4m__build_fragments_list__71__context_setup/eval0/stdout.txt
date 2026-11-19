@@ -1,0 +1,37 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_live_truncation_and_abnormal_count ____________________
+
+    def test_live_truncation_and_abnormal_count():
+        boot_info = {
+            'segments': [
+                {
+                    'segment_run': [
+                        ('segA', 4294967295),  # abnormal count
+                        ('segB', 3),
+                    ]
+                }
+            ],
+            'fragments': [
+                {
+                    'fragments': [
+                        {'first': 10}
+                    ]
+                }
+            ],
+            'live': True
+        }
+        result = build_fragments_list(boot_info)
+        # For live, only last two fragments should be kept
+        # Normal count is replaced by 2 for abnormal value
+        # Fragment numbers: 10,11,12,13,14,15 -> last two are 14,15
+>       assert result == [('segB', 14), ('segB', 15)]
+E       AssertionError: assert [('segB', 13), ('segB', 14)] == [('segB', 14), ('segB', 15)]
+E         
+E         At index 0 diff: ('segB', 13) != ('segB', 14)
+E         Use -v to get more diff
+
+test_generated.py:50: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_live_truncation_and_abnormal_count - Assertion...
+1 failed, 2 passed in 1.28s

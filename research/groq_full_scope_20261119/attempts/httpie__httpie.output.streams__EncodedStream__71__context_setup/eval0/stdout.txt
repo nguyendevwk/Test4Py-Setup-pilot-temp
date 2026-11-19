@@ -1,0 +1,90 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_encoded_stream_normal_text ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.output.streams__EncodedStream__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_encoded_stream_normal_tex0')
+
+    def test_encoded_stream_normal_text(tmp_path):
+        body = b"Hello\nWorld\n"
+>       msg = DummyMessage(body, content_type="text/plain; charset=utf-8", encoding="utf-8")
+
+test_generated.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyMessage object at 0x7fa5f62334c0>
+body = b'Hello\nWorld\n', content_type = 'text/plain; charset=utf-8'
+encoding = 'utf-8'
+
+    def __init__(self, body: bytes, content_type: str = "text/plain", encoding: str = "utf-8"):
+        self._body = body
+>       self.content_type = content_type
+E       AttributeError: can't set attribute 'content_type'
+
+test_generated.py:12: AttributeError
+____________________ test_encoded_stream_binary_suppressed _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.output.streams__EncodedStream__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_encoded_stream_binary_sup0')
+
+    def test_encoded_stream_binary_suppressed(tmp_path):
+        body = b"binary\x00data"
+>       msg = DummyMessage(body, content_type="application/octet-stream", encoding="utf-8")
+
+test_generated.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyMessage object at 0x7fa5f5a37f10>
+body = b'binary\x00data', content_type = 'application/octet-stream'
+encoding = 'utf-8'
+
+    def __init__(self, body: bytes, content_type: str = "text/plain", encoding: str = "utf-8"):
+        self._body = body
+>       self.content_type = content_type
+E       AttributeError: can't set attribute 'content_type'
+
+test_generated.py:12: AttributeError
+______________________ test_encoded_stream_encoding_guess ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.output.streams__EncodedStream__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_encoded_stream_encoding_g0')
+
+    def test_encoded_stream_encoding_guess(tmp_path):
+        # Simulate a message where smart_decode returns different guesses
+        class GuessMessage(DummyMessage):
+            def __init__(self, body, guesses):
+                super().__init__(body)
+                self._guesses = guesses
+                self._index = 0
+    
+            def iter_lines(self, chunk_size: int):
+                for line in self._body.splitlines(True):
+                    yield line, b'\n'
+    
+            def decode_chunk(self, raw_chunk):
+                # Override to return a guess
+                guess = self._guesses[self._index % len(self._guesses)]
+                self._index += 1
+                return raw_chunk.decode(guess)
+    
+        body = b"test\n"
+        guesses = ["utf-8", "utf-8", "utf-8"]
+>       msg = GuessMessage(body, guesses)
+
+test_generated.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_generated.py:54: in __init__
+    super().__init__(body)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.test_encoded_stream_encoding_guess.<locals>.GuessMessage object at 0x7fa5f5afc040>
+body = b'test\n', content_type = 'text/plain', encoding = 'utf-8'
+
+    def __init__(self, body: bytes, content_type: str = "text/plain", encoding: str = "utf-8"):
+        self._body = body
+>       self.content_type = content_type
+E       AttributeError: can't set attribute 'content_type'
+
+test_generated.py:12: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_encoded_stream_normal_text - AttributeError: c...
+FAILED test_generated.py::test_encoded_stream_binary_suppressed - AttributeEr...
+FAILED test_generated.py::test_encoded_stream_encoding_guess - AttributeError...
+3 failed in 0.79s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-06b44930-5b96-4c4e-89e1-38c510dba23f",
+  "object": "chat.completion",
+  "created": 1795078447,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport os\nfrom pathlib import Path\n\nimport pytest\n\nfrom cookiecutter.replay import dump, get_file_name\n\n\ndef test_dump_creates_file_and_writes_json(tmp_path: Path) -> None:\n    \"\"\"Normal case: dump writes JSON to the expected file.\"\"\"\n    replay_dir = tmp_path / \"replay\"\n    template_name = \"my_template\"\n    context = {\"cookiecutter\": {\"name\": \"Alice\"}, \"other\": 123}\n\n    dump(replay_dir, template_name, context)\n\n    # Directory should exist\n    assert replay_dir.is_dir()\n\n    # File should exist\n    replay_file = get_file_name(replay_dir, template_name)\n    assert replay_file.is_file()\n\n    # File content should match the context\n    with replay_file.open(\"r\", encoding=\"utf-8\") as f:\n        data = json.load(f)\n    assert data == context\n\n\ndef test_dump_raises_value_error_when_cookiecutter_missing(tmp_path: Path) -> None:\n    \"\"\"Error case: missing 'cookiecutter' key in context raises ValueError.\"\"\"\n    replay_dir = tmp_path / \"replay\"\n    template_name = \"my_template\"\n    context = {\"other\": 123}\n\n    with pytest.raises(ValueError, match=\"Context is required to contain a cookiecutter key\"):\n        dump(replay_dir, template_name, context)\n\n\ndef test_dump_overwrites_existing_file(tmp_path: Path) -> None:\n    \"\"\"Boundary case: calling dump twice overwrites the previous file.\"\"\"\n    replay_dir = tmp_path / \"replay\"\n    template_name = \"my_template\"\n    first_context = {\"cookiecutter\": {\"name\": \"Alice\"}, \"other\": 123}\n    second_context = {\"cookiecutter\": {\"name\": \"Bob\"}, \"other\": 456}\n\n    dump(replay_dir, template_name, first_context)\n    first_file = get_file_name(replay_dir, template_name)\n    assert first_file.read_text(encoding=\"utf-8\") == json.dumps(first_context, indent=2)\n\n    dump(replay_dir, template_name, second_context)\n    second_file = get_file_name(replay_dir, template_name)\n    assert second_file.read_text(encoding=\"utf-8\") == json.dumps(second_context, indent=2)\n    # Ensure the file was overwritten, not duplicated\n    assert first_file.read_text(encoding=\"utf-8\") == json.dumps(second_context, indent=2)\n```",
+        "reasoning": "Need tests for dump: normal, boundary, error. Use tmp_path. Also test that file exists and content. Also test error when missing cookiecutter key. Also test that directory created. Use Path from pathlib."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047713903,
+    "prompt_tokens": 369,
+    "prompt_time": 0.021021506,
+    "completion_tokens": 564,
+    "completion_time": 0.641274299,
+    "total_tokens": 933,
+    "total_time": 0.662295805,
+    "completion_tokens_details": {
+      "reasoning_tokens": 45
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg6qq2e2kr4p8dtc0y2399",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport os\nfrom pathlib import Path\n\nimport pytest\n\nfrom cookiecutter.replay import dump, get_file_name\n\n\ndef test_dump_creates_file_and_writes_json(tmp_path: Path) -> None:\n    \"\"\"Normal case: dump writes JSON to the expected file.\"\"\"\n    replay_dir = tmp_path / \"replay\"\n    template_name = \"my_template\"\n    context = {\"cookiecutter\": {\"name\": \"Alice\"}, \"other\": 123}\n\n    dump(replay_dir, template_name, context)\n\n    # Directory should exist\n    assert replay_dir.is_dir()\n\n    # File should exist\n    replay_file = get_file_name(replay_dir, template_name)\n    assert replay_file.is_file()\n\n    # File content should match the context\n    with replay_file.open(\"r\", encoding=\"utf-8\") as f:\n        data = json.load(f)\n    assert data == context\n\n\ndef test_dump_raises_value_error_when_cookiecutter_missing(tmp_path: Path) -> None:\n    \"\"\"Error case: missing 'cookiecutter' key in context raises ValueError.\"\"\"\n    replay_dir = tmp_path / \"replay\"\n    template_name = \"my_template\"\n    context = {\"other\": 123}\n\n    with pytest.raises(ValueError, match=\"Context is required to contain a cookiecutter key\"):\n        dump(replay_dir, template_name, context)\n\n\ndef test_dump_overwrites_existing_file(tmp_path: Path) -> None:\n    \"\"\"Boundary case: calling dump twice overwrites the previous file.\"\"\"\n    replay_dir = tmp_path / \"replay\"\n    template_name = \"my_template\"\n    first_context = {\"cookiecutter\": {\"name\": \"Alice\"}, \"other\": 123}\n    second_context = {\"cookiecutter\": {\"name\": \"Bob\"}, \"other\": 456}\n\n    dump(replay_dir, template_name, first_context)\n    first_file = get_file_name(replay_dir, template_name)\n    assert first_file.read_text(encoding=\"utf-8\") == json.dumps(first_context, indent=2)\n\n    dump(replay_dir, template_name, second_context)\n    second_file = get_file_name(replay_dir, template_name)\n    assert second_file.read_text(encoding=\"utf-8\") == json.dumps(second_context, indent=2)\n    # Ensure the file was overwritten, not duplicated\n    assert first_file.read_text(encoding=\"utf-8\") == json.dumps(second_context, indent=2)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0663339190068655
+}

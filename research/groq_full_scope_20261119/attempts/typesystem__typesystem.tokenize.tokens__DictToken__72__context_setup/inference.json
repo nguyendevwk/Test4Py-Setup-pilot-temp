@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-1e886b3a-7d69-48fe-aa1d-ed78fb308292",
+  "object": "chat.completion",
+  "created": 1795078682,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokens import DictToken\nfrom typesystem.base import Position\n\ndef test_dict_token_value_and_lookup():\n    # Create a simple dictionary token with two key/value pairs\n    content = '{\"a\": 1, \"b\": 2}'\n    # Construct the underlying Token objects manually\n    # For simplicity, use DictToken directly with a dict of Token-like objects\n    class SimpleToken(DictToken):\n        def _get_value(self):\n            return self._value\n\n    # Build child tokens\n    a_token = SimpleToken(1, 0, 0, content)\n    b_token = SimpleToken(2, 0, 0, content)\n    dict_token = DictToken({\"a\": a_token, \"b\": b_token}, 0, len(content)-1, content)\n\n    # The value property should return a plain dict\n    assert dict_token.value == {\"a\": 1, \"b\": 2}\n\n    # lookup should return the child token for a given key\n    assert dict_token.lookup([\"a\"]) is a_token\n    assert dict_token.lookup([\"b\"]) is b_token\n\n    # lookup_key should return the key token (here same as child token)\n    assert dict_token.lookup_key([\"a\"]) is a_token\n    assert dict_token.lookup_key([\"b\"]) is b_token\n\ndef test_empty_dict_token():\n    content = '{}'\n    empty_token = DictToken({}, 0, len(content)-1, content)\n    # Value should be an empty dict\n    assert empty_token.value == {}\n    # lookup on empty dict should raise KeyError\n    with pytest.raises(KeyError):\n        empty_token.lookup([\"missing\"])\n    # lookup_key on empty dict should raise KeyError\n    with pytest.raises(KeyError):\n        empty_token.lookup_key([\"missing\"])\n\ndef test_dict_token_position_and_repr():\n    content = '{\"x\": 10}'\n    x_token = DictToken(10, 0, 0, content)\n    dict_token = DictToken({\"x\": x_token}, 0, len(content)-1, content)\n\n    # start and end positions should be correct\n    start_pos = dict_token.start\n    end_pos = dict_token.end\n    assert isinstance(start_pos, Position)\n    assert isinstance(end_pos, Position)\n    assert start_pos.index == 0\n    assert end_pos.index == len(content)-1\n\n    # string property should return the full content slice\n    assert dict_token.string == content\n\n    # __repr__ should include class name and string\n    repr_str = repr(dict_token)\n    assert repr_str.startswith(\"DictToken(\")\n    assert content in repr_str\n```",
+        "reasoning": "We need three tests for DictToken. Use simple dict with string keys. Test value property, lookup, lookup_key. Also boundary: empty dict. Error: accessing non-existent key raises KeyError. Use tmp_path? not needed. Provide code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047940994,
+    "prompt_tokens": 931,
+    "prompt_time": 0.247294993,
+    "completion_tokens": 613,
+    "completion_time": 0.721462445,
+    "total_tokens": 1544,
+    "total_time": 0.968757438,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 51
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgdwh6ekctkr15ns212vst",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokens import DictToken\nfrom typesystem.base import Position\n\ndef test_dict_token_value_and_lookup():\n    # Create a simple dictionary token with two key/value pairs\n    content = '{\"a\": 1, \"b\": 2}'\n    # Construct the underlying Token objects manually\n    # For simplicity, use DictToken directly with a dict of Token-like objects\n    class SimpleToken(DictToken):\n        def _get_value(self):\n            return self._value\n\n    # Build child tokens\n    a_token = SimpleToken(1, 0, 0, content)\n    b_token = SimpleToken(2, 0, 0, content)\n    dict_token = DictToken({\"a\": a_token, \"b\": b_token}, 0, len(content)-1, content)\n\n    # The value property should return a plain dict\n    assert dict_token.value == {\"a\": 1, \"b\": 2}\n\n    # lookup should return the child token for a given key\n    assert dict_token.lookup([\"a\"]) is a_token\n    assert dict_token.lookup([\"b\"]) is b_token\n\n    # lookup_key should return the key token (here same as child token)\n    assert dict_token.lookup_key([\"a\"]) is a_token\n    assert dict_token.lookup_key([\"b\"]) is b_token\n\ndef test_empty_dict_token():\n    content = '{}'\n    empty_token = DictToken({}, 0, len(content)-1, content)\n    # Value should be an empty dict\n    assert empty_token.value == {}\n    # lookup on empty dict should raise KeyError\n    with pytest.raises(KeyError):\n        empty_token.lookup([\"missing\"])\n    # lookup_key on empty dict should raise KeyError\n    with pytest.raises(KeyError):\n        empty_token.lookup_key([\"missing\"])\n\ndef test_dict_token_position_and_repr():\n    content = '{\"x\": 10}'\n    x_token = DictToken(10, 0, 0, content)\n    dict_token = DictToken({\"x\": x_token}, 0, len(content)-1, content)\n\n    # start and end positions should be correct\n    start_pos = dict_token.start\n    end_pos = dict_token.end\n    assert isinstance(start_pos, Position)\n    assert isinstance(end_pos, Position)\n    assert start_pos.index == 0\n    assert end_pos.index == len(content)-1\n\n    # string property should return the full content slice\n    assert dict_token.string == content\n\n    # __repr__ should include class name and string\n    repr_str = repr(dict_token)\n    assert repr_str.startswith(\"DictToken(\")\n    assert content in repr_str\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3710869679925963
+}

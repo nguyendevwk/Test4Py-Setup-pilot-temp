@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-18874327-12f8-4d19-90cc-dcb94abd4e6e",
+  "object": "chat.completion",
+  "created": 1795079616,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport struct\nimport pytest\nfrom youtube_dl.downloader.f4m import FlvReader\nfrom youtube_dl.compat import compat_struct_pack\n\ndef build_box(box_type: bytes, payload: bytes) -> bytes:\n    \"\"\"Construct a box with 32‑bit size header.\"\"\"\n    size = 8 + len(payload)\n    return compat_struct_pack('!I4s', size, box_type) + payload\n\ndef test_read_box_info_basic():\n    \"\"\"Verify that read_box_info correctly parses a simple box.\"\"\"\n    payload = b'hello'\n    box = build_box(b'abst', payload)\n    reader = FlvReader(box)\n    size, box_type, data = reader.read_box_info()\n    assert size == 8 + len(payload)\n    assert box_type == b'abst'\n    assert data == payload\n\ndef test_read_asrt_minimal():\n    \"\"\"Test parsing of an ASRT box with no quality entries or segments.\"\"\"\n    # ASRT box payload: version(1) + flags(3) + quality_entry_count(1) + segment_run_count(4)\n    payload = struct.pack('!B3sB', 0, b'\\x00\\x00\\x00', 0) + struct.pack('!I', 0)\n    box = build_box(b'asrt', payload)\n    reader = FlvReader(box)\n    result = reader.read_asrt()\n    assert result == {'segment_run': []}\n\ndef test_read_afrt_minimal():\n    \"\"\"Test parsing of an AFRT box with no fragments.\"\"\"\n    # AFRT box payload: version(1) + flags(3) + time_scale(4) + quality_entry_count(1)\n    # + fragments_count(4)\n    payload = struct.pack('!B3sI', 0, b'\\x00\\x00\\x00', 1000) + struct.pack('!B', 0)\n    payload += struct.pack('!I', 0)  # fragments_count\n    box = build_box(b'afrt', payload)\n    reader = FlvReader(box)\n    result = reader.read_afrt()\n    assert result == {'fragments': []}\n```",
+        "reasoning": "Need tests for FlvReader: normal parsing, boundary truncated error, and maybe live flag. Create minimal FLV bootstrap data. Hard to craft. Maybe use known small bootstrap from internet? Can't network. Could construct minimal valid bootstrap: need box 'abst' with required fields. Hard.\n\nMaybe test read_bytes truncation: create FlvReader with less bytes and call read_bytes expecting DataTruncatedError. But DataTruncatedError not defined. Search.Search in repo.We don't have repo. Might be defined elsewhere. Can't rely.\n\nMaybe test that read_box_info reads size correctly. Construct bytes: size 8 + type 4 + data. For size=1 extended. Use struct.pack. Use compat_struct_pack. We can import from youtube_dl.compat. Use that. Build minimal box: size=8, type=b'abst', data empty. Then read_box_info returns (8,b'abst',b''). Test.\n\nAlso test read_asrt with simple data: need version char, flags 3 bytes, quality_entry_count char, then that many strings, segment_run_count int, then segments. Build minimal: version=0, flags=0, qec=0, segment_run_count=0. So bytes: 1+3+1+0+4+0. That's 9 bytes? Actually 1+3+1+4=9. Build and read_asrt returns {'segment_run':[]}. Test.\n\nThird test: read_afrt minimal: version, flags, timescale, qec, fragments_count=0. Build accordingly.\n\nLet's implement. Need compat_struct_pack."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004540746,
+    "prompt_tokens": 1353,
+    "prompt_time": 0.008577449,
+    "completion_tokens": 805,
+    "completion_time": 1.164086594,
+    "total_tokens": 2158,
+    "total_time": 1.172664043,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 333
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7shacyfevpv6xszz71f58px",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport struct\nimport pytest\nfrom youtube_dl.downloader.f4m import FlvReader\nfrom youtube_dl.compat import compat_struct_pack\n\ndef build_box(box_type: bytes, payload: bytes) -> bytes:\n    \"\"\"Construct a box with 32‑bit size header.\"\"\"\n    size = 8 + len(payload)\n    return compat_struct_pack('!I4s', size, box_type) + payload\n\ndef test_read_box_info_basic():\n    \"\"\"Verify that read_box_info correctly parses a simple box.\"\"\"\n    payload = b'hello'\n    box = build_box(b'abst', payload)\n    reader = FlvReader(box)\n    size, box_type, data = reader.read_box_info()\n    assert size == 8 + len(payload)\n    assert box_type == b'abst'\n    assert data == payload\n\ndef test_read_asrt_minimal():\n    \"\"\"Test parsing of an ASRT box with no quality entries or segments.\"\"\"\n    # ASRT box payload: version(1) + flags(3) + quality_entry_count(1) + segment_run_count(4)\n    payload = struct.pack('!B3sB', 0, b'\\x00\\x00\\x00', 0) + struct.pack('!I', 0)\n    box = build_box(b'asrt', payload)\n    reader = FlvReader(box)\n    result = reader.read_asrt()\n    assert result == {'segment_run': []}\n\ndef test_read_afrt_minimal():\n    \"\"\"Test parsing of an AFRT box with no fragments.\"\"\"\n    # AFRT box payload: version(1) + flags(3) + time_scale(4) + quality_entry_count(1)\n    # + fragments_count(4)\n    payload = struct.pack('!B3sI', 0, b'\\x00\\x00\\x00', 1000) + struct.pack('!B', 0)\n    payload += struct.pack('!I', 0)  # fragments_count\n    box = build_box(b'afrt', payload)\n    reader = FlvReader(box)\n    result = reader.read_afrt()\n    assert result == {'fragments': []}\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "8925eda2f1f5487db73b97f5459e9f45",
+  "_api_plus_pacing_seconds": 6.621025437023491
+}

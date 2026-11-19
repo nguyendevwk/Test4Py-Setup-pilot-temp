@@ -1,0 +1,68 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_shell_logger_no_shell __________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7efe65a24f40>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7efe65a250f0>
+
+    def test_shell_logger_no_shell(monkeypatch, caplog):
+        """When SHELL is not set, shell_logger warns and exits with code 1."""
+        monkeypatch.delenv("SHELL", raising=False)
+        with pytest.raises(SystemExit) as excinfo:
+            shell_logger("/dev/null")
+        assert excinfo.value.code == 1
+>       assert "Shell logger doesn't support your platform." in caplog.text
+E       assert "Shell logger doesn't support your platform." in ''
+E        +  where '' = <_pytest.logging.LogCaptureFixture object at 0x7efe65a250f0>.text
+
+test_generated.py:13: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[41m[37m[1m[WARN] Shell logger doesn't support your platform.[0m
+___________________ test_shell_logger_creates_file_and_mmaps ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.entrypoints.shell_logger__shell_logger__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_shell_logger_creates_file0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7efe659bb760>
+
+    def test_shell_logger_creates_file_and_mmaps(tmp_path, monkeypatch):
+        """shell_logger creates the log file with the correct size and maps it."""
+        log_file = tmp_path / "logfile"
+        # Set SHELL to a harmless shell that exits immediately
+        monkeypatch.setenv("SHELL", "/bin/sh")
+        # Ensure the shell exits with 0
+        def fake_spawn(shell, read_func):
+            # Simulate reading from the shell and then exit
+            read_func()
+            return 0
+        monkeypatch.setattr("thefuck.entrypoints.shell_logger._spawn", fake_spawn)
+        # Replace _read to just return immediately
+        monkeypatch.setattr("thefuck.entrypoints.shell_logger._read", lambda buf: None)
+    
+        # Run shell_logger; it should exit with code 0
+        with pytest.raises(SystemExit) as excinfo:
+            shell_logger(str(log_file))
+        assert excinfo.value.code == 0
+    
+        # Verify file exists and has the expected size
+        assert log_file.exists()
+        assert log_file.stat().st_size == const.LOG_SIZE_IN_BYTES
+    
+        # Verify that the file is memory‑mapped and writable
+        with open(log_file, "rb") as f:
+>           mm = mmap.mmap(f.fileno(), const.LOG_SIZE_IN_BYTES, mmap.MAP_SHARED, mmap.PROT_WRITE)
+E           PermissionError: [Errno 13] Permission denied
+
+test_generated.py:40: PermissionError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_shell_logger_no_shell - assert "Shell logger d...
+FAILED test_generated.py::test_shell_logger_creates_file_and_mmaps - Permissi...
+2 failed, 1 passed, 2 warnings in 0.23s

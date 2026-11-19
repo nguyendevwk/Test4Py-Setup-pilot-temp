@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-1178dc66-453d-460a-b787-f2be7a877da9",
+  "object": "chat.completion",
+  "created": 1795076545,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport zipfile\nimport tempfile\nimport shutil\nimport pathlib\n\nfrom thefuck.rules.dirty_unzip import side_effect, _zip_file\n\n\nclass DummyCommand:\n    def __init__(self, script_parts):\n        self.script_parts = script_parts\n\n\ndef create_zip(zip_path, files):\n    \"\"\"Create a zip file containing the given files mapping name->content.\"\"\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        for name, content in files.items():\n            zf.writestr(name, content)\n\n\ndef test_side_effect_removes_files_in_cwd(tmp_path):\n    \"\"\"Files listed in the zip that are inside the current working directory are removed.\"\"\"\n    cwd = tmp_path\n    os.chdir(cwd)\n\n    # Create a file that will be removed\n    target_file = cwd / \"to_remove.txt\"\n    target_file.write_text(\"remove me\")\n\n    # Create a zip containing that file\n    zip_path = cwd / \"archive.zip\"\n    create_zip(zip_path, {\"to_remove.txt\": \"content\"})\n\n    # Run side_effect\n    cmd = DummyCommand([\"unzip\", str(zip_path)])\n    side_effect(cmd, None)\n\n    # Assert the file has been removed\n    assert not target_file.exists()\n\n\ndef test_side_effect_skips_files_outside_cwd(tmp_path, tmp_path_factory):\n    \"\"\"Files listed in the zip that are outside the current working directory are not removed.\"\"\"\n    cwd = tmp_path\n    os.chdir(cwd)\n\n    # Create a file outside cwd\n    outside_dir = tmp_path_factory.mktemp(\"outside\")\n    outside_file = outside_dir / \"outside.txt\"\n    outside_file.write_text(\"do not remove\")\n\n    # Create a zip containing the absolute path of the outside file\n    zip_path = cwd / \"archive.zip\"\n    create_zip(zip_path, {str(outside_file): \"content\"})\n\n    # Run side_effect\n    cmd = DummyCommand([\"unzip\", str(zip_path)])\n    side_effect(cmd, None)\n\n    # Assert the outside file still exists\n    assert outside_file.exists()\n\n\ndef test_side_effect_ignores_directories(tmp_path):\n    \"\"\"Directories inside the zip are not removed; only files are attempted.\"\"\"\n    cwd = tmp_path\n    os.chdir(cwd)\n\n    # Create a directory that will be present after extraction\n    dir_path = cwd / \"dir\"\n    dir_path.mkdir()\n\n    # Create a zip containing a file and a directory entry\n    zip_path = cwd / \"archive.zip\"\n    create_zip(zip_path, {\"dir/\": \"\", \"dir/file.txt\": \"content\"})\n\n    # Create the file inside the directory to simulate extraction\n    file_path = dir_path / \"file.txt\"\n    file_path.write_text(\"content\")\n\n    # Run side_effect\n    cmd = DummyCommand([\"unzip\", str(zip_path)])\n    side_effect(cmd, None)\n\n    # The file should be removed\n    assert not file_path.exists()\n    # The directory should still exist\n    assert dir_path.is_dir()\n```",
+        "reasoning": "We need to write tests for side_effect. It opens zip file, removes files inside if safe. We can create a zip with files inside and outside cwd. Use tmp_path. Test that files inside are removed. Also test that files outside not removed. Also test that directories not removed? But side_effect only removes files. We'll test that OSError is ignored. Use a file that cannot be removed? maybe a directory? But os.remove on dir raises IsADirectoryError. It will be caught. So test that directories remain. We'll create a zip with a file and a directory? zip can contain directories. We'll create a file and a dir entry. After side_effect, file removed, dir remains. Also test that if file outside cwd, not removed. We'll create a temp dir outside cwd, create file, zip it, but path inside zip is absolute? We can add file path with absolute path? But zipfile will store relative names. We can simulate by adding a file with absolute path? But zipfile will store the name as given. We can add a file with name '/tmp/...'? But zipfile may normalize? We'll just create a file outside cwd, add it to zip with absolute path. Then side_effect should skip removal. We'll check file still exists. Use command object with script_parts. We need a dummy command with script_parts attribute. We'll create simple class. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04795706,
+    "prompt_tokens": 456,
+    "prompt_time": 0.879090424,
+    "completion_tokens": 923,
+    "completion_time": 1.091314486,
+    "total_tokens": 1379,
+    "total_time": 1.97040491,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 285
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7secn76ej6v1y7tgf3scws7",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport zipfile\nimport tempfile\nimport shutil\nimport pathlib\n\nfrom thefuck.rules.dirty_unzip import side_effect, _zip_file\n\n\nclass DummyCommand:\n    def __init__(self, script_parts):\n        self.script_parts = script_parts\n\n\ndef create_zip(zip_path, files):\n    \"\"\"Create a zip file containing the given files mapping name->content.\"\"\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        for name, content in files.items():\n            zf.writestr(name, content)\n\n\ndef test_side_effect_removes_files_in_cwd(tmp_path):\n    \"\"\"Files listed in the zip that are inside the current working directory are removed.\"\"\"\n    cwd = tmp_path\n    os.chdir(cwd)\n\n    # Create a file that will be removed\n    target_file = cwd / \"to_remove.txt\"\n    target_file.write_text(\"remove me\")\n\n    # Create a zip containing that file\n    zip_path = cwd / \"archive.zip\"\n    create_zip(zip_path, {\"to_remove.txt\": \"content\"})\n\n    # Run side_effect\n    cmd = DummyCommand([\"unzip\", str(zip_path)])\n    side_effect(cmd, None)\n\n    # Assert the file has been removed\n    assert not target_file.exists()\n\n\ndef test_side_effect_skips_files_outside_cwd(tmp_path, tmp_path_factory):\n    \"\"\"Files listed in the zip that are outside the current working directory are not removed.\"\"\"\n    cwd = tmp_path\n    os.chdir(cwd)\n\n    # Create a file outside cwd\n    outside_dir = tmp_path_factory.mktemp(\"outside\")\n    outside_file = outside_dir / \"outside.txt\"\n    outside_file.write_text(\"do not remove\")\n\n    # Create a zip containing the absolute path of the outside file\n    zip_path = cwd / \"archive.zip\"\n    create_zip(zip_path, {str(outside_file): \"content\"})\n\n    # Run side_effect\n    cmd = DummyCommand([\"unzip\", str(zip_path)])\n    side_effect(cmd, None)\n\n    # Assert the outside file still exists\n    assert outside_file.exists()\n\n\ndef test_side_effect_ignores_directories(tmp_path):\n    \"\"\"Directories inside the zip are not removed; only files are attempted.\"\"\"\n    cwd = tmp_path\n    os.chdir(cwd)\n\n    # Create a directory that will be present after extraction\n    dir_path = cwd / \"dir\"\n    dir_path.mkdir()\n\n    # Create a zip containing a file and a directory entry\n    zip_path = cwd / \"archive.zip\"\n    create_zip(zip_path, {\"dir/\": \"\", \"dir/file.txt\": \"content\"})\n\n    # Create the file inside the directory to simulate extraction\n    file_path = dir_path / \"file.txt\"\n    file_path.write_text(\"content\")\n\n    # Run side_effect\n    cmd = DummyCommand([\"unzip\", str(zip_path)])\n    side_effect(cmd, None)\n\n    # The file should be removed\n    assert not file_path.exists()\n    # The directory should still exist\n    assert dir_path.is_dir()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 2.3404455030104145
+}

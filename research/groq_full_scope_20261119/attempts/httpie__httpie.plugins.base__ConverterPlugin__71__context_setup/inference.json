@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-2ccdc5d2-b5d5-43d1-80dd-7a400724c373",
+  "object": "chat.completion",
+  "created": 1795076627,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.plugins.base import ConverterPlugin, BasePlugin\n\n\nclass DummyConverter(ConverterPlugin):\n    \"\"\"Concrete implementation for testing purposes.\"\"\"\n\n    def __init__(self, mime: str):\n        super().__init__(mime)\n\n    def convert(self, body: bytes) -> tuple[str, str]:\n        # Simple echo converter that pretends to convert binary to text\n        return (\"text/plain\", body.decode(\"utf-8\"))\n\n    @classmethod\n    def supports(cls, mime: str) -> bool:\n        # Supports only MIME types that start with \"text/\"\n        return mime.startswith(\"text/\")\n\n\ndef test_abstract_methods_raise_not_implemented():\n    \"\"\"Ensure that the base class methods raise NotImplementedError.\"\"\"\n    plugin = ConverterPlugin(\"application/octet-stream\")\n    with pytest.raises(NotImplementedError):\n        plugin.convert(b\"data\")\n    with pytest.raises(NotImplementedError):\n        ConverterPlugin.supports(\"application/octet-stream\")\n\n\ndef test_dummy_converter_supports_and_convert():\n    \"\"\"Verify that DummyConverter correctly reports support and converts data.\"\"\"\n    assert DummyConverter.supports(\"text/plain\") is True\n    assert DummyConverter.supports(\"application/json\") is False\n\n    body = b\"hello world\"\n    content_type, content = DummyConverter(\"text/plain\").convert(body)\n    assert content_type == \"text/plain\"\n    assert content == \"hello world\"\n\n\ndef test_converter_plugin_initialization_and_attributes():\n    \"\"\"Check that the plugin stores the MIME type and inherits BasePlugin attributes.\"\"\"\n    plugin = DummyConverter(\"text/plain\")\n    assert plugin.mime == \"text/plain\"\n    # BasePlugin defines class attributes; they should be accessible\n    assert hasattr(plugin, \"name\") and plugin.name is None\n    assert hasattr(plugin, \"description\") and plugin.description is None\n    assert hasattr(plugin, \"package_name\") and plugin.package_name is None\n```",
+        "reasoning": "We need to test ConverterPlugin. It has abstract methods. We can subclass to test behavior. Test that supports returns bool, convert raises NotImplementedError. Also test that subclass can override. Use tmp_path? not needed. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053580359,
+    "prompt_tokens": 496,
+    "prompt_time": 0.03020955,
+    "completion_tokens": 443,
+    "completion_time": 0.525698705,
+    "total_tokens": 939,
+    "total_time": 0.555908255,
+    "completion_tokens_details": {
+      "reasoning_tokens": 50
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sef696e3rvpyf196crrnce",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.plugins.base import ConverterPlugin, BasePlugin\n\n\nclass DummyConverter(ConverterPlugin):\n    \"\"\"Concrete implementation for testing purposes.\"\"\"\n\n    def __init__(self, mime: str):\n        super().__init__(mime)\n\n    def convert(self, body: bytes) -> tuple[str, str]:\n        # Simple echo converter that pretends to convert binary to text\n        return (\"text/plain\", body.decode(\"utf-8\"))\n\n    @classmethod\n    def supports(cls, mime: str) -> bool:\n        # Supports only MIME types that start with \"text/\"\n        return mime.startswith(\"text/\")\n\n\ndef test_abstract_methods_raise_not_implemented():\n    \"\"\"Ensure that the base class methods raise NotImplementedError.\"\"\"\n    plugin = ConverterPlugin(\"application/octet-stream\")\n    with pytest.raises(NotImplementedError):\n        plugin.convert(b\"data\")\n    with pytest.raises(NotImplementedError):\n        ConverterPlugin.supports(\"application/octet-stream\")\n\n\ndef test_dummy_converter_supports_and_convert():\n    \"\"\"Verify that DummyConverter correctly reports support and converts data.\"\"\"\n    assert DummyConverter.supports(\"text/plain\") is True\n    assert DummyConverter.supports(\"application/json\") is False\n\n    body = b\"hello world\"\n    content_type, content = DummyConverter(\"text/plain\").convert(body)\n    assert content_type == \"text/plain\"\n    assert content == \"hello world\"\n\n\ndef test_converter_plugin_initialization_and_attributes():\n    \"\"\"Check that the plugin stores the MIME type and inherits BasePlugin attributes.\"\"\"\n    plugin = DummyConverter(\"text/plain\")\n    assert plugin.mime == \"text/plain\"\n    # BasePlugin defines class attributes; they should be accessible\n    assert hasattr(plugin, \"name\") and plugin.name is None\n    assert hasattr(plugin, \"description\") and plugin.description is None\n    assert hasattr(plugin, \"package_name\") and plugin.package_name is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9069330740021542
+}

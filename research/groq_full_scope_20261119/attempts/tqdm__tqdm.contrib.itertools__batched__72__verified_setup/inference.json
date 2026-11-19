@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-ede04233-38ac-4033-8d44-18abf7fe49a7",
+  "object": "chat.completion",
+  "created": 1795076559,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport itertools\nimport math\nimport pytest\nfrom tqdm.contrib.itertools import batched\n\ndef test_batched_normal_behavior():\n    data = list(range(10))\n    n = 3\n    # Use default tqdm_auto; capture the returned tqdm iterator\n    batched_iter = batched(data, n)\n    # The iterator should be a tqdm instance\n    assert hasattr(batched_iter, \"total\")\n    # Total number of batches should be ceil(len(data)/n)\n    expected_total = (len(data) + n - 1) // n\n    assert batched_iter.total == expected_total\n    # Collect batches\n    batches = list(batched_iter)\n    # Verify number of batches\n    assert len(batches) == expected_total\n    # Verify each batch size (except possibly last)\n    for i, batch in enumerate(batches):\n        if i < expected_total - 1:\n            assert len(batch) == n\n        else:\n            # last batch may be smaller\n            assert len(batch) == len(data) % n or len(batch) == n\n    # Verify content matches original data\n    assert list(itertools.chain.from_iterable(batches)) == data\n\ndef test_batched_boundary_large_n():\n    data = [1, 2, 3]\n    n = 10  # larger than data length\n    batched_iter = batched(data, n)\n    assert batched_iter.total == 1  # only one batch\n    batches = list(batched_iter)\n    assert len(batches) == 1\n    assert batches[0] == data  # entire data in one batch\n\ndef test_batched_invalid_n_raises():\n    data = [1, 2, 3]\n    with pytest.raises(ValueError):\n        # itertools.batched raises ValueError for non-positive n\n        list(batched(data, 0))\n    with pytest.raises(ValueError):\n        list(batched(data, -5))\n```",
+        "reasoning": "We need to test batched. Use tmp_path for file? Not needed. Just test behavior. Use tqdm.contrib.itertools.batched. We need to import. Use tqdm.contrib.itertools.batched. Test normal: list of 10, n=3, check that output yields batches of size 3, last 1. Also check total param. Use a dummy tqdm class that records parameters? But we cannot modify product code. We can use real tqdm_auto which is tqdm.auto.tqdm. It will produce a tqdm iterator. We can iterate and collect. For total, we can check that the tqdm object's total attribute equals expected. We can access the iterator returned: it's a tqdm instance. We can check its total. Use list(batched(...)).\n\nTest boundary: n larger than iterable length. Should produce one batch. Test error: n <=0 should raise ValueError? itertools.batched requires n>0? In Python 3.12, itertools.batched raises ValueError if n <=0. So test that.\n\nImplement three test functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.175961252,
+    "prompt_tokens": 330,
+    "prompt_time": 0.306154203,
+    "completion_tokens": 632,
+    "completion_time": 0.759182505,
+    "total_tokens": 962,
+    "total_time": 1.065336708,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 216
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sed3kee8vrxvpnr064cxch",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport itertools\nimport math\nimport pytest\nfrom tqdm.contrib.itertools import batched\n\ndef test_batched_normal_behavior():\n    data = list(range(10))\n    n = 3\n    # Use default tqdm_auto; capture the returned tqdm iterator\n    batched_iter = batched(data, n)\n    # The iterator should be a tqdm instance\n    assert hasattr(batched_iter, \"total\")\n    # Total number of batches should be ceil(len(data)/n)\n    expected_total = (len(data) + n - 1) // n\n    assert batched_iter.total == expected_total\n    # Collect batches\n    batches = list(batched_iter)\n    # Verify number of batches\n    assert len(batches) == expected_total\n    # Verify each batch size (except possibly last)\n    for i, batch in enumerate(batches):\n        if i < expected_total - 1:\n            assert len(batch) == n\n        else:\n            # last batch may be smaller\n            assert len(batch) == len(data) % n or len(batch) == n\n    # Verify content matches original data\n    assert list(itertools.chain.from_iterable(batches)) == data\n\ndef test_batched_boundary_large_n():\n    data = [1, 2, 3]\n    n = 10  # larger than data length\n    batched_iter = batched(data, n)\n    assert batched_iter.total == 1  # only one batch\n    batches = list(batched_iter)\n    assert len(batches) == 1\n    assert batches[0] == data  # entire data in one batch\n\ndef test_batched_invalid_n_raises():\n    data = [1, 2, 3]\n    with pytest.raises(ValueError):\n        # itertools.batched raises ValueError for non-positive n\n        list(batched(data, 0))\n    with pytest.raises(ValueError):\n        list(batched(data, -5))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5416300109936856
+}

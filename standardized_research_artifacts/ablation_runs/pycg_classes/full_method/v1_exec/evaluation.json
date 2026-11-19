@@ -1,0 +1,16 @@
+{
+  "status": "test_failure",
+  "exit_code": 1,
+  "timeout": false,
+  "total_nodes": 1,
+  "collected": 1,
+  "collection_errors": 0,
+  "passing_nodes": [],
+  "pass_count": 0,
+  "suite_pass": false,
+  "line_pct": null,
+  "branch_pct": null,
+  "coverage_status": "not_measured: suite not all-pass",
+  "stdout": "F                                                                        [100%]\n=================================== FAILURES ===================================\n_____________________ test_class_manager_and_node_behavior _____________________\n\n    def test_class_manager_and_node_behavior():\n        cm = ClassManager()\n    \n        # Create a new ClassNode via ClassManager\n        node = cm.create('pkg.mod.ClassA', 'moduleA')\n        assert isinstance(node, ClassNode)\n        assert node.ns == 'pkg.mod.ClassA'\n        assert node.get_module() == 'moduleA'\n        assert node.get_mro() == ['pkg.mod.ClassA']\n    \n        # Repeated create with same name returns the same instance\n        same_node = cm.create('pkg.mod.ClassA', 'moduleB')\n        assert same_node is node\n        assert same_node.get_module() == 'moduleA'  # original module preserved\n    \n        # get returns the stored node\n        assert cm.get('pkg.mod.ClassA') is node\n    \n        # get on unknown name returns None\n        assert cm.get('unknown') is None\n    \n        # get_classes returns the internal mapping\n        classes = cm.get_classes()\n        assert isinstance(classes, dict)\n        assert classes['pkg.mod.ClassA'] is node\n    \n        # Test ClassNode add_parent behavior\n        node.add_parent('pkg.mod.Base')\n        assert node.get_mro() == ['pkg.mod.ClassA', 'pkg.mod.Base']\n    \n        node.add_parent(['pkg.mod.Base', 'pkg.mod.Interface'])\n        assert node.get_mro() == ['pkg.mod.ClassA', 'pkg.mod.Base', 'pkg.mod.Interface']\n    \n        # Adding an existing parent should not duplicate it\n        node.add_parent('pkg.mod.Base')\n>       assert node.get_mro() == ['pkg.mod.ClassA', 'pkg.mod.Base', 'pkg.mod.Interface']\nE       AssertionError: assert ['pkg.mod.Cla...pkg.mod.Base'] == ['pkg.mod.Cla...od.Interface']\nE         \nE         At index 1 diff: 'pkg.mod.Interface' != 'pkg.mod.Base'\nE         Use -v to get more diff\n\n../../standardized_research_artifacts/ablation_runs/pycg_classes/full_method/v1_exec/test_run.py:39: AssertionError\n=========================== short test summary info ============================\nFAILED ../../standardized_research_artifacts/ablation_runs/pycg_classes/full_method/v1_exec/test_run.py::test_class_manager_and_node_behavior\n1 failed in 0.14s\n",
+  "stderr": ""
+}

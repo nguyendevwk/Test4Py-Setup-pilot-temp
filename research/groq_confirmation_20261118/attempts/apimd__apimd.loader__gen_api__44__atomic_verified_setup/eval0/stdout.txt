@@ -1,0 +1,80 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_gen_api_creates_markdown _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-57/test_gen_api_creates_markdown0')
+
+    def test_gen_api_creates_markdown(tmp_path):
+        """Normal case: a module with a simple function should produce a markdown file."""
+        # Create a temporary module
+        mod_name = "sample_module"
+        _create_module(tmp_path, mod_name, "def foo():\n    return 42\n")
+    
+        # Ensure the module is importable
+        sys.path.insert(0, str(tmp_path))
+        try:
+            # Call gen_api
+            docs = gen_api({"Sample": mod_name}, prefix=str(tmp_path / "docs"))
+        finally:
+            sys.path.pop(0)
+    
+        # Verify that a markdown file was created
+        md_path = tmp_path / "docs" / f"{mod_name.replace('_', '-')}-api.md"
+>       assert md_path.is_file()
+E       AssertionError: assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/tmp/pytest-of-heurix/pytest-57/test_gen_api_creates_markdown0/docs/sample-module-api.md').is_file
+
+../../../../../../attempts/apimd__apimd.loader__gen_api__44__atomic_verified_setup/eval0/test_generated.py:37: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-57/test_gen_api_creates_markdown0/docs[0m
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-57/test_gen_api_creates_markdown0/docs[0m
+[32mLoad root: sample_module (Sample)[0m
+[32mLoad root: sample_module (Sample)[0m
+[33m'sample_module' can not be found[0m
+[33m'sample_module' can not be found[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:127 Create directory: /tmp/pytest-of-heurix/pytest-57/test_gen_api_creates_markdown0/docs
+INFO     root:loader.py:131 Load root: sample_module (Sample)
+WARNING  root:loader.py:134 'sample_module' can not be found
+_____________________________ test_gen_api_dry_run _____________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-57/test_gen_api_dry_run0')
+
+    def test_gen_api_dry_run(tmp_path):
+        """Dry run should not write files but still return the generated docs."""
+        # Create a temporary module
+        mod_name = "dry_module"
+        _create_module(tmp_path, mod_name, "def bar(x):\n    return x * 2\n")
+    
+        # Ensure the module is importable
+        sys.path.insert(0, str(tmp_path))
+        try:
+            docs = gen_api({"Dry": mod_name}, prefix=str(tmp_path / "docs"), dry=True)
+        finally:
+            sys.path.pop(0)
+    
+        # No markdown file should be written
+        md_path = tmp_path / "docs" / f"{mod_name.replace('_', '-')}-api.md"
+        assert not md_path.exists()
+        # The docs list should contain the generated content
+>       assert len(docs) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+../../../../../../attempts/apimd__apimd.loader__gen_api__44__atomic_verified_setup/eval0/test_generated.py:77: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-57/test_gen_api_dry_run0/docs[0m
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-57/test_gen_api_dry_run0/docs[0m
+[32mLoad root: dry_module (Dry)[0m
+[32mLoad root: dry_module (Dry)[0m
+[33m'dry_module' can not be found[0m
+[33m'dry_module' can not be found[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:127 Create directory: /tmp/pytest-of-heurix/pytest-57/test_gen_api_dry_run0/docs
+INFO     root:loader.py:131 Load root: dry_module (Dry)
+WARNING  root:loader.py:134 'dry_module' can not be found
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/apimd__apimd.loader__gen_api__44__atomic_verified_setup/eval0/test_generated.py::test_gen_api_creates_markdown
+FAILED ../../../../../../attempts/apimd__apimd.loader__gen_api__44__atomic_verified_setup/eval0/test_generated.py::test_gen_api_dry_run
+2 failed, 1 passed in 0.31s

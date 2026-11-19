@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-55658551-7fca-42c7-bf86-b52e98c4dfad",
+  "object": "chat.completion",
+  "created": 1795078069,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport pathlib\nimport pytest\nfrom flutils.pathutils import find_paths, normalize_path\n\n@pytest.fixture\ndef sample_dir(tmp_path):\n    \"\"\"Create a temporary directory structure for testing.\"\"\"\n    # Create files and subdirectories\n    (tmp_path / \"file_one\").write_text(\"one\")\n    (tmp_path / \"file_two\").write_text(\"two\")\n    sub = tmp_path / \"dir_one\"\n    sub.mkdir()\n    (sub / \"inner_file\").write_text(\"inner\")\n    return tmp_path\n\ndef test_find_paths_with_wildcard(sample_dir):\n    \"\"\"Test that find_paths correctly expands a wildcard pattern.\"\"\"\n    # Use a pattern that matches both files and the subdirectory\n    pattern = str(sample_dir / \"*\")\n    paths = list(find_paths(pattern))\n    # Convert to set of names for easier comparison\n    names = {p.name for p in paths}\n    assert names == {\"file_one\", \"file_two\", \"dir_one\"}\n    # Ensure returned objects are Path instances\n    assert all(isinstance(p, pathlib.Path) for p in paths)\n\ndef test_find_paths_no_matches(tmp_path):\n    \"\"\"Test that find_paths yields nothing when no files match.\"\"\"\n    # Pattern that matches nothing\n    pattern = str(tmp_path / \"nonexistent_*\")\n    paths = list(find_paths(pattern))\n    assert paths == []\n\ndef test_find_paths_with_home_expansion(tmp_path, monkeypatch):\n    \"\"\"Test that find_paths expands the ~ to the current user's home directory.\"\"\"\n    # Create a file in the real home directory\n    home = pathlib.Path.home()\n    test_file = home / \".flutils_test_file\"\n    try:\n        test_file.write_text(\"test\")\n        # Patch normalize_path to return a Path that uses the real home\n        monkeypatch.setattr(\n            \"flutils.pathutils.normalize_path\",\n            lambda p: pathlib.Path(p).expanduser()\n        )\n        pattern = \"~/.flutils_test_file\"\n        paths = list(find_paths(pattern))\n        assert len(paths) == 1\n        assert paths[0] == test_file\n    finally:\n        # Clean up the test file\n        if test_file.exists():\n            test_file.unlink()\n```",
+        "reasoning": "We need tests for find_paths. Use tmp_path to create files. Test normal glob, boundary like no matches, error like invalid pattern? find_paths uses normalize_path which we don't see; assume works. We'll test that it yields correct Path objects. Also test that pattern with ~ expands. Use tmp_path and create directories. Use pattern with wildcard. Also test that no matches yields empty. Third test maybe pattern with absolute path. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04778674,
+    "prompt_tokens": 505,
+    "prompt_time": 0.052068349,
+    "completion_tokens": 557,
+    "completion_time": 1.15124553,
+    "total_tokens": 1062,
+    "total_time": 1.203313879,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 90
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfv5s5eb0v0r0a9nzaazv2",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport pathlib\nimport pytest\nfrom flutils.pathutils import find_paths, normalize_path\n\n@pytest.fixture\ndef sample_dir(tmp_path):\n    \"\"\"Create a temporary directory structure for testing.\"\"\"\n    # Create files and subdirectories\n    (tmp_path / \"file_one\").write_text(\"one\")\n    (tmp_path / \"file_two\").write_text(\"two\")\n    sub = tmp_path / \"dir_one\"\n    sub.mkdir()\n    (sub / \"inner_file\").write_text(\"inner\")\n    return tmp_path\n\ndef test_find_paths_with_wildcard(sample_dir):\n    \"\"\"Test that find_paths correctly expands a wildcard pattern.\"\"\"\n    # Use a pattern that matches both files and the subdirectory\n    pattern = str(sample_dir / \"*\")\n    paths = list(find_paths(pattern))\n    # Convert to set of names for easier comparison\n    names = {p.name for p in paths}\n    assert names == {\"file_one\", \"file_two\", \"dir_one\"}\n    # Ensure returned objects are Path instances\n    assert all(isinstance(p, pathlib.Path) for p in paths)\n\ndef test_find_paths_no_matches(tmp_path):\n    \"\"\"Test that find_paths yields nothing when no files match.\"\"\"\n    # Pattern that matches nothing\n    pattern = str(tmp_path / \"nonexistent_*\")\n    paths = list(find_paths(pattern))\n    assert paths == []\n\ndef test_find_paths_with_home_expansion(tmp_path, monkeypatch):\n    \"\"\"Test that find_paths expands the ~ to the current user's home directory.\"\"\"\n    # Create a file in the real home directory\n    home = pathlib.Path.home()\n    test_file = home / \".flutils_test_file\"\n    try:\n        test_file.write_text(\"test\")\n        # Patch normalize_path to return a Path that uses the real home\n        monkeypatch.setattr(\n            \"flutils.pathutils.normalize_path\",\n            lambda p: pathlib.Path(p).expanduser()\n        )\n        pattern = \"~/.flutils_test_file\"\n        paths = list(find_paths(pattern))\n        assert len(paths) == 1\n        assert paths[0] == test_file\n    finally:\n        # Clean up the test file\n        if test_file.exists():\n            test_file.unlink()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.6032261779764667
+}

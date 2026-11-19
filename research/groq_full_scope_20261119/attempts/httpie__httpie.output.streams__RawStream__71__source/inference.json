@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-b18948f9-482c-41c3-8a69-350d9a18bbb3",
+  "object": "chat.completion",
+  "created": 1795079564,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.streams import RawStream\n\n\nclass DummyMessage:\n    \"\"\"A minimal HTTPMessage stub that yields a body in chunks.\"\"\"\n\n    def __init__(self, body: bytes, chunk_size: int = 1024):\n        self.body = body\n        self.chunk_size = chunk_size\n\n    def iter_body(self, chunk_size: int):\n        \"\"\"Yield the body in chunks of the requested size.\"\"\"\n        for i in range(0, len(self.body), chunk_size):\n            yield self.body[i : i + chunk_size]\n\n\ndef test_rawstream_default_chunk_size(tmp_path):\n    \"\"\"RawStream should use the default CHUNK_SIZE and yield the full body.\"\"\"\n    body = b\"Hello, world!\" * 100  # 1300 bytes\n    msg = DummyMessage(body)\n    stream = RawStream(msg=msg)\n    chunks = list(stream.iter_body())\n    # With default chunk size 100KB, the body should be yielded in one chunk\n    assert len(chunks) == 1\n    assert chunks[0] == body\n\n\ndef test_rawstream_custom_chunk_size(tmp_path):\n    \"\"\"RawStream should respect a custom chunk size and split the body accordingly.\"\"\"\n    body = b\"abc\" * 500  # 1500 bytes\n    msg = DummyMessage(body)\n    stream = RawStream(chunk_size=200, msg=msg)\n    chunks = list(stream.iter_body())\n    # 1500 bytes with 200-byte chunks should produce 8 chunks (7 full + 1 partial)\n    assert len(chunks) == 8\n    assert chunks[-1] == body[7 * 200 :]\n\n\ndef test_rawstream_iter_body_raises(tmp_path):\n    \"\"\"If the underlying message raises an exception, RawStream should propagate it.\"\"\"\n    class FailingMessage:\n        def iter_body(self, chunk_size: int):\n            raise RuntimeError(\"failed to read body\")\n\n    msg = FailingMessage()\n    stream = RawStream(msg=msg)\n    with pytest.raises(RuntimeError, match=\"failed to read body\"):\n        list(stream.iter_body())\n```",
+        "reasoning": "We need to test RawStream. Need to import from httpie.output.streams. We need to create a dummy HTTPMessage with body. Let's inspect HTTPMessage? Not available. But we can create a simple object with iter_body method. But RawStream expects self.msg to be HTTPMessage. In BaseStream? Not provided. But we can instantiate RawStream with msg param? Let's check BaseStream? Not given. Might be in httpie.output.streams. But we can import RawStream and pass msg via kwargs. Let's assume BaseStream __init__ accepts msg. We'll create a simple class with iter_body returning generator yielding chunks. Test that iter_body yields correct chunks. Also test chunk_size default. Third test error: passing non-bytes? But iter_body returns bytes. We can test that if msg.iter_body raises exception, RawStream passes it. Use pytest.raises. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004699464,
+    "prompt_tokens": 382,
+    "prompt_time": 0.015064506,
+    "completion_tokens": 628,
+    "completion_time": 0.659300042,
+    "total_tokens": 1010,
+    "total_time": 0.674364548,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 182
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh8ttve8hbw5xwyxs50gxp",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.streams import RawStream\n\n\nclass DummyMessage:\n    \"\"\"A minimal HTTPMessage stub that yields a body in chunks.\"\"\"\n\n    def __init__(self, body: bytes, chunk_size: int = 1024):\n        self.body = body\n        self.chunk_size = chunk_size\n\n    def iter_body(self, chunk_size: int):\n        \"\"\"Yield the body in chunks of the requested size.\"\"\"\n        for i in range(0, len(self.body), chunk_size):\n            yield self.body[i : i + chunk_size]\n\n\ndef test_rawstream_default_chunk_size(tmp_path):\n    \"\"\"RawStream should use the default CHUNK_SIZE and yield the full body.\"\"\"\n    body = b\"Hello, world!\" * 100  # 1300 bytes\n    msg = DummyMessage(body)\n    stream = RawStream(msg=msg)\n    chunks = list(stream.iter_body())\n    # With default chunk size 100KB, the body should be yielded in one chunk\n    assert len(chunks) == 1\n    assert chunks[0] == body\n\n\ndef test_rawstream_custom_chunk_size(tmp_path):\n    \"\"\"RawStream should respect a custom chunk size and split the body accordingly.\"\"\"\n    body = b\"abc\" * 500  # 1500 bytes\n    msg = DummyMessage(body)\n    stream = RawStream(chunk_size=200, msg=msg)\n    chunks = list(stream.iter_body())\n    # 1500 bytes with 200-byte chunks should produce 8 chunks (7 full + 1 partial)\n    assert len(chunks) == 8\n    assert chunks[-1] == body[7 * 200 :]\n\n\ndef test_rawstream_iter_body_raises(tmp_path):\n    \"\"\"If the underlying message raises an exception, RawStream should propagate it.\"\"\"\n    class FailingMessage:\n        def iter_body(self, chunk_size: int):\n            raise RuntimeError(\"failed to read body\")\n\n    msg = FailingMessage()\n    stream = RawStream(msg=msg)\n    with pytest.raises(RuntimeError, match=\"failed to read body\"):\n        list(stream.iter_body())\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "0cf025ac269349f3af22c5f1be0b0b6d",
+  "_api_plus_pacing_seconds": 2.540039026993327
+}

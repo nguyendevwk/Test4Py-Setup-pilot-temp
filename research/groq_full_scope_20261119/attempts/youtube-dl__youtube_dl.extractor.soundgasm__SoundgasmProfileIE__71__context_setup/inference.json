@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-938361d0-e4b9-4001-9068-90e8f5b7bd7c",
+  "object": "chat.completion",
+  "created": 1795079575,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.soundgasm import SoundgasmProfileIE\n\n# Helper to create an instance with overridden methods\ndef make_ie_with_overrides(overrides):\n    ie = SoundgasmProfileIE()\n    for name, func in overrides.items():\n        setattr(ie, name, func)\n    return ie\n\ndef test_real_extract_parses_multiple_entries():\n    # Fake webpage containing two audio URLs for profile 'ytdl'\n    fake_webpage = '''\n        <html>\n            <a href=\"https://soundgasm.net/u/ytdl/12345\">Audio 1</a>\n            <a href=\"https://soundgasm.net/u/ytdl/67890\">Audio 2</a>\n        </html>\n    '''\n    captured_entries = []\n\n    def fake_download_webpage(url, video_id):\n        assert url == 'http://soundgasm.net/u/ytdl'\n        assert video_id == 'ytdl'\n        return fake_webpage\n\n    def fake_url_result(url, ie_name):\n        captured_entries.append((url, ie_name))\n        return {'url': url, 'ie': ie_name}\n\n    def fake_playlist_result(entries, playlist_id):\n        # Return a dict that contains the entries list and id\n        return {'entries': entries, 'playlist_id': playlist_id}\n\n    ie = make_ie_with_overrides({\n        '_download_webpage': fake_download_webpage,\n        'url_result': fake_url_result,\n        'playlist_result': fake_playlist_result,\n    })\n\n    result = ie._real_extract('http://soundgasm.net/u/ytdl')\n    assert result['playlist_id'] == 'ytdl'\n    assert len(result['entries']) == 2\n    assert captured_entries[0][0] == 'https://soundgasm.net/u/ytdl/12345'\n    assert captured_entries[1][0] == 'https://soundgasm.net/u/ytdl/67890'\n    assert all(entry['ie'] == 'Soundgasm' for entry in result['entries'])\n\ndef test_real_extract_no_entries_returns_empty_playlist():\n    # Fake webpage with no matching hrefs\n    fake_webpage = '<html><p>No audio here</p></html>'\n\n    def fake_download_webpage(url, video_id):\n        return fake_webpage\n\n    def fake_playlist_result(entries, playlist_id):\n        return {'entries': entries, 'playlist_id': playlist_id}\n\n    ie = make_ie_with_overrides({\n        '_download_webpage': fake_download_webpage,\n        'playlist_result': fake_playlist_result,\n    })\n\n    result = ie._real_extract('http://soundgasm.net/u/emptyprofile')\n    assert result['playlist_id'] == 'emptyprofile'\n    assert result['entries'] == []\n\ndef test_real_extract_invalid_url_raises():\n    ie = SoundgasmProfileIE()\n    # URL that does not match the pattern should raise ExtractorError\n    with pytest.raises(Exception) as excinfo:\n        ie._real_extract('http://invalid.com/u/abc')\n    # The exception should be due to _match_id failing\n    assert 'Invalid URL' in str(excinfo.value) or 'does not match' in str(excinfo.value)\n```",
+        "reasoning": "We need to test SoundgasmProfileIE._real_extract. But we cannot access network. We can simulate by monkeypatching _download_webpage to return a fake page. But cannot mock target. But we can instantiate the class and override its method? We can subclass? But we cannot modify product code. But we can monkeypatch instance attribute. That's allowed. Use tmp_path? Not needed. Just test logic. Use re to find entries. Provide fake webpage containing hrefs. Test that playlist_result called with correct entries. But we can't inspect playlist_result output easily. We can monkeypatch playlist_result to capture arguments. Similarly url_result. We'll monkeypatch methods on instance. That's allowed. Write three tests: normal extraction, boundary no entries, error when invalid URL? But _match_id uses regex; we can test that invalid URL raises? It might raise ExtractorError. But we can test that. Use pytest.raises. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00528537,
+    "prompt_tokens": 471,
+    "prompt_time": 0.011591165,
+    "completion_tokens": 880,
+    "completion_time": 1.127723284,
+    "total_tokens": 1351,
+    "total_time": 1.139314449,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 192
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh950fez2a0x4mvk28et5f",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.soundgasm import SoundgasmProfileIE\n\n# Helper to create an instance with overridden methods\ndef make_ie_with_overrides(overrides):\n    ie = SoundgasmProfileIE()\n    for name, func in overrides.items():\n        setattr(ie, name, func)\n    return ie\n\ndef test_real_extract_parses_multiple_entries():\n    # Fake webpage containing two audio URLs for profile 'ytdl'\n    fake_webpage = '''\n        <html>\n            <a href=\"https://soundgasm.net/u/ytdl/12345\">Audio 1</a>\n            <a href=\"https://soundgasm.net/u/ytdl/67890\">Audio 2</a>\n        </html>\n    '''\n    captured_entries = []\n\n    def fake_download_webpage(url, video_id):\n        assert url == 'http://soundgasm.net/u/ytdl'\n        assert video_id == 'ytdl'\n        return fake_webpage\n\n    def fake_url_result(url, ie_name):\n        captured_entries.append((url, ie_name))\n        return {'url': url, 'ie': ie_name}\n\n    def fake_playlist_result(entries, playlist_id):\n        # Return a dict that contains the entries list and id\n        return {'entries': entries, 'playlist_id': playlist_id}\n\n    ie = make_ie_with_overrides({\n        '_download_webpage': fake_download_webpage,\n        'url_result': fake_url_result,\n        'playlist_result': fake_playlist_result,\n    })\n\n    result = ie._real_extract('http://soundgasm.net/u/ytdl')\n    assert result['playlist_id'] == 'ytdl'\n    assert len(result['entries']) == 2\n    assert captured_entries[0][0] == 'https://soundgasm.net/u/ytdl/12345'\n    assert captured_entries[1][0] == 'https://soundgasm.net/u/ytdl/67890'\n    assert all(entry['ie'] == 'Soundgasm' for entry in result['entries'])\n\ndef test_real_extract_no_entries_returns_empty_playlist():\n    # Fake webpage with no matching hrefs\n    fake_webpage = '<html><p>No audio here</p></html>'\n\n    def fake_download_webpage(url, video_id):\n        return fake_webpage\n\n    def fake_playlist_result(entries, playlist_id):\n        return {'entries': entries, 'playlist_id': playlist_id}\n\n    ie = make_ie_with_overrides({\n        '_download_webpage': fake_download_webpage,\n        'playlist_result': fake_playlist_result,\n    })\n\n    result = ie._real_extract('http://soundgasm.net/u/emptyprofile')\n    assert result['playlist_id'] == 'emptyprofile'\n    assert result['entries'] == []\n\ndef test_real_extract_invalid_url_raises():\n    ie = SoundgasmProfileIE()\n    # URL that does not match the pattern should raise ExtractorError\n    with pytest.raises(Exception) as excinfo:\n        ie._real_extract('http://invalid.com/u/abc')\n    # The exception should be due to _match_id failing\n    assert 'Invalid URL' in str(excinfo.value) or 'does not match' in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "9d933114244a47909d07441858b39928",
+  "_api_plus_pacing_seconds": 1.9358395410235971
+}

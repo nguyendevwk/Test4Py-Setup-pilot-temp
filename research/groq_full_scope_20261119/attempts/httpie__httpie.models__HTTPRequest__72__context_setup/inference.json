@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-90ac7750-4afe-4c3f-8fd2-450242190f0d",
+  "object": "chat.completion",
+  "created": 1795079511,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport requests\nfrom httpie.models import HTTPRequest\nfrom urllib.parse import urlsplit\n\ndef test_headers_includes_request_line_and_host():\n    # Build a request without an explicit Host header\n    req = requests.Request(\n        method=\"GET\",\n        url=\"https://example.com/api?foo=bar\",\n        headers={\"User-Agent\": \"test-agent\"},\n    )\n    prepared = requests.Session().prepare_request(req)\n    wrapped = HTTPRequest(prepared)\n\n    headers_str = wrapped.headers\n    # The request line should be first\n    assert headers_str.startswith(\"GET /api?foo=bar HTTP/1.1\")\n    # Host header should be added automatically\n    assert \"Host: example.com\" in headers_str\n    # User-Agent header should be present\n    assert \"User-Agent: test-agent\" in headers_str\n\ndef test_body_encoding_and_iter_body():\n    # Body provided as a string should be encoded to bytes\n    req = requests.Request(\n        method=\"POST\",\n        url=\"https://example.com/submit\",\n        data=\"foo=bar\",\n        headers={\"Content-Type\": \"application/x-www-form-urlencoded\"},\n    )\n    prepared = requests.Session().prepare_request(req)\n    wrapped = HTTPRequest(prepared)\n\n    # Body property should return bytes\n    assert isinstance(wrapped.body, bytes)\n    assert wrapped.body == b\"foo=bar\"\n\n    # iter_body should yield the body once\n    chunks = list(wrapped.iter_body(chunk_size=10))\n    assert chunks == [b\"foo=bar\"]\n\ndef test_iter_lines_yields_body_and_empty_line_feed():\n    # Body as bytes\n    req = requests.Request(\n        method=\"PUT\",\n        url=\"https://example.com/update\",\n        data=b\"update data\",\n        headers={\"Content-Type\": \"text/plain\"},\n    )\n    prepared = requests.Session().prepare_request(req)\n    wrapped = HTTPRequest(prepared)\n\n    lines = list(wrapped.iter_lines(chunk_size=5))\n    # Should yield a single tuple (body, empty line feed)\n    assert lines == [(b\"update data\", b\"\")]\n```",
+        "reasoning": "We need tests for HTTPRequest. We can create a requests.Request object. Use requests.Request to build. Then prepare. Use requests.Session().prepare_request. Then wrap. Test headers property formatting, body property encoding, iter_body. Use tmp_path? Not needed. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005565164,
+    "prompt_tokens": 893,
+    "prompt_time": 0.047719446,
+    "completion_tokens": 504,
+    "completion_time": 0.569466842,
+    "total_tokens": 1397,
+    "total_time": 0.617186288,
+    "completion_tokens_details": {
+      "reasoning_tokens": 58
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh76ggetva99c4hcr93ey1",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport requests\nfrom httpie.models import HTTPRequest\nfrom urllib.parse import urlsplit\n\ndef test_headers_includes_request_line_and_host():\n    # Build a request without an explicit Host header\n    req = requests.Request(\n        method=\"GET\",\n        url=\"https://example.com/api?foo=bar\",\n        headers={\"User-Agent\": \"test-agent\"},\n    )\n    prepared = requests.Session().prepare_request(req)\n    wrapped = HTTPRequest(prepared)\n\n    headers_str = wrapped.headers\n    # The request line should be first\n    assert headers_str.startswith(\"GET /api?foo=bar HTTP/1.1\")\n    # Host header should be added automatically\n    assert \"Host: example.com\" in headers_str\n    # User-Agent header should be present\n    assert \"User-Agent: test-agent\" in headers_str\n\ndef test_body_encoding_and_iter_body():\n    # Body provided as a string should be encoded to bytes\n    req = requests.Request(\n        method=\"POST\",\n        url=\"https://example.com/submit\",\n        data=\"foo=bar\",\n        headers={\"Content-Type\": \"application/x-www-form-urlencoded\"},\n    )\n    prepared = requests.Session().prepare_request(req)\n    wrapped = HTTPRequest(prepared)\n\n    # Body property should return bytes\n    assert isinstance(wrapped.body, bytes)\n    assert wrapped.body == b\"foo=bar\"\n\n    # iter_body should yield the body once\n    chunks = list(wrapped.iter_body(chunk_size=10))\n    assert chunks == [b\"foo=bar\"]\n\ndef test_iter_lines_yields_body_and_empty_line_feed():\n    # Body as bytes\n    req = requests.Request(\n        method=\"PUT\",\n        url=\"https://example.com/update\",\n        data=b\"update data\",\n        headers={\"Content-Type\": \"text/plain\"},\n    )\n    prepared = requests.Session().prepare_request(req)\n    wrapped = HTTPRequest(prepared)\n\n    lines = list(wrapped.iter_lines(chunk_size=5))\n    # Should yield a single tuple (body, empty line feed)\n    assert lines == [(b\"update data\", b\"\")]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "f6999d8a3b714267b6e1358bac976be2",
+  "_api_plus_pacing_seconds": 1.1783622640068643
+}

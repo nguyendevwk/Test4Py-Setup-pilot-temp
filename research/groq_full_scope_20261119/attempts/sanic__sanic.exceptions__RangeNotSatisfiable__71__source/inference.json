@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-8caf0a82-5ce6-42ec-881c-d522a3181b02",
+  "object": "chat.completion",
+  "created": 1795078308,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.exceptions import RangeNotSatisfiable\nfrom sanic.helpers import STATUS_CODES\n\n\nclass DummyRange:\n    \"\"\"Simple object mimicking the Range protocol with a total attribute.\"\"\"\n    def __init__(self, total: int):\n        self.total = total\n\n\ndef test_default_status_and_quiet():\n    \"\"\"RangeNotSatisfiable should have status code 416 and quiet set to True by default.\"\"\"\n    exc = RangeNotSatisfiable()\n    assert exc.status_code == 416\n    assert exc.quiet is True\n    # The default message should be the status description\n    assert exc.message == STATUS_CODES[416]\n\n\ndef test_content_range_header_inclusion():\n    \"\"\"Providing a content_range should add a Content-Range header with the total size.\"\"\"\n    total_size = 1024\n    content_range = DummyRange(total=total_size)\n    exc = RangeNotSatisfiable(content_range=content_range)\n    # The header should be present and correctly formatted\n    assert \"Content-Range\" in exc.headers\n    assert exc.headers[\"Content-Range\"] == f\"bytes */{total_size}\"\n\n\ndef test_custom_message_and_headers_override():\n    \"\"\"Custom message and headers should override defaults and be preserved.\"\"\"\n    custom_msg = \"Custom error message\"\n    custom_headers = {\"X-Custom-Header\": \"value\"}\n    exc = RangeNotSatisfiable(\n        message=custom_msg,\n        headers=custom_headers,\n        content_range=DummyRange(total=500),\n    )\n    # Message should be the custom one\n    assert exc.message == custom_msg\n    # Custom header should be present\n    assert exc.headers[\"X-Custom-Header\"] == \"value\"\n    # Content-Range header should also be present\n    assert exc.headers[\"Content-Range\"] == \"bytes */500\"\n```",
+        "reasoning": "Need tests for RangeNotSatisfiable. Import from sanic.exceptions. Test default status_code, quiet, headers when content_range provided. Also error when content_range missing total? But protocol. We'll create dummy Range with total attribute. Test that headers updated. Also test that quiet default True. Third test: passing message and headers override. Use pytest.raises? Not needed. Just assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053357411,
+    "prompt_tokens": 664,
+    "prompt_time": 0.048588869,
+    "completion_tokens": 467,
+    "completion_time": 0.551082099,
+    "total_tokens": 1131,
+    "total_time": 0.599670968,
+    "completion_tokens_details": {
+      "reasoning_tokens": 79
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg2gb7e0jtrvaqbxcjknh1",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.exceptions import RangeNotSatisfiable\nfrom sanic.helpers import STATUS_CODES\n\n\nclass DummyRange:\n    \"\"\"Simple object mimicking the Range protocol with a total attribute.\"\"\"\n    def __init__(self, total: int):\n        self.total = total\n\n\ndef test_default_status_and_quiet():\n    \"\"\"RangeNotSatisfiable should have status code 416 and quiet set to True by default.\"\"\"\n    exc = RangeNotSatisfiable()\n    assert exc.status_code == 416\n    assert exc.quiet is True\n    # The default message should be the status description\n    assert exc.message == STATUS_CODES[416]\n\n\ndef test_content_range_header_inclusion():\n    \"\"\"Providing a content_range should add a Content-Range header with the total size.\"\"\"\n    total_size = 1024\n    content_range = DummyRange(total=total_size)\n    exc = RangeNotSatisfiable(content_range=content_range)\n    # The header should be present and correctly formatted\n    assert \"Content-Range\" in exc.headers\n    assert exc.headers[\"Content-Range\"] == f\"bytes */{total_size}\"\n\n\ndef test_custom_message_and_headers_override():\n    \"\"\"Custom message and headers should override defaults and be preserved.\"\"\"\n    custom_msg = \"Custom error message\"\n    custom_headers = {\"X-Custom-Header\": \"value\"}\n    exc = RangeNotSatisfiable(\n        message=custom_msg,\n        headers=custom_headers,\n        content_range=DummyRange(total=500),\n    )\n    # Message should be the custom one\n    assert exc.message == custom_msg\n    # Custom header should be present\n    assert exc.headers[\"X-Custom-Header\"] == \"value\"\n    # Content-Range header should also be present\n    assert exc.headers[\"Content-Range\"] == \"bytes */500\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9965719809988514
+}

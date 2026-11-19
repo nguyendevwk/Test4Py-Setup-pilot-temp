@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-cc364e1a-01a0-4ca8-bc84-26600ba4d5c0",
+  "object": "chat.completion",
+  "created": 1795078075,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport importlib\nimport types\nimport requests\nimport pytest\n\n# Import the target function\nfrom httpie.client import build_requests_session\n# Import plugin manager to monkeypatch\nfrom httpie.plugins.registry import plugin_manager\n\ndef test_session_mounts_http_and_https_adapters():\n    \"\"\"\n    Verify that the returned session has the custom HTTPie adapters mounted\n    for both http:// and https:// prefixes.\n    \"\"\"\n    session = build_requests_session(verify=True)\n    # The adapters should be instances of HTTPieHTTPAdapter and HTTPieHTTPSAdapter\n    http_adapter = session.adapters.get('http://')\n    https_adapter = session.adapters.get('https://')\n    assert http_adapter is not None, \"HTTP adapter not mounted\"\n    assert https_adapter is not None, \"HTTPS adapter not mounted\"\n    # Ensure they are of the expected types\n    from httpie.adapters import HTTPieHTTPAdapter, HTTPieHTTPSAdapter\n    assert isinstance(http_adapter, HTTPieHTTPAdapter), \"Incorrect HTTP adapter type\"\n    assert isinstance(https_adapter, HTTPieHTTPSAdapter), \"Incorrect HTTPS adapter type\"\n\ndef test_session_mounts_plugin_adapters(monkeypatch):\n    \"\"\"\n    Verify that plugin transport adapters are mounted on the session.\n    A dummy plugin is created and registered via monkeypatching the plugin manager.\n    \"\"\"\n    # Create a dummy plugin class\n    class DummyPlugin:\n        prefix = 'ftp://'\n        def get_adapter(self):\n            return requests.adapters.HTTPAdapter()\n    # Monkeypatch the plugin manager to return our dummy plugin\n    monkeypatch.setattr(plugin_manager, \"get_transport_plugins\", lambda: [DummyPlugin])\n    session = build_requests_session(verify=False)\n    # The dummy plugin adapter should be mounted under its prefix\n    ftp_adapter = session.adapters.get('ftp://')\n    assert ftp_adapter is not None, \"Plugin adapter not mounted\"\n    assert isinstance(ftp_adapter, requests.adapters.HTTPAdapter), \"Incorrect plugin adapter type\"\n\ndef test_build_requests_session_verify_and_ssl_version():\n    \"\"\"\n    Verify that the HTTPS adapter is configured with the correct verify flag\n    and ssl_version mapping when provided.\n    \"\"\"\n    # Use a known ssl_version key from AVAILABLE_SSL_VERSION_ARG_MAPPING\n    from httpie.ssl_ import AVAILABLE_SSL_VERSION_ARG_MAPPING\n    ssl_key = next(iter(AVAILABLE_SSL_VERSION_ARG_MAPPING))\n    session = build_requests_session(verify=False, ssl_version=ssl_key)\n    https_adapter = session.adapters.get('https://')\n    # The adapter should have the verify attribute set to False\n    assert hasattr(https_adapter, \"verify\")\n    assert https_adapter.verify is False\n    # The ssl_version attribute should be set to the mapped value\n    expected_ssl_version = AVAILABLE_SSL_VERSION_ARG_MAPPING[ssl_key]\n    assert getattr(https_adapter, \"ssl_version\", None) == expected_ssl_version\n```",
+        "reasoning": "We need three tests. Test that session mounts http and https adapters. Also plugin mounting. We can create dummy plugin by monkeypatching plugin_manager.get_transport_plugins to return list with dummy class. No mocks of target. But we can monkeypatch plugin_manager. Use import. Ensure no network. Just check adapters. Use tmp_path not needed. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048170697,
+    "prompt_tokens": 598,
+    "prompt_time": 0.009334062,
+    "completion_tokens": 665,
+    "completion_time": 0.953566962,
+    "total_tokens": 1263,
+    "total_time": 0.962901024,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 73
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfvbseetyt54dxk9m9bfkp",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport importlib\nimport types\nimport requests\nimport pytest\n\n# Import the target function\nfrom httpie.client import build_requests_session\n# Import plugin manager to monkeypatch\nfrom httpie.plugins.registry import plugin_manager\n\ndef test_session_mounts_http_and_https_adapters():\n    \"\"\"\n    Verify that the returned session has the custom HTTPie adapters mounted\n    for both http:// and https:// prefixes.\n    \"\"\"\n    session = build_requests_session(verify=True)\n    # The adapters should be instances of HTTPieHTTPAdapter and HTTPieHTTPSAdapter\n    http_adapter = session.adapters.get('http://')\n    https_adapter = session.adapters.get('https://')\n    assert http_adapter is not None, \"HTTP adapter not mounted\"\n    assert https_adapter is not None, \"HTTPS adapter not mounted\"\n    # Ensure they are of the expected types\n    from httpie.adapters import HTTPieHTTPAdapter, HTTPieHTTPSAdapter\n    assert isinstance(http_adapter, HTTPieHTTPAdapter), \"Incorrect HTTP adapter type\"\n    assert isinstance(https_adapter, HTTPieHTTPSAdapter), \"Incorrect HTTPS adapter type\"\n\ndef test_session_mounts_plugin_adapters(monkeypatch):\n    \"\"\"\n    Verify that plugin transport adapters are mounted on the session.\n    A dummy plugin is created and registered via monkeypatching the plugin manager.\n    \"\"\"\n    # Create a dummy plugin class\n    class DummyPlugin:\n        prefix = 'ftp://'\n        def get_adapter(self):\n            return requests.adapters.HTTPAdapter()\n    # Monkeypatch the plugin manager to return our dummy plugin\n    monkeypatch.setattr(plugin_manager, \"get_transport_plugins\", lambda: [DummyPlugin])\n    session = build_requests_session(verify=False)\n    # The dummy plugin adapter should be mounted under its prefix\n    ftp_adapter = session.adapters.get('ftp://')\n    assert ftp_adapter is not None, \"Plugin adapter not mounted\"\n    assert isinstance(ftp_adapter, requests.adapters.HTTPAdapter), \"Incorrect plugin adapter type\"\n\ndef test_build_requests_session_verify_and_ssl_version():\n    \"\"\"\n    Verify that the HTTPS adapter is configured with the correct verify flag\n    and ssl_version mapping when provided.\n    \"\"\"\n    # Use a known ssl_version key from AVAILABLE_SSL_VERSION_ARG_MAPPING\n    from httpie.ssl_ import AVAILABLE_SSL_VERSION_ARG_MAPPING\n    ssl_key = next(iter(AVAILABLE_SSL_VERSION_ARG_MAPPING))\n    session = build_requests_session(verify=False, ssl_version=ssl_key)\n    https_adapter = session.adapters.get('https://')\n    # The adapter should have the verify attribute set to False\n    assert hasattr(https_adapter, \"verify\")\n    assert https_adapter.verify is False\n    # The ssl_version attribute should be set to the mapped value\n    expected_ssl_version = AVAILABLE_SSL_VERSION_ARG_MAPPING[ssl_key]\n    assert getattr(https_adapter, \"ssl_version\", None) == expected_ssl_version\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3554506929940544
+}

@@ -1,0 +1,120 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_placeholder_reordering_and_command_split _________________
+
+self = ArgumentParser(prog='thefuck', usage=None, description=None, formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=False)
+args = ['-y', 'ls', '-l', '--']
+namespace = Namespace(version=False, alias=None, shell_logger=None, enable_experimental_instant_mode=False, help=False, yes=True, repeat=False, debug=False, force_command=None, command=['ls'])
+
+    def parse_known_args(self, args=None, namespace=None):
+        if args is None:
+            # args default to the system args
+            args = _sys.argv[1:]
+        else:
+            # make sure that args are mutable
+            args = list(args)
+    
+        # default Namespace built from parser defaults
+        if namespace is None:
+            namespace = Namespace()
+    
+        # add any action defaults that aren't present
+        for action in self._actions:
+            if action.dest is not SUPPRESS:
+                if not hasattr(namespace, action.dest):
+                    if action.default is not SUPPRESS:
+                        setattr(namespace, action.dest, action.default)
+    
+        # add any parser defaults that aren't present
+        for dest in self._defaults:
+            if not hasattr(namespace, dest):
+                setattr(namespace, dest, self._defaults[dest])
+    
+        # parse the arguments and exit if there are any errors
+        if self.exit_on_error:
+            try:
+>               namespace, args = self._parse_known_args(args, namespace)
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:1866: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:2079: in _parse_known_args
+    start_index = consume_optional(start_index)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:2009: in consume_optional
+    arg_count = match_argument(action, selected_patterns)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ArgumentParser(prog='thefuck', usage=None, description=None, formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=False)
+action = _StoreAction(option_strings=['-l', '--shell-logger'], dest='shell_logger', nargs=None, const=None, default=None, type=None, choices=None, required=False, help='log shell output to the file', metavar=None)
+arg_strings_pattern = '-'
+
+    def _match_argument(self, action, arg_strings_pattern):
+        # match the pattern for this action to the arg strings
+        nargs_pattern = self._get_nargs_pattern(action)
+        match = _re.match(nargs_pattern, arg_strings_pattern)
+    
+        # raise an exception if we weren't able to find a match
+        if match is None:
+            nargs_errors = {
+                None: _('expected one argument'),
+                OPTIONAL: _('expected at most one argument'),
+                ONE_OR_MORE: _('expected at least one argument'),
+            }
+            msg = nargs_errors.get(action.nargs)
+            if msg is None:
+                msg = ngettext('expected %s argument',
+                               'expected %s arguments',
+                               action.nargs) % action.nargs
+>           raise ArgumentError(action, msg)
+E           argparse.ArgumentError: argument -l/--shell-logger: expected one argument
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:2174: ArgumentError
+
+During handling of the above exception, another exception occurred:
+
+    def test_placeholder_reordering_and_command_split():
+        """Ensure placeholder moves following args to front and splits command."""
+        parser = Parser()
+        # placeholder before options
+>       args = parser.parse(['thefuck', ARGUMENT_PLACEHOLDER, '-y', 'ls', '-l'])
+
+test_generated.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/argument_parser.py:86: in parse
+    return self._parser.parse_args(arguments)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:1833: in parse_args
+    args, argv = self.parse_known_args(args, namespace)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:1869: in parse_known_args
+    self.error(str(err))
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:2594: in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ArgumentParser(prog='thefuck', usage=None, description=None, formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=False)
+status = 2
+message = 'thefuck: error: argument -l/--shell-logger: expected one argument\n'
+
+    def exit(self, status=0, message=None):
+        if message:
+            self._print_message(message, _sys.stderr)
+>       _sys.exit(status)
+E       SystemExit: 2
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/argparse.py:2581: SystemExit
+----------------------------- Captured stderr call -----------------------------
+usage: thefuck [-v] [-a [ALIAS]] [-l SHELL_LOGGER]
+               [--enable-experimental-instant-mode] [-h] [-y | -r] [-d]
+               [command ...]
+thefuck: error: argument -l/--shell-logger: expected one argument
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_placeholder_reordering_and_command_split - Sys...
+1 failed, 2 passed, 2 warnings in 0.48s

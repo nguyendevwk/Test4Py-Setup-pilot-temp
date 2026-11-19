@@ -1,0 +1,32 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_parse_forwarded_normal __________________________
+
+    def test_parse_forwarded_normal():
+        # Header contains the secret and several parameters
+        headers = DummyHeaders({
+            "forwarded": [
+                'for=192.0.2.60;proto=http;by=203.0.113.43;secret=abc123',
+                'for=2001:db8::1;proto=https;by=2001:db8::2;secret=abc123'
+            ]
+        })
+        config = DummyConfig(secret="abc123")
+        result = parse_forwarded(headers, config)
+        # The function should return the first matching element (rightmost)
+>       assert result == {
+            "for": "2001:db8::1",
+            "proto": "https",
+            "by": "2001:db8::2",
+            "secret": "abc123"
+        }
+E       AssertionError: assert {'secret': 'abc123'} == {'for': '2001...et': 'abc123'}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Right contains 3 more items:
+E         {'by': '2001:db8::2', 'for': '2001:db8::1', 'proto': 'https'}
+E         Use -v to get more diff
+
+test_generated.py:25: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_forwarded_normal - AssertionError: asser...
+1 failed, 2 passed in 0.57s

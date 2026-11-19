@@ -1,0 +1,110 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_parse_from_object_function_docstring ___________________
+
+    def test_parse_from_object_function_docstring():
+        """Normal case: parse a simple function docstring."""
+        def sample_func(x, y):
+            """Return the sum of x and y.
+    
+            Parameters
+            ----------
+            x : int
+                First number.
+            y : int
+                Second number.
+    
+            Returns
+            -------
+            int
+                The sum of x and y.
+            """
+            return x + y
+    
+        doc = parse_from_object(sample_func, style=DocstringStyle.GOOGLE)
+        assert isinstance(doc, Docstring)
+>       assert doc.summary == "Return the sum of x and y."
+E       AttributeError: 'Docstring' object has no attribute 'summary'
+
+test_generated.py:29: AttributeError
+______________ test_parse_from_object_class_attribute_docstrings _______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/docstring_parser__docstring_parser.parser__parse_from_object__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_parse_from_object_class_a0')
+
+    def test_parse_from_object_class_attribute_docstrings(tmp_path):
+        """Boundary case: parse a class with attribute docstrings defined in source."""
+        # Create a temporary module file with a class that has attribute docstrings.
+        module_code = '''
+    class MyClass:
+        """A simple class with attributes."""
+    
+        attr1 = 1  # :type int: The first attribute.
+        attr2 = "two"  # :type str: The second attribute.
+    '''
+        module_path = tmp_path / "mymodule.py"
+        module_path.write_text(module_code)
+    
+        # Dynamically import the module
+        spec = types.ModuleType("mymodule")
+        with open(module_path, "r") as f:
+            exec(f.read(), spec.__dict__)
+    
+        # Parse the class object
+>       doc = parse_from_object(spec.MyClass, style=DocstringStyle.AUTO)
+
+test_generated.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/parser.py:77: in parse_from_object
+    add_attribute_docstrings(obj, docstring)
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/attrdoc.py:115: in add_attribute_docstrings
+    AttributeDocstrings().get_attr_docs(obj).items()
+../../../../groq_codamosa_extension_20261119/environments/docstring_parser/venv/lib/python3.10/site-packages/docstring_parser/attrdoc.py:90: in get_attr_docs
+    source = textwrap.dedent(inspect.getsource(component))
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:1139: in getsource
+    lines, lnum = getsourcelines(object)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:1121: in getsourcelines
+    lines, lnum = findsource(object)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:940: in findsource
+    file = getsourcefile(object)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:817: in getsourcefile
+    filename = getfile(object)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+object = <class 'mymodule.MyClass'>
+
+    def getfile(object):
+        """Work out which source or compiled file an object was defined in."""
+        if ismodule(object):
+            if getattr(object, '__file__', None):
+                return object.__file__
+            raise TypeError('{!r} is a built-in module'.format(object))
+        if isclass(object):
+            if hasattr(object, '__module__'):
+                module = sys.modules.get(object.__module__)
+                if getattr(module, '__file__', None):
+                    return module.__file__
+                if object.__module__ == '__main__':
+                    raise OSError('source code not available')
+>           raise TypeError('{!r} is a built-in class'.format(object))
+E           TypeError: <class 'mymodule.MyClass'> is a built-in class
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/inspect.py:786: TypeError
+_______________ test_parse_from_object_missing_docstring_raises ________________
+
+    def test_parse_from_object_missing_docstring_raises():
+        """Error case: passing an object with no docstring should raise ParseError."""
+        class NoDoc:
+            pass
+    
+        # Remove the __doc__ attribute to simulate missing docstring
+        NoDoc.__doc__ = None
+    
+>       with pytest.raises(ParseError):
+E       Failed: DID NOT RAISE ParseError
+
+test_generated.py:77: Failed
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_from_object_function_docstring - Attribu...
+FAILED test_generated.py::test_parse_from_object_class_attribute_docstrings
+FAILED test_generated.py::test_parse_from_object_missing_docstring_raises - F...
+3 failed in 0.29s

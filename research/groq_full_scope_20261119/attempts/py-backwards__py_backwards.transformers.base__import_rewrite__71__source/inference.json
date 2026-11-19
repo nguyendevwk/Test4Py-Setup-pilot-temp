@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-84502dac-ce87-40e9-a5c3-f60396b74926",
+  "object": "chat.completion",
+  "created": 1795078557,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport importlib\nimport pytest\nfrom py_backwards.transformers.base import import_rewrite\n\n# Helper to create a dummy object that can be passed to extend\nclass Dummy:\n    def __init__(self, name):\n        self.name = name\n\ndef test_import_rewrite_success(monkeypatch):\n    \"\"\"extend(previous) succeeds, extend(current) is not called.\"\"\"\n    called = {\"previous\": False, \"current\": False}\n\n    def fake_extend(obj):\n        if obj.name == \"previous\":\n            called[\"previous\"] = True\n        else:\n            called[\"current\"] = True\n\n    monkeypatch.setattr(importlib.import_module(\"py_backwards.utils.snippet\"), \"extend\", fake_extend)\n\n    import_rewrite(Dummy(\"previous\"), Dummy(\"current\"))\n\n    assert called[\"previous\"] is True\n    assert called[\"current\"] is False\n\ndef test_import_rewrite_fallback(monkeypatch):\n    \"\"\"extend(previous) raises ImportError, extend(current) succeeds.\"\"\"\n    called = {\"previous\": False, \"current\": False}\n\n    def fake_extend(obj):\n        if obj.name == \"previous\":\n            called[\"previous\"] = True\n            raise ImportError(\"simulated failure\")\n        else:\n            called[\"current\"] = True\n\n    monkeypatch.setattr(importlib.import_module(\"py_backwards.utils.snippet\"), \"extend\", fake_extend)\n\n    import_rewrite(Dummy(\"previous\"), Dummy(\"current\"))\n\n    assert called[\"previous\"] is True\n    assert called[\"current\"] is True\n\ndef test_import_rewrite_both_fail(monkeypatch):\n    \"\"\"extend(previous) raises ImportError and extend(current) also raises ImportError.\"\"\"\n    def fake_extend(obj):\n        raise ImportError(\"simulated failure\")\n\n    monkeypatch.setattr(importlib.import_module(\"py_backwards.utils.snippet\"), \"extend\", fake_extend)\n\n    with pytest.raises(ImportError):\n        import_rewrite(Dummy(\"previous\"), Dummy(\"current\"))\n```",
+        "reasoning": "We need to test import_rewrite. It tries extend(previous) and if ImportError, extend(current). We need to simulate extend raising ImportError. Since extend is imported from utils.snippet. We cannot modify product code. We can monkeypatch extend in the module. Use importlib to reload? We can import the module and patch its extend. Use pytest. Three tests: normal where extend(previous) succeeds, boundary where extend(previous) raises ImportError and extend(current) succeeds, error where both raise ImportError? But function doesn't handle second error; will propagate. So test that ImportError propagates. Use monkeypatch fixture. Use tmp_path? Not needed. Provide dummy args. Use simple objects."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054180035,
+    "prompt_tokens": 296,
+    "prompt_time": 0.028483403,
+    "completion_tokens": 553,
+    "completion_time": 0.604548536,
+    "total_tokens": 849,
+    "total_time": 0.633031939,
+    "completion_tokens_details": {
+      "reasoning_tokens": 143
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sga2vee7t9n2k51c70yv6f",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport importlib\nimport pytest\nfrom py_backwards.transformers.base import import_rewrite\n\n# Helper to create a dummy object that can be passed to extend\nclass Dummy:\n    def __init__(self, name):\n        self.name = name\n\ndef test_import_rewrite_success(monkeypatch):\n    \"\"\"extend(previous) succeeds, extend(current) is not called.\"\"\"\n    called = {\"previous\": False, \"current\": False}\n\n    def fake_extend(obj):\n        if obj.name == \"previous\":\n            called[\"previous\"] = True\n        else:\n            called[\"current\"] = True\n\n    monkeypatch.setattr(importlib.import_module(\"py_backwards.utils.snippet\"), \"extend\", fake_extend)\n\n    import_rewrite(Dummy(\"previous\"), Dummy(\"current\"))\n\n    assert called[\"previous\"] is True\n    assert called[\"current\"] is False\n\ndef test_import_rewrite_fallback(monkeypatch):\n    \"\"\"extend(previous) raises ImportError, extend(current) succeeds.\"\"\"\n    called = {\"previous\": False, \"current\": False}\n\n    def fake_extend(obj):\n        if obj.name == \"previous\":\n            called[\"previous\"] = True\n            raise ImportError(\"simulated failure\")\n        else:\n            called[\"current\"] = True\n\n    monkeypatch.setattr(importlib.import_module(\"py_backwards.utils.snippet\"), \"extend\", fake_extend)\n\n    import_rewrite(Dummy(\"previous\"), Dummy(\"current\"))\n\n    assert called[\"previous\"] is True\n    assert called[\"current\"] is True\n\ndef test_import_rewrite_both_fail(monkeypatch):\n    \"\"\"extend(previous) raises ImportError and extend(current) also raises ImportError.\"\"\"\n    def fake_extend(obj):\n        raise ImportError(\"simulated failure\")\n\n    monkeypatch.setattr(importlib.import_module(\"py_backwards.utils.snippet\"), \"extend\", fake_extend)\n\n    with pytest.raises(ImportError):\n        import_rewrite(Dummy(\"previous\"), Dummy(\"current\"))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.042038373008836
+}

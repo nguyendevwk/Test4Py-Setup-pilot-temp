@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-fc9fc499-7c4c-4b2b-a0cd-5c4382cb94f1",
+  "object": "chat.completion",
+  "created": 1795078326,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport concurrent.futures\nimport asyncio\nimport pytest\nfrom tornado.netutil import ThreadedResolver\n\n# Test 1: Creating a resolver initializes a thread pool with the requested size\ndef test_threaded_resolver_initializes_pool():\n    resolver = ThreadedResolver()\n    resolver.initialize(num_threads=5)\n    # The executor should be a ThreadPoolExecutor with 5 workers\n    assert isinstance(resolver.executor, concurrent.futures.ThreadPoolExecutor)\n    assert resolver.executor._max_workers == 5\n\n# Test 2: Multiple resolvers share the same thread pool within the same process\ndef test_threaded_resolver_shared_pool():\n    resolver1 = ThreadedResolver()\n    resolver1.initialize(num_threads=3)\n    resolver2 = ThreadedResolver()\n    resolver2.initialize(num_threads=7)  # size argument ignored after first pool\n    # Both resolvers should reference the same executor instance\n    assert resolver1.executor is resolver2.executor\n    # The pool should still have the original size (3 workers)\n    assert resolver1.executor._max_workers == 3\n\n# Test 3: After a fork, the thread pool is recreated for the child process\ndef test_threaded_resolver_fork_behavior(tmp_path):\n    # Create a resolver in the parent process\n    parent_resolver = ThreadedResolver()\n    parent_resolver.initialize(num_threads=2)\n    parent_executor = parent_resolver.executor\n\n    # Fork the process\n    pid = os.fork()\n    if pid == 0:\n        # Child process\n        try:\n            child_resolver = ThreadedResolver()\n            child_resolver.initialize(num_threads=4)\n            child_executor = child_resolver.executor\n            # In the child, the executor should be a new instance\n            assert child_executor is not parent_executor\n            # And it should have the requested number of workers\n            assert child_executor._max_workers == 4\n        finally:\n            os._exit(0)\n    else:\n        # Parent process waits for child to finish\n        _, status = os.waitpid(pid, 0)\n        assert os.WIFEXITED(status) and os.WEXITSTATUS(status) == 0\n```",
+        "reasoning": "Need tests for ThreadedResolver. We can instantiate, check threadpool creation, reuse across instances, and that after fork pid changes? Hard to fork. Maybe test that _create_threadpool returns same executor for same pid. Also test initialize sets executor. Use tmp_path? Not needed. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05322603,
+    "prompt_tokens": 665,
+    "prompt_time": 0.044670139,
+    "completion_tokens": 525,
+    "completion_time": 0.589274319,
+    "total_tokens": 1190,
+    "total_time": 0.633944458,
+    "completion_tokens_details": {
+      "reasoning_tokens": 63
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg31qbex3t1s70atvqh2hy",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport concurrent.futures\nimport asyncio\nimport pytest\nfrom tornado.netutil import ThreadedResolver\n\n# Test 1: Creating a resolver initializes a thread pool with the requested size\ndef test_threaded_resolver_initializes_pool():\n    resolver = ThreadedResolver()\n    resolver.initialize(num_threads=5)\n    # The executor should be a ThreadPoolExecutor with 5 workers\n    assert isinstance(resolver.executor, concurrent.futures.ThreadPoolExecutor)\n    assert resolver.executor._max_workers == 5\n\n# Test 2: Multiple resolvers share the same thread pool within the same process\ndef test_threaded_resolver_shared_pool():\n    resolver1 = ThreadedResolver()\n    resolver1.initialize(num_threads=3)\n    resolver2 = ThreadedResolver()\n    resolver2.initialize(num_threads=7)  # size argument ignored after first pool\n    # Both resolvers should reference the same executor instance\n    assert resolver1.executor is resolver2.executor\n    # The pool should still have the original size (3 workers)\n    assert resolver1.executor._max_workers == 3\n\n# Test 3: After a fork, the thread pool is recreated for the child process\ndef test_threaded_resolver_fork_behavior(tmp_path):\n    # Create a resolver in the parent process\n    parent_resolver = ThreadedResolver()\n    parent_resolver.initialize(num_threads=2)\n    parent_executor = parent_resolver.executor\n\n    # Fork the process\n    pid = os.fork()\n    if pid == 0:\n        # Child process\n        try:\n            child_resolver = ThreadedResolver()\n            child_resolver.initialize(num_threads=4)\n            child_executor = child_resolver.executor\n            # In the child, the executor should be a new instance\n            assert child_executor is not parent_executor\n            # And it should have the requested number of workers\n            assert child_executor._max_workers == 4\n        finally:\n            os._exit(0)\n    else:\n        # Parent process waits for child to finish\n        _, status = os.waitpid(pid, 0)\n        assert os.WIFEXITED(status) and os.WEXITSTATUS(status) == 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0778191779972985
+}

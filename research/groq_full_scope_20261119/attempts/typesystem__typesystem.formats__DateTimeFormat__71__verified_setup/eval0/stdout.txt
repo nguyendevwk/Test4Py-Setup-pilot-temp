@@ -1,0 +1,37 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_datetimeformat_parse_fractional_and_offset ________________
+
+    def test_datetimeformat_parse_fractional_and_offset():
+        fmt = DateTimeFormat()
+        # 3 fractional digits, offset +02:30
+        input_str = "2021-12-31T23:59:59.123+02:30"
+        parsed = fmt.validate(input_str)
+        assert parsed.microsecond == 123000  # padded to 6 digits
+        assert parsed.tzinfo == datetime.timezone(datetime.timedelta(hours=2, minutes=30))
+    
+        # Serialize back and compare
+        serialized = fmt.serialize(parsed)
+        # isoformat will use +02:30
+>       assert serialized == "2021-12-31T23:59:59.123+02:30"
+E       AssertionError: assert '2021-12-31T2....123000+02:30' == '2021-12-31T2...:59.123+02:30'
+E         
+E         - 2021-12-31T23:59:59.123+02:30
+E         + 2021-12-31T23:59:59.123000+02:30
+E         ?                        +++
+
+test_generated.py:35: AssertionError
+__________________ test_datetimeformat_invalid_format_raises ___________________
+
+    def test_datetimeformat_invalid_format_raises():
+        fmt = DateTimeFormat()
+        # Missing 'T' separator
+        bad_input = "2023-07-15 12:34:56"
+>       with pytest.raises(fmt.ValidationError) as excinfo:
+E       AttributeError: 'DateTimeFormat' object has no attribute 'ValidationError'. Did you mean: 'validation_error'?
+
+test_generated.py:42: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_datetimeformat_parse_fractional_and_offset - A...
+FAILED test_generated.py::test_datetimeformat_invalid_format_raises - Attribu...
+2 failed, 1 passed in 0.14s

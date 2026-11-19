@@ -1,0 +1,44 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_unexpected_exception_propagation _____________________
+
+    def test_unexpected_exception_propagation():
+        # Pass a value that causes getaddrinfo to raise an unexpected error
+        # (e.g., a negative port number triggers a ValueError in socket module)
+        with pytest.raises(ValueError):
+            # The function ignores the port argument, but passing a negative
+            # port to getaddrinfo via the AI_NUMERICHOST flag will raise ValueError
+>           socket.getaddrinfo("127.0.0.1", -1, socket.AF_UNSPEC, socket.SOCK_STREAM,
+                               0, socket.AI_NUMERICHOST)
+
+test_generated.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+host = '127.0.0.1', port = -1, family = <AddressFamily.AF_UNSPEC: 0>
+type = <SocketKind.SOCK_STREAM: 1>, proto = 0
+flags = <AddressInfo.AI_NUMERICHOST: 4>
+
+    def getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+        """Resolve host and port into list of address info entries.
+    
+        Translate the host/port argument into a sequence of 5-tuples that contain
+        all the necessary arguments for creating a socket connected to that service.
+        host is a domain name, a string representation of an IPv4/v6 address or
+        None. port is a string service name such as 'http', a numeric port number or
+        None. By passing None as the value of host and port, you can pass NULL to
+        the underlying C API.
+    
+        The family, type and proto arguments can be optionally specified in order to
+        narrow the list of addresses returned. Passing zero as a value for each of
+        these arguments selects the full range of results.
+        """
+        # We override this function since we want to translate the numeric family
+        # and socket type values to enum constants.
+        addrlist = []
+>       for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+E       socket.gaierror: [Errno -8] Servname not supported for ai_socktype
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/socket.py:967: gaierror
+=========================== short test summary info ============================
+FAILED test_generated.py::test_unexpected_exception_propagation - socket.gaie...
+1 failed, 2 passed in 0.32s

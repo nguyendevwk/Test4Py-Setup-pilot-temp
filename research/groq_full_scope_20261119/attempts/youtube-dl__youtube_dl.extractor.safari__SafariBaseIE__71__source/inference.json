@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-695885aa-26d5-46dd-addb-e2de4bde86ab",
+  "object": "chat.completion",
+  "created": 1795078250,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport types\nimport pytest\nfrom youtube_dl.extractor.safari import SafariBaseIE\n\n\nclass DummyHandle:\n    \"\"\"Simple object mimicking a urllib response with geturl.\"\"\"\n    def __init__(self, url):\n        self._url = url\n\n    def geturl(self):\n        return self._url\n\n\nclass TestSafariBaseIE:\n    def test_login_skipped_when_no_credentials(self):\n        \"\"\"When no login info is provided, LOGGED_IN stays False.\"\"\"\n        class TestIE(SafariBaseIE):\n            def _get_login_info(self):\n                return None\n\n            # Override network methods to avoid actual HTTP calls\n            def _download_webpage_handle(self, *args, **kwargs):\n                raise AssertionError(\"Network call should not happen\")\n\n            def _download_json_handle(self, *args, **kwargs):\n                raise AssertionError(\"Network call should not happen\")\n\n        ie = TestIE()\n        ie._real_initialize()\n        assert ie.LOGGED_IN is False\n\n    def test_login_successful_with_mocked_handle(self):\n        \"\"\"Simulate a successful login by providing a handle that reports a logged‑in URL.\"\"\"\n        class TestIE(SafariBaseIE):\n            def _get_login_info(self):\n                return (\"user@example.com\", \"secret\")\n\n            def _download_webpage_handle(self, url, *args, **kwargs):\n                # First call returns a redirect URL containing 'login-check'\n                if \"login-check\" in url:\n                    return DummyHandle(\"https://learning.oreilly.com/accounts/login-check/?next=/home/\")\n                # Second call after auth redirects to home\n                return DummyHandle(\"https://learning.oreilly.com/home/\")\n\n            def _download_json_handle(self, url, *args, **kwargs):\n                # Return a JSON dict that mimics a successful auth response\n                return {\n                    \"logged_in\": True,\n                    \"redirect_uri\": \"https://learning.oreilly.com/home/\",\n                    \"credentials\": None,\n                }\n\n            def _apply_first_set_cookie_header(self, urlh, cookie):\n                # No-op for test\n                pass\n\n        ie = TestIE()\n        ie._real_initialize()\n        assert ie.LOGGED_IN is True\n\n    def test_login_failure_raises_error(self):\n        \"\"\"If the auth response indicates failure, an ExtractorError is raised.\"\"\"\n        class TestIE(SafariBaseIE):\n            def _get_login_info(self):\n                return (\"user@example.com\", \"wrong\")\n\n            def _download_webpage_handle(self, url, *args, **kwargs):\n                return DummyHandle(\"https://learning.oreilly.com/accounts/login-check/?next=/home/\")\n\n            def _download_json_handle(self, url, *args, **kwargs):\n                # Simulate failure: logged_in False, no redirect_uri, but credentials present\n                return {\n                    \"logged_in\": False,\n                    \"redirect_uri\": None,\n                    \"credentials\": \"Invalid credentials\",\n                }\n\n            def _apply_first_set_cookie_header(self, urlh, cookie):\n                pass\n\n        ie = TestIE()\n        with pytest.raises(Exception) as excinfo:\n            ie._real_initialize()\n        assert \"Unable to login\" in str(excinfo.value)\n```",
+        "reasoning": "We need to test SafariBaseIE. But it's complex network. We cannot mock. But we can test that _LOGIN_URL etc. Maybe test that _real_initialize calls _login. We can subclass to override methods to avoid network. Use monkeypatch to replace _download_webpage_handle etc. But cannot mock target. But we can subclass in test to override methods. That's allowed. We'll create DummyIE inheriting SafariBaseIE and override _get_login_info to return None so _login returns. Then test that LOGGED_IN remains False. Also test that if _get_login_info returns credentials, we simulate login flow by mocking _download_webpage_handle to return a dummy handle with geturl returning a logged-in URL. We can monkeypatch methods on instance. Use simple objects. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054344964,
+    "prompt_tokens": 769,
+    "prompt_time": 0.020163144,
+    "completion_tokens": 832,
+    "completion_time": 1.133454413,
+    "total_tokens": 1601,
+    "total_time": 1.153617557,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 161
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg0pzteb9s0ny12mw73p00",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport types\nimport pytest\nfrom youtube_dl.extractor.safari import SafariBaseIE\n\n\nclass DummyHandle:\n    \"\"\"Simple object mimicking a urllib response with geturl.\"\"\"\n    def __init__(self, url):\n        self._url = url\n\n    def geturl(self):\n        return self._url\n\n\nclass TestSafariBaseIE:\n    def test_login_skipped_when_no_credentials(self):\n        \"\"\"When no login info is provided, LOGGED_IN stays False.\"\"\"\n        class TestIE(SafariBaseIE):\n            def _get_login_info(self):\n                return None\n\n            # Override network methods to avoid actual HTTP calls\n            def _download_webpage_handle(self, *args, **kwargs):\n                raise AssertionError(\"Network call should not happen\")\n\n            def _download_json_handle(self, *args, **kwargs):\n                raise AssertionError(\"Network call should not happen\")\n\n        ie = TestIE()\n        ie._real_initialize()\n        assert ie.LOGGED_IN is False\n\n    def test_login_successful_with_mocked_handle(self):\n        \"\"\"Simulate a successful login by providing a handle that reports a logged‑in URL.\"\"\"\n        class TestIE(SafariBaseIE):\n            def _get_login_info(self):\n                return (\"user@example.com\", \"secret\")\n\n            def _download_webpage_handle(self, url, *args, **kwargs):\n                # First call returns a redirect URL containing 'login-check'\n                if \"login-check\" in url:\n                    return DummyHandle(\"https://learning.oreilly.com/accounts/login-check/?next=/home/\")\n                # Second call after auth redirects to home\n                return DummyHandle(\"https://learning.oreilly.com/home/\")\n\n            def _download_json_handle(self, url, *args, **kwargs):\n                # Return a JSON dict that mimics a successful auth response\n                return {\n                    \"logged_in\": True,\n                    \"redirect_uri\": \"https://learning.oreilly.com/home/\",\n                    \"credentials\": None,\n                }\n\n            def _apply_first_set_cookie_header(self, urlh, cookie):\n                # No-op for test\n                pass\n\n        ie = TestIE()\n        ie._real_initialize()\n        assert ie.LOGGED_IN is True\n\n    def test_login_failure_raises_error(self):\n        \"\"\"If the auth response indicates failure, an ExtractorError is raised.\"\"\"\n        class TestIE(SafariBaseIE):\n            def _get_login_info(self):\n                return (\"user@example.com\", \"wrong\")\n\n            def _download_webpage_handle(self, url, *args, **kwargs):\n                return DummyHandle(\"https://learning.oreilly.com/accounts/login-check/?next=/home/\")\n\n            def _download_json_handle(self, url, *args, **kwargs):\n                # Simulate failure: logged_in False, no redirect_uri, but credentials present\n                return {\n                    \"logged_in\": False,\n                    \"redirect_uri\": None,\n                    \"credentials\": \"Invalid credentials\",\n                }\n\n            def _apply_first_set_cookie_header(self, urlh, cookie):\n                pass\n\n        ie = TestIE()\n        with pytest.raises(Exception) as excinfo:\n            ie._real_initialize()\n        assert \"Unable to login\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5677400339627638
+}

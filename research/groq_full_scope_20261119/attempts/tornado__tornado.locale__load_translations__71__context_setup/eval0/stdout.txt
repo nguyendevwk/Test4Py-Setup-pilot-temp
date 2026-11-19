@@ -1,0 +1,55 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_load_translations_basic _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_translations__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_translations_basic0')
+
+    def test_load_translations_basic(tmp_path):
+        # Create a simple CSV with two locales
+        csv_content = [
+            ['"Hello"', '"Hola"'],
+            ['"Goodbye"', '"Adiós"'],
+        ]
+        for locale in ['es_ES', 'fr_FR']:
+            file_path = tmp_path / f"{locale}.csv"
+            with open(file_path, "w", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerows(csv_content)
+    
+        load_translations(str(tmp_path))
+        # Verify that both locales are loaded
+>       assert _supported_locales == frozenset(['es_ES', 'fr_FR', _default_locale])
+E       AssertionError: assert frozenset({'en_US'}) == frozenset({'e...ES', 'fr_FR'})
+E         
+E         Extra items in the right set:
+E         'es_ES'
+E         'fr_FR'
+E         Use -v to get more diff
+
+test_generated.py:20: AssertionError
+_______________ test_load_translations_plural_and_missing_column _______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_translations__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_translations_plural_0')
+
+    def test_load_translations_plural_and_missing_column(tmp_path):
+        # CSV with plural indicator and a row missing the third column
+        csv_rows = [
+            ['"Item"', '"Artículo"', 'plural'],
+            ['"Item"', '"Artículo"', 'singular'],
+            ['"Item"', '"Artículo"'],  # missing plural column
+        ]
+        file_path = tmp_path / "es_ES.csv"
+        with open(file_path, "w", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerows(csv_rows)
+    
+        load_translations(str(tmp_path))
+        # Check that both plural and singular forms are stored
+>       assert _translations["es_ES"]["plural"]["Item"] == "Artículo"
+E       KeyError: 'es_ES'
+
+test_generated.py:40: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_load_translations_basic - AssertionError: asse...
+FAILED test_generated.py::test_load_translations_plural_and_missing_column - ...
+2 failed, 1 passed in 0.17s

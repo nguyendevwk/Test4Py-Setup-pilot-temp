@@ -1,0 +1,61 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_load_translations_basic _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_translations__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_translations_basic0')
+
+    def test_load_translations_basic(tmp_path):
+        # Create a simple CSV with two locales
+        en_csv = tmp_path / "en_US.csv"
+        es_csv = tmp_path / "es_ES.csv"
+        en_csv.write_text('"Hello","Hola"\n', encoding="utf-8")
+        es_csv.write_text('"Goodbye","Adiós"\n', encoding="utf-8")
+        load_translations(str(tmp_path))
+        # Check that translations dictionary contains both locales
+>       assert "en_US" in _translations
+E       AssertionError: assert 'en_US' in {}
+
+test_generated.py:15: AssertionError
+_______________ test_load_translations_plural_and_missing_column _______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_translations__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_translations_plural_0')
+
+    def test_load_translations_plural_and_missing_column(tmp_path):
+        # CSV with plural indicator and missing third column
+        csv_path = tmp_path / "fr_FR.csv"
+        csv_path.write_text(
+            '"%s likes this","%s aime ceci","plural"\n'
+            '"%s likes this","%s aime ceci"\n',  # missing plural column
+            encoding="utf-8"
+        )
+        load_translations(str(tmp_path))
+        # The row with missing plural column should default to "unknown"
+>       assert _translations["fr_FR"]["plural"]["%s likes this"] == "%s aime ceci"
+E       KeyError: 'fr_FR'
+
+test_generated.py:35: KeyError
+_______________ test_load_translations_invalid_plural_indicator ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_translations__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_load_translations_invalid0')
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7fcfa12f68f0>
+
+    def test_load_translations_invalid_plural_indicator(tmp_path, caplog):
+        # CSV with an invalid plural indicator
+        csv_path = tmp_path / "de_DE.csv"
+        csv_path.write_text(
+            '"Hello","Hallo","invalid"\n',
+            encoding="utf-8"
+        )
+        load_translations(str(tmp_path))
+        # The invalid row should be skipped; translations dict remains empty for this locale
+>       assert "de_DE" in _translations
+E       AssertionError: assert 'de_DE' in {}
+
+test_generated.py:47: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    tornado.general:locale.py:165 Unrecognized plural indicator 'invalid' in de_DE.csv line 1
+=========================== short test summary info ============================
+FAILED test_generated.py::test_load_translations_basic - AssertionError: asse...
+FAILED test_generated.py::test_load_translations_plural_and_missing_column - ...
+FAILED test_generated.py::test_load_translations_invalid_plural_indicator - A...
+3 failed in 0.16s

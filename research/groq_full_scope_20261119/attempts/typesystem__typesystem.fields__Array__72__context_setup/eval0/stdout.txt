@@ -1,0 +1,64 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_array_normal_validation_and_serialization ________________
+
+    def test_array_normal_validation_and_serialization():
+        """Array with a single item type and min_items constraint."""
+        arr_field = Array(items=IntField(), min_items=2)
+        # Valid input: list of two integers
+        result = arr_field.validate([1, 2])
+        assert result == [1, 2]
+        # Serialization should preserve the values
+        serialized = arr_field.serialize(result)
+        assert serialized == [1, 2]
+        # Invalid input: too few items
+        with pytest.raises(ValidationError) as excinfo:
+            arr_field.validate([1])
+>       assert "exact_items" not in excinfo.value.text
+E       AttributeError: 'ValidationError' object has no attribute 'text'
+
+test_generated.py:27: AttributeError
+______________________ test_array_exact_items_constraint _______________________
+
+    def test_array_exact_items_constraint():
+        """Array with exact_items should enforce exact length."""
+        arr_field = Array(items=IntField(), exact_items=3)
+        # Valid input: list of three integers
+        assert arr_field.validate([10, 20, 30]) == [10, 20, 30]
+        # Invalid input: list of two integers
+        with pytest.raises(ValidationError) as excinfo:
+            arr_field.validate([10, 20])
+>       assert "exact_items" in excinfo.value.text
+E       AttributeError: 'ValidationError' object has no attribute 'text'
+
+test_generated.py:39: AttributeError
+________________________ test_array_unique_items_error _________________________
+
+    def test_array_unique_items_error():
+        """Array with unique_items should reject duplicate elements."""
+        arr_field = Array(items=IntField(), unique_items=True)
+        # Valid input: unique integers
+        assert arr_field.validate([1, 2, 3]) == [1, 2, 3]
+        # Invalid input: duplicate integer
+        with pytest.raises(ValidationError) as excinfo:
+            arr_field.validate([1, 2, 1])
+        # The error message should indicate a duplicate at the duplicate position
+        messages = excinfo.value.messages()
+        assert any(msg.code == "unique_items" for msg in messages)
+        # Ensure the duplicate position is reported correctly
+>       duplicate_positions = [msg.key for msg in messages if msg.code == "unique_items"]
+
+test_generated.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x7f7722064400>
+
+>   duplicate_positions = [msg.key for msg in messages if msg.code == "unique_items"]
+E   AttributeError: 'Message' object has no attribute 'key'
+
+test_generated.py:58: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_array_normal_validation_and_serialization - At...
+FAILED test_generated.py::test_array_exact_items_constraint - AttributeError:...
+FAILED test_generated.py::test_array_unique_items_error - AttributeError: 'Me...
+3 failed in 0.12s

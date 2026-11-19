@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-bb91b1f4-80f0-4bef-867b-fae9dd426a72",
+  "object": "chat.completion",
+  "created": 1795078263,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom cookiecutter.prompt import read_user_choice\nfrom rich.prompt import Prompt\n\n# Test 1: Normal selection with default (no user input)\ndef test_read_user_choice_default(monkeypatch):\n    # Monkeypatch Prompt.ask to simulate no input (returns default)\n    def fake_ask(prompt, choices, default):\n        # Ensure the default is the first option\n        assert default == \"1\"\n        return default\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n\n    options = [\"apple\", \"banana\", \"cherry\"]\n    result = read_user_choice(\"fruit\", options)\n    assert result == \"apple\", \"Default should return the first option\"\n\n# Test 2: Custom prompts with __prompt__ and custom labels\ndef test_read_user_choice_custom_prompts(monkeypatch):\n    # Simulate user selecting option 2\n    def fake_ask(prompt, choices, default):\n        # The prompt should contain the custom __prompt__\n        assert \"Pick a color\" in prompt\n        # The choices should be strings of numbers\n        assert choices == [\"1\", \"2\", \"3\"]\n        return \"2\"\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n\n    options = [\"red\", \"green\", \"blue\"]\n    prompts = {\n        \"color\": {\n            \"__prompt__\": \"Pick a color\",\n            \"red\": \"Bright Red\",\n            \"green\": \"Lush Green\",\n            # No custom label for blue, should fallback to key\n        }\n    }\n    result = read_user_choice(\"color\", options, prompts=prompts)\n    assert result == \"green\", \"Should return the second option\"\n\n# Test 3: Error when options list is empty\ndef test_read_user_choice_empty_options():\n    with pytest.raises(ValueError):\n        read_user_choice(\"empty\", [])\n```",
+        "reasoning": "Need tests for read_user_choice. We can simulate Prompt.ask by monkeypatching Prompt.ask to return a value. Use pytest. Three tests: normal with default, custom prompts, error on empty options. Use tmp_path? not needed. Use monkeypatch fixture."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05154136,
+    "prompt_tokens": 706,
+    "prompt_time": 0.145762679,
+    "completion_tokens": 452,
+    "completion_time": 0.563125229,
+    "total_tokens": 1158,
+    "total_time": 0.708887908,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 54
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg141pe2jbhw8vjm781c2d",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom cookiecutter.prompt import read_user_choice\nfrom rich.prompt import Prompt\n\n# Test 1: Normal selection with default (no user input)\ndef test_read_user_choice_default(monkeypatch):\n    # Monkeypatch Prompt.ask to simulate no input (returns default)\n    def fake_ask(prompt, choices, default):\n        # Ensure the default is the first option\n        assert default == \"1\"\n        return default\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n\n    options = [\"apple\", \"banana\", \"cherry\"]\n    result = read_user_choice(\"fruit\", options)\n    assert result == \"apple\", \"Default should return the first option\"\n\n# Test 2: Custom prompts with __prompt__ and custom labels\ndef test_read_user_choice_custom_prompts(monkeypatch):\n    # Simulate user selecting option 2\n    def fake_ask(prompt, choices, default):\n        # The prompt should contain the custom __prompt__\n        assert \"Pick a color\" in prompt\n        # The choices should be strings of numbers\n        assert choices == [\"1\", \"2\", \"3\"]\n        return \"2\"\n    monkeypatch.setattr(Prompt, \"ask\", fake_ask)\n\n    options = [\"red\", \"green\", \"blue\"]\n    prompts = {\n        \"color\": {\n            \"__prompt__\": \"Pick a color\",\n            \"red\": \"Bright Red\",\n            \"green\": \"Lush Green\",\n            # No custom label for blue, should fallback to key\n        }\n    }\n    result = read_user_choice(\"color\", options, prompts=prompts)\n    assert result == \"green\", \"Should return the second option\"\n\n# Test 3: Error when options list is empty\ndef test_read_user_choice_empty_options():\n    with pytest.raises(ValueError):\n        read_user_choice(\"empty\", [])\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1291808729874901
+}

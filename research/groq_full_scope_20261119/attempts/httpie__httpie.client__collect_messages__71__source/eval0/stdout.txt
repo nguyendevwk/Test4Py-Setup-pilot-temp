@@ -1,0 +1,153 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_collect_messages_yields_prepared_request_offline _____________
+
+env = <Environment {'apply_warnings_filter': <function Environment.apply_warnings_filter at 0x7f8e30007b50>,
+ 'args': Namesp...IO name=6 mode='rb+' closefd=True>" mode='r+' encoding='utf-8'>,
+ 'stdout_encoding': 'utf-8',
+ 'stdout_isatty': False}>
+
+    def test_collect_messages_yields_prepared_request_offline(env):
+        """When offline, collect_messages yields only the prepared request."""
+        args = make_args(
+            url='http://example.com',
+            method='GET',
+            offline=True,
+        )
+>       msgs = list(collect_messages(env, args))
+
+test_generated.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/client.py:60: in collect_messages
+    request_kwargs = make_request_kwargs(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = <Environment {'apply_warnings_filter': <function Environment.apply_warnings_filter at 0x7f8e30007b50>,
+ 'args': Namesp...IO name=6 mode='rb+' closefd=True>" mode='r+' encoding='utf-8'>,
+ 'stdout_encoding': 'utf-8',
+ 'stdout_isatty': False}>
+args = Namespace(session=None, session_read_only=None, headers={}, url='http://example.com', method='GET', data=None, json=No...fline=True, max_redirects=None, follow=False, all=False, max_headers=None, ssl_version=None, ciphers=None, verify=True)
+base_headers = None, request_body_read_callback = None
+
+    def make_request_kwargs(
+        env: Environment,
+        args: argparse.Namespace,
+        base_headers: HTTPHeadersDict = None,
+        request_body_read_callback=lambda chunk: chunk
+    ) -> dict:
+        """
+        Translate our `args` into `requests.Request` keyword arguments.
+    
+        """
+>       files = args.files
+E       AttributeError: 'Namespace' object has no attribute 'files'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/client.py:335: AttributeError
+___________ test_collect_messages_path_as_is_preserves_encoded_path ____________
+
+env = <Environment {'apply_warnings_filter': <function Environment.apply_warnings_filter at 0x7f8e30007b50>,
+ 'args': Namesp...IO name=6 mode='rb+' closefd=True>" mode='r+' encoding='utf-8'>,
+ 'stdout_encoding': 'utf-8',
+ 'stdout_isatty': False}>
+
+    def test_collect_messages_path_as_is_preserves_encoded_path(env):
+        """When path_as_is is set, the URL path is not modified."""
+        encoded_path = '/path%20with%20space'
+        args = make_args(
+            url=f'http://example.com{encoded_path}',
+            method='GET',
+            path_as_is=True,
+            offline=True,
+        )
+>       msgs = list(collect_messages(env, args))
+
+test_generated.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/client.py:60: in collect_messages
+    request_kwargs = make_request_kwargs(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = <Environment {'apply_warnings_filter': <function Environment.apply_warnings_filter at 0x7f8e30007b50>,
+ 'args': Namesp...IO name=6 mode='rb+' closefd=True>" mode='r+' encoding='utf-8'>,
+ 'stdout_encoding': 'utf-8',
+ 'stdout_isatty': False}>
+args = Namespace(session=None, session_read_only=None, headers={}, url='http://example.com/path%20with%20space', method='GET'...fline=True, max_redirects=None, follow=False, all=False, max_headers=None, ssl_version=None, ciphers=None, verify=True)
+base_headers = None, request_body_read_callback = None
+
+    def make_request_kwargs(
+        env: Environment,
+        args: argparse.Namespace,
+        base_headers: HTTPHeadersDict = None,
+        request_body_read_callback=lambda chunk: chunk
+    ) -> dict:
+        """
+        Translate our `args` into `requests.Request` keyword arguments.
+    
+        """
+>       files = args.files
+E       AttributeError: 'Namespace' object has no attribute 'files'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/client.py:335: AttributeError
+________________ test_collect_messages_compress_request_called _________________
+
+env = <Environment {'apply_warnings_filter': <function Environment.apply_warnings_filter at 0x7f8e30007b50>,
+ 'args': Namesp...IO name=6 mode='rb+' closefd=True>" mode='r+' encoding='utf-8'>,
+ 'stdout_encoding': 'utf-8',
+ 'stdout_isatty': False}>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8e2ffe9330>
+
+    def test_collect_messages_compress_request_called(env, monkeypatch):
+        """When compress is enabled and a body is present, compress_request is invoked."""
+        body = b'{"key":"value"}'
+        called = {'flag': False}
+        def fake_compress_request(request, always):
+            called['flag'] = True
+            # Ensure body is unchanged for this test
+            assert request.body == body
+        monkeypatch.setattr('httpie.uploads.compress_request', fake_compress_request)
+    
+        args = make_args(
+            url='http://example.com',
+            method='POST',
+            data=body,
+            compress=1,
+            offline=True,
+        )
+        # Provide a callback that simply records the body
+        def body_callback(b):
+            assert b == body
+>       msgs = list(collect_messages(env, args, request_body_read_callback=body_callback))
+
+test_generated.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/client.py:60: in collect_messages
+    request_kwargs = make_request_kwargs(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+env = <Environment {'apply_warnings_filter': <function Environment.apply_warnings_filter at 0x7f8e30007b50>,
+ 'args': Namesp...IO name=6 mode='rb+' closefd=True>" mode='r+' encoding='utf-8'>,
+ 'stdout_encoding': 'utf-8',
+ 'stdout_isatty': False}>
+args = Namespace(session=None, session_read_only=None, headers={}, url='http://example.com', method='POST', data=b'{"key":"va...fline=True, max_redirects=None, follow=False, all=False, max_headers=None, ssl_version=None, ciphers=None, verify=True)
+base_headers = None
+request_body_read_callback = <function test_collect_messages_compress_request_called.<locals>.body_callback at 0x7f8e2fde84c0>
+
+    def make_request_kwargs(
+        env: Environment,
+        args: argparse.Namespace,
+        base_headers: HTTPHeadersDict = None,
+        request_body_read_callback=lambda chunk: chunk
+    ) -> dict:
+        """
+        Translate our `args` into `requests.Request` keyword arguments.
+    
+        """
+>       files = args.files
+E       AttributeError: 'Namespace' object has no attribute 'files'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/client.py:335: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_collect_messages_yields_prepared_request_offline
+FAILED test_generated.py::test_collect_messages_path_as_is_preserves_encoded_path
+FAILED test_generated.py::test_collect_messages_compress_request_called - Att...
+3 failed in 0.56s

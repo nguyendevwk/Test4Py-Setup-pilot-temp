@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-34d761a7-4936-450a-aba0-46b314527137",
+  "object": "chat.completion",
+  "created": 1795079410,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport importlib\nimport types\nimport os\nfrom pathlib import Path\nimport pytest\n\n# Import the target function after setting up a controlled environment\ndef _reload_get_rules_import_paths(user_dir, contrib_dirs):\n    # Temporarily modify sys.path and settings.user_dir\n    original_sys_path = sys.path.copy()\n    original_user_dir = None\n    try:\n        # Ensure the module is reloaded with the new settings\n        from thefuck import conf\n        original_user_dir = conf.settings.user_dir\n        conf.settings.user_dir = Path(user_dir)\n\n        # Insert contrib directories into sys.path\n        sys.path = [str(user_dir)] + [str(d) for d in contrib_dirs] + sys.path\n\n        # Reload the module to pick up changes\n        import thefuck.corrector\n        importlib.reload(thefuck.corrector)\n        return thefuck.corrector.get_rules_import_paths\n    finally:\n        sys.path = original_sys_path\n        if original_user_dir is not None:\n            conf.settings.user_dir = original_user_dir\n\n@pytest.fixture\ndef temp_dirs(tmp_path):\n    # Create a user rules directory\n    user_rules = tmp_path / \"user_rules\"\n    user_rules.mkdir()\n    # Create a contrib package with rules\n    contrib_pkg = tmp_path / \"thefuck_contrib_example\"\n    contrib_pkg.mkdir()\n    (contrib_pkg / \"rules\").mkdir()\n    # Create a contrib package without rules\n    contrib_pkg_no_rules = tmp_path / \"thefuck_contrib_norules\"\n    contrib_pkg_no_rules.mkdir()\n    return user_rules, contrib_pkg, contrib_pkg_no_rules\n\ndef test_bundled_and_user_paths(temp_dirs):\n    user_rules, _, _ = temp_dirs\n    get_paths = _reload_get_rules_import_paths(user_rules, [])\n    paths = list(get_paths())\n    # The first path should be the bundled rules directory\n    bundled = Path(__file__).parent.parent / \"rules\"\n    assert bundled in paths\n    # The second path should be the user rules directory\n    assert user_rules in paths\n    # No third‑party paths should be present\n    assert all(p.parent.name != \"thefuck_contrib_example\" for p in paths)\n\ndef test_third_party_contrib(temp_dirs):\n    user_rules, contrib_pkg, _ = temp_dirs\n    get_paths = _reload_get_rules_import_paths(user_rules, [contrib_pkg])\n    paths = list(get_paths())\n    # The contrib rules directory should be included\n    assert contrib_pkg / \"rules\" in paths\n    # Ensure the bundled and user paths are still present\n    bundled = Path(__file__).parent.parent / \"rules\"\n    assert bundled in paths\n    assert user_rules in paths\n\ndef test_no_contrib_rules(temp_dirs):\n    user_rules, _, contrib_pkg_no_rules = temp_dirs\n    get_paths = _reload_get_rules_import_paths(user_rules, [contrib_pkg_no_rules])\n    paths = list(get_paths())\n    # The contrib package without a rules directory should not be yielded\n    assert not any(p.parent.name == \"thefuck_contrib_norules\" for p in paths)\n    # Bundled and user paths should still be present\n    bundled = Path(__file__).parent.parent / \"rules\"\n    assert bundled in paths\n    assert user_rules in paths\n```",
+        "reasoning": "We need to test get_rules_import_paths. It yields Path objects. We can test that it includes bundled rules path, user_dir path, and third-party. We can simulate sys.path with a temp dir containing a contrib module. Use tmp_path. Ensure settings.user_dir is accessible; settings likely from .conf. We can monkeypatch settings.user_dir to tmp_path. Also monkeypatch sys.path. Use importlib.reload. Write three test functions: test_bundled_and_user_paths, test_third_party_contrib, test_no_contrib. Use pytest.raises? Not needed. Use precise assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054453875,
+    "prompt_tokens": 394,
+    "prompt_time": 0.021034714,
+    "completion_tokens": 822,
+    "completion_time": 0.881889839,
+    "total_tokens": 1216,
+    "total_time": 0.902924553,
+    "completion_tokens_details": {
+      "reasoning_tokens": 122
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sh442qeh5sntppq89sbhwh",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport importlib\nimport types\nimport os\nfrom pathlib import Path\nimport pytest\n\n# Import the target function after setting up a controlled environment\ndef _reload_get_rules_import_paths(user_dir, contrib_dirs):\n    # Temporarily modify sys.path and settings.user_dir\n    original_sys_path = sys.path.copy()\n    original_user_dir = None\n    try:\n        # Ensure the module is reloaded with the new settings\n        from thefuck import conf\n        original_user_dir = conf.settings.user_dir\n        conf.settings.user_dir = Path(user_dir)\n\n        # Insert contrib directories into sys.path\n        sys.path = [str(user_dir)] + [str(d) for d in contrib_dirs] + sys.path\n\n        # Reload the module to pick up changes\n        import thefuck.corrector\n        importlib.reload(thefuck.corrector)\n        return thefuck.corrector.get_rules_import_paths\n    finally:\n        sys.path = original_sys_path\n        if original_user_dir is not None:\n            conf.settings.user_dir = original_user_dir\n\n@pytest.fixture\ndef temp_dirs(tmp_path):\n    # Create a user rules directory\n    user_rules = tmp_path / \"user_rules\"\n    user_rules.mkdir()\n    # Create a contrib package with rules\n    contrib_pkg = tmp_path / \"thefuck_contrib_example\"\n    contrib_pkg.mkdir()\n    (contrib_pkg / \"rules\").mkdir()\n    # Create a contrib package without rules\n    contrib_pkg_no_rules = tmp_path / \"thefuck_contrib_norules\"\n    contrib_pkg_no_rules.mkdir()\n    return user_rules, contrib_pkg, contrib_pkg_no_rules\n\ndef test_bundled_and_user_paths(temp_dirs):\n    user_rules, _, _ = temp_dirs\n    get_paths = _reload_get_rules_import_paths(user_rules, [])\n    paths = list(get_paths())\n    # The first path should be the bundled rules directory\n    bundled = Path(__file__).parent.parent / \"rules\"\n    assert bundled in paths\n    # The second path should be the user rules directory\n    assert user_rules in paths\n    # No third‑party paths should be present\n    assert all(p.parent.name != \"thefuck_contrib_example\" for p in paths)\n\ndef test_third_party_contrib(temp_dirs):\n    user_rules, contrib_pkg, _ = temp_dirs\n    get_paths = _reload_get_rules_import_paths(user_rules, [contrib_pkg])\n    paths = list(get_paths())\n    # The contrib rules directory should be included\n    assert contrib_pkg / \"rules\" in paths\n    # Ensure the bundled and user paths are still present\n    bundled = Path(__file__).parent.parent / \"rules\"\n    assert bundled in paths\n    assert user_rules in paths\n\ndef test_no_contrib_rules(temp_dirs):\n    user_rules, _, contrib_pkg_no_rules = temp_dirs\n    get_paths = _reload_get_rules_import_paths(user_rules, [contrib_pkg_no_rules])\n    paths = list(get_paths())\n    # The contrib package without a rules directory should not be yielded\n    assert not any(p.parent.name == \"thefuck_contrib_norules\" for p in paths)\n    # Bundled and user paths should still be present\n    bundled = Path(__file__).parent.parent / \"rules\"\n    assert bundled in paths\n    assert user_rules in paths\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "99e83d1ac99243f5b0f220736949d106",
+  "_api_plus_pacing_seconds": 1.8287685309769586
+}

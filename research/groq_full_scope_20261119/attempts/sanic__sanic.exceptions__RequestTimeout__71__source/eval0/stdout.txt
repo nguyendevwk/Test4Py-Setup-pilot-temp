@@ -1,0 +1,35 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+___________________________ test_default_properties ____________________________
+
+    def test_default_properties():
+        """RequestTimeout should have default status code and quiet flag."""
+        exc = RequestTimeout()
+        assert exc.status_code == 408
+        assert exc.quiet is True
+        # The default message should be the status description
+>       assert exc.message == STATUS_CODES[408]
+E       AssertionError: assert 'Request Timeout' == b'Request Timeout'
+E        +  where 'Request Timeout' = RequestTimeout('Request Timeout').message
+
+test_generated.py:11: AssertionError
+________________________ test_error_in_production_mode _________________________
+
+    def test_error_in_production_mode():
+        """When in production mode, extra context should not be exposed."""
+        exc = RequestTimeout(message="prod message", extra={"secret": "data"})
+        # In production, the extra dict should not be part of the public data
+        # The HTTPException base class exposes a `data` attribute for public payload
+        # which should not contain the 'extra' key.
+        public_data = getattr(exc, "data", {})
+        assert "secret" not in public_data
+        # However, the internal `_extra` attribute should still hold the data
+>       assert getattr(exc, "_extra", None) == {"secret": "data"}
+E       AssertionError: assert None == {'secret': 'data'}
+E        +  where None = getattr(RequestTimeout('prod message'), '_extra', None)
+
+test_generated.py:32: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_default_properties - AssertionError: assert 'R...
+FAILED test_generated.py::test_error_in_production_mode - AssertionError: ass...
+2 failed, 1 passed in 0.33s

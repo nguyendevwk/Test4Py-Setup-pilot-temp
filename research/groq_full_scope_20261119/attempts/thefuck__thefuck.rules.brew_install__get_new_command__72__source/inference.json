@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-496120d9-a378-42b3-800c-b4de9f7ae0c3",
+  "object": "chat.completion",
+  "created": 1795077657,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport re\nimport pytest\nfrom thefuck.rules.brew_install import get_new_command, _get_similar_formula\nfrom thefuck.specific.brew import get_brew_path_prefix, brew_available\n\nclass DummyCommand:\n    def __init__(self, script, output):\n        self.script = script\n        self.output = output\n\ndef _setup_brew_prefix(tmp_path, formulas):\n    \"\"\"Create a fake brew prefix with given formula names.\"\"\"\n    brew_prefix = tmp_path / \"Cellar\"\n    brew_prefix.mkdir(parents=True)\n    for name in formulas:\n        (brew_prefix / f\"{name}.rb\").write_text(\"# dummy formula\")\n    os.environ[\"BREW_PREFIX\"] = str(tmp_path)\n    return brew_prefix\n\ndef test_get_new_command_replaces_formula(tmp_path):\n    # Arrange: fake brew prefix with one available formula \"bar\"\n    _setup_brew_prefix(tmp_path, [\"bar\"])\n    cmd = DummyCommand(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    # Act\n    new_cmd = get_new_command(cmd)\n    # Assert: \"foo\" replaced by \"bar\"\n    assert new_cmd == \"brew install bar\"\n\ndef test_get_new_command_raises_on_no_match(tmp_path):\n    # Arrange: fake brew prefix with no formulas\n    _setup_brew_prefix(tmp_path, [])\n    cmd = DummyCommand(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    # Act & Assert: IndexError from re.findall or ValueError from _get_similar_formula\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n\ndef test_get_new_command_selects_closest_formula(tmp_path):\n    # Arrange: fake brew prefix with two formulas \"bar\" and \"baz\"\n    _setup_brew_prefix(tmp_path, [\"bar\", \"baz\"])\n    cmd = DummyCommand(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    # Act\n    new_cmd = get_new_command(cmd)\n    # Assert: \"foo\" replaced by the closest formula, which should be \"bar\"\n    assert new_cmd == \"brew install bar\"\n```",
+        "reasoning": "We need to test get_new_command. We need to simulate command object with script and output. Use tmp_path to create brew formula? But we can mock brew_available? But cannot mock target. We can create a fake command with output containing error. _get_similar_formula is not defined; likely in module. Let's inspect. But we can't. Assume _get_similar_formula uses get_closest. We can create a command where output has \"Error: No available formula for foo\". Then get_new_command should replace foo with similar formula. We need to know similar formula. get_closest likely finds closest match among available formulas. brew_available returns list of available formulas. We can create a fake brew_available by creating a temporary brew path? But we cannot modify product code. We can create a temporary brew directory with a formula file named \"bar.rb\" to simulate available formula \"bar\". brew_available likely reads from brew path. We can set environment variable BREW_PREFIX? get_brew_path_prefix uses env. We can set BREW_PREFIX to tmp_path. Then brew_available will list formulas. Then get_new_command should replace foo with bar. We'll test that.\n\nAlso test boundary: if output has no match? But function will error. We can test error behavior: command.output missing pattern should raise IndexError. Use pytest.raises.\n\nThird test: normal behavior with multiple formulas? But we have only one.\n\nLet's implement three tests: test_replacement, test_no_match_raises, test_multiple_possible? maybe test that if multiple similar formulas, choose closest. We can create two formulas: \"bar\" and \"baz\". For foo, closest maybe bar. We'll test that.\n\nImplement command class simple with script and output attributes. Use tmp_path to create brew prefix. Set env variable. Ensure brew_available uses that. Let's code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053381127,
+    "prompt_tokens": 313,
+    "prompt_time": 0.019457513,
+    "completion_tokens": 847,
+    "completion_time": 0.993150246,
+    "total_tokens": 1160,
+    "total_time": 1.012607759,
+    "completion_tokens_details": {
+      "reasoning_tokens": 372
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfem49ez1bzxp4gmza7zad",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport re\nimport pytest\nfrom thefuck.rules.brew_install import get_new_command, _get_similar_formula\nfrom thefuck.specific.brew import get_brew_path_prefix, brew_available\n\nclass DummyCommand:\n    def __init__(self, script, output):\n        self.script = script\n        self.output = output\n\ndef _setup_brew_prefix(tmp_path, formulas):\n    \"\"\"Create a fake brew prefix with given formula names.\"\"\"\n    brew_prefix = tmp_path / \"Cellar\"\n    brew_prefix.mkdir(parents=True)\n    for name in formulas:\n        (brew_prefix / f\"{name}.rb\").write_text(\"# dummy formula\")\n    os.environ[\"BREW_PREFIX\"] = str(tmp_path)\n    return brew_prefix\n\ndef test_get_new_command_replaces_formula(tmp_path):\n    # Arrange: fake brew prefix with one available formula \"bar\"\n    _setup_brew_prefix(tmp_path, [\"bar\"])\n    cmd = DummyCommand(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    # Act\n    new_cmd = get_new_command(cmd)\n    # Assert: \"foo\" replaced by \"bar\"\n    assert new_cmd == \"brew install bar\"\n\ndef test_get_new_command_raises_on_no_match(tmp_path):\n    # Arrange: fake brew prefix with no formulas\n    _setup_brew_prefix(tmp_path, [])\n    cmd = DummyCommand(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    # Act & Assert: IndexError from re.findall or ValueError from _get_similar_formula\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n\ndef test_get_new_command_selects_closest_formula(tmp_path):\n    # Arrange: fake brew prefix with two formulas \"bar\" and \"baz\"\n    _setup_brew_prefix(tmp_path, [\"bar\", \"baz\"])\n    cmd = DummyCommand(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    # Act\n    new_cmd = get_new_command(cmd)\n    # Assert: \"foo\" replaced by the closest formula, which should be \"bar\"\n    assert new_cmd == \"brew install bar\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3915279030334204
+}

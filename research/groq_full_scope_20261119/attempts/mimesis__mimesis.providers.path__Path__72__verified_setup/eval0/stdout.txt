@@ -1,0 +1,133 @@
+.FFF.FF                                                                  [100%]
+=================================== FAILURES ===================================
+________________________ test_path_basic[darwin-/Users] ________________________
+
+platform = 'darwin', expected_home_prefix = '/Users'
+
+    @pytest.mark.parametrize("platform,expected_home_prefix", [
+        ("linux", "/home"),
+        ("darwin", "/Users"),
+        ("win32", "C:\\Users"),
+        ("win64", "C:\\Users"),
+        ("freebsd", "/home"),
+    ])
+    def test_path_basic(platform, expected_home_prefix):
+        """Verify that root, home, and user paths are constructed correctly for various platforms."""
+        provider = Path(platform=platform)
+        _seed_provider(provider, seed=42)
+    
+        # Root should be the parent directory of home
+        root = provider.root()
+        home = provider.home()
+        assert pathlib.PurePath(home).parent == pathlib.PurePath(root)
+    
+        # Home should start with the expected prefix
+>       assert home.startswith(expected_home_prefix)
+E       AssertionError: assert False
+E        +  where False = <built-in method startswith of str object at 0x7f2eae0ddbb0>('/Users')
+E        +    where <built-in method startswith of str object at 0x7f2eae0ddbb0> = '/home'.startswith
+
+test_generated.py:28: AssertionError
+_______________________ test_path_basic[win32-C:\\Users] _______________________
+
+platform = 'win32', expected_home_prefix = 'C:\\Users'
+
+    @pytest.mark.parametrize("platform,expected_home_prefix", [
+        ("linux", "/home"),
+        ("darwin", "/Users"),
+        ("win32", "C:\\Users"),
+        ("win64", "C:\\Users"),
+        ("freebsd", "/home"),
+    ])
+    def test_path_basic(platform, expected_home_prefix):
+        """Verify that root, home, and user paths are constructed correctly for various platforms."""
+        provider = Path(platform=platform)
+        _seed_provider(provider, seed=42)
+    
+        # Root should be the parent directory of home
+        root = provider.root()
+        home = provider.home()
+>       assert pathlib.PurePath(home).parent == pathlib.PurePath(root)
+E       AssertionError: assert PurePosixPath('.') == PurePosixPath('C:\\')
+E        +  where PurePosixPath('.') = PurePosixPath('C:\\Users').parent
+E        +    where PurePosixPath('C:\\Users') = <class 'pathlib.PurePath'>('C:\\Users')
+E        +      where <class 'pathlib.PurePath'> = pathlib.PurePath
+E        +  and   PurePosixPath('C:\\') = <class 'pathlib.PurePath'>('C:\\')
+E        +    where <class 'pathlib.PurePath'> = pathlib.PurePath
+
+test_generated.py:25: AssertionError
+_______________________ test_path_basic[win64-C:\\Users] _______________________
+
+platform = 'win64', expected_home_prefix = 'C:\\Users'
+
+    @pytest.mark.parametrize("platform,expected_home_prefix", [
+        ("linux", "/home"),
+        ("darwin", "/Users"),
+        ("win32", "C:\\Users"),
+        ("win64", "C:\\Users"),
+        ("freebsd", "/home"),
+    ])
+    def test_path_basic(platform, expected_home_prefix):
+        """Verify that root, home, and user paths are constructed correctly for various platforms."""
+        provider = Path(platform=platform)
+        _seed_provider(provider, seed=42)
+    
+        # Root should be the parent directory of home
+        root = provider.root()
+        home = provider.home()
+>       assert pathlib.PurePath(home).parent == pathlib.PurePath(root)
+E       AssertionError: assert PurePosixPath('.') == PurePosixPath('C:\\')
+E        +  where PurePosixPath('.') = PurePosixPath('C:\\Users').parent
+E        +    where PurePosixPath('C:\\Users') = <class 'pathlib.PurePath'>('C:\\Users')
+E        +      where <class 'pathlib.PurePath'> = pathlib.PurePath
+E        +  and   PurePosixPath('C:\\') = <class 'pathlib.PurePath'>('C:\\')
+E        +    where <class 'pathlib.PurePath'> = pathlib.PurePath
+
+test_generated.py:25: AssertionError
+___________________ test_users_folder_and_dev_dir_structure ____________________
+
+    def test_users_folder_and_dev_dir_structure():
+        """Ensure that users_folder and dev_dir produce nested paths under the user's home."""
+        provider = Path(platform="linux")
+        _seed_provider(provider, seed=123)
+    
+        user_path = provider.user()
+        users_folder = provider.users_folder()
+        dev_dir = provider.dev_dir()
+    
+        # users_folder should be user_path / folder
+        assert pathlib.PurePath(users_folder).parts[:2] == pathlib.PurePath(user_path).parts[:2]
+        # dev_dir should be user_path / (Development|Dev) / language
+        dev_parts = pathlib.PurePath(dev_dir).parts
+        assert dev_parts[0] == pathlib.PurePath(user_path).parts[0]
+        assert dev_parts[1] == pathlib.PurePath(user_path).parts[1]
+>       assert dev_parts[2] in ("Development", "Dev")
+E       AssertionError: assert 'protected' in ('Development', 'Dev')
+
+test_generated.py:58: AssertionError
+_______________ test_project_dir_includes_dev_and_project_names ________________
+
+    def test_project_dir_includes_dev_and_project_names():
+        """Check that project_dir contains the dev directory and a project name."""
+        provider = Path(platform="darwin")
+        _seed_provider(provider, seed=7)
+    
+        dev_dir = provider.dev_dir()
+        project_dir = provider.project_dir()
+    
+        # project_dir should start with dev_dir
+>       assert pathlib.PurePath(project_dir).is_relative_to(dev_dir)
+E       AssertionError: assert False
+E        +  where False = is_relative_to('/home/merry/Development/GNU Octave')
+E        +    where is_relative_to = PurePosixPath('/home/beaches/Development/Scala/euphemism').is_relative_to
+E        +      where PurePosixPath('/home/beaches/Development/Scala/euphemism') = <class 'pathlib.PurePath'>('/home/beaches/Development/Scala/euphemism')
+E        +        where <class 'pathlib.PurePath'> = pathlib.PurePath
+
+test_generated.py:71: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_path_basic[darwin-/Users] - AssertionError: as...
+FAILED test_generated.py::test_path_basic[win32-C:\\Users] - AssertionError: ...
+FAILED test_generated.py::test_path_basic[win64-C:\\Users] - AssertionError: ...
+FAILED test_generated.py::test_users_folder_and_dev_dir_structure - Assertion...
+FAILED test_generated.py::test_project_dir_includes_dev_and_project_names - A...
+5 failed, 2 passed in 0.24s

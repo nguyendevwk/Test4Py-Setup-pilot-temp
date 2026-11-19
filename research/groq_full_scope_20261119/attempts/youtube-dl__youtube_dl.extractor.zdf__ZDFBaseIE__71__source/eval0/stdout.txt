@@ -1,0 +1,91 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_extract_format_m3u8_and_f4m _______________________
+
+    def test_extract_format_m3u8_and_f4m():
+        ie = DummyZDFIE()
+        formats = []
+        format_urls = set()
+        # M3U8 case
+        meta_m3u8 = {"url": "http://example.com/stream.m3u8", "mimeType": "application/x-mpegURL",
+                     "type": "video", "quality": "high", "mimeCodec": "avc1.64001F"}
+>       ie._extract_format("vid123", formats, format_urls, meta_m3u8)
+
+test_generated.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/zdf.py:60: in _extract_format
+    formats.extend(self._extract_m3u8_formats(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:1639: in _extract_m3u8_formats
+    res = self._download_webpage_handle(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:667: in _download_webpage_handle
+    urlh = self._request_webpage(url_or_request, video_id, note, errnote, fatal, data=data, headers=headers, query=query, expected_status=expected_status)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:611: in _request_webpage
+    self.to_screen('%s: %s' % (video_id, note))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyZDFIE object at 0x7fe6706c8220>
+msg = 'vid123: Downloading m3u8 information'
+
+    def to_screen(self, msg):
+        """Print msg to screen, prefixing it with '[ie_name]'"""
+>       self._downloader.to_screen('[%s] %s' % (self.IE_NAME, msg))
+E       AttributeError: 'NoneType' object has no attribute 'to_screen'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:921: AttributeError
+________________________ test_extract_ptmd_integration _________________________
+
+    def test_extract_ptmd_integration():
+        ie = DummyZDFIE()
+        # Prepare a fake ptmd URL and override _call_api to return a custom structure
+        def fake_call_api(url, video_id, item, api_token=None, referrer=None):
+            return {
+                "basename": "test_video",
+                "priorityList": [
+                    {
+                        "formitaeten": [
+                            {
+                                "type": "audio",
+                                "mimeType": "audio/mp4",
+                                "qualities": [
+                                    {
+                                        "quality": "low",
+                                        "audio": {
+                                            "tracks": [
+                                                {"uri": "http://example.com/audio_low.mp3", "language": "deu"},
+                                                {"uri": "http://example.com/audio_low2.mp3", "language": "eng"}
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "quality": "high",
+                                        "audio": {
+                                            "tracks": [
+                                                {"uri": "http://example.com/audio_high.mp3", "language": "deu"}
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "attributes": {"duration": {"value": 60000}},
+                "captions": [
+                    {"uri": "http://example.com/sub_de.vtt", "language": "deu"}
+                ]
+            }
+        ie._call_api = fake_call_api
+        result = ie._extract_ptmd("http://example.com/ptmd", "vid123", None, None)
+        assert result["id"] == "test_video"
+        assert result["duration"] == 60.0  # 60000 ms -> 60 s
+>       assert result["extractor_key"] == ie.ie_key()
+E       AssertionError: assert 'ZDF' == 'DummyZDF'
+E         
+E         - DummyZDF
+E         + ZDF
+
+test_generated.py:108: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extract_format_m3u8_and_f4m - AttributeError: ...
+FAILED test_generated.py::test_extract_ptmd_integration - AssertionError: ass...
+2 failed, 1 passed in 0.85s

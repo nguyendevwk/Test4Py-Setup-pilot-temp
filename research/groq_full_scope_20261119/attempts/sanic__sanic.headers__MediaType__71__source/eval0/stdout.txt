@@ -1,0 +1,44 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_match_with_exact_and_parameters _____________________
+
+    def test_match_with_exact_and_parameters():
+        """Exact match succeeds and parameters must match."""
+        mt = MediaType("text", "html", charset="utf-8", q="0.8")
+        # Exact string with same parameters
+        assert mt.match("text/html; charset=utf-8; q=0.8") is mt
+        # Same parameters but different order
+        assert mt.match("text/html; q=0.8; charset=utf-8") is mt
+        # Missing a parameter -> no match
+>       assert mt.match("text/html; charset=utf-8") is None
+E       AssertionError: assert text/html;charset=utf-8;q=0.8 is None
+E        +  where text/html;charset=utf-8;q=0.8 = match('text/html; charset=utf-8')
+E        +    where match = text/html;charset=utf-8;q=0.8.match
+
+test_generated.py:13: AssertionError
+_____________________ test_parse_invalid_and_missing_slash _____________________
+
+    def test_parse_invalid_and_missing_slash():
+        """_parse returns None or raises ValueError for malformed inputs."""
+        # No slash -> None
+        assert MediaType._parse("plain") is None
+        # Empty type or subtype -> ValueError
+        with pytest.raises(ValueError, match="Invalid media type"):
+            MediaType._parse("/html")
+        with pytest.raises(ValueError, match="Invalid media type"):
+            MediaType._parse("text/")
+        # Leading/trailing spaces are stripped
+        mt = MediaType._parse("  text / html ; charset = utf-8 ")
+        assert isinstance(mt, MediaType)
+>       assert mt.type == "text"
+E       AssertionError: assert 'text ' == 'text'
+E         
+E         - text
+E         + text 
+E         ?     +
+
+test_generated.py:43: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_match_with_exact_and_parameters - AssertionErr...
+FAILED test_generated.py::test_parse_invalid_and_missing_slash - AssertionErr...
+2 failed, 1 passed in 0.37s

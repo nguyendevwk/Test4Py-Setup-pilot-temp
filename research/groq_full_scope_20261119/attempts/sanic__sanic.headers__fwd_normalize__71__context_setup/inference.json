@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a4cbc659-3f77-425b-829f-f32ea5164c41",
+  "object": "chat.completion",
+  "created": 1795079333,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import fwd_normalize, fwd_normalize_address\n\ndef test_fwd_normalize_basic_types():\n    # Basic key/value pairs with different expected conversions\n    input_iter = [\n        (\"by\", \"192.0.2.1\"),\n        (\"for\", \"2001:db8::1\"),\n        (\"host\", \"Example.COM\"),\n        (\"proto\", \"HTTPS\"),\n        (\"port\", \"443\"),\n        (\"path\", \"/foo%20bar\"),\n        (\"custom\", \"value\"),\n    ]\n    result = fwd_normalize(input_iter)\n    assert result == {\n        \"by\": \"192.0.2.1\",\n        \"for\": \"[2001:db8::1]\",          # IPv6 bracketed and lowercased\n        \"host\": \"example.com\",\n        \"proto\": \"https\",\n        \"port\": 443,\n        \"path\": \"/foo bar\",\n        \"custom\": \"value\",\n    }\n\ndef test_fwd_normalize_address_edge_cases():\n    # Address normalization edge cases: unknown, obfuscated, IPv6\n    assert fwd_normalize_address(\"unknown\") is None  # ValueError swallowed in fwd_normalize\n    with pytest.raises(ValueError):\n        fwd_normalize_address(\"unknown\")  # direct call should raise\n\n    # Obfuscated string starting with underscore should remain unchanged\n    assert fwd_normalize_address(\"_obf\") == \"_obf\"\n\n    # IPv6 address should be bracketed and lowercased\n    ipv6 = \"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"\n    assert fwd_normalize_address(ipv6) == f\"[{ipv6.lower()}]\"\n\ndef test_fwd_normalize_error_handling():\n    # Invalid integer for port and malformed IPv6 should be ignored\n    input_iter = [\n        (\"port\", \"not_an_int\"),\n        (\"by\", \"invalid_ipv6\"),  # not matching IPv6 regex, should be lowercased\n        (\"for\", \"unknown\"),      # should be omitted\n    ]\n    result = fwd_normalize(input_iter)\n    assert result == {\n        \"by\": \"invalid_ipv6\",\n    }\n    # Ensure that the 'for' key is omitted due to ValueError\n    assert \"for\" not in result\n```",
+        "reasoning": "Need tests for fwd_normalize. Three functions. Test normal behavior, boundary (unknown, obfuscated, ipv6), error handling. Use tmp_path? not needed. Just test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005354146,
+    "prompt_tokens": 603,
+    "prompt_time": 0.032217422,
+    "completion_tokens": 548,
+    "completion_time": 0.580257094,
+    "total_tokens": 1151,
+    "total_time": 0.612474516,
+    "completion_tokens_details": {
+      "reasoning_tokens": 39
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh1s06e7tbfsgjrg0sksrc",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import fwd_normalize, fwd_normalize_address\n\ndef test_fwd_normalize_basic_types():\n    # Basic key/value pairs with different expected conversions\n    input_iter = [\n        (\"by\", \"192.0.2.1\"),\n        (\"for\", \"2001:db8::1\"),\n        (\"host\", \"Example.COM\"),\n        (\"proto\", \"HTTPS\"),\n        (\"port\", \"443\"),\n        (\"path\", \"/foo%20bar\"),\n        (\"custom\", \"value\"),\n    ]\n    result = fwd_normalize(input_iter)\n    assert result == {\n        \"by\": \"192.0.2.1\",\n        \"for\": \"[2001:db8::1]\",          # IPv6 bracketed and lowercased\n        \"host\": \"example.com\",\n        \"proto\": \"https\",\n        \"port\": 443,\n        \"path\": \"/foo bar\",\n        \"custom\": \"value\",\n    }\n\ndef test_fwd_normalize_address_edge_cases():\n    # Address normalization edge cases: unknown, obfuscated, IPv6\n    assert fwd_normalize_address(\"unknown\") is None  # ValueError swallowed in fwd_normalize\n    with pytest.raises(ValueError):\n        fwd_normalize_address(\"unknown\")  # direct call should raise\n\n    # Obfuscated string starting with underscore should remain unchanged\n    assert fwd_normalize_address(\"_obf\") == \"_obf\"\n\n    # IPv6 address should be bracketed and lowercased\n    ipv6 = \"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"\n    assert fwd_normalize_address(ipv6) == f\"[{ipv6.lower()}]\"\n\ndef test_fwd_normalize_error_handling():\n    # Invalid integer for port and malformed IPv6 should be ignored\n    input_iter = [\n        (\"port\", \"not_an_int\"),\n        (\"by\", \"invalid_ipv6\"),  # not matching IPv6 regex, should be lowercased\n        (\"for\", \"unknown\"),      # should be omitted\n    ]\n    result = fwd_normalize(input_iter)\n    assert result == {\n        \"by\": \"invalid_ipv6\",\n    }\n    # Ensure that the 'for' key is omitted due to ValueError\n    assert \"for\" not in result\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0326756609720178
+}

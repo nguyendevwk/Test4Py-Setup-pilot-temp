@@ -1,0 +1,58 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_named_session_path_and_id ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.sessions__get_httpie_session__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_named_session_path_and_id0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff109a4dd80>
+
+    def test_named_session_path_and_id(tmp_path, monkeypatch):
+        # Patch Session to DummySession
+        monkeypatch.setattr(importlib.import_module('httpie.sessions'), 'Session', DummySession)
+    
+        env = DummyEnvironment()
+        config_dir = tmp_path
+        session_name = "my_session"
+        host = "api.test.com:8080"
+        url = "http://api.test.com/resource"
+    
+        session = get_httpie_session(env, config_dir, session_name, host, url)
+    
+        # Path should be inside config_dir with hostname-based directory
+        expected_dirname = f"{host.split(':')[0]}-{session_name}"
+        expected_path = config_dir / expected_dirname
+>       assert session.path == expected_path
+E       AssertionError: assert PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.sessions__ge...source/eval0/tmp/pytest-of-heurix/pytest-0/test_named_session_path_and_id0/sessions/api.test.com_8080/my_session.json') == PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.sessions__get_httpie_session__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_named_session_path_and_id0/api.test.com-my_session')
+E        +  where PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.sessions__ge...source/eval0/tmp/pytest-of-heurix/pytest-0/test_named_session_path_and_id0/sessions/api.test.com_8080/my_session.json') = <test_generated.DummySession object at 0x7ff109a4dd50>.path
+
+test_generated.py:70: AssertionError
+___________________ test_missing_host_fallback_to_localhost ____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.sessions__get_httpie_session__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_missing_host_fallback_to_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff109bed330>
+
+    def test_missing_host_fallback_to_localhost(tmp_path, monkeypatch):
+        # Patch Session to DummySession
+        monkeypatch.setattr(importlib.import_module('httpie.sessions'), 'Session', DummySession)
+    
+        env = DummyEnvironment()
+        config_dir = tmp_path
+        session_name = "anon"
+        host = None
+        # URL without hostname (e.g., unix socket)
+        url = "unix:///tmp/socket"
+    
+        session = get_httpie_session(env, config_dir, session_name, host, url)
+    
+        # Since url_as_host would return None, fallback to 'localhost'
+        assert session.bound_host == "localhost"
+        # Path should be expanded user path for anonymous session
+        expected_path = os.path.expanduser(session_name)
+>       assert session.path == expected_path
+E       AssertionError: assert PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.sessions__ge..._session__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_missing_host_fallback_to_0/sessions/localhost/anon.json') == 'anon'
+E        +  where PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.sessions__ge..._session__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_missing_host_fallback_to_0/sessions/localhost/anon.json') = <test_generated.DummySession object at 0x7ff109bed480>.path
+
+test_generated.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_named_session_path_and_id - AssertionError: as...
+FAILED test_generated.py::test_missing_host_fallback_to_localhost - Assertion...
+2 failed, 1 passed in 0.48s

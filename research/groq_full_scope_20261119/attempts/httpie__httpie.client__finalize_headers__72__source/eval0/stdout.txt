@@ -1,0 +1,49 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_finalize_headers_encodes_and_strips ___________________
+
+    def test_finalize_headers_encodes_and_strips():
+        """Headers with leading/trailing whitespace and string values are stripped and encoded."""
+        raw = HTTPHeadersDict()
+        raw.add("X-Test-Header", "  value with spaces  ")
+        raw.add("X-Empty", "   ")
+        raw.add("X-Number", 123)  # non-string, should stay unchanged
+    
+>       final = finalize_headers(raw)
+
+test_generated.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+headers = <HTTPHeadersDict('X-Test-Header': '  value with spaces  ', 'X-Empty': '   ', 'X-Number': 123)>
+
+    def finalize_headers(headers: HTTPHeadersDict) -> HTTPHeadersDict:
+        final_headers = HTTPHeadersDict()
+        for name, value in headers.items():
+            if value is not None:
+                # “leading or trailing LWS MAY be removed without
+                # changing the semantics of the field value”
+                # <https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html>
+                # Also, requests raises `InvalidHeader` for leading spaces.
+>               value = value.strip()
+E               AttributeError: 'int' object has no attribute 'strip'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/client.py:200: AttributeError
+_______________ test_finalize_headers_non_skippable_none_ignored _______________
+
+    def test_finalize_headers_non_skippable_none_ignored():
+        """Headers set to None that are not skippable are omitted from the result."""
+        raw = HTTPHeadersDict()
+        raw.add("X-Non-Skippable", None)
+        raw.add("Content-Type", "text/plain")
+    
+        final = finalize_headers(raw)
+    
+        # Non-skippable None header should not appear
+>       assert "X-Non-Skippable" not in final
+E       AssertionError: assert 'X-Non-Skippable' not in <HTTPHeadersDict('X-Non-Skippable': None, 'Content-Type': b'text/plain')>
+
+test_generated.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_finalize_headers_encodes_and_strips - Attribut...
+FAILED test_generated.py::test_finalize_headers_non_skippable_none_ignored - ...
+2 failed, 1 passed in 0.81s

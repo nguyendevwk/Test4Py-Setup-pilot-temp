@@ -1,0 +1,48 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________ test_get_converter_returns_converter_for_supported_mime ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fef1b989d50>
+
+    def test_get_converter_returns_converter_for_supported_mime(monkeypatch):
+        # Arrange: monkeypatch the plugin manager and is_valid_mime
+        monkeypatch.setattr(plugin_manager, "get_converters", lambda: [DummyConverter])
+>       monkeypatch.setattr(Conversion, "is_valid_mime", lambda mime: True)
+E       AttributeError: <class 'httpie.output.processing.Conversion'> has no attribute 'is_valid_mime'
+
+test_generated.py:23: AttributeError
+_____________ test_get_converter_returns_none_for_unsupported_mime _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fef1b857a60>
+
+    def test_get_converter_returns_none_for_unsupported_mime(monkeypatch):
+        # Arrange: plugin manager returns a converter that does not support the mime
+        class UnsupportedConverter(ConverterPlugin):
+            @classmethod
+            def supports(cls, mime: str) -> bool:
+                return False
+    
+            def __init__(self, mime: str):
+                self.mime = mime
+    
+        monkeypatch.setattr(plugin_manager, "get_converters", lambda: [UnsupportedConverter])
+>       monkeypatch.setattr(Conversion, "is_valid_mime", lambda mime: True)
+E       AttributeError: <class 'httpie.output.processing.Conversion'> has no attribute 'is_valid_mime'
+
+test_generated.py:46: AttributeError
+_______________ test_get_converter_returns_none_for_invalid_mime _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fef1b8632e0>
+
+    def test_get_converter_returns_none_for_invalid_mime(monkeypatch):
+        # Arrange: even if a converter exists, invalid mime should return None
+        monkeypatch.setattr(plugin_manager, "get_converters", lambda: [DummyConverter])
+>       monkeypatch.setattr(Conversion, "is_valid_mime", lambda mime: False)
+E       AttributeError: <class 'httpie.output.processing.Conversion'> has no attribute 'is_valid_mime'
+
+test_generated.py:58: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_converter_returns_converter_for_supported_mime
+FAILED test_generated.py::test_get_converter_returns_none_for_unsupported_mime
+FAILED test_generated.py::test_get_converter_returns_none_for_invalid_mime - ...
+3 failed in 0.88s

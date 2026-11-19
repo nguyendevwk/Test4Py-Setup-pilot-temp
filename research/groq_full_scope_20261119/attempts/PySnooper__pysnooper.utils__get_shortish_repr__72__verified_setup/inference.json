@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-f2c9996a-1346-4a7f-afcc-0cd65763a1c6",
+  "object": "chat.completion",
+  "created": 1795076725,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom pysnooper.utils import get_shortish_repr\n\n\ndef test_custom_repr_and_truncation():\n    \"\"\"Custom repr should override default and max_length should truncate.\"\"\"\n    # Custom repr for list objects\n    custom_repr = (\n        list,\n        lambda x: f\"CUSTOM LIST with {len(x)} items\",\n    )\n    result = get_shortish_repr([1, 2, 3], custom_repr=custom_repr, max_length=20)\n    # The custom repr is used and then truncated if necessary\n    assert result == \"CUSTOM LIST with 3 items\"\n    # Ensure that truncation works when the string is longer\n    long_custom = lambda x: \"X\" * 50\n    result_long = get_shortish_repr([1], custom_repr=(list, long_custom), max_length=10)\n    assert result_long == \"XXXXXXXXXX\"\n\n\ndef test_repr_failure_handling():\n    \"\"\"If __repr__ raises, the function should return 'REPR FAILED'.\"\"\"\n    class BadRepr:\n        def __repr__(self):\n            raise ValueError(\"cannot represent\")\n\n    bad = BadRepr()\n    result = get_shortish_repr(bad)\n    assert result == \"REPR FAILED\"\n\n\ndef test_newline_and_carriage_return_removal():\n    \"\"\"Newline and carriage return characters in the repr output should be removed.\"\"\"\n    # Custom repr that returns a string containing actual newline and carriage return\n    def custom_repr_with_newlines(x):\n        return \"line1\\nline2\\rline3\"\n\n    result = get_shortish_repr(\"ignored\", custom_repr=(str, custom_repr_with_newlines))\n    # The returned string should have all '\\n' and '\\r' removed\n    assert result == \"line1line2line3\"\n```",
+        "reasoning": "We need to test get_shortish_repr. Let's inspect utils code for other functions: get_repr_function, normalize_repr, truncate. But we only need to test get_shortish_repr behavior. We'll create tests for normal, boundary, error. Use tmp_path for any file? Not needed. We'll test that custom_repr works, max_length truncates, normalize removes newlines etc. Also test error handling when repr raises. We'll create a class with __repr__ raising. Also test that normalize True uses normalize_repr: maybe it replaces non-ascii? Let's inspect normalize_repr implementation.We need to view utils file.We don't have file content. But we can guess normalize_repr likely normalizes unicode? Let's open?We can't. But we can test that normalize=True removes non-ascii? Might be safe to test that it removes newlines and carriage returns. But that's already done. Maybe normalize replaces non-printable? Hard. We'll just test that normalize=True returns same as without? Might not. We'll skip normalize test. Instead test that max_length truncates correctly. Also test that custom_repr tuple works: if custom_repr contains a type, its repr function used. We'll create custom repr for list that returns 'CUSTOM LIST'. Then get_shortish_repr([1,2], custom_repr=(list, lambda x: 'CUSTOM LIST')). Should return 'CUSTOM LIST'. Also test error: class BadRepr with __repr__ raising. Should return 'REPR FAILED'. Also test that newlines removed: item with repr containing newline: e.g., multiline string. Use repr of a string with newline: 'a\\nb'. get_shortish_repr('a\\nb') should return 'a\\\\nb'? Actually repr('a\\nb') is \"'a\\\\nb'\". replace removes \\r\\n but not \\n inside string? It replaces actual newline characters, not escape sequences. So repr('a\\nb') contains '\\\\n' not actual newline. So no change. Maybe use custom repr that returns string with actual newline. We'll create custom function that returns 'line1\\nline2'. Then get_shortish_repr will replace newline with ''? It replaces '\\r' and '\\n' characters. So result will be 'line1line2'. Good test.\n\nLet's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053880537,
+    "prompt_tokens": 389,
+    "prompt_time": 0.02470547,
+    "completion_tokens": 859,
+    "completion_time": 0.940368671,
+    "total_tokens": 1248,
+    "total_time": 0.965074141,
+    "completion_tokens_details": {
+      "reasoning_tokens": 465
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sej5htenhveykzste44595",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom pysnooper.utils import get_shortish_repr\n\n\ndef test_custom_repr_and_truncation():\n    \"\"\"Custom repr should override default and max_length should truncate.\"\"\"\n    # Custom repr for list objects\n    custom_repr = (\n        list,\n        lambda x: f\"CUSTOM LIST with {len(x)} items\",\n    )\n    result = get_shortish_repr([1, 2, 3], custom_repr=custom_repr, max_length=20)\n    # The custom repr is used and then truncated if necessary\n    assert result == \"CUSTOM LIST with 3 items\"\n    # Ensure that truncation works when the string is longer\n    long_custom = lambda x: \"X\" * 50\n    result_long = get_shortish_repr([1], custom_repr=(list, long_custom), max_length=10)\n    assert result_long == \"XXXXXXXXXX\"\n\n\ndef test_repr_failure_handling():\n    \"\"\"If __repr__ raises, the function should return 'REPR FAILED'.\"\"\"\n    class BadRepr:\n        def __repr__(self):\n            raise ValueError(\"cannot represent\")\n\n    bad = BadRepr()\n    result = get_shortish_repr(bad)\n    assert result == \"REPR FAILED\"\n\n\ndef test_newline_and_carriage_return_removal():\n    \"\"\"Newline and carriage return characters in the repr output should be removed.\"\"\"\n    # Custom repr that returns a string containing actual newline and carriage return\n    def custom_repr_with_newlines(x):\n        return \"line1\\nline2\\rline3\"\n\n    result = get_shortish_repr(\"ignored\", custom_repr=(str, custom_repr_with_newlines))\n    # The returned string should have all '\\n' and '\\r' removed\n    assert result == \"line1line2line3\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.327475559024606
+}

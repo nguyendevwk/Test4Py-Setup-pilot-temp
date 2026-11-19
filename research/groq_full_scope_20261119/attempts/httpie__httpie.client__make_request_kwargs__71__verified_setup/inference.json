@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-541de5b9-25c1-4d2f-837d-242894580027",
+  "object": "chat.completion",
+  "created": 1795079648,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport argparse\nimport json\nimport os\nimport tempfile\nimport pytest\nfrom httpie.client import make_request_kwargs\nfrom httpie.context import Environment\nfrom httpie.cli.dicts import HTTPHeadersDict\n\n# Helper to create a minimal Environment instance\nclass DummyEnvironment(Environment):\n    def __init__(self):\n        super().__init__(None)\n\ndef test_make_request_kwargs_with_json_and_headers(tmp_path):\n    env = DummyEnvironment()\n    ns = argparse.Namespace(\n        method=\"POST\",\n        url=\"http://example.com/api\",\n        data={\"key\": \"value\"},\n        json=True,\n        form=False,\n        files=None,\n        multipart=False,\n        boundary=None,\n        headers=HTTPHeadersDict({\"X-Custom\": \"123\"}),\n        auth=None,\n        params={},\n        offline=False,\n        chunked=False,\n    )\n    kwargs = make_request_kwargs(env, ns)\n    # Body should be JSON string\n    assert kwargs[\"method\"] == \"post\"\n    assert kwargs[\"url\"] == \"http://example.com/api\"\n    assert kwargs[\"headers\"][\"X-Custom\"] == \"123\"\n    assert kwargs[\"headers\"][\"Content-Type\"] == \"application/json\"\n    body = kwargs[\"data\"]\n    # body is a file-like object; read it\n    assert json.loads(body.read()) == {\"key\": \"value\"}\n    assert kwargs[\"auth\"] is None\n    assert kwargs[\"params\"] == []\n\ndef test_make_request_kwargs_with_multipart_and_files(tmp_path):\n    env = DummyEnvironment()\n    # create a temporary file to upload\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"content\")\n    ns = argparse.Namespace(\n        method=\"PUT\",\n        url=\"http://example.com/upload\",\n        data=None,\n        json=False,\n        form=True,\n        files=[str(file_path)],\n        multipart=True,\n        boundary=\"myboundary\",\n        headers=HTTPHeadersDict({\"Content-Type\": \"multipart/form-data\"}),\n        auth=(\"user\", \"pass\"),\n        params={\"q\": \"search\"},\n        offline=False,\n        chunked=False,\n    )\n    kwargs = make_request_kwargs(env, ns)\n    # multipart data should be bytes with boundary\n    body = kwargs[\"data\"]\n    body_bytes = body.read()\n    assert b\"myboundary\" in body_bytes\n    assert b\"Content-Disposition: form-data; name=\\\"file\\\"; filename=\\\"test.txt\\\"\" in body_bytes\n    assert kwargs[\"auth\"] == (\"user\", \"pass\")\n    assert kwargs[\"params\"] == [(\"q\", \"search\")]\n\ndef test_make_request_kwargs_offline_chunked_header(tmp_path):\n    env = DummyEnvironment()\n    ns = argparse.Namespace(\n        method=\"GET\",\n        url=\"http://example.com/stream\",\n        data=None,\n        json=False,\n        form=False,\n        files=None,\n        multipart=False,\n        boundary=None,\n        headers=HTTPHeadersDict(),\n        auth=None,\n        params={},\n        offline=True,\n        chunked=True,\n    )\n    kwargs = make_request_kwargs(env, ns)\n    # When offline and chunked, Transfer-Encoding should be set\n    assert kwargs[\"headers\"][\"Transfer-Encoding\"] == \"chunked\"\n    # No Content-Length header should be present\n    assert \"Content-Length\" not in kwargs[\"headers\"]\n```",
+        "reasoning": "We need tests for make_request_kwargs. Use tmp_path for any file. We need to import function. We'll create dummy Environment and argparse.Namespace. Use simple args. Test normal: data dict with json flag. Test boundary: form with files. Test error: missing required? maybe args.method missing? But function uses args.method. We can test that headers updated correctly. Use simple Environment stub. Use minimal."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.006656215,
+    "prompt_tokens": 777,
+    "prompt_time": 0.041079088,
+    "completion_tokens": 770,
+    "completion_time": 0.814972156,
+    "total_tokens": 1547,
+    "total_time": 0.856051244,
+    "completion_tokens_details": {
+      "reasoning_tokens": 83
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7shbcrdenfbdmefavzh9afh",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport argparse\nimport json\nimport os\nimport tempfile\nimport pytest\nfrom httpie.client import make_request_kwargs\nfrom httpie.context import Environment\nfrom httpie.cli.dicts import HTTPHeadersDict\n\n# Helper to create a minimal Environment instance\nclass DummyEnvironment(Environment):\n    def __init__(self):\n        super().__init__(None)\n\ndef test_make_request_kwargs_with_json_and_headers(tmp_path):\n    env = DummyEnvironment()\n    ns = argparse.Namespace(\n        method=\"POST\",\n        url=\"http://example.com/api\",\n        data={\"key\": \"value\"},\n        json=True,\n        form=False,\n        files=None,\n        multipart=False,\n        boundary=None,\n        headers=HTTPHeadersDict({\"X-Custom\": \"123\"}),\n        auth=None,\n        params={},\n        offline=False,\n        chunked=False,\n    )\n    kwargs = make_request_kwargs(env, ns)\n    # Body should be JSON string\n    assert kwargs[\"method\"] == \"post\"\n    assert kwargs[\"url\"] == \"http://example.com/api\"\n    assert kwargs[\"headers\"][\"X-Custom\"] == \"123\"\n    assert kwargs[\"headers\"][\"Content-Type\"] == \"application/json\"\n    body = kwargs[\"data\"]\n    # body is a file-like object; read it\n    assert json.loads(body.read()) == {\"key\": \"value\"}\n    assert kwargs[\"auth\"] is None\n    assert kwargs[\"params\"] == []\n\ndef test_make_request_kwargs_with_multipart_and_files(tmp_path):\n    env = DummyEnvironment()\n    # create a temporary file to upload\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_text(\"content\")\n    ns = argparse.Namespace(\n        method=\"PUT\",\n        url=\"http://example.com/upload\",\n        data=None,\n        json=False,\n        form=True,\n        files=[str(file_path)],\n        multipart=True,\n        boundary=\"myboundary\",\n        headers=HTTPHeadersDict({\"Content-Type\": \"multipart/form-data\"}),\n        auth=(\"user\", \"pass\"),\n        params={\"q\": \"search\"},\n        offline=False,\n        chunked=False,\n    )\n    kwargs = make_request_kwargs(env, ns)\n    # multipart data should be bytes with boundary\n    body = kwargs[\"data\"]\n    body_bytes = body.read()\n    assert b\"myboundary\" in body_bytes\n    assert b\"Content-Disposition: form-data; name=\\\"file\\\"; filename=\\\"test.txt\\\"\" in body_bytes\n    assert kwargs[\"auth\"] == (\"user\", \"pass\")\n    assert kwargs[\"params\"] == [(\"q\", \"search\")]\n\ndef test_make_request_kwargs_offline_chunked_header(tmp_path):\n    env = DummyEnvironment()\n    ns = argparse.Namespace(\n        method=\"GET\",\n        url=\"http://example.com/stream\",\n        data=None,\n        json=False,\n        form=False,\n        files=None,\n        multipart=False,\n        boundary=None,\n        headers=HTTPHeadersDict(),\n        auth=None,\n        params={},\n        offline=True,\n        chunked=True,\n    )\n    kwargs = make_request_kwargs(env, ns)\n    # When offline and chunked, Transfer-Encoding should be set\n    assert kwargs[\"headers\"][\"Transfer-Encoding\"] == \"chunked\"\n    # No Content-Length header should be present\n    assert \"Content-Length\" not in kwargs[\"headers\"]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "181c899ce07b494b8dc72e529469ae49",
+  "_api_plus_pacing_seconds": 1.6744132990133949
+}

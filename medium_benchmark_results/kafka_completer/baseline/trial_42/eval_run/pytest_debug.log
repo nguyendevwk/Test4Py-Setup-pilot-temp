@@ -1,0 +1,32 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_kafka_completer_yield_commands_display_meta _______________
+
+    def test_kafka_completer_yield_commands_display_meta():
+        # Setup settings with help enabled
+        settings_help = DummySettings(enable_help=True, enable_fuzzy_search=False)
+        completer_help = KafkaCompleter(settings_help)
+        doc = DummyDocument("kafka")
+        completions_help = list(completer_help.get_completions(doc, None))
+    
+        # Expect two completions: kafka-topics and kafka-configs
+        assert len(completions_help) == 2
+        texts_help = [c.text for c in completions_help]
+        assert texts_help == ["kafka-topics", "kafka-configs"]
+        # start_position should be negative length of word before cursor
+        assert all(c.start_position == -len("kafka") for c in completions_help)
+        # display_meta should be the command description
+>       assert [c.display_meta for c in completions_help] == [
+            "Manage topics",
+            "Manage configs",
+        ]
+E       AssertionError: assert [FormattedTex...e configs')])] == ['Manage topi...nage configs']
+E         
+E         At index 0 diff: FormattedText([('', 'Manage topics')]) != 'Manage topics'
+E         Use -v to get more diff
+
+../eval_run/test_run.py:40: AssertionError
+=========================== short test summary info ============================
+FAILED ../eval_run/test_run.py::test_kafka_completer_yield_commands_display_meta
+1 failed in 1.16s
+

@@ -1,0 +1,16 @@
+import pytest
+from docstring_parser.parser import parse
+from docstring_parser.common import BaseParser, Docstring
+
+
+def test_parse_raises_value_error_when_parser_and_sections_provided():
+    """`parse` should raise ValueError if a BaseParser instance is given with non‑None sections."""
+    class DummyParser(BaseParser):
+        def parse(self, text):
+            # Should never be called in this test
+            raise AssertionError("DummyParser.parse should not be invoked")
+
+    dummy_parser = DummyParser()
+    # Provide any non‑None sections; the type is not validated at runtime
+    with pytest.raises(ValueError, match="A parser has its sections; pass none"):
+        parse("example docstring", style=dummy_parser, sections=[1, 2])

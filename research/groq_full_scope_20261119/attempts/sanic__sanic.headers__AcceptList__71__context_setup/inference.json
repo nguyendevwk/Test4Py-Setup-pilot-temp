@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-20cdfeef-3089-4828-a3af-2dee11949a1d",
+  "object": "chat.completion",
+  "created": 1795079272,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import AcceptList, Matched\n\n# Helper to create a simple AcceptList with known media types\ndef make_accept_list(*mimes: str):\n    # Each mime string is parsed into a MediaType by AcceptList constructor\n    return AcceptList(*mimes)\n\ndef test_match_prefers_q_and_specificity():\n    # Accept header with two entries: one with higher q, one more specific\n    accept = make_accept_list(\"text/*;q=0.8\", \"text/html;q=0.5\")\n    # Search for text/html and application/json\n    result = accept.match(\"text/html\", \"application/json\")\n    # Should match text/html because it is explicitly listed and has higher q\n    assert isinstance(result, Matched)\n    assert result.mime == \"text/html\"\n    assert result.header is not None\n    # The matched header should be the one from the AcceptList\n    assert result.header.type == \"text\" and result.header.subtype == \"html\"\n\ndef test_match_with_wildcards_and_order():\n    # Accept header with wildcard and specific type\n    accept = make_accept_list(\"image/*;q=0.7\", \"image/png;q=0.9\")\n    # Search for image/png first, then image/jpeg\n    result = accept.match(\"image/png\", \"image/jpeg\")\n    # Should match image/png because it appears earlier in the arguments\n    assert result.mime == \"image/png\"\n    # Now search with reverse order\n    result2 = accept.match(\"image/jpeg\", \"image/png\")\n    # Should still match image/png because it has higher q\n    assert result2.mime == \"image/png\"\n\ndef test_match_no_match_and_wildcard_disabled():\n    # Accept header with only a wildcard\n    accept = make_accept_list(\"*/*;q=0.5\")\n    # Search for a type not present\n    result = accept.match(\"application/xml\")\n    # Should match because wildcard is present\n    assert result.mime == \"application/xml\"\n    # Disable wildcard matching\n    result_no_wildcard = accept.match(\"application/xml\", accept_wildcards=False)\n    # Should be falsy because no explicit match\n    assert not result_no_wildcard\n    assert result_no_wildcard.mime == \"\"\n    assert result_no_wildcard.header is None\n```",
+        "reasoning": "Need tests for AcceptList.match normal, boundary, error. Use MediaType? Not imported. But AcceptList uses MediaType from sanic.headers? Assume available. We'll create AcceptList with some entries. Use simple mimes. Test match returns correct. Also test when no match returns falsy. Also test accept_wildcards False."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048492666,
+    "prompt_tokens": 1397,
+    "prompt_time": 0.084530554,
+    "completion_tokens": 568,
+    "completion_time": 0.670127935,
+    "total_tokens": 1965,
+    "total_time": 0.754658489,
+    "completion_tokens_details": {
+      "reasoning_tokens": 69
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgzx0ge2286x0ag4gah6g0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import AcceptList, Matched\n\n# Helper to create a simple AcceptList with known media types\ndef make_accept_list(*mimes: str):\n    # Each mime string is parsed into a MediaType by AcceptList constructor\n    return AcceptList(*mimes)\n\ndef test_match_prefers_q_and_specificity():\n    # Accept header with two entries: one with higher q, one more specific\n    accept = make_accept_list(\"text/*;q=0.8\", \"text/html;q=0.5\")\n    # Search for text/html and application/json\n    result = accept.match(\"text/html\", \"application/json\")\n    # Should match text/html because it is explicitly listed and has higher q\n    assert isinstance(result, Matched)\n    assert result.mime == \"text/html\"\n    assert result.header is not None\n    # The matched header should be the one from the AcceptList\n    assert result.header.type == \"text\" and result.header.subtype == \"html\"\n\ndef test_match_with_wildcards_and_order():\n    # Accept header with wildcard and specific type\n    accept = make_accept_list(\"image/*;q=0.7\", \"image/png;q=0.9\")\n    # Search for image/png first, then image/jpeg\n    result = accept.match(\"image/png\", \"image/jpeg\")\n    # Should match image/png because it appears earlier in the arguments\n    assert result.mime == \"image/png\"\n    # Now search with reverse order\n    result2 = accept.match(\"image/jpeg\", \"image/png\")\n    # Should still match image/png because it has higher q\n    assert result2.mime == \"image/png\"\n\ndef test_match_no_match_and_wildcard_disabled():\n    # Accept header with only a wildcard\n    accept = make_accept_list(\"*/*;q=0.5\")\n    # Search for a type not present\n    result = accept.match(\"application/xml\")\n    # Should match because wildcard is present\n    assert result.mime == \"application/xml\"\n    # Disable wildcard matching\n    result_no_wildcard = accept.match(\"application/xml\", accept_wildcards=False)\n    # Should be falsy because no explicit match\n    assert not result_no_wildcard\n    assert result_no_wildcard.mime == \"\"\n    assert result_no_wildcard.header is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.151099022012204
+}

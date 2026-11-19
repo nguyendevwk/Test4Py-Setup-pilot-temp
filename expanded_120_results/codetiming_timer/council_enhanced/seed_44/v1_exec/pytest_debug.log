@@ -1,0 +1,59 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________________ test_timer_start_stop_logging_and_timers ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f7e092ad6a0>
+
+    def test_timer_start_stop_logging_and_timers(monkeypatch):
+        # Prepare a deterministic perf_counter sequence: 1.0 on start, 2.5 on stop
+        perf_counter_values = iter([1.0, 2.5])
+        monkeypatch.setattr("codetiming._timer.time.perf_counter", lambda: next(perf_counter_values))
+    
+        # Reset shared timers state
+        Timer.timers.clear()
+    
+        # Logger that records messages
+        logged = []
+    
+        # Create Timer with custom text and initial_text
+        t = Timer(
+            name="test",
+            text="Elapsed: {:0.4f}s",
+            initial_text="Starting timer {name}",
+            logger=logged.append,
+        )
+    
+        # Start the timer and verify initial log
+        t.start()
+        assert logged == ["Starting timer test"]
+        assert t._start_time is not None
+    
+        # Stop the timer and verify elapsed time, last value, and final log
+        elapsed = t.stop()
+        assert elapsed == 1.5
+        assert t.last == 1.5
+        assert logged == ["Starting timer test", "Elapsed: 1.5000s"]
+    
+        # Verify that the timer value was recorded in the shared Timers instance
+        assert Timer.timers.total("test") == 1.5
+        assert Timer.timers.count("test") == 1
+    
+        # Starting an already running timer should raise TimerError
+>       t.start()
+
+../../expanded_120_results/codetiming_timer/council_enhanced/seed_44/v1_exec/test_run.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+codetiming/_timer.py:69: in start
+    self._start_time = time.perf_counter()
+                       ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   monkeypatch.setattr("codetiming._timer.time.perf_counter", lambda: next(perf_counter_values))
+                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration
+
+../../expanded_120_results/codetiming_timer/council_enhanced/seed_44/v1_exec/test_run.py:7: StopIteration
+=========================== short test summary info ============================
+FAILED ../../expanded_120_results/codetiming_timer/council_enhanced/seed_44/v1_exec/test_run.py::test_timer_start_stop_logging_and_timers
+1 failed in 0.13s
+

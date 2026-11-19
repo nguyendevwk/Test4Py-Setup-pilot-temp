@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-c2c3186c-ab38-467a-bc0a-e0dafd7c8db8",
+  "object": "chat.completion",
+  "created": 1795078861,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.extractor.hitrecord import HitRecordIE\nfrom youtube_dl.utils import clean_html\n\ndef test_valid_url_match():\n    \"\"\"Ensure the extractor correctly extracts the video id from a valid URL.\"\"\"\n    url = \"https://hitrecord.org/records/1234567\"\n    extractor = HitRecordIE()\n    # _match_id should return the numeric id part\n    assert extractor._match_id(url) == \"1234567\"\n\ndef test_tags_extraction(monkeypatch):\n    \"\"\"Verify that tags are extracted only when present and correctly filtered.\"\"\"\n    # Prepare a fake JSON response with tags\n    fake_video = {\n        \"title\": \"Test Video\",\n        \"source_url\": {\"mp4_url\": \"https://example.com/video.mp4\"},\n        \"body\": \"<p>Desc</p>\",\n        \"duration\": 120000,\n        \"created_at_i\": 1609459200,\n        \"user\": {\"username\": \"tester\", \"id\": 42},\n        \"total_views_count\": 100,\n        \"hearts_count\": 10,\n        \"comments_count\": 5,\n        \"tags\": [\n            {\"text\": \"fun\"},\n            {\"text\": None},\n            {\"text\": 123},\n            {\"not_text\": \"ignore\"},\n        ],\n    }\n\n    # Monkeypatch the network call to return our fake data\n    monkeypatch.setattr(\n        HitRecordIE,\n        \"_download_json\",\n        lambda self, url, video_id: fake_video,\n    )\n\n    extractor = HitRecordIE()\n    result = extractor._real_extract(\"https://hitrecord.org/records/9999999\")\n\n    # Only the valid string tag should be present\n    assert result[\"tags\"] == [\"fun\"]\n    # Verify other fields are correctly parsed\n    assert result[\"id\"] == \"9999999\"\n    assert result[\"url\"] == \"https://example.com/video.mp4\"\n    assert result[\"title\"] == \"Test Video\"\n    assert result[\"description\"] == \"Desc\"\n    assert result[\"duration\"] == 120.0\n    assert result[\"timestamp\"] == 1609459200\n    assert result[\"uploader\"] == \"tester\"\n    assert result[\"uploader_id\"] == \"42\"\n    assert result[\"view_count\"] == 100\n    assert result[\"like_count\"] == 10\n    assert result[\"comment_count\"] == 5\n\ndef test_missing_optional_fields(monkeypatch):\n    \"\"\"Ensure that missing optional fields are handled gracefully.\"\"\"\n    # Fake JSON with minimal required fields and missing optional ones\n    fake_video = {\n        \"title\": \"Minimal\",\n        \"source_url\": {\"mp4_url\": \"https://example.com/minimal.mp4\"},\n        \"body\": None,\n        \"duration\": None,\n        \"created_at_i\": None,\n        \"user\": {\"username\": None, \"id\": None},\n        \"total_views_count\": None,\n        \"hearts_count\": None,\n        \"comments_count\": None,\n        \"tags\": None,\n    }\n\n    monkeypatch.setattr(\n        HitRecordIE,\n        \"_download_json\",\n        lambda self, url, video_id: fake_video,\n    )\n\n    extractor = HitRecordIE()\n    result = extractor._real_extract(\"https://hitrecord.org/records/1\")\n\n    # Optional fields should be None or empty\n    assert result[\"tags\"] is None\n    assert result[\"description\"] == \"\"\n    assert result[\"duration\"] is None\n    assert result[\"timestamp\"] is None\n    assert result[\"uploader\"] is None\n    assert result[\"uploader_id\"] is None\n    assert result[\"view_count\"] is None\n    assert result[\"like_count\"] is None\n    assert result[\"comment_count\"] is None\n```",
+        "reasoning": "Need tests for HitRecordIE. Use youtube_dl? Actually module path. We'll import HitRecordIE from youtube_dl.extractor.hitrecord. We'll need to mock network? Can't. But we can test parsing logic by feeding a fake video dict? But _real_extract downloads JSON. We can't hit network. So we need to test that given a URL, _real_extract returns expected dict? But requires network. Can't. So maybe test that _VALID_URL matches and _match_id works. Also test tags extraction logic by monkeypatching _download_json to return a crafted dict. We can subclass or patch method. Use monkeypatch fixture. Three tests: test_valid_url_match, test_tags_extraction, test_missing_fields. Use tmp_path? Not needed. We'll patch HitRecordIE._download_json."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053080646,
+    "prompt_tokens": 791,
+    "prompt_time": 0.043878204,
+    "completion_tokens": 954,
+    "completion_time": 1.481665505,
+    "total_tokens": 1745,
+    "total_time": 1.525543709,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 162
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgkarver5s4z8heena1q8q",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.extractor.hitrecord import HitRecordIE\nfrom youtube_dl.utils import clean_html\n\ndef test_valid_url_match():\n    \"\"\"Ensure the extractor correctly extracts the video id from a valid URL.\"\"\"\n    url = \"https://hitrecord.org/records/1234567\"\n    extractor = HitRecordIE()\n    # _match_id should return the numeric id part\n    assert extractor._match_id(url) == \"1234567\"\n\ndef test_tags_extraction(monkeypatch):\n    \"\"\"Verify that tags are extracted only when present and correctly filtered.\"\"\"\n    # Prepare a fake JSON response with tags\n    fake_video = {\n        \"title\": \"Test Video\",\n        \"source_url\": {\"mp4_url\": \"https://example.com/video.mp4\"},\n        \"body\": \"<p>Desc</p>\",\n        \"duration\": 120000,\n        \"created_at_i\": 1609459200,\n        \"user\": {\"username\": \"tester\", \"id\": 42},\n        \"total_views_count\": 100,\n        \"hearts_count\": 10,\n        \"comments_count\": 5,\n        \"tags\": [\n            {\"text\": \"fun\"},\n            {\"text\": None},\n            {\"text\": 123},\n            {\"not_text\": \"ignore\"},\n        ],\n    }\n\n    # Monkeypatch the network call to return our fake data\n    monkeypatch.setattr(\n        HitRecordIE,\n        \"_download_json\",\n        lambda self, url, video_id: fake_video,\n    )\n\n    extractor = HitRecordIE()\n    result = extractor._real_extract(\"https://hitrecord.org/records/9999999\")\n\n    # Only the valid string tag should be present\n    assert result[\"tags\"] == [\"fun\"]\n    # Verify other fields are correctly parsed\n    assert result[\"id\"] == \"9999999\"\n    assert result[\"url\"] == \"https://example.com/video.mp4\"\n    assert result[\"title\"] == \"Test Video\"\n    assert result[\"description\"] == \"Desc\"\n    assert result[\"duration\"] == 120.0\n    assert result[\"timestamp\"] == 1609459200\n    assert result[\"uploader\"] == \"tester\"\n    assert result[\"uploader_id\"] == \"42\"\n    assert result[\"view_count\"] == 100\n    assert result[\"like_count\"] == 10\n    assert result[\"comment_count\"] == 5\n\ndef test_missing_optional_fields(monkeypatch):\n    \"\"\"Ensure that missing optional fields are handled gracefully.\"\"\"\n    # Fake JSON with minimal required fields and missing optional ones\n    fake_video = {\n        \"title\": \"Minimal\",\n        \"source_url\": {\"mp4_url\": \"https://example.com/minimal.mp4\"},\n        \"body\": None,\n        \"duration\": None,\n        \"created_at_i\": None,\n        \"user\": {\"username\": None, \"id\": None},\n        \"total_views_count\": None,\n        \"hearts_count\": None,\n        \"comments_count\": None,\n        \"tags\": None,\n    }\n\n    monkeypatch.setattr(\n        HitRecordIE,\n        \"_download_json\",\n        lambda self, url, video_id: fake_video,\n    )\n\n    extractor = HitRecordIE()\n    result = extractor._real_extract(\"https://hitrecord.org/records/1\")\n\n    # Optional fields should be None or empty\n    assert result[\"tags\"] is None\n    assert result[\"description\"] == \"\"\n    assert result[\"duration\"] is None\n    assert result[\"timestamp\"] is None\n    assert result[\"uploader\"] is None\n    assert result[\"uploader_id\"] is None\n    assert result[\"view_count\"] is None\n    assert result[\"like_count\"] is None\n    assert result[\"comment_count\"] is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.9474706969922408
+}

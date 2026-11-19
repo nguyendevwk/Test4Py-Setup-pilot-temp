@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-82037f95-b531-4932-81de-73ae5340a951",
+  "object": "chat.completion",
+  "created": 1795079637,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.aes import aes_cbc_encrypt, BLOCK_SIZE_BYTES\n\ndef test_empty_input_returns_empty_output():\n    \"\"\"When data is empty, no blocks are processed and the result is an empty list.\"\"\"\n    data = []\n    key = [0] * 16\n    iv = [0] * 16\n    result = aes_cbc_encrypt(data, key, iv)\n    assert result == [], \"Expected empty list for empty input data\"\n\ndef test_padding_and_output_length():\n    \"\"\"\n    Verify that the output length is a multiple of BLOCK_SIZE_BYTES and that\n    the padding byte value equals the number of padding bytes added.\n    \"\"\"\n    data = [1, 2, 3]  # 3 bytes of data\n    key = [0] * 16\n    iv = [0] * 16\n    result = aes_cbc_encrypt(data, key, iv)\n\n    # Output length must be a multiple of BLOCK_SIZE_BYTES\n    assert len(result) % BLOCK_SIZE_BYTES == 0, \"Output length not a multiple of block size\"\n\n    # The last byte of the output corresponds to the padding byte of the last block\n    # Since we used a dummy key and iv, the padding byte will be the same as the\n    # padding length added to the last block.\n    padding_length = BLOCK_SIZE_BYTES - len(data)\n    assert result[-1] == padding_length, (\n        f\"Expected padding byte {padding_length}, got {result[-1]}\"\n    )\n\ndef test_different_iv_changes_output():\n    \"\"\"\n    The same data and key but different IVs should produce different ciphertexts.\n    \"\"\"\n    data = [10] * 32  # two full blocks of data\n    key = [0] * 16\n    iv1 = [0] * 16\n    iv2 = [1] * 16  # different IV\n\n    out1 = aes_cbc_encrypt(data, key, iv1)\n    out2 = aes_cbc_encrypt(data, key, iv2)\n\n    assert out1 != out2, \"Ciphertexts should differ when IV changes\"\n    assert len(out1) == len(out2), \"Ciphertexts should have the same length\"\n```",
+        "reasoning": "Need to test aes_cbc_encrypt. Need to import from youtube_dl.aes. Let's inspect other functions? But we can test encryption with known key, iv, data and compare to expected output using known AES implementation? We can use cryptography library? Not allowed to install. But we can use built-in hashlib? No. We can use PyCryptodome? Not installed. We can use built-in 'cryptography' maybe not present. But we can compute expected using known reference? We can use 'openssl' via subprocess? Not allowed network. But we can use 'hashlib' for AES? No.\n\nMaybe we can test that encryption is deterministic and reversible? But we don't have decrypt function. But we can test that output length matches input padded length. Also test that changing iv changes output. Also test that key length restrictions? But function doesn't check.\n\nWe can test that for empty data, output is block of padding? data empty -> block_count=1? ceil(0/16)=0? ceil(0)=0. So no blocks? Actually block_count=0. So encrypted_data empty. But maybe expected? We can test that.\n\nAlso test that data length less than block size padded correctly. We can compute expected by using known AES encryption from cryptography library if available. Let's check if 'cryptography' is available. Probably not. But we can use 'pycryptodome' maybe not.\n\nWe can import 'Crypto.Cipher' if available. Let's assume not.\n\nWe can test that encryption of data with key and iv produces same result when called twice with same inputs. That's trivial.\n\nMaybe test that iv must be 16 bytes? But function doesn't enforce.\n\nWe can test that key expansion uses key length 16. But we don't have key_expansion.\n\nMaybe we can import the module and introspect functions. But we need to test behavior.\n\nGiven constraints, we can test that encryption of data with key and iv yields output length equal to ceil(len(data)/16)*16. Also test that padding bytes are correct: last byte equals padding length. We can inspect output and confirm last byte equals padding length. Also test that XOR with iv works: we can compute first block manually: block padded, XOR with iv, then encrypt using known AES? Without AES, can't compute.\n\nThus tests limited.\n\nWe can test that encryption of data with key and iv produces different output when iv changed. Also test that encryption of data with key and iv produces different output when key changed.\n\nWe can test that encryption of empty data returns empty list.\n\nOk."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005217986,
+    "prompt_tokens": 469,
+    "prompt_time": 0.025440744,
+    "completion_tokens": 997,
+    "completion_time": 1.185499692,
+    "total_tokens": 1466,
+    "total_time": 1.210940436,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 522
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7shb13wepjafk4mzx1jmb1p",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.aes import aes_cbc_encrypt, BLOCK_SIZE_BYTES\n\ndef test_empty_input_returns_empty_output():\n    \"\"\"When data is empty, no blocks are processed and the result is an empty list.\"\"\"\n    data = []\n    key = [0] * 16\n    iv = [0] * 16\n    result = aes_cbc_encrypt(data, key, iv)\n    assert result == [], \"Expected empty list for empty input data\"\n\ndef test_padding_and_output_length():\n    \"\"\"\n    Verify that the output length is a multiple of BLOCK_SIZE_BYTES and that\n    the padding byte value equals the number of padding bytes added.\n    \"\"\"\n    data = [1, 2, 3]  # 3 bytes of data\n    key = [0] * 16\n    iv = [0] * 16\n    result = aes_cbc_encrypt(data, key, iv)\n\n    # Output length must be a multiple of BLOCK_SIZE_BYTES\n    assert len(result) % BLOCK_SIZE_BYTES == 0, \"Output length not a multiple of block size\"\n\n    # The last byte of the output corresponds to the padding byte of the last block\n    # Since we used a dummy key and iv, the padding byte will be the same as the\n    # padding length added to the last block.\n    padding_length = BLOCK_SIZE_BYTES - len(data)\n    assert result[-1] == padding_length, (\n        f\"Expected padding byte {padding_length}, got {result[-1]}\"\n    )\n\ndef test_different_iv_changes_output():\n    \"\"\"\n    The same data and key but different IVs should produce different ciphertexts.\n    \"\"\"\n    data = [10] * 32  # two full blocks of data\n    key = [0] * 16\n    iv1 = [0] * 16\n    iv2 = [1] * 16  # different IV\n\n    out1 = aes_cbc_encrypt(data, key, iv1)\n    out2 = aes_cbc_encrypt(data, key, iv2)\n\n    assert out1 != out2, \"Ciphertexts should differ when IV changes\"\n    assert len(out1) == len(out2), \"Ciphertexts should have the same length\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "3a96ed5db8c04a58adbf56c6ff1ef40d",
+  "_api_plus_pacing_seconds": 2.9972292560269125
+}

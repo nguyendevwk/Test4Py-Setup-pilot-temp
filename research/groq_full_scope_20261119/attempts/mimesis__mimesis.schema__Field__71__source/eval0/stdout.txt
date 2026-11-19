@@ -1,0 +1,112 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_field_call_returns_value _________________________
+
+    def test_field_call_returns_value():
+        """Field instance should be callable and return a non‑empty value."""
+        field = Field()
+>       result = field()
+
+test_generated.py:8: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:328: in __call__
+    return self.perform(name, key=key, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <mimesis.schema.Field object at 0x7f7491e1cc10>, name = None, key = None
+kwargs = {}
+
+    def perform(
+        self,
+        name: str | None = None,
+        key: Key = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Returns the value of the field by its name.
+    
+        It takes any string that represents the name of any method of
+        any supported data provider and the ``**kwargs`` of this method.
+    
+        .. note:: Some data providers have methods with the same names,
+            and in such cases, you can explicitly define that the method
+            belongs to data-provider ``field(name='provider.name')`` otherwise
+            it will return the data from the first provider which
+            has a method ``name``.
+    
+            Allowed delimiters: ``.``, ``:``, ``/`` and space:
+    
+            - ``provider.name``
+            - ``provider:name``
+            - ``provider/name``
+            - ``provider name``
+    
+        You can apply a *key function* to the result returned by
+        the method, by passing a parameter **key** with a callable
+        object which returns the final result.
+    
+        The key function has the option to accept two parameters: **result**
+        and **random**. In case you require access to a random instance within
+        the key function, you must modify the function to accept both of them,
+        where the first corresponds to the method result and the second
+        corresponds to the instance of random.
+    
+        :param name: Name of the method.
+        :param key: A key function (any callable object)
+            which will be applied to the result.
+        :param kwargs: Keyword arguments of the method.
+        :return: The result of the method.
+        :raises FieldError: If the field is missing or invalid.
+        :raises AliasesTypeError: If ``aliases`` is not a flat dictionary.
+        """
+        # Validate aliases before lookup
+        self._validate_aliases()
+    
+        if name is None:
+>           raise FieldError
+E           mimesis.exceptions.FieldError: A field name is required.
+
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:201: FieldError
+_____________________ test_field_call_invalid_name_raises ______________________
+
+    def test_field_call_invalid_name_raises():
+        """Using an invalid name should raise FieldNameError."""
+        field = Field()
+        with pytest.raises(FieldNameError):
+>           field(name="non_existent_provider")
+
+test_generated.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:328: in __call__
+    return self.perform(name, key=key, **kwargs)
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:209: in perform
+    result = self._lookup_method(name)(**kwargs)
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:137: in _lookup_method
+    method = self._fuzzy_lookup(name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <mimesis.schema.Field object at 0x7f749197ba30>
+name = 'non_existent_provider'
+
+    def _fuzzy_lookup(self, name: str) -> Any:
+        """A fuzzy method lookup.
+    
+        This method is called when the field definition
+        is fuzzy, like this: ``method``
+    
+        :param name: The field name.
+        :return: Callable object.
+        :raise FieldError: When field is invalid.
+        """
+        for provider_name in dir(self._generic):
+            provider = getattr(self._generic, provider_name)
+            if isinstance(provider, BaseProvider) and name in dir(provider):
+                return getattr(provider, name)
+    
+>       raise FieldError(name)
+E       mimesis.exceptions.FieldError: Field «non_existent_provider» is not supported.
+
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:117: FieldError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_field_call_returns_value - mimesis.exceptions....
+FAILED test_generated.py::test_field_call_invalid_name_raises - mimesis.excep...
+2 failed, 1 passed in 0.24s

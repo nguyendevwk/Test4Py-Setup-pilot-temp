@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-eb304206-7b60-4ba3-825a-c8888da94e9e",
+  "object": "chat.completion",
+  "created": 1795076275,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport warnings\nimport pytest\nfrom tqdm.rich import tqdm_rich\n\n# Test 1: Normal usage – progress updates and close works without errors\ndef test_tqdm_rich_basic_progress():\n    with tqdm_rich(total=3, leave=False, disable=False) as p:\n        # Ensure the internal rich Progress object is created\n        assert hasattr(p, \"_prog\")\n        # Iterate and check that internal counter matches\n        for i in range(3):\n            p.update(1)\n            assert p.n == i + 1\n    # After context exit, close should have been called and no exception raised\n    assert not hasattr(p, \"_prog\") or p._prog is None\n\n# Test 2: Disable flag – no warning should be emitted\ndef test_tqdm_rich_disable_no_warning():\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        with tqdm_rich(total=2, disable=True) as p:\n            # No progress should be shown; internal _prog should not be created\n            assert not hasattr(p, \"_prog\")\n            # Update should be a no-op\n            p.update(1)\n            assert p.n == 0\n    # No experimental warning should have been raised\n    assert all(\"experimental\" not in str(item.message) for item in w)\n\n# Test 3: Reset behavior – total can be changed after reset\ndef test_tqdm_rich_reset_total():\n    with tqdm_rich(total=4, leave=False) as p:\n        for _ in range(2):\n            p.update(1)\n        # Reset to a new total\n        p.reset(total=6)\n        # After reset, internal counter should be zero\n        assert p.n == 0\n        # Update again and check that total is updated\n        p.update(3)\n        assert p.n == 3\n        # The internal rich progress should reflect the new total\n        assert p._prog.tasks[0].total == 6\n```",
+        "reasoning": "Need tests for tqdm_rich. Use tmp_path to create dummy file? Actually tqdm_rich inherits tqdm. We can test that when disable=True it doesn't warn. Also test that progress created and update works. Use small loop. Use pytest.raises? maybe test that close calls exit. We'll check that after close, _prog is None? Actually _prog.__exit__ called. We can check that after close, calling display does nothing. Use warnings.catch_warnings. Let's write three tests: 1) normal progress: create tqdm_rich with total=5, iterate, check that after close, no exception. 2) disable True: no warning. 3) reset behavior: after reset total changes. Use tmp_path not needed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04872249,
+    "prompt_tokens": 813,
+    "prompt_time": 0.00484741,
+    "completion_tokens": 580,
+    "completion_time": 0.661815304,
+    "total_tokens": 1393,
+    "total_time": 0.666662714,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 151
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se4eqaee0s8f61hw4wngpa",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport warnings\nimport pytest\nfrom tqdm.rich import tqdm_rich\n\n# Test 1: Normal usage – progress updates and close works without errors\ndef test_tqdm_rich_basic_progress():\n    with tqdm_rich(total=3, leave=False, disable=False) as p:\n        # Ensure the internal rich Progress object is created\n        assert hasattr(p, \"_prog\")\n        # Iterate and check that internal counter matches\n        for i in range(3):\n            p.update(1)\n            assert p.n == i + 1\n    # After context exit, close should have been called and no exception raised\n    assert not hasattr(p, \"_prog\") or p._prog is None\n\n# Test 2: Disable flag – no warning should be emitted\ndef test_tqdm_rich_disable_no_warning():\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        with tqdm_rich(total=2, disable=True) as p:\n            # No progress should be shown; internal _prog should not be created\n            assert not hasattr(p, \"_prog\")\n            # Update should be a no-op\n            p.update(1)\n            assert p.n == 0\n    # No experimental warning should have been raised\n    assert all(\"experimental\" not in str(item.message) for item in w)\n\n# Test 3: Reset behavior – total can be changed after reset\ndef test_tqdm_rich_reset_total():\n    with tqdm_rich(total=4, leave=False) as p:\n        for _ in range(2):\n            p.update(1)\n        # Reset to a new total\n        p.reset(total=6)\n        # After reset, internal counter should be zero\n        assert p.n == 0\n        # Update again and check that total is updated\n        p.update(3)\n        assert p.n == 3\n        # The internal rich progress should reflect the new total\n        assert p._prog.tasks[0].total == 6\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0213187710032798
+}

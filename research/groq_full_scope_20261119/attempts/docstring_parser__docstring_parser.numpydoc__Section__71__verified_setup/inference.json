@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-9c81d9ae-aa75-4a1f-bf50-8e5a32a668a6",
+  "object": "chat.completion",
+  "created": 1795077475,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport inspect\nimport re\nimport pytest\nfrom docstring_parser.numpydoc import Section\nfrom docstring_parser.common import DocstringMeta\n\ndef test_title_pattern_matches_header():\n    \"\"\"The title_pattern should match a header consisting of the title and a line of dashes.\"\"\"\n    sec = Section(\"Parameters\", \"parameters\")\n    pattern = sec.title_pattern\n    header = \"Parameters\\n----------\\n\"\n    assert re.match(pattern, header) is not None\n    # Ensure the captured group is the title\n    match = re.match(pattern, header)\n    assert match.group(1) == \"Parameters\"\n\ndef test_parse_returns_cleaned_description():\n    \"\"\"parse should yield a DocstringMeta with the cleaned description.\"\"\"\n    sec = Section(\"Returns\", \"returns\")\n    raw = \"   This function returns a value.\\n\\n    It can be None.\"\n    cleaned = inspect.cleandoc(raw)\n    meta_iter = sec.parse(raw)\n    meta = next(meta_iter)\n    assert isinstance(meta, DocstringMeta)\n    assert meta.args == [\"returns\"]\n    # The description should be cleaned (no leading indentation, no trailing newlines)\n    assert meta.description == cleaned\n    # No more items\n    with pytest.raises(StopIteration):\n        next(meta_iter)\n\ndef test_parse_raises_on_non_string_input():\n    \"\"\"parse should raise a TypeError when called with a non-string argument.\"\"\"\n    sec = Section(\"Examples\", \"examples\")\n    with pytest.raises(TypeError):\n        # Passing an integer should trigger a TypeError because the function expects a string\n        list(sec.parse(123))\n```",
+        "reasoning": "We need to write tests for Section class. We can import from module. We'll test title_pattern, parse returns correct DocstringMeta. Use tmp_path? not needed. We'll create Section('Parameters','parameters') and test pattern matches header. Also test parse returns description cleaned. Use inspect.cleandoc. Also test boundary: empty text. Also error: passing non-string? but parse expects str. We'll test that passing None raises TypeError. Use pytest.raises. Write three test functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04718368,
+    "prompt_tokens": 620,
+    "prompt_time": 0.031821778,
+    "completion_tokens": 442,
+    "completion_time": 0.502337569,
+    "total_tokens": 1062,
+    "total_time": 0.534159347,
+    "completion_tokens_details": {
+      "reasoning_tokens": 100
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sf9241egy8320s81542g0x",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport inspect\nimport re\nimport pytest\nfrom docstring_parser.numpydoc import Section\nfrom docstring_parser.common import DocstringMeta\n\ndef test_title_pattern_matches_header():\n    \"\"\"The title_pattern should match a header consisting of the title and a line of dashes.\"\"\"\n    sec = Section(\"Parameters\", \"parameters\")\n    pattern = sec.title_pattern\n    header = \"Parameters\\n----------\\n\"\n    assert re.match(pattern, header) is not None\n    # Ensure the captured group is the title\n    match = re.match(pattern, header)\n    assert match.group(1) == \"Parameters\"\n\ndef test_parse_returns_cleaned_description():\n    \"\"\"parse should yield a DocstringMeta with the cleaned description.\"\"\"\n    sec = Section(\"Returns\", \"returns\")\n    raw = \"   This function returns a value.\\n\\n    It can be None.\"\n    cleaned = inspect.cleandoc(raw)\n    meta_iter = sec.parse(raw)\n    meta = next(meta_iter)\n    assert isinstance(meta, DocstringMeta)\n    assert meta.args == [\"returns\"]\n    # The description should be cleaned (no leading indentation, no trailing newlines)\n    assert meta.description == cleaned\n    # No more items\n    with pytest.raises(StopIteration):\n        next(meta_iter)\n\ndef test_parse_raises_on_non_string_input():\n    \"\"\"parse should raise a TypeError when called with a non-string argument.\"\"\"\n    sec = Section(\"Examples\", \"examples\")\n    with pytest.raises(TypeError):\n        # Passing an integer should trigger a TypeError because the function expects a string\n        list(sec.parse(123))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.888105331978295
+}

@@ -1,0 +1,50 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_proxy_error_default_message _______________________
+
+    def test_proxy_error_default_message():
+        """When only a code is supplied, the message comes from CODES or defaults to 'unknown error'."""
+        # Use a code that is unlikely to be in CODES to trigger the default
+        code = 9999
+>       err = ProxyError(code=code)
+
+test_generated.py:9: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ProxyError(), code = 9999, msg = None
+
+    def __init__(self, code=None, msg=None):
+        if code is not None and msg is None:
+>           msg = self.CODES.get(code) or 'unknown error'
+E           AttributeError: 'ProxyError' object has no attribute 'CODES'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/socks.py:63: AttributeError
+_________________________ test_proxy_error_known_code __________________________
+
+    def test_proxy_error_known_code():
+        """When a known code is supplied, the message is taken from CODES."""
+        # Pick a code that is known to exist in the CODES mapping
+>       known_code = next(iter(ProxyError.CODES))
+E       AttributeError: type object 'ProxyError' has no attribute 'CODES'
+
+test_generated.py:20: AttributeError
+_______________________ test_proxy_error_custom_message ________________________
+
+    def test_proxy_error_custom_message():
+        """When both code and custom message are supplied, the custom message overrides the mapping."""
+        code = 42
+        custom_msg = "Custom error message"
+        err = ProxyError(code=code, msg=custom_msg)
+>       assert str(err) == custom_msg
+E       AssertionError: assert '[Errno 42] C...error message' == 'Custom error message'
+E         
+E         - Custom error message
+E         + [Errno 42] Custom error message
+E         ? +++++++++++
+
+test_generated.py:31: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_proxy_error_default_message - AttributeError: ...
+FAILED test_generated.py::test_proxy_error_known_code - AttributeError: type ...
+FAILED test_generated.py::test_proxy_error_custom_message - AssertionError: a...
+3 failed in 0.78s

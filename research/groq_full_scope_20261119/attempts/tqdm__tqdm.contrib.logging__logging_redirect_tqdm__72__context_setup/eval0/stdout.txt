@@ -1,0 +1,65 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_logging_redirect_to_tqdm_write ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.logging__logging_redirect_tqdm__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_logging_redirect_to_tqdm_0')
+
+    def test_logging_redirect_to_tqdm_write(tmp_path):
+        """When a console handler is present, messages are written via tqdm.write."""
+        # Create a logger with a console StreamHandler
+        logger = logging.getLogger("test_logger")
+        logger.setLevel(logging.INFO)
+        stream = io.StringIO()
+        console_handler = logging.StreamHandler(stream)
+        logger.handlers = [console_handler]
+    
+        # Capture tqdm.write output
+        captured = io.StringIO()
+        with contextlib.redirect_stdout(captured):
+            with logging_redirect_tqdm([logger]):
+                logger.info("redirected message")
+    
+        # The message should appear in the captured stdout via tqdm.write
+        output = captured.getvalue()
+>       assert "redirected message" in output
+E       AssertionError: assert 'redirected message' in ''
+
+test_generated.py:28: AssertionError
+----------------------------- Captured stderr call -----------------------------
+redirected message
+------------------------------ Captured log call -------------------------------
+INFO     test_logger:test_generated.py:24 redirected message
+__________________ test_default_loggers_use_root_and_restore ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.logging__logging_redirect_tqdm__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_default_loggers_use_root_0')
+
+    def test_default_loggers_use_root_and_restore(tmp_path):
+        """When no loggers are provided, the root logger is used and restored."""
+        root = logging.getLogger()
+        root.setLevel(logging.INFO)
+        stream = io.StringIO()
+        console_handler = logging.StreamHandler(stream)
+        root.handlers = [console_handler]
+    
+        with logging_redirect_tqdm():
+            logging.info("root message")
+    
+        # After context, root handlers should be restored
+        assert root.handlers == [console_handler]
+        # The message should have been redirected via tqdm.write
+        # Since tqdm.write writes to stdout, capture it
+        captured = io.StringIO()
+        with contextlib.redirect_stdout(captured):
+            logging.info("root message")
+>       assert "root message" in captured.getvalue()
+E       AssertionError: assert 'root message' in ''
+E        +  where '' = <built-in method getvalue of _io.StringIO object at 0x7f803aca8a60>()
+E        +    where <built-in method getvalue of _io.StringIO object at 0x7f803aca8a60> = <_io.StringIO object at 0x7f803aca8a60>.getvalue
+
+test_generated.py:71: AssertionError
+----------------------------- Captured stderr call -----------------------------
+root message
+=========================== short test summary info ============================
+FAILED test_generated.py::test_logging_redirect_to_tqdm_write - AssertionErro...
+FAILED test_generated.py::test_default_loggers_use_root_and_restore - Asserti...
+2 failed, 1 passed in 0.17s

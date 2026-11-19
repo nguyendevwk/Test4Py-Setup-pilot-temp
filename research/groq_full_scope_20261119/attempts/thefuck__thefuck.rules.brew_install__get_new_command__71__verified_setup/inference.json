@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-ba238b13-07af-4ab0-b58a-9ca88da97791",
+  "object": "chat.completion",
+  "created": 1795077655,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom types import SimpleNamespace\n\nimport thefuck.rules.brew_install as brew_install\n\n\ndef test_get_new_command_replaces_formula(tmp_path):\n    # Arrange: create a fake command object with script and output\n    cmd = SimpleNamespace(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    # Monkeypatch the internal helper to return a known similar formula\n    brew_install._get_similar_formula = lambda x: \"bar\"\n\n    # Act\n    new_cmd = brew_install.get_new_command(cmd)\n\n    # Assert: the script should have 'foo' replaced by 'bar'\n    assert new_cmd == \"brew install bar\"\n    # Ensure the original command is unchanged\n    assert cmd.script == \"brew install foo\"\n\n\ndef test_get_new_command_no_match_raises():\n    # Arrange: command output that does not match the regex\n    cmd = SimpleNamespace(\n        script=\"brew install foo\",\n        output=\"Some unrelated error message\\n\"\n    )\n    # Act & Assert: IndexError should be raised because re.findall returns empty list\n    with pytest.raises(IndexError):\n        brew_install.get_new_command(cmd)\n\n\ndef test_get_new_command_no_change_when_similar_is_same(tmp_path):\n    # Arrange: command where the similar formula is the same as the original\n    cmd = SimpleNamespace(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    brew_install._get_similar_formula = lambda x: \"foo\"\n\n    # Act\n    new_cmd = brew_install.get_new_command(cmd)\n\n    # Assert: script remains unchanged\n    assert new_cmd == \"brew install foo\"\n```",
+        "reasoning": "We need to test get_new_command. Need to simulate command object with script and output. Also need to mock get_brew_path_prefix, brew_available? But we cannot modify product code. We can monkeypatch functions in module. Use import thefuck.rules.brew_install as module. We'll patch _get_similar_formula? It's internal. We can patch get_brew_path_prefix and brew_available to control behavior. But get_new_command uses _get_similar_formula which uses get_brew_path_prefix and brew_available. Let's inspect _get_similar_formula? Not provided. But we can patch it directly. Simpler: monkeypatch module._get_similar_formula to return a known string. Then test replace_argument works. Also test error when no match? But get_new_command expects match. Provide output with pattern. Test that replace_argument changes script. Also test boundary: formula with uppercase? pattern only lowercase. So test that it raises IndexError if no match? But we can test that function raises IndexError when output doesn't match. Use pytest.raises(IndexError). Third test: test that if similar formula is same as original, script unchanged. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046978389,
+    "prompt_tokens": 313,
+    "prompt_time": 0.02172406,
+    "completion_tokens": 597,
+    "completion_time": 0.679703441,
+    "total_tokens": 910,
+    "total_time": 0.701427501,
+    "completion_tokens_details": {
+      "reasoning_tokens": 234
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfehqqe6at5bmfyn4e5yep",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom types import SimpleNamespace\n\nimport thefuck.rules.brew_install as brew_install\n\n\ndef test_get_new_command_replaces_formula(tmp_path):\n    # Arrange: create a fake command object with script and output\n    cmd = SimpleNamespace(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    # Monkeypatch the internal helper to return a known similar formula\n    brew_install._get_similar_formula = lambda x: \"bar\"\n\n    # Act\n    new_cmd = brew_install.get_new_command(cmd)\n\n    # Assert: the script should have 'foo' replaced by 'bar'\n    assert new_cmd == \"brew install bar\"\n    # Ensure the original command is unchanged\n    assert cmd.script == \"brew install foo\"\n\n\ndef test_get_new_command_no_match_raises():\n    # Arrange: command output that does not match the regex\n    cmd = SimpleNamespace(\n        script=\"brew install foo\",\n        output=\"Some unrelated error message\\n\"\n    )\n    # Act & Assert: IndexError should be raised because re.findall returns empty list\n    with pytest.raises(IndexError):\n        brew_install.get_new_command(cmd)\n\n\ndef test_get_new_command_no_change_when_similar_is_same(tmp_path):\n    # Arrange: command where the similar formula is the same as the original\n    cmd = SimpleNamespace(\n        script=\"brew install foo\",\n        output=\"Error: No available formula for foo\\n\"\n    )\n    brew_install._get_similar_formula = lambda x: \"foo\"\n\n    # Act\n    new_cmd = brew_install.get_new_command(cmd)\n\n    # Assert: script remains unchanged\n    assert new_cmd == \"brew install foo\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.061916108999867
+}

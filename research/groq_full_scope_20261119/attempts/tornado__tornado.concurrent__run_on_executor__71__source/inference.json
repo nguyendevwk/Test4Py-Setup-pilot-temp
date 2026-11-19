@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-952fa493-4809-4dd3-a4e6-f018fe628ce1",
+  "object": "chat.completion",
+  "created": 1795078670,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import run_on_executor, Future, chain_future\n\nclass Dummy:\n    def __init__(self):\n        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n    @run_on_executor\n    def add(self, a, b):\n        return a + b\n\n    @run_on_executor(executor=\"_executor\")\n    def mul(self, a, b):\n        return a * b\n\n    _executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_normal():\n    d = Dummy()\n    result = await d.add(2, 3)\n    assert result == 5\n    # Ensure the underlying executor was used\n    assert isinstance(d.executor, concurrent.futures.ThreadPoolExecutor)\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_custom_executor():\n    d = Dummy()\n    result = await d.mul(4, 5)\n    assert result == 20\n    assert isinstance(d._executor, concurrent.futures.ThreadPoolExecutor)\n\ndef test_run_on_executor_invalid_arguments():\n    with pytest.raises(ValueError, match=\"cannot combine positional and keyword args\"):\n        run_on_executor(1, executor=\"foo\")\n```",
+        "reasoning": "Need tests for decorator behavior. Use a dummy class with executor ThreadPoolExecutor. Test normal: method returns value, async future resolves. Use asyncio.run to await. Test boundary: missing executor attribute raises AttributeError? Actually getattr will error. Test error: passing both positional and keyword raises ValueError. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.063967646,
+    "prompt_tokens": 789,
+    "prompt_time": 0.047309011,
+    "completion_tokens": 334,
+    "completion_time": 0.366314563,
+    "total_tokens": 1123,
+    "total_time": 0.413623574,
+    "completion_tokens_details": {
+      "reasoning_tokens": 65
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgdhyjed79cx1fpsf839je",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport concurrent.futures\nimport pytest\nfrom tornado.concurrent import run_on_executor, Future, chain_future\n\nclass Dummy:\n    def __init__(self):\n        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n    @run_on_executor\n    def add(self, a, b):\n        return a + b\n\n    @run_on_executor(executor=\"_executor\")\n    def mul(self, a, b):\n        return a * b\n\n    _executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_normal():\n    d = Dummy()\n    result = await d.add(2, 3)\n    assert result == 5\n    # Ensure the underlying executor was used\n    assert isinstance(d.executor, concurrent.futures.ThreadPoolExecutor)\n\n@pytest.mark.asyncio\nasync def test_run_on_executor_custom_executor():\n    d = Dummy()\n    result = await d.mul(4, 5)\n    assert result == 20\n    assert isinstance(d._executor, concurrent.futures.ThreadPoolExecutor)\n\ndef test_run_on_executor_invalid_arguments():\n    with pytest.raises(ValueError, match=\"cannot combine positional and keyword args\"):\n        run_on_executor(1, executor=\"foo\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8352013310068287
+}

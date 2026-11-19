@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-085c8b37-281c-4cd2-825f-9a1788bf086e",
+  "object": "chat.completion",
+  "created": 1795079404,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.fields import Union, Field\nfrom typesystem.base import ValidationError, ValidationResult\n\n# Simple concrete Field implementation for testing\nclass IntField(Field):\n    errors = {\"type\": \"Expected an integer.\"}\n\n    def validate(self, value):\n        if isinstance(value, int):\n            return value\n        raise self.validation_error(\"type\")\n\nclass StrField(Field):\n    errors = {\"type\": \"Expected a string.\"}\n\n    def validate(self, value):\n        if isinstance(value, str):\n            return value\n        raise self.validation_error(\"type\")\n\ndef test_union_accepts_valid_child():\n    \"\"\"Union should validate when one child matches.\"\"\"\n    union = Union(any_of=[IntField(), StrField()])\n    result = union.validate_or_error(42)\n    assert isinstance(result, ValidationResult)\n    assert result.error is None\n    assert result.value == 42\n\ndef test_union_null_handling_and_error_message():\n    \"\"\"Union should allow null if any child allows it, otherwise raise error.\"\"\"\n    int_field = IntField(allow_null=True)\n    str_field = StrField()\n    union = Union(any_of=[int_field, str_field])\n    # Null is allowed because int_field allows null\n    assert union.validate_or_error(None).value is None\n\n    # Create a union without any allow_null child\n    union_no_null = Union(any_of=[IntField(), StrField()])\n    with pytest.raises(ValidationError) as excinfo:\n        union_no_null.validate_or_error(None)\n    assert \"May not be null.\" in str(excinfo.value)\n\ndef test_union_fallback_to_union_error():\n    \"\"\"When no child validates, Union should raise its own error.\"\"\"\n    union = Union(any_of=[IntField(), StrField()])\n    with pytest.raises(ValidationError) as excinfo:\n        union.validate_or_error(3.14)  # float is invalid for both\n    # The error should come from the Union itself, not from a child\n    assert \"Did not match any valid type.\" in str(excinfo.value)\n```",
+        "reasoning": "We need three tests for Field/Union. Test Union validation success, null handling, and error. Use tmp_path? not needed. Just test behavior."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047245225,
+    "prompt_tokens": 1065,
+    "prompt_time": 0.065774181,
+    "completion_tokens": 465,
+    "completion_time": 0.5164426,
+    "total_tokens": 1530,
+    "total_time": 0.582216781,
+    "completion_tokens_details": {
+      "reasoning_tokens": 32
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sh3ye5e8bs0k7zr1zk0mvy",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.fields import Union, Field\nfrom typesystem.base import ValidationError, ValidationResult\n\n# Simple concrete Field implementation for testing\nclass IntField(Field):\n    errors = {\"type\": \"Expected an integer.\"}\n\n    def validate(self, value):\n        if isinstance(value, int):\n            return value\n        raise self.validation_error(\"type\")\n\nclass StrField(Field):\n    errors = {\"type\": \"Expected a string.\"}\n\n    def validate(self, value):\n        if isinstance(value, str):\n            return value\n        raise self.validation_error(\"type\")\n\ndef test_union_accepts_valid_child():\n    \"\"\"Union should validate when one child matches.\"\"\"\n    union = Union(any_of=[IntField(), StrField()])\n    result = union.validate_or_error(42)\n    assert isinstance(result, ValidationResult)\n    assert result.error is None\n    assert result.value == 42\n\ndef test_union_null_handling_and_error_message():\n    \"\"\"Union should allow null if any child allows it, otherwise raise error.\"\"\"\n    int_field = IntField(allow_null=True)\n    str_field = StrField()\n    union = Union(any_of=[int_field, str_field])\n    # Null is allowed because int_field allows null\n    assert union.validate_or_error(None).value is None\n\n    # Create a union without any allow_null child\n    union_no_null = Union(any_of=[IntField(), StrField()])\n    with pytest.raises(ValidationError) as excinfo:\n        union_no_null.validate_or_error(None)\n    assert \"May not be null.\" in str(excinfo.value)\n\ndef test_union_fallback_to_union_error():\n    \"\"\"When no child validates, Union should raise its own error.\"\"\"\n    union = Union(any_of=[IntField(), StrField()])\n    with pytest.raises(ValidationError) as excinfo:\n        union.validate_or_error(3.14)  # float is invalid for both\n    # The error should come from the Union itself, not from a child\n    assert \"Did not match any valid type.\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "43e4a4b0ab754956a2dcb3b024001a9d",
+  "_api_plus_pacing_seconds": 1.544547561032232
+}

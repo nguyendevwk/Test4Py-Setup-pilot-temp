@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-a8bb9bc7-61d1-4dae-af85-7011d665b77c",
+  "object": "chat.completion",
+  "created": 1795077171,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.composites import OneOf\nfrom typesystem.fields import Int, String, Any\n\ndef test_oneof_single_match():\n    \"\"\"Value matches exactly one child field.\"\"\"\n    field = OneOf([Int(), String()])\n    result = field.validate(42)\n    assert result == 42  # Int field returns the validated value unchanged\n\ndef test_oneof_multiple_match():\n    \"\"\"Value matches more than one child field, should raise multiple_matches.\"\"\"\n    field = OneOf([Int(), Any()])\n    with pytest.raises(field.validation_error.__class__) as excinfo:\n        field.validate(10)\n    assert \"multiple_matches\" in str(excinfo.value)\n\ndef test_oneof_no_match():\n    \"\"\"Value matches none of the child fields, should raise no_match.\"\"\"\n    field = OneOf([Int(), String()])\n    with pytest.raises(field.validation_error.__class__) as excinfo:\n        field.validate(3.14)  # float does not match Int or String\n    assert \"no_match\" in str(excinfo.value)\n```",
+        "reasoning": "We need to write tests for OneOf. We need to import typesystem.composites.OneOf. We need to create Field instances. typesystem.fields.Any, Field. We can use Any() as a field that accepts any value. For specific types, maybe use typesystem.fields.Int? But not sure. Let's inspect typesystem.fields.Any. It likely accepts any value. For error scenario, we need a field that rejects certain values. Maybe use typesystem.fields.Int() which only accepts int. Use typesystem.fields.String() for string. We'll test: normal: value matches exactly one type. boundary: value matches multiple? For example, value 1 matches Int and Any? But Any accepts any, so multiple matches. That should raise multiple_matches. Error: value matches none: e.g., value True? Int and String don't match bool? Int may accept bool? In Python bool is subclass of int, so Int might accept bool. So maybe use a custom field that only accepts list? Use typesystem.fields.List? Might accept list. Use value 5? That matches Int and Any. So multiple. For no match, use a field that only accepts dict? Use typesystem.fields.Dict? Might accept dict. Use value 5? No match. But Any matches any, so again multiple. So need fields that don't overlap. Maybe use typesystem.fields.Int and typesystem.fields.String. Value \"hello\" matches String only. Value 5 matches Int only. Value 5.0 matches neither? Float not int? Int may reject float. So no match. Good. So tests: test_oneof_single_match: OneOf([Int(), String()]) validate 5 returns 5. test_oneof_multiple_match: OneOf([Int(), Any()]) validate 5 raises multiple_matches. test_oneof_no_match: OneOf([Int(), String()]) validate 5.0 raises no_match. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054496991,
+    "prompt_tokens": 515,
+    "prompt_time": 7.2329e-05,
+    "completion_tokens": 622,
+    "completion_time": 0.785603507,
+    "total_tokens": 1137,
+    "total_time": 0.785675836,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 395
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sezs73ej5tgk5ksk296zjs",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.composites import OneOf\nfrom typesystem.fields import Int, String, Any\n\ndef test_oneof_single_match():\n    \"\"\"Value matches exactly one child field.\"\"\"\n    field = OneOf([Int(), String()])\n    result = field.validate(42)\n    assert result == 42  # Int field returns the validated value unchanged\n\ndef test_oneof_multiple_match():\n    \"\"\"Value matches more than one child field, should raise multiple_matches.\"\"\"\n    field = OneOf([Int(), Any()])\n    with pytest.raises(field.validation_error.__class__) as excinfo:\n        field.validate(10)\n    assert \"multiple_matches\" in str(excinfo.value)\n\ndef test_oneof_no_match():\n    \"\"\"Value matches none of the child fields, should raise no_match.\"\"\"\n    field = OneOf([Int(), String()])\n    with pytest.raises(field.validation_error.__class__) as excinfo:\n        field.validate(3.14)  # float does not match Int or String\n    assert \"no_match\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1352325499756262
+}

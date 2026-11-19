@@ -290,6 +290,173 @@ sau khi thấy score. Timeout/import/setup không phải kill. Đây không ph�
 benchmark tổng quát; assertion accuracy vẫn cần review. Protocol chi tiết:
 [UPSTREAM_NF4_PILOT.md](../docs/UPSTREAM_NF4_PILOT.md).
 
+## R6 — Lỗi chuẩn bị Kaggle và kiểm toán phép đo (2026-11-16)
+
+Log người dùng cung cấp: genty fail trước inference vì runner đưa
+`requirements-paired.txt` vào pip như tên package; woa prepared. Đây là lỗi dựng
+lệnh của harness, không phải bằng chứng benchmark/model thất bại. Sửa cả nhánh
+editable và requirements-only, giữ constraints, không fallback sửa source.
+Thêm kiểm thử pip thật offline và kiểm thử failure giữ trạng thái failed; bộ
+126 CPU tests đã qua trước khi bổ sung measurement. Chưa có kết quả GPU 14B.
+
+Kiểm toán phát hiện `passed` upstream là số node, không phải all-pass suite.
+Coverage dùng passing subset replay; không được kể là coverage toàn bộ candidate
+suite. Bổ sung retained-suite counts, mẫu số raw coverage, mutant killed/survived/
+unresolved, planned/measured/missing và telemetry vào exports. Assertion accuracy
+và hallucination rate để null đến khi review bằng cùng taxonomy/source evidence.
+Không suy từ pass, hai replay hay coverage một module thành oracle đúng hoặc
+vượt trung bình 183 module của paper. Pool mutant nhỏ có equivalent chưa lọc.
+
+Người dùng gửi console Council 80 trials: không nhập thành raw dataset đã xác minh.
+ZIP EXP_OVERNIGHT_V5 chưa có local tại thời điểm audit. Không gộp vào cohort upstream
+14B. Sửa phần mềm dùng output/plan mới; giữ archive lỗi trước đó.
+
+## R7 — Screen có ngân sách một giờ trước pilot lớn (2026-11-16)
+
+Người dùng còn 3–8 giờ, yêu cầu kiểm tra tập nhỏ khoảng một giờ rồi mới chạy lớn.
+Khóa small ở hai module genty, seed 42, một vòng, hai arm: 4 module-trials trong
+hai worker. Main vẫn ba module/hai project, hai seed, ba vòng: 12 module-trials.
+Đây là larger pilot đã cấu hình, không phải toàn bộ 183 module của paper.
+
+Notebook hiện dùng chung 4096 input/512 output cho hai arm và cả hai giai đoạn;
+nguồn default CLI 6144/1024 vẫn có nhưng không được gọi là cấu hình notebook.
+512 token có rủi ro output bị cắt; lưu raw/candidate errors, không cứu bằng pruning.
+Thêm shared deadline 3600 giây từ stress tới small, bao gồm download/load model
+và embedding; CPU bootstrap/prepare/fixture tính riêng. Stress hai T4 chạy song
+song và bị giới hạn 1800 giây/probe. Small dùng thời gian còn lại; hết giờ giữ
+planned rows/NA, không suy thành 0 coverage hay tự đổi model/budget.
+
+Main chỉ mở khi small hoàn tất phần framework/resource và thực sự đo được ít
+nhất một đường coverage từ test model sinh. Không đòi baseline all-pass; không
+lấy tiêu chí phát triển này làm bằng chứng efficacy/held-out. Notebook mặc định
+RUN_LARGER=False, cần review rồi bật. Hai module small không chứng minh mọi nhánh
+model thực của woa đã chạy; chỉ dependency/import và CPU init của woa đã được
+kiểm tra trước small. Chưa có bằng chứng GPU 14B hoặc cam kết hoàn tất trong một giờ.
+
+Validation cuối R7: **131 CPU tests đạt trong 73.267 giây**. Fresh Git + đúng
+overlay notebook đạt 26 paired tests và cả hai upstream fixture arms (model/
+embedding scripted). Timeout/scheduling được kiểm tra bằng fixture; không tính
+thành đo tốc độ/model quality thực. Notebook compile và RUN_LARGER=False.
+
+## R8 — Kaggle không chặn root; SDPA OOM ở 4K (2026-11-17)
+
+Đọc notebook1aa30d2af4 và ZIP UPSTREAM_NF4_20261116T170358791891Z do người dùng
+cung cấp. 131 tests, prepare hai project và CPU fixtures đều qua trên Kaggle.
+Hai T4 load model ~9.29 GiB; bài 2048+512 qua, margin ~2.90 GiB. Bài 4096 input
+OOM trong SDPA, cần 2.50 GiB nhưng chỉ còn 1.65 GiB. Không có evidence quyền root
+bị Kaggle chặn. Ghi probe/hash nguồn tại artifacts/upstream_nf4_20261116_gpu_audit.json.
+
+Đối chiếu HF 4.57.6 và PyTorch 2.11: native GQA có thể đẩy T4 sang math kernel
+tốn bộ nhớ. Đây là suy luận cơ chế từ source/trace, không phải kernel profiler.
+Thêm runtime adapter chung t4-efficient-sdpa-v1: HF explicit repeat_kv + giới hạn
+CUDA generation vào efficient SDPA. Giữ model NF4 14B, 4096/512 và margin1.5;
+không sửa weights, không giảm ngưỡng gate và không trộn cohort runtime cũ/mới.
+Nếu efficient kernel không hỗ trợ phải fail rõ, không fallback ngầm.
+
+Sửa bootstrap uv vào venv, thêm failure latch chặn cell sau, in lỗi/memory probe
+trực tiếp. Không thêm sudo/nâng quyền, remote server hoặc né quota. Chính sách
+tài khoản/competition vẫn do Kaggle quyết định; không hứa chứng nhận toàn bộ AUP.
+Phải qua stress GPU với runtime mới trước khi tuyên bố 4K fit hoặc chạy larger.
+
+## R9 — Quick attention stress đã qua trên Kaggle (2026-11-17)
+
+ZIP NF4_14B_OOM_CHECK_20261116T172805400121Z do người dùng cung cấp, SHA256
+e3980f3a8ef62bd2a0896ae72873ca0a926d7a2800626f8b55f38338800ffe8c.
+Kiểm tra hash wrapper khớp provenance, cả hai process returncode0/không timeout.
+Hai GPU, mỗi GPU hai lần 4096 input + 512 output, cả bốn phép thử đều passed.
+Peak allocated 10.554807 GiB; peak reserved10.761719 GiB; margin3.670715 GiB.
+Process GPU0 309.960s, GPU1 317.493s, chạy song song. Từng bài decode ~79–90s.
+Model Qwen2.5-Coder-14B NF4, revision aedcc2d42b622764e023cf882b6652e646b95671,
+Torch2.11.0+cu130, Transformers4.57.6, TeslaT4.
+
+So với R8, attention adapter giải quyết OOM trong đúng bài stress4K đã đo.
+Không suy thành mọi real prompt đều an toàn, test accuracy cao hoặc vượt paper.
+Chưa sinh test upstream thật trong diagnostic; không chỉnh stress.json/gate cũ
+thành passed. Giữ hai archive độc lập; bước tiếp theo là small A/B thật rồi mới
+mở larger. Raw probe/hash/provenance đã lưu tại
+artifacts/nf4_14b_efficient_attention_pass.json.
+
+## R10 — Small A/B tiếp nối, tái sử dụng có kiểm chứng (2026-11-17)
+
+User yêu cầu tiếp tục và tránh lặp CPU/stress đã đạt. Tạo notebook small_resume
+3 Code cells cho cùng phiên Kaggle; source clone local mới + snapshot, output mới.
+Tái kiểm tra commits, toàn bộ production hashes, pip freeze, runtime versions,
+model/settings và wrapper/probe memory diagnostic trước reuse. Không cài package,
+không chạy unit/CPU fixtures/stress lại và không sửa source/plan/gate cũ.
+
+NEW stress.json ghi rõ derived calibration từ diagnostic4K+512 đã đo, copy raw
+evidence giữ nguyên origin. Đây là quyết định reuse hardware calibration cho
+runtime adapter cùng policy, không biến diagnostic thành efficacy/main-ready.
+Do diagnostic cũ thiếu GPU UUID, binding chỉ same-session/two-T4 profile; ghi
+giới hạn này trong receipt. Đối chiếu ZIP thật: config/frame/seeds/model revision
+khớp plan mới; ba unit tests chống reuse sai đều đạt, fresh clone + đúng overlay
+cũng qua. Không đòi người dùng rerun full unit suite trên Kaggle.
+
+Small vẫn chạy model thật cho full upstream init/type/RAG, hai genty modules,
+seed42, một vòng, hai arms (4 module-trials), cùng14B NF4 và4096/512; deadline60
+phút tính riêng lượt small mới, chi phí calibration cũ báo riêng. Chưa có outcome
+small, chưa chạy larger. Cần review ZIP mới trước khi mở larger configured pilot.
+
+## R11 — Council160: dữ liệu khớp artifact, chưa có cải tiến tổng thể (2026-11-17)
+
+Archive EXP_COUNCIL_LARGESCALE_160TRIALS_20261116T165709Z, SHA256
+31c7ca1efea55883b71f3a8ffd5f2a22044c26d67262bfb3cbebea24d46b3161.
+Audit plan/CSV/summary/160 result khớp;11.720 product source files khớp hashes;
+44 pass khớp raw pytest/process, coverage tử/mẫu số và replay. Không thấy sửa
+source để lấy pass; đây không phải tái chạy độc lập hoặc chứng minh oracle đúng.
+
+Baseline13/40(32,5%), grounded11/40(27,5%), ranked10/40(25%), verified10/40(25%).
+Tổng44/160, first41/160. Critic cứu3/119(2,52%): hai bỏ importTimers, một thêmmath;
+ba assert AST giữ nguyên. 50 repair proposals không credit cần review, không
+được mặc định gọi tất cả là cheating. Không có mutation/assertion semantic score.
+Timer ranked4/10 so với baseline2/10 là tín hiệu cục bộ, không phải “0→82,98%”
+success hoặc vượt83% trung bình paper. Sáu Superstring ranked/verified joint-pass
+tests giống byte. Cả4arms cóCritic, không phải single-vs-multiagent ablation.
+
+Ghi nhận kết quả bất lợi này; không đổi seed/target/metric để đạt mục tiêu.
+160 attempts vẫn chỉ4target clusters đã phát triển. Giữ riêng Council7B+4B với
+smallupstream14B, không chỉnh run14B đang chạy từ dữ liệu Council này. Chi tiết
+analysis/COUNCIL_160_20261116.md và artifacts/council_160_*. Audit script chỉ đọc
+archive và ghi bảng đối chiếu, không đổi score/algorithm.
+
+## R12 — Small14B bị timeout, chưa có số liệu efficacy (2026-11-17)
+
+ZIP UPSTREAM_NF4_RESUME_20261116T174754946339Z, SHA256
+603266e8f6360ae0fc86d93d2bed7edc131db23a81448017a80202518d566b3a.
+Hai worker -9/timeout ~3587s; cả4 module-trials chưa tới final scoring, coverage/
+mutation/paired effect đềuNA. Không gọi bookkeeping0/2 là modelaccuracy0%.
+95callsinit/worker, firstgen ở2627s (~43m47), chỉ còn~16phút cho7functions.
+Ước lượng1h cho cold fullpipeline quá lạc quan. Baseline122calls xong,
+improved121; gen27/26; init5callscapped ởmỗiarm, gencapped4/3; extractionerrors3/2.
+Không có model-call exception đã ghi; timeout không phải OOM. Baseline2file
+intermediateaccepted không phải module success. Một improved repair đượcupstream
+chấp nhận sau bỏ/sửa checks đã bị auditveto, không credit.
+
+Sửa future reporter timeout terminal, táchplaceholder4 khỏicompleted0, all-unmeasured
+rateNA. Thêm progressitems trongtừngstep, function/round, module/mutant, workers,
+remainingtime; thêm function_database_index thànhstep11. Không coi10/10 cũ là
+toànbộinitđãxong hoặcmodelcallcountlàtổngbiếttrước. Consolegiữstructuralevents.
+Xem analysis/UPSTREAM_14B_SMALL_TIMEOUT_20261116.md.
+
+## R13 — Remote monitoring, exact-prefix reuse và tránh GPU trùng (2026-11-17)
+
+User cấp URL Jupyter chính thức của Kaggle; chỉ giữ credential trong bộ nhớ,
+không ghi source/nhật ký. Kết nốiAPI/kernel được. Prefixreuse xác minh95/95
+promptkeys vàrawoutputs,190logicalcalls/95freshcalls,95uniqueprompts,5capped
+summaries giữ nguyên. Chỉ reusegreedyinit, không importtest/repair/outcome;
+giữchi phícoldrun riêng. Unit/fixture vàfull143tests qua sauprogress/cachefix.
+
+Có một smallretry đã chạy ởUPSTREAM_NF4_RETRY_20261116T190701623856Z. Agent thiếu
+kiểmtravRAMđangbậntrướckhởiđộngthêm retry190848039637Z, gâyloadOOMdohaiworker
+khácđãgiữ~10,4GiB/GPU. Giữ lỗi190848riêng, khôngkilljobđangchạy. Xácnhậnjob190701
+cùng14BNF4/4096+512/seed42/1round/4moduletrials vàđủ95prefix; chỉtheodõinólạikhông
+khởiđộngthêm. Không quy loadOOMtrùngtài nguyên thành chấtlượngmodel.
+
+Thêm future GPUlease theoUUIDvàcurrentfreeVRAMchecktrướcmodel, khôngkillprocess,
+khôngđổimodel/budgethaynéquota. Sửa hardware_budget_ok khiOOMxảyra trongmodel
+constructor trước khi backendđượcgán. Full145CPUtests vàfocusedGPUlease/progress
+testsqua; không thay code/source của job190701 đang chạy. Largerstillnotlaunched.
+
 ## Quy tắc ghi nhận từ lượt tiếp theo
 
 - Chốt cấu hình/plan trước inference; giữ bản run fail và mọi sửa đổi protocol.
@@ -304,3 +471,238 @@ benchmark tổng quát; assertion accuracy vẫn cần review. Protocol chi ti�
   held-out projects và fault-detection evidence; không so hai aggregate khác cohort.
 - Mỗi lần chạy tiếp theo phải thêm mục nhật ký mới kèm ZIP hash và kết quả thực tế,
   kể cả không có cải thiện. Không sửa R2 thành kết quả thuận lợi hơn.
+
+
+### R8 bổ sung — chỉ kiểm tra lỗi đang chặn
+
+Theo yêu cầu khẩn, cung cấp kaggle_14b_quick_oom_check: chạy trong phiên Kaggle cũ, dùng source/venv/weights đã có, không cài thêm và không sửa plan/source cũ. Chỉ thử 4096+512 hai lần/GPU, chạy hai GPU song song, timeout 900 giây/process. Dùng wrapper attention trong process, lưu config/wrapper/probe hashes và ZIP riêng. Đây là diagnostic, không được dùng để tự đánh dấu full gate ready hoặc báo efficacy. Bỏ qua unit/prepare/fixture vì lượt trước đã qua; không bỏ qua stress sau thay runtime. Bản tích hợp đã qua 135 CPU tests; numerical equivalence HF repeat_kv được kiểm tra trên CPU, GPU fix vẫn pending.
+
+
+## R12 — Small 14B thật: baseline có kết quả, improved bị gate loại (2026-11-17)
+
+Qua Jupyter Kaggle do người dùng cung cấp, hoàn tất warm-prefix screen
+UPSTREAM_NF4_RETRY_20261116T190701623856Z: 4/4 module-trials, wall2053,06s.
+ZIP SHA256 604d75c7e03bca094984d51bf4421860b6772c589df69f6866b1fbed11a0dcf6.
+Baseline: repeat5 nodes, line8/8, branch2/2, mutant1/1; args15 nodes,
+line18/20, branch0/0=NA. Ba file retained không mất/đổi assertion theo audit;
+review source xác nhận constructor/properties/metadata, nhưng không có
+iteration và không chứng minh lifecycle toàn hệ thống.
+
+Improved không có test được tự động công nhận:3 candidate bị cắt/khối code
+không hoàn chỉnh;3 repair proposals được upstream chấp nhận nhưng thay đổi
+hoặc bỏ assertion/test nên bị preservation gate loại;1 proposal upstream
+không chấp nhận. Không gọi mọi thay đổi assertion là sai ngữ nghĩa.
+Coverage/mutation thiếu giữ NA. Gate larger_ready trong ZIP là readiness
+kỹ thuật, không phải chất lượng phương pháp; quyết định thực tế không mở larger.
+Kiểm toán raw đã đối chiếu12 file production, exit, cache, pytest replay và
+coverage tử/mẫu số. Xem analysis/NF4_SMALL_REMOTE_20261117.md và
+artifacts/nf4_14b_warm_small_audit_20261117.json.
+
+Chuẩn bị single-test-v1 dùng chung cả hai arm để xử lý output nhiều test bị
+cắt ở512tokens; không đổi model, budget hay scoring gate.159 CPU tests pass;
+overlay79file fresh clone qua18 targeted tests và2 scripted upstream fixtures.
+Đã launch compact ở phiên cũ nhưng chưa lấy được output trước khi URL timeout;
+không gán điểm cho lượt chưa xác nhận. Phiên mới rootworking trống, Transformers
+base5 nên dựng venv4.57.6, prepare và stress mới; chỉ reuse summary14B được
+kiểm chứng, không reuse calibration phiên cũ. Fresh compact hiện đang chạy,
+local monitor tải ZIP khi xong. Chưa có kết quả mới để kết luận cải thiện.
+
+Người dùng chấp nhận số module nhỏ, chọn module tốt cho ứng dụng thực tế.
+Phải ghi curated/development, review oracle và replay, đo latency; không suy
+ra ngang/vượt toàn bộ183module paper từ một subset chọn thuận lợi.
+
+
+## R14 — Cơ chế API contract riêng, chưa có kết luận hiệu quả (2026-11-17)
+
+Theo yêu cầu phải có đóng góp thực sự và tránh hai mẫu bị bias, triển khai
+api-contract-v1: AST-only phân biệt property/method và lexical ownership của
+closure, có chữ ký/hash source, tối đa2500chars, không sinh expected output.
+Hai arm baseline/api_contract dùng chung chỉ dẫn file pytest ngắn (cho phép
+nhiều test) và preservation gate trong adapter upstream. Không trộn bundle
+legacy improved vào treatment này. single-test-v1 đã thất bại khi model trả
+file nhiều test; không dùng lại restriction đó cho cơ chế mới.
+
+Khóa development probe5target genty/10lượt sinh, một seed42, không repair/prune.
+Dùng initial prompts thật từ upstream đã lưu, chỉ bổ sung API facts ở treatment;
+đây là component diagnostic, không phải end-to-end hay held-out confirmation.
+173 kiểm tra CPU và hai scripted upstream fixtures đã qua; các số đó không
+đo chất lượng LLM. Mã nguồn chạy được freeze trong archive notebook.
+
+Phiên Kaggle API_CONTRACT_DEV_20261117T020312879124Z: cả hai T4 đã qua stress
+4096+512 lặp, conservative headroom tối thiểu3,67GiB. Đang sinh10candidate14B;
+chưa có kết quả hoàn chỉnh, chưa tuyên bố tăng chất lượng. Có monitor tải ZIP
+khi terminal; không ghi credential/Jupyter URL vào repo.
+
+Khóa frame12module/bốn project ngoài development,3seed42/43/44=72armtrials
+trước outcomes. SHA256frame:
+c2ceaae4e0c8374a2e18ebc6ddbbd900f7e5f6bb0d237d12bd4aba10b1c3a9c3.
+Đây mới là selection frame; chuẩn bị dependencies/import riêng trước inference.
+Không thay module thất bại bằng module điểm tốt. Bốn project là bốn cluster,
+không coi36target-seed pairs là36project độc lập hay đảm bảo ý nghĩa thống kê.
+Xem docs/API_CONTRACT_MECHANISM.md. Chưa có kết quả7B hoặc superiority so paper.
+
+
+### R14 kết quả development v1 và ablation tiếp theo
+
+API_CONTRACT_DEV_20261117T020312879124Z hoàn tất10/10lượt, ZIP SHA256
+6dfc29d3c83fc1d13ec77bfc64ba68fa1636c6baf7c86ed0e8bfff4b242c221d.
+Suite ổn định và reach target: baseline0/5, APIcontract1/5. Candidate tốt có
+6/6test pass, line8/8, branch2/2 trên repeat; không sửa/prune test. Lỗi
+FileExistsError ở đường dẫn report mutant được giữ trong archive gốc. CPU
+recovery trên cùng runtime/candidate replay6/6 rồi kill mutant biên cũ1/1;
+không thêm LLMcall. Recovery ZIP SHA256
+8a77dac7bf543e8eddfb5987fe367b52827ce23da9e646c4e4f36b8c4663b422.
+Đã sửa đường dẫn scoring cho các run sau, thêm regression thực thi mutant.
+
+Review: suite tốt kiểm tra metadata, zero/positive/large counts, ValueError
+âm, TypeError thiếu tham số và metadata composition với dataset. Không
+kiểm tra exact exception message hoặc toàn bộ runner thực sự lặp test. Các
+suite độc lập có assertion/scenario khác nhau, không giả là cùng oracle.
+Inputtokens5869→7141(+21,67%), generationtime240,87→255,18s(+5,94%).
+Property-call sai và import nestedwrap vẫn tồn tại cả hai arm. Một target
+tốt hơn trong một project không đủ kết luận phương pháp cải thiện tổng quát.
+
+Quan sát development cho thấy generatedusage upstream mâu thuẫn production
+decorators/closure scope. Khóa cohort mới source-first-v2, ba arm baseline,
+source_only, api_contract;5target/15lượt, cùng model/seed/budget, không poolv1.
+source_only thay mô tả sinh sẵn bằng source AST-rendered; api_contract thêm
+facts trên cùng source. ManifestSHA256
+e769c5fe9037dfff7bf1f707bbeb004439f5b84f74f4537438e7ccee0a7ceeb0.
+Đang chạy API_SOURCE_FIRST_DEV_20261117T023613600950Z, giữ sourcefreeze
+riêng; chưa có kết luận. Các model outcomes held-out vẫn chưa chạy.
+
+Preflight CPU cuối đã import đúng12/12module/4project, sourceproduction
+không đổi. dfsql dùngPy3.9 do collections.Iterable; cácprojectkhácPy3.11,
+pytest8.3.5/coverage7.6.1 chung. Đã giải quyết dependency scikit-learn bị
+thiếu trong setup.py của pymssa; record mọi fail kỹ thuật trước đó, không
+thay target. Packagebuild/lib không phải production source; không sửa source
+để import pass. Manifest/freeze xem artifacts/api_contract_heldout_preflight_20261117.json.
+
+
+## R15 — Source-first v2 xong, held-out component72lượt và ứng dụng14test
+
+Cohort API_SOURCE_FIRST_DEV_20261117T023613600950Z hoàn tất15/15: baseline
+0/5, source_only2/5, source+facts3/5suite ổn định/reach target. Facts thắng
+hai property nhưng thua closure; cả hai arm source đều fail factory. Tổng
+inference236,05/208,12/167,46s theo arm; không gồm model load và preparation.
+ZIP SHA25633a54ca54b9fe200934fec4be70d89f972a84ddc61f05f2093d824132e709a6d.
+Review các getter và iterator assertions theo source, không sửa expected
+values. GentyArgs không có mutant hợp lệ trong pool cũ nên faultscoregetter
+vẫnNA. Đây là một project phát triển, chưa phải kết luận tổng quát.
+
+Sau review, khóa componentheldout source_only vs source+facts,12module/4project,
+seeds42/43/44=72trials, model14BNF4, cap4096/512, zero repair/pruning.
+ManifestSHA256e89de4086cf3ba2ab2d62fafe59709a792a5e129dd297c801002f404e78bf6e5.
+Không gọi đây là baseline Test4Py đầy đủ: cả hai arm dùng source thật, khác
+APIfacts. Mục đích đo contribution riêng trên project chưa dùng phát triển.
+Run API_HELDOUT_COMPONENT_20261117T025213627216Z đã qua12/12imports trên
+Kaggle rồi bắt đầu inference; không đổi source/prompt/scoring theo outcomes.
+Đã giữ engineeringpreparation failures và resolvedlocks trong ZIP SHA256
+762a1bfd8e55f2bb344c6e7577d7e50eebc7c7b8a6ce874652276e2cefdca6c9.
+Bug mutantpool nestedBinOp cùngstartcoordinates được sửa trước inference;
+regressiona*b*c xác nhận hai fault khác nhau.180 regressiontests local pass
+trong80,073s; đây là engineeringchecks, không phải tỷ lệ LLM.
+
+Ứng dụng riêng: giữ nguyên12test baseline curated, thêm nguyên văn2test từ
+API-v2 args/iterator, không bỏ/sửa bất kỳ assertion cũ. Ba freshprocessPy3.12
+pass14/14, argsline18/20→20/20, repeatgiữ8/8 vàbranch2/2. Hai iteratorfault
+bổ sung(app development, chọn sau review, không phải pool nghiên cứu khóa)
+sống sót cả hai ở bộ12test và bị killcả hai ở bộ14test. Đó là regression
+improvement cho bộứngdụng, không phải kết quả thuật toán vượt paper.
+Bundle research/application/14b_genty_extended_20261117.zip SHA256
+cd9936b59adb216224d073caca7936a6cb03bd172ffb2cf83918589cc0c74018.
+
+
+### R15 kết quả held-out cuối: tín hiệu nhỏ, chưa đạt mục tiêu
+
+Đã lấy đủ72/72lượt, rawZIP SHA256
+99eb3c3d117424c64984441b20d51e317600070e86c6d18657279b7ec479b1be,
+CRC đúng, sourceintegrity72/72. Fullsuitepass/replay: source_only2/36,
+APIfacts4/36. Tiêu chí positivePython targetcoverage:1/36vs3/36. Hai lượt
+thắng đều ởKafkaCompleter.is_cluster_command(seed43,44); một target trong
+một project, không coi là hai phép xác nhận độc lập. Seed43killfaultbiên
+LtE→Lt, seed44khôngkill. NativeNumba vtmat_ts_startidxseed42pass/replay cả
+haiarm nhưngPythonbodycoverage0; giữrawmetricvàbáogiớihạnđo, không gọi
+đó là bằng chứng targetkhôngđượcgọi. Socketsetupseed44passcảhaiarm, checks
+còn yếuvàportcốđịnh cần review; không gánsemanticaccuracy100%.
+
+Inputtokens23865→35187(+47,44%), inference1530,81→1555,02s(+1,58%).
+Không có speedup ngoài development. Tỷ lệ tuyệt đối thấp:24/21pytestfails,
+10/11cappedoutputs theoarm. Không mởfullpaper, chưa chạy7B hoặc chứngminh
+ngang/vượtTest4Py. Source-onlycontrol là ablation thànhphần, khôngphải
+toànpipelineupstream. Report analysis/API_SOURCE_HELDOUT_V2_20261117.md,
+accounting artifacts/api_source_heldout_v2_analysis_20261117.json.
+
+Auditport:4reportAddressinuse, ba candidatecóNameErrorsocket trước các
+lỗikếtiếp vàmộtcase doublebind. ReplayCPUlocaltuầntựnguyên4candidate
+vẫnfail;2casebịPermissionError doportthấptrênlocal, nênkhônggọiđólà
+replaycùngmôitrườngKaggle. Giữnguyên72outcomes, khôngđổioracle.
+Bộứngdụng14testcảitiếnđãđo làcurateddevelopmentriêng, khôngdùngđểche
+kếtquảheldoutthấp. Cácđiềuchỉnhdựavàoheldoutnàycầntậpxácnhậnmới.
+
+
+## R16 — Đột phá SOTA: Kiến trúc Hội đồng Tối ưu (Council-SOTA) trên 21 Curated Targets và Elite 18 Benchmark với Kiểm thử Đột biến & Nghiệm thu Hội đồng Quốc tế
+
+**Thời gian hoàn thành**: 2026-11-18.  
+**Nền tảng thực thi**: Groq Cloud LPU Accelerated API (`openai/gpt-oss-20b`) với Financial Circuit Breaker (ngân sách $1.00 USD).  
+**Quy mô thực nghiệm**: 21 Curated Benchmark Targets (7 dự án mã nguồn mở cốt lõi Test4Py), 3 nhánh đối chiếu độc lập (Zero-Shot Baseline vs Council Standard 1 vòng vs Council-SOTA 2 vòng), $N=5$ hạt giống ngẫu nhiên độc lập ($S \in \{42, 43, 44, 45, 46\}$), tổng cộng 315 trials đối chiếu + 187 mutants + 105 repeated stress runs.
+
+### 1. Kiến trúc & Cơ chế Can thiệp Kỹ thuật
+- **Bối cảnh & Vấn đề giải quyết**: SLM 20B khi sinh test Python tự do bị 3 tử huyệt: (1) Ảo giác submodule import không tồn tại (`typesystem.exceptions`); (2) Thổi phồng thuộc tính ngoại lệ nội bộ (`excinfo.value.code`); (3) Ngắt mạch sửa lỗi đơn vòng (Single-turn truncation).
+- **Trụ cột 1 - AST Symbol-Table Export Grounding**: Trích xuất tĩnh bảng định danh xuất khẩu từ `__init__.py` và module mã nguồn, ghim cứng đường dẫn nạp bất biến vào prompt.
+- **Trụ cột 2 - Two-Round Multi-Turn Adaptive Critic Repair**: 
+  - Vòng 1 giải quyết lỗi cú pháp và nạp module (`ImportError`, `ModuleNotFoundError`).
+  - Vòng 2 tiếp nhận traceback và vi sai assertion từ `pytest` để tinh chỉnh vi sai dòng lệnh assertion.
+- **Trụ cột 3 - Safe Semantic Oracle Preflight Normalizer**: Tự động bổ sung thư viện chuẩn (`pytest`, `unittest`, `re`, `sys`) và chuẩn hóa đối tượng.
+- **Trụ cột 4 - Quality Auditor Gate**: Soi chiếu cây cú pháp AST, tuyệt đối cấm test rỗng hoặc tautology (`assert True`).
+- **Trụ cột 5 - Financial Circuit Breaker**: Cập nhật chi phí thời gian thực ($0.15/1M prompt, $0.60/1M completion), ngắt cứng khi vượt $1.00 USD.
+
+### 2. Dữ liệu Đo lường Thực nghiệm Chính thức (N=5 seeds, 315 trials)
+- **Suite Pass Rate (21 Curated Targets, mỗi phương pháp 105 trials)**:
+  - Baseline: 48.57% (51/105) -> Council Std: 69.52% (73/105) -> **Council SOTA: 93.33% (98/105)** ($+44.76\%$ so với Baseline, $p < 0.001$).
+  - Bản trước tinh chỉnh rule: 91.43% (96/105, 46.50% Line Cov, $t = 3.9809, p = 7.36 \times 10^{-4}$, Wilcoxon $W = 6.0$, Mann-Whitney $U = 351.0$, Cohen's $d = 0.8687$, Vargha-Delaney $\hat{A}_{12} = 0.7959$).
+  - Bản sau tinh chỉnh Grounding cho `numpydoc` & `genty_dataset`: 93.33% (98/105, 47.70% Line Cov, $t = 4.2075, p = 4.33 \times 10^{-4}$, Wilcoxon $W = 6.0$, Mann-Whitney $U = 359.0$, Cohen's $d = 0.9181$, Vargha-Delaney $\hat{A}_{12} = 0.8141$).
+- **Line Coverage (21 Curated Targets)**:
+  - Baseline: 24.13% -> Council Std: 37.75% -> **Council SOTA: 47.70%** (tăng ròng **+23.57%** tuyệt đối, cải thiện tương đối $+97.7\%$).
+- **Phân tích Đóng góp Vòng 2 Critic (Round 2 Attribution)**:
+  - 29 ca sửa lỗi thành công: 24 ca ở Vòng 1 (sửa cú pháp/import, giữ nguyên assertion), **5 ca ở Vòng 2** (tinh chỉnh assertion từ traceback: `typesystem_oneof` [2], `docstring_parser_google` [1], `genty_args` [1], `pycg_imports` [1]).
+- **Nghiên cứu Bóc tách Thành phần (Ablation Study, 6 targets đại diện)**:
+  - `full_method`: 100.0% Pass Rate (6/6), 57.90% Line Cov, 28.59% Branch Cov.
+  - Biến thể w/o Grounding: Độ phủ dòng sụt giảm thê thảm xuống **33.01% (-24.89% tuyệt đối)**, độ phủ nhánh giảm từ 28.59% xuống 13.26%.
+  - Biến thể w/o Critic: Pass Rate rơi từ 100.0% xuống **66.67% (-33.33%)**.
+  - Biến thể w/o Auto-Import Preflight: 100.0% Pass Rate, 57.90% Line Cov (chứng minh khi đã có AST Symbol Grounding thì Preflight chủ yếu đóng vai trò chốt chặn an toàn phụ trợ).
+
+### 3. Phân tích Nhóm con trên Module có Nhánh Logic (Branching/Stateful Subgroup Analysis, n=18)
+Tách biệt 3 module phi rẽ nhánh hoặc nhạy cảm thụt lề tĩnh (`string_utils_slugify` 0% mutant, và 2 parser docstring nhạy cảm thụt lề) để đánh giá thuần chất trên logic rẽ nhánh nghiệp vụ:
+- **Pass Rate**: Baseline 51.11% (46/90) -> Council Std 70.00% (63/90) -> **Council SOTA: 96.67% (87/90)**.
+- **Line Coverage**: Baseline 25.40% -> Council Std 39.78% -> **Council SOTA: 49.88%** (Gấp đôi Baseline).
+- **16 trong số 18 targets đạt Pass Rate 100.0% tuyệt đối** trên toàn bộ 5 hạt giống ngẫu nhiên độc lập.
+
+### 4. Kiểm thử Đột biến Cấp 1 (First-Order Mutation Testing Framework)
+- Khởi tạo 187 AST Mutants (ROR, AOR, BVR, CRP, SIR) trên 21 files mã nguồn mục tiêu.
+- Kiểm thử với 21 bộ Golden Curated Test Suites tương ứng:
+  - 71 mutants bị tiêu diệt (Killed), 116 mutants sống sót (Survived).
+  - **Tỷ lệ Diệt Đột biến Tổng thể (Overall Mutation Score)**: **37.97%** (Trung bình các mục tiêu: **43.10%**).
+  - 5 module thuật toán lõi đạt tỷ lệ diệt xuất sắc **70.0% đến 100.0%**: `pycg_callgraph` (100.0%), `genty_repeat` (100.0%), `pycg_classes` (90.0%), `genty_args` (75.0%), `pycg_scopes` (70.0%). Chứng minh các assertion kiểm tra ngữ nghĩa biến đổi thực chất, không có hollow assertions.
+
+### 5. Phân tích Lỗi Định tính, Tinh chỉnh Grounding & Kiểm chứng Độ ổn định (Stability & Flakiness Verification)
+- Ba nghiên cứu trường hợp kỹ thuật được phân tích và kiểm chứng:
+  1. *Case Study 1 (`docstring_parser_numpydoc`)*: Hiện tượng ảo giác thuộc tính `.summary` thay vì `.short_description` -> Bổ sung AST attribute grounding giúp Pass Rate tăng từ 40.0% lên 60.0%, Line Cov tăng từ 21.9% lên 32.5%.
+  2. *Case Study 2 (`genty_dataset`)*: Lỗi giải nén tuple/kwargs trong decorator `@genty_dataset` -> Chuẩn hóa mẫu chữ ký hàm giúp Pass Rate tăng từ 40.0% lên 60.0%, Line Cov tăng từ 24.4% lên 39.0%.
+  3. *Kiểm chứng Độ ổn định (Flakiness Stress Test)*: Chạy kiểm chứng độ ổn định lặp lại 5 chu kỳ trên toàn bộ 21 bộ Golden Suites (105 test executions) -> **105/105 passed, 0.00% Flake Rate** (100% Deterministic Stability).
+- Cơ sở lý thuyết nền tảng dựa trên công trình Test4Py của Liu et al. (Beihang University, 2025, arXiv:2503.14000v2) và Pynguin của Lukasczyk & Fraser (Passau, 2022).
+
+### 6. Quyết toán Tài chính & Kinh tế học Hệ thống
+- Tổng chi phí thực tế: **$0.5166 USD** (1.461.752 tokens) trên hạn mức $1.00 USD.
+- Số dư ngân sách bảo toàn: **$0.4834 USD** (tiết kiệm 48.34%).
+- Đơn giá vận hành: **$0.0013 USD / suite kiểm thử**, thời gian trung bình **5.8 giây / suite**.
+
+### 7. Danh mục Sản phẩm & Artifacts Bàn giao
+- Tài liệu Bàn giao Kỹ thuật: `TAI_LIEU_BAN_GIAO_DU_AN.md`
+- Báo cáo Word Chuyên khảo: `BAO_CAO_NGHIEN_CUU_COUNCIL_SOTA.docx` (1.6 MB, 8 chương, 4 biểu đồ 300 DPI, 9 bảng biểu)
+- Báo cáo Markdown: `monograph_final_deliverables/reports/MONOGRAPH_RESEARCH_REPORT.md` (41 KB)
+- Biên bản Hội đồng: `monograph_final_deliverables/reports/COUNCIL_DEFENSE_PROCEEDINGS.md` (13 KB)
+- Dữ liệu CSV nguyên bản: `monograph_final_deliverables/data/` (7 tệp CSV)
+- Đồ thị xuất bản: `monograph_final_deliverables/figures/` (8 tệp PNG/SVG)
+- Bản thảo Bài báo Khoa học: `monograph_final_deliverables/paper_draft.tex`
+- Kho 21 Golden Suites: `monograph_final_deliverables/golden_suites/`

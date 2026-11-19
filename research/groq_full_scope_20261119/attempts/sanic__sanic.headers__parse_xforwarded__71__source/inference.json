@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-3261b58c-d26b-4da8-b87f-84dd25e30b39",
+  "object": "chat.completion",
+  "created": 1795078494,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import parse_xforwarded\n\nclass DummyHeaders:\n    def __init__(self, mapping):\n        self._mapping = mapping\n\n    def getone(self, key, default=None):\n        return self._mapping.get(key, default)\n\n    def getall(self, key):\n        if key not in self._mapping:\n            raise KeyError(key)\n        value = self._mapping[key]\n        if isinstance(value, list):\n            return value\n        return [value]\n\nclass DummyConfig:\n    def __init__(self, real_ip_header=None, forwarded_for_header=\"X-Forwarded-For\",\n                 proxies_count=0, **kwargs):\n        self.REAL_IP_HEADER = real_ip_header\n        self.FORWARDED_FOR_HEADER = forwarded_for_header\n        self.PROXIES_COUNT = proxies_count\n        for k, v in kwargs.items():\n            setattr(self, k, v)\n\ndef test_parse_xforwarded_with_real_ip_header():\n    headers = DummyHeaders({\n        \"X-Real-IP\": \"203.0.113.195\",\n        \"X-Forwarded-Proto\": \"https\",\n        \"X-Forwarded-Host\": \"example.com\",\n        \"X-Forwarded-Port\": \"443\",\n        \"X-Forwarded-Path\": \"/resource\"\n    })\n    config = DummyConfig(real_ip_header=\"X-Real-IP\")\n    result = parse_xforwarded(headers, config)\n    assert result is not None\n    # The result should be an Options-like iterable; convert to dict for assertion\n    options_dict = dict(result)\n    assert options_dict[\"for\"] == \"203.0.113.195\"\n    assert options_dict[\"proto\"] == \"https\"\n    assert options_dict[\"host\"] == \"example.com\"\n    assert options_dict[\"port\"] == \"443\"\n    assert options_dict[\"path\"] == \"/resource\"\n\ndef test_parse_xforwarded_with_forwarded_for_and_proxies_count():\n    headers = DummyHeaders({\n        \"X-Forwarded-For\": [\"203.0.113.1, 203.0.113.2\", \"203.0.113.3\"],\n        \"X-Forwarded-Proto\": \"http\",\n        \"X-Forwarded-Host\": \"example.org\",\n        \"X-Forwarded-Port\": \"80\",\n        \"X-Forwarded-Path\": \"/api\"\n    })\n    config = DummyConfig(forwarded_for_header=\"X-Forwarded-For\", proxies_count=2)\n    result = parse_xforwarded(headers, config)\n    assert result is not None\n    options_dict = dict(result)\n    # With proxies_count=2, the second-to-last address should be used\n    assert options_dict[\"for\"] == \"203.0.113.2\"\n    assert options_dict[\"proto\"] == \"http\"\n    assert options_dict[\"host\"] == \"example.org\"\n    assert options_dict[\"port\"] == \"80\"\n    assert options_dict[\"path\"] == \"/api\"\n\ndef test_parse_xforwarded_returns_none_when_no_address():\n    headers = DummyHeaders({\n        \"X-Forwarded-Proto\": \"https\",\n        \"X-Forwarded-Host\": \"example.net\"\n    })\n    config = DummyConfig(real_ip_header=\"X-Real-IP\", forwarded_for_header=\"X-Forwarded-For\", proxies_count=1)\n    result = parse_xforwarded(headers, config)\n    assert result is None\n```",
+        "reasoning": "Need to test parse_xforwarded. Need Options type? Not defined. Probably Options is a type alias? Let's inspect sanic.headers. But we can't. We'll assume parse_xforwarded returns something that can be iterated? fwd_normalize likely returns Options. We can test that returned object yields expected values. But we don't know fwd_normalize. Maybe it's a function that normalizes options into dict? Let's search.We can't import. But we can simulate by creating dummy headers and config objects. We need to import parse_xforwarded from sanic.headers. Let's assume fwd_normalize returns a dict mapping keys to values. We'll test that. Use simple config with attributes. Use headers object with getone, getall. We'll create simple class. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054462459,
+    "prompt_tokens": 543,
+    "prompt_time": 0.0351907,
+    "completion_tokens": 894,
+    "completion_time": 1.013621812,
+    "total_tokens": 1437,
+    "total_time": 1.048812512,
+    "completion_tokens_details": {
+      "reasoning_tokens": 161
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg84rzep78jbkjc6a3a5jz",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import parse_xforwarded\n\nclass DummyHeaders:\n    def __init__(self, mapping):\n        self._mapping = mapping\n\n    def getone(self, key, default=None):\n        return self._mapping.get(key, default)\n\n    def getall(self, key):\n        if key not in self._mapping:\n            raise KeyError(key)\n        value = self._mapping[key]\n        if isinstance(value, list):\n            return value\n        return [value]\n\nclass DummyConfig:\n    def __init__(self, real_ip_header=None, forwarded_for_header=\"X-Forwarded-For\",\n                 proxies_count=0, **kwargs):\n        self.REAL_IP_HEADER = real_ip_header\n        self.FORWARDED_FOR_HEADER = forwarded_for_header\n        self.PROXIES_COUNT = proxies_count\n        for k, v in kwargs.items():\n            setattr(self, k, v)\n\ndef test_parse_xforwarded_with_real_ip_header():\n    headers = DummyHeaders({\n        \"X-Real-IP\": \"203.0.113.195\",\n        \"X-Forwarded-Proto\": \"https\",\n        \"X-Forwarded-Host\": \"example.com\",\n        \"X-Forwarded-Port\": \"443\",\n        \"X-Forwarded-Path\": \"/resource\"\n    })\n    config = DummyConfig(real_ip_header=\"X-Real-IP\")\n    result = parse_xforwarded(headers, config)\n    assert result is not None\n    # The result should be an Options-like iterable; convert to dict for assertion\n    options_dict = dict(result)\n    assert options_dict[\"for\"] == \"203.0.113.195\"\n    assert options_dict[\"proto\"] == \"https\"\n    assert options_dict[\"host\"] == \"example.com\"\n    assert options_dict[\"port\"] == \"443\"\n    assert options_dict[\"path\"] == \"/resource\"\n\ndef test_parse_xforwarded_with_forwarded_for_and_proxies_count():\n    headers = DummyHeaders({\n        \"X-Forwarded-For\": [\"203.0.113.1, 203.0.113.2\", \"203.0.113.3\"],\n        \"X-Forwarded-Proto\": \"http\",\n        \"X-Forwarded-Host\": \"example.org\",\n        \"X-Forwarded-Port\": \"80\",\n        \"X-Forwarded-Path\": \"/api\"\n    })\n    config = DummyConfig(forwarded_for_header=\"X-Forwarded-For\", proxies_count=2)\n    result = parse_xforwarded(headers, config)\n    assert result is not None\n    options_dict = dict(result)\n    # With proxies_count=2, the second-to-last address should be used\n    assert options_dict[\"for\"] == \"203.0.113.2\"\n    assert options_dict[\"proto\"] == \"http\"\n    assert options_dict[\"host\"] == \"example.org\"\n    assert options_dict[\"port\"] == \"80\"\n    assert options_dict[\"path\"] == \"/api\"\n\ndef test_parse_xforwarded_returns_none_when_no_address():\n    headers = DummyHeaders({\n        \"X-Forwarded-Proto\": \"https\",\n        \"X-Forwarded-Host\": \"example.net\"\n    })\n    config = DummyConfig(real_ip_header=\"X-Real-IP\", forwarded_for_header=\"X-Forwarded-For\", proxies_count=1)\n    result = parse_xforwarded(headers, config)\n    assert result is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4602970480336808
+}

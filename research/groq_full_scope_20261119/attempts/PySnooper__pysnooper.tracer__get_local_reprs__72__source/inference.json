@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-a3657b67-1e65-453a-84ee-56815a2e4240",
+  "object": "chat.completion",
+  "created": 1795077810,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport inspect\nimport collections\nimport pytest\nfrom pysnooper.tracer import get_local_reprs\nfrom pysnooper import utils\n\n# Helper variable class for watch tests\nclass DummyWatch:\n    def __init__(self, mapping):\n        self._mapping = mapping\n\n    def items(self, frame, normalize):\n        # Return mapping as is; ignore frame and normalize for simplicity\n        return self._mapping\n\ndef test_get_local_reprs_order_and_repr(tmp_path):\n    # Define a function with local variables to capture a frame\n    def inner():\n        a = 1\n        b = \"hello\"\n        c = [1, 2, 3]\n        return inspect.currentframe()\n\n    frame = inner()\n    result = get_local_reprs(frame)\n\n    # Expected order: a, b, c (co_varnames order)\n    expected_keys = (\"a\", \"b\", \"c\")\n    assert list(result.keys()) == list(expected_keys)\n\n    # Check that reprs are shortish and correct\n    assert result[\"a\"] == \"1\"\n    assert result[\"b\"] == \"'hello'\"\n    # List repr should be truncated if longer than default max_length\n    assert result[\"c\"].startswith(\"[1, 2, 3]\")  # full list fits default\n\ndef test_get_local_reprs_custom_repr_and_max_length(tmp_path):\n    def inner():\n        long_str = \"x\" * 50\n        num = 123456789\n        return inspect.currentframe()\n\n    frame = inner()\n    # Custom repr for int: show hex\n    custom_repr = (int, lambda x: hex(x))\n    # Max length 10 to truncate long_str\n    result = get_local_reprs(frame, custom_repr=custom_repr, max_length=10)\n\n    # long_str should be truncated\n    assert result[\"long_str\"].startswith(\"'xxxxxxxxxx\")\n    # int should use custom hex repr\n    assert result[\"num\"] == \"0x75bcd15\"\n\ndef test_get_local_reprs_watch_integration(tmp_path):\n    def inner():\n        x = 42\n        y = \"test\"\n        return inspect.currentframe()\n\n    frame = inner()\n    watch = DummyWatch({\"watch_var\": \"watched_value\"})\n    result = get_local_reprs(frame, watch=watch)\n\n    # Original locals should be present\n    assert result[\"x\"] == \"42\"\n    assert result[\"y\"] == \"'test'\"\n\n    # Watch variable should be added and sorted appropriately\n    # Since 'watch_var' is not in locals, it appears after existing keys\n    assert list(result.keys())[-1] == \"watch_var\"\n    assert result[\"watch_var\"] == \"watched_value\"\n```",
+        "reasoning": "We need to test get_local_reprs. We'll create a function that defines locals, call get_local_reprs with frame. Use inspect.currentframe. Test ordering, custom_repr, max_length, normalize. Also watch variable. Use a dummy variable class? watch expects variable objects with items(frame, normalize). We can create simple class with items returning dict. Test that watch updates. Write three tests: 1 normal ordering and repr. 2 custom_repr and max_length. 3 watch variable integration."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.0478465,
+    "prompt_tokens": 413,
+    "prompt_time": 0.077385038,
+    "completion_tokens": 680,
+    "completion_time": 0.82618754,
+    "total_tokens": 1093,
+    "total_time": 0.903572578,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 102
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfk9cneffr1kq495fwxwje",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport inspect\nimport collections\nimport pytest\nfrom pysnooper.tracer import get_local_reprs\nfrom pysnooper import utils\n\n# Helper variable class for watch tests\nclass DummyWatch:\n    def __init__(self, mapping):\n        self._mapping = mapping\n\n    def items(self, frame, normalize):\n        # Return mapping as is; ignore frame and normalize for simplicity\n        return self._mapping\n\ndef test_get_local_reprs_order_and_repr(tmp_path):\n    # Define a function with local variables to capture a frame\n    def inner():\n        a = 1\n        b = \"hello\"\n        c = [1, 2, 3]\n        return inspect.currentframe()\n\n    frame = inner()\n    result = get_local_reprs(frame)\n\n    # Expected order: a, b, c (co_varnames order)\n    expected_keys = (\"a\", \"b\", \"c\")\n    assert list(result.keys()) == list(expected_keys)\n\n    # Check that reprs are shortish and correct\n    assert result[\"a\"] == \"1\"\n    assert result[\"b\"] == \"'hello'\"\n    # List repr should be truncated if longer than default max_length\n    assert result[\"c\"].startswith(\"[1, 2, 3]\")  # full list fits default\n\ndef test_get_local_reprs_custom_repr_and_max_length(tmp_path):\n    def inner():\n        long_str = \"x\" * 50\n        num = 123456789\n        return inspect.currentframe()\n\n    frame = inner()\n    # Custom repr for int: show hex\n    custom_repr = (int, lambda x: hex(x))\n    # Max length 10 to truncate long_str\n    result = get_local_reprs(frame, custom_repr=custom_repr, max_length=10)\n\n    # long_str should be truncated\n    assert result[\"long_str\"].startswith(\"'xxxxxxxxxx\")\n    # int should use custom hex repr\n    assert result[\"num\"] == \"0x75bcd15\"\n\ndef test_get_local_reprs_watch_integration(tmp_path):\n    def inner():\n        x = 42\n        y = \"test\"\n        return inspect.currentframe()\n\n    frame = inner()\n    watch = DummyWatch({\"watch_var\": \"watched_value\"})\n    result = get_local_reprs(frame, watch=watch)\n\n    # Original locals should be present\n    assert result[\"x\"] == \"42\"\n    assert result[\"y\"] == \"'test'\"\n\n    # Watch variable should be added and sorted appropriately\n    # Since 'watch_var' is not in locals, it appears after existing keys\n    assert list(result.keys())[-1] == \"watch_var\"\n    assert result[\"watch_var\"] == \"watched_value\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2730410560034215
+}

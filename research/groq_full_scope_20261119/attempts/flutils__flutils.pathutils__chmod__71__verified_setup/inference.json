@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-446cf2d8-9240-43a5-bc41-b102bdadb798",
+  "object": "chat.completion",
+  "created": 1795078869,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport stat\nimport pytest\nfrom flutils.pathutils import chmod, normalize_path\n\ndef test_chmod_file_and_directory(tmp_path):\n    # Create a file and a directory\n    file_path = tmp_path / \"testfile.txt\"\n    dir_path = tmp_path / \"testdir\"\n    file_path.write_text(\"content\")\n    dir_path.mkdir()\n\n    # Apply chmod with custom modes\n    chmod(file_path, mode_file=0o644, mode_dir=0o755)\n    chmod(dir_path, mode_file=0o644, mode_dir=0o755)\n\n    # Verify file mode\n    file_mode = stat.S_IMODE(os.lstat(file_path).st_mode)\n    assert file_mode == 0o644, f\"Expected 0o644, got {oct(file_mode)}\"\n\n    # Verify directory mode\n    dir_mode = stat.S_IMODE(os.lstat(dir_path).st_mode)\n    assert dir_mode == 0o755, f\"Expected 0o755, got {oct(dir_mode)}\"\n\ndef test_chmod_glob_and_include_parent(tmp_path):\n    # Setup nested structure\n    (tmp_path / \"a\").mkdir()\n    (tmp_path / \"a\" / \"b\").mkdir()\n    (tmp_path / \"a\" / \"b\" / \"file.txt\").write_text(\"data\")\n    (tmp_path / \"a\" / \"c.txt\").write_text(\"data\")\n\n    # Glob pattern to change all files and dirs under tmp_path\n    pattern = normalize_path(tmp_path / \"**\")\n    chmod(pattern, mode_file=0o600, mode_dir=0o700, include_parent=True)\n\n    # Check modes\n    for p in [tmp_path, tmp_path / \"a\", tmp_path / \"a\" / \"b\"]:\n        mode = stat.S_IMODE(os.lstat(p).st_mode)\n        assert mode == 0o700, f\"{p} mode should be 0o700, got {oct(mode)}\"\n\n    for p in [tmp_path / \"a\" / \"c.txt\", tmp_path / \"a\" / \"b\" / \"file.txt\"]:\n        mode = stat.S_IMODE(os.lstat(p).st_mode)\n        assert mode == 0o600, f\"{p} mode should be 0o600, got {oct(mode)}\"\n\ndef test_chmod_nonexistent_path(tmp_path):\n    # Path that does not exist\n    nonexistent = tmp_path / \"does_not_exist.txt\"\n\n    # Ensure no exception is raised and nothing is created\n    chmod(nonexistent, mode_file=0o644, mode_dir=0o755)\n\n    # Path should still not exist\n    assert not nonexistent.exists(), \"Nonexistent path should remain nonexistent\"\n```",
+        "reasoning": "We need three tests. Use tmp_path. Test normal file chmod, directory, glob, include_parent. Also error: non-existent path does nothing. Use os.stat to check mode. Use pytest.raises? maybe test that no exception on non-existent. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053245806,
+    "prompt_tokens": 923,
+    "prompt_time": 0.088666199,
+    "completion_tokens": 639,
+    "completion_time": 0.719804798,
+    "total_tokens": 1562,
+    "total_time": 0.808470997,
+    "completion_tokens_details": {
+      "reasoning_tokens": 54
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgkkd8ecza2914mmcby8b4",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport stat\nimport pytest\nfrom flutils.pathutils import chmod, normalize_path\n\ndef test_chmod_file_and_directory(tmp_path):\n    # Create a file and a directory\n    file_path = tmp_path / \"testfile.txt\"\n    dir_path = tmp_path / \"testdir\"\n    file_path.write_text(\"content\")\n    dir_path.mkdir()\n\n    # Apply chmod with custom modes\n    chmod(file_path, mode_file=0o644, mode_dir=0o755)\n    chmod(dir_path, mode_file=0o644, mode_dir=0o755)\n\n    # Verify file mode\n    file_mode = stat.S_IMODE(os.lstat(file_path).st_mode)\n    assert file_mode == 0o644, f\"Expected 0o644, got {oct(file_mode)}\"\n\n    # Verify directory mode\n    dir_mode = stat.S_IMODE(os.lstat(dir_path).st_mode)\n    assert dir_mode == 0o755, f\"Expected 0o755, got {oct(dir_mode)}\"\n\ndef test_chmod_glob_and_include_parent(tmp_path):\n    # Setup nested structure\n    (tmp_path / \"a\").mkdir()\n    (tmp_path / \"a\" / \"b\").mkdir()\n    (tmp_path / \"a\" / \"b\" / \"file.txt\").write_text(\"data\")\n    (tmp_path / \"a\" / \"c.txt\").write_text(\"data\")\n\n    # Glob pattern to change all files and dirs under tmp_path\n    pattern = normalize_path(tmp_path / \"**\")\n    chmod(pattern, mode_file=0o600, mode_dir=0o700, include_parent=True)\n\n    # Check modes\n    for p in [tmp_path, tmp_path / \"a\", tmp_path / \"a\" / \"b\"]:\n        mode = stat.S_IMODE(os.lstat(p).st_mode)\n        assert mode == 0o700, f\"{p} mode should be 0o700, got {oct(mode)}\"\n\n    for p in [tmp_path / \"a\" / \"c.txt\", tmp_path / \"a\" / \"b\" / \"file.txt\"]:\n        mode = stat.S_IMODE(os.lstat(p).st_mode)\n        assert mode == 0o600, f\"{p} mode should be 0o600, got {oct(mode)}\"\n\ndef test_chmod_nonexistent_path(tmp_path):\n    # Path that does not exist\n    nonexistent = tmp_path / \"does_not_exist.txt\"\n\n    # Ensure no exception is raised and nothing is created\n    chmod(nonexistent, mode_file=0o644, mode_dir=0o755)\n\n    # Path should still not exist\n    assert not nonexistent.exists(), \"Nonexistent path should remain nonexistent\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.230159698985517
+}

@@ -1,0 +1,69 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_safari_api_ie_normal ___________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5182632f20>
+
+    def test_safari_api_ie_normal(monkeypatch):
+        """Test normal extraction of a Safari API part."""
+        # Prepare a dummy downloader and monkeypatch the download_json method
+        dummy = DummyDownloader()
+        def fake_download_json(url, name, note):
+            # Record the URL for later inspection
+            dummy.last_url = url
+            # Return a JSON dict with a web_url field
+            return {'web_url': 'https://example.com/content.html'}
+        monkeypatch.setattr(SafariApiIE, '_download_json', fake_download_json, raising=False)
+    
+        ie = SafariApiIE()
+        # Use a valid URL from the tests
+        url = 'https://www.safaribooksonline.com/api/v1/book/9780133392838/chapter/part00.html'
+>       result = ie._real_extract(url)
+
+test_generated.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.safari.SafariApiIE object at 0x7f5182631540>
+url = 'https://www.safaribooksonline.com/api/v1/book/9780133392838/chapter/part00.html'
+
+    def _real_extract(self, url):
+        mobj = re.match(self._VALID_URL, url)
+>       part = self._download_json(
+            url, '%s/%s' % (mobj.group('course_id'), mobj.group('part')),
+            'Downloading part JSON')
+E       TypeError: test_safari_api_ie_normal.<locals>.fake_download_json() takes 3 positional arguments but 4 were given
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/safari.py:193: TypeError
+______________________ test_safari_api_ie_download_error _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5181703490>
+
+    def test_safari_api_ie_download_error(monkeypatch):
+        """Test that an error during JSON download propagates as ExtractorError."""
+        def fake_download_json(url, name, note):
+            raise ExtractorError('download failed')
+        monkeypatch.setattr(SafariApiIE, '_download_json', fake_download_json, raising=False)
+    
+        ie = SafariApiIE()
+        url = 'https://www.safaribooksonline.com/api/v1/book/9780133392838/chapter/part00.html'
+        with pytest.raises(ExtractorError, match='download failed'):
+>           ie._real_extract(url)
+
+test_generated.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.safari.SafariApiIE object at 0x7f51817033d0>
+url = 'https://www.safaribooksonline.com/api/v1/book/9780133392838/chapter/part00.html'
+
+    def _real_extract(self, url):
+        mobj = re.match(self._VALID_URL, url)
+>       part = self._download_json(
+            url, '%s/%s' % (mobj.group('course_id'), mobj.group('part')),
+            'Downloading part JSON')
+E       TypeError: test_safari_api_ie_download_error.<locals>.fake_download_json() takes 3 positional arguments but 4 were given
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/safari.py:193: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_safari_api_ie_normal - TypeError: test_safari_...
+FAILED test_generated.py::test_safari_api_ie_download_error - TypeError: test...
+2 failed, 1 passed in 0.73s

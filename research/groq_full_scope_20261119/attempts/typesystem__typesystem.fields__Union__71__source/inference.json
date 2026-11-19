@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-4da15626-60c4-41f6-80ad-6db93babba09",
+  "object": "chat.completion",
+  "created": 1795078241,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem import fields\nfrom typesystem.base import ValidationError\n\ndef test_union_accepts_valid_type():\n    union_field = fields.Union(any_of=[fields.Integer(), fields.String()])\n    # Integer value should be accepted and returned unchanged\n    assert union_field.validate(42) == 42\n    # String value should be accepted and returned unchanged\n    assert union_field.validate(\"hello\") == \"hello\"\n\ndef test_union_null_behavior():\n    # Union of Integer and String, neither allows null\n    union_field = fields.Union(any_of=[fields.Integer(), fields.String()])\n    with pytest.raises(ValidationError) as excinfo:\n        union_field.validate(None)\n    assert \"null\" in excinfo.value.messages()[0].code\n\n    # Union where one child allows null\n    string_allow_null = fields.String(allow_null=True)\n    union_field_null = fields.Union(any_of=[fields.Integer(), string_allow_null])\n    # Now None should be accepted\n    assert union_field_null.validate(None) is None\n\ndef test_union_invalid_type_raises_union_error():\n    union_field = fields.Union(any_of=[fields.Integer(), fields.String()])\n    with pytest.raises(ValidationError) as excinfo:\n        union_field.validate([1, 2, 3])  # list is not a valid type\n    # The error should be the union error, not a type error from a child\n    assert excinfo.value.messages()[0].code == \"union\"\n```",
+        "reasoning": "We need to test Union field. Need to import typesystem.fields.Union. We need child fields. Use typesystem.fields.Integer, String? Let's inspect typesystem. Assume available. We'll create simple Union of Integer and String. Test normal: valid int passes. Boundary: null allowed if any child allow_null. Use String allow_null? maybe String field has allow_null default False. We can set allow_null=True on one child. Test error: invalid type raises union error. Also test candidate error scenario: child returns type error vs other error. Hard. Maybe test that if one child returns type error and another returns other error, union uses other error. Use Decimal field? Use Decimal field that fails type error? Hard.\n\nSimpler: test normal, null allowed, error. Provide three tests.\n\nImplement using typesystem.fields.Integer, String. Use Union(any_of=[Integer(), String()]). Test int passes. Test null allowed? none allow_null so null raises null error. Test string passes. For error: pass list -> raises union error. Use pytest.raises and check message. Use ValidationError. Let's code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054166959,
+    "prompt_tokens": 543,
+    "prompt_time": 0.04164133,
+    "completion_tokens": 543,
+    "completion_time": 0.620702541,
+    "total_tokens": 1086,
+    "total_time": 0.662343871,
+    "completion_tokens_details": {
+      "reasoning_tokens": 226
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg0ez6e3ss90zehqsfqpez",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem import fields\nfrom typesystem.base import ValidationError\n\ndef test_union_accepts_valid_type():\n    union_field = fields.Union(any_of=[fields.Integer(), fields.String()])\n    # Integer value should be accepted and returned unchanged\n    assert union_field.validate(42) == 42\n    # String value should be accepted and returned unchanged\n    assert union_field.validate(\"hello\") == \"hello\"\n\ndef test_union_null_behavior():\n    # Union of Integer and String, neither allows null\n    union_field = fields.Union(any_of=[fields.Integer(), fields.String()])\n    with pytest.raises(ValidationError) as excinfo:\n        union_field.validate(None)\n    assert \"null\" in excinfo.value.messages()[0].code\n\n    # Union where one child allows null\n    string_allow_null = fields.String(allow_null=True)\n    union_field_null = fields.Union(any_of=[fields.Integer(), string_allow_null])\n    # Now None should be accepted\n    assert union_field_null.validate(None) is None\n\ndef test_union_invalid_type_raises_union_error():\n    union_field = fields.Union(any_of=[fields.Integer(), fields.String()])\n    with pytest.raises(ValidationError) as excinfo:\n        union_field.validate([1, 2, 3])  # list is not a valid type\n    # The error should be the union error, not a type error from a child\n    assert excinfo.value.messages()[0].code == \"union\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1640501099755056
+}

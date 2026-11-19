@@ -1,0 +1,54 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_compress_file_like_body_non_economical_always ______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.uploads__compress_request__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_compress_file_like_body_n0')
+
+    def test_compress_file_like_body_non_economical_always(tmp_path):
+        # Create a file-like object with data that does not compress well
+        data = b"".join([bytes([i % 256]) for i in range(1000)])  # random-ish data
+        file_obj = io.BytesIO(data)
+        req = requests.Request("POST", "http://example.com", data=file_obj).prepare()
+        # Ensure body is read from file-like object
+>       assert isinstance(req.body, bytes)
+E       assert False
+E        +  where False = isinstance(<_io.BytesIO object at 0x7f4801208180>, bytes)
+E        +    where <_io.BytesIO object at 0x7f4801208180> = <PreparedRequest [POST]>.body
+
+test_generated.py:31: AssertionError
+______________________ test_compress_none_body_no_change _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.uploads__compress_request__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_compress_none_body_no_cha0')
+
+    def test_compress_none_body_no_change(tmp_path):
+        # Prepare a request with no body
+        req = requests.Request("GET", "http://example.com").prepare()
+        # Body is None
+        assert req.body is None
+        # Compress should leave body unchanged
+>       compress_request(req, always=False)
+
+test_generated.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+request = <PreparedRequest [GET]>, always = False
+
+    def compress_request(
+        request: requests.PreparedRequest,
+        always: bool,
+    ):
+        deflater = zlib.compressobj()
+        if isinstance(request.body, str):
+            body_bytes = request.body.encode()
+        elif hasattr(request.body, 'read'):
+            body_bytes = request.body.read()
+        else:
+            body_bytes = request.body
+>       deflated_data = deflater.compress(body_bytes)
+E       TypeError: a bytes-like object is required, not 'NoneType'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/uploads.py:263: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_compress_file_like_body_non_economical_always
+FAILED test_generated.py::test_compress_none_body_no_change - TypeError: a by...
+2 failed, 1 passed in 0.57s

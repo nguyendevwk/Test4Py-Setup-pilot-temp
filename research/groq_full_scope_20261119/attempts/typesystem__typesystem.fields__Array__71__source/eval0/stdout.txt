@@ -1,0 +1,31 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_array_min_max_and_exact_constraints ___________________
+
+    def test_array_min_max_and_exact_constraints():
+        # Array must have exactly 2 items, each a string
+        field = Array(items=Integer(), exact_items=2)
+        # Too few items -> exact_items error
+        with pytest.raises(ValidationError) as excinfo:
+            field.validate([1])
+>       assert any(msg.code == "exact_items" for msg in excinfo.value.messages)
+E       TypeError: 'method' object is not iterable
+
+test_generated.py:25: TypeError
+________________________ test_array_unique_items_error _________________________
+
+    def test_array_unique_items_error():
+        # Array with unique items constraint
+        field = Array(items=Integer(), unique_items=True)
+        # Duplicate values should trigger unique_items error
+        with pytest.raises(ValidationError) as excinfo:
+            field.validate([1, 2, 1])
+        messages = excinfo.value.messages
+>       assert any(msg.code == "unique_items" for msg in messages)
+E       TypeError: 'method' object is not iterable
+
+test_generated.py:44: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_array_min_max_and_exact_constraints - TypeErro...
+FAILED test_generated.py::test_array_unique_items_error - TypeError: 'method'...
+2 failed, 1 passed in 0.11s

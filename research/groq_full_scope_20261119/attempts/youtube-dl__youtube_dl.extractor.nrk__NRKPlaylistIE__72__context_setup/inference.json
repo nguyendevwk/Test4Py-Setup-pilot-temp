@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-318d4f33-a4c7-4912-9114-9c3c594b6530",
+  "object": "chat.completion",
+  "created": 1795079565,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKPlaylistIE\nfrom youtube_dl.utils import ExtractorError\n\n# Helper subclass that overrides network-dependent methods\nclass DummyNRKPlaylistIE(NRKPlaylistIE):\n    def __init__(self, webpage):\n        super().__init__(downloader=None)\n        self._webpage = webpage\n\n    def _download_webpage(self, url, playlist_id, note=None, errnote=None, headers=None, data=None, timeout=None, *, fatal=True):\n        # Return the pre‑provided webpage regardless of URL\n        return self._webpage\n\n    def _match_id(self, url):\n        # Use the regex from the real class to extract the id\n        m = re.search(self._VALID_URL, url)\n        if not m:\n            raise ExtractorError('Invalid URL')\n        return m.group('id')\n\n# Test 1: Normal extraction with two video items\ndef test_nrk_playlist_normal(tmp_path):\n    # Construct a minimal webpage containing two video IDs and og tags\n    webpage = '''\n        <html>\n        <head>\n            <meta property=\"og:title\" content=\"Test Playlist Title\" />\n            <meta property=\"og:description\" content=\"Test description.\" />\n        </head>\n        <body>\n            <div class=\"rich\" data-video-id=\"vid1\"></div>\n            <div class=\"rich\" data-video-id=\"vid2\"></div>\n        </body>\n        </html>\n    '''\n    url = 'http://www.nrk.no/test/playlist-1.12345678'\n    ie = DummyNRKPlaylistIE(webpage)\n    result = ie._real_extract(url)\n\n    # Verify playlist metadata\n    assert result['id'] == 'playlist-1.12345678'\n    assert result['title'] == 'Test Playlist Title'\n    assert result['description'] == 'Test description.'\n\n    # Verify entries\n    entries = result['entries']\n    assert len(entries) == 2\n    assert entries[0]['url'] == 'nrk:vid1'\n    assert entries[1]['url'] == 'nrk:vid2'\n\n# Test 2: Boundary case with no video items\ndef test_nrk_playlist_no_items(tmp_path):\n    webpage = '''\n        <html>\n        <head>\n            <meta property=\"og:title\" content=\"Empty Playlist\" />\n            <meta property=\"og:description\" content=\"No videos.\" />\n        </head>\n        <body>\n            <p>No videos here.</p>\n        </body>\n        </html>\n    '''\n    url = 'http://www.nrk.no/test/empty-1.87654321'\n    ie = DummyNRKPlaylistIE(webpage)\n    result = ie._real_extract(url)\n\n    assert result['id'] == 'empty-1.87654321'\n    assert result['title'] == 'Empty Playlist'\n    assert result['description'] == 'No videos.'\n    assert result['entries'] == []\n\n# Test 3: Error when URL does not match the expected pattern\ndef test_nrk_playlist_invalid_url(tmp_path):\n    webpage = '<html></html>'\n    url = 'http://www.example.com/not-nrk'\n    ie = DummyNRKPlaylistIE(webpage)\n    with pytest.raises(ExtractorError):\n        ie._real_extract(url)\n```",
+        "reasoning": "We need tests for NRKPlaylistIE. We can instantiate and call _real_extract with a fake URL? But it downloads webpage. Can't network. But we can monkeypatch _download_webpage to return a crafted string. No mocks allowed? It says no mocks of target. But we can subclass? We can create a dummy subclass overriding _download_webpage. That's allowed? It's not mocking target, just subclass. Use tmp_path? Not needed. We'll test that entries list built correctly. Use a fake webpage containing two data-video-id. Also test title extraction using og tags. Use _extract_title and _extract_description. They rely on _og_search_title etc from InfoExtractor. Might be complex. Instead test _real_extract with overridden _download_webpage and _match_id? _match_id uses regex. Provide URL matching. Use real URL. Provide webpage with two items. Ensure playlist_result returns dict with entries list length 2. Use assert. Three tests: normal extraction, boundary with no items, error when invalid URL. Use pytest.raises for ExtractorError. We'll need to import ExtractorError. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005430192,
+    "prompt_tokens": 848,
+    "prompt_time": 0.018889641,
+    "completion_tokens": 937,
+    "completion_time": 1.075963138,
+    "total_tokens": 1785,
+    "total_time": 1.094852779,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 229
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh8v5zeagbgqj2j5nxj0r6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKPlaylistIE\nfrom youtube_dl.utils import ExtractorError\n\n# Helper subclass that overrides network-dependent methods\nclass DummyNRKPlaylistIE(NRKPlaylistIE):\n    def __init__(self, webpage):\n        super().__init__(downloader=None)\n        self._webpage = webpage\n\n    def _download_webpage(self, url, playlist_id, note=None, errnote=None, headers=None, data=None, timeout=None, *, fatal=True):\n        # Return the pre‑provided webpage regardless of URL\n        return self._webpage\n\n    def _match_id(self, url):\n        # Use the regex from the real class to extract the id\n        m = re.search(self._VALID_URL, url)\n        if not m:\n            raise ExtractorError('Invalid URL')\n        return m.group('id')\n\n# Test 1: Normal extraction with two video items\ndef test_nrk_playlist_normal(tmp_path):\n    # Construct a minimal webpage containing two video IDs and og tags\n    webpage = '''\n        <html>\n        <head>\n            <meta property=\"og:title\" content=\"Test Playlist Title\" />\n            <meta property=\"og:description\" content=\"Test description.\" />\n        </head>\n        <body>\n            <div class=\"rich\" data-video-id=\"vid1\"></div>\n            <div class=\"rich\" data-video-id=\"vid2\"></div>\n        </body>\n        </html>\n    '''\n    url = 'http://www.nrk.no/test/playlist-1.12345678'\n    ie = DummyNRKPlaylistIE(webpage)\n    result = ie._real_extract(url)\n\n    # Verify playlist metadata\n    assert result['id'] == 'playlist-1.12345678'\n    assert result['title'] == 'Test Playlist Title'\n    assert result['description'] == 'Test description.'\n\n    # Verify entries\n    entries = result['entries']\n    assert len(entries) == 2\n    assert entries[0]['url'] == 'nrk:vid1'\n    assert entries[1]['url'] == 'nrk:vid2'\n\n# Test 2: Boundary case with no video items\ndef test_nrk_playlist_no_items(tmp_path):\n    webpage = '''\n        <html>\n        <head>\n            <meta property=\"og:title\" content=\"Empty Playlist\" />\n            <meta property=\"og:description\" content=\"No videos.\" />\n        </head>\n        <body>\n            <p>No videos here.</p>\n        </body>\n        </html>\n    '''\n    url = 'http://www.nrk.no/test/empty-1.87654321'\n    ie = DummyNRKPlaylistIE(webpage)\n    result = ie._real_extract(url)\n\n    assert result['id'] == 'empty-1.87654321'\n    assert result['title'] == 'Empty Playlist'\n    assert result['description'] == 'No videos.'\n    assert result['entries'] == []\n\n# Test 3: Error when URL does not match the expected pattern\ndef test_nrk_playlist_invalid_url(tmp_path):\n    webpage = '<html></html>'\n    url = 'http://www.example.com/not-nrk'\n    ie = DummyNRKPlaylistIE(webpage)\n    with pytest.raises(ExtractorError):\n        ie._real_extract(url)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "a84a840500bf47968356d39966922ad6",
+  "_api_plus_pacing_seconds": 16.452502899977844
+}

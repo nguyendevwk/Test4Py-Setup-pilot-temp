@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-ee34b175-3300-41bd-b516-c5585837d1c2",
+  "object": "chat.completion",
+  "created": 1795077103,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.core import main\nfrom httpie.status import ExitStatus\n\ndef test_main_debug_returns_success(tmp_path):\n    \"\"\"Passing '--debug' alone should print debug info and exit with SUCCESS.\"\"\"\n    status = main(args=['prog', '--debug'])\n    assert status == ExitStatus.SUCCESS\n\ndef test_main_bytes_args_are_decoded(tmp_path):\n    \"\"\"Bytes arguments should be decoded using stdin encoding and processed.\"\"\"\n    # Use a byte string that is valid UTF-8\n    status = main(args=['prog', b'--debug'])\n    assert status == ExitStatus.SUCCESS\n\ndef test_main_unknown_option_returns_error(tmp_path):\n    \"\"\"An unknown command‑line option should result in an ERROR exit status.\"\"\"\n    status = main(args=['prog', '--unknown'])\n    assert status == ExitStatus.ERROR\n```",
+        "reasoning": "We need tests for main. Use tmp_path for env config? We can call main with args that trigger error: e.g., invalid JSON syntax leads to NestedJSONSyntaxError. We can simulate by passing '--json' with bad syntax? But parser unknown. Simpler: test decode_raw_args conversion. But target is main. We can test that passing bytes args decodes. Use main with args ['prog', b'--debug'] expecting ExitStatus.SUCCESS? Actually debug prints and returns SUCCESS. But need environment. Use Environment() default. main returns ExitStatus. We can assert it's SUCCESS. Also test error handling: passing '--json' with bad syntax triggers NestedJSONSyntaxError. Need to know parser expects --json? Might be complex. Instead test that passing '--debug' alone returns SUCCESS. Third test: passing unknown option triggers SystemExit and exit status ERROR. Use pytest.raises SystemExit? main handles SystemExit internally and returns ERROR. So call main(['prog','--unknown']) and assert ExitStatus.ERROR. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053712598,
+    "prompt_tokens": 2130,
+    "prompt_time": 0.012146221,
+    "completion_tokens": 387,
+    "completion_time": 0.439665439,
+    "total_tokens": 2517,
+    "total_time": 0.45181166,
+    "prompt_tokens_details": {
+      "cached_tokens": 2048
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 209
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sexq5zeb6s5hwak65zhe6d",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.core import main\nfrom httpie.status import ExitStatus\n\ndef test_main_debug_returns_success(tmp_path):\n    \"\"\"Passing '--debug' alone should print debug info and exit with SUCCESS.\"\"\"\n    status = main(args=['prog', '--debug'])\n    assert status == ExitStatus.SUCCESS\n\ndef test_main_bytes_args_are_decoded(tmp_path):\n    \"\"\"Bytes arguments should be decoded using stdin encoding and processed.\"\"\"\n    # Use a byte string that is valid UTF-8\n    status = main(args=['prog', b'--debug'])\n    assert status == ExitStatus.SUCCESS\n\ndef test_main_unknown_option_returns_error(tmp_path):\n    \"\"\"An unknown command‑line option should result in an ERROR exit status.\"\"\"\n    status = main(args=['prog', '--unknown'])\n    assert status == ExitStatus.ERROR\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.7987729579908773
+}

@@ -1,0 +1,52 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_json_header_set_when_json_flag ______________________
+
+    def test_json_header_set_when_json_flag():
+        """When the `--json` flag is set, Accept and Content-Type headers are added."""
+        args = argparse.Namespace(
+            data=None, form=False, json=True, files=None
+        )
+        headers = make_default_headers(args)
+        assert isinstance(headers, HTTPHeadersDict)
+>       assert headers["User-Agent"] == DEFAULT_UA
+E       AssertionError: assert 'HTTPie/3.2.4' == 'httpie/1.0'
+E         
+E         - httpie/1.0
+E         + HTTPie/3.2.4
+
+test_generated.py:19: AssertionError
+_________________ test_auto_json_header_when_data_and_not_form _________________
+
+    def test_auto_json_header_when_data_and_not_form():
+        """When data is provided and not form, auto_json triggers JSON headers."""
+        args = argparse.Namespace(
+            data="{'key':'value'}", form=False, json=False, files=None
+        )
+        headers = make_default_headers(args)
+>       assert headers["Accept"] == JSON_ACCEPT
+E       AssertionError: assert 'application/json, */*;q=0.5' == 'application/json'
+E         
+E         - application/json
+E         + application/json, */*;q=0.5
+
+test_generated.py:29: AssertionError
+___________________ test_no_content_type_when_form_and_files ___________________
+
+    def test_no_content_type_when_form_and_files():
+        """When form is true and files are provided, Content-Type should not be set."""
+        args = argparse.Namespace(
+            data=None, form=True, json=False, files=["file1.txt"]
+        )
+        headers = make_default_headers(args)
+        # Content-Type should not be present because requests will set it
+        assert "Content-Type" not in headers
+>       assert headers["Accept"] != JSON_ACCEPT  # no JSON headers added
+E       KeyError: 'Accept'
+
+test_generated.py:40: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_json_header_set_when_json_flag - AssertionErro...
+FAILED test_generated.py::test_auto_json_header_when_data_and_not_form - Asse...
+FAILED test_generated.py::test_no_content_type_when_form_and_files - KeyError...
+3 failed in 0.86s

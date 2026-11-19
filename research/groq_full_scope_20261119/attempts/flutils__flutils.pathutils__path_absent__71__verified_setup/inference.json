@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-84f1644c-9136-415b-85ce-f85fc301453c",
+  "object": "chat.completion",
+  "created": 1795076619,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport pathlib\nimport pytest\nfrom flutils.pathutils import path_absent\n\n\ndef test_path_absent_removes_file(tmp_path: pathlib.Path) -> None:\n    # Create a temporary file\n    file_path = tmp_path / \"temp_file.txt\"\n    file_path.write_text(\"content\")\n    assert file_path.exists()\n\n    # Ensure the file is removed\n    path_absent(file_path)\n    assert not file_path.exists()\n\n\ndef test_path_absent_removes_directory(tmp_path: pathlib.Path) -> None:\n    # Create a nested directory structure with files\n    dir_path = tmp_path / \"nested_dir\"\n    sub_dir = dir_path / \"sub\"\n    sub_dir.mkdir(parents=True)\n    (sub_dir / \"file1.txt\").write_text(\"data\")\n    (dir_path / \"file2.txt\").write_text(\"more data\")\n    assert dir_path.exists()\n    assert (sub_dir / \"file1.txt\").exists()\n\n    # Ensure the entire directory tree is removed\n    path_absent(dir_path)\n    assert not dir_path.exists()\n\n\ndef test_path_absent_handles_symlink_and_nonexistent(tmp_path: pathlib.Path) -> None:\n    # Create a file and a symlink to it\n    target_file = tmp_path / \"target.txt\"\n    target_file.write_text(\"target\")\n    symlink_path = tmp_path / \"link.txt\"\n    symlink_path.symlink_to(target_file)\n    assert symlink_path.is_symlink()\n    assert symlink_path.exists()\n\n    # Remove the symlink\n    path_absent(symlink_path)\n    assert not symlink_path.exists()\n    # Target file should still exist\n    assert target_file.exists()\n\n    # Call path_absent on a non-existent path; should not raise\n    non_existent = tmp_path / \"does_not_exist.txt\"\n    assert not non_existent.exists()\n    path_absent(non_existent)  # should complete silently\n    assert not non_existent.exists()\n```",
+        "reasoning": "Need tests for path_absent. Use tmp_path. Three tests: normal file deletion, directory deletion, error when path doesn't exist? path_absent does nothing. test that no exception. Also test symlink removal. Use tmp_path to create file, dir, symlink. Ensure after call path_absent, path not exists. Use pytest.raises? maybe test that no exception. Third test: path_absent on non-existent path doesn't raise. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051910675,
+    "prompt_tokens": 614,
+    "prompt_time": 0.044658002,
+    "completion_tokens": 515,
+    "completion_time": 0.627558635,
+    "total_tokens": 1129,
+    "total_time": 0.672216637,
+    "completion_tokens_details": {
+      "reasoning_tokens": 94
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7seeyyqea89y65ja6hj6mym",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport pathlib\nimport pytest\nfrom flutils.pathutils import path_absent\n\n\ndef test_path_absent_removes_file(tmp_path: pathlib.Path) -> None:\n    # Create a temporary file\n    file_path = tmp_path / \"temp_file.txt\"\n    file_path.write_text(\"content\")\n    assert file_path.exists()\n\n    # Ensure the file is removed\n    path_absent(file_path)\n    assert not file_path.exists()\n\n\ndef test_path_absent_removes_directory(tmp_path: pathlib.Path) -> None:\n    # Create a nested directory structure with files\n    dir_path = tmp_path / \"nested_dir\"\n    sub_dir = dir_path / \"sub\"\n    sub_dir.mkdir(parents=True)\n    (sub_dir / \"file1.txt\").write_text(\"data\")\n    (dir_path / \"file2.txt\").write_text(\"more data\")\n    assert dir_path.exists()\n    assert (sub_dir / \"file1.txt\").exists()\n\n    # Ensure the entire directory tree is removed\n    path_absent(dir_path)\n    assert not dir_path.exists()\n\n\ndef test_path_absent_handles_symlink_and_nonexistent(tmp_path: pathlib.Path) -> None:\n    # Create a file and a symlink to it\n    target_file = tmp_path / \"target.txt\"\n    target_file.write_text(\"target\")\n    symlink_path = tmp_path / \"link.txt\"\n    symlink_path.symlink_to(target_file)\n    assert symlink_path.is_symlink()\n    assert symlink_path.exists()\n\n    # Remove the symlink\n    path_absent(symlink_path)\n    assert not symlink_path.exists()\n    # Target file should still exist\n    assert target_file.exists()\n\n    # Call path_absent on a non-existent path; should not raise\n    non_existent = tmp_path / \"does_not_exist.txt\"\n    assert not non_existent.exists()\n    path_absent(non_existent)  # should complete silently\n    assert not non_existent.exists()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.016326725948602
+}

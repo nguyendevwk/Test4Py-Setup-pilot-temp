@@ -1,0 +1,107 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_logging_redirected_to_tqdm_write _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.logging__logging_redirect_tqdm__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_logging_redirected_to_tqd0')
+
+    def test_logging_redirected_to_tqdm_write(tmp_path):
+        """When inside the context, console logs are redirected to tqdm.write."""
+        logger = logging.getLogger("test_logger")
+        logger.setLevel(logging.INFO)
+        # Attach a console handler that writes to stdout
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(logging.Formatter("%(message)s"))
+        logger.handlers = [console_handler]
+    
+        # Capture output before context to ensure nothing is printed
+        out_before, err_before = _capture_output(logger.info, "before")
+        assert out_before == ""
+        assert err_before == ""
+    
+        with logging_redirect_tqdm([logger]):
+            # Inside context, the message should go to tqdm.write (stderr)
+            out_inside, err_inside = _capture_output(logger.info, "inside")
+            # tqdm.write writes to stderr by default
+>           assert "inside" in err_inside
+E           AssertionError: assert 'inside' in ''
+
+test_generated.py:39: AssertionError
+----------------------------- Captured stdout call -----------------------------
+before
+inside
+------------------------------ Captured log call -------------------------------
+INFO     test_logger:test_generated.py:17 before
+INFO     test_logger:test_generated.py:17 inside
+____________________ test_default_loggers_use_logging_root _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.logging__logging_redirect_tqdm__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_default_loggers_use_loggi0')
+
+    def test_default_loggers_use_logging_root(tmp_path):
+        """When no loggers are provided, the root logger is used."""
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.INFO)
+        # Attach a console handler to root
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(logging.Formatter("%(message)s"))
+        root_logger.handlers = [console_handler]
+    
+        out_before, err_before = _capture_output(root_logger.info, "root before")
+        assert out_before == ""
+        assert err_before == ""
+    
+        with logging_redirect_tqdm():
+            out_inside, err_inside = _capture_output(root_logger.info, "root inside")
+>           assert "root inside" in err_inside
+E           AssertionError: assert 'root inside' in ''
+
+test_generated.py:63: AssertionError
+----------------------------- Captured stdout call -----------------------------
+root before
+root inside
+____________________ test_multiple_loggers_and_restoration _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tqdm__tqdm.contrib.logging__logging_redirect_tqdm__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_multiple_loggers_and_rest0')
+
+    def test_multiple_loggers_and_restoration(tmp_path):
+        """Multiple loggers are redirected and restored correctly."""
+        logger_a = logging.getLogger("logger_a")
+        logger_b = logging.getLogger("logger_b")
+        for logger in (logger_a, logger_b):
+            logger.setLevel(logging.INFO)
+            console_handler = logging.StreamHandler(sys.stdout)
+            console_handler.setFormatter(logging.Formatter("%(message)s"))
+            logger.handlers = [console_handler]
+    
+        # Capture before context
+        out_a_before, err_a_before = _capture_output(logger_a.info, "a before")
+        out_b_before, err_b_before = _capture_output(logger_b.info, "b before")
+        assert out_a_before == "" and err_a_before == ""
+        assert out_b_before == "" and err_b_before == ""
+    
+        with logging_redirect_tqdm([logger_a, logger_b]):
+            out_a_inside, err_a_inside = _capture_output(logger_a.info, "a inside")
+            out_b_inside, err_b_inside = _capture_output(logger_b.info, "b inside")
+            # Both should be redirected to stderr via tqdm.write
+>           assert "a inside" in err_a_inside
+E           AssertionError: assert 'a inside' in ''
+
+test_generated.py:91: AssertionError
+----------------------------- Captured stdout call -----------------------------
+a before
+a before
+b before
+b before
+a inside
+a inside
+b inside
+b inside
+------------------------------ Captured log call -------------------------------
+INFO     logger_a:test_generated.py:17 a before
+INFO     logger_b:test_generated.py:17 b before
+INFO     logger_a:test_generated.py:17 a inside
+INFO     logger_b:test_generated.py:17 b inside
+=========================== short test summary info ============================
+FAILED test_generated.py::test_logging_redirected_to_tqdm_write - AssertionEr...
+FAILED test_generated.py::test_default_loggers_use_logging_root - AssertionEr...
+FAILED test_generated.py::test_multiple_loggers_and_restoration - AssertionEr...
+3 failed in 0.20s

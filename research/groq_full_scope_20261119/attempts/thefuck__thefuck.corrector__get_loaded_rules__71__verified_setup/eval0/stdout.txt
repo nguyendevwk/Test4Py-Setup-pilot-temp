@@ -1,0 +1,76 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_get_loaded_rules_skips_init _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.corrector__get_loaded_rules__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_loaded_rules_skips_in0')
+
+    def test_get_loaded_rules_skips_init(tmp_path):
+        """`get_loaded_rules` should skip files named '__init__.py'."""
+        # Create a dummy rule file that would normally be loaded
+        rule_file = tmp_path / "dummy_rule.py"
+        rule_file.write_text(
+            """
+    from thefuck.types import Rule
+    
+    class DummyRule(Rule):
+        is_enabled = True
+    """
+        )
+        # Create an __init__.py file that should be ignored
+        init_file = tmp_path / "__init__.py"
+        init_file.write_text("# init")
+    
+        # Convert to ThefuckPath objects
+        paths = [ThefuckPath(p) for p in [rule_file, init_file]]
+>       loaded = list(get_loaded_rules(paths))
+
+test_generated.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/corrector.py:17: in get_loaded_rules
+    rule = Rule.from_path(path)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'thefuck.types.Rule'>
+path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.corrector__get_loaded_rules__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_get_loaded_rules_skips_in0/dummy_rule.py')
+
+    @classmethod
+    def from_path(cls, path):
+        """Creates rule instance from path.
+    
+        :type path: pathlib.Path
+        :rtype: Rule
+    
+        """
+        name = path.name[:-3]
+        if name in settings.exclude_rules:
+            logs.debug(u'Ignoring excluded rule: {}'.format(name))
+            return
+        with logs.debug_time(u'Importing rule: {};'.format(name)):
+            try:
+                rule_module = load_source(name, str(path))
+            except Exception:
+                logs.exception(u"Rule {} failed to load".format(name), sys.exc_info())
+                return
+        priority = getattr(rule_module, 'priority', DEFAULT_PRIORITY)
+>       return cls(name, rule_module.match,
+                   rule_module.get_new_command,
+                   getattr(rule_module, 'enabled_by_default', True),
+                   getattr(rule_module, 'side_effect', None),
+                   settings.priority.get(name, priority),
+                   getattr(rule_module, 'requires_output', True))
+E       AttributeError: module 'dummy_rule' has no attribute 'match'
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/types.py:149: AttributeError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_loaded_rules_skips_init - AttributeError: ...
+1 failed, 2 passed, 2 warnings in 0.27s

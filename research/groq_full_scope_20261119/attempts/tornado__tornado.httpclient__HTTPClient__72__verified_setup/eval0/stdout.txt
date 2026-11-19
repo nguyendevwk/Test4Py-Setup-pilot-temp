@@ -1,0 +1,76 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_httpclient_fetch_returns_expected_response ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.httpclient__HTTPClient__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_httpclient_fetch_returns_0')
+
+    def test_httpclient_fetch_returns_expected_response(tmp_path):
+        """HTTPClient should return the response from the async client."""
+        client = HTTPClient(async_client_class=DummyAsyncClient, return_body="hello")
+>       response = client.fetch("http://example.com")
+
+test_generated.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/httpclient.py:134: in fetch
+    response = self._io_loop.run_sync(
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/ioloop.py:547: in run_sync
+    return future_cell["future"].result()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyAsyncClient object at 0x7f649ef1e620>
+request = 'http://example.com', kwargs = {}
+
+    async def fetch(self, request, **kwargs):
+        if self.raise_exc:
+            raise self.raise_exc
+        # Return a simple HTTPResponse-like object
+>       return HTTPResponse(
+            request=request,
+            code=200,
+            reason="OK",
+            headers={},
+            buffer=bytes(self.return_body, "utf-8"),
+            request_time=0.0,
+            elapsed=0.0,
+            connection_time=0.0,
+            request_size=0,
+            response_size=len(self.return_body),
+        )
+E       TypeError: HTTPResponse.__init__() got an unexpected keyword argument 'elapsed'
+
+test_generated.py:16: TypeError
+_________________ test_httpclient_close_does_not_prevent_fetch _________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.httpclient__HTTPClient__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_httpclient_close_does_not0')
+
+    def test_httpclient_close_does_not_prevent_fetch(tmp_path):
+        """Closing the client should not raise errors when fetching again."""
+        client = HTTPClient(async_client_class=DummyAsyncClient, return_body="world")
+        client.close()
+        # After close, the underlying async client still exists; fetch should still work
+>       response = client.fetch("http://example.com")
+
+test_generated.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/httpclient.py:134: in fetch
+    response = self._io_loop.run_sync(
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/ioloop.py:536: in run_sync
+    self.start()
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/platform/asyncio.py:211: in start
+    self.asyncio_loop.run_forever()
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/asyncio/base_events.py:591: in run_forever
+    self._check_closed()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_UnixSelectorEventLoop running=False closed=True debug=False>
+
+    def _check_closed(self):
+        if self._closed:
+>           raise RuntimeError('Event loop is closed')
+E           RuntimeError: Event loop is closed
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/asyncio/base_events.py:515: RuntimeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_httpclient_fetch_returns_expected_response - T...
+FAILED test_generated.py::test_httpclient_close_does_not_prevent_fetch - Runt...
+2 failed, 1 passed in 0.36s

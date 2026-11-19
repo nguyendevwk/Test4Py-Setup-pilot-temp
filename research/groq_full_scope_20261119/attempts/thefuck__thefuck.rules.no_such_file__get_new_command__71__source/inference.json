@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-14805ce5-250a-4edb-86e8-dfc0a0da0ad5",
+  "object": "chat.completion",
+  "created": 1795079504,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules import no_such_file\n\nclass DummyCommand:\n    def __init__(self, output, script):\n        self.output = output\n        self.script = script\n\ndef test_get_new_command_creates_mkdir_for_existing_file(tmp_path):\n    # Arrange: create a command whose output contains a file path\n    file_path = str(tmp_path / \"subdir\" / \"file.txt\")\n    output = f\"Error: No such file or directory: '{file_path}'\"\n    cmd = DummyCommand(output=output, script=\"cat file.txt\")\n    # Act\n    new_cmd = no_such_file.get_new_command(cmd)\n    # Assert: the new command should create the directory and then run the original script\n    expected_dir = str(tmp_path / \"subdir\")\n    assert new_cmd.startswith(\"mkdir -p\")\n    assert expected_dir in new_cmd\n    assert cmd.script in new_cmd\n\ndef test_get_new_command_handles_root_file(tmp_path):\n    # Arrange: file at root of tmp_path\n    file_path = str(tmp_path / \"rootfile.txt\")\n    output = f\"Error: No such file or directory: '{file_path}'\"\n    cmd = DummyCommand(output=output, script=\"cat rootfile.txt\")\n    # Act\n    new_cmd = no_such_file.get_new_command(cmd)\n    # Assert: directory part should be empty string, but mkdir -p '' is acceptable\n    assert new_cmd.startswith(\"mkdir -p\")\n    # The directory part before the last slash is empty, so the command should still contain the script\n    assert cmd.script in new_cmd\n\ndef test_get_new_command_returns_none_when_no_match(tmp_path):\n    # Arrange: output that does not contain any file path\n    output = \"Error: Something went wrong\"\n    cmd = DummyCommand(output=output, script=\"cat missing.txt\")\n    # Act\n    new_cmd = no_such_file.get_new_command(cmd)\n    # Assert: no command should be suggested\n    assert new_cmd is None\n```",
+        "reasoning": "We need to test get_new_command. We need patterns variable? It's not defined in snippet. In real module, patterns likely defined. Let's inspect? Assume patterns is list of regex patterns matching file paths. We'll create a dummy command object with output and script. Test normal: output contains file path. Test boundary: file at root. Test error: no match returns None. Use tmp_path? Not needed. Just create command. Use simple patterns: maybe patterns = [r'(?P<file>[^ ]+\\.txt)'] but actual patterns unknown. We can import the module and inspect patterns. Let's assume patterns defined. We'll write tests accordingly. Use import thefuck.rules.no_such_file as mod. Then use mod.patterns. We'll create command with output containing a file path. Test that returned command starts with 'mkdir -p'. Also test root path: file '/file.txt' dir ''? rfind('/') returns 0, dir = file[0:0] = ''. mkdir -p ''? Might be weird. But test that dir is '' and command script appended. Third test: no match returns None. Use pytest.raises? No, just assert None. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005601112,
+    "prompt_tokens": 300,
+    "prompt_time": 0.021443235,
+    "completion_tokens": 680,
+    "completion_time": 0.795968335,
+    "total_tokens": 980,
+    "total_time": 0.81741157,
+    "completion_tokens_details": {
+      "reasoning_tokens": 243
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh6zveemb9y6bcqc1zd8dh",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules import no_such_file\n\nclass DummyCommand:\n    def __init__(self, output, script):\n        self.output = output\n        self.script = script\n\ndef test_get_new_command_creates_mkdir_for_existing_file(tmp_path):\n    # Arrange: create a command whose output contains a file path\n    file_path = str(tmp_path / \"subdir\" / \"file.txt\")\n    output = f\"Error: No such file or directory: '{file_path}'\"\n    cmd = DummyCommand(output=output, script=\"cat file.txt\")\n    # Act\n    new_cmd = no_such_file.get_new_command(cmd)\n    # Assert: the new command should create the directory and then run the original script\n    expected_dir = str(tmp_path / \"subdir\")\n    assert new_cmd.startswith(\"mkdir -p\")\n    assert expected_dir in new_cmd\n    assert cmd.script in new_cmd\n\ndef test_get_new_command_handles_root_file(tmp_path):\n    # Arrange: file at root of tmp_path\n    file_path = str(tmp_path / \"rootfile.txt\")\n    output = f\"Error: No such file or directory: '{file_path}'\"\n    cmd = DummyCommand(output=output, script=\"cat rootfile.txt\")\n    # Act\n    new_cmd = no_such_file.get_new_command(cmd)\n    # Assert: directory part should be empty string, but mkdir -p '' is acceptable\n    assert new_cmd.startswith(\"mkdir -p\")\n    # The directory part before the last slash is empty, so the command should still contain the script\n    assert cmd.script in new_cmd\n\ndef test_get_new_command_returns_none_when_no_match(tmp_path):\n    # Arrange: output that does not contain any file path\n    output = \"Error: Something went wrong\"\n    cmd = DummyCommand(output=output, script=\"cat missing.txt\")\n    # Act\n    new_cmd = no_such_file.get_new_command(cmd)\n    # Assert: no command should be suggested\n    assert new_cmd is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "6af801a7530544ba9d1e02345017bf50",
+  "_api_plus_pacing_seconds": 1.4997498979791999
+}

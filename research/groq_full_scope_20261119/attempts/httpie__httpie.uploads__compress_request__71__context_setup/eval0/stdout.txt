@@ -1,0 +1,36 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_compress_request_with_file_like_body ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.uploads__compress_request__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_compress_request_with_fil0')
+
+    def test_compress_request_with_file_like_body(tmp_path):
+        # Create a temporary file with content that compresses poorly
+        file_path = tmp_path / "data.bin"
+        file_path.write_bytes(b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09")  # random bytes
+        with open(file_path, "rb") as f:
+            req = requests.Request("POST", "http://example.com", data=f)
+            prepared = req.prepare()
+    
+>       compress_request(prepared, always=False)
+
+test_generated.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+request = <PreparedRequest [POST]>, always = False
+
+    def compress_request(
+        request: requests.PreparedRequest,
+        always: bool,
+    ):
+        deflater = zlib.compressobj()
+        if isinstance(request.body, str):
+            body_bytes = request.body.encode()
+        elif hasattr(request.body, 'read'):
+>           body_bytes = request.body.read()
+E           ValueError: read of closed file
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/uploads.py:260: ValueError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_compress_request_with_file_like_body - ValueEr...
+1 failed, 2 passed in 0.56s

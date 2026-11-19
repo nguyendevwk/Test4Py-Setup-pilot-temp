@@ -1,0 +1,70 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_aes_ctr_decrypt_roundtrip ________________________
+
+    def test_aes_ctr_decrypt_roundtrip():
+        # 32‑byte plaintext (two blocks)
+        plaintext = b"Hello, world! 1234567890"
+>       assert len(plaintext) == 32
+E       AssertionError: assert 24 == 32
+E        +  where 24 = len(b'Hello, world! 1234567890')
+
+test_generated.py:24: AssertionError
+______________________ test_aes_ctr_decrypt_partial_block ______________________
+
+    def test_aes_ctr_decrypt_partial_block():
+        # 20‑byte plaintext (not a multiple of block size)
+        plaintext = b"Partial block test!"
+        key = b"anothersecretkey"[:16]
+        counter = SimpleCounter()
+    
+        # Encrypt manually
+>       expanded_key = key_expansion(key)
+
+test_generated.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/aes.py:105: in key_expansion
+    temp = key_schedule_core(temp, rcon_iteration)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/aes.py:294: in key_schedule_core
+    data = rotate(data)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = b'tkey'
+
+    def rotate(data):
+>       return data[1:] + [data[0]]
+E       TypeError: can't concat list to bytes
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/aes.py:290: TypeError
+___________________ test_aes_ctr_decrypt_invalid_key_length ____________________
+
+    def test_aes_ctr_decrypt_invalid_key_length():
+        plaintext = b"Test data"
+        key = b"short"  # invalid length
+        counter = SimpleCounter()
+        ciphertext = [0] * len(plaintext)
+        with pytest.raises(ValueError):
+>           aes_ctr_decrypt(ciphertext, key, counter)
+
+test_generated.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/aes.py:21: in aes_ctr_decrypt
+    expanded_key = key_expansion(key)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/aes.py:105: in key_expansion
+    temp = key_schedule_core(temp, rcon_iteration)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/aes.py:294: in key_schedule_core
+    data = rotate(data)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = b'hort'
+
+    def rotate(data):
+>       return data[1:] + [data[0]]
+E       TypeError: can't concat list to bytes
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/aes.py:290: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_aes_ctr_decrypt_roundtrip - AssertionError: as...
+FAILED test_generated.py::test_aes_ctr_decrypt_partial_block - TypeError: can...
+FAILED test_generated.py::test_aes_ctr_decrypt_invalid_key_length - TypeError...
+3 failed in 1.39s

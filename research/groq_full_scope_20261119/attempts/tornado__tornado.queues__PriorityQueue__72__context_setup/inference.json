@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-be167842-0a18-4aab-af07-b2a786dcfee4",
+  "object": "chat.completion",
+  "created": 1795077432,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.queues import PriorityQueue\n\n\n@pytest.mark.asyncio\nasync def test_priority_queue_order_and_size():\n    \"\"\"Normal behavior: items are retrieved in ascending priority order.\"\"\"\n    q = PriorityQueue()\n    # Put items with varying priorities\n    q.put((5, \"low\"))\n    q.put((1, \"high\"))\n    q.put((3, \"medium\"))\n    # Queue size should reflect number of items\n    assert q.qsize() == 3\n    # Retrieve items and check order\n    assert await q.get() == (1, \"high\")\n    assert await q.get() == (3, \"medium\")\n    assert await q.get() == (5, \"low\")\n    # After all items are consumed, queue should be empty\n    assert q.empty()\n\n\n@pytest.mark.asyncio\nasync def test_priority_queue_with_equal_priorities():\n    \"\"\"Boundary case: items with equal priority are ordered by insertion order.\"\"\"\n    q = PriorityQueue()\n    # Insert items with the same priority but different data\n    q.put((2, \"first\"))\n    q.put((2, \"second\"))\n    q.put((2, \"third\"))\n    # Since heapq compares the second element when priorities are equal,\n    # the items will be ordered lexicographically by the data string.\n    # \"first\" < \"second\" < \"third\" alphabetically.\n    assert await q.get() == (2, \"first\")\n    assert await q.get() == (2, \"second\")\n    assert await q.get() == (2, \"third\")\n\n\n@pytest.mark.asyncio\nasync def test_priority_queue_type_error_on_uncomparable_items():\n    \"\"\"Error behavior: retrieving items that cannot be compared raises TypeError.\"\"\"\n    q = PriorityQueue()\n    # Insert items where the second element is not comparable (e.g., a set)\n    q.put((1, {\"a\"}))\n    q.put((1, {\"b\"}))\n    # The heap will try to compare the second elements when priorities are equal,\n    # which will raise a TypeError because sets are not orderable.\n    with pytest.raises(TypeError):\n        await q.get()\n```",
+        "reasoning": "We need to test PriorityQueue from tornado.queues. We need three independent test functions. Use tmp_path? Not needed. Just test normal, boundary, error. For error: putting non comparable? But priority queue expects comparable items. If we put items with same priority but different types? heapq will compare second element if first equal. That could raise TypeError if not comparable. Test that. Also test boundary: maxsize? PriorityQueue inherits Queue; maxsize default 0 unlimited. We can test that putting items works and get order. Also test that get blocks? Hard. Just test order. Third test error: putting None? Should work. Maybe test that putting non-tuple? It just pushes. But get returns same. So error scenario: putting items that are not comparable leads to TypeError on get. We'll test that. Use pytest.raises. Ensure no mocks. Use asyncio. Use tornado's gen? But we can use asyncio. Use tornado.queues import PriorityQueue. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.255639158,
+    "prompt_tokens": 572,
+    "prompt_time": 0.132277271,
+    "completion_tokens": 663,
+    "completion_time": 0.725282282,
+    "total_tokens": 1235,
+    "total_time": 0.857559553,
+    "completion_tokens_details": {
+      "reasoning_tokens": 204
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sf7qzyeegr2mpeqm2sfpfa",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport pytest\nfrom tornado.queues import PriorityQueue\n\n\n@pytest.mark.asyncio\nasync def test_priority_queue_order_and_size():\n    \"\"\"Normal behavior: items are retrieved in ascending priority order.\"\"\"\n    q = PriorityQueue()\n    # Put items with varying priorities\n    q.put((5, \"low\"))\n    q.put((1, \"high\"))\n    q.put((3, \"medium\"))\n    # Queue size should reflect number of items\n    assert q.qsize() == 3\n    # Retrieve items and check order\n    assert await q.get() == (1, \"high\")\n    assert await q.get() == (3, \"medium\")\n    assert await q.get() == (5, \"low\")\n    # After all items are consumed, queue should be empty\n    assert q.empty()\n\n\n@pytest.mark.asyncio\nasync def test_priority_queue_with_equal_priorities():\n    \"\"\"Boundary case: items with equal priority are ordered by insertion order.\"\"\"\n    q = PriorityQueue()\n    # Insert items with the same priority but different data\n    q.put((2, \"first\"))\n    q.put((2, \"second\"))\n    q.put((2, \"third\"))\n    # Since heapq compares the second element when priorities are equal,\n    # the items will be ordered lexicographically by the data string.\n    # \"first\" < \"second\" < \"third\" alphabetically.\n    assert await q.get() == (2, \"first\")\n    assert await q.get() == (2, \"second\")\n    assert await q.get() == (2, \"third\")\n\n\n@pytest.mark.asyncio\nasync def test_priority_queue_type_error_on_uncomparable_items():\n    \"\"\"Error behavior: retrieving items that cannot be compared raises TypeError.\"\"\"\n    q = PriorityQueue()\n    # Insert items where the second element is not comparable (e.g., a set)\n    q.put((1, {\"a\"}))\n    q.put((1, {\"b\"}))\n    # The heap will try to compare the second elements when priorities are equal,\n    # which will raise a TypeError because sets are not orderable.\n    with pytest.raises(TypeError):\n        await q.get()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4521365140099078
+}

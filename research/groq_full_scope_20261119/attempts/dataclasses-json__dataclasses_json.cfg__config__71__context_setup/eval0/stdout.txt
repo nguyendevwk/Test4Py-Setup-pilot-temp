@@ -1,0 +1,25 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_config_field_name_override_with_letter_case _______________
+
+    def test_config_field_name_override_with_letter_case():
+        """When field_name is provided, the letter_case function should be overridden to return that name."""
+        def custom_case(name: str) -> str:
+            return name.upper()
+    
+        metadata = config(
+            letter_case=custom_case,
+            field_name="custom_field"
+        )
+        # The stored letter_case should be a wrapper that ignores its input
+        letter_case_func = metadata["dataclasses_json"]["letter_case"]
+>       assert letter_case_func("ignored") == "custom_field"
+E       AssertionError: assert 'CUSTOM_FIELD' == 'custom_field'
+E         
+E         - custom_field
+E         + CUSTOM_FIELD
+
+test_generated.py:32: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_config_field_name_override_with_letter_case - ...
+1 failed, 2 passed in 0.13s

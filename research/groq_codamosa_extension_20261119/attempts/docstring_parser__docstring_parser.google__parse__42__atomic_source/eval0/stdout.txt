@@ -1,0 +1,56 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_parse_basic_docstring __________________________
+
+    def test_parse_basic_docstring():
+        """Verify that a simple Google‑style docstring is parsed correctly."""
+        doc = """
+        Short summary.
+    
+        Longer description that spans multiple lines.
+    
+        Args:
+            x (int): The first argument.
+            y (str): The second argument.
+    
+        Returns:
+            bool: True if successful, False otherwise.
+    
+        Raises:
+            ValueError: If the input is invalid.
+        """
+        result = parse(doc)
+    
+        # Basic structure
+        assert isinstance(result, Docstring)
+        assert result.short_description == "Short summary."
+        assert "Longer description" in result.long_description
+    
+        # Parameters
+        assert len(result.params) == 2
+        param_x = next(p for p in result.params if p.arg_name == "x")
+        assert isinstance(param_x, DocstringParam)
+        assert param_x.type_name == "int"
+        assert param_x.description == "The first argument."
+    
+        # Returns
+>       assert len(result.returns) == 1
+E       TypeError: object of type 'DocstringReturns' has no len()
+
+../../../../../../attempts/docstring_parser__docstring_parser.google__parse__42__atomic_source/eval0/test_generated.py:37: TypeError
+__________________________ test_parse_empty_and_none ___________________________
+
+    def test_parse_empty_and_none():
+        """Empty string or None should yield an empty Docstring without errors."""
+        for input_text in ("", None):
+            result = parse(input_text)
+            assert isinstance(result, Docstring)
+>           assert result.short_description == ""
+E           AssertionError: assert None == ''
+E            +  where None = <docstring_parser.common.Docstring object at 0x7f80ef543d30>.short_description
+
+../../../../../../attempts/docstring_parser__docstring_parser.google__parse__42__atomic_source/eval0/test_generated.py:55: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.google__parse__42__atomic_source/eval0/test_generated.py::test_parse_basic_docstring
+FAILED ../../../../../../attempts/docstring_parser__docstring_parser.google__parse__42__atomic_source/eval0/test_generated.py::test_parse_empty_and_none
+2 failed, 1 passed in 0.13s

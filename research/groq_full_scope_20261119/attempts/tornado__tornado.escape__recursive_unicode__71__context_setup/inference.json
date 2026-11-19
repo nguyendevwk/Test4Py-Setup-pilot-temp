@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-621a664c-a82e-46b6-8c3e-31ff2e1e30ec",
+  "object": "chat.completion",
+  "created": 1795079553,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado.escape import recursive_unicode, to_unicode\n\ndef test_recursive_unicode_converts_bytes_in_nested_structures():\n    data = {\n        b'key1': [b'value1', (b'value2',)],\n        'key2': {'nested': b'value3'}\n    }\n    result = recursive_unicode(data)\n    assert isinstance(result, dict)\n    assert isinstance(result['key1'], list)\n    assert isinstance(result['key1'][0], str)\n    assert isinstance(result['key1'][1], tuple)\n    assert isinstance(result['key1'][1][0], str)\n    assert isinstance(result['key2']['nested'], str)\n    assert result['key1'][0] == 'value1'\n    assert result['key1'][1][0] == 'value2'\n    assert result['key2']['nested'] == 'value3'\n\ndef test_recursive_unicode_handles_empty_and_non_byte_types():\n    empty_list = []\n    empty_dict = {}\n    empty_tuple = ()\n    mixed = [b'bytes', 123, None, 'unicode', empty_dict]\n    result = recursive_unicode(mixed)\n    assert result == ['bytes', 123, None, 'unicode', {}]\n    assert recursive_unicode(empty_list) == []\n    assert recursive_unicode(empty_dict) == {}\n    assert recursive_unicode(empty_tuple) == ()\n\ndef test_recursive_unicode_raises_on_invalid_utf8_bytes():\n    invalid_bytes = b'\\xff\\xfe\\xfa'\n    with pytest.raises(UnicodeDecodeError):\n        recursive_unicode(invalid_bytes)\n```",
+        "reasoning": "We need 3 test functions for recursive_unicode. Test normal conversion, boundary (empty structures), error behavior? recursive_unicode doesn't raise errors except to_unicode may raise TypeError if not bytes. But recursive_unicode only calls to_unicode on bytes. So error scenario: passing non-bytes that are not dict/list/tuple/bytes -> returns as is. Maybe test that passing bytes nested in dict returns unicode. Also test that passing bytes in tuple returns tuple. And test that passing non-bytes raises? Actually recursive_unicode won't raise. So maybe test that passing a bytes that is not utf8 decodable? to_unicode will decode utf-8; if invalid bytes, will raise UnicodeDecodeError. So test that.\n\nImplement tests. Use tmp_path? Not needed. Just pure. Provide three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004887796,
+    "prompt_tokens": 568,
+    "prompt_time": 0.032266306,
+    "completion_tokens": 489,
+    "completion_time": 0.510710382,
+    "total_tokens": 1057,
+    "total_time": 0.542976688,
+    "completion_tokens_details": {
+      "reasoning_tokens": 161
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh8g3xe02t1sbp7xk9p2tq",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado.escape import recursive_unicode, to_unicode\n\ndef test_recursive_unicode_converts_bytes_in_nested_structures():\n    data = {\n        b'key1': [b'value1', (b'value2',)],\n        'key2': {'nested': b'value3'}\n    }\n    result = recursive_unicode(data)\n    assert isinstance(result, dict)\n    assert isinstance(result['key1'], list)\n    assert isinstance(result['key1'][0], str)\n    assert isinstance(result['key1'][1], tuple)\n    assert isinstance(result['key1'][1][0], str)\n    assert isinstance(result['key2']['nested'], str)\n    assert result['key1'][0] == 'value1'\n    assert result['key1'][1][0] == 'value2'\n    assert result['key2']['nested'] == 'value3'\n\ndef test_recursive_unicode_handles_empty_and_non_byte_types():\n    empty_list = []\n    empty_dict = {}\n    empty_tuple = ()\n    mixed = [b'bytes', 123, None, 'unicode', empty_dict]\n    result = recursive_unicode(mixed)\n    assert result == ['bytes', 123, None, 'unicode', {}]\n    assert recursive_unicode(empty_list) == []\n    assert recursive_unicode(empty_dict) == {}\n    assert recursive_unicode(empty_tuple) == ()\n\ndef test_recursive_unicode_raises_on_invalid_utf8_bytes():\n    invalid_bytes = b'\\xff\\xfe\\xfa'\n    with pytest.raises(UnicodeDecodeError):\n        recursive_unicode(invalid_bytes)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "fc2f4cc8d1a94994b27835a4508d4977",
+  "_api_plus_pacing_seconds": 6.38751021400094
+}

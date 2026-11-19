@@ -1,0 +1,60 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_color_mapping_and_timestamp _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f33552a9690>
+
+    def test_color_mapping_and_timestamp(monkeypatch):
+        # Enable color support by faking a terminal that supports it
+        monkeypatch.setattr("tornado.log._stderr_supports_color", lambda: True)
+        # Fake curses module with minimal interface
+        fake_curses = types.SimpleNamespace()
+        fake_curses.tigetstr = lambda name: b"\x1b[2;3%dm" if name in ("setaf", "setf") else b"\x1b[0m"
+        fake_curses.tparm = lambda seq, code: seq % code
+        monkeypatch.setitem(sys.modules, "curses", fake_curses)
+>       fmt = LogFormatter(color=True)
+
+test_generated.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tornado.log.LogFormatter object at 0x7f33552a97b0>
+fmt = '%(color)s[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d]%(end_color)s %(message)s'
+datefmt = '%y%m%d %H:%M:%S', style = '%', color = True
+colors = {10: 4, 20: 2, 30: 3, 40: 1, ...}
+
+    def __init__(
+        self,
+        fmt: str = DEFAULT_FORMAT,
+        datefmt: str = DEFAULT_DATE_FORMAT,
+        style: str = "%",
+        color: bool = True,
+        colors: Dict[int, int] = DEFAULT_COLORS,
+    ) -> None:
+        r"""
+        :arg bool color: Enables color support.
+        :arg str fmt: Log message format.
+          It will be applied to the attributes dict of log records. The
+          text between ``%(color)s`` and ``%(end_color)s`` will be colored
+          depending on the level if color support is on.
+        :arg dict colors: color mappings from logging level to terminal color
+          code
+        :arg str datefmt: Datetime format.
+          Used for formatting ``(asctime)`` placeholder in ``prefix_fmt``.
+    
+        .. versionchanged:: 3.2
+    
+           Added ``fmt`` and ``datefmt`` arguments.
+        """
+        logging.Formatter.__init__(self, datefmt=datefmt)
+        self._fmt = fmt
+    
+        self._colors = {}  # type: Dict[int, str]
+        if color and _stderr_supports_color():
+            if curses is not None:
+>               fg_color = curses.tigetstr("setaf") or curses.tigetstr("setf") or b""
+E               _curses.error: must call (at least) setupterm() first
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/log.py:145: error
+=========================== short test summary info ============================
+FAILED test_generated.py::test_color_mapping_and_timestamp - _curses.error: m...
+1 failed, 2 passed in 0.33s

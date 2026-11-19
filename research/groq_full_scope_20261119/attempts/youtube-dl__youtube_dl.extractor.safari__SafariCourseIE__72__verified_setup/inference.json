@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-b54d00c8-8261-4d15-bd86-fda6e0aa4d7e",
+  "object": "chat.completion",
+  "created": 1795079598,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.extractor.safari import SafariCourseIE\nfrom youtube_dl.utils import ExtractorError\n\n# Test that SafariCourseIE correctly identifies URLs that it should handle\ndef test_safari_course_ie_suitable():\n    # URL that matches the pattern but is not handled by SafariIE or SafariApiIE\n    url = \"https://www.safaribooksonline.com/library/view/hadoop-fundamentals-livelessons/9780133392838/\"\n    assert SafariCourseIE.suitable(url) is True\n\n    # URL that is handled by SafariIE (e.g., a book page)\n    url_book = \"https://www.safaribooksonline.com/api/v1/book/9781449396459/?override_format=json\"\n    assert SafariCourseIE.suitable(url_book) is False\n\n    # URL that is handled by SafariApiIE (e.g., a video page)\n    url_video = \"https://www.safaribooksonline.com/videos/python-programming-language/9780134217314\"\n    assert SafariCourseIE.suitable(url_video) is False\n\n# Test that _real_extract returns a playlist with the expected entries\ndef test_safari_course_ie_extract_success():\n    # Create an instance of the extractor\n    ie = SafariCourseIE()\n    # Monkeypatch the downloader to return a controlled JSON response\n    def fake_download_json(url, video_id, note):\n        # The URL is not used in this test; we just return a minimal valid structure\n        return {\n            \"title\": \"Test Course Title\",\n            \"chapters\": [\n                \"https://www.safaribooksonline.com/api/v1/chapter/1\",\n                \"https://www.safaribooksonline.com/api/v1/chapter/2\",\n            ],\n        }\n    ie._download_json = fake_download_json\n\n    # Use a URL that matches the extractor's pattern\n    url = \"https://www.safaribooksonline.com/library/view/test-course/1234567890/\"\n    result = ie.extract(url)\n\n    # The result should be a playlist with two entries\n    assert result['entries'] is not None\n    assert len(result['entries']) == 2\n    # Each entry should be a URL result pointing to SafariApiIE\n    for entry in result['entries']:\n        assert entry['ie_key'] == 'safari:api'\n        assert entry['url'] in [\n            \"https://www.safaribooksonline.com/api/v1/chapter/1\",\n            \"https://www.safaribooksonline.com/api/v1/chapter/2\",\n        ]\n    # The playlist title should match the fake JSON title\n    assert result['title'] == \"Test Course Title\"\n    # The playlist ID should be extracted from the URL\n    assert result['id'] == \"1234567890\"\n\n# Test that an ExtractorError is raised when the JSON lacks chapters\ndef test_safari_course_ie_extract_no_chapters():\n    ie = SafariCourseIE()\n    def fake_download_json(url, video_id, note):\n        # Return JSON without 'chapters' key to trigger the error\n        return {\"title\": \"Incomplete Course\"}\n    ie._download_json = fake_download_json\n\n    url = \"https://www.safaribooksonline.com/library/view/incomplete-course/9876543210/\"\n    with pytest.raises(ExtractorError) as excinfo:\n        ie.extract(url)\n    assert \"No chapters found for course 9876543210\" in str(excinfo.value)\n```",
+        "reasoning": "Need tests for SafariCourseIE. We can instantiate IE and test suitable, _match_id, and error when chapters missing. Use dummy downloader? We can mock _download_json by monkeypatching method to return dict. No mocks allowed? It says no mocks of target. But we can monkeypatch method on instance? That's allowed. Use pytest fixture. Write three tests: test_suitable, test_extract_success, test_extract_no_chapters. Use tmp_path? Not needed. Use real IE."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005213433,
+    "prompt_tokens": 925,
+    "prompt_time": 0.049818367,
+    "completion_tokens": 851,
+    "completion_time": 0.889026756,
+    "total_tokens": 1776,
+    "total_time": 0.938845123,
+    "completion_tokens_details": {
+      "reasoning_tokens": 101
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh9vb6eh5tjwgb3ad7vra5",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.extractor.safari import SafariCourseIE\nfrom youtube_dl.utils import ExtractorError\n\n# Test that SafariCourseIE correctly identifies URLs that it should handle\ndef test_safari_course_ie_suitable():\n    # URL that matches the pattern but is not handled by SafariIE or SafariApiIE\n    url = \"https://www.safaribooksonline.com/library/view/hadoop-fundamentals-livelessons/9780133392838/\"\n    assert SafariCourseIE.suitable(url) is True\n\n    # URL that is handled by SafariIE (e.g., a book page)\n    url_book = \"https://www.safaribooksonline.com/api/v1/book/9781449396459/?override_format=json\"\n    assert SafariCourseIE.suitable(url_book) is False\n\n    # URL that is handled by SafariApiIE (e.g., a video page)\n    url_video = \"https://www.safaribooksonline.com/videos/python-programming-language/9780134217314\"\n    assert SafariCourseIE.suitable(url_video) is False\n\n# Test that _real_extract returns a playlist with the expected entries\ndef test_safari_course_ie_extract_success():\n    # Create an instance of the extractor\n    ie = SafariCourseIE()\n    # Monkeypatch the downloader to return a controlled JSON response\n    def fake_download_json(url, video_id, note):\n        # The URL is not used in this test; we just return a minimal valid structure\n        return {\n            \"title\": \"Test Course Title\",\n            \"chapters\": [\n                \"https://www.safaribooksonline.com/api/v1/chapter/1\",\n                \"https://www.safaribooksonline.com/api/v1/chapter/2\",\n            ],\n        }\n    ie._download_json = fake_download_json\n\n    # Use a URL that matches the extractor's pattern\n    url = \"https://www.safaribooksonline.com/library/view/test-course/1234567890/\"\n    result = ie.extract(url)\n\n    # The result should be a playlist with two entries\n    assert result['entries'] is not None\n    assert len(result['entries']) == 2\n    # Each entry should be a URL result pointing to SafariApiIE\n    for entry in result['entries']:\n        assert entry['ie_key'] == 'safari:api'\n        assert entry['url'] in [\n            \"https://www.safaribooksonline.com/api/v1/chapter/1\",\n            \"https://www.safaribooksonline.com/api/v1/chapter/2\",\n        ]\n    # The playlist title should match the fake JSON title\n    assert result['title'] == \"Test Course Title\"\n    # The playlist ID should be extracted from the URL\n    assert result['id'] == \"1234567890\"\n\n# Test that an ExtractorError is raised when the JSON lacks chapters\ndef test_safari_course_ie_extract_no_chapters():\n    ie = SafariCourseIE()\n    def fake_download_json(url, video_id, note):\n        # Return JSON without 'chapters' key to trigger the error\n        return {\"title\": \"Incomplete Course\"}\n    ie._download_json = fake_download_json\n\n    url = \"https://www.safaribooksonline.com/library/view/incomplete-course/9876543210/\"\n    with pytest.raises(ExtractorError) as excinfo:\n        ie.extract(url)\n    assert \"No chapters found for course 9876543210\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "fb788a4d9aa84d0997f1e3893807be2b",
+  "_api_plus_pacing_seconds": 1.7442418650025502
+}

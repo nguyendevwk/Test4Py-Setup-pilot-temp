@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-ed91dc6f-68f6-4382-bfc2-d32d2a9f0e7f",
+  "object": "chat.completion",
+  "created": 1795076315,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom dataclasses_json.cfg import config, UndefinedParameterError\nfrom marshmallow.fields import Field as MarshmallowField\n\ndef test_field_name_override_with_letter_case():\n    # Define a simple letter case function that uppercases the input\n    def upper_case(s: str) -> str:\n        return s.upper()\n\n    # Use config to set a field_name and a letter_case\n    metadata = config(\n        metadata={},\n        field_name=\"my_field\",\n        letter_case=upper_case\n    )\n\n    # The resulting metadata should contain a 'letter_case' key\n    assert \"dataclasses_json\" in metadata\n    assert \"letter_case\" in metadata[\"dataclasses_json\"]\n\n    # The letter_case function should transform the field name to uppercase\n    letter_case_func = metadata[\"dataclasses_json\"][\"letter_case\"]\n    assert letter_case_func(None) == \"MY_FIELD\"\n\ndef test_invalid_undefined_raises_error():\n    # Passing an invalid undefined string should raise UndefinedParameterError\n    with pytest.raises(UndefinedParameterError) as excinfo:\n        config(undefined=\"nonexistent_action\")\n\n    # The error message should list the valid actions\n    valid_actions = [\"IGNORE\", \"FAIL\", \"DEFAULT\"]\n    for action in valid_actions:\n        assert action in str(excinfo.value)\n\ndef test_exclude_function_is_stored_and_callable():\n    # Define an exclude function that excludes fields starting with underscore\n    def exclude_fn(field):\n        return field.name.startswith(\"_\")\n\n    metadata = config(exclude=exclude_fn)\n\n    # The exclude function should be stored in the metadata\n    assert \"exclude\" in metadata[\"dataclasses_json\"]\n    stored_fn = metadata[\"dataclasses_json\"][\"exclude\"]\n    assert stored_fn is exclude_fn\n\n    # Test that the function behaves as expected\n    class DummyField:\n        def __init__(self, name):\n            self.name = name\n\n    assert stored_fn(DummyField(\"_private\")) is True\n    assert stored_fn(DummyField(\"public\")) is False\n```",
+        "reasoning": "We need three test functions testing config behavior. Use tmp_path? not needed. Just test metadata dict. Test field_name override, undefined string invalid raises, and exclude function."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052091525,
+    "prompt_tokens": 869,
+    "prompt_time": 0.043658612,
+    "completion_tokens": 460,
+    "completion_time": 0.502805676,
+    "total_tokens": 1329,
+    "total_time": 0.546464288,
+    "completion_tokens_details": {
+      "reasoning_tokens": 36
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se5p75ezqvdngkyfnvefff",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom dataclasses_json.cfg import config, UndefinedParameterError\nfrom marshmallow.fields import Field as MarshmallowField\n\ndef test_field_name_override_with_letter_case():\n    # Define a simple letter case function that uppercases the input\n    def upper_case(s: str) -> str:\n        return s.upper()\n\n    # Use config to set a field_name and a letter_case\n    metadata = config(\n        metadata={},\n        field_name=\"my_field\",\n        letter_case=upper_case\n    )\n\n    # The resulting metadata should contain a 'letter_case' key\n    assert \"dataclasses_json\" in metadata\n    assert \"letter_case\" in metadata[\"dataclasses_json\"]\n\n    # The letter_case function should transform the field name to uppercase\n    letter_case_func = metadata[\"dataclasses_json\"][\"letter_case\"]\n    assert letter_case_func(None) == \"MY_FIELD\"\n\ndef test_invalid_undefined_raises_error():\n    # Passing an invalid undefined string should raise UndefinedParameterError\n    with pytest.raises(UndefinedParameterError) as excinfo:\n        config(undefined=\"nonexistent_action\")\n\n    # The error message should list the valid actions\n    valid_actions = [\"IGNORE\", \"FAIL\", \"DEFAULT\"]\n    for action in valid_actions:\n        assert action in str(excinfo.value)\n\ndef test_exclude_function_is_stored_and_callable():\n    # Define an exclude function that excludes fields starting with underscore\n    def exclude_fn(field):\n        return field.name.startswith(\"_\")\n\n    metadata = config(exclude=exclude_fn)\n\n    # The exclude function should be stored in the metadata\n    assert \"exclude\" in metadata[\"dataclasses_json\"]\n    stored_fn = metadata[\"dataclasses_json\"][\"exclude\"]\n    assert stored_fn is exclude_fn\n\n    # Test that the function behaves as expected\n    class DummyField:\n        def __init__(self, name):\n            self.name = name\n\n    assert stored_fn(DummyField(\"_private\")) is True\n    assert stored_fn(DummyField(\"public\")) is False\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.889537566981744
+}

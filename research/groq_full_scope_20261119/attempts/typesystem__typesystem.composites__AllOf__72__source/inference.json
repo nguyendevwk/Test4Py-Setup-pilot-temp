@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-286d1932-8b6f-4a17-b7d6-73da74ea1c7e",
+  "object": "chat.completion",
+  "created": 1795076082,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.composites import AllOf\nfrom typesystem.fields import Any, Field\n\n\nclass FailingField(Field):\n    \"\"\"A field that always fails validation.\"\"\"\n    def validate(self, value):\n        raise ValueError(\"validation failed\")\n\n\ndef test_allof_passes_with_any_fields():\n    \"\"\"AllOf should accept any value when composed of Any fields.\"\"\"\n    all_of = AllOf(all_of=[Any(), Any()])\n    # Any field accepts any value, so validation should succeed for various types\n    for val in [None, 42, \"hello\", [1, 2], {\"a\": 1}]:\n        assert all_of.validate(val) is val\n\n\ndef test_allof_accepts_empty_list():\n    \"\"\"AllOf with an empty list should simply return the value unchanged.\"\"\"\n    all_of = AllOf(all_of=[])\n    for val in [None, 0, \"\", [], {}]:\n        assert all_of.validate(val) is val\n\n\ndef test_allof_propagates_child_error():\n    \"\"\"AllOf should raise the exception from the first failing child.\"\"\"\n    all_of = AllOf(all_of=[Any(), FailingField(), Any()])\n    with pytest.raises(ValueError, match=\"validation failed\"):\n        all_of.validate(\"test\")\n```",
+        "reasoning": "We need tests for AllOf. It inherits Field. We need to import. Let's inspect Field? But we can create dummy Fields that validate. Use Any? typesystem.fields.Any likely accepts any. But we need to test validation passes and raises if child fails. We can create custom Field subclass that raises. But we cannot modify product code. We can subclass Field in test. Use AllOf with list of fields. Test normal: AllOf with two Any fields passes any value. Test boundary: maybe empty list? AllOf requires list; but validate will loop none, returns value. So test that. Test error: child field that raises ValueError. Ensure AllOf propagates. Use pytest.raises. Use tmp_path? Not needed. Provide three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.083446124,
+    "prompt_tokens": 348,
+    "prompt_time": 0.052663645,
+    "completion_tokens": 426,
+    "completion_time": 0.525185279,
+    "total_tokens": 774,
+    "total_time": 0.577848924,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 154
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sdyj2fefqr3enve3fqp15j",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.composites import AllOf\nfrom typesystem.fields import Any, Field\n\n\nclass FailingField(Field):\n    \"\"\"A field that always fails validation.\"\"\"\n    def validate(self, value):\n        raise ValueError(\"validation failed\")\n\n\ndef test_allof_passes_with_any_fields():\n    \"\"\"AllOf should accept any value when composed of Any fields.\"\"\"\n    all_of = AllOf(all_of=[Any(), Any()])\n    # Any field accepts any value, so validation should succeed for various types\n    for val in [None, 42, \"hello\", [1, 2], {\"a\": 1}]:\n        assert all_of.validate(val) is val\n\n\ndef test_allof_accepts_empty_list():\n    \"\"\"AllOf with an empty list should simply return the value unchanged.\"\"\"\n    all_of = AllOf(all_of=[])\n    for val in [None, 0, \"\", [], {}]:\n        assert all_of.validate(val) is val\n\n\ndef test_allof_propagates_child_error():\n    \"\"\"AllOf should raise the exception from the first failing child.\"\"\"\n    all_of = AllOf(all_of=[Any(), FailingField(), Any()])\n    with pytest.raises(ValueError, match=\"validation failed\"):\n        all_of.validate(\"test\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.940070595999714
+}

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-55880ebe-7edc-48cc-9a36-24a9f1ba194e",
+  "object": "chat.completion",
+  "created": 1795077809,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport inspect\nimport collections\nimport pytest\nfrom pysnooper.tracer import get_local_reprs\n\n# Helper class to act as a watch variable\nclass DummyWatch:\n    def __init__(self, mapping):\n        self._mapping = mapping\n\n    def items(self, frame, normalize):\n        # Return items sorted by key\n        return sorted(self._mapping.items())\n\ndef test_get_local_reprs_order_and_repr(tmp_path):\n    # Define a function with local variables\n    def inner():\n        a = 1\n        b = \"text\"\n        c = [1, 2, 3]\n        return locals()\n\n    # Capture the frame of the inner function\n    frame = inspect.currentframe()\n    try:\n        # Call inner to populate its locals\n        inner()\n        # Get the frame of the inner function\n        inner_frame = frame.f_back\n        # Call get_local_reprs on that frame\n        result = get_local_reprs(inner_frame, max_length=10, normalize=True)\n        # Ensure the result is an OrderedDict\n        assert isinstance(result, collections.OrderedDict)\n        # Check that keys are in the order of co_varnames\n        expected_keys = (\"a\", \"b\", \"c\")\n        assert list(result.keys()) == list(expected_keys)\n        # Verify that reprs are shortish and normalized\n        assert result[\"a\"] == \"1\"\n        assert result[\"b\"] == \"'text'\"\n        assert result[\"c\"] == \"[1, 2, 3]\"\n    finally:\n        del frame\n\ndef test_get_local_reprs_with_watch(tmp_path):\n    # Define a function with local variables\n    def inner():\n        x = 42\n        y = \"hello\"\n        return locals()\n\n    frame = inspect.currentframe()\n    try:\n        inner()\n        inner_frame = frame.f_back\n        # Create a watch variable that adds a new key\n        watch = DummyWatch({\"z\": \"watched\"})\n        result = get_local_reprs(inner_frame, watch=[watch])\n        # Ensure watch key is present\n        assert \"z\" in result\n        assert result[\"z\"] == \"watched\"\n        # Ensure original locals are still present\n        assert result[\"x\"] == \"42\"\n        assert result[\"y\"] == \"'hello'\"\n    finally:\n        del frame\n\ndef test_get_local_reprs_invalid_frame_raises():\n    # Passing None should raise AttributeError due to missing f_code\n    with pytest.raises(AttributeError):\n        get_local_reprs(None)\n```",
+        "reasoning": "We need to test get_local_reprs. We'll create a function that defines locals and call get_local_reprs on its frame. Use tmp_path? Not needed. We'll test normal behavior: ordering, repr. Also watch variable: maybe use a dummy variable class? But watch expects objects with items(frame, normalize). We can create a simple class. Also test error: passing non-callable? But function expects frame. We can pass None and expect AttributeError. We'll write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04838994,
+    "prompt_tokens": 413,
+    "prompt_time": 0.214339689,
+    "completion_tokens": 634,
+    "completion_time": 0.744281294,
+    "total_tokens": 1047,
+    "total_time": 0.958620983,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 99
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfk832eabbk3rq8fv0vzj6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport inspect\nimport collections\nimport pytest\nfrom pysnooper.tracer import get_local_reprs\n\n# Helper class to act as a watch variable\nclass DummyWatch:\n    def __init__(self, mapping):\n        self._mapping = mapping\n\n    def items(self, frame, normalize):\n        # Return items sorted by key\n        return sorted(self._mapping.items())\n\ndef test_get_local_reprs_order_and_repr(tmp_path):\n    # Define a function with local variables\n    def inner():\n        a = 1\n        b = \"text\"\n        c = [1, 2, 3]\n        return locals()\n\n    # Capture the frame of the inner function\n    frame = inspect.currentframe()\n    try:\n        # Call inner to populate its locals\n        inner()\n        # Get the frame of the inner function\n        inner_frame = frame.f_back\n        # Call get_local_reprs on that frame\n        result = get_local_reprs(inner_frame, max_length=10, normalize=True)\n        # Ensure the result is an OrderedDict\n        assert isinstance(result, collections.OrderedDict)\n        # Check that keys are in the order of co_varnames\n        expected_keys = (\"a\", \"b\", \"c\")\n        assert list(result.keys()) == list(expected_keys)\n        # Verify that reprs are shortish and normalized\n        assert result[\"a\"] == \"1\"\n        assert result[\"b\"] == \"'text'\"\n        assert result[\"c\"] == \"[1, 2, 3]\"\n    finally:\n        del frame\n\ndef test_get_local_reprs_with_watch(tmp_path):\n    # Define a function with local variables\n    def inner():\n        x = 42\n        y = \"hello\"\n        return locals()\n\n    frame = inspect.currentframe()\n    try:\n        inner()\n        inner_frame = frame.f_back\n        # Create a watch variable that adds a new key\n        watch = DummyWatch({\"z\": \"watched\"})\n        result = get_local_reprs(inner_frame, watch=[watch])\n        # Ensure watch key is present\n        assert \"z\" in result\n        assert result[\"z\"] == \"watched\"\n        # Ensure original locals are still present\n        assert result[\"x\"] == \"42\"\n        assert result[\"y\"] == \"'hello'\"\n    finally:\n        del frame\n\ndef test_get_local_reprs_invalid_frame_raises():\n    # Passing None should raise AttributeError due to missing f_code\n    with pytest.raises(AttributeError):\n        get_local_reprs(None)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3055004890193231
+}

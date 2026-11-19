@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-48c77f1e-d3b9-4d20-af04-fc9580ebd860",
+  "object": "chat.completion",
+  "created": 1795079382,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nfrom types import SimpleNamespace\nfrom decimal import Decimal\n\nimport pytest\n\nfrom pypara.accounting.ledger import LedgerEntry\nfrom pypara.accounting.accounts import Account\nfrom pypara.commons.numbers import Amount, Quantity\n\n\ndef make_posting(amount, direction, date, description, counter_accounts):\n    \"\"\"Create a minimal posting object with the attributes required by LedgerEntry.\"\"\"\n    # Create a dummy journal entry with a list of postings\n    postings = []\n    for acct, dir_ in counter_accounts:\n        postings.append(SimpleNamespace(account=acct, direction=dir_))\n    journal = SimpleNamespace(\n        description=description,\n        postings=postings,\n    )\n    return SimpleNamespace(\n        date=date,\n        journal=journal,\n        amount=amount,\n        direction=direction,\n        is_debit=(direction == \"debit\"),\n        is_credit=(direction == \"credit\"),\n    )\n\n\ndef test_ledger_entry_basic_properties():\n    \"\"\"Test that LedgerEntry exposes the correct basic properties.\"\"\"\n    date = datetime.date(2023, 1, 15)\n    amount = Amount(Decimal(\"100.00\"))\n    acct = Account(\"Cash\")\n    posting = make_posting(amount, \"debit\", date, \"Test transaction\", [(acct, \"credit\")])\n    entry = LedgerEntry(ledger=None, posting=posting, balance=Quantity(Decimal(\"100.00\")))\n\n    assert entry.date == date\n    assert entry.description == \"Test transaction\"\n    assert entry.amount == amount\n    assert entry.is_debit is True\n    assert entry.is_credit is False\n    assert entry.debit == amount\n    assert entry.credit is None\n    assert entry.cntraccts == [acct]\n\n\ndef test_ledger_entry_credit_and_counter_accounts():\n    \"\"\"Test that a credit entry correctly identifies counter accounts.\"\"\"\n    date = datetime.date(2023, 2, 20)\n    amount = Amount(Decimal(\"50.00\"))\n    acct1 = Account(\"Revenue\")\n    acct2 = Account(\"Cash\")\n    posting = make_posting(amount, \"credit\", date, \"Sale\", [(acct1, \"debit\"), (acct2, \"debit\")])\n    entry = LedgerEntry(ledger=None, posting=posting, balance=Quantity(Decimal(\"-50.00\")))\n\n    assert entry.is_debit is False\n    assert entry.is_credit is True\n    assert entry.debit is None\n    assert entry.credit == amount\n    # Counter accounts are those with direction different from the posting's direction\n    assert set(entry.cntraccts) == {acct1, acct2}\n\n\ndef test_ledger_entry_multiple_counter_accounts_and_balance():\n    \"\"\"Test that multiple counter accounts are returned and balance is stored.\"\"\"\n    date = datetime.date(2023, 3, 5)\n    amount = Amount(Decimal(\"200.00\"))\n    acct1 = Account(\"Accounts Receivable\")\n    acct2 = Account(\"Sales\")\n    acct3 = Account(\"Tax Payable\")\n    posting = make_posting(\n        amount,\n        \"debit\",\n        date,\n        \"Invoice issued\",\n        [(acct1, \"credit\"), (acct2, \"credit\"), (acct3, \"credit\")],\n    )\n    balance = Quantity(Decimal(\"200.00\"))\n    entry = LedgerEntry(ledger=None, posting=posting, balance=balance)\n\n    assert entry.balance == balance\n    assert set(entry.cntraccts) == {acct1, acct2, acct3}\n    assert entry.debit == amount\n    assert entry.credit is None\n```",
+        "reasoning": "We need tests for LedgerEntry. Need to import from pypara.accounting.ledger. Need to create minimal objects: Ledger, Posting, JournalEntry etc. But we can construct using existing classes? We can import LedgerEntry and create dummy posting? Might need to create a simple Ledger and JournalEntry. Let's inspect other modules? Not available. We can create minimal stubs? But cannot modify product code. We can instantiate LedgerEntry by providing ledger and posting. But posting requires JournalEntry etc. Might be complex. Maybe we can use simple objects with required attributes: posting has date, journal with description and postings list, amount, direction, is_debit, is_credit. We can create a simple class with those attributes. Since LedgerEntry only accesses those attributes, we can use a simple object. Use types.SimpleNamespace. For cntraccts, posting.journal.postings list of postings with account and direction. We can create dummy accounts. Use dataclass Account? import. We'll create simple Account dataclass with name. Use Quantity from commons.numbers? Might be Decimal. We can use Decimal. For balance we can set any. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047898756,
+    "prompt_tokens": 656,
+    "prompt_time": 0.055469011,
+    "completion_tokens": 982,
+    "completion_time": 1.238366685,
+    "total_tokens": 1638,
+    "total_time": 1.293835696,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 235
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh37w7eaj90qnchb4hsyn9",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nfrom types import SimpleNamespace\nfrom decimal import Decimal\n\nimport pytest\n\nfrom pypara.accounting.ledger import LedgerEntry\nfrom pypara.accounting.accounts import Account\nfrom pypara.commons.numbers import Amount, Quantity\n\n\ndef make_posting(amount, direction, date, description, counter_accounts):\n    \"\"\"Create a minimal posting object with the attributes required by LedgerEntry.\"\"\"\n    # Create a dummy journal entry with a list of postings\n    postings = []\n    for acct, dir_ in counter_accounts:\n        postings.append(SimpleNamespace(account=acct, direction=dir_))\n    journal = SimpleNamespace(\n        description=description,\n        postings=postings,\n    )\n    return SimpleNamespace(\n        date=date,\n        journal=journal,\n        amount=amount,\n        direction=direction,\n        is_debit=(direction == \"debit\"),\n        is_credit=(direction == \"credit\"),\n    )\n\n\ndef test_ledger_entry_basic_properties():\n    \"\"\"Test that LedgerEntry exposes the correct basic properties.\"\"\"\n    date = datetime.date(2023, 1, 15)\n    amount = Amount(Decimal(\"100.00\"))\n    acct = Account(\"Cash\")\n    posting = make_posting(amount, \"debit\", date, \"Test transaction\", [(acct, \"credit\")])\n    entry = LedgerEntry(ledger=None, posting=posting, balance=Quantity(Decimal(\"100.00\")))\n\n    assert entry.date == date\n    assert entry.description == \"Test transaction\"\n    assert entry.amount == amount\n    assert entry.is_debit is True\n    assert entry.is_credit is False\n    assert entry.debit == amount\n    assert entry.credit is None\n    assert entry.cntraccts == [acct]\n\n\ndef test_ledger_entry_credit_and_counter_accounts():\n    \"\"\"Test that a credit entry correctly identifies counter accounts.\"\"\"\n    date = datetime.date(2023, 2, 20)\n    amount = Amount(Decimal(\"50.00\"))\n    acct1 = Account(\"Revenue\")\n    acct2 = Account(\"Cash\")\n    posting = make_posting(amount, \"credit\", date, \"Sale\", [(acct1, \"debit\"), (acct2, \"debit\")])\n    entry = LedgerEntry(ledger=None, posting=posting, balance=Quantity(Decimal(\"-50.00\")))\n\n    assert entry.is_debit is False\n    assert entry.is_credit is True\n    assert entry.debit is None\n    assert entry.credit == amount\n    # Counter accounts are those with direction different from the posting's direction\n    assert set(entry.cntraccts) == {acct1, acct2}\n\n\ndef test_ledger_entry_multiple_counter_accounts_and_balance():\n    \"\"\"Test that multiple counter accounts are returned and balance is stored.\"\"\"\n    date = datetime.date(2023, 3, 5)\n    amount = Amount(Decimal(\"200.00\"))\n    acct1 = Account(\"Accounts Receivable\")\n    acct2 = Account(\"Sales\")\n    acct3 = Account(\"Tax Payable\")\n    posting = make_posting(\n        amount,\n        \"debit\",\n        date,\n        \"Invoice issued\",\n        [(acct1, \"credit\"), (acct2, \"credit\"), (acct3, \"credit\")],\n    )\n    balance = Quantity(Decimal(\"200.00\"))\n    entry = LedgerEntry(ledger=None, posting=posting, balance=balance)\n\n    assert entry.balance == balance\n    assert set(entry.cntraccts) == {acct1, acct2, acct3}\n    assert entry.debit == amount\n    assert entry.credit is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "5bdac9c8482944ce9d5c2d8d408724fd",
+  "_api_plus_pacing_seconds": 1.994385879021138
+}

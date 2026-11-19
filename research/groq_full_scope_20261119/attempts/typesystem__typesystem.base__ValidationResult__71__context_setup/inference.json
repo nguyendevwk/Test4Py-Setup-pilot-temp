@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-dfecbfa9-8bbf-40a1-b4be-49ccf50d57ca",
+  "object": "chat.completion",
+  "created": 1795078517,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.base import ValidationResult, ValidationError, Message\n\n\ndef test_validation_result_truthiness_and_iteration():\n    # Successful validation: value present, error None\n    vr_success = ValidationResult(value={\"ok\": True})\n    assert bool(vr_success) is True\n    assert vr_success.value == {\"ok\": True}\n    assert vr_success.error is None\n    # Iteration yields value then error\n    assert list(iter(vr_success)) == [{\"ok\": True}, None]\n\n    # Failure validation: error present, value None\n    err = ValidationError(text=\"Invalid data\")\n    vr_fail = ValidationResult(error=err)\n    assert bool(vr_fail) is False\n    assert vr_fail.value is None\n    assert vr_fail.error is err\n    # Iteration yields value then error\n    assert list(iter(vr_fail)) == [None, err]\n\n\ndef test_validation_result_repr_single_error():\n    # Single error without index\n    err = ValidationError(text=\"Missing field\", code=\"required\")\n    vr = ValidationResult(error=err)\n    # __repr__ should include text and code\n    assert repr(vr) == \"ValidationResult(error=ValidationError(text='Missing field', code='required'))\"\n    # __str__ of the error should be the message text\n    assert str(err) == \"Missing field\"\n\n\ndef test_validation_result_repr_success_and_error_dict():\n    # Successful result with complex value\n    vr = ValidationResult(value={\"a\": 1, \"b\": 2})\n    assert repr(vr) == \"ValidationResult(value={'a': 1, 'b': 2})\"\n\n    # Error with multiple messages and nested indices\n    msg1 = Message(text=\"First error\", code=\"e1\", index=[\"field1\"])\n    msg2 = Message(text=\"Second error\", code=\"e2\", index=[\"field2\", 0])\n    err = ValidationError(messages=[msg1, msg2])\n    vr_err = ValidationResult(error=err)\n    # __repr__ should show the list of messages\n    expected_repr = (\n        \"ValidationResult(error=ValidationError([\"\n        \"Message(text='First error', code='e1', index=['field1']), \"\n        \"Message(text='Second error', code='e2', index=['field2', 0])\"\n        \"]))\"\n    )\n    assert repr(vr_err) == expected_repr\n    # The error's dict representation should reflect nested structure\n    assert dict(err) == {\"field1\": \"First error\", \"field2\": {0: \"Second error\"}}\n```",
+        "reasoning": "We need tests for ValidationResult. Three functions. Test truthiness, iteration, repr. Use ValidationError."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051938305,
+    "prompt_tokens": 1378,
+    "prompt_time": 0.064830434,
+    "completion_tokens": 574,
+    "completion_time": 0.819200949,
+    "total_tokens": 1952,
+    "total_time": 0.884031383,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 23
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg8vcee61szvevp78n4cmt",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.base import ValidationResult, ValidationError, Message\n\n\ndef test_validation_result_truthiness_and_iteration():\n    # Successful validation: value present, error None\n    vr_success = ValidationResult(value={\"ok\": True})\n    assert bool(vr_success) is True\n    assert vr_success.value == {\"ok\": True}\n    assert vr_success.error is None\n    # Iteration yields value then error\n    assert list(iter(vr_success)) == [{\"ok\": True}, None]\n\n    # Failure validation: error present, value None\n    err = ValidationError(text=\"Invalid data\")\n    vr_fail = ValidationResult(error=err)\n    assert bool(vr_fail) is False\n    assert vr_fail.value is None\n    assert vr_fail.error is err\n    # Iteration yields value then error\n    assert list(iter(vr_fail)) == [None, err]\n\n\ndef test_validation_result_repr_single_error():\n    # Single error without index\n    err = ValidationError(text=\"Missing field\", code=\"required\")\n    vr = ValidationResult(error=err)\n    # __repr__ should include text and code\n    assert repr(vr) == \"ValidationResult(error=ValidationError(text='Missing field', code='required'))\"\n    # __str__ of the error should be the message text\n    assert str(err) == \"Missing field\"\n\n\ndef test_validation_result_repr_success_and_error_dict():\n    # Successful result with complex value\n    vr = ValidationResult(value={\"a\": 1, \"b\": 2})\n    assert repr(vr) == \"ValidationResult(value={'a': 1, 'b': 2})\"\n\n    # Error with multiple messages and nested indices\n    msg1 = Message(text=\"First error\", code=\"e1\", index=[\"field1\"])\n    msg2 = Message(text=\"Second error\", code=\"e2\", index=[\"field2\", 0])\n    err = ValidationError(messages=[msg1, msg2])\n    vr_err = ValidationResult(error=err)\n    # __repr__ should show the list of messages\n    expected_repr = (\n        \"ValidationResult(error=ValidationError([\"\n        \"Message(text='First error', code='e1', index=['field1']), \"\n        \"Message(text='Second error', code='e2', index=['field2', 0])\"\n        \"]))\"\n    )\n    assert repr(vr_err) == expected_repr\n    # The error's dict representation should reflect nested structure\n    assert dict(err) == {\"field1\": \"First error\", \"field2\": {0: \"Second error\"}}\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2916332239983603
+}

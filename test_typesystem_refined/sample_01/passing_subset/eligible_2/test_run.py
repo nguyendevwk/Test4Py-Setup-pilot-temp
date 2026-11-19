@@ -1,0 +1,19 @@
+import pytest
+from typesystem.schemas import Schema
+from typesystem.fields import String, Integer
+from typesystem.base import ValidationError
+
+def test_schema_validate_missing_required_field():
+    # All fields are required (no defaults, not read-only)
+    schema = Schema(fields={"name": String(), "age": Integer()})
+    # Provide only the 'name' key; 'age' is missing
+    with pytest.raises(ValidationError) as excinfo:
+        schema.validate({"name": "Alice"})
+    # The ValidationError should contain a single Message for the missing 'age' key
+    messages = excinfo.value.messages()
+    assert len(messages) == 1
+    msg = messages[0]
+    assert msg.code == "required"
+    assert msg.index == ["age"]
+    # The message text should match the schema's error text
+    assert msg.text == schema.get_error_text("required")

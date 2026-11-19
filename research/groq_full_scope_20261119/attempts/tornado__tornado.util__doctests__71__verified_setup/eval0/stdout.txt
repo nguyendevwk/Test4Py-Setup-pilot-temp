@@ -1,0 +1,23 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_doctests_import_error_handled ______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5bfdcd5e10>
+
+    def test_doctests_import_error_handled(monkeypatch):
+        """If the doctest module cannot be imported, doctests() should raise ImportError."""
+        # Temporarily remove doctest from sys.modules and block its import
+        original_import = __import__
+    
+        def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+            if name == "doctest":
+                raise ImportError("doctest not available")
+            return original_import(name, globals, locals, fromlist, level)
+    
+>       monkeypatch.setattr(builtins, "__import__", fake_import)
+E       NameError: name 'builtins' is not defined
+
+test_generated.py:41: NameError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_doctests_import_error_handled - NameError: nam...
+1 failed, 2 passed in 0.29s

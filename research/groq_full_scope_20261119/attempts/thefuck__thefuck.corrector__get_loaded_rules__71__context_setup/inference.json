@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-32a29d59-f2e0-46f8-a20a-225eaa863396",
+  "object": "chat.completion",
+  "created": 1795079141,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pathlib\nimport pytest\nfrom thefuck.corrector import get_loaded_rules\nfrom thefuck.types import Rule\n\ndef test_get_loaded_rules_empty_list():\n    \"\"\"When no paths are provided, the generator yields nothing.\"\"\"\n    rules = list(get_loaded_rules([]))\n    assert rules == []\n\ndef test_get_loaded_rules_skips_init(tmp_path):\n    \"\"\"Files named '__init__.py' are skipped regardless of rule status.\"\"\"\n    # Create a dummy __init__.py file\n    init_file = tmp_path / \"__init__.py\"\n    init_file.write_text(\"# dummy init\")\n    # The generator should skip this file\n    rules = list(get_loaded_rules([init_file]))\n    assert rules == []\n\ndef test_get_loaded_rules_yields_enabled_rule(tmp_path):\n    \"\"\"A rule file that defines an enabled Rule is yielded.\"\"\"\n    # Create a simple rule file that defines a Rule subclass\n    rule_file = tmp_path / \"dummy_rule.py\"\n    rule_file.write_text(\n        \"\"\"\nfrom thefuck.types import Rule\n\nclass DummyRule(Rule):\n    def __init__(self):\n        super().__init__()\n        self.is_enabled = True\n\"\"\"\n    )\n    # Import the module to ensure it is discoverable\n    import importlib.util\n    spec = importlib.util.spec_from_file_location(\"dummy_rule\", rule_file)\n    module = importlib.util.module_from_spec(spec)\n    spec.loader.exec_module(module)\n\n    # Now get the rule via get_loaded_rules\n    rules = list(get_loaded_rules([rule_file]))\n    assert len(rules) == 1\n    rule = rules[0]\n    assert isinstance(rule, Rule)\n    assert rule.is_enabled is True\n```",
+        "reasoning": "We need to write tests for get_loaded_rules. We need to create temporary files representing rule files. Rule.from_path likely loads a rule class. We need to inspect Rule.from_path behavior. But we can't import private. Let's inspect the module. Probably in thefuck/rules? But we can't. We'll assume Rule.from_path returns a Rule object with is_enabled attribute. We can create dummy Path objects? Path is from .system import Path. Likely a pathlib.Path subclass. We can use pathlib.Path. We'll create temp files with __init__.py and other. We need to simulate Rule.from_path. But we can't modify code. We can monkeypatch Rule.from_path to return a dummy rule. But tests shouldn't mock target. But we can monkeypatch within test? It's allowed? It says no mocks of the target. But monkeypatching is mocking. So we should rely on actual implementation. But we don't know. Maybe Rule.from_path loads a rule module and returns a Rule instance. We can create a simple rule file that defines a Rule subclass. But we don't know the expected interface. Might be too complex.\n\nMaybe simpler: test that get_loaded_rules skips __init__.py and yields only enabled rules. We can create a dummy rule file that defines a Rule class with is_enabled True. But we need to import Rule from .types. That likely expects a certain structure. Might be too heavy.\n\nGiven constraints, maybe we can test that passing empty list yields nothing. And passing list with __init__.py yields nothing. And passing list with a path that doesn't exist? But Rule.from_path will error? Might raise. We can test that it raises FileNotFoundError? But not sure.\n\nGiven uncertainty, maybe we can test that get_loaded_rules returns generator and that iterating over it yields nothing for empty input. That's trivial.\n\nBut need three independent tests. We can test that passing a list with a Path that is not a file yields nothing? Might raise? Hard.\n\nGiven limited info, I'll write tests that check behavior with empty list and with __init__.py path. Use pathlib.Path. Use tmp_path. Use get_loaded_rules from thefuck.corrector."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.124335387,
+    "prompt_tokens": 359,
+    "prompt_time": 0.020807092,
+    "completion_tokens": 796,
+    "completion_time": 0.930345814,
+    "total_tokens": 1155,
+    "total_time": 0.951152906,
+    "completion_tokens_details": {
+      "reasoning_tokens": 441
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgvx71etjt3vh4cevzcgq7",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pathlib\nimport pytest\nfrom thefuck.corrector import get_loaded_rules\nfrom thefuck.types import Rule\n\ndef test_get_loaded_rules_empty_list():\n    \"\"\"When no paths are provided, the generator yields nothing.\"\"\"\n    rules = list(get_loaded_rules([]))\n    assert rules == []\n\ndef test_get_loaded_rules_skips_init(tmp_path):\n    \"\"\"Files named '__init__.py' are skipped regardless of rule status.\"\"\"\n    # Create a dummy __init__.py file\n    init_file = tmp_path / \"__init__.py\"\n    init_file.write_text(\"# dummy init\")\n    # The generator should skip this file\n    rules = list(get_loaded_rules([init_file]))\n    assert rules == []\n\ndef test_get_loaded_rules_yields_enabled_rule(tmp_path):\n    \"\"\"A rule file that defines an enabled Rule is yielded.\"\"\"\n    # Create a simple rule file that defines a Rule subclass\n    rule_file = tmp_path / \"dummy_rule.py\"\n    rule_file.write_text(\n        \"\"\"\nfrom thefuck.types import Rule\n\nclass DummyRule(Rule):\n    def __init__(self):\n        super().__init__()\n        self.is_enabled = True\n\"\"\"\n    )\n    # Import the module to ensure it is discoverable\n    import importlib.util\n    spec = importlib.util.spec_from_file_location(\"dummy_rule\", rule_file)\n    module = importlib.util.module_from_spec(spec)\n    spec.loader.exec_module(module)\n\n    # Now get the rule via get_loaded_rules\n    rules = list(get_loaded_rules([rule_file]))\n    assert len(rules) == 1\n    rule = rules[0]\n    assert isinstance(rule, Rule)\n    assert rule.is_enabled is True\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3946035740082152
+}

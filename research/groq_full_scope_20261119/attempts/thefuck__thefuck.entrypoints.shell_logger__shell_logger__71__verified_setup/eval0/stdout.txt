@@ -1,0 +1,90 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_shell_logger_exits_when_no_shell _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f7b1df149d0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7f7b1df14880>
+
+    def test_shell_logger_exits_when_no_shell(monkeypatch, caplog):
+        """When SHELL is not set, shell_logger should warn and exit."""
+        # Ensure SHELL is unset
+        monkeypatch.delenv("SHELL", raising=False)
+    
+        # Capture logs
+        caplog.set_level("WARNING")
+    
+        with pytest.raises(SystemExit) as excinfo:
+            shell_logger("dummy_output")
+    
+        # Verify exit code
+        assert excinfo.value.code == 1
+    
+        # Verify warning message
+>       assert any(
+            "Shell logger doesn't support your platform." in rec.message
+            for rec in caplog.records
+        )
+E       assert False
+E        +  where False = any(<generator object test_shell_logger_exits_when_no_shell.<locals>.<genexpr> at 0x7f7b1dd85af0>)
+
+test_generated.py:30: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[41m[37m[1m[WARN] Shell logger doesn't support your platform.[0m
+_____________ test_shell_logger_logs_warning_on_nonexistent_shell ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f7b1df17160>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7f7b1df17280>
+tmp_log_file = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.entrypoint..._logger__shell_logger__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_shell_logger_logs_warning0/logfile')
+
+    def test_shell_logger_logs_warning_on_nonexistent_shell(monkeypatch, caplog, tmp_log_file):
+        """If SHELL points to a non‑existent executable, shell_logger should warn and exit."""
+        # Point SHELL to a non‑existent path
+        monkeypatch.setenv("SHELL", "/nonexistent/shell")
+    
+        # Patch _spawn to raise FileNotFoundError to simulate missing shell
+        def fake_spawn(shell, read_func):
+            raise FileNotFoundError(f"{shell} not found")
+    
+        monkeypatch.setattr(
+            "thefuck.entrypoints.shell_logger._spawn",
+            fake_spawn
+        )
+        # Patch _read to do nothing
+        monkeypatch.setattr(
+            "thefuck.entrypoints.shell_logger._read",
+            lambda buffer: None
+        )
+    
+        caplog.set_level("ERROR")
+    
+        with pytest.raises(SystemExit) as excinfo:
+>           shell_logger(str(tmp_log_file))
+
+test_generated.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/entrypoints/shell_logger.py:77: in shell_logger
+    return_code = _spawn(os.environ['SHELL'], partial(_read, buffer))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+shell = '/nonexistent/shell'
+read_func = functools.partial(<function test_shell_logger_logs_warning_on_nonexistent_shell.<locals>.<lambda> at 0x7f7b1dd99d80>, <mmap.mmap closed=False, access=ACCESS_WRITE, length=1048576, pos=0, offset=0>)
+
+    def fake_spawn(shell, read_func):
+>       raise FileNotFoundError(f"{shell} not found")
+E       FileNotFoundError: /nonexistent/shell not found
+
+test_generated.py:72: FileNotFoundError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_shell_logger_exits_when_no_shell - assert False
+FAILED test_generated.py::test_shell_logger_logs_warning_on_nonexistent_shell
+2 failed, 1 passed, 2 warnings in 0.26s

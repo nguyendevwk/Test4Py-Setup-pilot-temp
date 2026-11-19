@@ -1,0 +1,41 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_aes_decrypt_text_returns_bytes ______________________
+
+    def test_aes_decrypt_text_returns_bytes():
+        """The function should return a bytes object."""
+        # Create a minimal valid base64 string: 8 nonce bytes + 16 cipher bytes
+        nonce = b'\x00' * 8
+        cipher = b'\x00' * 16
+        data = base64.b64encode(nonce + cipher).decode('ascii')
+        result = aes_decrypt_text(data, "pass", 16)
+        assert isinstance(result, bytes)
+        # With all-zero key and counter, the keystream is all zeros, so plaintext is all zeros
+>       assert result == b'\x00' * 16
+E       AssertionError: assert b'\xcb\xf4M\x...\x1eJ\xe5\xa9' == b'\x00\x00\x0...0\x00\x00\x00'
+E         
+E         At index 0 diff: b'\xcb' != b'\x00'
+E         Use -v to get more diff
+
+../../../../../../attempts/youtube-dl__youtube_dl.aes__aes_decrypt_text__43__atomic_verified_setup/eval0/test_generated.py:21: AssertionError
+____________________ test_aes_decrypt_text_password_padding ____________________
+
+    def test_aes_decrypt_text_password_padding():
+        """Password shorter than key_size_bytes should be padded with zeros."""
+        # Use a password of length 5, key_size_bytes=16
+        nonce = b'\x00' * 8
+        cipher = b'\x00' * 16
+        data = base64.b64encode(nonce + cipher).decode('ascii')
+        result = aes_decrypt_text(data, "abcde", 16)
+        assert isinstance(result, bytes)
+>       assert result == b'\x00' * 16
+E       AssertionError: assert b'\x02\xbfl\x...xfeB\xfe@\xac' == b'\x00\x00\x0...0\x00\x00\x00'
+E         
+E         At index 0 diff: b'\x02' != b'\x00'
+E         Use -v to get more diff
+
+../../../../../../attempts/youtube-dl__youtube_dl.aes__aes_decrypt_text__43__atomic_verified_setup/eval0/test_generated.py:31: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/youtube-dl__youtube_dl.aes__aes_decrypt_text__43__atomic_verified_setup/eval0/test_generated.py::test_aes_decrypt_text_returns_bytes
+FAILED ../../../../../../attempts/youtube-dl__youtube_dl.aes__aes_decrypt_text__43__atomic_verified_setup/eval0/test_generated.py::test_aes_decrypt_text_password_padding
+2 failed, 1 passed in 1.11s

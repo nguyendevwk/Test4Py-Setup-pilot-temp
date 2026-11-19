@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-43957964-ec0f-4c0d-9561-d9dc519bfd0e",
+  "object": "chat.completion",
+  "created": 1795078560,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom py_backwards.transformers.base import import_rewrite\n\n# Helper to replace the extend function in the module\ndef replace_extend(monkeypatch, func):\n    monkeypatch.setattr(\"py_backwards.transformers.base.extend\", func)\n\ndef test_import_rewrite_calls_previous(monkeypatch):\n    called = {\"prev\": False, \"curr\": False}\n\n    def fake_extend(arg):\n        if arg == \"prev\":\n            called[\"prev\"] = True\n        elif arg == \"curr\":\n            called[\"curr\"] = True\n        else:\n            raise ValueError(\"Unexpected argument\")\n\n    replace_extend(monkeypatch, fake_extend)\n\n    import_rewrite(\"prev\", \"curr\")\n\n    assert called[\"prev\"] is True, \"extend(previous) should be called\"\n    assert called[\"curr\"] is False, \"extend(current) should not be called when no ImportError\"\n\ndef test_import_rewrite_falls_back_on_importerror(monkeypatch):\n    called = {\"prev\": False, \"curr\": False}\n\n    def fake_extend(arg):\n        if arg == \"prev\":\n            called[\"prev\"] = True\n            raise ImportError(\"Simulated import error\")\n        elif arg == \"curr\":\n            called[\"curr\"] = True\n        else:\n            raise ValueError(\"Unexpected argument\")\n\n    replace_extend(monkeypatch, fake_extend)\n\n    import_rewrite(\"prev\", \"curr\")\n\n    assert called[\"prev\"] is True, \"extend(previous) should be called first\"\n    assert called[\"curr\"] is True, \"extend(current) should be called after ImportError\"\n\ndef test_import_rewrite_propagates_other_exceptions(monkeypatch):\n    def fake_extend(arg):\n        raise RuntimeError(\"Unexpected error\")\n\n    replace_extend(monkeypatch, fake_extend)\n\n    with pytest.raises(RuntimeError, match=\"Unexpected error\"):\n        import_rewrite(\"prev\", \"curr\")\n```",
+        "reasoning": "We need to test import_rewrite function. It tries extend(previous) and if ImportError, extend(current). We need to simulate extend raising ImportError. But extend is imported from ..utils.snippet. We cannot mock. But we can create dummy objects that when passed to extend cause ImportError? extend likely expects a string? But we can't rely. Instead we can monkeypatch extend in the module. But instruction: no mocks of target. But we can monkeypatch the imported extend function? That's mocking target? It's modifying imported function, but not the target function itself. It's allowed? Probably okay. We can patch py_backwards.transformers.base.extend to raise ImportError. Then test that import_rewrite calls extend(previous) and on ImportError calls extend(current). We can use monkeypatch fixture. Also test normal behavior: extend(previous) succeeds, so current not called. We can use a flag. Use a simple object to track calls. Use a custom function to replace extend. Use monkeypatch. Provide three tests: normal, error, boundary? maybe test that if previous is None? But extend likely fails. We'll just test normal and error. Third test: ensure that if extend(previous) raises ImportError, extend(current) is called. That's same as error. Maybe test that if extend(previous) raises other exception, it propagates. Use pytest.raises. That's third. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053245651,
+    "prompt_tokens": 296,
+    "prompt_time": 0.004715739,
+    "completion_tokens": 680,
+    "completion_time": 0.753221868,
+    "total_tokens": 976,
+    "total_time": 0.757937607,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 282
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sga68vemy954gxphxg2rpf",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom py_backwards.transformers.base import import_rewrite\n\n# Helper to replace the extend function in the module\ndef replace_extend(monkeypatch, func):\n    monkeypatch.setattr(\"py_backwards.transformers.base.extend\", func)\n\ndef test_import_rewrite_calls_previous(monkeypatch):\n    called = {\"prev\": False, \"curr\": False}\n\n    def fake_extend(arg):\n        if arg == \"prev\":\n            called[\"prev\"] = True\n        elif arg == \"curr\":\n            called[\"curr\"] = True\n        else:\n            raise ValueError(\"Unexpected argument\")\n\n    replace_extend(monkeypatch, fake_extend)\n\n    import_rewrite(\"prev\", \"curr\")\n\n    assert called[\"prev\"] is True, \"extend(previous) should be called\"\n    assert called[\"curr\"] is False, \"extend(current) should not be called when no ImportError\"\n\ndef test_import_rewrite_falls_back_on_importerror(monkeypatch):\n    called = {\"prev\": False, \"curr\": False}\n\n    def fake_extend(arg):\n        if arg == \"prev\":\n            called[\"prev\"] = True\n            raise ImportError(\"Simulated import error\")\n        elif arg == \"curr\":\n            called[\"curr\"] = True\n        else:\n            raise ValueError(\"Unexpected argument\")\n\n    replace_extend(monkeypatch, fake_extend)\n\n    import_rewrite(\"prev\", \"curr\")\n\n    assert called[\"prev\"] is True, \"extend(previous) should be called first\"\n    assert called[\"curr\"] is True, \"extend(current) should be called after ImportError\"\n\ndef test_import_rewrite_propagates_other_exceptions(monkeypatch):\n    def fake_extend(arg):\n        raise RuntimeError(\"Unexpected error\")\n\n    replace_extend(monkeypatch, fake_extend)\n\n    with pytest.raises(RuntimeError, match=\"Unexpected error\"):\n        import_rewrite(\"prev\", \"curr\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1501733459881507
+}

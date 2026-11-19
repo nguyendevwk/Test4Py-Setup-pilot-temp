@@ -1,0 +1,62 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_default_initialization __________________________
+
+    def test_default_initialization():
+        """RequestTimeout should initialize with default attributes."""
+        exc = RequestTimeout()
+        # Default status code
+        assert exc.status_code == 408
+        # Default quiet flag
+        assert exc.quiet is True
+        # No message by default
+>       assert exc.message is None
+E       AssertionError: assert 'Request Timeout' is None
+E        +  where 'Request Timeout' = RequestTimeout('Request Timeout').message
+
+test_generated.py:13: AssertionError
+_______________________ test_custom_headers_and_context ________________________
+
+    def test_custom_headers_and_context():
+        """Custom headers and context should be stored correctly."""
+        headers = {"X-Custom": "value"}
+        context = {"detail": "timeout occurred"}
+        exc = RequestTimeout(
+            message="Timed out",
+            headers=headers,
+            context=context,
+        )
+        # Message should be stored
+        assert exc.message == "Timed out"
+        # Headers should be exactly as provided
+        assert exc.headers == headers
+        # Context should be exactly as provided
+        assert exc.context == context
+        # Quiet flag remains default True unless overridden
+        assert exc.quiet is True
+        # Extra remains empty
+>       assert exc.extra == {}
+E       AssertionError: assert None == {}
+E        +  where None = RequestTimeout('Timed out').extra
+
+test_generated.py:39: AssertionError
+_____________________ test_status_code_and_quiet_override ______________________
+
+    def test_status_code_and_quiet_override():
+        """Status code is fixed and quiet can be overridden."""
+        exc = RequestTimeout(quiet=False)
+        # Status code remains 408
+        assert exc.status_code == 408
+        # Quiet flag overridden
+        assert exc.quiet is False
+        # No message
+>       assert exc.message is None
+E       AssertionError: assert 'Request Timeout' is None
+E        +  where 'Request Timeout' = RequestTimeout('Request Timeout').message
+
+test_generated.py:50: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_default_initialization - AssertionError: asser...
+FAILED test_generated.py::test_custom_headers_and_context - AssertionError: a...
+FAILED test_generated.py::test_status_code_and_quiet_override - AssertionErro...
+3 failed in 0.33s

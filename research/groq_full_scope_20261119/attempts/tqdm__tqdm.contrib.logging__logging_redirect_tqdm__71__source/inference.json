@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-1e69682a-a3d6-46d6-b0b2-19cb90194ba0",
+  "object": "chat.completion",
+  "created": 1795078120,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport logging\nimport sys\nimport contextlib\n\nimport pytest\nfrom tqdm.contrib.logging import logging_redirect_tqdm\nfrom tqdm import trange\n\n\ndef test_logging_redirected_to_tqdm_write(tmp_path):\n    \"\"\"When a console handler is present, messages are redirected to tqdm.write.\"\"\"\n    # Create a StringIO to capture tqdm.write output\n    captured = io.StringIO()\n    # Replace tqdm's default stream with our StringIO\n    original_stdout = sys.stdout\n    sys.stdout = captured\n    try:\n        logger = logging.getLogger(\"test_logger\")\n        logger.setLevel(logging.INFO)\n        # Ensure a console handler exists\n        console_handler = logging.StreamHandler(sys.stdout)\n        logger.addHandler(console_handler)\n\n        with logging_redirect_tqdm([logger]):\n            logger.info(\"Hello from logger\")\n            # Use tqdm to ensure progress bar is active\n            for _ in trange(1, leave=False):\n                pass\n\n        # After exiting the context, the message should have been written via tqdm.write\n        output = captured.getvalue()\n        assert \"Hello from logger\" in output\n        # tqdm.write prefixes the message with a newline if needed\n        assert output.strip().endswith(\"Hello from logger\")\n    finally:\n        sys.stdout = original_stdout\n\n\ndef test_original_handlers_restored_after_context():\n    \"\"\"After exiting the context, the original handlers are restored.\"\"\"\n    logger = logging.getLogger(\"restore_test\")\n    logger.setLevel(logging.INFO)\n    console_handler = logging.StreamHandler(sys.stdout)\n    logger.addHandler(console_handler)\n\n    original_handlers = list(logger.handlers)\n\n    with logging_redirect_tqdm([logger]):\n        # Inside context, handlers should be replaced\n        assert any(\n            handler.__class__.__name__ == \"_TqdmLoggingHandler\"\n            for handler in logger.handlers\n        )\n\n    # After context, handlers should match the original list\n    assert logger.handlers == original_handlers\n\n\ndef test_no_console_handler_no_redirect(tmp_path):\n    \"\"\"If no console handler is found, no redirect occurs and logger remains unchanged.\"\"\"\n    logger = logging.getLogger(\"no_console\")\n    logger.setLevel(logging.INFO)\n    # Add a file handler instead of console\n    file_handler = logging.FileHandler(tmp_path / \"log.txt\")\n    logger.addHandler(file_handler)\n\n    original_handlers = list(logger.handlers)\n\n    with logging_redirect_tqdm([logger]):\n        # Inside context, handlers should remain unchanged\n        assert logger.handlers == original_handlers\n\n    # After context, handlers should still be unchanged\n    assert logger.handlers == original_handlers\n```",
+        "reasoning": "Need tests for context manager. Use logging, capture output via StringIO. Test that messages appear via tqdm.write. Use tqdm.trange to produce progress. Use tmp_path? Not needed. Use pytest. Provide three functions: normal redirect, boundary when no console handler, error when logger not list? maybe test that original handlers restored. Use contextmanager. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004955555,
+    "prompt_tokens": 634,
+    "prompt_time": 0.05212585,
+    "completion_tokens": 614,
+    "completion_time": 0.673078739,
+    "total_tokens": 1248,
+    "total_time": 0.725204589,
+    "completion_tokens_details": {
+      "reasoning_tokens": 75
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sfwrm0eza94f3t3dbkqvva",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport logging\nimport sys\nimport contextlib\n\nimport pytest\nfrom tqdm.contrib.logging import logging_redirect_tqdm\nfrom tqdm import trange\n\n\ndef test_logging_redirected_to_tqdm_write(tmp_path):\n    \"\"\"When a console handler is present, messages are redirected to tqdm.write.\"\"\"\n    # Create a StringIO to capture tqdm.write output\n    captured = io.StringIO()\n    # Replace tqdm's default stream with our StringIO\n    original_stdout = sys.stdout\n    sys.stdout = captured\n    try:\n        logger = logging.getLogger(\"test_logger\")\n        logger.setLevel(logging.INFO)\n        # Ensure a console handler exists\n        console_handler = logging.StreamHandler(sys.stdout)\n        logger.addHandler(console_handler)\n\n        with logging_redirect_tqdm([logger]):\n            logger.info(\"Hello from logger\")\n            # Use tqdm to ensure progress bar is active\n            for _ in trange(1, leave=False):\n                pass\n\n        # After exiting the context, the message should have been written via tqdm.write\n        output = captured.getvalue()\n        assert \"Hello from logger\" in output\n        # tqdm.write prefixes the message with a newline if needed\n        assert output.strip().endswith(\"Hello from logger\")\n    finally:\n        sys.stdout = original_stdout\n\n\ndef test_original_handlers_restored_after_context():\n    \"\"\"After exiting the context, the original handlers are restored.\"\"\"\n    logger = logging.getLogger(\"restore_test\")\n    logger.setLevel(logging.INFO)\n    console_handler = logging.StreamHandler(sys.stdout)\n    logger.addHandler(console_handler)\n\n    original_handlers = list(logger.handlers)\n\n    with logging_redirect_tqdm([logger]):\n        # Inside context, handlers should be replaced\n        assert any(\n            handler.__class__.__name__ == \"_TqdmLoggingHandler\"\n            for handler in logger.handlers\n        )\n\n    # After context, handlers should match the original list\n    assert logger.handlers == original_handlers\n\n\ndef test_no_console_handler_no_redirect(tmp_path):\n    \"\"\"If no console handler is found, no redirect occurs and logger remains unchanged.\"\"\"\n    logger = logging.getLogger(\"no_console\")\n    logger.setLevel(logging.INFO)\n    # Add a file handler instead of console\n    file_handler = logging.FileHandler(tmp_path / \"log.txt\")\n    logger.addHandler(file_handler)\n\n    original_handlers = list(logger.handlers)\n\n    with logging_redirect_tqdm([logger]):\n        # Inside context, handlers should remain unchanged\n        assert logger.handlers == original_handlers\n\n    # After context, handlers should still be unchanged\n    assert logger.handlers == original_handlers\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.102886540000327
+}

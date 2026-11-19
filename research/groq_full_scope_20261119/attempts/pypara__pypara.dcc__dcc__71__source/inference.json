@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-713a117e-769d-4a46-8acd-ef644a58770c",
+  "object": "chat.completion",
+  "created": 1795079320,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom pypara.dcc import dcc, DCCRegistry, DCC, Currency\n\n# Helper to clear registry between tests\n@pytest.fixture(autouse=True)\ndef clear_registry():\n    DCCRegistry._registry.clear()\n    yield\n    DCCRegistry._registry.clear()\n\ndef test_dcc_registration_and_attributes():\n    # Define a simple day count fraction calculator\n    def simple_dcfc(start, end):\n        return 1.0\n\n    # Register with name, alternative names, and currencies\n    alt_names = {\"ACT/360\", \"Actual/360\"}\n    ccys = {Currency(\"USD\"), Currency(\"EUR\")}\n\n    decorated = dcc(\"ACT/360\", altnames=alt_names, ccys=ccys)(simple_dcfc)\n\n    # The decorated function should have the __dcc attribute\n    assert hasattr(decorated, \"__dcc\")\n    dcc_instance = getattr(decorated, \"__dcc\")\n    assert isinstance(dcc_instance, DCC)\n\n    # The DCC instance should have the correct properties\n    assert dcc_instance.name == \"ACT/360\"\n    assert dcc_instance.altnames == alt_names\n    assert dcc_instance.ccys == ccys\n    assert dcc_instance.func is simple_dcfc\n\n    # The registry should contain the new DCC\n    assert dcc_instance in DCCRegistry._registry\n    # The registry should map the name to the DCC\n    assert DCCRegistry._registry[\"ACT/360\"] is dcc_instance\n    # Alternative names should also map to the same DCC\n    for alt in alt_names:\n        assert DCCRegistry._registry[alt] is dcc_instance\n\ndef test_dcc_registration_without_optional_arguments():\n    # Define a simple day count fraction calculator\n    def simple_dcfc(start, end):\n        return 2.0\n\n    # Register with only the mandatory name\n    decorated = dcc(\"30/360\")(simple_dcfc)\n\n    # The decorated function should have the __dcc attribute\n    assert hasattr(decorated, \"__dcc\")\n    dcc_instance = getattr(decorated, \"__dcc\")\n    assert isinstance(dcc_instance, DCC)\n\n    # The DCC instance should have empty sets for altnames and ccys\n    assert dcc_instance.altnames == set()\n    assert dcc_instance.ccys == set()\n\n    # The registry should contain the new DCC\n    assert dcc_instance in DCCRegistry._registry\n    assert DCCRegistry._registry[\"30/360\"] is dcc_instance\n\ndef test_dcc_registration_duplicate_name_raises():\n    # Define two simple calculators\n    def dcfc_a(start, end):\n        return 3.0\n\n    def dcfc_b(start, end):\n        return 4.0\n\n    # Register first calculator\n    dcc(\"ACT/365\")(dcfc_a)\n\n    # Attempt to register second calculator with the same name should raise ValueError\n    with pytest.raises(ValueError):\n        dcc(\"ACT/365\")(dcfc_b)\n```",
+        "reasoning": "We need to test dcc decorator. We need to import pypara.dcc module. Let's inspect DCCRegistry, DCC, DCFC. Assume they exist. We'll test that decorator registers and attaches. Use tmp_path? Not needed. We'll create dummy function. Test that after decoration, function has __dcc attribute, and registry contains it. Also test that duplicate registration raises? Not sure. We'll just test normal. Also test that alternative names and ccys stored. We'll access dcc instance attributes. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004860845,
+    "prompt_tokens": 600,
+    "prompt_time": 0.04007561,
+    "completion_tokens": 755,
+    "completion_time": 0.801224677,
+    "total_tokens": 1355,
+    "total_time": 0.841300287,
+    "completion_tokens_details": {
+      "reasoning_tokens": 107
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh1cd5ekxth5n8k3he1a7v",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom pypara.dcc import dcc, DCCRegistry, DCC, Currency\n\n# Helper to clear registry between tests\n@pytest.fixture(autouse=True)\ndef clear_registry():\n    DCCRegistry._registry.clear()\n    yield\n    DCCRegistry._registry.clear()\n\ndef test_dcc_registration_and_attributes():\n    # Define a simple day count fraction calculator\n    def simple_dcfc(start, end):\n        return 1.0\n\n    # Register with name, alternative names, and currencies\n    alt_names = {\"ACT/360\", \"Actual/360\"}\n    ccys = {Currency(\"USD\"), Currency(\"EUR\")}\n\n    decorated = dcc(\"ACT/360\", altnames=alt_names, ccys=ccys)(simple_dcfc)\n\n    # The decorated function should have the __dcc attribute\n    assert hasattr(decorated, \"__dcc\")\n    dcc_instance = getattr(decorated, \"__dcc\")\n    assert isinstance(dcc_instance, DCC)\n\n    # The DCC instance should have the correct properties\n    assert dcc_instance.name == \"ACT/360\"\n    assert dcc_instance.altnames == alt_names\n    assert dcc_instance.ccys == ccys\n    assert dcc_instance.func is simple_dcfc\n\n    # The registry should contain the new DCC\n    assert dcc_instance in DCCRegistry._registry\n    # The registry should map the name to the DCC\n    assert DCCRegistry._registry[\"ACT/360\"] is dcc_instance\n    # Alternative names should also map to the same DCC\n    for alt in alt_names:\n        assert DCCRegistry._registry[alt] is dcc_instance\n\ndef test_dcc_registration_without_optional_arguments():\n    # Define a simple day count fraction calculator\n    def simple_dcfc(start, end):\n        return 2.0\n\n    # Register with only the mandatory name\n    decorated = dcc(\"30/360\")(simple_dcfc)\n\n    # The decorated function should have the __dcc attribute\n    assert hasattr(decorated, \"__dcc\")\n    dcc_instance = getattr(decorated, \"__dcc\")\n    assert isinstance(dcc_instance, DCC)\n\n    # The DCC instance should have empty sets for altnames and ccys\n    assert dcc_instance.altnames == set()\n    assert dcc_instance.ccys == set()\n\n    # The registry should contain the new DCC\n    assert dcc_instance in DCCRegistry._registry\n    assert DCCRegistry._registry[\"30/360\"] is dcc_instance\n\ndef test_dcc_registration_duplicate_name_raises():\n    # Define two simple calculators\n    def dcfc_a(start, end):\n        return 3.0\n\n    def dcfc_b(start, end):\n        return 4.0\n\n    # Register first calculator\n    dcc(\"ACT/365\")(dcfc_a)\n\n    # Attempt to register second calculator with the same name should raise ValueError\n    with pytest.raises(ValueError):\n        dcc(\"ACT/365\")(dcfc_b)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.279578548972495
+}

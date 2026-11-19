@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-0cf127f3-000a-4568-b0f7-c4da70f71701",
+  "object": "chat.completion",
+  "created": 1795077805,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport inspect\nimport collections\nimport pytest\nfrom pysnooper.tracer import get_local_reprs\nfrom pysnooper import utils\n\n# Helper variable class for watch functionality\nclass DummyWatch:\n    def __init__(self, mapping):\n        self._mapping = mapping\n\n    def items(self, frame, normalize):\n        # Return items sorted by key\n        return sorted(self._mapping.items())\n\ndef _frame_with_locals():\n    \"\"\"Return a frame object with a known set of local variables.\"\"\"\n    def inner():\n        a = 1\n        b = \"hello\"\n        c = [1, 2, 3]\n        return inspect.currentframe()\n    return inner()\n\ndef test_get_local_reprs_order_and_repr():\n    frame = _frame_with_locals()\n    # Capture local representations\n    result = get_local_reprs(frame, max_length=None, normalize=False)\n    # Ensure the order follows co_varnames + cellvars + freevars + f_locals keys\n    expected_order = list(frame.f_code.co_varnames) + list(frame.f_code.co_cellvars) + list(frame.f_code.co_freevars) + list(frame.f_locals.keys())\n    assert list(result.keys()) == sorted(set(expected_order), key=expected_order.index)\n    # Check that each value is a string representation\n    for key, val in result.items():\n        assert isinstance(val, str)\n    # Verify specific representations\n    assert result[\"a\"] == \"1\"\n    assert result[\"b\"] == \"'hello'\"\n    assert result[\"c\"] == \"[1, 2, 3]\"\n\ndef test_get_local_reprs_custom_repr_and_max_length():\n    frame = _frame_with_locals()\n    # Custom repr that returns a fixed string for any input\n    def custom_repr(obj):\n        return f\"<custom:{type(obj).__name__}>\"\n    # Set max_length to truncate long representations\n    result = get_local_reprs(frame, custom_repr=(custom_repr,), max_length=10, normalize=False)\n    # Custom repr should be applied\n    assert result[\"a\"] == \"<custom:int>\"\n    assert result[\"b\"] == \"<custom:str>\"\n    assert result[\"c\"] == \"<custom:list>\"\n    # Ensure max_length truncation is respected (though custom_repr ignores it)\n    # Use default utils.get_shortish_repr to test truncation\n    short_repr = utils.get_shortish_repr(\"a very long string\", max_length=5)\n    assert short_repr == \"a ver...\"\n\ndef test_get_local_reprs_watch_variable_integration():\n    frame = _frame_with_locals()\n    watch_var = DummyWatch({\"watch1\": \"value1\", \"watch2\": \"value2\"})\n    result = get_local_reprs(frame, watch=(watch_var,), normalize=False)\n    # Watch items should be present and sorted\n    assert \"watch1\" in result\n    assert \"watch2\" in result\n    assert result[\"watch1\"] == \"value1\"\n    assert result[\"watch2\"] == \"value2\"\n    # Ensure watch items are appended after local variables\n    local_keys = list(frame.f_locals.keys())\n    watch_keys = [\"watch1\", \"watch2\"]\n    # The order of watch keys in result should follow sorted order\n    assert list(result.keys())[-2:] == sorted(watch_keys)\n```",
+        "reasoning": "We need to test get_local_reprs. We'll create a function that defines locals, call get_local_reprs with frame. Use inspect.currentframe. Test ordering, custom_repr, max_length, normalize. Also watch variables? We can create a dummy variable class with items method. Let's test three scenarios: normal locals ordering, custom_repr truncation, watch variable addition. Use tmp_path? Not needed. Provide three test functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053046451,
+    "prompt_tokens": 413,
+    "prompt_time": 0.029351596,
+    "completion_tokens": 788,
+    "completion_time": 0.855968497,
+    "total_tokens": 1201,
+    "total_time": 0.885320093,
+    "completion_tokens_details": {
+      "reasoning_tokens": 87
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfk4d5eve9nfh5fferpfd9",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport inspect\nimport collections\nimport pytest\nfrom pysnooper.tracer import get_local_reprs\nfrom pysnooper import utils\n\n# Helper variable class for watch functionality\nclass DummyWatch:\n    def __init__(self, mapping):\n        self._mapping = mapping\n\n    def items(self, frame, normalize):\n        # Return items sorted by key\n        return sorted(self._mapping.items())\n\ndef _frame_with_locals():\n    \"\"\"Return a frame object with a known set of local variables.\"\"\"\n    def inner():\n        a = 1\n        b = \"hello\"\n        c = [1, 2, 3]\n        return inspect.currentframe()\n    return inner()\n\ndef test_get_local_reprs_order_and_repr():\n    frame = _frame_with_locals()\n    # Capture local representations\n    result = get_local_reprs(frame, max_length=None, normalize=False)\n    # Ensure the order follows co_varnames + cellvars + freevars + f_locals keys\n    expected_order = list(frame.f_code.co_varnames) + list(frame.f_code.co_cellvars) + list(frame.f_code.co_freevars) + list(frame.f_locals.keys())\n    assert list(result.keys()) == sorted(set(expected_order), key=expected_order.index)\n    # Check that each value is a string representation\n    for key, val in result.items():\n        assert isinstance(val, str)\n    # Verify specific representations\n    assert result[\"a\"] == \"1\"\n    assert result[\"b\"] == \"'hello'\"\n    assert result[\"c\"] == \"[1, 2, 3]\"\n\ndef test_get_local_reprs_custom_repr_and_max_length():\n    frame = _frame_with_locals()\n    # Custom repr that returns a fixed string for any input\n    def custom_repr(obj):\n        return f\"<custom:{type(obj).__name__}>\"\n    # Set max_length to truncate long representations\n    result = get_local_reprs(frame, custom_repr=(custom_repr,), max_length=10, normalize=False)\n    # Custom repr should be applied\n    assert result[\"a\"] == \"<custom:int>\"\n    assert result[\"b\"] == \"<custom:str>\"\n    assert result[\"c\"] == \"<custom:list>\"\n    # Ensure max_length truncation is respected (though custom_repr ignores it)\n    # Use default utils.get_shortish_repr to test truncation\n    short_repr = utils.get_shortish_repr(\"a very long string\", max_length=5)\n    assert short_repr == \"a ver...\"\n\ndef test_get_local_reprs_watch_variable_integration():\n    frame = _frame_with_locals()\n    watch_var = DummyWatch({\"watch1\": \"value1\", \"watch2\": \"value2\"})\n    result = get_local_reprs(frame, watch=(watch_var,), normalize=False)\n    # Watch items should be present and sorted\n    assert \"watch1\" in result\n    assert \"watch2\" in result\n    assert result[\"watch1\"] == \"value1\"\n    assert result[\"watch2\"] == \"value2\"\n    # Ensure watch items are appended after local variables\n    local_keys = list(frame.f_locals.keys())\n    watch_keys = [\"watch1\", \"watch2\"]\n    # The order of watch keys in result should follow sorted order\n    assert list(result.keys())[-2:] == sorted(watch_keys)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2565404960187152
+}

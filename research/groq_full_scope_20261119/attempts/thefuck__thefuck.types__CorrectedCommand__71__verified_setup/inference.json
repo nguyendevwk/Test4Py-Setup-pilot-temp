@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-1f0cfae9-6b97-4c61-8036-c88982ffceab",
+  "object": "chat.completion",
+  "created": 1795077880,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport pytest\nfrom thefuck.types import CorrectedCommand\nfrom thefuck.conf import settings\nfrom thefuck.shells import shell\nfrom thefuck.utils import get_alias\n\n# Helper side effect that records calls\nclass SideEffectRecorder:\n    def __init__(self):\n        self.calls = []\n\n    def __call__(self, old_cmd, script):\n        self.calls.append((old_cmd, script))\n\ndef test_corrected_command_equality_and_hash():\n    \"\"\"CorrectedCommand equality ignores priority and hash is consistent.\"\"\"\n    side_effect = SideEffectRecorder()\n    cmd1 = CorrectedCommand(\"echo hi\", side_effect, priority=10)\n    cmd2 = CorrectedCommand(\"echo hi\", side_effect, priority=20)\n    cmd3 = CorrectedCommand(\"echo bye\", side_effect, priority=10)\n\n    # Equality ignores priority\n    assert cmd1 == cmd2\n    assert cmd1 != cmd3\n\n    # Hash is based on script and side_effect\n    assert hash(cmd1) == hash(cmd2)\n    assert hash(cmd1) != hash(cmd3)\n\ndef test_corrected_command_repr_and_run(monkeypatch, tmp_path):\n    \"\"\"__repr__ shows all fields and run writes the script.\"\"\"\n    # Prepare a dummy old command\n    class DummyCommand:\n        def __init__(self, text):\n            self.text = text\n    old_cmd = DummyCommand(\"wrong command\")\n\n    # Capture stdout\n    output = []\n\n    def fake_write(s):\n        output.append(s)\n\n    monkeypatch.setattr(sys.stdout, \"write\", fake_write)\n\n    # Ensure history is not altered\n    monkeypatch.setattr(settings, \"alter_history\", False)\n\n    # Use a simple side effect that does nothing\n    side_effect = None\n    cmd = CorrectedCommand(\"corrected command\", side_effect, priority=5)\n\n    # Check repr\n    expected_repr = \"CorrectedCommand(script=corrected command, side_effect=None, priority=5)\"\n    assert repr(cmd) == expected_repr\n\n    # Run the command\n    cmd.run(old_cmd)\n    # The script should be written to stdout\n    assert output == [\"corrected command\"]\n\ndef test_corrected_command_get_script_repeat(monkeypatch):\n    \"\"\"_get_script appends repeat command when settings.repeat is True.\"\"\"\n    # Set repeat and debug flags\n    monkeypatch.setattr(settings, \"repeat\", True)\n    monkeypatch.setattr(settings, \"debug\", False)\n\n    # Mock get_alias to return a known alias\n    monkeypatch.setattr(\"thefuck.utils.get_alias\", lambda: \"fuck\")\n\n    # Mock shell.quote to return quoted script\n    monkeypatch.setattr(shell, \"quote\", lambda s: f\"'{s}'\")\n\n    # Mock shell.or_ to join commands with \" || \"\n    monkeypatch.setattr(shell, \"or_\", lambda a, b: f\"{a} || {b}\")\n\n    cmd = CorrectedCommand(\"ls -l\", None, priority=1)\n    script = cmd._get_script()\n    expected_repeat = \"fuck --repeat  --force-command 'ls -l'\"\n    expected_script = f\"ls -l || {expected_repeat}\"\n    assert script == expected_script\n```",
+        "reasoning": "We need tests for CorrectedCommand. Use tmp_path for any file. We can test equality ignoring priority, hash, repr, _get_script behavior with settings.repeat. We need to manipulate settings. settings is imported from .conf. We can patch settings attributes. Use monkeypatch fixture. Write three tests: test_eq_and_hash, test_repr, test_get_script_repeat. Use real CorrectedCommand."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048858261,
+    "prompt_tokens": 766,
+    "prompt_time": 0.055253098,
+    "completion_tokens": 762,
+    "completion_time": 0.804585852,
+    "total_tokens": 1528,
+    "total_time": 0.85983895,
+    "completion_tokens_details": {
+      "reasoning_tokens": 82
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfndfhe53sxe1fqt7v2nmh",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport pytest\nfrom thefuck.types import CorrectedCommand\nfrom thefuck.conf import settings\nfrom thefuck.shells import shell\nfrom thefuck.utils import get_alias\n\n# Helper side effect that records calls\nclass SideEffectRecorder:\n    def __init__(self):\n        self.calls = []\n\n    def __call__(self, old_cmd, script):\n        self.calls.append((old_cmd, script))\n\ndef test_corrected_command_equality_and_hash():\n    \"\"\"CorrectedCommand equality ignores priority and hash is consistent.\"\"\"\n    side_effect = SideEffectRecorder()\n    cmd1 = CorrectedCommand(\"echo hi\", side_effect, priority=10)\n    cmd2 = CorrectedCommand(\"echo hi\", side_effect, priority=20)\n    cmd3 = CorrectedCommand(\"echo bye\", side_effect, priority=10)\n\n    # Equality ignores priority\n    assert cmd1 == cmd2\n    assert cmd1 != cmd3\n\n    # Hash is based on script and side_effect\n    assert hash(cmd1) == hash(cmd2)\n    assert hash(cmd1) != hash(cmd3)\n\ndef test_corrected_command_repr_and_run(monkeypatch, tmp_path):\n    \"\"\"__repr__ shows all fields and run writes the script.\"\"\"\n    # Prepare a dummy old command\n    class DummyCommand:\n        def __init__(self, text):\n            self.text = text\n    old_cmd = DummyCommand(\"wrong command\")\n\n    # Capture stdout\n    output = []\n\n    def fake_write(s):\n        output.append(s)\n\n    monkeypatch.setattr(sys.stdout, \"write\", fake_write)\n\n    # Ensure history is not altered\n    monkeypatch.setattr(settings, \"alter_history\", False)\n\n    # Use a simple side effect that does nothing\n    side_effect = None\n    cmd = CorrectedCommand(\"corrected command\", side_effect, priority=5)\n\n    # Check repr\n    expected_repr = \"CorrectedCommand(script=corrected command, side_effect=None, priority=5)\"\n    assert repr(cmd) == expected_repr\n\n    # Run the command\n    cmd.run(old_cmd)\n    # The script should be written to stdout\n    assert output == [\"corrected command\"]\n\ndef test_corrected_command_get_script_repeat(monkeypatch):\n    \"\"\"_get_script appends repeat command when settings.repeat is True.\"\"\"\n    # Set repeat and debug flags\n    monkeypatch.setattr(settings, \"repeat\", True)\n    monkeypatch.setattr(settings, \"debug\", False)\n\n    # Mock get_alias to return a known alias\n    monkeypatch.setattr(\"thefuck.utils.get_alias\", lambda: \"fuck\")\n\n    # Mock shell.quote to return quoted script\n    monkeypatch.setattr(shell, \"quote\", lambda s: f\"'{s}'\")\n\n    # Mock shell.or_ to join commands with \" || \"\n    monkeypatch.setattr(shell, \"or_\", lambda a, b: f\"{a} || {b}\")\n\n    cmd = CorrectedCommand(\"ls -l\", None, priority=1)\n    script = cmd._get_script()\n    expected_repeat = \"fuck --repeat  --force-command 'ls -l'\"\n    expected_script = f\"ls -l || {expected_repeat}\"\n    assert script == expected_script\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2426788180018775
+}

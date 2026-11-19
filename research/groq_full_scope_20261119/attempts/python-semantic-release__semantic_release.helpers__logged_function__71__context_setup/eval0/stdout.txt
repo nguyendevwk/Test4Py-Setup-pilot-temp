@@ -1,0 +1,62 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_logged_function_logs_args_and_return_value ________________
+
+    def test_logged_function_logs_args_and_return_value():
+        logger = DummyLogger()
+    
+        @logged_function(logger)
+        def add(a, b):
+            return a + b
+    
+        result = add(2, 3)
+    
+        # The function should return the correct result
+        assert result == 5
+    
+        # Two debug calls should have been made: one for arguments, one for result
+        assert len(logger.messages) == 2
+    
+        # First message logs the function name and arguments
+        expected_args = ", ".join([format_arg(x) for x in (2, 3)])
+        assert logger.messages[0] == f"add({expected_args}, )"
+    
+        # Second message logs the return value
+>       assert logger.messages[1] == f"add -> 5"
+E       AssertionError: assert 'test_logged_...als>.add -> 5' == 'add -> 5'
+E         
+E         - add -> 5
+E         + test_logged_function_logs_args_and_return_value.<locals>.add -> 5
+
+test_generated.py:36: AssertionError
+________________ test_logged_function_handles_kwargs_and_order _________________
+
+    def test_logged_function_handles_kwargs_and_order():
+        logger = DummyLogger()
+    
+        @logged_function(logger)
+        def greet(greeting, name="world"):
+            return f"{greeting}, {name}!"
+    
+        result = greet("Hello", name="Alice")
+    
+        assert result == "Hello, Alice!"
+    
+        # Check that kwargs are logged in the order they were passed
+        assert len(logger.messages) == 2
+        # Arguments message should include both positional and keyword arguments
+        expected_args = ", ".join([format_arg("Hello")]) + ", " + ", ".join([f"name={format_arg('Alice')}"])
+        assert logger.messages[0] == f"greet({expected_args})"
+    
+        # Return value message
+>       assert logger.messages[1] == "greet -> Hello, Alice!"
+E       AssertionError: assert 'test_logged_...Hello, Alice!' == 'greet -> Hello, Alice!'
+E         
+E         - greet -> Hello, Alice!
+E         + test_logged_function_handles_kwargs_and_order.<locals>.greet -> Hello, Alice!
+
+test_generated.py:57: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_logged_function_logs_args_and_return_value - A...
+FAILED test_generated.py::test_logged_function_handles_kwargs_and_order - Ass...
+2 failed, 1 passed in 0.50s

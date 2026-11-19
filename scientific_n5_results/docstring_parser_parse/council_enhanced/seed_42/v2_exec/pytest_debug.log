@@ -1,0 +1,85 @@
+F...                                                                     [100%]
+=================================== FAILURES ===================================
+____________________ test_parse_behavior[None-google-None] _____________________
+
+style = None, expected_style = <DocstringStyle.GOOGLE: 'google'>, raises = None
+
+    @pytest.mark.parametrize(
+        "style,expected_style,raises",
+        [
+            (None, DocstringStyle.GOOGLE, None),
+            ("google", DocstringStyle.GOOGLE, None),
+            (DocstringStyle.GOOGLE, DocstringStyle.GOOGLE, None),
+            ("invalid", None, ValueError),
+        ],
+    )
+    def test_parse_behavior(style, expected_style, raises):
+        if raises:
+            with pytest.raises(raises):
+                parse(sample_doc, style=style)
+        else:
+>           result = parse(sample_doc, style=style)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../../scientific_n5_results/docstring_parser_parse/council_enhanced/seed_42/v2_exec/test_run.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docstring_parser/parser.py:57: in parse
+    style = DocstringStyle(style)
+            ^^^^^^^^^^^^^^^^^^^^^
+../../../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/enum.py:751: in __call__
+    return cls.__new__(cls, value)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <enum 'DocstringStyle'>, value = None
+
+    def __new__(cls, value):
+        # all enum instances are actually created during class construction
+        # without calling this method; this method is called by the metaclass'
+        # __call__ (i.e. Color(3) ), and by pickle
+        if type(value) is cls:
+            # For lookups like Color(Color.RED)
+            return value
+        # by-value search for a matching enum member
+        # see if it's in the reverse mapping (for hashable values)
+        try:
+            return cls._value2member_map_[value]
+        except KeyError:
+            # Not found, no need to do long O(n) search
+            pass
+        except TypeError:
+            # not there, now do long search -- O(n) behavior
+            for member in cls._member_map_.values():
+                if member._value_ == value:
+                    return member
+        # still not found -- verify that members exist, in-case somebody got here mistakenly
+        # (such as via super when trying to override __new__)
+        if not cls._member_map_:
+            raise TypeError("%r has no members defined" % cls)
+        #
+        # still not found -- try _missing_ hook
+        try:
+            exc = None
+            result = cls._missing_(value)
+        except Exception as e:
+            exc = e
+            result = None
+        try:
+            if isinstance(result, cls):
+                return result
+            elif (
+                    Flag is not None and issubclass(cls, Flag)
+                    and cls._boundary_ is EJECT and isinstance(result, int)
+                ):
+                return result
+            else:
+                ve_exc = ValueError("%r is not a valid %s" % (value, cls.__qualname__))
+                if result is None and exc is None:
+>                   raise ve_exc
+E                   ValueError: None is not a valid DocstringStyle
+
+../../../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/enum.py:1170: ValueError
+=========================== short test summary info ============================
+FAILED ../../scientific_n5_results/docstring_parser_parse/council_enhanced/seed_42/v2_exec/test_run.py::test_parse_behavior[None-google-None]
+1 failed, 3 passed in 0.40s
+

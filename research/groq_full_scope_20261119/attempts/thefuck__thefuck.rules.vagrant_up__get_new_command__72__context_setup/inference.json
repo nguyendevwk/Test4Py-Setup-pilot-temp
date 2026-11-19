@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-d608c169-6ea8-495a-8cc8-d0f771045ea2",
+  "object": "chat.completion",
+  "created": 1795079078,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom thefuck.rules.vagrant_up import get_new_command\nfrom thefuck.shells import shell\n\n\nclass DummyCommand:\n    def __init__(self, script):\n        self.script = script\n        self.script_parts = script.split()\n\n\ndef test_get_new_command_no_machine(tmp_path):\n    # Command with only two parts: \"vagrant up\"\n    cmd = DummyCommand(\"vagrant up\")\n    result = get_new_command(cmd)\n    # Should return a single ShellCommand that starts all instances\n    assert isinstance(result, shell.ShellCommand)\n    assert result.script == \"vagrant up\"\n\n\ndef test_get_new_command_with_machine(tmp_path):\n    # Command with a machine name: \"vagrant up mymachine\"\n    cmd = DummyCommand(\"vagrant up mymachine\")\n    result = get_new_command(cmd)\n    # Should return a list of two ShellCommands\n    assert isinstance(result, list)\n    assert len(result) == 2\n    # First command starts the specific machine\n    assert isinstance(result[0], shell.ShellCommand)\n    assert result[0].script == \"vagrant up mymachine\"\n    # Second command starts all instances\n    assert isinstance(result[1], shell.ShellCommand)\n    assert result[1].script == \"vagrant up\"\n\n\ndef test_get_new_command_edge_case_empty_script(tmp_path):\n    # Empty script should still return a ShellCommand that starts all instances\n    cmd = DummyCommand(\"\")\n    result = get_new_command(cmd)\n    assert isinstance(result, shell.ShellCommand)\n    assert result.script == \"vagrant up\"\n```",
+        "reasoning": "We need to test get_new_command. Need to import the function. Need to create a command object with script_parts and script. Use a simple class. Test when machine None (len<3) and when machine present. Also test that returned list contains correct shell.and_ objects. shell.and_ returns a ShellCommand? Let's inspect shell.and_ behavior. But we can just check that returned objects have .script attribute? Let's quickly assume shell.and_ returns a ShellCommand with .script property equal to combined. We can import shell.and_ and check its script. We'll create dummy command with script=\"vagrant up\" and script_parts [\"vagrant\",\"up\"]. len<3 so machine None. Expect returned is shell.and_(u\"vagrant up\", command.script). That object's script should be \"vagrant up\". For machine present: script=\"vagrant up mymachine\". script_parts [\"vagrant\",\"up\",\"mymachine\"]. Expect list of two: first shell.and_(u\"vagrant up mymachine\", command.script) script \"vagrant up mymachine\". second start_all_instances script \"vagrant up\". We'll assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052882769,
+    "prompt_tokens": 325,
+    "prompt_time": 0.00910834,
+    "completion_tokens": 571,
+    "completion_time": 0.838620061,
+    "total_tokens": 896,
+    "total_time": 0.847728401,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 232
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgszs3en69wwd6nq4hpr31",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom thefuck.rules.vagrant_up import get_new_command\nfrom thefuck.shells import shell\n\n\nclass DummyCommand:\n    def __init__(self, script):\n        self.script = script\n        self.script_parts = script.split()\n\n\ndef test_get_new_command_no_machine(tmp_path):\n    # Command with only two parts: \"vagrant up\"\n    cmd = DummyCommand(\"vagrant up\")\n    result = get_new_command(cmd)\n    # Should return a single ShellCommand that starts all instances\n    assert isinstance(result, shell.ShellCommand)\n    assert result.script == \"vagrant up\"\n\n\ndef test_get_new_command_with_machine(tmp_path):\n    # Command with a machine name: \"vagrant up mymachine\"\n    cmd = DummyCommand(\"vagrant up mymachine\")\n    result = get_new_command(cmd)\n    # Should return a list of two ShellCommands\n    assert isinstance(result, list)\n    assert len(result) == 2\n    # First command starts the specific machine\n    assert isinstance(result[0], shell.ShellCommand)\n    assert result[0].script == \"vagrant up mymachine\"\n    # Second command starts all instances\n    assert isinstance(result[1], shell.ShellCommand)\n    assert result[1].script == \"vagrant up\"\n\n\ndef test_get_new_command_edge_case_empty_script(tmp_path):\n    # Empty script should still return a ShellCommand that starts all instances\n    cmd = DummyCommand(\"\")\n    result = get_new_command(cmd)\n    assert isinstance(result, shell.ShellCommand)\n    assert result.script == \"vagrant up\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2205650439718738
+}

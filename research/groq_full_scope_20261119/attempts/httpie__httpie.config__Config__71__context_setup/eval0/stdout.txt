@@ -1,0 +1,50 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_default_config_initialization ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_default_config_initializa0')
+
+    def test_default_config_initialization(tmp_path):
+        """Config should create a new file with defaults when none exists."""
+        cfg_dir = tmp_path / "httpie"
+        cfg = Config(directory=cfg_dir)
+        # The config file should be created with defaults
+>       assert cfg.path.exists()
+E       AssertionError: assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_default_config_initializa0/httpie/config.json').exists
+E        +      where PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_default_config_initializa0/httpie/config.json') = {'default_options': []}.path
+
+test_generated.py:15: AssertionError
+_______________ test_custom_config_overrides_and_path_resolution _______________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.config__Config__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_custom_config_overrides_a0')
+
+    def test_custom_config_overrides_and_path_resolution(tmp_path):
+        """Custom values in the config file should override defaults and
+        path resolution should work for relative and absolute paths."""
+        cfg_dir = tmp_path / "httpie"
+        cfg_file = cfg_dir / Config.FILENAME
+        cfg_dir.mkdir()
+        # Write a custom config with relative paths
+        custom = {
+            "default_options": ["--verbose"],
+            "plugins_dir": "my_plugins",
+            "version_info_file": "~/my_version.json",
+            "developer_mode": True,
+        }
+        cfg_file.write_text(json.dumps(custom, indent=4), encoding="utf-8")
+    
+        cfg = Config(directory=cfg_dir)
+        # Load should read the file
+>       assert cfg["default_options"] == ["--verbose"]
+E       AssertionError: assert [] == ['--verbose']
+E         
+E         Right contains one more item: '--verbose'
+E         Use -v to get more diff
+
+test_generated.py:41: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_default_config_initialization - AssertionError...
+FAILED test_generated.py::test_custom_config_overrides_and_path_resolution - ...
+2 failed, 1 passed in 0.32s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-87cf1398-061a-4282-b00c-62272246a632",
+  "object": "chat.completion",
+  "created": 1795077196,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport pytest\nfrom collections import OrderedDict\n\nfrom cookiecutter.prompt import prompt_for_config\nfrom cookiecutter.exceptions import UndefinedVariableInTemplate\nfrom cookiecutter.utils import create_env_with_context\n\n\ndef test_prompt_for_config_simple_and_boolean_no_input(tmp_path):\n    \"\"\"\n    Verify that simple string and boolean variables are rendered correctly\n    when no user input is requested.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"demo\",\n            \"use_feature\": True,\n            \"_private\": \"secret\",\n            \"__rendered\": \"{{ cookiecutter.project_name }}\",\n        }\n    }\n    result = prompt_for_config(context, no_input=True)\n\n    # Simple string should be rendered unchanged\n    assert result[\"project_name\"] == \"demo\"\n    # Boolean should be rendered as True\n    assert result[\"use_feature\"] is True\n    # Private key should be preserved\n    assert result[\"_private\"] == \"secret\"\n    # Rendered key should resolve the template\n    assert result[\"__rendered\"] == \"demo\"\n    # The result should be an OrderedDict preserving insertion order\n    assert isinstance(result, OrderedDict)\n    assert list(result.keys()) == [\n        \"project_name\",\n        \"use_feature\",\n        \"_private\",\n        \"__rendered\",\n    ]\n\n\ndef test_prompt_for_config_choice_and_dict_no_input(tmp_path):\n    \"\"\"\n    Verify that choice variables and dictionary variables are rendered\n    correctly when no user input is requested.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"language\": [\"python\", \"javascript\"],\n            \"config\": {\"debug\": False, \"timeout\": 30},\n            \"__choice_rendered\": \"{{ cookiecutter.language }}\",\n        }\n    }\n    result = prompt_for_config(context, no_input=True)\n\n    # Choice variable should default to the first option\n    assert result[\"language\"] == \"python\"\n    # Dictionary variable should be rendered as a dict\n    assert result[\"config\"] == {\"debug\": False, \"timeout\": 30}\n    # Rendered choice should reflect the chosen value\n    assert result[\"__choice_rendered\"] == \"python\"\n\n\ndef test_prompt_for_config_undefined_variable_raises(tmp_path):\n    \"\"\"\n    Verify that an undefined variable in a template raises\n    UndefinedVariableInTemplate with the correct message.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"{{ undefined_var }}\",\n        }\n    }\n    with pytest.raises(UndefinedVariableInTemplate) as excinfo:\n        prompt_for_config(context, no_input=True)\n\n    # The exception message should mention the problematic key\n    assert \"project_name\" in str(excinfo.value)\n    # The original UndefinedError should be the cause\n    assert isinstance(excinfo.value.__cause__, Exception)\n```",
+        "reasoning": "We need three tests. We can test simple variable rendering, choice, and error. Use tmp_path for any file? Not needed. We'll simulate context. Use prompt_for_config with no_input True to avoid interactive. Test that list choice returns first? In prompt_choice_for_config likely picks first. We can't inspect. But we can test that boolean with no_input returns rendered bool. Also test that UndefinedError triggers UndefinedVariableInTemplate. We'll craft context with variable referencing undefined. Use create_env_with_context from cookiecutter.utils. We'll import. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053348194,
+    "prompt_tokens": 1014,
+    "prompt_time": 0.060440436,
+    "completion_tokens": 708,
+    "completion_time": 0.788163887,
+    "total_tokens": 1722,
+    "total_time": 0.848604323,
+    "completion_tokens_details": {
+      "reasoning_tokens": 114
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sf0hgwey6ragdxneq79x20",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport pytest\nfrom collections import OrderedDict\n\nfrom cookiecutter.prompt import prompt_for_config\nfrom cookiecutter.exceptions import UndefinedVariableInTemplate\nfrom cookiecutter.utils import create_env_with_context\n\n\ndef test_prompt_for_config_simple_and_boolean_no_input(tmp_path):\n    \"\"\"\n    Verify that simple string and boolean variables are rendered correctly\n    when no user input is requested.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"demo\",\n            \"use_feature\": True,\n            \"_private\": \"secret\",\n            \"__rendered\": \"{{ cookiecutter.project_name }}\",\n        }\n    }\n    result = prompt_for_config(context, no_input=True)\n\n    # Simple string should be rendered unchanged\n    assert result[\"project_name\"] == \"demo\"\n    # Boolean should be rendered as True\n    assert result[\"use_feature\"] is True\n    # Private key should be preserved\n    assert result[\"_private\"] == \"secret\"\n    # Rendered key should resolve the template\n    assert result[\"__rendered\"] == \"demo\"\n    # The result should be an OrderedDict preserving insertion order\n    assert isinstance(result, OrderedDict)\n    assert list(result.keys()) == [\n        \"project_name\",\n        \"use_feature\",\n        \"_private\",\n        \"__rendered\",\n    ]\n\n\ndef test_prompt_for_config_choice_and_dict_no_input(tmp_path):\n    \"\"\"\n    Verify that choice variables and dictionary variables are rendered\n    correctly when no user input is requested.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"language\": [\"python\", \"javascript\"],\n            \"config\": {\"debug\": False, \"timeout\": 30},\n            \"__choice_rendered\": \"{{ cookiecutter.language }}\",\n        }\n    }\n    result = prompt_for_config(context, no_input=True)\n\n    # Choice variable should default to the first option\n    assert result[\"language\"] == \"python\"\n    # Dictionary variable should be rendered as a dict\n    assert result[\"config\"] == {\"debug\": False, \"timeout\": 30}\n    # Rendered choice should reflect the chosen value\n    assert result[\"__choice_rendered\"] == \"python\"\n\n\ndef test_prompt_for_config_undefined_variable_raises(tmp_path):\n    \"\"\"\n    Verify that an undefined variable in a template raises\n    UndefinedVariableInTemplate with the correct message.\n    \"\"\"\n    context = {\n        \"cookiecutter\": {\n            \"project_name\": \"{{ undefined_var }}\",\n        }\n    }\n    with pytest.raises(UndefinedVariableInTemplate) as excinfo:\n        prompt_for_config(context, no_input=True)\n\n    # The exception message should mention the problematic key\n    assert \"project_name\" in str(excinfo.value)\n    # The original UndefinedError should be the cause\n    assert isinstance(excinfo.value.__cause__, Exception)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2033365970128216
+}

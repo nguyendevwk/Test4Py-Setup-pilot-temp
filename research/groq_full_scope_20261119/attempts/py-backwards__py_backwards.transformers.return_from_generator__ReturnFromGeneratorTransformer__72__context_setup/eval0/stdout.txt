@@ -1,0 +1,73 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_transformer_replaces_return_in_generator _________________
+
+    def test_transformer_replaces_return_in_generator():
+        source = """
+    def gen():
+        yield 1
+        return 5
+    """
+>       tree = _parse_and_transform(source)
+
+test_generated.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+source = '\ndef gen():\n    yield 1\n    return 5\n'
+
+    def _parse_and_transform(source: str) -> ast.Module:
+        """Parse source with typed_ast and apply the transformer."""
+        tree = ast.parse(source)
+>       transformer = ReturnFromGeneratorTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:9: TypeError
+_______________ test_transformer_ignores_non_generator_functions _______________
+
+    def test_transformer_ignores_non_generator_functions():
+        source = """
+    def normal():
+        x = 1
+        return x
+    """
+>       tree = _parse_and_transform(source)
+
+test_generated.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+source = '\ndef normal():\n    x = 1\n    return x\n'
+
+    def _parse_and_transform(source: str) -> ast.Module:
+        """Parse source with typed_ast and apply the transformer."""
+        tree = ast.parse(source)
+>       transformer = ReturnFromGeneratorTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:9: TypeError
+_________________ test_transformer_skips_return_without_value __________________
+
+    def test_transformer_skips_return_without_value():
+        source = """
+    def gen_no_value():
+        yield 2
+        return
+    """
+>       tree = _parse_and_transform(source)
+
+test_generated.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+source = '\ndef gen_no_value():\n    yield 2\n    return\n'
+
+    def _parse_and_transform(source: str) -> ast.Module:
+        """Parse source with typed_ast and apply the transformer."""
+        tree = ast.parse(source)
+>       transformer = ReturnFromGeneratorTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:9: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_transformer_replaces_return_in_generator - Typ...
+FAILED test_generated.py::test_transformer_ignores_non_generator_functions - ...
+FAILED test_generated.py::test_transformer_skips_return_without_value - TypeE...
+3 failed in 0.15s

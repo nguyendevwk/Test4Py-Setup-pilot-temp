@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-0568c19e-8cd3-4f72-bd52-0f51c08a4a90",
+  "object": "chat.completion",
+  "created": 1795079413,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokens import ListToken\nfrom typesystem.base import Position\n\n# Simple concrete Token implementation for testing\nclass DummyToken:\n    def __init__(self, value, start_index, end_index, content=\"\"):\n        self._value = value\n        self._start_index = start_index\n        self._end_index = end_index\n        self._content = content\n\n    def _get_value(self):\n        return self._value\n\n    def _get_child_token(self, key):\n        raise NotImplementedError\n\n    def _get_key_token(self, key):\n        raise NotImplementedError\n\n    @property\n    def string(self):\n        return self._content[self._start_index : self._end_index + 1]\n\n    @property\n    def value(self):\n        return self._get_value()\n\n    @property\n    def start(self):\n        return Position(self._start_index, 1, self._start_index)\n\n    @property\n    def end(self):\n        return Position(self._end_index, 1, self._end_index)\n\n    def __repr__(self):\n        return f\"{self.__class__.__name__}({self.string!r})\"\n\n    def __eq__(self, other):\n        return isinstance(other, DummyToken) and self._value == other._value\n\n\ndef test_list_token_value_and_repr():\n    \"\"\"ListToken should expose the underlying values and have a useful repr.\"\"\"\n    t1 = DummyToken(\"a\", 0, 0)\n    t2 = DummyToken(\"b\", 2, 2)\n    lt = ListToken([t1, t2], 0, 2)\n    assert lt.value == [\"a\", \"b\"]\n    assert repr(lt) == \"ListToken('a b')\"\n\n\ndef test_list_token_lookup_success_and_boundary():\n    \"\"\"lookup should return the correct child token and raise IndexError on out‑of‑range.\"\"\"\n    t1 = DummyToken(\"x\", 0, 0)\n    t2 = DummyToken(\"y\", 2, 2)\n    lt = ListToken([t1, t2], 0, 2)\n    # Successful lookup\n    assert lt.lookup([0]) is t1\n    assert lt.lookup([1]) is t2\n    # Boundary: last valid index\n    assert lt.lookup([1]) is t2\n    # Out of range should raise\n    with pytest.raises(IndexError):\n        lt.lookup([2])\n\n\ndef test_list_token_start_end_positions():\n    \"\"\"start and end properties should return correct Position objects.\"\"\"\n    t1 = DummyToken(\"foo\", 0, 2)\n    t2 = DummyToken(\"bar\", 4, 6)\n    lt = ListToken([t1, t2], 0, 6)\n    assert lt.start == Position(1, 1, 0)\n    assert lt.end == Position(1, 1, 6)\n```",
+        "reasoning": "We need to test ListToken. We need to import it. Use tmp_path? Not needed. Just create ListToken with nested tokens. Use Token base? We can create simple subclass? But ListToken expects value list of Token. We can create simple Token subclass that returns its value. Maybe use Token directly? But Token is abstract. We can create a simple DummyToken inheriting Token and implementing _get_value returning its _value. For child token, we need _get_child_token returns self._value[key]. So DummyToken can store list of DummyToken? For list token, value is list of DummyToken. So create DummyToken for primitives. Then ListToken(value=[DummyToken(...), ...], start_index, end_index). Test value property returns list of underlying values. Test lookup works. Test error when index out of range raises IndexError. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048062759,
+    "prompt_tokens": 891,
+    "prompt_time": 0.05692335,
+    "completion_tokens": 801,
+    "completion_time": 0.869931368,
+    "total_tokens": 1692,
+    "total_time": 0.926854718,
+    "completion_tokens_details": {
+      "reasoning_tokens": 178
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh46tjea0rqz2khs1qazp0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokens import ListToken\nfrom typesystem.base import Position\n\n# Simple concrete Token implementation for testing\nclass DummyToken:\n    def __init__(self, value, start_index, end_index, content=\"\"):\n        self._value = value\n        self._start_index = start_index\n        self._end_index = end_index\n        self._content = content\n\n    def _get_value(self):\n        return self._value\n\n    def _get_child_token(self, key):\n        raise NotImplementedError\n\n    def _get_key_token(self, key):\n        raise NotImplementedError\n\n    @property\n    def string(self):\n        return self._content[self._start_index : self._end_index + 1]\n\n    @property\n    def value(self):\n        return self._get_value()\n\n    @property\n    def start(self):\n        return Position(self._start_index, 1, self._start_index)\n\n    @property\n    def end(self):\n        return Position(self._end_index, 1, self._end_index)\n\n    def __repr__(self):\n        return f\"{self.__class__.__name__}({self.string!r})\"\n\n    def __eq__(self, other):\n        return isinstance(other, DummyToken) and self._value == other._value\n\n\ndef test_list_token_value_and_repr():\n    \"\"\"ListToken should expose the underlying values and have a useful repr.\"\"\"\n    t1 = DummyToken(\"a\", 0, 0)\n    t2 = DummyToken(\"b\", 2, 2)\n    lt = ListToken([t1, t2], 0, 2)\n    assert lt.value == [\"a\", \"b\"]\n    assert repr(lt) == \"ListToken('a b')\"\n\n\ndef test_list_token_lookup_success_and_boundary():\n    \"\"\"lookup should return the correct child token and raise IndexError on out‑of‑range.\"\"\"\n    t1 = DummyToken(\"x\", 0, 0)\n    t2 = DummyToken(\"y\", 2, 2)\n    lt = ListToken([t1, t2], 0, 2)\n    # Successful lookup\n    assert lt.lookup([0]) is t1\n    assert lt.lookup([1]) is t2\n    # Boundary: last valid index\n    assert lt.lookup([1]) is t2\n    # Out of range should raise\n    with pytest.raises(IndexError):\n        lt.lookup([2])\n\n\ndef test_list_token_start_end_positions():\n    \"\"\"start and end properties should return correct Position objects.\"\"\"\n    t1 = DummyToken(\"foo\", 0, 2)\n    t2 = DummyToken(\"bar\", 4, 6)\n    lt = ListToken([t1, t2], 0, 6)\n    assert lt.start == Position(1, 1, 0)\n    assert lt.end == Position(1, 1, 6)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "e0f783b55e31403f9fab4385e005e364",
+  "_api_plus_pacing_seconds": 1.9601457029930316
+}

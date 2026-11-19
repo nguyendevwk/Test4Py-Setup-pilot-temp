@@ -1,0 +1,59 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_none_money_comparisons_and_identity ___________________
+
+    def test_none_money_comparisons_and_identity():
+        nm = NoneMoney()
+        # Identity and defined/undefined flags
+        assert nm.defined is False
+        assert nm.undefined is True
+        # Equality only with other NoneMoney instances
+        assert nm == NoneMoney()
+        assert nm != 42
+        # Comparison operators
+>       assert nm < NoneMoney()  # other defined? False -> True
+E       assert <pypara.monetary.NoneMoney object at 0x7fa4cbc09280> < <pypara.monetary.NoneMoney object at 0x7fa4cbc093c0>
+E        +  where <pypara.monetary.NoneMoney object at 0x7fa4cbc093c0> = NoneMoney()
+
+test_generated.py:16: AssertionError
+__________________ test_none_money_arithmetic_and_conversion ___________________
+
+    def test_none_money_arithmetic_and_conversion():
+        nm = NoneMoney()
+        # Arithmetic with other Money returns the other operand
+        other = NoneMoney()
+        assert nm + other is other
+        assert nm - other == -other
+        # Scalar operations return self
+        assert nm * 5 == nm
+        assert nm / 3 == nm
+        assert nm // 2 == nm
+        # Conversion and currency/quantity methods return self or defaults
+>       assert nm.with_ccy(Currency("USD")) is nm
+E       TypeError: Currency.__init__() missing 5 required positional arguments: 'name', 'decimals', 'type', 'quantizer', and 'hashcache'
+
+test_generated.py:32: TypeError
+__________________ test_none_money_error_and_or_else_behavior __________________
+
+    def test_none_money_error_and_or_else_behavior():
+        nm = NoneMoney()
+        # as_float and as_integer raise TypeError
+        with pytest.raises(TypeError):
+            nm.as_float()
+        with pytest.raises(TypeError):
+            nm.as_integer()
+        # or_else executes the supplied callable
+        def factory():
+            return NoneMoney()
+>       assert nm.or_else(factory) is factory()
+E       assert <pypara.monetary.NoneMoney object at 0x7fa4cbc0b7c0> is <pypara.monetary.NoneMoney object at 0x7fa4cbc0bd40>
+E        +  where <pypara.monetary.NoneMoney object at 0x7fa4cbc0b7c0> = or_else(<function test_none_money_error_and_or_else_behavior.<locals>.factory at 0x7fa4cb591d80>)
+E        +    where or_else = <pypara.monetary.NoneMoney object at 0x7fa4cbc0bfc0>.or_else
+E        +  and   <pypara.monetary.NoneMoney object at 0x7fa4cbc0bd40> = <function test_none_money_error_and_or_else_behavior.<locals>.factory at 0x7fa4cb591d80>()
+
+test_generated.py:49: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_none_money_comparisons_and_identity - assert <...
+FAILED test_generated.py::test_none_money_arithmetic_and_conversion - TypeErr...
+FAILED test_generated.py::test_none_money_error_and_or_else_behavior - assert...
+3 failed in 0.16s

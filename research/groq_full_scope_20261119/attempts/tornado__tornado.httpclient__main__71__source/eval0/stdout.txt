@@ -1,0 +1,102 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_main_raises_system_exit_when_no_args ___________________
+
+    def test_main_raises_system_exit_when_no_args():
+        """
+        The main function should raise SystemExit when invoked without command line arguments.
+        This is the expected behavior of tornado.options.parse_command_line when no URLs are provided.
+        """
+        # Temporarily replace sys.argv to simulate running without arguments
+        original_argv = sys.argv
+        sys.argv = [original_argv[0]]
+        try:
+>           with pytest.raises(SystemExit):
+E           Failed: DID NOT RAISE SystemExit
+
+test_generated.py:17: Failed
+____________________ test_main_is_callable_and_returns_none ____________________
+
+    def test_main_is_callable_and_returns_none():
+        """
+        Verify that the main function is callable and its return type is None.
+        The function is expected to perform side effects and not return a value.
+        """
+        assert callable(httpclient.main)
+        # Since main may raise SystemExit, we catch it to inspect the return value
+        original_argv = sys.argv
+        sys.argv = [original_argv[0], "http://example.com"]
+        try:
+            with pytest.raises(SystemExit):
+>               result = httpclient.main()
+
+test_generated.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/httpclient.py:760: in main
+    define("print_headers", type=bool, default=False)
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/options.py:698: in define
+    return options.define(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tornado.options.OptionParser object at 0x7fcc9c8aac80>
+name = 'print_headers', default = False, type = <class 'bool'>, help = None
+metavar = None, multiple = False, group = None, callback = None
+
+    def define(
+        self,
+        name: str,
+        default: Any = None,
+        type: Optional[type] = None,
+        help: Optional[str] = None,
+        metavar: Optional[str] = None,
+        multiple: bool = False,
+        group: Optional[str] = None,
+        callback: Optional[Callable[[Any], None]] = None,
+    ) -> None:
+        """Defines a new command line option.
+    
+        ``type`` can be any of `str`, `int`, `float`, `bool`,
+        `~datetime.datetime`, or `~datetime.timedelta`. If no ``type``
+        is given but a ``default`` is, ``type`` is the type of
+        ``default``. Otherwise, ``type`` defaults to `str`.
+    
+        If ``multiple`` is True, the option value is a list of ``type``
+        instead of an instance of ``type``.
+    
+        ``help`` and ``metavar`` are used to construct the
+        automatically generated command line help string. The help
+        message is formatted like::
+    
+           --name=METAVAR      help string
+    
+        ``group`` is used to group the defined options in logical
+        groups. By default, command line options are grouped by the
+        file in which they are defined.
+    
+        Command line option names must be unique globally.
+    
+        If a ``callback`` is given, it will be run with the new value whenever
+        the option is changed.  This can be used to combine command-line
+        and file-based options::
+    
+            define("config", type=str, help="path to config file",
+                   callback=lambda path: parse_config_file(path, final=False))
+    
+        With this definition, options in the file specified by ``--config`` will
+        override options set earlier on the command line, but can be overridden
+        by later flags.
+    
+        """
+        normalized = self._normalize_name(name)
+        if normalized in self._options:
+>           raise Error(
+                "Option %r already defined in %s"
+                % (normalized, self._options[normalized].file_name)
+            )
+E           tornado.options.Error: Option 'print-headers' already defined in /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/httpclient.py
+
+../../../../groq_codamosa_extension_20261119/environments/tornado/venv/lib/python3.10/site-packages/tornado/options.py:270: Error
+=========================== short test summary info ============================
+FAILED test_generated.py::test_main_raises_system_exit_when_no_args - Failed:...
+FAILED test_generated.py::test_main_is_callable_and_returns_none - tornado.op...
+2 failed, 1 passed in 0.45s

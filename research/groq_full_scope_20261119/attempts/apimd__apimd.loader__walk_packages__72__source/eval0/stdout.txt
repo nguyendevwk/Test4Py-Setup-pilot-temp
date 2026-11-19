@@ -1,0 +1,75 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_walk_packages_normal ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_normal0')
+
+    def test_walk_packages_normal(tmp_path):
+        """
+        Verify that walk_packages yields correct module names for a
+        typical package layout with .py and .pyi files.
+        """
+        # Create a package structure:
+        # tmp_path/
+        #   pkg/
+        #     __init__.py
+        #     module.py
+        #     subpkg/
+        #       __init__.py
+        #       submodule.py
+        #   other.py
+        pkg_dir = tmp_path / "pkg"
+        subpkg_dir = pkg_dir / "subpkg"
+        create_file(pkg_dir / "__init__.py")
+        create_file(pkg_dir / "module.py")
+        create_file(subpkg_dir / "__init__.py")
+        create_file(subpkg_dir / "submodule.py")
+        create_file(tmp_path / "other.py")
+    
+        # Run walk_packages on the top-level package
+        results = list(walk_packages("pkg", str(tmp_path)))
+        # Expected module names
+        expected = {
+            ("pkg", str(pkg_dir)),
+            ("pkg.module", str(pkg_dir / "module.py")),
+            ("pkg.subpkg", str(subpkg_dir)),
+            ("pkg.subpkg.submodule", str(subpkg_dir / "submodule.py")),
+        }
+>       assert set(results) == expected
+E       AssertionError: assert {('pkg', '/ho...g/submodule')} == {('pkg', '/ho...ubmodule.py')}
+E         
+E         Extra items in the left set:
+E         ('pkg.subpkg', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_normal0/pkg/subpkg/__init__')
+E         ('pkg', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_normal0/pkg/__init__')
+E         ('pkg.subpkg.submodule', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/ap...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+test_generated.py:43: AssertionError
+____________________ test_walk_packages_ignores_non_python _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_ignores_non0')
+
+    def test_walk_packages_ignores_non_python(tmp_path):
+        """
+        Verify that files not ending with .py or .pyi are ignored.
+        """
+        # Create a package with a non-Python file
+        pkg_dir = tmp_path / "pkg"
+        create_file(pkg_dir / "__init__.py")
+        create_file(pkg_dir / "data.txt")
+        create_file(pkg_dir / "script.sh")
+    
+        results = list(walk_packages("pkg", str(tmp_path)))
+        # Only the __init__ should be yielded
+>       assert results == [("pkg", str(pkg_dir))]
+E       AssertionError: assert [('pkg', '/ho...kg/__init__')] == [('pkg', '/ho...es_non0/pkg')]
+E         
+E         At index 0 diff: ('pkg', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_ignores_non0/pkg/__init__') != ('pkg', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_ignores_non0/pkg')
+E         Use -v to get more diff
+
+test_generated.py:57: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_walk_packages_normal - AssertionError: assert ...
+FAILED test_generated.py::test_walk_packages_ignores_non_python - AssertionEr...
+2 failed, 1 passed in 0.12s

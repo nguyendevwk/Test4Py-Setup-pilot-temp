@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-fa2991de-b589-4e89-8d76-571312ecf845",
+  "object": "chat.completion",
+  "created": 1795079606,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport datetime\n\nimport pytest\nfrom tornado import ioloop\nfrom tornado.locks import Condition\n\n\n@pytest.mark.asyncio\nasync def test_wait_and_notify():\n    \"\"\"A waiter should receive True when notified.\"\"\"\n    condition = Condition()\n    # Start a waiter that will be notified shortly\n    waiter_task = asyncio.create_task(condition.wait())\n    # Give the loop a moment to register the waiter\n    await asyncio.sleep(0)\n    # Notify one waiter\n    condition.notify()\n    # Await the waiter result\n    result = await waiter_task\n    assert result is True, \"waiter should be notified with True\"\n\n\n@pytest.mark.asyncio\nasync def test_wait_timeout():\n    \"\"\"A waiter should receive False when the timeout expires.\"\"\"\n    condition = Condition()\n    # Use a short timeout of 0.1 seconds\n    timeout = ioloop.IOLoop.current().time() + 0.1\n    waiter_task = asyncio.create_task(condition.wait(timeout=timeout))\n    # Wait slightly longer than the timeout\n    await asyncio.sleep(0.2)\n    result = await waiter_task\n    assert result is False, \"waiter should time out and return False\"\n\n\n@pytest.mark.asyncio\nasync def test_notify_all_wakes_all_waiters():\n    \"\"\"notify_all should wake all pending waiters.\"\"\"\n    condition = Condition()\n    # Create three waiters\n    waiter1 = asyncio.create_task(condition.wait())\n    waiter2 = asyncio.create_task(condition.wait())\n    waiter3 = asyncio.create_task(condition.wait())\n    # Ensure all waiters are registered\n    await asyncio.sleep(0)\n    # Notify all\n    condition.notify_all()\n    # Await all results\n    results = await asyncio.gather(waiter1, waiter2, waiter3)\n    assert all(results) is True, \"All waiters should be notified with True\"\n```",
+        "reasoning": "We need 3 test functions. Use tornado IOLoop? We can use asyncio with tornado.gen? But easier: use tornado.ioloop.IOLoop.current() and run in event loop. Use pytest.mark.asyncio. Test wait then notify. Test timeout returns False. Test notify_all. Use tmp_path? not needed. Provide assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004469452,
+    "prompt_tokens": 1177,
+    "prompt_time": 0.027160991,
+    "completion_tokens": 463,
+    "completion_time": 0.508107022,
+    "total_tokens": 1640,
+    "total_time": 0.535268013,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 71
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sha3hbe65a1pwmnj22jgxe",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport datetime\n\nimport pytest\nfrom tornado import ioloop\nfrom tornado.locks import Condition\n\n\n@pytest.mark.asyncio\nasync def test_wait_and_notify():\n    \"\"\"A waiter should receive True when notified.\"\"\"\n    condition = Condition()\n    # Start a waiter that will be notified shortly\n    waiter_task = asyncio.create_task(condition.wait())\n    # Give the loop a moment to register the waiter\n    await asyncio.sleep(0)\n    # Notify one waiter\n    condition.notify()\n    # Await the waiter result\n    result = await waiter_task\n    assert result is True, \"waiter should be notified with True\"\n\n\n@pytest.mark.asyncio\nasync def test_wait_timeout():\n    \"\"\"A waiter should receive False when the timeout expires.\"\"\"\n    condition = Condition()\n    # Use a short timeout of 0.1 seconds\n    timeout = ioloop.IOLoop.current().time() + 0.1\n    waiter_task = asyncio.create_task(condition.wait(timeout=timeout))\n    # Wait slightly longer than the timeout\n    await asyncio.sleep(0.2)\n    result = await waiter_task\n    assert result is False, \"waiter should time out and return False\"\n\n\n@pytest.mark.asyncio\nasync def test_notify_all_wakes_all_waiters():\n    \"\"\"notify_all should wake all pending waiters.\"\"\"\n    condition = Condition()\n    # Create three waiters\n    waiter1 = asyncio.create_task(condition.wait())\n    waiter2 = asyncio.create_task(condition.wait())\n    waiter3 = asyncio.create_task(condition.wait())\n    # Ensure all waiters are registered\n    await asyncio.sleep(0)\n    # Notify all\n    condition.notify_all()\n    # Await all results\n    results = await asyncio.gather(waiter1, waiter2, waiter3)\n    assert all(results) is True, \"All waiters should be notified with True\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "093ad3b3c01540c1befb11b1e227fffb",
+  "_api_plus_pacing_seconds": 1.2685594820068218
+}

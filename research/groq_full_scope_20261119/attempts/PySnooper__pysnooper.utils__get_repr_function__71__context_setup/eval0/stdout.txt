@@ -1,0 +1,54 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_get_repr_function_matches_type_condition _________________
+
+    def test_get_repr_function_matches_type_condition():
+        # custom_repr contains a type condition that should match int
+        custom_repr = [
+            (int, lambda x: f"int:{x}"),
+            (str, lambda x: f"str:{x}"),
+        ]
+        result = get_repr_function(42, custom_repr)
+>       assert result == "int:42"
+E       AssertionError: assert <function test_get_repr_function_matches_type_condition.<locals>.<lambda> at 0x7fa3a0dbb250> == 'int:42'
+
+test_generated.py:12: AssertionError
+___________ test_get_repr_function_falls_back_to_repr_when_no_match ____________
+
+    def test_get_repr_function_falls_back_to_repr_when_no_match():
+        # custom_repr contains conditions that do not match the item
+        custom_repr = [
+            (list, lambda x: f"list:{x}"),
+            (dict, lambda x: f"dict:{x}"),
+        ]
+        result = get_repr_function(3.14, custom_repr)
+        # Should use the built-in repr for a float
+>       assert result == repr(3.14)
+E       AssertionError: assert <built-in function repr> == '3.14'
+E        +  where '3.14' = repr(3.14)
+
+test_generated.py:22: AssertionError
+___________ test_get_repr_function_handles_custom_callable_condition ___________
+
+    def test_get_repr_function_handles_custom_callable_condition():
+        # custom_repr uses a callable condition that checks for a specific attribute
+        class Dummy:
+            def __init__(self, value):
+                self.value = value
+    
+        custom_repr = [
+            (lambda x: hasattr(x, "value") and x.value > 10, lambda x: f"high:{x.value}"),
+            (lambda x: hasattr(x, "value") and x.value <= 10, lambda x: f"low:{x.value}"),
+        ]
+        high = Dummy(15)
+        low = Dummy(5)
+>       assert get_repr_function(high, custom_repr) == "high:15"
+E       AssertionError: assert <function test_get_repr_function_handles_custom_callable_condition.<locals>.<lambda> at 0x7fa3a0e17910> == 'high:15'
+E        +  where <function test_get_repr_function_handles_custom_callable_condition.<locals>.<lambda> at 0x7fa3a0e17910> = get_repr_function(<test_generated.test_get_repr_function_handles_custom_callable_condition.<locals>.Dummy object at 0x7fa3a0dfd120>, [(<function test_get_repr_function_handles_custom_callable_condition.<locals>.<lambda> at 0x7fa3a0e15f30>, <function t...fa3a0e179a0>, <function test_get_repr_function_handles_custom_callable_condition.<locals>.<lambda> at 0x7fa3a0e17a30>)])
+
+test_generated.py:36: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_repr_function_matches_type_condition - Ass...
+FAILED test_generated.py::test_get_repr_function_falls_back_to_repr_when_no_match
+FAILED test_generated.py::test_get_repr_function_handles_custom_callable_condition
+3 failed in 0.12s

@@ -1,0 +1,48 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_get_repr_function_matches_type_condition _________________
+
+    def test_get_repr_function_matches_type_condition():
+        # custom_repr contains a type condition that should match int
+        custom_repr = [
+            (int, lambda x: f"int:{x}"),
+            (str, lambda x: f"str:{x}"),
+        ]
+        result = get_repr_function(42, custom_repr)
+>       assert result == "int:42"
+E       AssertionError: assert <function test_get_repr_function_matches_type_condition.<locals>.<lambda> at 0x7f7e3363f250> == 'int:42'
+
+test_generated.py:12: AssertionError
+___________ test_get_repr_function_falls_back_to_repr_when_no_match ____________
+
+    def test_get_repr_function_falls_back_to_repr_when_no_match():
+        # custom_repr contains conditions that do not match the item
+        custom_repr = [
+            (list, lambda x: f"list:{x}"),
+            (dict, lambda x: f"dict:{x}"),
+        ]
+        result = get_repr_function(3.14, custom_repr)
+        # Should use the built-in repr for a float
+>       assert result == repr(3.14)
+E       AssertionError: assert <built-in function repr> == '3.14'
+E        +  where '3.14' = repr(3.14)
+
+test_generated.py:22: AssertionError
+______________ test_get_repr_function_handles_callable_condition _______________
+
+    def test_get_repr_function_handles_callable_condition():
+        # custom_repr uses a callable condition that checks for truthiness
+        custom_repr = [
+            (lambda x: isinstance(x, str) and x.startswith("foo"), lambda x: f"foo:{x}"),
+            (lambda x: isinstance(x, str), lambda x: f"str:{x}"),
+        ]
+        result = get_repr_function("foobar", custom_repr)
+>       assert result == "foo:foobar"
+E       AssertionError: assert <function test_get_repr_function_handles_callable_condition.<locals>.<lambda> at 0x7f7e33697910> == 'foo:foobar'
+
+test_generated.py:31: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_repr_function_matches_type_condition - Ass...
+FAILED test_generated.py::test_get_repr_function_falls_back_to_repr_when_no_match
+FAILED test_generated.py::test_get_repr_function_handles_callable_condition
+3 failed in 0.11s

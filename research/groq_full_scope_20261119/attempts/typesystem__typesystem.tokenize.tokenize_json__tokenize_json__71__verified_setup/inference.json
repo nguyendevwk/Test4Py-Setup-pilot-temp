@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-60e2589b-354d-439d-b09f-db2e993f5f2e",
+  "object": "chat.completion",
+  "created": 1795076563,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import tokenize_json, ParseError, Position\nfrom typesystem.tokenize.tokens import DictToken, ListToken, ScalarToken, Token\n\ndef test_tokenize_json_valid_dict():\n    \"\"\"Tokenize a simple JSON object and verify the returned token type and structure.\"\"\"\n    json_str = '{\"key\": \"value\", \"num\": 42}'\n    token = tokenize_json(json_str)\n    assert isinstance(token, Token)\n    assert isinstance(token, DictToken)\n    # The token should contain two key-value pairs\n    assert len(token) == 2\n    # Verify that the keys are ScalarTokens and values are ScalarTokens or appropriate types\n    for key_token, value_token in token.items():\n        assert isinstance(key_token, ScalarToken)\n        assert isinstance(value_token, ScalarToken)\n    # Check that the original JSON string is preserved in the token's raw representation\n    assert token.raw == json_str\n\ndef test_tokenize_json_empty_string_raises():\n    \"\"\"An empty string should raise a ParseError with code 'no_content'.\"\"\"\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    # Position should be at the start of the input\n    assert isinstance(err.position, Position)\n    assert err.position.line_no == 1\n    assert err.position.column_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_json_malformed_raises():\n    \"\"\"Malformed JSON should raise a ParseError with code 'parse_error'.\"\"\"\n    malformed = '{\"incomplete\": true'\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(malformed)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    # The error message should contain the JSONDecodeError message\n    assert \"Expecting\" in err.text or \"Expecting\" in err.text\n    # Position should reflect the location of the error\n    assert isinstance(err.position, Position)\n    # The column and line numbers should be greater than zero\n    assert err.position.line_no > 0\n    assert err.position.column_no > 0\n    assert err.position.char_index >= 0\n```",
+        "reasoning": "We need to test tokenize_json. We need to import it. We need to test normal, boundary, error. Use tmp_path for file? content is string. We can test normal: valid JSON returns Token. We can check type. For boundary: empty string raises ParseError with code no_content. For error: malformed JSON raises ParseError with code parse_error. Use pytest.raises. Ensure Position attributes. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.15645441,
+    "prompt_tokens": 468,
+    "prompt_time": 0.027709159,
+    "completion_tokens": 573,
+    "completion_time": 0.680637209,
+    "total_tokens": 1041,
+    "total_time": 0.708346368,
+    "completion_tokens_details": {
+      "reasoning_tokens": 88
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sed7abefdrhb30vtfke8zy",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import tokenize_json, ParseError, Position\nfrom typesystem.tokenize.tokens import DictToken, ListToken, ScalarToken, Token\n\ndef test_tokenize_json_valid_dict():\n    \"\"\"Tokenize a simple JSON object and verify the returned token type and structure.\"\"\"\n    json_str = '{\"key\": \"value\", \"num\": 42}'\n    token = tokenize_json(json_str)\n    assert isinstance(token, Token)\n    assert isinstance(token, DictToken)\n    # The token should contain two key-value pairs\n    assert len(token) == 2\n    # Verify that the keys are ScalarTokens and values are ScalarTokens or appropriate types\n    for key_token, value_token in token.items():\n        assert isinstance(key_token, ScalarToken)\n        assert isinstance(value_token, ScalarToken)\n    # Check that the original JSON string is preserved in the token's raw representation\n    assert token.raw == json_str\n\ndef test_tokenize_json_empty_string_raises():\n    \"\"\"An empty string should raise a ParseError with code 'no_content'.\"\"\"\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    # Position should be at the start of the input\n    assert isinstance(err.position, Position)\n    assert err.position.line_no == 1\n    assert err.position.column_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_json_malformed_raises():\n    \"\"\"Malformed JSON should raise a ParseError with code 'parse_error'.\"\"\"\n    malformed = '{\"incomplete\": true'\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(malformed)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    # The error message should contain the JSONDecodeError message\n    assert \"Expecting\" in err.text or \"Expecting\" in err.text\n    # Position should reflect the location of the error\n    assert isinstance(err.position, Position)\n    # The column and line numbers should be greater than zero\n    assert err.position.line_no > 0\n    assert err.position.column_no > 0\n    assert err.position.char_index >= 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1364695090451278
+}

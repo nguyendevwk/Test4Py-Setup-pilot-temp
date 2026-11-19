@@ -1,0 +1,89 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_parse_xforwarded_with_real_ip_header ___________________
+
+    def test_parse_xforwarded_with_real_ip_header():
+        """When REAL_IP_HEADER is present, it should be used directly."""
+        headers = DummyHeaders({
+            "X-Real-IP": "192.0.2.1",
+            "X-Forwarded-Proto": "https",
+            "X-Forwarded-Host": "example.com",
+            "X-Forwarded-Port": "443",
+            "X-Forwarded-Path": "/path%20with%20spaces"
+        })
+        config = DummyConfig(real_ip_header="X-Real-IP")
+        result = parse_xforwarded(headers, config)
+>       assert result == {
+            "for": "192.0.2.1",
+            "proto": "https",
+            "host": "example.com",
+            "port": 443,
+            "path": "/path with spaces"
+        }
+E       AssertionError: assert {'for': '192.0.2.1'} == {'for': '192....rt': 443, ...}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Right contains 4 more items:
+E         {'host': 'example.com',
+E          'path': '/path with spaces',
+E          'port': 443,
+E          'proto': 'https'}
+E         Use -v to get more diff
+
+test_generated.py:39: AssertionError
+___________________ test_parse_xforwarded_with_proxies_count ___________________
+
+    def test_parse_xforwarded_with_proxies_count():
+        """When no real IP header, proxies_count should pick the correct address."""
+        headers = DummyHeaders({
+            "X-Forwarded-For": ["203.0.113.1, 198.51.100.2", "192.0.2.3"],
+            "X-Forwarded-Proto": "http",
+            "X-Forwarded-Host": "example.org",
+            "X-Forwarded-Port": "80",
+            "X-Forwarded-Path": "/foo"
+        })
+        config = DummyConfig(proxies_count=2)  # pick the second last address
+        result = parse_xforwarded(headers, config)
+>       assert result == {
+            "for": "198.51.100.2",
+            "proto": "http",
+            "host": "example.org",
+            "port": 80,
+            "path": "/foo"
+        }
+E       AssertionError: assert {'for': '198.51.100.2'} == {'for': '198....ort': 80, ...}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Right contains 4 more items:
+E         {'host': 'example.org', 'path': '/foo', 'port': 80, 'proto': 'http'}
+E         Use -v to get more diff
+
+test_generated.py:58: AssertionError
+____________ test_parse_xforwarded_invalid_port_and_unknown_address ____________
+
+    def test_parse_xforwarded_invalid_port_and_unknown_address():
+        """Invalid port should be omitted; 'unknown' address should raise ValueError and be omitted."""
+        headers = DummyHeaders({
+            "X-Forwarded-For": "unknown",
+            "X-Forwarded-Proto": "HTTPS",
+            "X-Forwarded-Host": "EXAMPLE.NET",
+            "X-Forwarded-Port": "not-a-number",
+            "X-Forwarded-Path": "/bar"
+        })
+        config = DummyConfig()
+        result = parse_xforwarded(headers, config)
+        # 'for' should be omitted because 'unknown' triggers ValueError
+        # 'port' should be omitted due to ValueError on int conversion
+>       assert result == {
+            "proto": "https",
+            "host": "example.net",
+            "path": "/bar"
+        }
+E       AssertionError: assert None == {'proto': 'https', 'host': 'example.net', 'path': '/bar'}
+
+test_generated.py:79: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_parse_xforwarded_with_real_ip_header - Asserti...
+FAILED test_generated.py::test_parse_xforwarded_with_proxies_count - Assertio...
+FAILED test_generated.py::test_parse_xforwarded_invalid_port_and_unknown_address
+3 failed in 0.32s

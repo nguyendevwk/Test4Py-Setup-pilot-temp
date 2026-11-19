@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-49837005-f351-4806-8689-8932b5b5ae30",
+  "object": "chat.completion",
+  "created": 1795075973,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport json\nimport zipfile\nimport tempfile\nimport shutil\nfrom pathlib import Path\n\nimport pytest\n\nfrom cookiecutter.repository import determine_repo_dir, RepositoryNotFound\n\n\ndef _create_cookiecutter_dir(base: Path) -> Path:\n    \"\"\"Create a directory containing a minimal cookiecutter.json.\"\"\"\n    dir_path = base / \"template\"\n    dir_path.mkdir(parents=True, exist_ok=True)\n    (dir_path / \"cookiecutter.json\").write_text(json.dumps({\"project_name\": \"demo\"}))\n    return dir_path\n\n\ndef _create_zip_with_cookiecutter(tmp_path: Path) -> Path:\n    \"\"\"Create a zip file containing a cookiecutter.json.\"\"\"\n    zip_path = tmp_path / \"template.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        zf.writestr(\"cookiecutter.json\", json.dumps({\"project_name\": \"demo\"}))\n    return zip_path\n\n\ndef test_determine_repo_dir_local_path(tmp_path: Path):\n    \"\"\"When template is a local path, the function returns that path.\"\"\"\n    template_dir = _create_cookiecutter_dir(tmp_path)\n    clone_to_dir = tmp_path / \"clone\"\n    clone_to_dir.mkdir()\n    result_dir, cleanup = determine_repo_dir(\n        template=str(template_dir),\n        abbreviations={},\n        clone_to_dir=clone_to_dir,\n        checkout=None,\n        no_input=True,\n    )\n    assert result_dir == str(template_dir)\n    assert cleanup is False\n    # The directory should still exist after the call\n    assert Path(result_dir).exists()\n\n\ndef test_determine_repo_dir_zip_file(tmp_path: Path):\n    \"\"\"When template is a zip file, it is unzipped and returned.\"\"\"\n    zip_path = _create_zip_with_cookiecutter(tmp_path)\n    clone_to_dir = tmp_path / \"clone\"\n    clone_to_dir.mkdir()\n    result_dir, cleanup = determine_repo_dir(\n        template=str(zip_path),\n        abbreviations={},\n        clone_to_dir=clone_to_dir,\n        checkout=None,\n        no_input=True,\n    )\n    # The unzipped directory should be inside clone_to_dir\n    assert Path(result_dir).is_dir()\n    assert Path(result_dir).joinpath(\"cookiecutter.json\").exists()\n    assert cleanup is True\n    # After cleanup flag is True, the directory should be removed by caller\n    # (here we just check that it exists now)\n    assert Path(result_dir).exists()\n\n\ndef test_determine_repo_dir_missing(tmp_path: Path):\n    \"\"\"If no cookiecutter.json is found, a RepositoryNotFound is raised.\"\"\"\n    missing_dir = tmp_path / \"missing\"\n    missing_dir.mkdir()\n    clone_to_dir = tmp_path / \"clone\"\n    clone_to_dir.mkdir()\n    with pytest.raises(RepositoryNotFound) as excinfo:\n        determine_repo_dir(\n            template=str(missing_dir),\n            abbreviations={},\n            clone_to_dir=clone_to_dir,\n            checkout=None,\n            no_input=True,\n        )\n    assert str(missing_dir) in str(excinfo.value)\n```",
+        "reasoning": "We need tests for determine_repo_dir. We can create a temp dir with cookiecutter.json. Use tmp_path. Test local path, test zip file, test repo url? clone uses external, can't. So test local path and zip. Use unzip function? It will unzip. We can create a zip with cookiecutter.json. Use real unzip. Ensure cleanup flag. Also test error when missing."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047056013,
+    "prompt_tokens": 810,
+    "prompt_time": 0.042097884,
+    "completion_tokens": 734,
+    "completion_time": 0.838296618,
+    "total_tokens": 1544,
+    "total_time": 0.880394502,
+    "completion_tokens_details": {
+      "reasoning_tokens": 83
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdv746e0tvwr4z5hn7sqrw",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport json\nimport zipfile\nimport tempfile\nimport shutil\nfrom pathlib import Path\n\nimport pytest\n\nfrom cookiecutter.repository import determine_repo_dir, RepositoryNotFound\n\n\ndef _create_cookiecutter_dir(base: Path) -> Path:\n    \"\"\"Create a directory containing a minimal cookiecutter.json.\"\"\"\n    dir_path = base / \"template\"\n    dir_path.mkdir(parents=True, exist_ok=True)\n    (dir_path / \"cookiecutter.json\").write_text(json.dumps({\"project_name\": \"demo\"}))\n    return dir_path\n\n\ndef _create_zip_with_cookiecutter(tmp_path: Path) -> Path:\n    \"\"\"Create a zip file containing a cookiecutter.json.\"\"\"\n    zip_path = tmp_path / \"template.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as zf:\n        zf.writestr(\"cookiecutter.json\", json.dumps({\"project_name\": \"demo\"}))\n    return zip_path\n\n\ndef test_determine_repo_dir_local_path(tmp_path: Path):\n    \"\"\"When template is a local path, the function returns that path.\"\"\"\n    template_dir = _create_cookiecutter_dir(tmp_path)\n    clone_to_dir = tmp_path / \"clone\"\n    clone_to_dir.mkdir()\n    result_dir, cleanup = determine_repo_dir(\n        template=str(template_dir),\n        abbreviations={},\n        clone_to_dir=clone_to_dir,\n        checkout=None,\n        no_input=True,\n    )\n    assert result_dir == str(template_dir)\n    assert cleanup is False\n    # The directory should still exist after the call\n    assert Path(result_dir).exists()\n\n\ndef test_determine_repo_dir_zip_file(tmp_path: Path):\n    \"\"\"When template is a zip file, it is unzipped and returned.\"\"\"\n    zip_path = _create_zip_with_cookiecutter(tmp_path)\n    clone_to_dir = tmp_path / \"clone\"\n    clone_to_dir.mkdir()\n    result_dir, cleanup = determine_repo_dir(\n        template=str(zip_path),\n        abbreviations={},\n        clone_to_dir=clone_to_dir,\n        checkout=None,\n        no_input=True,\n    )\n    # The unzipped directory should be inside clone_to_dir\n    assert Path(result_dir).is_dir()\n    assert Path(result_dir).joinpath(\"cookiecutter.json\").exists()\n    assert cleanup is True\n    # After cleanup flag is True, the directory should be removed by caller\n    # (here we just check that it exists now)\n    assert Path(result_dir).exists()\n\n\ndef test_determine_repo_dir_missing(tmp_path: Path):\n    \"\"\"If no cookiecutter.json is found, a RepositoryNotFound is raised.\"\"\"\n    missing_dir = tmp_path / \"missing\"\n    missing_dir.mkdir()\n    clone_to_dir = tmp_path / \"clone\"\n    clone_to_dir.mkdir()\n    with pytest.raises(RepositoryNotFound) as excinfo:\n        determine_repo_dir(\n            template=str(missing_dir),\n            abbreviations={},\n            clone_to_dir=clone_to_dir,\n            checkout=None,\n            no_input=True,\n        )\n    assert str(missing_dir) in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2056033660192043
+}

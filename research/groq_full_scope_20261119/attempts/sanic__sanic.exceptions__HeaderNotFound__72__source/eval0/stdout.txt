@@ -1,0 +1,45 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_header_not_found_default_message_and_status _______________
+
+    def test_header_not_found_default_message_and_status():
+        """HeaderNotFound should default to a 400 status and a default message."""
+        exc = HeaderNotFound()
+        # Status code should be 400
+>       assert exc.status == 400
+E       AttributeError: 'HeaderNotFound' object has no attribute 'status'
+
+test_generated.py:8: AttributeError
+____________ test_header_not_found_with_custom_headers_and_context _____________
+
+    def test_header_not_found_with_custom_headers_and_context():
+        """HeaderNotFound should store custom headers and context correctly."""
+        custom_headers = {"X-Custom": "value"}
+        context = {"detail": "missing header"}
+        exc = HeaderNotFound(message="Missing header", headers=custom_headers, context=context)
+        # Status code remains 400
+>       assert exc.status == 400
+E       AttributeError: 'HeaderNotFound' object has no attribute 'status'
+
+test_generated.py:20: AttributeError
+_________ test_header_not_found_extra_not_included_in_client_response __________
+
+    def test_header_not_found_extra_not_included_in_client_response():
+        """Extra data should not be exposed in the client response."""
+        extra = {"secret": "data"}
+        exc = HeaderNotFound(message="Error", extra=extra)
+        # The `extra` attribute should be present on the exception
+        assert exc.extra == extra
+        # But the `client_response` (or similar) should not contain the secret
+        # Since the actual client response construction is internal, we check that
+        # the `extra` dict is not part of the `headers` or `context`.
+        assert "secret" not in exc.headers
+>       assert "secret" not in exc.context or exc.context is None
+E       TypeError: argument of type 'NoneType' is not iterable
+
+test_generated.py:38: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_header_not_found_default_message_and_status - ...
+FAILED test_generated.py::test_header_not_found_with_custom_headers_and_context
+FAILED test_generated.py::test_header_not_found_extra_not_included_in_client_response
+3 failed in 0.34s

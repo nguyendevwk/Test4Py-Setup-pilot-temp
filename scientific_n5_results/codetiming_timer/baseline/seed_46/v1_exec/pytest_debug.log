@@ -1,0 +1,43 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________ test_timer_start_stop_logs_and_updates_timers _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3bc541ef90>
+
+    def test_timer_start_stop_logs_and_updates_timers(monkeypatch):
+        # Capture logger output
+        logs = []
+        def logger(msg: str) -> None:
+            logs.append(msg)
+    
+        # Replace Timers.add to record calls
+        add_calls = []
+        monkeypatch.setattr(Timer.timers, "add", lambda name, elapsed: add_calls.append((name, elapsed)))
+    
+        # Create timer with custom logger, initial text, and callable text
+        t = Timer(name="test", initial_text="Starting {name}", text=lambda elapsed: f"Elapsed: {elapsed:.2f}s", logger=logger)
+    
+        # Start and stop the timer
+        t.start()
+        elapsed = t.stop()
+    
+        # Verify initial log
+        assert logs[0] == "Starting test"
+    
+        # Verify elapsed log
+        assert logs[1].startswith("Elapsed: ")
+        assert logs[1].endswith("s")
+        # Extract numeric part and compare to elapsed
+        numeric = float(logs[1].split(":")[1].strip()[:-1])
+>       assert pytest.approx(numeric, rel=0.1) == elapsed
+E       assert 0.0 ± 1.0e-12 == 3.673601895570755e-05
+E         
+E         comparison failed
+E         Obtained: 3.673601895570755e-05
+E         Expected: 0.0 ± 1.0e-12
+
+../../scientific_n5_results/codetiming_timer/baseline/seed_46/v1_exec/test_run.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED ../../scientific_n5_results/codetiming_timer/baseline/seed_46/v1_exec/test_run.py::test_timer_start_stop_logs_and_updates_timers
+1 failed in 0.10s
+

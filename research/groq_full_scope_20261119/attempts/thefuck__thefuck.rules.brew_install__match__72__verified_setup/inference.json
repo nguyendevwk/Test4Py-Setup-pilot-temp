@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-57f52cd5-9404-4729-a280-1ce10c7f819e",
+  "object": "chat.completion",
+  "created": 1795078418,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport types\nimport pytest\nfrom thefuck.rules.brew_install import match, _get_similar_formula\n\n# Helper to create a minimal command object\nclass DummyCommand:\n    def __init__(self, script, output):\n        self.script = script\n        self.output = output\n\ndef test_match_returns_true_for_similar_formula(monkeypatch):\n    # Simulate that get_closest finds a similar formula\n    def fake_get_closest(formula, candidates):\n        return \"similar_formula\"\n    monkeypatch.setattr(\"thefuck.utils.get_closest\", fake_get_closest)\n\n    cmd = DummyCommand(\n        script=\"brew install nonexistent\",\n        output=\"Error: No available formula for nonexistent\\n\"\n               \"  Did you mean: similar_formula?\"\n    )\n    assert match(cmd) is True\n\ndef test_match_returns_false_when_no_similar_formula(monkeypatch):\n    # Simulate that get_closest returns None (no similar formula)\n    def fake_get_closest(formula, candidates):\n        return None\n    monkeypatch.setattr(\"thefuck.utils.get_closest\", fake_get_closest)\n\n    cmd = DummyCommand(\n        script=\"brew install nonexistent\",\n        output=\"Error: No available formula for nonexistent\\n\"\n               \"  Did you mean: similar_formula?\"\n    )\n    assert match(cmd) is False\n\ndef test_match_returns_false_for_non_brew_command():\n    cmd = DummyCommand(\n        script=\"apt-get install nonexistent\",\n        output=\"Error: No available formula for nonexistent\\n\"\n               \"  Did you mean: similar_formula?\"\n    )\n    assert match(cmd) is False\n```",
+        "reasoning": "We need to test match function. Need to create command objects with script and output. Use simple class. Test normal: proper command with formula, and similar formula exists. Need get_closest and replace_argument but not needed. We need to simulate _get_similar_formula? It's internal. We can patch get_closest to return something. Use monkeypatch. Three tests: normal match returns True, boundary where no similar formula returns False, error where script not brew install returns False. Use tmp_path? not needed. Provide tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047054861,
+    "prompt_tokens": 326,
+    "prompt_time": 0.006309118,
+    "completion_tokens": 452,
+    "completion_time": 0.540689934,
+    "total_tokens": 778,
+    "total_time": 0.546999052,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 108
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg5v7kee2s8b8fya6n0pd3",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport types\nimport pytest\nfrom thefuck.rules.brew_install import match, _get_similar_formula\n\n# Helper to create a minimal command object\nclass DummyCommand:\n    def __init__(self, script, output):\n        self.script = script\n        self.output = output\n\ndef test_match_returns_true_for_similar_formula(monkeypatch):\n    # Simulate that get_closest finds a similar formula\n    def fake_get_closest(formula, candidates):\n        return \"similar_formula\"\n    monkeypatch.setattr(\"thefuck.utils.get_closest\", fake_get_closest)\n\n    cmd = DummyCommand(\n        script=\"brew install nonexistent\",\n        output=\"Error: No available formula for nonexistent\\n\"\n               \"  Did you mean: similar_formula?\"\n    )\n    assert match(cmd) is True\n\ndef test_match_returns_false_when_no_similar_formula(monkeypatch):\n    # Simulate that get_closest returns None (no similar formula)\n    def fake_get_closest(formula, candidates):\n        return None\n    monkeypatch.setattr(\"thefuck.utils.get_closest\", fake_get_closest)\n\n    cmd = DummyCommand(\n        script=\"brew install nonexistent\",\n        output=\"Error: No available formula for nonexistent\\n\"\n               \"  Did you mean: similar_formula?\"\n    )\n    assert match(cmd) is False\n\ndef test_match_returns_false_for_non_brew_command():\n    cmd = DummyCommand(\n        script=\"apt-get install nonexistent\",\n        output=\"Error: No available formula for nonexistent\\n\"\n               \"  Did you mean: similar_formula?\"\n    )\n    assert match(cmd) is False\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9461828949861228
+}

@@ -6,10 +6,21 @@ from pilot.common import append_json
 from pilot.progress import emit
 from pilot.model_profiles import profile
 from pilot.quality import final_answer
+from pilot.output_contract import (
+    OutputContractError,
+    POLICY as TEST_OUTPUT_CONTRACT_POLICY,
+    append_prompt_contract,
+    contract_kind,
+    validate_initial_generation,
+    validate_repair_module,
+)
 
 
 class TransformersBackend:
     def __init__(self, settings, work):
+        output_policy = settings.get('test_output_contract')
+        if output_policy not in (None, '', TEST_OUTPUT_CONTRACT_POLICY):
+            raise ValueError(f'Unknown test output contract policy: {output_policy}')
         import torch
         import transformers
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -35,6 +46,7 @@ class TransformersBackend:
         from transformers import BitsAndBytesConfig
         self.model, quantization = load_causal_model(settings, torch, AutoModelForCausalLM, BitsAndBytesConfig)
         self.versions = dict(quantization=quantization, torch=torch.__version__, transformers=transformers.__version__,
+                             attention_policy=settings.get('attention_policy','auto'),
                              gpu=torch.cuda.get_device_name(0),
                              loaded_model_revision=getattr(self.model.config, '_commit_hash', None))
         emit(work, 'model_load', 'ready', allocated_gib=round(torch.cuda.memory_allocated()/1024**3, 2))
@@ -57,11 +69,19 @@ class TransformersBackend:
         finally:
             del frame
         role = upstream_role or next((name for name in callers if name.startswith(('repair_', 'generate_test_case'))), None)
+        output_contract_applied = None
+        if (self.settings.get('test_output_contract') == TEST_OUTPUT_CONTRACT_POLICY
+                and self.phase != 'initialization'):
+            output_contract_applied = contract_kind(role)
+            if output_contract_applied:
+                system, user = append_prompt_contract(system, user, role)
         messages = [dict(role='system', content=system), dict(role='user', content=user)]
         inputs = self.tokenizer.apply_chat_template(messages, tokenize=True,
                     add_generation_prompt=True, return_tensors='pt', return_dict=True)
         start = time.perf_counter()
         record = dict(phase=self.phase, upstream_operation=role, messages=messages,
+                      output_contract_applied=(TEST_OUTPUT_CONTRACT_POLICY+':'+output_contract_applied
+                                               if output_contract_applied else None),
                       input_tokens=int(inputs.input_ids.shape[1]))
         self.call_count += 1
         emit(self.work, self.phase, 'model_call_start', call=self.call_count, operation=role,
@@ -92,7 +112,8 @@ class TransformersBackend:
                     if sampling['do_sample']:
                         sampling.update(temperature=generation.get('temperature',.6), top_p=generation.get('top_p',.95))
                     record['inference_started'] = True
-                    with self.torch.inference_mode():
+                    from pilot.attention import generation_attention_context
+                    with self.torch.inference_mode(), generation_attention_context(self.settings):
                         result = self.model.generate(**inputs, **sampling,
                             max_new_tokens=self.settings['max_new_tokens'],
                             pad_token_id=self.tokenizer.eos_token_id,
@@ -106,6 +127,13 @@ class TransformersBackend:
                 record.update(final_answer=answer, answer_status=answer_status)
                 if not answer:
                     raise ValueError('Model produced no complete final answer; inspect raw model log and token budget')
+                if output_contract_applied:
+                    if record.get('truncated'):
+                        raise OutputContractError('Opt-in test output contract rejects capped generation/repair output')
+                    if output_contract_applied == 'generation':
+                        validate_initial_generation(answer)
+                    else:
+                        validate_repair_module(answer)
                 return answer
         except Exception as exc:
             record['error'] = repr(exc)

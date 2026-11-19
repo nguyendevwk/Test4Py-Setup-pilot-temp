@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-01da811f-a94f-4a53-9400-fa51a4aa617f",
+  "object": "chat.completion",
+  "created": 1795076141,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport pytest\nfrom httpie.output.writer import write_stream\nfrom httpie.output.streams import BaseStream\n\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields predefined byte chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def __iter__(self):\n        return iter(self._chunks)\n\n\nclass FlushTracker(io.BytesIO):\n    \"\"\"BytesIO that records whether flush was called.\"\"\"\n    def __init__(self):\n        super().__init__()\n        self.flushed = False\n\n    def flush(self):\n        self.flushed = True\n        super().flush()\n\n\ndef test_write_stream_with_flush_and_no_buffer(tmp_path):\n    \"\"\"write_stream writes chunks to a BytesIO and flushes when requested.\"\"\"\n    data = [b\"hello \", b\"world\"]\n    stream = DummyStream(data)\n    outfile = FlushTracker()\n\n    write_stream(stream, outfile, flush=True)\n\n    # The buffer should contain the concatenated data\n    assert outfile.getvalue() == b\"hello world\"\n    # Flush should have been called after each chunk\n    assert outfile.flushed is True\n\n\ndef test_write_stream_with_buffer(tmp_path):\n    \"\"\"write_stream writes to the buffer attribute of a TextIOWrapper.\"\"\"\n    data = [b\"foo\", b\"bar\"]\n    stream = DummyStream(data)\n    # Create a TextIOWrapper around a BytesIO to provide a .buffer attribute\n    raw = io.BytesIO()\n    outfile = io.TextIOWrapper(raw, encoding=\"utf-8\")\n\n    write_stream(stream, outfile, flush=False)\n\n    # The underlying buffer should contain the raw bytes\n    assert raw.getvalue() == b\"foobar\"\n    # Since flush=False, the TextIOWrapper should not have flushed the buffer\n    # (TextIOWrapper flushes its own buffer, but we can check that raw buffer is unchanged)\n    assert outfile.tell() == 0  # no characters written to the TextIOWrapper\n\n\ndef test_write_stream_propagates_stream_exception():\n    \"\"\"write_stream should propagate exceptions raised by the stream iterator.\"\"\"\n    class ErrorStream(BaseStream):\n        def __iter__(self):\n            raise RuntimeError(\"stream error\")\n\n    stream = ErrorStream()\n    outfile = io.BytesIO()\n\n    with pytest.raises(RuntimeError, match=\"stream error\"):\n        write_stream(stream, outfile, flush=False)\n```",
+        "reasoning": "We need to test write_stream. It writes chunks from stream to outfile.buffer or outfile. We can create a dummy BaseStream that yields bytes. Use tmp_path to create file. Test that data written correctly, flush called. We can use a mock file with buffer attribute? Use io.BytesIO as outfile; it has buffer? BytesIO has no buffer attribute. So it will use outfile directly. For flush, BytesIO has flush method? It does. So test that flush called when flush True. We can subclass BytesIO to track flush calls. Also test when outfile has buffer attribute: use io.TextIOWrapper over BytesIO? TextIOWrapper has buffer. Use that. Test that data written to buffer. Also test error: if stream raises exception, ensure it's propagated. Write three tests: normal with flush True, normal with buffer, error propagation."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.056363657,
+    "prompt_tokens": 419,
+    "prompt_time": 0.025026822,
+    "completion_tokens": 672,
+    "completion_time": 0.753938279,
+    "total_tokens": 1091,
+    "total_time": 0.778965101,
+    "completion_tokens_details": {
+      "reasoning_tokens": 174
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se0bneerxv6c862hy29wsd",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport pytest\nfrom httpie.output.writer import write_stream\nfrom httpie.output.streams import BaseStream\n\n\nclass DummyStream(BaseStream):\n    \"\"\"A minimal BaseStream that yields predefined byte chunks.\"\"\"\n    def __init__(self, chunks):\n        self._chunks = chunks\n\n    def __iter__(self):\n        return iter(self._chunks)\n\n\nclass FlushTracker(io.BytesIO):\n    \"\"\"BytesIO that records whether flush was called.\"\"\"\n    def __init__(self):\n        super().__init__()\n        self.flushed = False\n\n    def flush(self):\n        self.flushed = True\n        super().flush()\n\n\ndef test_write_stream_with_flush_and_no_buffer(tmp_path):\n    \"\"\"write_stream writes chunks to a BytesIO and flushes when requested.\"\"\"\n    data = [b\"hello \", b\"world\"]\n    stream = DummyStream(data)\n    outfile = FlushTracker()\n\n    write_stream(stream, outfile, flush=True)\n\n    # The buffer should contain the concatenated data\n    assert outfile.getvalue() == b\"hello world\"\n    # Flush should have been called after each chunk\n    assert outfile.flushed is True\n\n\ndef test_write_stream_with_buffer(tmp_path):\n    \"\"\"write_stream writes to the buffer attribute of a TextIOWrapper.\"\"\"\n    data = [b\"foo\", b\"bar\"]\n    stream = DummyStream(data)\n    # Create a TextIOWrapper around a BytesIO to provide a .buffer attribute\n    raw = io.BytesIO()\n    outfile = io.TextIOWrapper(raw, encoding=\"utf-8\")\n\n    write_stream(stream, outfile, flush=False)\n\n    # The underlying buffer should contain the raw bytes\n    assert raw.getvalue() == b\"foobar\"\n    # Since flush=False, the TextIOWrapper should not have flushed the buffer\n    # (TextIOWrapper flushes its own buffer, but we can check that raw buffer is unchanged)\n    assert outfile.tell() == 0  # no characters written to the TextIOWrapper\n\n\ndef test_write_stream_propagates_stream_exception():\n    \"\"\"write_stream should propagate exceptions raised by the stream iterator.\"\"\"\n    class ErrorStream(BaseStream):\n        def __iter__(self):\n            raise RuntimeError(\"stream error\")\n\n    stream = ErrorStream()\n    outfile = io.BytesIO()\n\n    with pytest.raises(RuntimeError, match=\"stream error\"):\n        write_stream(stream, outfile, flush=False)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1224915450438857
+}

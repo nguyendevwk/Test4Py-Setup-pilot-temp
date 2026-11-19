@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-da014849-ecdd-4be2-aef8-e22654226162",
+  "object": "chat.completion",
+  "created": 1795076900,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport getpass\nimport grp\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import directory_present\n\n@pytest.fixture\ndef user_and_group():\n    \"\"\"Return current user and group names for chown.\"\"\"\n    return getpass.getuser(), grp.getgrgid(os.getgid()).gr_name\n\ndef test_directory_present_creates_missing_dirs(tmp_path, user_and_group):\n    \"\"\"directory_present should create missing directories and set mode.\"\"\"\n    # Build a nested path that does not exist\n    nested = tmp_path / \"level1\" / \"level2\" / \"level3\"\n    # Ensure it does not exist yet\n    assert not nested.exists()\n\n    # Call directory_present with explicit mode and ownership\n    result = directory_present(\n        nested,\n        mode=0o755,\n        user=user_and_group[0],\n        group=user_and_group[1],\n    )\n\n    # The returned Path should be absolute and equal to the nested path\n    assert isinstance(result, Path)\n    assert result.is_absolute()\n    assert result == nested\n\n    # The directory should now exist\n    assert nested.is_dir()\n\n    # Mode should be applied (owner read/write/execute, group and others read/execute)\n    assert oct(nested.stat().st_mode & 0o777) == \"0o755\"\n\ndef test_directory_present_raises_on_glob(tmp_path):\n    \"\"\"directory_present should raise ValueError if path contains a glob pattern.\"\"\"\n    glob_path = tmp_path / \"foo*\"\n    with pytest.raises(ValueError, match=\"must NOT contain any glob patterns\"):\n        directory_present(glob_path)\n\ndef test_directory_present_raises_on_existing_file(tmp_path, user_and_group):\n    \"\"\"directory_present should raise FileExistsError if path exists as a file.\"\"\"\n    # Create a file at the target location\n    file_path = tmp_path / \"existing_file\"\n    file_path.write_text(\"content\")\n    assert file_path.is_file()\n\n    with pytest.raises(FileExistsError, match=\"already exists as a file\"):\n        directory_present(\n            file_path,\n            user=user_and_group[0],\n            group=user_and_group[1],\n        )\n```",
+        "reasoning": "We need tests for directory_present. Use tmp_path. Test normal creation, boundary: existing file raises error, existing parent file raises error. Also test mode and ownership? Hard to check ownership without root. Skip chown? But function calls chown which may fail. But in test environment, chown may raise PermissionError. We can set user/group None to skip. But chown still called. Might fail. Maybe mock chown? But instruction: no mocks. So we need to avoid chown by passing user/group '-1'? But code passes user=user, group=group. If None, chown called with None. chown likely fails. So we need to set user/group to current user? That may succeed? But chown requires permission. So better to skip chown by passing user/group '-1'? But code passes '-1' string? chown likely interprets '-1' to leave unchanged. Might still attempt chown? Hard. Maybe we can set mode only and ignore chown errors? But function doesn't catch. So tests may fail. Maybe we can set environment to allow? Probably easier: use user=getpass.getuser() and group=grp.getgrgid(os.getgid()).gr_name. That should succeed. We'll use that. Test creation. Also test error when path contains '*'. Use tmp_path / 'a*'. But must be absolute. Use tmp_path / 'a*' is absolute. Should raise ValueError. Third test: existing file. Create file then call. Expect FileExistsError. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049792944,
+    "prompt_tokens": 1282,
+    "prompt_time": 0.026150884,
+    "completion_tokens": 773,
+    "completion_time": 0.855731572,
+    "total_tokens": 2055,
+    "total_time": 0.881882456,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 317
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7seqgyweesv3fycx02t1yxy",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport getpass\nimport grp\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import directory_present\n\n@pytest.fixture\ndef user_and_group():\n    \"\"\"Return current user and group names for chown.\"\"\"\n    return getpass.getuser(), grp.getgrgid(os.getgid()).gr_name\n\ndef test_directory_present_creates_missing_dirs(tmp_path, user_and_group):\n    \"\"\"directory_present should create missing directories and set mode.\"\"\"\n    # Build a nested path that does not exist\n    nested = tmp_path / \"level1\" / \"level2\" / \"level3\"\n    # Ensure it does not exist yet\n    assert not nested.exists()\n\n    # Call directory_present with explicit mode and ownership\n    result = directory_present(\n        nested,\n        mode=0o755,\n        user=user_and_group[0],\n        group=user_and_group[1],\n    )\n\n    # The returned Path should be absolute and equal to the nested path\n    assert isinstance(result, Path)\n    assert result.is_absolute()\n    assert result == nested\n\n    # The directory should now exist\n    assert nested.is_dir()\n\n    # Mode should be applied (owner read/write/execute, group and others read/execute)\n    assert oct(nested.stat().st_mode & 0o777) == \"0o755\"\n\ndef test_directory_present_raises_on_glob(tmp_path):\n    \"\"\"directory_present should raise ValueError if path contains a glob pattern.\"\"\"\n    glob_path = tmp_path / \"foo*\"\n    with pytest.raises(ValueError, match=\"must NOT contain any glob patterns\"):\n        directory_present(glob_path)\n\ndef test_directory_present_raises_on_existing_file(tmp_path, user_and_group):\n    \"\"\"directory_present should raise FileExistsError if path exists as a file.\"\"\"\n    # Create a file at the target location\n    file_path = tmp_path / \"existing_file\"\n    file_path.write_text(\"content\")\n    assert file_path.is_file()\n\n    with pytest.raises(FileExistsError, match=\"already exists as a file\"):\n        directory_present(\n            file_path,\n            user=user_and_group[0],\n            group=user_and_group[1],\n        )\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3546378099708818
+}

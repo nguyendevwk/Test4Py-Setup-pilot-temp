@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-51429dbe-8e53-42cd-90eb-d74ea88f15e1",
+  "object": "chat.completion",
+  "created": 1795077591,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nfrom pathlib import Path\n\nimport pytest\nfrom jinja2 import Environment\nfrom cookiecutter.exceptions import NonTemplatedInputDirException\n\nfrom cookiecutter.find import find_template\n\n\ndef test_find_template_normal(tmp_path: Path) -> None:\n    \"\"\"When a matching subdirectory exists, the function returns its Path.\"\"\"\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    # Create a directory that matches the pattern\n    template_dir = repo_dir / \"cookiecutter_{{project_name}}_template\"\n    template_dir.mkdir()\n    # Create another unrelated directory\n    (repo_dir / \"other\").mkdir()\n\n    env = Environment()\n    result = find_template(repo_dir, env)\n    assert result == template_dir\n    assert result.is_dir()\n\n\ndef test_find_template_boundary(tmp_path: Path) -> None:\n    \"\"\"If multiple matching directories exist, the first one in os.listdir order is returned.\"\"\"\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    # Create two matching directories\n    first = repo_dir / \"cookiecutter_{{first}}_template\"\n    second = repo_dir / \"cookiecutter_{{second}}_template\"\n    first.mkdir()\n    second.mkdir()\n\n    env = Environment()\n    result = find_template(repo_dir, env)\n    # os.listdir may not guarantee order, but the function returns the first match it encounters\n    assert result in {first, second}\n    assert result.is_dir()\n\n\ndef test_find_template_error(tmp_path: Path) -> None:\n    \"\"\"If no matching subdirectory exists, a NonTemplatedInputDirException is raised.\"\"\"\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    # Create a non-matching directory\n    (repo_dir / \"not_a_template\").mkdir()\n\n    env = Environment()\n    with pytest.raises(NonTemplatedInputDirException):\n        find_template(repo_dir, env)\n```",
+        "reasoning": "We need three tests: normal, boundary, error. Use tmp_path to create directories. Need Environment from jinja2? cookiecutter uses jinja2.Environment. Import. Use default variable_start_string '{{' etc. Test normal: create repo_dir with subdir matching pattern. Test boundary: maybe multiple matches? but function picks first. Test error: no matching dir raises exception. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048733465,
+    "prompt_tokens": 420,
+    "prompt_time": 0.023020975,
+    "completion_tokens": 498,
+    "completion_time": 0.548326394,
+    "total_tokens": 918,
+    "total_time": 0.571347369,
+    "completion_tokens_details": {
+      "reasoning_tokens": 83
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfcm52e1vsabcdpqm72nmw",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nfrom pathlib import Path\n\nimport pytest\nfrom jinja2 import Environment\nfrom cookiecutter.exceptions import NonTemplatedInputDirException\n\nfrom cookiecutter.find import find_template\n\n\ndef test_find_template_normal(tmp_path: Path) -> None:\n    \"\"\"When a matching subdirectory exists, the function returns its Path.\"\"\"\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    # Create a directory that matches the pattern\n    template_dir = repo_dir / \"cookiecutter_{{project_name}}_template\"\n    template_dir.mkdir()\n    # Create another unrelated directory\n    (repo_dir / \"other\").mkdir()\n\n    env = Environment()\n    result = find_template(repo_dir, env)\n    assert result == template_dir\n    assert result.is_dir()\n\n\ndef test_find_template_boundary(tmp_path: Path) -> None:\n    \"\"\"If multiple matching directories exist, the first one in os.listdir order is returned.\"\"\"\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    # Create two matching directories\n    first = repo_dir / \"cookiecutter_{{first}}_template\"\n    second = repo_dir / \"cookiecutter_{{second}}_template\"\n    first.mkdir()\n    second.mkdir()\n\n    env = Environment()\n    result = find_template(repo_dir, env)\n    # os.listdir may not guarantee order, but the function returns the first match it encounters\n    assert result in {first, second}\n    assert result.is_dir()\n\n\ndef test_find_template_error(tmp_path: Path) -> None:\n    \"\"\"If no matching subdirectory exists, a NonTemplatedInputDirException is raised.\"\"\"\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    # Create a non-matching directory\n    (repo_dir / \"not_a_template\").mkdir()\n\n    env = Environment()\n    with pytest.raises(NonTemplatedInputDirException):\n        find_template(repo_dir, env)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9462317140423693
+}

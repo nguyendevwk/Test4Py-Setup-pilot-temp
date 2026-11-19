@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-7240bf0a-56e3-45a6-986f-dbe7e0356742",
+  "object": "chat.completion",
+  "created": 1795078311,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.exceptions import RangeNotSatisfiable\nfrom sanic.helpers import STATUS_CODES\n\nclass DummyRange:\n    def __init__(self, total):\n        self.total = total\n\ndef test_default_status_and_quiet():\n    \"\"\"RangeNotSatisfiable should default to status 416 and quiet=True.\"\"\"\n    exc = RangeNotSatisfiable()\n    assert exc.status_code == 416\n    assert exc.quiet is True\n    # The default message should be the status description\n    assert exc.message == STATUS_CODES[416]\n\ndef test_content_range_header_inclusion():\n    \"\"\"Providing a content_range should add a Content-Range header.\"\"\"\n    dummy = DummyRange(total=12345)\n    exc = RangeNotSatisfiable(content_range=dummy)\n    # The header should be present and correctly formatted\n    assert \"Content-Range\" in exc.headers\n    assert exc.headers[\"Content-Range\"] == \"bytes */12345\"\n\ndef test_quiet_override_and_headers_preservation():\n    \"\"\"Explicit quiet flag should override default and existing headers should be preserved.\"\"\"\n    exc = RangeNotSatisfiable(quiet=False, headers={\"X-Test\": \"value\"})\n    assert exc.quiet is False\n    # Existing headers should remain unchanged\n    assert exc.headers[\"X-Test\"] == \"value\"\n    # No Content-Range header should be added when content_range is None\n    assert \"Content-Range\" not in exc.headers\n```",
+        "reasoning": "We need to test RangeNotSatisfiable. Likely inherits HTTPException. We can test status_code, quiet default, headers when content_range provided. Also error when content_range missing total? But content_range is protocol. We'll create simple object with total attribute. Test that headers updated. Also test that quiet default True. Also test that passing quiet overrides. Three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054316533,
+    "prompt_tokens": 664,
+    "prompt_time": 0.036517276,
+    "completion_tokens": 386,
+    "completion_time": 0.456518485,
+    "total_tokens": 1050,
+    "total_time": 0.493035761,
+    "completion_tokens_details": {
+      "reasoning_tokens": 76
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg2kbye6e9qbwkhm9pcszq",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.exceptions import RangeNotSatisfiable\nfrom sanic.helpers import STATUS_CODES\n\nclass DummyRange:\n    def __init__(self, total):\n        self.total = total\n\ndef test_default_status_and_quiet():\n    \"\"\"RangeNotSatisfiable should default to status 416 and quiet=True.\"\"\"\n    exc = RangeNotSatisfiable()\n    assert exc.status_code == 416\n    assert exc.quiet is True\n    # The default message should be the status description\n    assert exc.message == STATUS_CODES[416]\n\ndef test_content_range_header_inclusion():\n    \"\"\"Providing a content_range should add a Content-Range header.\"\"\"\n    dummy = DummyRange(total=12345)\n    exc = RangeNotSatisfiable(content_range=dummy)\n    # The header should be present and correctly formatted\n    assert \"Content-Range\" in exc.headers\n    assert exc.headers[\"Content-Range\"] == \"bytes */12345\"\n\ndef test_quiet_override_and_headers_preservation():\n    \"\"\"Explicit quiet flag should override default and existing headers should be preserved.\"\"\"\n    exc = RangeNotSatisfiable(quiet=False, headers={\"X-Test\": \"value\"})\n    assert exc.quiet is False\n    # Existing headers should remain unchanged\n    assert exc.headers[\"X-Test\"] == \"value\"\n    # No Content-Range header should be added when content_range is None\n    assert \"Content-Range\" not in exc.headers\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9025857330416329
+}

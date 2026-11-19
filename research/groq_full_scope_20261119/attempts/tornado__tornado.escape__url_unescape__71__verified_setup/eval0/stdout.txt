@@ -1,0 +1,46 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_url_unescape_bytes_and_plus_handling ___________________
+
+    def test_url_unescape_bytes_and_plus_handling():
+        # Input bytes with percent-encoding and plus signs
+        raw = b"Hello%20World%21+Testing%2Bplus"
+        # Default plus=True: plus becomes space
+        result = url_unescape(raw, encoding="utf-8", plus=True)
+        assert isinstance(result, str)
+        assert result == "Hello World! Testing+plus"
+    
+        # plus=False: plus remains literal
+        result_no_plus = url_unescape(raw, encoding="utf-8", plus=False)
+>       assert result_no_plus == "Hello World! Testing+plus"
+E       AssertionError: assert 'Hello World!+Testing+plus' == 'Hello World! Testing+plus'
+E         
+E         - Hello World! Testing+plus
+E         ?             ^
+E         + Hello World!+Testing+plus
+E         ?             ^
+
+test_generated.py:15: AssertionError
+________________ test_url_unescape_encoding_none_returns_bytes _________________
+
+    def test_url_unescape_encoding_none_returns_bytes():
+        # When encoding is None, result should be bytes
+        raw = b"%41%42%43+%44"
+        result = url_unescape(raw, encoding=None, plus=True)
+        assert isinstance(result, bytes)
+        # plus sign replaced with space before unquoting
+        assert result == b"ABC D"
+    
+        # plus=False should not replace plus
+        result_no_plus = url_unescape(raw, encoding=None, plus=False)
+>       assert result_no_plus == b"ABC+ D"
+E       AssertionError: assert b'ABC+D' == b'ABC+ D'
+E         
+E         At index 4 diff: b'D' != b' '
+E         Use -v to get more diff
+
+test_generated.py:27: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_url_unescape_bytes_and_plus_handling - Asserti...
+FAILED test_generated.py::test_url_unescape_encoding_none_returns_bytes - Ass...
+2 failed, 1 passed in 0.14s

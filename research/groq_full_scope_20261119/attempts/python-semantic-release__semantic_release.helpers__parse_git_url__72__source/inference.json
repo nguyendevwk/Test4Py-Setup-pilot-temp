@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-e6544788-7f3e-4113-8a00-253c319c2f53",
+  "object": "chat.completion",
+  "created": 1795076668,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\n\n# Import the target function and the ParsedGitUrl dataclass\nfrom semantic_release.helpers import parse_git_url, ParsedGitUrl\n\n\ndef test_parse_git_url_http_and_file(tmp_path: Path):\n    \"\"\"Test parsing of a standard HTTPS URL and a local file path.\"\"\"\n    # HTTPS URL\n    https_url = \"https://github.com/owner/repo.git\"\n    result = parse_git_url(https_url)\n    assert isinstance(result, ParsedGitUrl)\n    assert result.scheme == \"https\"\n    assert result.netloc == \"github.com\"\n    assert result.namespace == \"owner\"\n    assert result.repo_name == \"repo\"\n\n    # Local file path (POSIX)\n    local_path = tmp_path / \"repo.git\"\n    local_path.touch()\n    file_url = f\"file://{local_path}\"\n    result_file = parse_git_url(file_url)\n    assert result_file.scheme == \"file\"\n    assert result_file.netloc == \"\"\n    assert result_file.namespace == \"\"\n    assert result_file.repo_name == \"repo\"\n\n\ndef test_parse_git_url_ssh_and_windows(tmp_path: Path):\n    \"\"\"Test parsing of SSH URLs and Windows file paths.\"\"\"\n    # SSH URL with explicit user and port\n    ssh_url = \"ssh://git@github.com:2222/owner/repo.git\"\n    result = parse_git_url(ssh_url)\n    assert result.scheme == \"ssh\"\n    assert result.netloc == \"git@github.com:2222\"\n    assert result.namespace == \"owner\"\n    assert result.repo_name == \"repo\"\n\n    # Windows file path\n    windows_path = Path(\"C:/Users/Me/project.git\")\n    windows_path.touch()\n    windows_url = f\"file:///{windows_path}\"\n    result_win = parse_git_url(windows_url)\n    assert result_win.scheme == \"file\"\n    assert result_win.netloc == \"\"\n    assert result_win.namespace == \"\"\n    assert result_win.repo_name == \"project\"\n\n\ndef test_parse_git_url_invalid_and_boundary():\n    \"\"\"Test that invalid URLs raise ValueError and boundary cases are handled.\"\"\"\n    # Missing scheme\n    with pytest.raises(ValueError, match=\"Cannot parse\"):\n        parse_git_url(\"github.com/owner/repo.git\")\n\n    # Empty path after scheme\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"https://github.com/\")\n\n    # URL with .git suffix missing\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"https://github.com/owner/\")\n\n    # URL with unsupported scheme\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"ftp://github.com/owner/repo.git\")\n```",
+        "reasoning": "Need ParsedGitUrl class? Not shown. Assume exists. Write tests for normal, boundary, error. Use tmp_path for file path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.080100903,
+    "prompt_tokens": 1150,
+    "prompt_time": 0.077159532,
+    "completion_tokens": 605,
+    "completion_time": 0.666868651,
+    "total_tokens": 1755,
+    "total_time": 0.744028183,
+    "completion_tokens_details": {
+      "reasoning_tokens": 29
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7segegze7br906m8ja6tmtp",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\n\n# Import the target function and the ParsedGitUrl dataclass\nfrom semantic_release.helpers import parse_git_url, ParsedGitUrl\n\n\ndef test_parse_git_url_http_and_file(tmp_path: Path):\n    \"\"\"Test parsing of a standard HTTPS URL and a local file path.\"\"\"\n    # HTTPS URL\n    https_url = \"https://github.com/owner/repo.git\"\n    result = parse_git_url(https_url)\n    assert isinstance(result, ParsedGitUrl)\n    assert result.scheme == \"https\"\n    assert result.netloc == \"github.com\"\n    assert result.namespace == \"owner\"\n    assert result.repo_name == \"repo\"\n\n    # Local file path (POSIX)\n    local_path = tmp_path / \"repo.git\"\n    local_path.touch()\n    file_url = f\"file://{local_path}\"\n    result_file = parse_git_url(file_url)\n    assert result_file.scheme == \"file\"\n    assert result_file.netloc == \"\"\n    assert result_file.namespace == \"\"\n    assert result_file.repo_name == \"repo\"\n\n\ndef test_parse_git_url_ssh_and_windows(tmp_path: Path):\n    \"\"\"Test parsing of SSH URLs and Windows file paths.\"\"\"\n    # SSH URL with explicit user and port\n    ssh_url = \"ssh://git@github.com:2222/owner/repo.git\"\n    result = parse_git_url(ssh_url)\n    assert result.scheme == \"ssh\"\n    assert result.netloc == \"git@github.com:2222\"\n    assert result.namespace == \"owner\"\n    assert result.repo_name == \"repo\"\n\n    # Windows file path\n    windows_path = Path(\"C:/Users/Me/project.git\")\n    windows_path.touch()\n    windows_url = f\"file:///{windows_path}\"\n    result_win = parse_git_url(windows_url)\n    assert result_win.scheme == \"file\"\n    assert result_win.netloc == \"\"\n    assert result_win.namespace == \"\"\n    assert result_win.repo_name == \"project\"\n\n\ndef test_parse_git_url_invalid_and_boundary():\n    \"\"\"Test that invalid URLs raise ValueError and boundary cases are handled.\"\"\"\n    # Missing scheme\n    with pytest.raises(ValueError, match=\"Cannot parse\"):\n        parse_git_url(\"github.com/owner/repo.git\")\n\n    # Empty path after scheme\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"https://github.com/\")\n\n    # URL with .git suffix missing\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"https://github.com/owner/\")\n\n    # URL with unsupported scheme\n    with pytest.raises(ValueError, match=\"Bad url\"):\n        parse_git_url(\"ftp://github.com/owner/repo.git\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1446455479599535
+}

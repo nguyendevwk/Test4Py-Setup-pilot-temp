@@ -1,0 +1,69 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_get_new_command_replaces_with_suggestions ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff85c651660>
+
+    def test_get_new_command_replaces_with_suggestions(monkeypatch):
+        # Arrange: mock the helper functions
+        broken_cmd = "deploy"
+        suggestions = ["tsuru deploy", "tsuru push"]
+        monkeypatch.setattr(
+            "thefuck.utils.get_all_matched_commands",
+            lambda output: suggestions,
+        )
+        monkeypatch.setattr(
+            "thefuck.utils.replace_command",
+            lambda cmd, broken, sugg: f"replaced:{broken}:{sugg}",
+        )
+        output = 'tsuru: "deploy" is not a tsuru command\nsome other text'
+        cmd = DummyCommand(output=output)
+    
+        # Act
+        result = get_new_command(cmd)
+    
+        # Assert
+>       assert result == f"replaced:{broken_cmd}:{suggestions}"
+E       assert [] == "replaced:deploy:['tsuru deploy', 'tsuru push']"
+
+test_generated.py:32: AssertionError
+_________________ test_get_new_command_with_empty_suggestions __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff85c6a0c40>
+
+    def test_get_new_command_with_empty_suggestions(monkeypatch):
+        # Arrange: mock get_all_matched_commands to return empty list
+        monkeypatch.setattr(
+            "thefuck.utils.get_all_matched_commands",
+            lambda output: [],
+        )
+        # Mock replace_command to simply return the broken command
+        monkeypatch.setattr(
+            "thefuck.utils.replace_command",
+            lambda cmd, broken, sugg: f"no-suggestions:{broken}",
+        )
+        output = 'tsuru: "status" is not a tsuru command'
+        cmd = DummyCommand(output=output)
+    
+        # Act
+        result = get_new_command(cmd)
+    
+        # Assert
+>       assert result == "no-suggestions:status"
+E       AssertionError: assert [] == 'no-suggestions:status'
+
+test_generated.py:63: AssertionError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_new_command_replaces_with_suggestions - as...
+FAILED test_generated.py::test_get_new_command_with_empty_suggestions - Asser...
+2 failed, 1 passed, 2 warnings in 0.13s

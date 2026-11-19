@@ -1,0 +1,75 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_rewrites_moved_module_import _______________________
+
+    def test_rewrites_moved_module_import():
+        """
+        Verify that an import of a module that has moved to six.moves
+        is rewritten to use six.moves.<module>.
+        """
+        source = "from cStringIO import StringIO\n"
+>       tree = _parse_and_transform(source)
+
+test_generated.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+source = 'from cStringIO import StringIO\n'
+
+    def _parse_and_transform(source: str) -> typed_ast.Module:
+        """Parse source with typed_ast and apply SixMovesTransformer."""
+        tree = typed_ast.parse(source)
+>       transformer = SixMovesTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:11: TypeError
+_____________________ test_no_rewrite_for_non_moved_module _____________________
+
+    def test_no_rewrite_for_non_moved_module():
+        """
+        Verify that imports of modules that are not moved remain unchanged.
+        """
+        source = "from collections import defaultdict\n"
+>       tree = _parse_and_transform(source)
+
+test_generated.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+source = 'from collections import defaultdict\n'
+
+    def _parse_and_transform(source: str) -> typed_ast.Module:
+        """Parse source with typed_ast and apply SixMovesTransformer."""
+        tree = typed_ast.parse(source)
+>       transformer = SixMovesTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:11: TypeError
+_________________ test_rewrite_with_alias_and_multiple_imports _________________
+
+    def test_rewrite_with_alias_and_multiple_imports():
+        """
+        Verify that multiple imports from the same moved module are all rewritten,
+        and that aliasing is preserved.
+        """
+        source = (
+            "from cStringIO import StringIO as SI\n"
+            "from cStringIO import BytesIO\n"
+        )
+>       tree = _parse_and_transform(source)
+
+test_generated.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+source = 'from cStringIO import StringIO as SI\nfrom cStringIO import BytesIO\n'
+
+    def _parse_and_transform(source: str) -> typed_ast.Module:
+        """Parse source with typed_ast and apply SixMovesTransformer."""
+        tree = typed_ast.parse(source)
+>       transformer = SixMovesTransformer()
+E       TypeError: BaseNodeTransformer.__init__() missing 1 required positional argument: 'tree'
+
+test_generated.py:11: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_rewrites_moved_module_import - TypeError: Base...
+FAILED test_generated.py::test_no_rewrite_for_non_moved_module - TypeError: B...
+FAILED test_generated.py::test_rewrite_with_alias_and_multiple_imports - Type...
+3 failed in 0.12s

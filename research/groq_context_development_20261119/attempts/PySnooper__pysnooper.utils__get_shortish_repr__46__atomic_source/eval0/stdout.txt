@@ -1,0 +1,66 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_normal_repr_and_truncate _________________________
+
+    def test_normal_repr_and_truncate():
+        # Normal representation without custom or normalization
+        result = get_shortish_repr(Dummy())
+        assert result == "DummyRepresentation"
+    
+        # Truncate to a shorter length
+        truncated = get_shortish_repr(Dummy(), max_length=5)
+>       assert truncated == "Dummy"
+E       AssertionError: assert 'D...n' == 'Dummy'
+E         
+E         - Dummy
+E         + D...n
+
+../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.utils__get_shortish_repr__46__atomic_source/eval0/test_generated.py:15: AssertionError
+________________________ test_custom_repr_and_normalize ________________________
+
+    def test_custom_repr_and_normalize():
+        # Custom repr function that returns a multi-line string
+        def custom_repr(obj):
+            return f"Custom\n{obj.__class__.__name__}\nRepresentation"
+    
+>       result = get_shortish_repr(Dummy(), custom_repr=(custom_repr,))
+
+../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.utils__get_shortish_repr__46__atomic_source/eval0/test_generated.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+pysnooper/utils.py:68: in get_shortish_repr
+    repr_function = get_repr_function(item, custom_repr)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = DummyRepresentation
+custom_repr = (<function test_custom_repr_and_normalize.<locals>.custom_repr at 0x7f5eb85aaa70>,)
+
+    def get_repr_function(item, custom_repr):
+>       for condition, action in custom_repr:
+E       TypeError: cannot unpack non-iterable function object
+
+pysnooper/utils.py:51: TypeError
+_____________________ test_repr_failure_and_error_handling _____________________
+
+    def test_repr_failure_and_error_handling():
+        # Object whose __repr__ raises an exception
+        class BadRepr:
+            def __repr__(self):
+                raise ValueError("bad repr")
+    
+        result = get_shortish_repr(BadRepr())
+        assert result == "REPR FAILED"
+    
+        # Ensure that even with max_length, the failure string is returned unchanged
+        truncated = get_shortish_repr(BadRepr(), max_length=10)
+>       assert truncated == "REPR FAILED"
+E       AssertionError: assert 'REP...ILED' == 'REPR FAILED'
+E         
+E         - REPR FAILED
+E         + REP...ILED
+
+../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.utils__get_shortish_repr__46__atomic_source/eval0/test_generated.py:41: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.utils__get_shortish_repr__46__atomic_source/eval0/test_generated.py::test_normal_repr_and_truncate
+FAILED ../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.utils__get_shortish_repr__46__atomic_source/eval0/test_generated.py::test_custom_repr_and_normalize
+FAILED ../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.utils__get_shortish_repr__46__atomic_source/eval0/test_generated.py::test_repr_failure_and_error_handling
+3 failed in 0.12s

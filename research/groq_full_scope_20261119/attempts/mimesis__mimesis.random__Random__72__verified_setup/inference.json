@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-d3ba3825-38b9-4fd3-b6ce-0daa7388d6c1",
+  "object": "chat.completion",
+  "created": 1795077512,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom mimesis.random import Random\nfrom enum import Enum\n\n\nclass DummyEnum(Enum):\n    A = 1\n    B = 2\n    C = 3\n\n\ndef test_randints_and_uniform_consistency():\n    rng = Random(42)\n    # randints should return a list of the requested length with values in [a, b)\n    ints = rng.randints(n=5, a=10, b=20)\n    assert isinstance(ints, list)\n    assert len(ints) == 5\n    assert all(10 <= i < 20 for i in ints)\n\n    # uniform should produce a float within [a, b) and respect precision\n    val = rng.uniform(0.0, 1.0, precision=3)\n    assert 0.0 <= val < 1.0\n    # precision 3 means at most 3 decimal places\n    assert round(val, 3) == val\n\n\ndef test_generate_string_by_mask_and_weighted_choice():\n    rng = Random(123)\n    # generate_string_by_mask should replace placeholders correctly\n    code = rng.generate_string_by_mask(mask=\"@@##\", char=\"@\")\n    assert len(code) == 4\n    assert code[0].isupper() and code[1].isupper()\n    assert code[2].isdigit() and code[3].isdigit()\n\n    # weighted_choice should return a key according to weights\n    choices = {\"x\": 1.0, \"y\": 3.0, \"z\": 6.0}\n    result = rng.weighted_choice(choices)\n    assert result in choices\n    # Running multiple times should reflect weight distribution roughly\n    results = [rng.weighted_choice(choices) for _ in range(1000)]\n    assert results.count(\"z\") > results.count(\"y\") > results.count(\"x\")\n\n\ndef test_error_conditions_and_choice_enum_item():\n    rng = Random(0)\n    # randints with non-positive n should raise ValueError\n    with pytest.raises(ValueError, match=\"n must be greater than 0\"):\n        rng.randints(n=0)\n\n    # generate_string_by_mask with same placeholder should raise ValueError\n    with pytest.raises(ValueError, match=\"The same placeholder\"):\n        rng.generate_string_by_mask(mask=\"@@##\", char=\"#\", digit=\"#\")\n\n    # weighted_choice with empty dict should raise ValueError\n    with pytest.raises(ValueError, match=\"Choices cannot be empty\"):\n        rng.weighted_choice({})\n\n    # choice_enum_item should return a member of the enum\n    enum_item = rng.choice_enum_item(DummyEnum)\n    assert enum_item in DummyEnum\n```",
+        "reasoning": "We need 3 test functions for Random class. Test normal, boundary, error. Use tmp_path not needed. We'll import Random from mimesis.random. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047229113,
+    "prompt_tokens": 1096,
+    "prompt_time": 0.055559564,
+    "completion_tokens": 603,
+    "completion_time": 0.667910238,
+    "total_tokens": 1699,
+    "total_time": 0.723469802,
+    "completion_tokens_details": {
+      "reasoning_tokens": 36
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfa6jyeb1t79pdz3km3k54",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom mimesis.random import Random\nfrom enum import Enum\n\n\nclass DummyEnum(Enum):\n    A = 1\n    B = 2\n    C = 3\n\n\ndef test_randints_and_uniform_consistency():\n    rng = Random(42)\n    # randints should return a list of the requested length with values in [a, b)\n    ints = rng.randints(n=5, a=10, b=20)\n    assert isinstance(ints, list)\n    assert len(ints) == 5\n    assert all(10 <= i < 20 for i in ints)\n\n    # uniform should produce a float within [a, b) and respect precision\n    val = rng.uniform(0.0, 1.0, precision=3)\n    assert 0.0 <= val < 1.0\n    # precision 3 means at most 3 decimal places\n    assert round(val, 3) == val\n\n\ndef test_generate_string_by_mask_and_weighted_choice():\n    rng = Random(123)\n    # generate_string_by_mask should replace placeholders correctly\n    code = rng.generate_string_by_mask(mask=\"@@##\", char=\"@\")\n    assert len(code) == 4\n    assert code[0].isupper() and code[1].isupper()\n    assert code[2].isdigit() and code[3].isdigit()\n\n    # weighted_choice should return a key according to weights\n    choices = {\"x\": 1.0, \"y\": 3.0, \"z\": 6.0}\n    result = rng.weighted_choice(choices)\n    assert result in choices\n    # Running multiple times should reflect weight distribution roughly\n    results = [rng.weighted_choice(choices) for _ in range(1000)]\n    assert results.count(\"z\") > results.count(\"y\") > results.count(\"x\")\n\n\ndef test_error_conditions_and_choice_enum_item():\n    rng = Random(0)\n    # randints with non-positive n should raise ValueError\n    with pytest.raises(ValueError, match=\"n must be greater than 0\"):\n        rng.randints(n=0)\n\n    # generate_string_by_mask with same placeholder should raise ValueError\n    with pytest.raises(ValueError, match=\"The same placeholder\"):\n        rng.generate_string_by_mask(mask=\"@@##\", char=\"#\", digit=\"#\")\n\n    # weighted_choice with empty dict should raise ValueError\n    with pytest.raises(ValueError, match=\"Choices cannot be empty\"):\n        rng.weighted_choice({})\n\n    # choice_enum_item should return a member of the enum\n    enum_item = rng.choice_enum_item(DummyEnum)\n    assert enum_item in DummyEnum\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.087763528979849
+}

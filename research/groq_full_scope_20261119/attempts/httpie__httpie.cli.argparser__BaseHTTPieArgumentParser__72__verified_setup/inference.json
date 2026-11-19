@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-019e1562-bc57-4093-bab4-526ba241afe7",
+  "object": "chat.completion",
+  "created": 1795076908,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport argparse\nimport io\nimport os\nimport sys\nimport tempfile\nimport pytest\n\nfrom httpie.cli.argparser import BaseHTTPieArgumentParser\nfrom httpie.context import Environment\nfrom httpie.exceptions import ParseError\n\n\n# Helper to create a minimal Environment instance for testing\nclass DummyEnvironment(Environment):\n    def __init__(self, stdin=None, stdout=None, stderr=None, stdin_isatty=True):\n        super().__init__()\n        self.stdin = stdin or io.BytesIO()\n        self.stdout = stdout or io.BytesIO()\n        self.stderr = stderr or io.BytesIO()\n        self.stdin_isatty = stdin_isatty\n        self.stdout_encoding = \"utf-8\"\n\n\ndef test_parse_args_sets_debug_and_traceback():\n    \"\"\"Verify that the --debug flag enables traceback.\"\"\"\n    env = DummyEnvironment(stdin_isatty=True)\n    parser = BaseHTTPieArgumentParser()\n    ns = parser.parse_args(env, args=[\"--debug\", \"GET\", \"http://example.com\"])\n    assert ns.debug is True\n    assert ns.traceback is True\n    # has_stdin_data should be False because stdin is a tty\n    assert ns.has_stdin_data is False\n    assert ns.has_input_data is False\n\n\ndef test_parse_args_detects_stdin_data_and_raw_input():\n    \"\"\"Verify that stdin data and raw input are detected correctly.\"\"\"\n    # stdin contains data and is not a tty\n    stdin_data = io.BytesIO(b\"key=value\")\n    env = DummyEnvironment(stdin=stdin_data, stdin_isatty=False)\n    parser = BaseHTTPieArgumentParser()\n    ns = parser.parse_args(env, args=[\"POST\", \"http://example.com\"])\n    assert ns.has_stdin_data is True\n    assert ns.has_input_data is True\n\n    # raw input via --raw flag\n    env2 = DummyEnvironment(stdin_isatty=True)\n    parser2 = BaseHTTPieArgumentParser()\n    ns2 = parser2.parse_args(env2, args=[\"--raw\", \"rawdata\", \"GET\", \"http://example.com\"])\n    assert ns2.has_stdin_data is False\n    assert ns2.has_input_data is True\n\n\ndef test_print_message_redirects_to_environment_streams():\n    \"\"\"Verify that _print_message writes to the correct environment streams.\"\"\"\n    stdout_capture = io.BytesIO()\n    stderr_capture = io.BytesIO()\n    env = DummyEnvironment(stdout=stdout_capture, stderr=stderr_capture, stdin_isatty=True)\n    parser = BaseHTTPieArgumentParser()\n    parser.env = env\n\n    # Message to stdout\n    parser._print_message(\"Hello stdout\\n\", file=sys.stdout)\n    # Message to stderr\n    parser._print_message(\"Hello stderr\\n\", file=sys.stderr)\n    # Message with default (None) should go to stderr\n    parser._print_message(\"Hello default\\n\")\n\n    stdout_capture.seek(0)\n    stderr_capture.seek(0)\n    assert stdout_capture.read() == b\"Hello stdout\\n\"\n    assert stderr_capture.read() == b\"Hello stderr\\nHello default\\n\"\n```",
+        "reasoning": "Need tests for BaseHTTPieArgumentParser. We'll create dummy Environment with stdin, stdout, stderr. Use tmp_path for files. Test parse_args normal, boundary, error. Use argparse error? maybe missing required? We'll test that has_stdin_data set correctly. Also test _print_message mapping. Use simple args: ['--debug', 'GET', 'http://example.com']. Need to set env with stdin_isatty False. We'll create simple Environment stub. Use minimal attributes. Let's craft."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052315121,
+    "prompt_tokens": 801,
+    "prompt_time": 0.005521358,
+    "completion_tokens": 743,
+    "completion_time": 0.946203563,
+    "total_tokens": 1544,
+    "total_time": 0.951724921,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 102
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7seqr56e0xa4j4gfh5rx0dy",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport argparse\nimport io\nimport os\nimport sys\nimport tempfile\nimport pytest\n\nfrom httpie.cli.argparser import BaseHTTPieArgumentParser\nfrom httpie.context import Environment\nfrom httpie.exceptions import ParseError\n\n\n# Helper to create a minimal Environment instance for testing\nclass DummyEnvironment(Environment):\n    def __init__(self, stdin=None, stdout=None, stderr=None, stdin_isatty=True):\n        super().__init__()\n        self.stdin = stdin or io.BytesIO()\n        self.stdout = stdout or io.BytesIO()\n        self.stderr = stderr or io.BytesIO()\n        self.stdin_isatty = stdin_isatty\n        self.stdout_encoding = \"utf-8\"\n\n\ndef test_parse_args_sets_debug_and_traceback():\n    \"\"\"Verify that the --debug flag enables traceback.\"\"\"\n    env = DummyEnvironment(stdin_isatty=True)\n    parser = BaseHTTPieArgumentParser()\n    ns = parser.parse_args(env, args=[\"--debug\", \"GET\", \"http://example.com\"])\n    assert ns.debug is True\n    assert ns.traceback is True\n    # has_stdin_data should be False because stdin is a tty\n    assert ns.has_stdin_data is False\n    assert ns.has_input_data is False\n\n\ndef test_parse_args_detects_stdin_data_and_raw_input():\n    \"\"\"Verify that stdin data and raw input are detected correctly.\"\"\"\n    # stdin contains data and is not a tty\n    stdin_data = io.BytesIO(b\"key=value\")\n    env = DummyEnvironment(stdin=stdin_data, stdin_isatty=False)\n    parser = BaseHTTPieArgumentParser()\n    ns = parser.parse_args(env, args=[\"POST\", \"http://example.com\"])\n    assert ns.has_stdin_data is True\n    assert ns.has_input_data is True\n\n    # raw input via --raw flag\n    env2 = DummyEnvironment(stdin_isatty=True)\n    parser2 = BaseHTTPieArgumentParser()\n    ns2 = parser2.parse_args(env2, args=[\"--raw\", \"rawdata\", \"GET\", \"http://example.com\"])\n    assert ns2.has_stdin_data is False\n    assert ns2.has_input_data is True\n\n\ndef test_print_message_redirects_to_environment_streams():\n    \"\"\"Verify that _print_message writes to the correct environment streams.\"\"\"\n    stdout_capture = io.BytesIO()\n    stderr_capture = io.BytesIO()\n    env = DummyEnvironment(stdout=stdout_capture, stderr=stderr_capture, stdin_isatty=True)\n    parser = BaseHTTPieArgumentParser()\n    parser.env = env\n\n    # Message to stdout\n    parser._print_message(\"Hello stdout\\n\", file=sys.stdout)\n    # Message to stderr\n    parser._print_message(\"Hello stderr\\n\", file=sys.stderr)\n    # Message with default (None) should go to stderr\n    parser._print_message(\"Hello default\\n\")\n\n    stdout_capture.seek(0)\n    stderr_capture.seek(0)\n    assert stdout_capture.read() == b\"Hello stdout\\n\"\n    assert stderr_capture.read() == b\"Hello stderr\\nHello default\\n\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.321441062958911
+}

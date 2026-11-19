@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-fdb700b4-8c34-4d7c-bcae-61351dfa0c8d",
+  "object": "chat.completion",
+  "created": 1795079276,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import AcceptList, MediaType, Matched\nfrom sanic.exceptions import InvalidHeader\n\n# Test 1: Basic matching with explicit types and q values\ndef test_acceptlist_match_basic():\n    # Accept header: text/html;q=0.8, application/json;q=0.9, */*;q=0.5\n    accept = AcceptList(\n        MediaType(\"text/html\", q=0.8),\n        MediaType(\"application/json\", q=0.9),\n        MediaType(\"*/*\", q=0.5)\n    )\n    # Query for application/json first, then text/html\n    matched = accept.match(\"application/json\", \"text/html\")\n    # Should match application/json because higher q\n    assert isinstance(matched, Matched)\n    assert str(matched) == \"application/json\"\n    assert matched.m == accept[1]  # second element\n\n# Test 2: Wildcard matching and preference order\ndef test_acceptlist_match_wildcard_and_order():\n    # Accept header: text/*;q=0.7, application/*;q=0.8, */*;q=0.6\n    accept = AcceptList(\n        MediaType(\"text/*\", q=0.7),\n        MediaType(\"application/*\", q=0.8),\n        MediaType(\"*/*\", q=0.6)\n    )\n    # Query for image/png (no explicit match) and application/xml\n    matched = accept.match(\"image/png\", \"application/xml\")\n    # Should match application/* because higher q than text/*\n    assert str(matched) == \"application/xml\"\n    assert matched.m == accept[1]  # application/* entry\n\n# Test 3: No match when accept_wildcards is False\ndef test_acceptlist_no_match_without_wildcards():\n    # Accept header: text/html;q=0.8, application/json;q=0.9\n    accept = AcceptList(\n        MediaType(\"text/html\", q=0.8),\n        MediaType(\"application/json\", q=0.9)\n    )\n    # Query for image/png which is not present and no wildcard\n    matched = accept.match(\"image/png\", accept_wildcards=False)\n    # Should return empty match\n    assert str(matched) == \"\"\n    assert matched.m is None\n```",
+        "reasoning": "We need tests for AcceptList.match, boundary, error? AcceptList doesn't raise. Maybe test match ordering, wildcard, no match. Use tmp_path? Not needed. Provide three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04836786,
+    "prompt_tokens": 805,
+    "prompt_time": 0.005361178,
+    "completion_tokens": 542,
+    "completion_time": 0.593439415,
+    "total_tokens": 1347,
+    "total_time": 0.598800593,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 39
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh01myefmvs358ajn17p5r",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import AcceptList, MediaType, Matched\nfrom sanic.exceptions import InvalidHeader\n\n# Test 1: Basic matching with explicit types and q values\ndef test_acceptlist_match_basic():\n    # Accept header: text/html;q=0.8, application/json;q=0.9, */*;q=0.5\n    accept = AcceptList(\n        MediaType(\"text/html\", q=0.8),\n        MediaType(\"application/json\", q=0.9),\n        MediaType(\"*/*\", q=0.5)\n    )\n    # Query for application/json first, then text/html\n    matched = accept.match(\"application/json\", \"text/html\")\n    # Should match application/json because higher q\n    assert isinstance(matched, Matched)\n    assert str(matched) == \"application/json\"\n    assert matched.m == accept[1]  # second element\n\n# Test 2: Wildcard matching and preference order\ndef test_acceptlist_match_wildcard_and_order():\n    # Accept header: text/*;q=0.7, application/*;q=0.8, */*;q=0.6\n    accept = AcceptList(\n        MediaType(\"text/*\", q=0.7),\n        MediaType(\"application/*\", q=0.8),\n        MediaType(\"*/*\", q=0.6)\n    )\n    # Query for image/png (no explicit match) and application/xml\n    matched = accept.match(\"image/png\", \"application/xml\")\n    # Should match application/* because higher q than text/*\n    assert str(matched) == \"application/xml\"\n    assert matched.m == accept[1]  # application/* entry\n\n# Test 3: No match when accept_wildcards is False\ndef test_acceptlist_no_match_without_wildcards():\n    # Accept header: text/html;q=0.8, application/json;q=0.9\n    accept = AcceptList(\n        MediaType(\"text/html\", q=0.8),\n        MediaType(\"application/json\", q=0.9)\n    )\n    # Query for image/png which is not present and no wildcard\n    matched = accept.match(\"image/png\", accept_wildcards=False)\n    # Should return empty match\n    assert str(matched) == \"\"\n    assert matched.m is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0299399089999497
+}

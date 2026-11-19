@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-e74d4bb7-f2ad-4b2e-8893-695b595d466c",
+  "object": "chat.completion",
+  "created": 1795076560,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import tokenize_json\nfrom typesystem.tokenize.tokens import DictToken, ListToken, ScalarToken\nfrom typesystem.base import ParseError\n\ndef test_tokenize_json_valid_dict():\n    \"\"\"Tokenize a simple JSON object and verify the returned token type.\"\"\"\n    json_str = '{\"key\": \"value\", \"num\": 42}'\n    token = tokenize_json(json_str)\n    assert isinstance(token, DictToken)\n    # The token should contain the correct number of children\n    assert len(token.children) == 2\n    # Each child should be a ScalarToken with the appropriate value\n    values = {child.key: child.value for child in token.children}\n    assert values == {\"key\": \"value\", \"num\": 42}\n\ndef test_tokenize_json_empty_string_raises():\n    \"\"\"An empty string should raise a ParseError with the correct code.\"\"\"\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    # Position should be at the start of the input\n    assert err.position.column_no == 1\n    assert err.position.line_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_json_invalid_json_raises():\n    \"\"\"Malformed JSON should raise a ParseError with parse_error code.\"\"\"\n    bad_json = '{\"missing_end\": true'\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(bad_json)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    # The error message should contain the original JSONDecodeError message\n    assert \"Expecting\" in err.text\n    # Position should reflect the location of the error\n    assert err.position.column_no > 0\n    assert err.position.line_no > 0\n    assert err.position.char_index >= 0\n```",
+        "reasoning": "We need to test tokenize_json. We need to import it. We need to test normal, boundary, error. Use tmp_path for file? content is string. We can test normal: valid JSON returns Token. We need to inspect returned type. Likely DictToken or ListToken. We can assert instance. Boundary: empty string triggers ParseError. Error: malformed JSON triggers ParseError. Use pytest.raises. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.214413798,
+    "prompt_tokens": 468,
+    "prompt_time": 0.025561121,
+    "completion_tokens": 503,
+    "completion_time": 0.557071614,
+    "total_tokens": 971,
+    "total_time": 0.582632735,
+    "completion_tokens_details": {
+      "reasoning_tokens": 89
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sed540e4waqsb73dtbyctk",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.tokenize.tokenize_json import tokenize_json\nfrom typesystem.tokenize.tokens import DictToken, ListToken, ScalarToken\nfrom typesystem.base import ParseError\n\ndef test_tokenize_json_valid_dict():\n    \"\"\"Tokenize a simple JSON object and verify the returned token type.\"\"\"\n    json_str = '{\"key\": \"value\", \"num\": 42}'\n    token = tokenize_json(json_str)\n    assert isinstance(token, DictToken)\n    # The token should contain the correct number of children\n    assert len(token.children) == 2\n    # Each child should be a ScalarToken with the appropriate value\n    values = {child.key: child.value for child in token.children}\n    assert values == {\"key\": \"value\", \"num\": 42}\n\ndef test_tokenize_json_empty_string_raises():\n    \"\"\"An empty string should raise a ParseError with the correct code.\"\"\"\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(\"\")\n    err = excinfo.value\n    assert err.code == \"no_content\"\n    assert err.text == \"No content.\"\n    # Position should be at the start of the input\n    assert err.position.column_no == 1\n    assert err.position.line_no == 1\n    assert err.position.char_index == 0\n\ndef test_tokenize_json_invalid_json_raises():\n    \"\"\"Malformed JSON should raise a ParseError with parse_error code.\"\"\"\n    bad_json = '{\"missing_end\": true'\n    with pytest.raises(ParseError) as excinfo:\n        tokenize_json(bad_json)\n    err = excinfo.value\n    assert err.code == \"parse_error\"\n    # The error message should contain the original JSONDecodeError message\n    assert \"Expecting\" in err.text\n    # Position should reflect the location of the error\n    assert err.position.column_no > 0\n    assert err.position.line_no > 0\n    assert err.position.char_index >= 0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0974989839596674
+}

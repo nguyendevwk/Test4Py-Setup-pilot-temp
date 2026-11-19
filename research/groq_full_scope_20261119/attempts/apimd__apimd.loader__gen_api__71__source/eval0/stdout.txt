@@ -1,0 +1,81 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_gen_api_creates_markdown _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__gen_api__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_gen_api_creates_markdown0')
+
+    def test_gen_api_creates_markdown(tmp_path):
+        """Normal case: a valid module is loaded and a markdown file is written."""
+        # Create a simple module with one function
+        mod_name = "sample_module"
+        mod_content = """
+    def hello(name: str) -> str:
+        return f"Hello, {name}"
+    """
+        _create_module(tmp_path, mod_name, mod_content)
+    
+        # Ensure the module can be found
+        sys.path.insert(0, str(tmp_path))
+    
+        # Run gen_api
+        docs = gen_api({"Sample": mod_name}, prefix=str(tmp_path / "docs"))
+    
+        # Verify that a markdown file was created
+        md_path = tmp_path / "docs" / f"{mod_name.replace('_', '-')}-api.md"
+>       assert md_path.is_file(), "Markdown file was not created"
+E       AssertionError: Markdown file was not created
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__gen_api__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_gen_api_creates_markdown0/docs/sample-module-api.md').is_file
+
+test_generated.py:36: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[32mCreate directory: /home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__gen_api__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_gen_api_creates_markdown0/docs[0m
+[32mLoad root: sample_module (Sample)[0m
+[33m'sample_module' can not be found[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:127 Create directory: /home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__gen_api__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_gen_api_creates_markdown0/docs
+INFO     root:loader.py:131 Load root: sample_module (Sample)
+WARNING  root:loader.py:134 'sample_module' can not be found
+_____________________________ test_gen_api_dry_run _____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__gen_api__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_gen_api_dry_run0')
+
+    def test_gen_api_dry_run(tmp_path):
+        """Error/edge case: dry run mode should not write files but still return docs."""
+        # Create a module
+        mod_name = "dry_module"
+        mod_content = """
+    def add(a: int, b: int) -> int:
+        return a + b
+    """
+        _create_module(tmp_path, mod_name, mod_content)
+    
+        # Ensure the module can be found
+        sys.path.insert(0, str(tmp_path))
+    
+        # Run gen_api in dry mode
+        docs = gen_api({"Dry": mod_name}, prefix=str(tmp_path / "docs"), dry=True)
+    
+        # No markdown file should be written
+        md_path = tmp_path / "docs" / f"{mod_name.replace('_', '-')}-api.md"
+        assert not md_path.exists(), "Markdown file should not be written in dry mode"
+    
+        # Docs should still contain the generated content
+>       assert docs, "Docs should not be empty in dry mode"
+E       AssertionError: Docs should not be empty in dry mode
+E       assert []
+
+test_generated.py:81: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[32mCreate directory: /home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__gen_api__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_gen_api_dry_run0/docs[0m
+[32mLoad root: dry_module (Dry)[0m
+[33m'dry_module' can not be found[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:127 Create directory: /home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__gen_api__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_gen_api_dry_run0/docs
+INFO     root:loader.py:131 Load root: dry_module (Dry)
+WARNING  root:loader.py:134 'dry_module' can not be found
+=========================== short test summary info ============================
+FAILED test_generated.py::test_gen_api_creates_markdown - AssertionError: Mar...
+FAILED test_generated.py::test_gen_api_dry_run - AssertionError: Docs should ...
+2 failed, 1 passed in 0.14s

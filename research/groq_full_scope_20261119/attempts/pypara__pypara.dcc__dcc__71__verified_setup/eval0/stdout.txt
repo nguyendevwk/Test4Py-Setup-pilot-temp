@@ -1,0 +1,85 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_dcc_decorator_registers_and_attaches_function ______________
+
+    def test_dcc_decorator_registers_and_attaches_function():
+        # Define a simple day count fraction calculator
+        @dcc("simple")
+        def simple_dcf(start: datetime.date, end: datetime.date, ref: datetime.date, freq: float = None) -> float:
+            return (end - start).days
+    
+        # The decorator should return the original function
+        assert simple_dcf is not None
+        assert callable(simple_dcf)
+    
+        # The function should have a __dcc attribute pointing to a DCC instance
+        assert hasattr(simple_dcf, "__dcc")
+        dcc_instance = getattr(simple_dcf, "__dcc")
+        assert isinstance(dcc_instance, DCC)
+        assert dcc_instance.name == "simple"
+        assert dcc_instance.altnames == set()
+>       assert dcc_instance.ccys == set()
+E       AttributeError: 'DCC' object has no attribute 'ccys'
+
+test_generated.py:23: AttributeError
+__________________ test_dcc_decorator_with_altnames_and_ccys ___________________
+
+    def test_dcc_decorator_with_altnames_and_ccys():
+        # Create dummy Currency objects for testing
+        class DummyCurrency:
+            def __init__(self, code):
+                self.code = code
+    
+        usd = DummyCurrency("USD")
+        eur = DummyCurrency("EUR")
+    
+        @dcc("alt_test", altnames={"alternative", "test"}, ccys={usd, eur})
+        def alt_dcf(start: datetime.date, end: datetime.date, ref: datetime.date, freq: float = None) -> float:
+            return (end - start).days / 30.0
+    
+        dcc_inst = getattr(alt_dcf, "__dcc")
+        assert isinstance(dcc_inst, DCC)
+        assert dcc_inst.name == "alt_test"
+        assert dcc_inst.altnames == {"alternative", "test"}
+>       assert dcc_inst.ccys == {usd, eur}
+E       AttributeError: 'DCC' object has no attribute 'ccys'
+
+test_generated.py:53: AttributeError
+__________________ test_dcc_decorator_error_on_duplicate_name __________________
+
+    def test_dcc_decorator_error_on_duplicate_name():
+        # Register a DCC with a given name
+        @dcc("duplicate")
+        def first_dcf(start: datetime.date, end: datetime.date, ref: datetime.date, freq: float = None) -> float:
+            return 0.0
+    
+        # Attempting to register another DCC with the same name should raise a ValueError
+        with pytest.raises(ValueError):
+            @dcc("duplicate")
+>           def second_dcf(start: datetime.date, end: datetime.date, ref: datetime.date, freq: float = None) -> float:
+
+test_generated.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/dcc.py:428: in register_and_return_dcfc
+    DCCRegistry.register(dcc)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <pypara.dcc.DCCRegistryMachinery object at 0x7fc62617ae60>
+dcc = DCC(name='duplicate', altnames=set(), currencies=set(), calculate_fraction_method=<function test_dcc_decorator_error_on_duplicate_name.<locals>.second_dcf at 0x7fc6260ab9a0>)
+
+    def register(self, dcc: DCC) -> None:
+        """
+        Attempts to register the given day count convention.
+        """
+        ## Check if the main name is ever registered before:
+        if self._is_registered(dcc.name):
+            ## Yep, raise a TypeError:
+>           raise TypeError(f"Day count convention '{dcc.name}' is already registered")
+E           TypeError: Day count convention 'duplicate' is already registered
+
+../../../../groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/dcc.py:318: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_dcc_decorator_registers_and_attaches_function
+FAILED test_generated.py::test_dcc_decorator_with_altnames_and_ccys - Attribu...
+FAILED test_generated.py::test_dcc_decorator_error_on_duplicate_name - TypeEr...
+3 failed in 0.19s

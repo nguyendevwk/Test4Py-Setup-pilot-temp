@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-3cae2c2d-60c4-412d-90f9-d03fe215daff",
+  "object": "chat.completion",
+  "created": 1795076272,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tqdm.rich import tqdm_rich\nfrom tqdm import TqdmExperimentalWarning\n\n\ndef test_tqdm_rich_normal_progress(tmp_path):\n    \"\"\"Verify that tqdm_rich updates its internal rich.Progress correctly.\"\"\"\n    # Create a tqdm_rich with a small total\n    bar = tqdm_rich(total=3, leave=False, disable=False)\n    # Iterate a few times\n    for _ in range(3):\n        bar.update()\n    # After iteration, n should equal total\n    assert bar.n == 3\n    # The internal rich.Progress should have been created\n    assert hasattr(bar, \"_prog\")\n    # The task should have been added and updated\n    assert hasattr(bar, \"_task_id\")\n    # The progress bar should reflect completion\n    bar.close()\n    # After close, the rich.Progress should be exited\n    assert not bar._prog._tasks  # tasks list should be empty after exit\n\n\ndef test_tqdm_rich_disable_skips_gui(tmp_path):\n    \"\"\"When disable=True, tqdm_rich should not create a rich.Progress.\"\"\"\n    bar = tqdm_rich(total=5, disable=True)\n    # No rich.Progress should be created\n    assert not hasattr(bar, \"_prog\")\n    # Updating should not raise\n    bar.update()\n    assert bar.n == 1\n    bar.close()\n    # Still no rich.Progress\n    assert not hasattr(bar, \"_prog\")\n\n\ndef test_tqdm_rich_invalid_progress_raises():\n    \"\"\"Passing a non-iterable progress argument should raise TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        tqdm_rich(progress=\"not a tuple\")\n```",
+        "reasoning": "We need 3 tests. Use tmp_path for any file? Not needed. Test normal: create tqdm_rich with total 5, iterate, check that internal _prog exists and updates. We can check that after iteration, n equals total. Also test that disable True skips GUI. Test error: passing invalid progress type? maybe passing progress as string should raise TypeError? But code expects tuple. Let's test that passing progress as non-iterable raises TypeError when adding task? Actually Progress(*progress) expects iterable of columns. If progress is string, *progress splits into chars leading to error. So test that. Use pytest.raises(TypeError)."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052120516,
+    "prompt_tokens": 813,
+    "prompt_time": 0.005295744,
+    "completion_tokens": 483,
+    "completion_time": 0.553019194,
+    "total_tokens": 1296,
+    "total_time": 0.558314938,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 133
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se4bmseb58q1nkd4svnqb7",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tqdm.rich import tqdm_rich\nfrom tqdm import TqdmExperimentalWarning\n\n\ndef test_tqdm_rich_normal_progress(tmp_path):\n    \"\"\"Verify that tqdm_rich updates its internal rich.Progress correctly.\"\"\"\n    # Create a tqdm_rich with a small total\n    bar = tqdm_rich(total=3, leave=False, disable=False)\n    # Iterate a few times\n    for _ in range(3):\n        bar.update()\n    # After iteration, n should equal total\n    assert bar.n == 3\n    # The internal rich.Progress should have been created\n    assert hasattr(bar, \"_prog\")\n    # The task should have been added and updated\n    assert hasattr(bar, \"_task_id\")\n    # The progress bar should reflect completion\n    bar.close()\n    # After close, the rich.Progress should be exited\n    assert not bar._prog._tasks  # tasks list should be empty after exit\n\n\ndef test_tqdm_rich_disable_skips_gui(tmp_path):\n    \"\"\"When disable=True, tqdm_rich should not create a rich.Progress.\"\"\"\n    bar = tqdm_rich(total=5, disable=True)\n    # No rich.Progress should be created\n    assert not hasattr(bar, \"_prog\")\n    # Updating should not raise\n    bar.update()\n    assert bar.n == 1\n    bar.close()\n    # Still no rich.Progress\n    assert not hasattr(bar, \"_prog\")\n\n\ndef test_tqdm_rich_invalid_progress_raises():\n    \"\"\"Passing a non-iterable progress argument should raise TypeError.\"\"\"\n    with pytest.raises(TypeError):\n        tqdm_rich(progress=\"not a tuple\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9057897719903849
+}

@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-34d66be9-b789-452b-b432-bf0d6ae5c869",
+  "object": "chat.completion",
+  "created": 1795079608,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKTVEpisodeIE, NRKTVIE, NRKIE\n\n# Helper to create a minimal extractor instance with a dummy downloader\ndef make_extractor():\n    return NRKTVEpisodeIE()\n\n# Test normal extraction with all required data present\ndef test_nrk_episode_extraction_normal(monkeypatch):\n    extractor = make_extractor()\n    url = \"https://tv.nrk.no/serie/hellums-kro/sesong/1/episode/2\"\n\n    # Mock the webpage download to return a simple HTML containing the required meta tags\n    monkeypatch.setattr(extractor, \"_download_webpage\", lambda u, d: \"<html></html>\")\n\n    # Mock JSON-LD search to return a dict with @id\n    mock_info = {\"@id\": \"MUHH36005220\"}\n    monkeypatch.setattr(extractor, \"_search_json_ld\", lambda w, d, default: mock_info)\n\n    # Ensure other search helpers are not called\n    monkeypatch.setattr(extractor, \"_html_search_meta\", lambda *args, **kwargs: None)\n    monkeypatch.setattr(extractor, \"_search_regex\", lambda *args, **kwargs: None)\n\n    # Perform extraction\n    result = extractor._real_extract(url)\n\n    # Assertions on the returned info dict\n    assert result[\"_type\"] == \"url\"\n    assert result[\"id\"] == \"MUHH36005220\"\n    assert result[\"url\"] == \"nrk:MUHH36005220\"\n    assert result[\"ie_key\"] == NRKIE.ie_key()\n    assert result[\"season_number\"] == 1\n    assert result[\"episode_number\"] == 2\n    assert result[\"display_id\"] == \"hellums-kro/sesong/1/episode/2\"\n\n# Test extraction when JSON-LD is missing but meta tag provides nrk id\ndef test_nrk_episode_extraction_meta_fallback(monkeypatch):\n    extractor = make_extractor()\n    url = \"https://tv.nrk.no/serie/backstage/sesong/1/episode/8\"\n\n    monkeypatch.setattr(extractor, \"_download_webpage\", lambda u, d: \"<html></html>\")\n\n    # JSON-LD returns empty dict\n    monkeypatch.setattr(extractor, \"_search_json_ld\", lambda w, d, default: {})\n\n    # Meta tag returns the nrk id\n    monkeypatch.setattr(extractor, \"_html_search_meta\",\n                       lambda name, w, default: \"MSUI14000816\" if name == \"nrk:program-id\" else default)\n\n    # Ensure regex fallback is not used\n    monkeypatch.setattr(extractor, \"_search_regex\", lambda *args, **kwargs: None)\n\n    result = extractor._real_extract(url)\n\n    assert result[\"id\"] == \"MSUI14000816\"\n    assert result[\"url\"] == \"nrk:MSUI14000816\"\n    assert result[\"season_number\"] == 1\n    assert result[\"episode_number\"] == 8\n\n# Test that an invalid nrk id raises an AssertionError\ndef test_nrk_episode_extraction_invalid_id(monkeypatch):\n    extractor = make_extractor()\n    url = \"https://tv.nrk.no/serie/invalid/sesong/1/episode/1\"\n\n    monkeypatch.setattr(extractor, \"_download_webpage\", lambda u, d: \"<html></html>\")\n\n    # Provide an invalid nrk id that does not match the expected pattern\n    monkeypatch.setattr(extractor, \"_search_json_ld\", lambda w, d, default: {\"@id\": \"INVALID_ID\"})\n\n    monkeypatch.setattr(extractor, \"_html_search_meta\", lambda *args, **kwargs: None)\n    monkeypatch.setattr(extractor, \"_search_regex\", lambda *args, **kwargs: None)\n\n    with pytest.raises(AssertionError):\n        extractor._real_extract(url)\n```",
+        "reasoning": "We need to write tests for NRKTVEpisodeIE._real_extract. But we cannot modify product code. We need to import the class and test its behavior. We need to provide a fake webpage? The extractor downloads webpage via _download_webpage which uses downloader. We can't network. We can monkeypatch _download_webpage to return a crafted HTML. Also _search_json_ld, _html_search_meta, _search_regex etc. We can patch these methods to return controlled data. Use pytest. Three tests: normal extraction, boundary missing nrk id, error when nrk id not match pattern. Use pytest.raises. Use tmp_path? Not needed. Just patch. Use monkeypatch fixture. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004928567,
+    "prompt_tokens": 957,
+    "prompt_time": 0.018740479,
+    "completion_tokens": 983,
+    "completion_time": 1.143544669,
+    "total_tokens": 1940,
+    "total_time": 1.162285148,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 145
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sha53yec6tpssykaqxcrja",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKTVEpisodeIE, NRKTVIE, NRKIE\n\n# Helper to create a minimal extractor instance with a dummy downloader\ndef make_extractor():\n    return NRKTVEpisodeIE()\n\n# Test normal extraction with all required data present\ndef test_nrk_episode_extraction_normal(monkeypatch):\n    extractor = make_extractor()\n    url = \"https://tv.nrk.no/serie/hellums-kro/sesong/1/episode/2\"\n\n    # Mock the webpage download to return a simple HTML containing the required meta tags\n    monkeypatch.setattr(extractor, \"_download_webpage\", lambda u, d: \"<html></html>\")\n\n    # Mock JSON-LD search to return a dict with @id\n    mock_info = {\"@id\": \"MUHH36005220\"}\n    monkeypatch.setattr(extractor, \"_search_json_ld\", lambda w, d, default: mock_info)\n\n    # Ensure other search helpers are not called\n    monkeypatch.setattr(extractor, \"_html_search_meta\", lambda *args, **kwargs: None)\n    monkeypatch.setattr(extractor, \"_search_regex\", lambda *args, **kwargs: None)\n\n    # Perform extraction\n    result = extractor._real_extract(url)\n\n    # Assertions on the returned info dict\n    assert result[\"_type\"] == \"url\"\n    assert result[\"id\"] == \"MUHH36005220\"\n    assert result[\"url\"] == \"nrk:MUHH36005220\"\n    assert result[\"ie_key\"] == NRKIE.ie_key()\n    assert result[\"season_number\"] == 1\n    assert result[\"episode_number\"] == 2\n    assert result[\"display_id\"] == \"hellums-kro/sesong/1/episode/2\"\n\n# Test extraction when JSON-LD is missing but meta tag provides nrk id\ndef test_nrk_episode_extraction_meta_fallback(monkeypatch):\n    extractor = make_extractor()\n    url = \"https://tv.nrk.no/serie/backstage/sesong/1/episode/8\"\n\n    monkeypatch.setattr(extractor, \"_download_webpage\", lambda u, d: \"<html></html>\")\n\n    # JSON-LD returns empty dict\n    monkeypatch.setattr(extractor, \"_search_json_ld\", lambda w, d, default: {})\n\n    # Meta tag returns the nrk id\n    monkeypatch.setattr(extractor, \"_html_search_meta\",\n                       lambda name, w, default: \"MSUI14000816\" if name == \"nrk:program-id\" else default)\n\n    # Ensure regex fallback is not used\n    monkeypatch.setattr(extractor, \"_search_regex\", lambda *args, **kwargs: None)\n\n    result = extractor._real_extract(url)\n\n    assert result[\"id\"] == \"MSUI14000816\"\n    assert result[\"url\"] == \"nrk:MSUI14000816\"\n    assert result[\"season_number\"] == 1\n    assert result[\"episode_number\"] == 8\n\n# Test that an invalid nrk id raises an AssertionError\ndef test_nrk_episode_extraction_invalid_id(monkeypatch):\n    extractor = make_extractor()\n    url = \"https://tv.nrk.no/serie/invalid/sesong/1/episode/1\"\n\n    monkeypatch.setattr(extractor, \"_download_webpage\", lambda u, d: \"<html></html>\")\n\n    # Provide an invalid nrk id that does not match the expected pattern\n    monkeypatch.setattr(extractor, \"_search_json_ld\", lambda w, d, default: {\"@id\": \"INVALID_ID\"})\n\n    monkeypatch.setattr(extractor, \"_html_search_meta\", lambda *args, **kwargs: None)\n    monkeypatch.setattr(extractor, \"_search_regex\", lambda *args, **kwargs: None)\n\n    with pytest.raises(AssertionError):\n        extractor._real_extract(url)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "54c29657dae7404f847827031c005b86",
+  "_api_plus_pacing_seconds": 3.4386167090269737
+}

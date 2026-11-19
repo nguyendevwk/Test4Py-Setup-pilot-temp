@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-b4bd011a-9388-47c5-b617-c33308177173",
+  "object": "chat.completion",
+  "created": 1795076129,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport time\nfrom flutes.timing import work_in_progress\n\ndef test_work_in_progress_normal_block(capsys, tmp_path):\n    \"\"\"Verify normal usage prints start and end messages with elapsed time.\"\"\"\n    start = time.time()\n    with work_in_progress(\"Test normal\"):\n        time.sleep(0.1)\n    end = time.time()\n    out, _ = capsys.readouterr()\n    assert out.startswith(\"Test normal... \")\n    assert out.endswith(f\"done. ({end - start:.2f}s)\\n\")\n    # elapsed time should be close to 0.1s\n    elapsed = float(out.split('(')[-1].split('s')[0])\n    assert 0.09 <= elapsed <= 0.2\n\ndef test_work_in_progress_zero_sleep(capsys):\n    \"\"\"Boundary case: zero sleep should still print elapsed time.\"\"\"\n    with work_in_progress(\"Zero sleep\"):\n        pass\n    out, _ = capsys.readouterr()\n    assert out.startswith(\"Zero sleep... \")\n    assert out.endswith(\"done. (0.00s)\\n\")\n    elapsed = float(out.split('(')[-1].split('s')[0])\n    assert elapsed == 0.0\n\ndef test_work_in_progress_exception(capsys):\n    \"\"\"Ensure that an exception inside the block still triggers the end message.\"\"\"\n    with pytest.raises(RuntimeError):\n        with work_in_progress(\"Exception test\"):\n            raise RuntimeError(\"boom\")\n    out, _ = capsys.readouterr()\n    assert out.startswith(\"Exception test... \")\n    assert out.endswith(\"done. (0.00s)\\n\")\n    elapsed = float(out.split('(')[-1].split('s')[0])\n    assert elapsed == 0.0\n```",
+        "reasoning": "We need to test work_in_progress context manager. It's a generator yielding. We can test that it prints correct messages and measures time. Use capsys. Three tests: normal block, function decorator? Actually it's a context manager only. Test normal block timing approx. Use time.sleep. Test boundary: zero sleep. Test error: if exception inside block, still prints done? It will still yield then after exception? Actually if exception occurs, generator will not resume? In contextmanager, if exception occurs, the generator will be closed, but the yield is not resumed, so time_consumed may not be printed? Actually contextmanager handles it: the generator is closed, but the finally block? In this code, after yield, time_consumed printed. If exception, generator is closed, but the finally block? I think it still runs after yield? In contextmanager, if exception, the generator is closed and the finally block runs. So test that even with exception, prints done. Use pytest.raises to catch exception. Ensure printed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04609543,
+    "prompt_tokens": 472,
+    "prompt_time": 0.028265149,
+    "completion_tokens": 588,
+    "completion_time": 0.680804648,
+    "total_tokens": 1060,
+    "total_time": 0.709069797,
+    "completion_tokens_details": {
+      "reasoning_tokens": 209
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sdzzxgepg8cz0ww627c745",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport time\nfrom flutes.timing import work_in_progress\n\ndef test_work_in_progress_normal_block(capsys, tmp_path):\n    \"\"\"Verify normal usage prints start and end messages with elapsed time.\"\"\"\n    start = time.time()\n    with work_in_progress(\"Test normal\"):\n        time.sleep(0.1)\n    end = time.time()\n    out, _ = capsys.readouterr()\n    assert out.startswith(\"Test normal... \")\n    assert out.endswith(f\"done. ({end - start:.2f}s)\\n\")\n    # elapsed time should be close to 0.1s\n    elapsed = float(out.split('(')[-1].split('s')[0])\n    assert 0.09 <= elapsed <= 0.2\n\ndef test_work_in_progress_zero_sleep(capsys):\n    \"\"\"Boundary case: zero sleep should still print elapsed time.\"\"\"\n    with work_in_progress(\"Zero sleep\"):\n        pass\n    out, _ = capsys.readouterr()\n    assert out.startswith(\"Zero sleep... \")\n    assert out.endswith(\"done. (0.00s)\\n\")\n    elapsed = float(out.split('(')[-1].split('s')[0])\n    assert elapsed == 0.0\n\ndef test_work_in_progress_exception(capsys):\n    \"\"\"Ensure that an exception inside the block still triggers the end message.\"\"\"\n    with pytest.raises(RuntimeError):\n        with work_in_progress(\"Exception test\"):\n            raise RuntimeError(\"boom\")\n    out, _ = capsys.readouterr()\n    assert out.startswith(\"Exception test... \")\n    assert out.endswith(\"done. (0.00s)\\n\")\n    elapsed = float(out.split('(')[-1].split('s')[0])\n    assert elapsed == 0.0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0538801020011306
+}

@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-8df8e816-0542-4743-8f6f-1657d5f9a867",
+  "object": "chat.completion",
+  "created": 1795076339,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import normalize_path\n\ndef test_normalize_absolute_path(tmp_path):\n    # Create a nested directory structure\n    nested = tmp_path / \"a\" / \"b\" / \"c\"\n    nested.mkdir(parents=True)\n    # Path with redundant separators and up-level references\n    raw = str(nested) + \"/../d/./e\"\n    expected = Path(tmp_path) / \"a\" / \"b\" / \"d\" / \"e\"\n    result = normalize_path(raw)\n    assert result == expected\n    assert isinstance(result, Path)\n\ndef test_normalize_with_env_and_user(tmp_path, monkeypatch):\n    # Set an environment variable and a fake home directory\n    monkeypatch.setenv(\"TEST_VAR\", \"folder\")\n    fake_home = tmp_path / \"home_user\"\n    fake_home.mkdir()\n    monkeypatch.setenv(\"HOME\", str(fake_home))\n    # Path using ~ and env var\n    raw = \"~/subdir/$TEST_VAR/file.txt\"\n    expected = fake_home / \"subdir\" / \"folder\" / \"file.txt\"\n    result = normalize_path(raw)\n    assert result == expected\n    assert isinstance(result, Path)\n\ndef test_normalize_bytes_and_relative(tmp_path):\n    # Create a relative path that is not absolute\n    rel = Path(\"relative\") / \"path\"\n    rel.mkdir(parents=True)\n    # Convert to bytes using filesystem encoding\n    raw_bytes = rel.as_posix().encode(sys.getfilesystemencoding())\n    # Normalize should prepend cwd and return a Path\n    result = normalize_path(raw_bytes)\n    expected = Path(os.getcwd()) / rel\n    assert result == expected\n    assert isinstance(result, Path)\n```",
+        "reasoning": "We need 3 test functions. Test normal path, boundary like relative, env var, error? maybe passing bytes. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.6947253,
+    "prompt_tokens": 845,
+    "prompt_time": 0.030168078,
+    "completion_tokens": 406,
+    "completion_time": 0.662328854,
+    "total_tokens": 1251,
+    "total_time": 0.692496932,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 29
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se6c4be6p8bvzb0sr9d2mq",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import normalize_path\n\ndef test_normalize_absolute_path(tmp_path):\n    # Create a nested directory structure\n    nested = tmp_path / \"a\" / \"b\" / \"c\"\n    nested.mkdir(parents=True)\n    # Path with redundant separators and up-level references\n    raw = str(nested) + \"/../d/./e\"\n    expected = Path(tmp_path) / \"a\" / \"b\" / \"d\" / \"e\"\n    result = normalize_path(raw)\n    assert result == expected\n    assert isinstance(result, Path)\n\ndef test_normalize_with_env_and_user(tmp_path, monkeypatch):\n    # Set an environment variable and a fake home directory\n    monkeypatch.setenv(\"TEST_VAR\", \"folder\")\n    fake_home = tmp_path / \"home_user\"\n    fake_home.mkdir()\n    monkeypatch.setenv(\"HOME\", str(fake_home))\n    # Path using ~ and env var\n    raw = \"~/subdir/$TEST_VAR/file.txt\"\n    expected = fake_home / \"subdir\" / \"folder\" / \"file.txt\"\n    result = normalize_path(raw)\n    assert result == expected\n    assert isinstance(result, Path)\n\ndef test_normalize_bytes_and_relative(tmp_path):\n    # Create a relative path that is not absolute\n    rel = Path(\"relative\") / \"path\"\n    rel.mkdir(parents=True)\n    # Convert to bytes using filesystem encoding\n    raw_bytes = rel.as_posix().encode(sys.getfilesystemencoding())\n    # Normalize should prepend cwd and return a Path\n    result = normalize_path(raw_bytes)\n    expected = Path(os.getcwd()) / rel\n    assert result == expected\n    assert isinstance(result, Path)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.6656292210100219
+}

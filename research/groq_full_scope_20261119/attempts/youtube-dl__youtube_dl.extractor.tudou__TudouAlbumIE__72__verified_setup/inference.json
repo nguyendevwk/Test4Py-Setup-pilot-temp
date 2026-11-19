@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-352c172f-cf1b-4de6-b697-6c28775f2144",
+  "object": "chat.completion",
+  "created": 1795077179,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.extractor.tudou import TudouAlbumIE\n\n# Helper to create a fake downloader that records calls\nclass FakeDownloader:\n    def __init__(self, json_data):\n        self.json_data = json_data\n        self.called_with = []\n\n    def _download_json(self, url, video_id):\n        self.called_with.append((url, video_id))\n        return self.json_data\n\ndef test_tudou_album_normal_extraction(tmp_path):\n    # Arrange: fake JSON with two items\n    fake_json = {\n        'items': [\n            {'icode': 'abc123', 'kw': 'video1'},\n            {'icode': 'def456', 'kw': 'video2'},\n        ]\n    }\n    downloader = FakeDownloader(fake_json)\n    ie = TudouAlbumIE(downloader=downloader)\n\n    # Act\n    result = ie.extract('http://www.tudou.com/albumplay/abc123def45.html')\n\n    # Assert\n    assert result['id'] == 'abc123def45'\n    assert result['entries'] == [\n        {'url': 'http://www.tudou.com/programs/view/abc123', 'ie_key': 'Tudou', 'id': 'abc123', 'title': 'video1'},\n        {'url': 'http://www.tudou.com/programs/view/def456', 'ie_key': 'Tudou', 'id': 'def456', 'title': 'video2'},\n    ]\n    # Ensure the downloader was called with the correct URL\n    assert downloader.called_with == [('http://www.tudou.com/tvp/alist.action?acode=abc123def45', 'abc123def45')]\n\ndef test_tudou_album_empty_items(tmp_path):\n    # Arrange: fake JSON with empty items list\n    fake_json = {'items': []}\n    downloader = FakeDownloader(fake_json)\n    ie = TudouAlbumIE(downloader=downloader)\n\n    # Act\n    result = ie.extract('http://www.tudou.com/albumcover/xyz98765432.html')\n\n    # Assert\n    assert result['id'] == 'xyz98765432'\n    assert result['entries'] == []\n    assert downloader.called_with == [('http://www.tudou.com/tvp/alist.action?acode=xyz98765432', 'xyz98765432')]\n\ndef test_tudou_album_missing_items_key(tmp_path):\n    # Arrange: fake JSON missing 'items' key\n    fake_json = {'no_items': []}\n    downloader = FakeDownloader(fake_json)\n    ie = TudouAlbumIE(downloader=downloader)\n\n    # Act & Assert: should raise a KeyError when accessing 'items'\n    with pytest.raises(KeyError):\n        ie.extract('http://www.tudou.com/albumplay/12345678901.html')\n```",
+        "reasoning": "We need to write tests for TudouAlbumIE. We cannot access network. But we can simulate by monkeypatching _download_json to return dummy data. Use tmp_path? Not needed. Just test extraction logic. Use pytest. Provide three test functions: normal extraction, boundary (empty items), error (missing items key). Use pytest.raises for error. Use real class. Let's import."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05458654,
+    "prompt_tokens": 518,
+    "prompt_time": 0.026384219,
+    "completion_tokens": 691,
+    "completion_time": 0.862881327,
+    "total_tokens": 1209,
+    "total_time": 0.889265546,
+    "completion_tokens_details": {
+      "reasoning_tokens": 80
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sf00syesy8ngz5dkryg73m",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.extractor.tudou import TudouAlbumIE\n\n# Helper to create a fake downloader that records calls\nclass FakeDownloader:\n    def __init__(self, json_data):\n        self.json_data = json_data\n        self.called_with = []\n\n    def _download_json(self, url, video_id):\n        self.called_with.append((url, video_id))\n        return self.json_data\n\ndef test_tudou_album_normal_extraction(tmp_path):\n    # Arrange: fake JSON with two items\n    fake_json = {\n        'items': [\n            {'icode': 'abc123', 'kw': 'video1'},\n            {'icode': 'def456', 'kw': 'video2'},\n        ]\n    }\n    downloader = FakeDownloader(fake_json)\n    ie = TudouAlbumIE(downloader=downloader)\n\n    # Act\n    result = ie.extract('http://www.tudou.com/albumplay/abc123def45.html')\n\n    # Assert\n    assert result['id'] == 'abc123def45'\n    assert result['entries'] == [\n        {'url': 'http://www.tudou.com/programs/view/abc123', 'ie_key': 'Tudou', 'id': 'abc123', 'title': 'video1'},\n        {'url': 'http://www.tudou.com/programs/view/def456', 'ie_key': 'Tudou', 'id': 'def456', 'title': 'video2'},\n    ]\n    # Ensure the downloader was called with the correct URL\n    assert downloader.called_with == [('http://www.tudou.com/tvp/alist.action?acode=abc123def45', 'abc123def45')]\n\ndef test_tudou_album_empty_items(tmp_path):\n    # Arrange: fake JSON with empty items list\n    fake_json = {'items': []}\n    downloader = FakeDownloader(fake_json)\n    ie = TudouAlbumIE(downloader=downloader)\n\n    # Act\n    result = ie.extract('http://www.tudou.com/albumcover/xyz98765432.html')\n\n    # Assert\n    assert result['id'] == 'xyz98765432'\n    assert result['entries'] == []\n    assert downloader.called_with == [('http://www.tudou.com/tvp/alist.action?acode=xyz98765432', 'xyz98765432')]\n\ndef test_tudou_album_missing_items_key(tmp_path):\n    # Arrange: fake JSON missing 'items' key\n    fake_json = {'no_items': []}\n    downloader = FakeDownloader(fake_json)\n    ie = TudouAlbumIE(downloader=downloader)\n\n    # Act & Assert: should raise a KeyError when accessing 'items'\n    with pytest.raises(KeyError):\n        ie.extract('http://www.tudou.com/albumplay/12345678901.html')\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2938210719730705
+}

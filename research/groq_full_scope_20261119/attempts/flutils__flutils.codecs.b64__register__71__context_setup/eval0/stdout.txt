@@ -1,0 +1,122 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_b64_encode_and_decode_roundtrip _____________________
+
+text = b'Hello, world! 123', errors = 'strict'
+
+    def encode(
+            text: _STR,
+            errors: _STR = 'strict'
+    ) -> Tuple[bytes, int]:
+        """Convert the given ``text`` of base64 characters into the base64
+        decoded bytes.
+    
+        Args:
+            text (str): The string input.  The given string input can span
+                across many lines and be indented any number of spaces.
+            errors (str): Not used.  This argument exists to meet the
+                interface requirements.  Any value given to this argument
+                is ignored.
+    
+        Returns:
+            bytes: The given ``text`` converted into base64 bytes.
+            int: The length of the returned bytes.
+        """
+        # Convert the given 'text', that are of type UserString into a str.
+        text_input = str(text)
+    
+        # Cleanup whitespace.
+        text_str = text_input.strip()
+        text_str = '\n'.join(
+            filter(
+                lambda x: len(x) > 0,
+                map(lambda x: x.strip(), text_str.strip().splitlines())
+            )
+        )
+    
+        # Convert the cleaned text into utf8 bytes
+        text_bytes = text_str.encode('utf-8')
+        try:
+>           out = base64.decodebytes(text_bytes)
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/b64.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = b"b'Hello, world! 123'"
+
+    def decodebytes(s):
+        """Decode a bytestring of base-64 data into a bytes object."""
+        _input_type_check(s)
+>       return binascii.a2b_base64(s)
+E       binascii.Error: Incorrect padding
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/base64.py:562: Error
+
+During handling of the above exception, another exception occurred:
+
+    def test_b64_encode_and_decode_roundtrip():
+        # Register the codec and verify it is available
+        register()
+        codec_info = codecs.lookup(NAME)
+        assert codec_info.name == NAME
+        # Original data
+        original = b"Hello, world! 123"
+        # Encode using the codec
+>       encoded_str, consumed = codec_info.encode(original)
+
+test_generated.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = b'Hello, world! 123', errors = 'strict'
+
+    def encode(
+            text: _STR,
+            errors: _STR = 'strict'
+    ) -> Tuple[bytes, int]:
+        """Convert the given ``text`` of base64 characters into the base64
+        decoded bytes.
+    
+        Args:
+            text (str): The string input.  The given string input can span
+                across many lines and be indented any number of spaces.
+            errors (str): Not used.  This argument exists to meet the
+                interface requirements.  Any value given to this argument
+                is ignored.
+    
+        Returns:
+            bytes: The given ``text`` converted into base64 bytes.
+            int: The length of the returned bytes.
+        """
+        # Convert the given 'text', that are of type UserString into a str.
+        text_input = str(text)
+    
+        # Cleanup whitespace.
+        text_str = text_input.strip()
+        text_str = '\n'.join(
+            filter(
+                lambda x: len(x) > 0,
+                map(lambda x: x.strip(), text_str.strip().splitlines())
+            )
+        )
+    
+        # Convert the cleaned text into utf8 bytes
+        text_bytes = text_str.encode('utf-8')
+        try:
+            out = base64.decodebytes(text_bytes)
+        except Error as e:
+>           raise UnicodeEncodeError(
+                'b64',
+                text_input,
+                0,
+                len(text),
+                (
+                    f'{text_str!r} is not a proper bas64 character string: '
+                    f'{e}'
+                )
+            )
+E           UnicodeEncodeError: 'b64' codec can't encode characters in position 0-16: "b'Hello, world! 123'" is not a proper bas64 character string: Incorrect padding
+
+../../../../groq_codamosa_extension_20261119/environments/flutils/venv/lib/python3.10/site-packages/flutils/codecs/b64.py:52: UnicodeEncodeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_b64_encode_and_decode_roundtrip - UnicodeEncod...
+1 failed, 2 passed in 0.15s

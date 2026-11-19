@@ -1,0 +1,55 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_replace_name_and_attribute ________________________
+
+    def test_replace_name_and_attribute():
+        # Original code with a variable and an attribute
+        src = "x = y\nobj.attr = z"
+        tree = typed_ast.parse(src)
+    
+        # Mapping: replace 'y' with 'y_unique', 'z' with 'z_unique', and 'attr' with 'attr_unique'
+        mapping = {"y": "y_unique", "z": "z_unique", "attr": "attr_unique"}
+        VariablesReplacer.replace(tree, mapping)
+    
+        # Verify that the Name node 'y' was replaced
+        assign = tree.body[0]
+        assert isinstance(assign, typed_ast.Assign)
+        assert isinstance(assign.value, typed_ast.Name)
+        assert assign.value.id == "y_unique"
+    
+        # Verify that the Attribute node 'attr' was replaced
+        assign2 = tree.body[1]
+        assert isinstance(assign2, typed_ast.Assign)
+>       assert isinstance(assign2.value, typed_ast.Attribute)
+E       AssertionError: assert False
+E        +  where False = isinstance(<typed_ast._ast3.Name object at 0x7f1e8a9c5bd0>, <class 'typed_ast._ast3.Attribute'>)
+E        +    where <typed_ast._ast3.Name object at 0x7f1e8a9c5bd0> = <typed_ast._ast3.Assign object at 0x7f1e8a9c75b0>.value
+E        +    and   <class 'typed_ast._ast3.Attribute'> = typed_ast.Attribute
+
+test_generated.py:24: AssertionError
+____________________ test_no_replacement_for_unmapped_names ____________________
+
+    def test_no_replacement_for_unmapped_names():
+        # Original code with names that are not in the mapping
+        src = "a = b\nc.d = e"
+        tree = typed_ast.parse(src)
+    
+        # Empty mapping: nothing should change
+        mapping = {}
+        VariablesReplacer.replace(tree, mapping)
+    
+        # Verify that names remain unchanged
+        assign1 = tree.body[0]
+        assert isinstance(assign1, typed_ast.Assign)
+        assert assign1.value.id == "b"
+    
+        assign2 = tree.body[1]
+        assert isinstance(assign2, typed_ast.Assign)
+>       assert assign2.value.attr == "d"
+E       AttributeError: 'Name' object has no attribute 'attr'
+
+test_generated.py:68: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_replace_name_and_attribute - AssertionError: a...
+FAILED test_generated.py::test_no_replacement_for_unmapped_names - AttributeE...
+2 failed, 1 passed in 0.13s

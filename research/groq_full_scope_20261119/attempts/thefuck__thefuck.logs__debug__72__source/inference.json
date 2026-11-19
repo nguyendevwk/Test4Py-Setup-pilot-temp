@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-04f4a4e0-add2-4b32-9529-7689d988c0fd",
+  "object": "chat.completion",
+  "created": 1795078991,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport io\nimport contextlib\nimport pytest\nfrom thefuck.logs import debug\nfrom thefuck import conf\n\n# Helper to capture stderr\n@contextlib.contextmanager\ndef capture_stderr():\n    old_stderr = sys.stderr\n    sys.stderr = io.StringIO()\n    try:\n        yield sys.stderr\n    finally:\n        sys.stderr = old_stderr\n\ndef test_debug_enabled_writes_formatted_message(tmp_path):\n    # Enable debug mode\n    conf.settings.debug = True\n    msg = \"Test message\"\n    with capture_stderr() as err:\n        debug(msg)\n    output = err.getvalue()\n    # The output should contain the message and the ANSI reset code\n    assert msg in output\n    assert \"DEBUG:\" in output\n    assert \"\\x1b[0m\" in output  # reset code from colorama\n\ndef test_debug_disabled_does_not_write(tmp_path):\n    # Disable debug mode\n    conf.settings.debug = False\n    msg = \"Should not appear\"\n    with capture_stderr() as err:\n        debug(msg)\n    output = err.getvalue()\n    # No output should be produced\n    assert output == \"\"\n\ndef test_debug_with_unicode_message(tmp_path):\n    # Enable debug mode\n    conf.settings.debug = True\n    msg = \"Unicode test: 測試\"\n    with capture_stderr() as err:\n        debug(msg)\n    output = err.getvalue()\n    # Ensure unicode characters are preserved\n    assert \"測試\" in output\n    assert msg in output\n```",
+        "reasoning": "We need to test debug function. It writes to stderr if settings.debug True. We can patch settings.debug. Use tmp_path? Not needed. Just capture stderr. Three tests: normal when debug True writes formatted string; when False writes nothing; boundary maybe msg with unicode. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.113896622,
+    "prompt_tokens": 312,
+    "prompt_time": 0.023948257,
+    "completion_tokens": 391,
+    "completion_time": 0.425624676,
+    "total_tokens": 703,
+    "total_time": 0.449572933,
+    "completion_tokens_details": {
+      "reasoning_tokens": 59
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgqbe0ea8bc1atf6mvq11d",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport io\nimport contextlib\nimport pytest\nfrom thefuck.logs import debug\nfrom thefuck import conf\n\n# Helper to capture stderr\n@contextlib.contextmanager\ndef capture_stderr():\n    old_stderr = sys.stderr\n    sys.stderr = io.StringIO()\n    try:\n        yield sys.stderr\n    finally:\n        sys.stderr = old_stderr\n\ndef test_debug_enabled_writes_formatted_message(tmp_path):\n    # Enable debug mode\n    conf.settings.debug = True\n    msg = \"Test message\"\n    with capture_stderr() as err:\n        debug(msg)\n    output = err.getvalue()\n    # The output should contain the message and the ANSI reset code\n    assert msg in output\n    assert \"DEBUG:\" in output\n    assert \"\\x1b[0m\" in output  # reset code from colorama\n\ndef test_debug_disabled_does_not_write(tmp_path):\n    # Disable debug mode\n    conf.settings.debug = False\n    msg = \"Should not appear\"\n    with capture_stderr() as err:\n        debug(msg)\n    output = err.getvalue()\n    # No output should be produced\n    assert output == \"\"\n\ndef test_debug_with_unicode_message(tmp_path):\n    # Enable debug mode\n    conf.settings.debug = True\n    msg = \"Unicode test: 測試\"\n    with capture_stderr() as err:\n        debug(msg)\n    output = err.getvalue()\n    # Ensure unicode characters are preserved\n    assert \"測試\" in output\n    assert msg in output\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9314161439542659
+}

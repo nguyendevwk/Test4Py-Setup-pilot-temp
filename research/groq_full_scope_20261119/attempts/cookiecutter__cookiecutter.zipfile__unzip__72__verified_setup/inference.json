@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-41685113-6907-49f4-8e70-4e4c636b05c8",
+  "object": "chat.completion",
+  "created": 1795076107,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport zipfile\nimport pytest\nfrom pathlib import Path\nfrom cookiecutter.zipfile import unzip\nfrom cookiecutter.exceptions import InvalidZipRepository\n\ndef test_unzip_local_zip(tmp_path):\n    # Create a simple zip file with a top‑level directory\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    (repo_dir / \"file.txt\").write_text(\"content\")\n    zip_path = tmp_path / \"repo.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as z:\n        z.write(repo_dir / \"file.txt\", arcname=\"repo/file.txt\")\n    # Unzip\n    result = unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path, no_input=True)\n    # Verify the extracted directory exists and contains the file\n    extracted = Path(result)\n    assert extracted.is_dir()\n    assert (extracted / \"file.txt\").read_text() == \"content\"\n\ndef test_unzip_empty_zip_raises(tmp_path):\n    # Create an empty zip file\n    zip_path = tmp_path / \"empty.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as z:\n        pass\n    # Unzip should raise InvalidZipRepository\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path, no_input=True)\n    assert \"empty\" in str(excinfo.value)\n\ndef test_unzip_password_protected_no_input_raises(tmp_path):\n    # Create a password‑protected zip file\n    zip_path = tmp_path / \"protected.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as z:\n        z.writestr(\"protected/file.txt\", b\"secret\", compress_type=zipfile.ZIP_DEFLATED, pwd=b\"mypwd\")\n    # Unzip with no_input=True should raise InvalidZipRepository\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path, no_input=True)\n    assert \"Unable to unlock password protected repository\" in str(excinfo.value)\n```",
+        "reasoning": "We need 3 tests: normal unzip local zip, boundary empty zip raises, error password protected zip with no password and no_input raises. Use tmp_path. Create zip files. Use requests? For local zip, is_url False. For empty zip, create zip with no files. For password protected, create zip with password using zipfile.ZipFile with pwd? Python's zipfile supports setting password when writing via setpassword? Actually ZipFile.write doesn't support password. Use zipfile.ZipFile with 'w' and setpwd? We can create a zip with a file and set password via ZipFile.setpassword? Actually to create password-protected zip, use ZipFile.write and then set password? In Python 3.7+, you can use ZipFile.setpassword for extraction, but for writing, you can use ZipFile.writestr with pwd? Use ZipFile.writestr(name, data, compress_type, pwd). So create zip with one file and pwd=b'pass'. Then test unzip with no password and no_input True should raise InvalidZipRepository. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05216151,
+    "prompt_tokens": 1221,
+    "prompt_time": 0.074421989,
+    "completion_tokens": 680,
+    "completion_time": 0.763778905,
+    "total_tokens": 1901,
+    "total_time": 0.838200894,
+    "completion_tokens_details": {
+      "reasoning_tokens": 221
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sdza8ney7a3v5v9md4a52p",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport zipfile\nimport pytest\nfrom pathlib import Path\nfrom cookiecutter.zipfile import unzip\nfrom cookiecutter.exceptions import InvalidZipRepository\n\ndef test_unzip_local_zip(tmp_path):\n    # Create a simple zip file with a top‑level directory\n    repo_dir = tmp_path / \"repo\"\n    repo_dir.mkdir()\n    (repo_dir / \"file.txt\").write_text(\"content\")\n    zip_path = tmp_path / \"repo.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as z:\n        z.write(repo_dir / \"file.txt\", arcname=\"repo/file.txt\")\n    # Unzip\n    result = unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path, no_input=True)\n    # Verify the extracted directory exists and contains the file\n    extracted = Path(result)\n    assert extracted.is_dir()\n    assert (extracted / \"file.txt\").read_text() == \"content\"\n\ndef test_unzip_empty_zip_raises(tmp_path):\n    # Create an empty zip file\n    zip_path = tmp_path / \"empty.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as z:\n        pass\n    # Unzip should raise InvalidZipRepository\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path, no_input=True)\n    assert \"empty\" in str(excinfo.value)\n\ndef test_unzip_password_protected_no_input_raises(tmp_path):\n    # Create a password‑protected zip file\n    zip_path = tmp_path / \"protected.zip\"\n    with zipfile.ZipFile(zip_path, \"w\") as z:\n        z.writestr(\"protected/file.txt\", b\"secret\", compress_type=zipfile.ZIP_DEFLATED, pwd=b\"mypwd\")\n    # Unzip with no_input=True should raise InvalidZipRepository\n    with pytest.raises(InvalidZipRepository) as excinfo:\n        unzip(str(zip_path), is_url=False, clone_to_dir=tmp_path, no_input=True)\n    assert \"Unable to unlock password protected repository\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2009226730442606
+}

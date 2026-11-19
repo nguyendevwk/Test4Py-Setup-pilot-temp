@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-5f3fdc7c-e6cb-4eac-811f-d0804fe6dbf2",
+  "object": "chat.completion",
+  "created": 1795078899,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom decimal import Decimal\n\nfrom pypara.exchange import FXRate\nfrom pypara.currencies import Currencies\nfrom pypara.commons.numbers import ONE, ZERO\n\n\ndef test_fxrate_of_normal_and_invert(tmp_path):\n    \"\"\"Test normal creation via `of` and the inversion operator.\"\"\"\n    eur = Currencies[\"EUR\"]\n    usd = Currencies[\"USD\"]\n    today = datetime.date.today()\n    rate = FXRate.of(eur, usd, today, Decimal(\"2.5\"))\n    assert isinstance(rate, FXRate)\n    assert rate.ccy1 == eur\n    assert rate.ccy2 == usd\n    assert rate.date == today\n    assert rate.value == Decimal(\"2.5\")\n\n    inverted = ~rate\n    assert inverted.ccy1 == usd\n    assert inverted.ccy2 == eur\n    assert inverted.date == today\n    # Inversion should be reciprocal\n    assert inverted.value == Decimal(\"2.5\") ** -1\n    # Inverting twice returns the original rate\n    assert ~inverted == rate\n\n\ndef test_fxrate_of_boundary_and_self_rate(tmp_path):\n    \"\"\"Test boundary conditions: zero value, negative value, same‑currency with value 1.\"\"\"\n    eur = Currencies[\"EUR\"]\n    today = datetime.date.today()\n\n    # Value must be > 0\n    with pytest.raises(ValueError, match=\"FX rate value can not be equal to or less than `zero`\"):\n        FXRate.of(eur, Currencies[\"USD\"], today, ZERO)\n\n    with pytest.raises(ValueError, match=\"FX rate value can not be equal to or less than `zero`\"):\n        FXRate.of(eur, Currencies[\"USD\"], today, Decimal(\"-1\"))\n\n    # Same‑currency rate must be 1\n    with pytest.raises(ValueError, match=\"FX rate to the same currency must be `one`\"):\n        FXRate.of(eur, eur, today, Decimal(\"1.1\"))\n\n    # Valid same‑currency rate of 1\n    same_rate = FXRate.of(eur, eur, today, ONE)\n    assert same_rate.ccy1 == same_rate.ccy2 == eur\n    assert same_rate.value == ONE\n\n\ndef test_fxrate_of_invalid_types(tmp_path):\n    \"\"\"Test that passing wrong types raises ValueError.\"\"\"\n    eur = Currencies[\"EUR\"]\n    today = datetime.date.today()\n\n    # Wrong type for ccy1\n    with pytest.raises(ValueError, match=\"CCY/1 must be of type `Currency`\"):\n        FXRate.of(\"EUR\", Currencies[\"USD\"], today, Decimal(\"1.2\"))\n\n    # Wrong type for ccy2\n    with pytest.raises(ValueError, match=\"CCY/2 must be of type `Currency`\"):\n        FXRate.of(eur, \"USD\", today, Decimal(\"1.2\"))\n\n    # Wrong type for date\n    with pytest.raises(ValueError, match=\"FX rate date must be of type `date`\"):\n        FXRate.of(eur, Currencies[\"USD\"], \"2024-01-01\", Decimal(\"1.2\"))\n\n    # Wrong type for value\n    with pytest.raises(ValueError, match=\"FX rate value must be of type `Decimal`\"):\n        FXRate.of(eur, Currencies[\"USD\"], today, 1.2)\n```",
+        "reasoning": "Need tests for FXRate.of normal, boundary, error. Use Currency from pypara.currencies. Let's import. Use Decimal. Test inversion."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052622912,
+    "prompt_tokens": 1206,
+    "prompt_time": 0.029849038,
+    "completion_tokens": 737,
+    "completion_time": 0.95107746,
+    "total_tokens": 1943,
+    "total_time": 0.980926498,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 30
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgmh14em4aqw6vdfd03z8y",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom decimal import Decimal\n\nfrom pypara.exchange import FXRate\nfrom pypara.currencies import Currencies\nfrom pypara.commons.numbers import ONE, ZERO\n\n\ndef test_fxrate_of_normal_and_invert(tmp_path):\n    \"\"\"Test normal creation via `of` and the inversion operator.\"\"\"\n    eur = Currencies[\"EUR\"]\n    usd = Currencies[\"USD\"]\n    today = datetime.date.today()\n    rate = FXRate.of(eur, usd, today, Decimal(\"2.5\"))\n    assert isinstance(rate, FXRate)\n    assert rate.ccy1 == eur\n    assert rate.ccy2 == usd\n    assert rate.date == today\n    assert rate.value == Decimal(\"2.5\")\n\n    inverted = ~rate\n    assert inverted.ccy1 == usd\n    assert inverted.ccy2 == eur\n    assert inverted.date == today\n    # Inversion should be reciprocal\n    assert inverted.value == Decimal(\"2.5\") ** -1\n    # Inverting twice returns the original rate\n    assert ~inverted == rate\n\n\ndef test_fxrate_of_boundary_and_self_rate(tmp_path):\n    \"\"\"Test boundary conditions: zero value, negative value, same‑currency with value 1.\"\"\"\n    eur = Currencies[\"EUR\"]\n    today = datetime.date.today()\n\n    # Value must be > 0\n    with pytest.raises(ValueError, match=\"FX rate value can not be equal to or less than `zero`\"):\n        FXRate.of(eur, Currencies[\"USD\"], today, ZERO)\n\n    with pytest.raises(ValueError, match=\"FX rate value can not be equal to or less than `zero`\"):\n        FXRate.of(eur, Currencies[\"USD\"], today, Decimal(\"-1\"))\n\n    # Same‑currency rate must be 1\n    with pytest.raises(ValueError, match=\"FX rate to the same currency must be `one`\"):\n        FXRate.of(eur, eur, today, Decimal(\"1.1\"))\n\n    # Valid same‑currency rate of 1\n    same_rate = FXRate.of(eur, eur, today, ONE)\n    assert same_rate.ccy1 == same_rate.ccy2 == eur\n    assert same_rate.value == ONE\n\n\ndef test_fxrate_of_invalid_types(tmp_path):\n    \"\"\"Test that passing wrong types raises ValueError.\"\"\"\n    eur = Currencies[\"EUR\"]\n    today = datetime.date.today()\n\n    # Wrong type for ccy1\n    with pytest.raises(ValueError, match=\"CCY/1 must be of type `Currency`\"):\n        FXRate.of(\"EUR\", Currencies[\"USD\"], today, Decimal(\"1.2\"))\n\n    # Wrong type for ccy2\n    with pytest.raises(ValueError, match=\"CCY/2 must be of type `Currency`\"):\n        FXRate.of(eur, \"USD\", today, Decimal(\"1.2\"))\n\n    # Wrong type for date\n    with pytest.raises(ValueError, match=\"FX rate date must be of type `date`\"):\n        FXRate.of(eur, Currencies[\"USD\"], \"2024-01-01\", Decimal(\"1.2\"))\n\n    # Wrong type for value\n    with pytest.raises(ValueError, match=\"FX rate value must be of type `Decimal`\"):\n        FXRate.of(eur, Currencies[\"USD\"], today, 1.2)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4163925860193558
+}

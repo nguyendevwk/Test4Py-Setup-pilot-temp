@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-a018186e-5363-495c-bc77-3884554de25c",
+  "object": "chat.completion",
+  "created": 1795076126,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport time\nimport pytest\nfrom flutes.timing import work_in_progress\n\ndef test_work_in_progress_context_prints_and_times(tmp_path, capsys):\n    \"\"\"Verify that the context manager prints the description and elapsed time.\"\"\"\n    start = time.time()\n    with work_in_progress(\"Test block\"):\n        time.sleep(0.1)\n    end = time.time()\n    captured = capsys.readouterr()\n    # The output should start with the description and end with \"done.\"\n    assert captured.out.startswith(\"Test block... \")\n    assert captured.out.strip().endswith(\"done.\")\n    # The reported time should be close to the actual sleep duration\n    reported_time = float(captured.out.split(\"(\")[-1].rstrip(\"s)\"))\n    assert 0.09 <= reported_time <= 0.2\n    # The real elapsed time should be at least as long as the reported time\n    assert (end - start) >= reported_time\n\ndef test_work_in_progress_decorator_prints_and_times(capsys):\n    \"\"\"Verify that the decorator works and prints timing information.\"\"\"\n    @work_in_progress(\"Decorated function\")\n    def dummy():\n        time.sleep(0.05)\n    dummy()\n    captured = capsys.readouterr()\n    assert captured.out.startswith(\"Decorated function... \")\n    assert captured.out.strip().endswith(\"done.\")\n    reported_time = float(captured.out.split(\"(\")[-1].rstrip(\"s)\"))\n    assert 0.04 <= reported_time <= 0.1\n\ndef test_work_in_progress_exception_handling(capsys):\n    \"\"\"Verify that the context manager still prints timing when an exception occurs.\"\"\"\n    try:\n        with work_in_progress(\"Error block\"):\n            raise ValueError(\"test error\")\n    except ValueError:\n        pass\n    captured = capsys.readouterr()\n    assert captured.out.startswith(\"Error block... \")\n    assert captured.out.strip().endswith(\"done.\")\n    reported_time = float(captured.out.split(\"(\")[-1].rstrip(\"s)\"))\n    assert reported_time >= 0.0\n```",
+        "reasoning": "We need to test work_in_progress context manager. It's a generator function used as context manager. We can test that it prints correct output and measures time. Use capsys. Three tests: normal block, function decorator? Actually it's used as decorator too. But we can test decorator by defining a function that sleeps. Use time.sleep small. Test that output contains description and time. Also test that it yields control. Third test error behavior: if exception inside block, it still prints done? It will still print after yield? If exception occurs, generator will not resume? Actually contextmanager will propagate exception after yield? It will still execute after yield? In contextmanager, if exception occurs inside block, the generator will receive exception and can handle. But here no exception handling, so it will propagate and not print? Let's test that it prints done even if exception? Actually contextmanager will call generator's __exit__ which will resume generator after yield, but if exception, it will raise inside generator? I think it will still resume and print. Let's test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052779589,
+    "prompt_tokens": 427,
+    "prompt_time": 0.02263105,
+    "completion_tokens": 653,
+    "completion_time": 0.735860999,
+    "total_tokens": 1080,
+    "total_time": 0.758492049,
+    "completion_tokens_details": {
+      "reasoning_tokens": 213
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sdzwrzesnsyskcyyg0zw36",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport time\nimport pytest\nfrom flutes.timing import work_in_progress\n\ndef test_work_in_progress_context_prints_and_times(tmp_path, capsys):\n    \"\"\"Verify that the context manager prints the description and elapsed time.\"\"\"\n    start = time.time()\n    with work_in_progress(\"Test block\"):\n        time.sleep(0.1)\n    end = time.time()\n    captured = capsys.readouterr()\n    # The output should start with the description and end with \"done.\"\n    assert captured.out.startswith(\"Test block... \")\n    assert captured.out.strip().endswith(\"done.\")\n    # The reported time should be close to the actual sleep duration\n    reported_time = float(captured.out.split(\"(\")[-1].rstrip(\"s)\"))\n    assert 0.09 <= reported_time <= 0.2\n    # The real elapsed time should be at least as long as the reported time\n    assert (end - start) >= reported_time\n\ndef test_work_in_progress_decorator_prints_and_times(capsys):\n    \"\"\"Verify that the decorator works and prints timing information.\"\"\"\n    @work_in_progress(\"Decorated function\")\n    def dummy():\n        time.sleep(0.05)\n    dummy()\n    captured = capsys.readouterr()\n    assert captured.out.startswith(\"Decorated function... \")\n    assert captured.out.strip().endswith(\"done.\")\n    reported_time = float(captured.out.split(\"(\")[-1].rstrip(\"s)\"))\n    assert 0.04 <= reported_time <= 0.1\n\ndef test_work_in_progress_exception_handling(capsys):\n    \"\"\"Verify that the context manager still prints timing when an exception occurs.\"\"\"\n    try:\n        with work_in_progress(\"Error block\"):\n            raise ValueError(\"test error\")\n    except ValueError:\n        pass\n    captured = capsys.readouterr()\n    assert captured.out.startswith(\"Error block... \")\n    assert captured.out.strip().endswith(\"done.\")\n    reported_time = float(captured.out.split(\"(\")[-1].rstrip(\"s)\"))\n    assert reported_time >= 0.0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1056928320322186
+}

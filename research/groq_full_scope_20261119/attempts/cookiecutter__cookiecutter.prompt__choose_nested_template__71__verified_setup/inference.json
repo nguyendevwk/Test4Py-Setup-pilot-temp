@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-d2427243-a001-4436-9ea7-eb9672395228",
+  "object": "chat.completion",
+  "created": 1795077705,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport os\nimport re\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\nfrom cookiecutter.prompt import choose_nested_template\n\n\ndef test_choose_nested_template_new_style(tmp_path):\n    \"\"\"Test new style template selection with a config dict.\"\"\"\n    # Create a fake template file in the repo\n    template_file = tmp_path / \"nested\" / \"template1\"\n    template_file.parent.mkdir(parents=True)\n    template_file.touch()\n\n    context = {\n        \"cookiecutter\": {\n            \"__prompts__\": {},\n            \"templates\": {\n                \"option1\": {\"path\": \"nested/template1\"},\n                \"option2\": {\"path\": \"nested/template2\"},\n            },\n        }\n    }\n\n    # No input: should pick the first key in the dict\n    result = choose_nested_template(context, tmp_path, no_input=True)\n    expected = str((tmp_path / \"nested/template1\").resolve())\n    assert result == expected\n    assert Path(result).exists()\n\n\ndef test_choose_nested_template_old_style(tmp_path):\n    \"\"\"Test old style template selection with a list of strings.\"\"\"\n    # Create a fake template file in the repo\n    template_file = tmp_path / \"nested\" / \"template2\"\n    template_file.parent.mkdir(parents=True)\n    template_file.touch()\n\n    context = {\n        \"cookiecutter\": {\n            \"__prompts__\": {},\n            \"template\": [\n                \"optionA (nested/template2)\",\n                \"optionB (nested/template3)\",\n            ],\n        }\n    }\n\n    # No input: should pick the first option\n    result = choose_nested_template(context, tmp_path, no_input=True)\n    expected = str((tmp_path / \"nested/template2\").resolve())\n    assert result == expected\n    assert Path(result).exists()\n\n\ndef test_choose_nested_template_illegal_path(tmp_path):\n    \"\"\"Test that an absolute template path raises ValueError.\"\"\"\n    # Create a fake template file in the repo\n    template_file = tmp_path / \"nested\" / \"template1\"\n    template_file.parent.mkdir(parents=True)\n    template_file.touch()\n\n    context = {\n        \"cookiecutter\": {\n            \"__prompts__\": {},\n            \"templates\": {\n                \"option1\": {\"path\": str(template_file.resolve())},  # absolute path\n            },\n        }\n    }\n\n    with pytest.raises(ValueError, match=\"Illegal template path\"):\n        choose_nested_template(context, tmp_path, no_input=True)\n```",
+        "reasoning": "Need tests for choose_nested_template. We can create context dict with cookiecutter dict. Need to test normal selection, boundary, error. Use tmp_path. We need to simulate prompts? no_input True to avoid prompting. For old style, config list of strings like \"template1 (path1)\". Use regex. Also test error when template path absolute. Provide repo_dir. Let's write three tests: 1) new style with config dict and no_input True. 2) old style list with no_input True. 3) error when template path absolute. Use tmp_path to create repo_dir and template files. Ensure returned path string."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052145558,
+    "prompt_tokens": 656,
+    "prompt_time": 0.049200649,
+    "completion_tokens": 650,
+    "completion_time": 0.709233146,
+    "total_tokens": 1306,
+    "total_time": 0.758433795,
+    "completion_tokens_details": {
+      "reasoning_tokens": 132
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfg2xaeh68agw9cqzyr42r",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport os\nimport re\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\nfrom cookiecutter.prompt import choose_nested_template\n\n\ndef test_choose_nested_template_new_style(tmp_path):\n    \"\"\"Test new style template selection with a config dict.\"\"\"\n    # Create a fake template file in the repo\n    template_file = tmp_path / \"nested\" / \"template1\"\n    template_file.parent.mkdir(parents=True)\n    template_file.touch()\n\n    context = {\n        \"cookiecutter\": {\n            \"__prompts__\": {},\n            \"templates\": {\n                \"option1\": {\"path\": \"nested/template1\"},\n                \"option2\": {\"path\": \"nested/template2\"},\n            },\n        }\n    }\n\n    # No input: should pick the first key in the dict\n    result = choose_nested_template(context, tmp_path, no_input=True)\n    expected = str((tmp_path / \"nested/template1\").resolve())\n    assert result == expected\n    assert Path(result).exists()\n\n\ndef test_choose_nested_template_old_style(tmp_path):\n    \"\"\"Test old style template selection with a list of strings.\"\"\"\n    # Create a fake template file in the repo\n    template_file = tmp_path / \"nested\" / \"template2\"\n    template_file.parent.mkdir(parents=True)\n    template_file.touch()\n\n    context = {\n        \"cookiecutter\": {\n            \"__prompts__\": {},\n            \"template\": [\n                \"optionA (nested/template2)\",\n                \"optionB (nested/template3)\",\n            ],\n        }\n    }\n\n    # No input: should pick the first option\n    result = choose_nested_template(context, tmp_path, no_input=True)\n    expected = str((tmp_path / \"nested/template2\").resolve())\n    assert result == expected\n    assert Path(result).exists()\n\n\ndef test_choose_nested_template_illegal_path(tmp_path):\n    \"\"\"Test that an absolute template path raises ValueError.\"\"\"\n    # Create a fake template file in the repo\n    template_file = tmp_path / \"nested\" / \"template1\"\n    template_file.parent.mkdir(parents=True)\n    template_file.touch()\n\n    context = {\n        \"cookiecutter\": {\n            \"__prompts__\": {},\n            \"templates\": {\n                \"option1\": {\"path\": str(template_file.resolve())},  # absolute path\n            },\n        }\n    }\n\n    with pytest.raises(ValueError, match=\"Illegal template path\"):\n        choose_nested_template(context, tmp_path, no_input=True)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.115889378997963
+}

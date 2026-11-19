@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-6a7418f0-6f09-4d3b-9a2c-8f8b1959b27b",
+  "object": "chat.completion",
+  "created": 1795079398,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.trutv import TruTVIE\n\n# Helper to create a fake downloader that returns predetermined JSON\nclass FakeDownloader:\n    def __init__(self, json_data):\n        self.json_data = json_data\n    def _download_json(self, url, display_id):\n        return self.json_data\n\ndef test_clip_extraction(monkeypatch):\n    # Fake JSON response for a clip\n    fake_json = {\n        'info': {\n            'mediaId': 'clip123',\n            'title': '  Clip Title  ',\n            'description': 'A short clip.',\n            'images': [\n                {'srcUrl': 'http://example.com/thumb1.jpg', 'width': '200', 'height': '100'},\n                {'srcUrl': None, 'width': '100', 'height': '50'},  # should be skipped\n            ],\n            'publicationDate': '2023-01-01T12:00:00Z',\n            'showTitle': 'Show Name',\n            'seasonNum': '2',\n            'episodeNum': '5',\n        }\n    }\n    downloader = FakeDownloader(fake_json)\n    ie = TruTVIE(downloader=downloader)\n    url = 'https://www.trutv.com/shows/show-name/videos/clip-slug'\n    info = ie._real_extract(url)\n\n    assert info['id'] == 'clip123'\n    assert info['display_id'] == 'clip-slug'\n    assert info['title'] == 'Clip Title'\n    assert info['description'] == 'A short clip.'\n    assert info['series'] == 'Show Name'\n    assert info['season_number'] == 2\n    assert info['episode_number'] == 5\n    assert len(info['thumbnails']) == 1\n    thumb = info['thumbnails'][0]\n    assert thumb['url'] == 'http://example.com/thumb1.jpg'\n    assert thumb['width'] == 200\n    assert thumb['height'] == 100\n\ndef test_episode_extraction(monkeypatch):\n    # Fake JSON response for an episode\n    fake_json = {\n        'episode': {\n            'mediaId': 'ep456',\n            'title': 'Episode Title',\n            'description': 'Full episode description.',\n            'images': [],\n            'publicationDate': '2022-12-31T23:59:59Z',\n            'showTitle': 'Another Show',\n            'seasonNum': None,\n            'episodeNum': '10',\n        }\n    }\n    downloader = FakeDownloader(fake_json)\n    ie = TruTVIE(downloader=downloader)\n    url = 'https://www.trutv.com/shows/another-show/12345'\n    info = ie._real_extract(url)\n\n    assert info['id'] == 'ep456'\n    assert info['display_id'] == '12345'\n    assert info['title'] == 'Episode Title'\n    assert info['description'] == 'Full episode description.'\n    assert info['series'] == 'Another Show'\n    assert info['season_number'] is None\n    assert info['episode_number'] == 10\n    assert info['thumbnails'] == []\n\ndef test_invalid_url_raises(monkeypatch):\n    ie = TruTVIE()\n    # URL that does not match the regex should cause AttributeError when accessing groups\n    bad_url = 'https://www.trutv.com/invalid/url'\n    with pytest.raises(AttributeError):\n        ie._real_extract(bad_url)\n```",
+        "reasoning": "We need to write tests for TruTVIE. We cannot modify code. We need to simulate extraction? But we cannot access network. So tests must use the class but not call _download_json which would hit network. We can monkeypatch _download_json to return fake data. But no mocks allowed? It says no mocks of the target. But we can monkeypatch methods? It's not mocking the target? It's patching internal method. Might be allowed. Use pytest monkeypatch fixture. We'll create fake data for both clip and episode. Test that info dict contains expected keys. Also test boundary: missing images. And error: invalid URL raises? The regex groups. If url doesn't match, re.match returns None leading to AttributeError. We can test that. Use pytest.raises(AttributeError). Let's write three tests: test_clip_extraction, test_episode_extraction, test_invalid_url. Use monkeypatch to override _download_json. Use tmp_path? Not needed. We'll just patch."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051801895,
+    "prompt_tokens": 874,
+    "prompt_time": 0.010153394,
+    "completion_tokens": 945,
+    "completion_time": 1.031083707,
+    "total_tokens": 1819,
+    "total_time": 1.041237101,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 199
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sh3qw0easa9a8re40fcf1y",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.extractor.trutv import TruTVIE\n\n# Helper to create a fake downloader that returns predetermined JSON\nclass FakeDownloader:\n    def __init__(self, json_data):\n        self.json_data = json_data\n    def _download_json(self, url, display_id):\n        return self.json_data\n\ndef test_clip_extraction(monkeypatch):\n    # Fake JSON response for a clip\n    fake_json = {\n        'info': {\n            'mediaId': 'clip123',\n            'title': '  Clip Title  ',\n            'description': 'A short clip.',\n            'images': [\n                {'srcUrl': 'http://example.com/thumb1.jpg', 'width': '200', 'height': '100'},\n                {'srcUrl': None, 'width': '100', 'height': '50'},  # should be skipped\n            ],\n            'publicationDate': '2023-01-01T12:00:00Z',\n            'showTitle': 'Show Name',\n            'seasonNum': '2',\n            'episodeNum': '5',\n        }\n    }\n    downloader = FakeDownloader(fake_json)\n    ie = TruTVIE(downloader=downloader)\n    url = 'https://www.trutv.com/shows/show-name/videos/clip-slug'\n    info = ie._real_extract(url)\n\n    assert info['id'] == 'clip123'\n    assert info['display_id'] == 'clip-slug'\n    assert info['title'] == 'Clip Title'\n    assert info['description'] == 'A short clip.'\n    assert info['series'] == 'Show Name'\n    assert info['season_number'] == 2\n    assert info['episode_number'] == 5\n    assert len(info['thumbnails']) == 1\n    thumb = info['thumbnails'][0]\n    assert thumb['url'] == 'http://example.com/thumb1.jpg'\n    assert thumb['width'] == 200\n    assert thumb['height'] == 100\n\ndef test_episode_extraction(monkeypatch):\n    # Fake JSON response for an episode\n    fake_json = {\n        'episode': {\n            'mediaId': 'ep456',\n            'title': 'Episode Title',\n            'description': 'Full episode description.',\n            'images': [],\n            'publicationDate': '2022-12-31T23:59:59Z',\n            'showTitle': 'Another Show',\n            'seasonNum': None,\n            'episodeNum': '10',\n        }\n    }\n    downloader = FakeDownloader(fake_json)\n    ie = TruTVIE(downloader=downloader)\n    url = 'https://www.trutv.com/shows/another-show/12345'\n    info = ie._real_extract(url)\n\n    assert info['id'] == 'ep456'\n    assert info['display_id'] == '12345'\n    assert info['title'] == 'Episode Title'\n    assert info['description'] == 'Full episode description.'\n    assert info['series'] == 'Another Show'\n    assert info['season_number'] is None\n    assert info['episode_number'] == 10\n    assert info['thumbnails'] == []\n\ndef test_invalid_url_raises(monkeypatch):\n    ie = TruTVIE()\n    # URL that does not match the regex should cause AttributeError when accessing groups\n    bad_url = 'https://www.trutv.com/invalid/url'\n    with pytest.raises(AttributeError):\n        ie._real_extract(bad_url)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "99140125122a4be8b0dcb6531ca21185",
+  "_api_plus_pacing_seconds": 1.5385235410067253
+}

@@ -1,0 +1,58 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_read_journal_entries_function_normal ___________________
+
+    def test_read_journal_entries_function_normal():
+        def dummy_reader(period: DateRange):
+            start, end = period.start, period.end
+            # Return two entries within the period
+            return [
+                JournalEntry(start, 100.0),
+                JournalEntry(end, 200.0),
+            ]
+    
+        period = DateRange(datetime(2023, 1, 1), datetime(2023, 12, 31))
+>       entries = dummy_reader(period)
+
+test_generated.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+period = DateRange(since=datetime.datetime(2023, 1, 1, 0, 0), until=datetime.datetime(2023, 12, 31, 0, 0))
+
+    def dummy_reader(period: DateRange):
+>       start, end = period.start, period.end
+E       AttributeError: 'DateRange' object has no attribute 'start'
+
+test_generated.py:21: AttributeError
+___________________ test_read_journal_entries_invalid_period ___________________
+
+    def test_read_journal_entries_invalid_period():
+        def dummy_reader(period: DateRange):
+            if period.start > period.end:
+                raise ValueError("Start date must be before end date")
+            return []
+    
+>       period = DateRange(datetime(2023, 12, 31), datetime(2023, 1, 1))
+
+test_generated.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<string>:5: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = DateRange(since=datetime.datetime(2023, 12, 31, 0, 0), until=datetime.datetime(2023, 1, 1, 0, 0))
+
+    def __post_init__(self) -> None:
+        """
+        Checks whether the two date endpoints are consistent.
+    
+        :raises AssertError: If ``since`` is later than ``until``.
+        """
+>       assert self.since <= self.until
+E       AssertionError
+
+../../../../groq_confirmation_20261118/environments/pypara/venv/lib/python3.10/site-packages/pypara/commons/zeitgeist.py:206: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_read_journal_entries_function_normal - Attribu...
+FAILED test_generated.py::test_read_journal_entries_invalid_period - Assertio...
+2 failed, 1 passed in 0.15s

@@ -1,0 +1,42 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_string_valid_and_trim_and_null_coercion _________________
+
+    def test_string_valid_and_trim_and_null_coercion():
+        # allow_blank True, trim_whitespace True, coerce_types True
+        field = String(allow_blank=True, trim_whitespace=True, coerce_types=True)
+        # Leading/trailing whitespace should be stripped
+        assert field.validate("  hello  ") == "hello"
+        # Null should be coerced to empty string because allow_blank
+        assert field.validate(None) == ""
+        # Empty string should be allowed because allow_blank
+        assert field.validate("") == ""
+        # Non-string should raise type error
+        with pytest.raises(ValidationError) as excinfo:
+            field.validate(123)
+>       assert "type" in str(excinfo.value)
+E       AssertionError: assert 'type' in 'Must be a string.'
+E        +  where 'Must be a string.' = str(ValidationError(text='Must be a string.', code='type'))
+E        +    where ValidationError(text='Must be a string.', code='type') = <ExceptionInfo ValidationError(text='Must be a string.', code='type') tblen=2>.value
+
+test_generated.py:18: AssertionError
+________________________ test_string_length_constraints ________________________
+
+    def test_string_length_constraints():
+        # max_length 5, min_length 3
+        field = String(max_length=5, min_length=3)
+        # Valid length
+        assert field.validate("abc") == "abc"
+        # Too short
+        with pytest.raises(ValidationError) as excinfo:
+            field.validate("ab")
+>       assert "min_length" in str(excinfo.value)
+E       AssertionError: assert 'min_length' in 'Must have at least 3 characters.'
+E        +  where 'Must have at least 3 characters.' = str(ValidationError(text='Must have at least 3 characters.', code='min_length'))
+E        +    where ValidationError(text='Must have at least 3 characters.', code='min_length') = <ExceptionInfo ValidationError(text='Must have at least 3 characters.', code='min_length') tblen=2>.value
+
+test_generated.py:28: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_string_valid_and_trim_and_null_coercion - Asse...
+FAILED test_generated.py::test_string_length_constraints - AssertionError: as...
+2 failed, 1 passed in 0.13s

@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-4dd1c7eb-2689-4983-a488-b4f8e3147816",
+  "object": "chat.completion",
+  "created": 1795079638,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom httpie.plugins.manager import enable_plugins\n\ndef test_enable_plugins_adds_and_removes_path(tmp_path: Path):\n    # Create a dummy plugin directory\n    plugin_dir = tmp_path / \"plugins\"\n    plugin_dir.mkdir()\n    # Record original sys.path\n    original_sys_path = list(sys.path)\n    # Use the context manager\n    with enable_plugins(plugin_dir) as cm:\n        # Inside the context, the plugin directory should be at the front of sys.path\n        assert cm is None  # Context manager returns None\n        assert sys.path[0] == str(plugin_dir)\n        # Ensure other paths remain unchanged after the new one\n        assert sys.path[1:] == original_sys_path\n    # After exiting, the path should be removed\n    assert str(plugin_dir) not in sys.path\n    assert sys.path == original_sys_path\n\ndef test_enable_plugins_none_returns_nullcontext():\n    # When plugins_dir is None, the context manager should be a nullcontext\n    ctx = enable_plugins(None)\n    # The returned object should be an instance of contextlib.nullcontext\n    from contextlib import nullcontext\n    assert isinstance(ctx, nullcontext)\n    # Entering and exiting should not alter sys.path\n    original_sys_path = list(sys.path)\n    with ctx:\n        assert sys.path == original_sys_path\n    assert sys.path == original_sys_path\n\ndef test_enable_plugins_with_nonexistent_directory(tmp_path: Path):\n    # Provide a path that does not exist; get_site_paths will still return it\n    nonexistent_dir = tmp_path / \"does_not_exist\"\n    # Record original sys.path\n    original_sys_path = list(sys.path)\n    with enable_plugins(nonexistent_dir):\n        # The nonexistent directory should still be added to sys.path\n        assert str(nonexistent_dir) == sys.path[0]\n    # After exiting, it should be removed\n    assert str(nonexistent_dir) not in sys.path\n    assert sys.path == original_sys_path\n```",
+        "reasoning": "We need tests for enable_plugins. It returns context manager that adds dirs to sys.path. Test normal: provide Path, ensure sys.path modified. Boundary: plugins_dir None returns nullcontext. Error: passing invalid path? maybe non-existent? but function just uses get_site_paths which may return Path. We can test that after exit, sys.path restored. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004861171,
+    "prompt_tokens": 505,
+    "prompt_time": 0.03001311,
+    "completion_tokens": 508,
+    "completion_time": 0.573473976,
+    "total_tokens": 1013,
+    "total_time": 0.603487086,
+    "completion_tokens_details": {
+      "reasoning_tokens": 76
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7shb2f4en89gb3kv9em9x6z",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom httpie.plugins.manager import enable_plugins\n\ndef test_enable_plugins_adds_and_removes_path(tmp_path: Path):\n    # Create a dummy plugin directory\n    plugin_dir = tmp_path / \"plugins\"\n    plugin_dir.mkdir()\n    # Record original sys.path\n    original_sys_path = list(sys.path)\n    # Use the context manager\n    with enable_plugins(plugin_dir) as cm:\n        # Inside the context, the plugin directory should be at the front of sys.path\n        assert cm is None  # Context manager returns None\n        assert sys.path[0] == str(plugin_dir)\n        # Ensure other paths remain unchanged after the new one\n        assert sys.path[1:] == original_sys_path\n    # After exiting, the path should be removed\n    assert str(plugin_dir) not in sys.path\n    assert sys.path == original_sys_path\n\ndef test_enable_plugins_none_returns_nullcontext():\n    # When plugins_dir is None, the context manager should be a nullcontext\n    ctx = enable_plugins(None)\n    # The returned object should be an instance of contextlib.nullcontext\n    from contextlib import nullcontext\n    assert isinstance(ctx, nullcontext)\n    # Entering and exiting should not alter sys.path\n    original_sys_path = list(sys.path)\n    with ctx:\n        assert sys.path == original_sys_path\n    assert sys.path == original_sys_path\n\ndef test_enable_plugins_with_nonexistent_directory(tmp_path: Path):\n    # Provide a path that does not exist; get_site_paths will still return it\n    nonexistent_dir = tmp_path / \"does_not_exist\"\n    # Record original sys.path\n    original_sys_path = list(sys.path)\n    with enable_plugins(nonexistent_dir):\n        # The nonexistent directory should still be added to sys.path\n        assert str(nonexistent_dir) == sys.path[0]\n    # After exiting, it should be removed\n    assert str(nonexistent_dir) not in sys.path\n    assert sys.path == original_sys_path\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "d1ceee6e58e54da5b0149d6486532362",
+  "_api_plus_pacing_seconds": 1.5037147179828025
+}

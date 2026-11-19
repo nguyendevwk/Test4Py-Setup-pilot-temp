@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-d11ce25c-3652-48f8-b9ae-09196e2e0251",
+  "object": "chat.completion",
+  "created": 1795078927,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport threading\nimport http.server\nimport socket\nimport os\nfrom tornado.httpclient import HTTPClient, HTTPError, HTTPResponse\nfrom tornado.ioloop import IOLoop\nfrom tornado import gen\n\n# Helper to start a simple HTTP server in a background thread\ndef start_test_server(tmp_path):\n    class Handler(http.server.SimpleHTTPRequestHandler):\n        def log_message(self, format, *args):\n            pass  # suppress logging\n\n    port = 0  # let OS pick a free port\n    server = http.server.HTTPServer(Handler, bind_address=('127.0.0.1', port))\n    addr, port = server.server_address\n    thread = threading.Thread(target=server.serve_forever, daemon=True)\n    thread.start()\n    return server, addr, port, thread\n\n@pytest.fixture\ndef http_server(tmp_path):\n    server, addr, port, thread = start_test_server(tmp_path)\n    yield addr, port\n    server.shutdown()\n    thread.join()\n\ndef test_fetch_returns_response_with_body(http_server, tmp_path):\n    addr, port = http_server\n    # Create a test file\n    content = b\"Hello, world!\"\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_bytes(content)\n\n    # The server serves files from tmp_path\n    os.chdir(tmp_path)\n\n    client = HTTPClient()\n    url = f\"http://{addr}:{port}/test.txt\"\n    response = client.fetch(url)\n    assert isinstance(response, HTTPResponse)\n    assert response.code == 200\n    assert response.body == content\n    client.close()\n\ndef test_close_releases_resources():\n    client = HTTPClient()\n    # After close, attempting to fetch should raise an exception\n    client.close()\n    with pytest.raises(RuntimeError):\n        client.fetch(\"http://example.com/\")\n\ndef test_fetch_invalid_domain_raises_http_error():\n    client = HTTPClient()\n    with pytest.raises(HTTPError) as excinfo:\n        client.fetch(\"http://nonexistent.invalid/\")\n    assert excinfo.value.response is None\n    client.close()\n```",
+        "reasoning": "We need tests for HTTPClient. But AsyncHTTPClient is not defined here. Likely in tornado.httpclient module. We can import HTTPClient and test that close works, fetch with simple URL? But network not allowed. We can use a local HTTP server via http.server in a thread. Use tmp_path for file? We can test that fetch returns HTTPResponse with body. Use http.server to serve a file. Use HTTPClient.fetch with URL. Ensure that close releases resources. Third test error: fetch non-existent domain raises HTTPError. Use pytest.raises. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.156211555,
+    "prompt_tokens": 1007,
+    "prompt_time": 0.031019913,
+    "completion_tokens": 561,
+    "completion_time": 1.038994353,
+    "total_tokens": 1568,
+    "total_time": 1.070014266,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 119
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgnc97epbtsgypmn9xhj77",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport threading\nimport http.server\nimport socket\nimport os\nfrom tornado.httpclient import HTTPClient, HTTPError, HTTPResponse\nfrom tornado.ioloop import IOLoop\nfrom tornado import gen\n\n# Helper to start a simple HTTP server in a background thread\ndef start_test_server(tmp_path):\n    class Handler(http.server.SimpleHTTPRequestHandler):\n        def log_message(self, format, *args):\n            pass  # suppress logging\n\n    port = 0  # let OS pick a free port\n    server = http.server.HTTPServer(Handler, bind_address=('127.0.0.1', port))\n    addr, port = server.server_address\n    thread = threading.Thread(target=server.serve_forever, daemon=True)\n    thread.start()\n    return server, addr, port, thread\n\n@pytest.fixture\ndef http_server(tmp_path):\n    server, addr, port, thread = start_test_server(tmp_path)\n    yield addr, port\n    server.shutdown()\n    thread.join()\n\ndef test_fetch_returns_response_with_body(http_server, tmp_path):\n    addr, port = http_server\n    # Create a test file\n    content = b\"Hello, world!\"\n    file_path = tmp_path / \"test.txt\"\n    file_path.write_bytes(content)\n\n    # The server serves files from tmp_path\n    os.chdir(tmp_path)\n\n    client = HTTPClient()\n    url = f\"http://{addr}:{port}/test.txt\"\n    response = client.fetch(url)\n    assert isinstance(response, HTTPResponse)\n    assert response.code == 200\n    assert response.body == content\n    client.close()\n\ndef test_close_releases_resources():\n    client = HTTPClient()\n    # After close, attempting to fetch should raise an exception\n    client.close()\n    with pytest.raises(RuntimeError):\n        client.fetch(\"http://example.com/\")\n\ndef test_fetch_invalid_domain_raises_http_error():\n    client = HTTPClient()\n    with pytest.raises(HTTPError) as excinfo:\n        client.fetch(\"http://nonexistent.invalid/\")\n    assert excinfo.value.response is None\n    client.close()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.5944897329900414
+}

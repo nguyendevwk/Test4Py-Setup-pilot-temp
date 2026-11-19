@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-f41ccb39-d0ad-4b76-b95d-2034e200b272",
+  "object": "chat.completion",
+  "created": 1795077595,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nfrom pathlib import Path\nimport pytest\nfrom jinja2 import Environment\nfrom cookiecutter.exceptions import NonTemplatedInputDirException\nfrom cookiecutter.find import find_template\n\n@pytest.fixture\ndef env() -> Environment:\n    \"\"\"Provide a Jinja2 Environment with default delimiters.\"\"\"\n    return Environment()\n\ndef test_find_template_success(tmp_path: Path, env: Environment) -> None:\n    \"\"\"\n    Verify that find_template correctly identifies a child directory\n    whose name contains the Jinja2 delimiters and the string 'cookiecutter'.\n    \"\"\"\n    # Create a matching directory\n    matching_dir = tmp_path / \"cookiecutter_{{project_name}}_template\"\n    matching_dir.mkdir()\n    # Create a non-matching sibling\n    (tmp_path / \"not_a_template\").mkdir()\n\n    result = find_template(tmp_path, env)\n    assert result == matching_dir, \"Returned path should be the matching directory\"\n\ndef test_find_template_no_match(tmp_path: Path, env: Environment) -> None:\n    \"\"\"\n    Verify that find_template raises NonTemplatedInputDirException when\n    no suitable child directory exists.\n    \"\"\"\n    # Create only non-matching directories\n    (tmp_path / \"random_dir\").mkdir()\n    (tmp_path / \"another_dir\").mkdir()\n\n    with pytest.raises(NonTemplatedInputDirException):\n        find_template(tmp_path, env)\n\ndef test_find_template_multiple_matches(tmp_path: Path, env: Environment) -> None:\n    \"\"\"\n    Verify that find_template returns the first matching directory\n    when multiple candidates exist.\n    \"\"\"\n    # Create two matching directories\n    first_match = tmp_path / \"cookiecutter_{{first}}_template\"\n    second_match = tmp_path / \"cookiecutter_{{second}}_template\"\n    first_match.mkdir()\n    second_match.mkdir()\n\n    result = find_template(tmp_path, env)\n    assert result == first_match, \"Should return the first matching directory found\"\n```",
+        "reasoning": "Need tests for find_template. Use tmp_path to create directories. Need Environment from jinja2? Actually cookiecutter uses jinja2.Environment. We'll import from jinja2 import Environment. Use default variable_start_string '{{' etc. Test normal: create dir with matching name. Test boundary: no matching dir raises exception. Test error: multiple? function picks first. But we can test that it returns correct path. Use precise assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048301321,
+    "prompt_tokens": 420,
+    "prompt_time": 0.015318987,
+    "completion_tokens": 512,
+    "completion_time": 0.700628403,
+    "total_tokens": 932,
+    "total_time": 0.71594739,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 90
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfcqb6em1rrt9vnw5xsv99",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nfrom pathlib import Path\nimport pytest\nfrom jinja2 import Environment\nfrom cookiecutter.exceptions import NonTemplatedInputDirException\nfrom cookiecutter.find import find_template\n\n@pytest.fixture\ndef env() -> Environment:\n    \"\"\"Provide a Jinja2 Environment with default delimiters.\"\"\"\n    return Environment()\n\ndef test_find_template_success(tmp_path: Path, env: Environment) -> None:\n    \"\"\"\n    Verify that find_template correctly identifies a child directory\n    whose name contains the Jinja2 delimiters and the string 'cookiecutter'.\n    \"\"\"\n    # Create a matching directory\n    matching_dir = tmp_path / \"cookiecutter_{{project_name}}_template\"\n    matching_dir.mkdir()\n    # Create a non-matching sibling\n    (tmp_path / \"not_a_template\").mkdir()\n\n    result = find_template(tmp_path, env)\n    assert result == matching_dir, \"Returned path should be the matching directory\"\n\ndef test_find_template_no_match(tmp_path: Path, env: Environment) -> None:\n    \"\"\"\n    Verify that find_template raises NonTemplatedInputDirException when\n    no suitable child directory exists.\n    \"\"\"\n    # Create only non-matching directories\n    (tmp_path / \"random_dir\").mkdir()\n    (tmp_path / \"another_dir\").mkdir()\n\n    with pytest.raises(NonTemplatedInputDirException):\n        find_template(tmp_path, env)\n\ndef test_find_template_multiple_matches(tmp_path: Path, env: Environment) -> None:\n    \"\"\"\n    Verify that find_template returns the first matching directory\n    when multiple candidates exist.\n    \"\"\"\n    # Create two matching directories\n    first_match = tmp_path / \"cookiecutter_{{first}}_template\"\n    second_match = tmp_path / \"cookiecutter_{{second}}_template\"\n    first_match.mkdir()\n    second_match.mkdir()\n\n    result = find_template(tmp_path, env)\n    assert result == first_match, \"Should return the first matching directory found\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.096818729012739
+}

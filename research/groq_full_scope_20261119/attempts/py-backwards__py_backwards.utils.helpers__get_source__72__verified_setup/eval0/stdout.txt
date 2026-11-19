@@ -1,0 +1,27 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_get_source_handles_nested_functions ___________________
+
+    def test_get_source_handles_nested_functions():
+        """get_source should correctly handle nested functions and preserve relative indentation."""
+        def outer():
+            def inner():
+                return "inner"
+            return inner()
+    
+        source = get_source(outer)
+        # The outer function definition should start at column 0
+        assert source.startswith("def outer():")
+        # The inner function should be indented by one level relative to outer
+        assert "def inner():" in source
+        # The return inside inner should be indented correctly
+        assert "return \"inner\"" in source
+        # No extra indentation should be present at the start of any line
+>       assert all(not line.startswith("    ") for line in source.splitlines() if line.strip())
+E       assert False
+E        +  where False = all(<generator object test_get_source_handles_nested_functions.<locals>.<genexpr> at 0x7f60af8b0120>)
+
+test_generated.py:39: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_source_handles_nested_functions - assert F...
+1 failed, 2 passed in 0.14s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-5ea29f80-5489-4353-b8fd-a201fc913f6b",
+  "object": "chat.completion",
+  "created": 1795076060,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom thefuck.logs import already_configured, color\nfrom thefuck.conf import settings\n\ndef test_already_configured_with_reload(capsys):\n    \"\"\"Verify that the function prints the expected message with the reload command.\"\"\"\n    reload_cmd = \"thefuck --reload\"\n    already_configured({\"reload\": reload_cmd})\n    captured = capsys.readouterr()\n    assert f\"For applying changes run {reload_cmd}\" in captured.out\n    # Ensure the message contains the alias name\n    assert \"alias already configured\" in captured.out\n    # The function should return None\n    assert already_configured({\"reload\": reload_cmd}) is None\n\ndef test_already_configured_no_colors(monkeypatch, capsys):\n    \"\"\"When no_colors is True, color codes should be stripped from the output.\"\"\"\n    monkeypatch.setattr(settings, \"no_colors\", True)\n    reload_cmd = \"thefuck --reload\"\n    already_configured({\"reload\": reload_cmd})\n    captured = capsys.readouterr()\n    # No ANSI escape sequences should be present\n    assert \"\\x1b\" not in captured.out\n    # The reload command should still appear\n    assert reload_cmd in captured.out\n\ndef test_color_function_respects_no_colors(monkeypatch):\n    \"\"\"The helper color() should return an empty string when colors are disabled.\"\"\"\n    monkeypatch.setattr(settings, \"no_colors\", True)\n    assert color(\"anything\") == \"\"\n    monkeypatch.setattr(settings, \"no_colors\", False)\n    # When colors are enabled, the original string should be returned\n    assert color(\"test\") == \"test\"\n```",
+        "reasoning": "We need to test already_configured. It prints a message. We can capture stdout. Use tmp_path? Not needed. Three tests: normal behavior with reload string, no_colors true, and maybe settings.no_colors false. But settings is imported from .conf. We cannot modify product code. We can monkeypatch settings.no_colors. Use contextmanager? Just patch attribute. Use capsys. Three tests: 1) default colors true, check output contains reload. 2) no_colors true, output has no color codes. 3) check that function returns None. Use pytest.raises? Not needed. Just assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053998216,
+    "prompt_tokens": 375,
+    "prompt_time": 0.018716234,
+    "completion_tokens": 474,
+    "completion_time": 0.530126952,
+    "total_tokens": 849,
+    "total_time": 0.548843186,
+    "completion_tokens_details": {
+      "reasoning_tokens": 127
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sdxwdresfbf7tk95r1zmfj",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom thefuck.logs import already_configured, color\nfrom thefuck.conf import settings\n\ndef test_already_configured_with_reload(capsys):\n    \"\"\"Verify that the function prints the expected message with the reload command.\"\"\"\n    reload_cmd = \"thefuck --reload\"\n    already_configured({\"reload\": reload_cmd})\n    captured = capsys.readouterr()\n    assert f\"For applying changes run {reload_cmd}\" in captured.out\n    # Ensure the message contains the alias name\n    assert \"alias already configured\" in captured.out\n    # The function should return None\n    assert already_configured({\"reload\": reload_cmd}) is None\n\ndef test_already_configured_no_colors(monkeypatch, capsys):\n    \"\"\"When no_colors is True, color codes should be stripped from the output.\"\"\"\n    monkeypatch.setattr(settings, \"no_colors\", True)\n    reload_cmd = \"thefuck --reload\"\n    already_configured({\"reload\": reload_cmd})\n    captured = capsys.readouterr()\n    # No ANSI escape sequences should be present\n    assert \"\\x1b\" not in captured.out\n    # The reload command should still appear\n    assert reload_cmd in captured.out\n\ndef test_color_function_respects_no_colors(monkeypatch):\n    \"\"\"The helper color() should return an empty string when colors are disabled.\"\"\"\n    monkeypatch.setattr(settings, \"no_colors\", True)\n    assert color(\"anything\") == \"\"\n    monkeypatch.setattr(settings, \"no_colors\", False)\n    # When colors are enabled, the original string should be returned\n    assert color(\"test\") == \"test\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8747854130342603
+}

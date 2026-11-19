@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-1f9d6ea1-8a4a-446d-a18e-9a3e4c813c8d",
+  "object": "chat.completion",
+  "created": 1795079407,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport pytest\nfrom httpie.uploads import prepare_request_body\nfrom httpie.cli.dicts import RequestDataDict\nfrom httpie.context import Environment\nfrom httpie.uploads import ChunkedUploadStream\n\n# Helper callback that records bytes read\ndef dummy_callback(data: bytes):\n    dummy_callback.read_bytes += data\ndummy_callback.read_bytes = b''\n\n@pytest.fixture\ndef env():\n    return Environment()\n\ndef test_prepare_request_body_with_bytes_and_offline(env, tmp_path):\n    # Create a temporary file to read from\n    file_path = tmp_path / \"sample.txt\"\n    file_path.write_text(\"hello world\")\n    with open(file_path, \"rb\") as f:\n        body = prepare_request_body(\n            env=env,\n            raw_body=f,\n            body_read_callback=dummy_callback,\n            offline=True\n        )\n    # When offline, the function should return the file contents as bytes\n    assert isinstance(body, bytes)\n    assert body == b\"hello world\"\n    # The callback should not have been called because offline bypasses reading\n    assert dummy_callback.read_bytes == b''\n\ndef test_prepare_request_body_with_request_data_dict(env):\n    data = RequestDataDict({\"a\": \"1\", \"b\": [\"x\", \"y\"]})\n    body = prepare_request_body(\n        env=env,\n        raw_body=data,\n        body_read_callback=dummy_callback,\n        offline=False,\n        chunked=False\n    )\n    # The body should be URL‑encoded bytes\n    assert isinstance(body, bytes)\n    # Order of parameters is not guaranteed, but both must be present\n    assert b\"a=1\" in body\n    assert b\"b=x\" in body\n    assert b\"b=y\" in body\n\ndef test_prepare_request_body_with_chunked_stream(env):\n    data = b\"chunked data\"\n    stream = prepare_request_body(\n        env=env,\n        raw_body=data,\n        body_read_callback=dummy_callback,\n        offline=False,\n        chunked=True\n    )\n    # The returned object should be a ChunkedUploadStream\n    assert isinstance(stream, ChunkedUploadStream)\n    # Reading from the stream should yield the original data\n    read_data = stream.read()\n    assert read_data == data\n    # The callback should have been called with the data chunk\n    assert dummy_callback.read_bytes == data\n```",
+        "reasoning": "Need tests for prepare_request_body. Use tmp_path for file. Test normal bytes, RequestDataDict, file-like, chunked. Also error? maybe passing unsupported type? But function handles. We'll test that offline True returns bytes. Also chunked returns ChunkedUploadStream. Need import. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.20116101,
+    "prompt_tokens": 548,
+    "prompt_time": 0.164165317,
+    "completion_tokens": 569,
+    "completion_time": 0.893105182,
+    "total_tokens": 1117,
+    "total_time": 1.057270499,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 64
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sh40m1eghayfcy04w6grg7",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport pytest\nfrom httpie.uploads import prepare_request_body\nfrom httpie.cli.dicts import RequestDataDict\nfrom httpie.context import Environment\nfrom httpie.uploads import ChunkedUploadStream\n\n# Helper callback that records bytes read\ndef dummy_callback(data: bytes):\n    dummy_callback.read_bytes += data\ndummy_callback.read_bytes = b''\n\n@pytest.fixture\ndef env():\n    return Environment()\n\ndef test_prepare_request_body_with_bytes_and_offline(env, tmp_path):\n    # Create a temporary file to read from\n    file_path = tmp_path / \"sample.txt\"\n    file_path.write_text(\"hello world\")\n    with open(file_path, \"rb\") as f:\n        body = prepare_request_body(\n            env=env,\n            raw_body=f,\n            body_read_callback=dummy_callback,\n            offline=True\n        )\n    # When offline, the function should return the file contents as bytes\n    assert isinstance(body, bytes)\n    assert body == b\"hello world\"\n    # The callback should not have been called because offline bypasses reading\n    assert dummy_callback.read_bytes == b''\n\ndef test_prepare_request_body_with_request_data_dict(env):\n    data = RequestDataDict({\"a\": \"1\", \"b\": [\"x\", \"y\"]})\n    body = prepare_request_body(\n        env=env,\n        raw_body=data,\n        body_read_callback=dummy_callback,\n        offline=False,\n        chunked=False\n    )\n    # The body should be URL‑encoded bytes\n    assert isinstance(body, bytes)\n    # Order of parameters is not guaranteed, but both must be present\n    assert b\"a=1\" in body\n    assert b\"b=x\" in body\n    assert b\"b=y\" in body\n\ndef test_prepare_request_body_with_chunked_stream(env):\n    data = b\"chunked data\"\n    stream = prepare_request_body(\n        env=env,\n        raw_body=data,\n        body_read_callback=dummy_callback,\n        offline=False,\n        chunked=True\n    )\n    # The returned object should be a ChunkedUploadStream\n    assert isinstance(stream, ChunkedUploadStream)\n    # Reading from the stream should yield the original data\n    read_data = stream.read()\n    assert read_data == data\n    # The callback should have been called with the data chunk\n    assert dummy_callback.read_bytes == data\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "1dbd6d55c786495b9f8c7d5f09776dce",
+  "_api_plus_pacing_seconds": 1.9177549100131728
+}

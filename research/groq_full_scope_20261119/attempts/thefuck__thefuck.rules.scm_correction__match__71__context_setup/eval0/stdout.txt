@@ -1,0 +1,77 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_match_git_repository ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.scm_correction__match__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_match_git_repository0')
+
+    def test_match_git_repository(tmp_path):
+        # Create a .git directory to simulate a git repo
+        (tmp_path / ".git").mkdir()
+        # Change working directory to tmp_path so Path.is_dir finds the .git folder
+        cwd = Path.cwd()
+        try:
+            Path(tmp_path).cwd()
+        except AttributeError:
+            # For Python <3.11, manually change cwd
+            import os
+            os.chdir(tmp_path)
+        # Prepare command that should match
+        cmd = DummyCommand(script_parts=["git"], output="fatal: Not a git repository")
+        # Ensure _get_actual_scm returns 'git'
+>       assert _get_actual_scm() == "git"
+E       AssertionError: assert None == 'git'
+E        +  where None = _get_actual_scm()
+
+test_generated.py:24: AssertionError
+___________________________ test_match_no_repository ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.scm_correction__match__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_match_no_repository0')
+
+    def test_match_no_repository(tmp_path):
+        # No .git or .hg directory present
+        # Prepare command that would match if a repo existed
+        cmd = DummyCommand(script_parts=["git"], output="fatal: Not a git repository")
+        # _get_actual_scm should return None
+        assert _get_actual_scm() is None
+        # match should return False because no actual scm directory
+>       assert match(cmd) is False
+E       assert None is False
+E        +  where None = match(<test_generated.DummyCommand object at 0x7f2ef5603340>)
+
+test_generated.py:35: AssertionError
+___________________________ test_match_hg_repository ___________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.scm_correction__match__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_match_hg_repository0')
+
+    def test_match_hg_repository(tmp_path):
+        # Create a .hg directory to simulate a hg repo
+        (tmp_path / ".hg").mkdir()
+        cwd = Path.cwd()
+        try:
+            Path(tmp_path).cwd()
+        except AttributeError:
+            import os
+            os.chdir(tmp_path)
+        # Prepare command that should match for hg
+        cmd = DummyCommand(script_parts=["hg"], output="abort: no repository found")
+        # Ensure _get_actual_scm returns 'hg'
+>       assert _get_actual_scm() == "hg"
+E       AssertionError: assert None == 'hg'
+E        +  where None = _get_actual_scm()
+
+test_generated.py:49: AssertionError
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_match_git_repository - AssertionError: assert ...
+FAILED test_generated.py::test_match_no_repository - assert None is False
+FAILED test_generated.py::test_match_hg_repository - AssertionError: assert N...
+3 failed, 2 warnings in 0.23s

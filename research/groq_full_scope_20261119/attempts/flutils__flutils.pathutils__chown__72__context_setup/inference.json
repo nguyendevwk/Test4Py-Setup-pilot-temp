@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-b7baadc6-00e9-4ef2-be26-5ac169ef66df",
+  "object": "chat.completion",
+  "created": 1795078277,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport pwd\nimport pytest\nfrom flutils.pathutils import chown, get_os_user, get_os_group, normalize_path\n\n\ndef test_chown_noop_on_nonexistent_path(tmp_path):\n    \"\"\"When the path does not exist, chown should silently return.\"\"\"\n    non_existent = tmp_path / \"does_not_exist.txt\"\n    # Ensure the file truly does not exist\n    assert not non_existent.exists()\n    # Using '-1' for both user and group leaves ownership unchanged\n    chown(non_existent, user='-1', group='-1')\n    # No exception should be raised and the file still does not exist\n    assert not non_existent.exists()\n\n\ndef test_chown_invalid_user_raises(tmp_path):\n    \"\"\"chown should raise OSError if the user does not exist.\"\"\"\n    file_path = tmp_path / \"file.txt\"\n    file_path.write_text(\"content\")\n    # Use a username that is unlikely to exist\n    invalid_user = \"this_user_does_not_exist_12345\"\n    with pytest.raises(OSError) as excinfo:\n        chown(file_path, user=invalid_user, group='-1')\n    # The exception message should mention the invalid user\n    assert invalid_user in str(excinfo.value)\n\n\ndef test_chown_with_glob_and_include_parent(tmp_path):\n    \"\"\"chown should apply to all matched files and optionally the parent dir.\"\"\"\n    # Create a directory structure with two files\n    subdir = tmp_path / \"sub\"\n    subdir.mkdir()\n    file1 = subdir / \"a.txt\"\n    file2 = subdir / \"b.txt\"\n    file1.write_text(\"a\")\n    file2.write_text(\"b\")\n\n    # Capture the original owner of the parent directory\n    original_uid = os.stat(tmp_path).st_uid\n    original_gid = os.stat(tmp_path).st_gid\n\n    # Use '-1' to leave ownership unchanged; this will still call os.chown\n    # but with -1, which is a no-op and should not raise an error.\n    chown(f\"{tmp_path}/sub/*\", user='-1', group='-1', include_parent=True)\n\n    # After the call, the parent directory's ownership should remain unchanged\n    new_uid = os.stat(tmp_path).st_uid\n    new_gid = os.stat(tmp_path).st_gid\n    assert new_uid == original_uid\n    assert new_gid == original_gid\n\n    # The files should still exist and be unchanged\n    assert file1.exists()\n    assert file2.exists()\n```",
+        "reasoning": "Need tests for chown. But chown uses os.chown which requires root. We cannot change ownership. We can test that it does nothing when path doesn't exist, and that it raises OSError for invalid user/group. Use tmp_path to create file. But chown will attempt to change ownership; may fail permission. We can skip actual chown by using user '-1' and group '-1' to leave unchanged. That will call os.chown with uid -1 gid -1 which does nothing? os.chown with -1 leaves unchanged. Should succeed. So test that file exists after. Also test glob pattern: create two files, call chown with include_parent True, check that parent dir chown called? Hard to detect. We can monkeypatch os.chown to record calls. But no mocks allowed. So we cannot. Maybe test that chown raises OSError when user invalid. Use get_os_user with non-existent. That will raise OSError before os.chown. So test that chown raises OSError for invalid user. Third test: path not exist: create temp dir, call chown on non-existent file, ensure no exception. Use tmp_path. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.573196109,
+    "prompt_tokens": 2263,
+    "prompt_time": 0.625701167,
+    "completion_tokens": 788,
+    "completion_time": 0.988873993,
+    "total_tokens": 3051,
+    "total_time": 1.61457516,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 244
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sg1gc1eptvhdf0tpedq6pe",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport pwd\nimport pytest\nfrom flutils.pathutils import chown, get_os_user, get_os_group, normalize_path\n\n\ndef test_chown_noop_on_nonexistent_path(tmp_path):\n    \"\"\"When the path does not exist, chown should silently return.\"\"\"\n    non_existent = tmp_path / \"does_not_exist.txt\"\n    # Ensure the file truly does not exist\n    assert not non_existent.exists()\n    # Using '-1' for both user and group leaves ownership unchanged\n    chown(non_existent, user='-1', group='-1')\n    # No exception should be raised and the file still does not exist\n    assert not non_existent.exists()\n\n\ndef test_chown_invalid_user_raises(tmp_path):\n    \"\"\"chown should raise OSError if the user does not exist.\"\"\"\n    file_path = tmp_path / \"file.txt\"\n    file_path.write_text(\"content\")\n    # Use a username that is unlikely to exist\n    invalid_user = \"this_user_does_not_exist_12345\"\n    with pytest.raises(OSError) as excinfo:\n        chown(file_path, user=invalid_user, group='-1')\n    # The exception message should mention the invalid user\n    assert invalid_user in str(excinfo.value)\n\n\ndef test_chown_with_glob_and_include_parent(tmp_path):\n    \"\"\"chown should apply to all matched files and optionally the parent dir.\"\"\"\n    # Create a directory structure with two files\n    subdir = tmp_path / \"sub\"\n    subdir.mkdir()\n    file1 = subdir / \"a.txt\"\n    file2 = subdir / \"b.txt\"\n    file1.write_text(\"a\")\n    file2.write_text(\"b\")\n\n    # Capture the original owner of the parent directory\n    original_uid = os.stat(tmp_path).st_uid\n    original_gid = os.stat(tmp_path).st_gid\n\n    # Use '-1' to leave ownership unchanged; this will still call os.chown\n    # but with -1, which is a no-op and should not raise an error.\n    chown(f\"{tmp_path}/sub/*\", user='-1', group='-1', include_parent=True)\n\n    # After the call, the parent directory's ownership should remain unchanged\n    new_uid = os.stat(tmp_path).st_uid\n    new_gid = os.stat(tmp_path).st_gid\n    assert new_uid == original_uid\n    assert new_gid == original_gid\n\n    # The files should still exist and be unchanged\n    assert file1.exists()\n    assert file2.exists()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 2.540426785009913
+}

@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-525e7cad-3a32-4275-b4fe-c359089c0e28",
+  "object": "chat.completion",
+  "created": 1795079495,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.streams import EncodedStream\nfrom httpie.context import Environment\nfrom httpie.models import HTTPMessage, OutputOptions\nfrom httpie.encoding import UTF8\nfrom httpie.utils import parse_content_type_header\n\n# Minimal HTTPMessage implementation for testing\nclass DummyMessage(HTTPMessage):\n    def __init__(self, body: bytes, content_type: str = \"text/plain\", encoding: str = \"utf-8\"):\n        self._body = body\n        self.content_type = content_type\n        self.encoding = encoding\n\n    def iter_lines(self, chunk_size: int):\n        # Yield each line separately with a trailing newline\n        for line in self._body.splitlines(True):\n            yield line, b'\\n'\n\n    def headers(self):\n        return b\"\"\n\n    def metadata(self):\n        return b\"\"\n\n# Test 1: Normal text body is encoded correctly\ndef test_encoded_stream_normal_text(tmp_path):\n    body = b\"Hello\\nWorld\\n\"\n    msg = DummyMessage(body, content_type=\"text/plain; charset=utf-8\", encoding=\"utf-8\")\n    env = Environment(stdout_isatty=True, stdout_encoding=\"utf-8\")\n    options = OutputOptions(headers=False, body=True, meta=False)\n    stream = EncodedStream(env=env, msg=msg, output_options=options)\n    result = b\"\".join(stream)\n    assert result == body\n\n# Test 2: Binary data triggers BinarySuppressedError\ndef test_encoded_stream_binary_suppressed(tmp_path):\n    body = b\"binary\\x00data\"\n    msg = DummyMessage(body, content_type=\"application/octet-stream\", encoding=\"utf-8\")\n    env = Environment(stdout_isatty=True, stdout_encoding=\"utf-8\")\n    options = OutputOptions(headers=False, body=True, meta=False)\n    stream = EncodedStream(env=env, msg=msg, output_options=options)\n    with pytest.raises(Exception) as excinfo:\n        list(stream)\n    # The exception should be BinarySuppressedError\n    from httpie.output.streams import BinarySuppressedError\n    assert isinstance(excinfo.value, BinarySuppressedError)\n\n# Test 3: Encoding guess updates after threshold\ndef test_encoded_stream_encoding_guess(tmp_path):\n    # Simulate a message where smart_decode returns different guesses\n    class GuessMessage(DummyMessage):\n        def __init__(self, body, guesses):\n            super().__init__(body)\n            self._guesses = guesses\n            self._index = 0\n\n        def iter_lines(self, chunk_size: int):\n            for line in self._body.splitlines(True):\n                yield line, b'\\n'\n\n        def decode_chunk(self, raw_chunk):\n            # Override to return a guess\n            guess = self._guesses[self._index % len(self._guesses)]\n            self._index += 1\n            return raw_chunk.decode(guess)\n\n    body = b\"test\\n\"\n    guesses = [\"utf-8\", \"utf-8\", \"utf-8\"]\n    msg = GuessMessage(body, guesses)\n    env = Environment(stdout_isatty=True, stdout_encoding=\"utf-8\")\n    options = OutputOptions(headers=False, body=True, meta=False)\n    stream = EncodedStream(env=env, msg=msg, output_options=options)\n    # Consume first two chunks; encoding should still be None\n    list(stream.iter_body())\n    assert stream.encoding is None\n    # Consume third chunk; encoding should now be set to 'utf-8'\n    list(stream.iter_body())\n    assert stream.encoding == \"utf-8\"\n```",
+        "reasoning": "Need tests for EncodedStream: normal text, binary suppression, encoding guess. Use dummy HTTPMessage with iter_lines. Create minimal HTTPMessage with content_type, encoding, iter_lines. Use Environment with stdout_isatty True. Test that iter_body yields encoded lines. Test binary suppression raises. Test encoding guess: provide raw_chunk with different encodings? smart_decode? Hard. Maybe test that encoding property updates after threshold. Use simple smart_decode that returns same string? Assume smart_decode returns (raw, None). Hard. Maybe skip encoding guess test. But need three tests. Use simple behavior."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00457563,
+    "prompt_tokens": 1249,
+    "prompt_time": 0.047281625,
+    "completion_tokens": 883,
+    "completion_time": 0.969323833,
+    "total_tokens": 2132,
+    "total_time": 1.016605458,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 121
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh6ppxec1rp1tevs46hegb",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.streams import EncodedStream\nfrom httpie.context import Environment\nfrom httpie.models import HTTPMessage, OutputOptions\nfrom httpie.encoding import UTF8\nfrom httpie.utils import parse_content_type_header\n\n# Minimal HTTPMessage implementation for testing\nclass DummyMessage(HTTPMessage):\n    def __init__(self, body: bytes, content_type: str = \"text/plain\", encoding: str = \"utf-8\"):\n        self._body = body\n        self.content_type = content_type\n        self.encoding = encoding\n\n    def iter_lines(self, chunk_size: int):\n        # Yield each line separately with a trailing newline\n        for line in self._body.splitlines(True):\n            yield line, b'\\n'\n\n    def headers(self):\n        return b\"\"\n\n    def metadata(self):\n        return b\"\"\n\n# Test 1: Normal text body is encoded correctly\ndef test_encoded_stream_normal_text(tmp_path):\n    body = b\"Hello\\nWorld\\n\"\n    msg = DummyMessage(body, content_type=\"text/plain; charset=utf-8\", encoding=\"utf-8\")\n    env = Environment(stdout_isatty=True, stdout_encoding=\"utf-8\")\n    options = OutputOptions(headers=False, body=True, meta=False)\n    stream = EncodedStream(env=env, msg=msg, output_options=options)\n    result = b\"\".join(stream)\n    assert result == body\n\n# Test 2: Binary data triggers BinarySuppressedError\ndef test_encoded_stream_binary_suppressed(tmp_path):\n    body = b\"binary\\x00data\"\n    msg = DummyMessage(body, content_type=\"application/octet-stream\", encoding=\"utf-8\")\n    env = Environment(stdout_isatty=True, stdout_encoding=\"utf-8\")\n    options = OutputOptions(headers=False, body=True, meta=False)\n    stream = EncodedStream(env=env, msg=msg, output_options=options)\n    with pytest.raises(Exception) as excinfo:\n        list(stream)\n    # The exception should be BinarySuppressedError\n    from httpie.output.streams import BinarySuppressedError\n    assert isinstance(excinfo.value, BinarySuppressedError)\n\n# Test 3: Encoding guess updates after threshold\ndef test_encoded_stream_encoding_guess(tmp_path):\n    # Simulate a message where smart_decode returns different guesses\n    class GuessMessage(DummyMessage):\n        def __init__(self, body, guesses):\n            super().__init__(body)\n            self._guesses = guesses\n            self._index = 0\n\n        def iter_lines(self, chunk_size: int):\n            for line in self._body.splitlines(True):\n                yield line, b'\\n'\n\n        def decode_chunk(self, raw_chunk):\n            # Override to return a guess\n            guess = self._guesses[self._index % len(self._guesses)]\n            self._index += 1\n            return raw_chunk.decode(guess)\n\n    body = b\"test\\n\"\n    guesses = [\"utf-8\", \"utf-8\", \"utf-8\"]\n    msg = GuessMessage(body, guesses)\n    env = Environment(stdout_isatty=True, stdout_encoding=\"utf-8\")\n    options = OutputOptions(headers=False, body=True, meta=False)\n    stream = EncodedStream(env=env, msg=msg, output_options=options)\n    # Consume first two chunks; encoding should still be None\n    list(stream.iter_body())\n    assert stream.encoding is None\n    # Consume third chunk; encoding should now be set to 'utf-8'\n    list(stream.iter_body())\n    assert stream.encoding == \"utf-8\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "3d3198f95ecd4a4aac2a0f55883cab46",
+  "_api_plus_pacing_seconds": 9.887219114985783
+}

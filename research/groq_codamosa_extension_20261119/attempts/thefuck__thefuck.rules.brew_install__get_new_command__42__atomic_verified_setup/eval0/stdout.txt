@@ -1,0 +1,105 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_get_new_command_replaces_formula _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f40736cc9d0>
+
+    def test_get_new_command_replaces_formula(monkeypatch):
+        # Arrange: mock get_closest to return a known formula
+        monkeypatch.setattr(
+            'thefuck.rules.brew_install.get_closest',
+            lambda prefix, formula: f"{formula}_fixed"
+        )
+        # Mock replace_argument to perform a simple string replace
+        monkeypatch.setattr(
+            'thefuck.utils.replace_argument',
+            lambda script, old, new: script.replace(old, new)
+        )
+        cmd = DummyCommand(
+            script="brew install foo",
+            output="Error: No available formula for foo\n"
+        )
+        # Act
+>       new_cmd = get_new_command(cmd)
+
+../../../../../../attempts/thefuck__thefuck.rules.brew_install__get_new_command__42__atomic_verified_setup/eval0/test_generated.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+thefuck/rules/brew_install.py:40: in get_new_command
+    exist_formula = _get_similar_formula(not_exist_formula)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+formula_name = 'foo'
+
+    def _get_similar_formula(formula_name):
+>       return get_closest(formula_name, _get_formulas(), cutoff=0.85)
+E       TypeError: test_get_new_command_replaces_formula.<locals>.<lambda>() got an unexpected keyword argument 'cutoff'
+
+thefuck/rules/brew_install.py:23: TypeError
+________ test_get_new_command_uses_brew_path_prefix_and_brew_available _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f40736cd270>
+
+    def test_get_new_command_uses_brew_path_prefix_and_brew_available(monkeypatch):
+        # Arrange: patch get_brew_path_prefix and brew_available to verify they are called
+        prefix_called = False
+        brew_called = False
+        def fake_prefix():
+            nonlocal prefix_called
+            prefix_called = True
+            return "/usr/local"
+        def fake_brew_available(formula):
+            nonlocal brew_called
+            brew_called = True
+            return True
+        monkeypatch.setattr(
+            'thefuck.rules.brew_install.get_brew_path_prefix',
+            fake_prefix
+        )
+        monkeypatch.setattr(
+            'thefuck.rules.brew_install.brew_available',
+            fake_brew_available
+        )
+        # Mock get_closest to return a formula that brew_available will accept
+        monkeypatch.setattr(
+            'thefuck.rules.brew_install.get_closest',
+            lambda prefix, formula: "foo"
+        )
+        # Mock replace_argument to perform a simple string replace
+        monkeypatch.setattr(
+            'thefuck.utils.replace_argument',
+            lambda script, old, new: script.replace(old, new)
+        )
+        cmd = DummyCommand(
+            script="brew install foo",
+            output="Error: No available formula for foo\n"
+        )
+        # Act
+>       new_cmd = get_new_command(cmd)
+
+../../../../../../attempts/thefuck__thefuck.rules.brew_install__get_new_command__42__atomic_verified_setup/eval0/test_generated.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+thefuck/rules/brew_install.py:40: in get_new_command
+    exist_formula = _get_similar_formula(not_exist_formula)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+formula_name = 'foo'
+
+    def _get_similar_formula(formula_name):
+>       return get_closest(formula_name, _get_formulas(), cutoff=0.85)
+E       TypeError: test_get_new_command_uses_brew_path_prefix_and_brew_available.<locals>.<lambda>() got an unexpected keyword argument 'cutoff'
+
+thefuck/rules/brew_install.py:23: TypeError
+=============================== warnings summary ===============================
+thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/thefuck__thefuck.rules.brew_install__get_new_command__42__atomic_verified_setup/eval0/test_generated.py::test_get_new_command_replaces_formula
+FAILED ../../../../../../attempts/thefuck__thefuck.rules.brew_install__get_new_command__42__atomic_verified_setup/eval0/test_generated.py::test_get_new_command_uses_brew_path_prefix_and_brew_available
+2 failed, 1 passed, 2 warnings in 0.15s

@@ -1,0 +1,50 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_default_repr_and_truncate ________________________
+
+    def test_default_repr_and_truncate():
+        # Normal object: repr is short enough, no truncation
+        result = get_shortish_repr(12345)
+        assert result == "12345"
+    
+        # Long string triggers truncation
+        long_str = "a" * 50
+        truncated = get_shortish_repr(long_str, max_length=10)
+        # Should keep first 4 and last 3 characters with ellipsis
+>       assert truncated == "aaaa...aaa"
+E       assert "'aa...aaa'" == 'aaaa...aaa'
+E         
+E         - aaaa...aaa
+E         ? ^^
+E         + 'aa...aaa'
+E         ? ^        +
+
+../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.utils__get_shortish_repr__46__atomic_verified_setup/eval0/test_generated.py:13: AssertionError
+______________________ test_normalize_and_error_handling _______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-245/test_normalize_and_error_handl0')
+
+    def test_normalize_and_error_handling(tmp_path):
+        # Object whose repr contains a memory address
+        class WithAddr:
+            def __repr__(self):
+                return f"<WithAddr at 0x1234>"
+        obj = WithAddr()
+        # Without normalization, address remains
+        raw = get_shortish_repr(obj)
+        assert "0x1234" in raw
+        # With normalization, address is removed
+        norm = get_shortish_repr(obj, normalize=True)
+        assert "0x1234" not in norm
+>       assert norm == "<WithAddr >"
+E       AssertionError: assert '<WithAddr>' == '<WithAddr >'
+E         
+E         - <WithAddr >
+E         ?          -
+E         + <WithAddr>
+
+../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.utils__get_shortish_repr__46__atomic_verified_setup/eval0/test_generated.py:43: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.utils__get_shortish_repr__46__atomic_verified_setup/eval0/test_generated.py::test_default_repr_and_truncate
+FAILED ../../../../../../../groq_context_development_20261119/attempts/PySnooper__pysnooper.utils__get_shortish_repr__46__atomic_verified_setup/eval0/test_generated.py::test_normalize_and_error_handling
+2 failed, 1 passed in 0.12s

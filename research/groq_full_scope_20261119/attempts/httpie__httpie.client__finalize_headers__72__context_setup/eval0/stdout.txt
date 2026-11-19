@@ -1,0 +1,53 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_finalize_headers_encodes_and_strips ___________________
+
+    def test_finalize_headers_encodes_and_strips():
+        """Headers with leading/trailing whitespace and string values are stripped and encoded."""
+        raw = HTTPHeadersDict()
+        raw.add("X-Test-Header", "  value with spaces  ")
+        raw.add("X-Another", "simple")
+        raw.add("X-Empty", None)
+    
+        final = finalize_headers(raw)
+    
+        # The header values should be stripped of whitespace and encoded to bytes
+        assert final["X-Test-Header"] == b"value with spaces"
+        assert final["X-Another"] == b"simple"
+        # None values should be omitted
+>       assert "X-Empty" not in final
+E       AssertionError: assert 'X-Empty' not in <HTTPHeadersDict('X-Test-Header': b'value with spaces', 'X-Another': b'simple', 'X-Empty': None)>
+
+test_generated.py:19: AssertionError
+_________________ test_finalize_headers_mixed_types_and_order __________________
+
+    def test_finalize_headers_mixed_types_and_order():
+        """Headers with mixed types preserve order and correctly handle non-string values."""
+        raw = HTTPHeadersDict()
+        raw.add("X-Int", 123)          # non-string, should stay as is
+        raw.add("X-None", None)        # None, should be omitted
+        raw.add("X-Bytes", b"bytes")   # bytes, should stay as is
+    
+>       final = finalize_headers(raw)
+
+test_generated.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+headers = <HTTPHeadersDict('X-Int': 123, 'X-None': None, 'X-Bytes': b'bytes')>
+
+    def finalize_headers(headers: HTTPHeadersDict) -> HTTPHeadersDict:
+        final_headers = HTTPHeadersDict()
+        for name, value in headers.items():
+            if value is not None:
+                # “leading or trailing LWS MAY be removed without
+                # changing the semantics of the field value”
+                # <https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html>
+                # Also, requests raises `InvalidHeader` for leading spaces.
+>               value = value.strip()
+E               AttributeError: 'int' object has no attribute 'strip'
+
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/client.py:200: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_finalize_headers_encodes_and_strips - Assertio...
+FAILED test_generated.py::test_finalize_headers_mixed_types_and_order - Attri...
+2 failed, 1 passed in 0.92s

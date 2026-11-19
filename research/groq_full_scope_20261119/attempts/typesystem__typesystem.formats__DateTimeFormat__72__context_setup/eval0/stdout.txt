@@ -1,0 +1,40 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_valid_datetime_with_timezone_and_microseconds ______________
+
+    def test_valid_datetime_with_timezone_and_microseconds():
+        fmt = DateTimeFormat()
+        # ISO string with UTC timezone and 3‑digit microseconds
+        iso_str = "2023-07-15T12:34:56.789Z"
+        result = fmt.validate(iso_str)
+        assert isinstance(result, datetime.datetime)
+        assert result == datetime.datetime(2023, 7, 15, 12, 34, 56, 789000, tzinfo=datetime.timezone.utc)
+        # Serialization should preserve the Z suffix
+        serialized = fmt.serialize(result)
+>       assert serialized == iso_str
+E       AssertionError: assert '2023-07-15T12:34:56.789000Z' == '2023-07-15T12:34:56.789Z'
+E         
+E         - 2023-07-15T12:34:56.789Z
+E         + 2023-07-15T12:34:56.789000Z
+E         ?                        +++
+
+test_generated.py:14: AssertionError
+________________ test_invalid_datetime_raises_validation_error _________________
+
+    def test_invalid_datetime_raises_validation_error():
+        fmt = DateTimeFormat()
+        # Invalid month (13) should trigger ValueError in datetime constructor
+        iso_str = "2023-13-01T00:00:00Z"
+        with pytest.raises(Exception) as excinfo:
+            fmt.validate(iso_str)
+        # The exception should be a ValidationError with code "invalid"
+>       assert hasattr(excinfo.value, "code") and excinfo.value.code == "invalid"
+E       AssertionError: assert (False)
+E        +  where False = hasattr(ValidationError(text='Must be a real datetime.', code='invalid'), 'code')
+E        +    where ValidationError(text='Must be a real datetime.', code='invalid') = <ExceptionInfo ValidationError(text='Must be a real datetime.', code='invalid') tblen=2>.value
+
+test_generated.py:34: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_valid_datetime_with_timezone_and_microseconds
+FAILED test_generated.py::test_invalid_datetime_raises_validation_error - Ass...
+2 failed, 1 passed in 0.13s

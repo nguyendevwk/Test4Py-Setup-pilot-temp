@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-85f0093b-a913-42ea-867d-e6f29a1d76a1",
+  "object": "chat.completion",
+  "created": 1795076168,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport pathlib\nimport pytest\nfrom mimesis.providers.base import BaseDataProvider\nfrom mimesis.enums import Locale\nfrom mimesis.exceptions import NonEnumerableError\n\n# Create a minimal concrete provider for testing\nclass TestProvider(BaseDataProvider):\n    class Meta:\n        datafile = \"test.json\"\n        datadir = pathlib.Path(__file__).parent / \"data\"\n\n@pytest.fixture\ndef provider(tmp_path):\n    # Prepare a data directory with a JSON file for the default locale\n    data_dir = tmp_path / \"data\"\n    data_dir.mkdir()\n    (data_dir / \"en\").mkdir()\n    (data_dir / \"en\" / \"test.json\").write_text(\n        json.dumps({\"a\": {\"b\": 1}, \"c\": 2})\n    )\n    # Patch the provider's datadir to point to the temporary directory\n    TestProvider.Meta.datadir = data_dir\n    return TestProvider()\n\ndef test_extract_and_update_dataset(provider):\n    # Normal extraction\n    assert provider._extract([\"a\", \"b\"]) == 1\n    # Missing key returns default\n    assert provider._extract([\"a\", \"x\"], default=\"missing\") == \"missing\"\n    # Empty key list raises ValueError\n    with pytest.raises(ValueError):\n        provider._extract([])\n    # Update dataset with a new key\n    provider.update_dataset({\"d\": 4})\n    assert provider._extract([\"d\"]) == 4\n    # Updating with non-dict raises TypeError\n    with pytest.raises(TypeError):\n        provider.update_dataset([\"not\", \"a\", \"dict\"])\n\ndef test_override_locale_context_manager(tmp_path):\n    # Create data for two locales\n    data_dir = tmp_path / \"data\"\n    data_dir.mkdir()\n    for loc in (\"en\", \"fr\"):\n        (data_dir / loc).mkdir()\n        (data_dir / loc / \"test.json\").write_text(\n            json.dumps({\"lang\": loc})\n        )\n    TestProvider.Meta.datadir = data_dir\n    provider = TestProvider()\n    # Default locale\n    assert provider.get_current_locale() == \"en\"\n    # Override locale temporarily\n    with provider.override_locale(Locale.FR):\n        assert provider.get_current_locale() == \"fr\"\n        assert provider._extract([\"lang\"]) == \"fr\"\n    # After context, locale restored\n    assert provider.get_current_locale() == \"en\"\n    assert provider._extract([\"lang\"]) == \"en\"\n\ndef test_str_representation_and_invalid_override():\n    provider = TestProvider()\n    # __str__ includes class name and locale\n    assert str(provider) == f\"TestProvider <{Locale.EN}>\"\n    # Attempt to override with an invalid locale (not a Locale enum)\n    with pytest.raises(ValueError):\n        provider.override_locale(\"invalid\")  # type: ignore[arg-type]\n```",
+        "reasoning": "We need to test BaseDataProvider. We need a concrete subclass with Meta datafile. Use tmp_path to create json files. Test _extract normal, boundary empty keys raises, missing keys returns default. Also test update_dataset type error. And override_locale context manager. Provide three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051996305,
+    "prompt_tokens": 1417,
+    "prompt_time": 0.071559575,
+    "completion_tokens": 657,
+    "completion_time": 0.744917947,
+    "total_tokens": 2074,
+    "total_time": 0.816477522,
+    "completion_tokens_details": {
+      "reasoning_tokens": 59
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7se15fkewr8ccf67xjnnvx6",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport pathlib\nimport pytest\nfrom mimesis.providers.base import BaseDataProvider\nfrom mimesis.enums import Locale\nfrom mimesis.exceptions import NonEnumerableError\n\n# Create a minimal concrete provider for testing\nclass TestProvider(BaseDataProvider):\n    class Meta:\n        datafile = \"test.json\"\n        datadir = pathlib.Path(__file__).parent / \"data\"\n\n@pytest.fixture\ndef provider(tmp_path):\n    # Prepare a data directory with a JSON file for the default locale\n    data_dir = tmp_path / \"data\"\n    data_dir.mkdir()\n    (data_dir / \"en\").mkdir()\n    (data_dir / \"en\" / \"test.json\").write_text(\n        json.dumps({\"a\": {\"b\": 1}, \"c\": 2})\n    )\n    # Patch the provider's datadir to point to the temporary directory\n    TestProvider.Meta.datadir = data_dir\n    return TestProvider()\n\ndef test_extract_and_update_dataset(provider):\n    # Normal extraction\n    assert provider._extract([\"a\", \"b\"]) == 1\n    # Missing key returns default\n    assert provider._extract([\"a\", \"x\"], default=\"missing\") == \"missing\"\n    # Empty key list raises ValueError\n    with pytest.raises(ValueError):\n        provider._extract([])\n    # Update dataset with a new key\n    provider.update_dataset({\"d\": 4})\n    assert provider._extract([\"d\"]) == 4\n    # Updating with non-dict raises TypeError\n    with pytest.raises(TypeError):\n        provider.update_dataset([\"not\", \"a\", \"dict\"])\n\ndef test_override_locale_context_manager(tmp_path):\n    # Create data for two locales\n    data_dir = tmp_path / \"data\"\n    data_dir.mkdir()\n    for loc in (\"en\", \"fr\"):\n        (data_dir / loc).mkdir()\n        (data_dir / loc / \"test.json\").write_text(\n            json.dumps({\"lang\": loc})\n        )\n    TestProvider.Meta.datadir = data_dir\n    provider = TestProvider()\n    # Default locale\n    assert provider.get_current_locale() == \"en\"\n    # Override locale temporarily\n    with provider.override_locale(Locale.FR):\n        assert provider.get_current_locale() == \"fr\"\n        assert provider._extract([\"lang\"]) == \"fr\"\n    # After context, locale restored\n    assert provider.get_current_locale() == \"en\"\n    assert provider._extract([\"lang\"]) == \"en\"\n\ndef test_str_representation_and_invalid_override():\n    provider = TestProvider()\n    # __str__ includes class name and locale\n    assert str(provider) == f\"TestProvider <{Locale.EN}>\"\n    # Attempt to override with an invalid locale (not a Locale enum)\n    with pytest.raises(ValueError):\n        provider.override_locale(\"invalid\")  # type: ignore[arg-type]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.2092559250304475
+}

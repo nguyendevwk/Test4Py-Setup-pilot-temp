@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-140fb3b9-41b8-450b-8e43-ff86769d7914",
+  "object": "chat.completion",
+  "created": 1795077576,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport types\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKPlaylistBaseIE\n\n# Helper dummy class to replace NRKIE in the module\nclass DummyNRKIE:\n    @staticmethod\n    def ie_key():\n        return \"DummyNRKIE\"\n\n# Test that the unimplemented _extract_description returns None\ndef test_extract_description_returns_none():\n    class DummyIE(NRKPlaylistBaseIE):\n        def _match_id(self, url):\n            return \"dummy_id\"\n        def _download_webpage(self, url, playlist_id):\n            return \"\"\n        def _extract_title(self, webpage):\n            return \"Dummy Title\"\n        def playlist_result(self, entries, playlist_id, title, description):\n            return {\n                \"entries\": entries,\n                \"id\": playlist_id,\n                \"title\": title,\n                \"description\": description,\n            }\n    dummy = DummyIE()\n    assert dummy._extract_description(\"\") is None\n\n# Test that _real_extract correctly builds the playlist result\ndef test_real_extract_builds_playlist(tmp_path):\n    # Prepare a fake webpage containing two video IDs\n    fake_webpage = \"\"\"\n        <div class=\"video\" data-id=\"vid1\"></div>\n        <div class=\"video\" data-id=\"vid2\"></div>\n    \"\"\"\n    # Patch the module's NRKIE reference\n    original_nrkie = getattr(NRKPlaylistBaseIE, \"__module__\").__dict__.get(\"NRKIE\", None)\n    NRKPlaylistBaseIE.__module__ = types.SimpleNamespace(NRKIE=DummyNRKIE)\n\n    class DummyIE(NRKPlaylistBaseIE):\n        _ITEM_RE = r'data-id=\"([^\"]+)\"'\n        def _match_id(self, url):\n            return \"playlist123\"\n        def _download_webpage(self, url, playlist_id):\n            return fake_webpage\n        def _extract_title(self, webpage):\n            return \"Test Playlist\"\n        def _extract_description(self, webpage):\n            return \"A test description.\"\n        def playlist_result(self, entries, playlist_id, title, description):\n            return {\n                \"entries\": entries,\n                \"id\": playlist_id,\n                \"title\": title,\n                \"description\": description,\n            }\n\n    dummy = DummyIE()\n    result = dummy._real_extract(\"http://example.com/playlist/playlist123\")\n\n    # Verify playlist metadata\n    assert result[\"id\"] == \"playlist123\"\n    assert result[\"title\"] == \"Test Playlist\"\n    assert result[\"description\"] == \"A test description.\"\n\n    # Verify entries list\n    assert isinstance(result[\"entries\"], list)\n    assert len(result[\"entries\"]) == 2\n    expected_urls = [\n        \"nrk:vid1\",\n        \"nrk:vid2\",\n    ]\n    for entry, expected_url in zip(result[\"entries\"], expected_urls):\n        assert entry[\"url\"] == expected_url\n        assert entry[\"ie_key\"] == DummyNRKIE.ie_key()\n\n    # Restore original NRKIE if it existed\n    if original_nrkie is not None:\n        NRKPlaylistBaseIE.__module__.NRKIE = original_nrkie\n```",
+        "reasoning": "We need to test NRKPlaylistBaseIE._extract_description which is pass. So cannot test. Maybe test _real_extract? But it relies on download_webpage etc. Can't. So maybe test that _extract_description is not implemented? We can assert that calling it raises NotImplementedError? But it's pass, so returns None. So test that returns None. Also test that entries list comprehension works? But need webpage. We can monkeypatch _match_id, _download_webpage, _ITEM_RE, _extract_title, _extract_description, playlist_result. But cannot mock target. But we can subclass to override. But tests should not modify product code. But we can create a dummy subclass in test. That's allowed. So create DummyIE inheriting NRKPlaylistBaseIE, override methods to return controlled values. Then test _real_extract returns expected playlist_result call. We can patch NRKIE.ie_key? But NRKIE not imported. But we can mock by setting NRKIE = type with ie_key returning 'NRKIE'. In test, we can monkeypatch module attributes. Use importlib. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051769073,
+    "prompt_tokens": 469,
+    "prompt_time": 0.027257605,
+    "completion_tokens": 898,
+    "completion_time": 0.990910785,
+    "total_tokens": 1367,
+    "total_time": 1.01816839,
+    "completion_tokens_details": {
+      "reasoning_tokens": 231
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfc4q0eaham0xemrqx14wa",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport types\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKPlaylistBaseIE\n\n# Helper dummy class to replace NRKIE in the module\nclass DummyNRKIE:\n    @staticmethod\n    def ie_key():\n        return \"DummyNRKIE\"\n\n# Test that the unimplemented _extract_description returns None\ndef test_extract_description_returns_none():\n    class DummyIE(NRKPlaylistBaseIE):\n        def _match_id(self, url):\n            return \"dummy_id\"\n        def _download_webpage(self, url, playlist_id):\n            return \"\"\n        def _extract_title(self, webpage):\n            return \"Dummy Title\"\n        def playlist_result(self, entries, playlist_id, title, description):\n            return {\n                \"entries\": entries,\n                \"id\": playlist_id,\n                \"title\": title,\n                \"description\": description,\n            }\n    dummy = DummyIE()\n    assert dummy._extract_description(\"\") is None\n\n# Test that _real_extract correctly builds the playlist result\ndef test_real_extract_builds_playlist(tmp_path):\n    # Prepare a fake webpage containing two video IDs\n    fake_webpage = \"\"\"\n        <div class=\"video\" data-id=\"vid1\"></div>\n        <div class=\"video\" data-id=\"vid2\"></div>\n    \"\"\"\n    # Patch the module's NRKIE reference\n    original_nrkie = getattr(NRKPlaylistBaseIE, \"__module__\").__dict__.get(\"NRKIE\", None)\n    NRKPlaylistBaseIE.__module__ = types.SimpleNamespace(NRKIE=DummyNRKIE)\n\n    class DummyIE(NRKPlaylistBaseIE):\n        _ITEM_RE = r'data-id=\"([^\"]+)\"'\n        def _match_id(self, url):\n            return \"playlist123\"\n        def _download_webpage(self, url, playlist_id):\n            return fake_webpage\n        def _extract_title(self, webpage):\n            return \"Test Playlist\"\n        def _extract_description(self, webpage):\n            return \"A test description.\"\n        def playlist_result(self, entries, playlist_id, title, description):\n            return {\n                \"entries\": entries,\n                \"id\": playlist_id,\n                \"title\": title,\n                \"description\": description,\n            }\n\n    dummy = DummyIE()\n    result = dummy._real_extract(\"http://example.com/playlist/playlist123\")\n\n    # Verify playlist metadata\n    assert result[\"id\"] == \"playlist123\"\n    assert result[\"title\"] == \"Test Playlist\"\n    assert result[\"description\"] == \"A test description.\"\n\n    # Verify entries list\n    assert isinstance(result[\"entries\"], list)\n    assert len(result[\"entries\"]) == 2\n    expected_urls = [\n        \"nrk:vid1\",\n        \"nrk:vid2\",\n    ]\n    for entry, expected_url in zip(result[\"entries\"], expected_urls):\n        assert entry[\"url\"] == expected_url\n        assert entry[\"ie_key\"] == DummyNRKIE.ie_key()\n\n    # Restore original NRKIE if it existed\n    if original_nrkie is not None:\n        NRKPlaylistBaseIE.__module__.NRKIE = original_nrkie\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3701079330057837
+}

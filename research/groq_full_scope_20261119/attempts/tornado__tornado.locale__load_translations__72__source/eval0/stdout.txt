@@ -1,0 +1,43 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_________________________ test_load_translations_basic _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_translations__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_load_translations_basic0')
+
+    def test_load_translations_basic(tmp_path):
+        # Create a simple CSV with two locales
+        en_csv = tmp_path / "en_US.csv"
+        es_csv = tmp_path / "es_ES.csv"
+        en_csv.write_text('"Hello","Hola"\n', encoding='utf-8')
+        es_csv.write_text('"Goodbye","Adiós"\n', encoding='utf-8')
+        load_translations(str(tmp_path))
+        # Check that translations are loaded correctly
+>       assert _translations["en_US"]["unknown"]["Hello"] == "Hola"
+E       KeyError: 'en_US'
+
+test_generated.py:16: KeyError
+__________________ test_load_translations_plural_and_encoding __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.locale__load_translations__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_load_translations_plural_0')
+
+    def test_load_translations_plural_and_encoding(tmp_path):
+        # Create a UTF-16 LE encoded CSV with plural indicators
+        csv_path = tmp_path / "fr_FR.csv"
+        rows = [
+            ['"Item","Article"', 'unknown'],
+            ['"%(name)s liked this","Un %(name)s a aimé ceci","plural"'],
+            ['"%(name)s liked this","Un %(name)s a aimé ceci","singular"'],
+        ]
+        # Write with BOM for UTF-16 LE
+        with open(csv_path, 'wb') as f:
+            f.write(codecs.BOM_UTF16_LE)
+            writer = csv.writer(f, dialect='excel')
+            for row in rows:
+>               writer.writerow(row)
+E               TypeError: a bytes-like object is required, not 'str'
+
+test_generated.py:34: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_load_translations_basic - KeyError: 'en_US'
+FAILED test_generated.py::test_load_translations_plural_and_encoding - TypeEr...
+2 failed, 1 passed in 0.16s

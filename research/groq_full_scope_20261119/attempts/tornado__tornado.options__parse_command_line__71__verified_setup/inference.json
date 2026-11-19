@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-c9443fce-8785-42d7-93e9-2e1030b6bd0a",
+  "object": "chat.completion",
+  "created": 1795079217,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado import options\nfrom tornado.options import define, options as opts\n\n# Ensure a clean state before each test\n@pytest.fixture(autouse=True)\ndef reset_options():\n    opts.reset()\n    yield\n    opts.reset()\n\n\ndef test_parse_command_line_normal():\n    # Define a simple integer option\n    define(\"count\", default=0, type=int, help=\"Number of items\")\n    # Parse a command line that sets the option and includes a positional argument\n    remaining = opts.parse_command_line([\"--count\", \"5\", \"positional\"])\n    # The option should be set correctly\n    assert opts.count == 5\n    # The positional argument should remain in the returned list\n    assert remaining == [\"positional\"]\n\n\ndef test_parse_command_line_empty():\n    # No arguments should result in an empty list and no options set\n    remaining = opts.parse_command_line([])\n    assert remaining == []\n    # Default values should remain unchanged\n    assert not hasattr(opts, \"foo\")  # no option defined\n\n\ndef test_parse_command_line_unknown_option():\n    # Attempting to parse an unknown option should raise a ValueError\n    with pytest.raises(ValueError) as excinfo:\n        opts.parse_command_line([\"--unknown\"])\n    # The error message should mention the unknown option\n    assert \"--unknown\" in str(excinfo.value)\n```",
+        "reasoning": "We need to write tests for parse_command_line from tornado.options. We need to import tornado.options. Let's inspect its behavior. In tornado.options, parse_command_line returns list of remaining args after parsing options. We can test normal parsing, boundary (empty args), error (unknown option). Use tmp_path? Not needed. Use pytest.raises for error. Let's write three tests: 1) normal: define an option, parse args with that option, assert remaining args. 2) boundary: no args, final=False? Actually final default True. If no args, returns empty list. 3) error: unknown option triggers error? parse_command_line raises ValueError? Let's check. In tornado.options, unknown option raises ValueError. We'll test that. Ensure we reset options between tests. Use tornado.options.options.reset? There's options.reset? In tornado.options, there is options.reset() to reset options. We'll use that. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047451887,
+    "prompt_tokens": 413,
+    "prompt_time": 0.03194293,
+    "completion_tokens": 480,
+    "completion_time": 0.627776305,
+    "total_tokens": 893,
+    "total_time": 0.659719235,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 190
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgy7beegsrjnjhy8jyc6e2",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado import options\nfrom tornado.options import define, options as opts\n\n# Ensure a clean state before each test\n@pytest.fixture(autouse=True)\ndef reset_options():\n    opts.reset()\n    yield\n    opts.reset()\n\n\ndef test_parse_command_line_normal():\n    # Define a simple integer option\n    define(\"count\", default=0, type=int, help=\"Number of items\")\n    # Parse a command line that sets the option and includes a positional argument\n    remaining = opts.parse_command_line([\"--count\", \"5\", \"positional\"])\n    # The option should be set correctly\n    assert opts.count == 5\n    # The positional argument should remain in the returned list\n    assert remaining == [\"positional\"]\n\n\ndef test_parse_command_line_empty():\n    # No arguments should result in an empty list and no options set\n    remaining = opts.parse_command_line([])\n    assert remaining == []\n    # Default values should remain unchanged\n    assert not hasattr(opts, \"foo\")  # no option defined\n\n\ndef test_parse_command_line_unknown_option():\n    # Attempting to parse an unknown option should raise a ValueError\n    with pytest.raises(ValueError) as excinfo:\n        opts.parse_command_line([\"--unknown\"])\n    # The error message should mention the unknown option\n    assert \"--unknown\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1010976249817759
+}

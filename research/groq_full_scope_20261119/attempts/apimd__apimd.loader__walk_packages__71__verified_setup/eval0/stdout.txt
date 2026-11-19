@@ -1,0 +1,66 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_walk_packages_yields_expected_names ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_yields_expe0')
+
+    def test_walk_packages_yields_expected_names(tmp_path):
+        """
+        Verify that walk_packages yields the correct dotted names and paths
+        for a simple package structure with .py and .pyi files.
+        """
+        # Create a package structure
+        pkg_dir = tmp_path / "mypkg"
+        pkg_dir.mkdir()
+        create_file(pkg_dir / "__init__.py")
+        create_file(pkg_dir / "module.py")
+        create_file(pkg_dir / "sub" / "__init__.py")
+        create_file(pkg_dir / "sub" / "submodule.pyi")
+    
+        # Run walk_packages
+        results = list(walk_packages("mypkg", str(tmp_path)))
+        # Expected names: mypkg, mypkg.module, mypkg.sub, mypkg.sub.submodule
+        expected = {
+            ("mypkg", str(pkg_dir)),
+            ("mypkg.module", str(pkg_dir / "module.py")),
+            ("mypkg.sub", str(pkg_dir / "sub" / "__init__.py")),
+            ("mypkg.sub.submodule", str(pkg_dir / "sub" / "submodule.pyi")),
+        }
+>       assert set(results) == expected
+E       AssertionError: assert {('mypkg', '/...b/submodule')} == {('mypkg', '/...bmodule.pyi')}
+E         
+E         Extra items in the left set:
+E         ('mypkg', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_yields_expe0/mypkg/__init__')
+E         ('mypkg.sub.submodule', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd...._packages__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_yields_expe0/mypkg/sub/submodule')
+E         ('mypkg.sub', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_2...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+test_generated.py:35: AssertionError
+__________________ test_walk_packages_skips_non_python_files ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_skips_non_p0')
+
+    def test_walk_packages_skips_non_python_files(tmp_path):
+        """
+        Verify that walk_packages skips files that are not .py or .pyi.
+        """
+        pkg_dir = tmp_path / "pkg"
+        pkg_dir.mkdir()
+        create_file(pkg_dir / "script.sh")
+        create_file(pkg_dir / "data.txt")
+        create_file(pkg_dir / "module.py")
+    
+        results = list(walk_packages("pkg", str(tmp_path)))
+        # Only the .py file should be yielded
+>       assert results == [("pkg.module", str(pkg_dir / "module.py"))]
+E       AssertionError: assert [('pkg.module.../pkg/module')] == [('pkg.module...g/module.py')]
+E         
+E         At index 0 diff: ('pkg.module', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_skips_non_p0/pkg/module') != ('pkg.module', '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/apimd__apimd.loader__walk_packages__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_walk_packages_skips_non_p0/pkg/module.py')
+E         Use -v to get more diff
+
+test_generated.py:49: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_walk_packages_yields_expected_names - Assertio...
+FAILED test_generated.py::test_walk_packages_skips_non_python_files - Asserti...
+2 failed, 1 passed in 0.13s

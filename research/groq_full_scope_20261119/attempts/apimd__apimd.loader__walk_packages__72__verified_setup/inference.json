@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-c237cff9-74eb-4113-a939-7bb1d9aa23b3",
+  "object": "chat.completion",
+  "created": 1795076305,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport importlib\nimport pytest\nfrom apimd.loader import walk_packages\n\n# Helper to create a package structure\ndef create_pkg_structure(tmp_path, pkg_name, files):\n    pkg_dir = tmp_path / pkg_name\n    pkg_dir.mkdir()\n    for file in files:\n        (pkg_dir / file).write_text(\"# dummy\")\n    return pkg_dir\n\ndef test_walk_packages_returns_expected_names(tmp_path):\n    # Create a package with two modules and an __init__.py\n    pkg_dir = create_pkg_structure(tmp_path, \"mypkg\", [\"__init__.py\", \"module1.py\", \"sub/__init__.py\", \"sub/module2.py\"])\n    # Ensure subdirectory exists\n    (pkg_dir / \"sub\").mkdir()\n    # Run walk_packages\n    results = list(walk_packages(\"mypkg\", str(tmp_path)))\n    # Expected names: mypkg, mypkg.module1, mypkg.sub, mypkg.sub.module2\n    expected = {\n        (\"mypkg\", str(pkg_dir)),\n        (\"mypkg.module1\", str(pkg_dir / \"module1.py\")),\n        (\"mypkg.sub\", str(pkg_dir / \"sub\")),\n        (\"mypkg.sub.module2\", str(pkg_dir / \"sub\" / \"module2.py\")),\n    }\n    assert set(results) == expected\n\ndef test_walk_packages_skips_non_python_files(tmp_path):\n    # Create a package with a .txt file\n    pkg_dir = create_pkg_structure(tmp_path, \"pkg\", [\"__init__.py\", \"script.py\", \"notes.txt\"])\n    # Run walk_packages\n    results = list(walk_packages(\"pkg\", str(tmp_path)))\n    # Only python files should be yielded\n    assert (\"pkg\", str(pkg_dir)) in results\n    assert (\"pkg.script\", str(pkg_dir / \"script.py\")) in results\n    # .txt file should not appear\n    assert all(name != \"pkg.notes\" for name, _ in results)\n\ndef test_walk_packages_with_nonexistent_path(tmp_path):\n    # Provide a path that does not exist\n    nonexistent = tmp_path / \"does_not_exist\"\n    # walk_packages should not raise an exception and yield nothing\n    results = list(walk_packages(\"any\", str(nonexistent)))\n    assert results == []\n```",
+        "reasoning": "We need to write tests for walk_packages. We need to create temporary directories with .py files. Test normal behavior: returns correct names. Boundary: no .py files. Error: path not existing? walk will handle. But we can test that it skips non .py. Use tmp_path. Three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054372951,
+    "prompt_tokens": 537,
+    "prompt_time": 0.027460548,
+    "completion_tokens": 550,
+    "completion_time": 0.603312099,
+    "total_tokens": 1087,
+    "total_time": 0.630772647,
+    "completion_tokens_details": {
+      "reasoning_tokens": 64
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7se5bwnenj9njhre21jcbeh",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport importlib\nimport pytest\nfrom apimd.loader import walk_packages\n\n# Helper to create a package structure\ndef create_pkg_structure(tmp_path, pkg_name, files):\n    pkg_dir = tmp_path / pkg_name\n    pkg_dir.mkdir()\n    for file in files:\n        (pkg_dir / file).write_text(\"# dummy\")\n    return pkg_dir\n\ndef test_walk_packages_returns_expected_names(tmp_path):\n    # Create a package with two modules and an __init__.py\n    pkg_dir = create_pkg_structure(tmp_path, \"mypkg\", [\"__init__.py\", \"module1.py\", \"sub/__init__.py\", \"sub/module2.py\"])\n    # Ensure subdirectory exists\n    (pkg_dir / \"sub\").mkdir()\n    # Run walk_packages\n    results = list(walk_packages(\"mypkg\", str(tmp_path)))\n    # Expected names: mypkg, mypkg.module1, mypkg.sub, mypkg.sub.module2\n    expected = {\n        (\"mypkg\", str(pkg_dir)),\n        (\"mypkg.module1\", str(pkg_dir / \"module1.py\")),\n        (\"mypkg.sub\", str(pkg_dir / \"sub\")),\n        (\"mypkg.sub.module2\", str(pkg_dir / \"sub\" / \"module2.py\")),\n    }\n    assert set(results) == expected\n\ndef test_walk_packages_skips_non_python_files(tmp_path):\n    # Create a package with a .txt file\n    pkg_dir = create_pkg_structure(tmp_path, \"pkg\", [\"__init__.py\", \"script.py\", \"notes.txt\"])\n    # Run walk_packages\n    results = list(walk_packages(\"pkg\", str(tmp_path)))\n    # Only python files should be yielded\n    assert (\"pkg\", str(pkg_dir)) in results\n    assert (\"pkg.script\", str(pkg_dir / \"script.py\")) in results\n    # .txt file should not appear\n    assert all(name != \"pkg.notes\" for name, _ in results)\n\ndef test_walk_packages_with_nonexistent_path(tmp_path):\n    # Provide a path that does not exist\n    nonexistent = tmp_path / \"does_not_exist\"\n    # walk_packages should not raise an exception and yield nothing\n    results = list(walk_packages(\"any\", str(nonexistent)))\n    assert results == []\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9878927350509912
+}

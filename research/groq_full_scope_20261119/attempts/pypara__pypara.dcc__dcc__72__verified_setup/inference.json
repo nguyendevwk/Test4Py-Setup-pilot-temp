@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-08ecf675-8e5e-47f1-9a79-0680d891124f",
+  "object": "chat.completion",
+  "created": 1795079327,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom pypara.dcc import dcc, DCCRegistry, DCC\nfrom pypara.currencies import Currency\n\n# Helper: a simple day count fraction calculator that returns a constant\ndef dummy_calculator(start: datetime.date, end: datetime.date, ref: datetime.date, freq: float = None) -> float:\n    return 1.0\n\ndef test_dcc_registers_default():\n    \"\"\"Decorator registers a DCC with default parameters.\"\"\"\n    # Apply decorator\n    decorated = dcc(\"ACT/360\")(dummy_calculator)\n    # The function should now have a __dcc attribute\n    assert hasattr(decorated, \"__dcc\")\n    dcc_obj = getattr(decorated, \"__dcc\")\n    assert isinstance(dcc_obj, DCC)\n    # The registry should contain the new DCC\n    assert dcc_obj in DCCRegistry._registry  # type: ignore[attr-defined]\n\ndef test_dcc_registers_with_altnames_and_ccys():\n    \"\"\"Decorator registers a DCC with alternative names and currencies.\"\"\"\n    alt_names = {\"Actual/360\", \"ACT/360\"}\n    # Use a real Currency instance\n    usd = Currency(\"USD\")\n    ccys = {usd}\n    decorated = dcc(\"ACT/360\", altnames=alt_names, ccys=ccys)(dummy_calculator)\n    dcc_obj = getattr(decorated, \"__dcc\")\n    assert dcc_obj.name == \"ACT/360\"\n    assert dcc_obj.altnames == alt_names\n    assert dcc_obj.ccys == ccys\n    assert dcc_obj in DCCRegistry._registry  # type: ignore[attr-defined]\n\ndef test_dcc_decorator_returns_original_function():\n    \"\"\"Decorator returns the original function unchanged.\"\"\"\n    decorated = dcc(\"ACT/360\")(dummy_calculator)\n    # The returned object should be the same callable as the original\n    assert decorated is dummy_calculator\n    # Calling the function should produce the expected constant result\n    start = datetime.date(2023, 1, 1)\n    end = datetime.date(2023, 12, 31)\n    ref = datetime.date(2023, 1, 1)\n    assert decorated(start, end, ref) == 1.0\n```",
+        "reasoning": "We need to test dcc decorator. We can create dummy function and check registration. Need DCCRegistry etc. Let's inspect product code? Not available. Assume DCCRegistry.register stores in registry. We'll test that after decoration, function has __dcc attribute and registry contains it. Also test that passing None works. Third test: passing altnames and ccys sets. Use dummy Currency class? import from pypara.currencies.Currency. We'll just create a dummy set? Might need actual Currency objects. We can import Currency and use one. We'll test that registry contains correct name. Use tmp_path? not needed. We'll write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005152507,
+    "prompt_tokens": 715,
+    "prompt_time": 0.011590083,
+    "completion_tokens": 619,
+    "completion_time": 0.652289313,
+    "total_tokens": 1334,
+    "total_time": 0.663879396,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 130
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh1k2hefj9zrfvff8ka3fv",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom pypara.dcc import dcc, DCCRegistry, DCC\nfrom pypara.currencies import Currency\n\n# Helper: a simple day count fraction calculator that returns a constant\ndef dummy_calculator(start: datetime.date, end: datetime.date, ref: datetime.date, freq: float = None) -> float:\n    return 1.0\n\ndef test_dcc_registers_default():\n    \"\"\"Decorator registers a DCC with default parameters.\"\"\"\n    # Apply decorator\n    decorated = dcc(\"ACT/360\")(dummy_calculator)\n    # The function should now have a __dcc attribute\n    assert hasattr(decorated, \"__dcc\")\n    dcc_obj = getattr(decorated, \"__dcc\")\n    assert isinstance(dcc_obj, DCC)\n    # The registry should contain the new DCC\n    assert dcc_obj in DCCRegistry._registry  # type: ignore[attr-defined]\n\ndef test_dcc_registers_with_altnames_and_ccys():\n    \"\"\"Decorator registers a DCC with alternative names and currencies.\"\"\"\n    alt_names = {\"Actual/360\", \"ACT/360\"}\n    # Use a real Currency instance\n    usd = Currency(\"USD\")\n    ccys = {usd}\n    decorated = dcc(\"ACT/360\", altnames=alt_names, ccys=ccys)(dummy_calculator)\n    dcc_obj = getattr(decorated, \"__dcc\")\n    assert dcc_obj.name == \"ACT/360\"\n    assert dcc_obj.altnames == alt_names\n    assert dcc_obj.ccys == ccys\n    assert dcc_obj in DCCRegistry._registry  # type: ignore[attr-defined]\n\ndef test_dcc_decorator_returns_original_function():\n    \"\"\"Decorator returns the original function unchanged.\"\"\"\n    decorated = dcc(\"ACT/360\")(dummy_calculator)\n    # The returned object should be the same callable as the original\n    assert decorated is dummy_calculator\n    # Calling the function should produce the expected constant result\n    start = datetime.date(2023, 1, 1)\n    end = datetime.date(2023, 12, 31)\n    ref = datetime.date(2023, 1, 1)\n    assert decorated(start, end, ref) == 1.0\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1159605479915626
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-373a2324-fc3d-4b6d-8d11-e7f3e6af4490",
+  "object": "chat.completion",
+  "created": 1795076830,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport builtins\nimport importlib\nimport types\nimport sys\nimport time\nimport pytest\n\n# Import the target module\nfrom thefuck import logs\n\n# Helper to capture calls to logs.debug\nclass DebugRecorder:\n    def __init__(self):\n        self.calls = []\n\n    def __call__(self, msg):\n        self.calls.append(msg)\n\ndef test_debug_time_basic_yield_and_logging(monkeypatch):\n    \"\"\"\n    Verify that debug_time yields control and logs the elapsed time.\n    \"\"\"\n    recorder = DebugRecorder()\n    monkeypatch.setattr(logs, \"debug\", recorder)\n\n    # Use the context manager\n    with logs.debug_time(\"test operation\") as ctx:\n        # Inside the context, ctx should be None\n        assert ctx is None\n        # Simulate some work\n        time.sleep(0.01)\n\n    # After exiting, debug should have been called once\n    assert len(recorder.calls) == 1\n    # The message should contain the provided msg and a duration string\n    assert recorder.calls[0].startswith(\"test operation took:\")\n\ndef test_debug_time_boundary_zero_duration(monkeypatch):\n    \"\"\"\n    Test that the context manager works even when the block executes instantly.\n    \"\"\"\n    recorder = DebugRecorder()\n    monkeypatch.setattr(logs, \"debug\", recorder)\n\n    with logs.debug_time(\"instant\"):\n        pass  # no work\n\n    assert len(recorder.calls) == 1\n    # Duration should be very small but still a string\n    assert \"instant took:\" in recorder.calls[0]\n    # Ensure the duration part is a valid time delta representation\n    duration_part = recorder.calls[0].split(\"instant took:\")[1].strip()\n    # It should end with a unit like 'seconds' or similar\n    assert any(unit in duration_part for unit in (\"seconds\", \"microseconds\", \"milliseconds\"))\n\ndef test_debug_time_exception_propagation(monkeypatch):\n    \"\"\"\n    Ensure that an exception inside the context propagates and debug is still called.\n    \"\"\"\n    recorder = DebugRecorder()\n    monkeypatch.setattr(logs, \"debug\", recorder)\n\n    with pytest.raises(RuntimeError):\n        with logs.debug_time(\"error case\"):\n            raise RuntimeError(\"boom\")\n\n    # Even though an exception was raised, debug should still have been called\n    assert len(recorder.calls) == 1\n    assert recorder.calls[0].startswith(\"error case took:\")\n```",
+        "reasoning": "We need to write tests for debug_time context manager. It yields, then logs debug. We need to import the module. Let's assume package name .? The module path is thefuck.logs. We'll write tests that check that debug_time yields and that debug is called with correct message. But we cannot mock debug. We can capture output? debug likely writes to logger. Let's inspect colorama? But we can't import product code? We can import the module. Use capsys to capture stdout? debug likely prints to stderr? Let's quickly inspect thefuck.logs. But we can't. We'll assume debug writes to sys.stderr via colorama? We'll just test that context manager yields and that after exit, debug called. We can monkeypatch the debug function in the module to capture call. But that is mocking target? It's allowed to patch target function? It's not mocking the target behavior but patching debug. It's acceptable? Probably okay. We'll patch logs.debug to a dummy that records. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004592616,
+    "prompt_tokens": 330,
+    "prompt_time": 0.018400918,
+    "completion_tokens": 715,
+    "completion_time": 0.731387321,
+    "total_tokens": 1045,
+    "total_time": 0.749788239,
+    "completion_tokens_details": {
+      "reasoning_tokens": 200
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sench5e40b2dae726b57m3",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport builtins\nimport importlib\nimport types\nimport sys\nimport time\nimport pytest\n\n# Import the target module\nfrom thefuck import logs\n\n# Helper to capture calls to logs.debug\nclass DebugRecorder:\n    def __init__(self):\n        self.calls = []\n\n    def __call__(self, msg):\n        self.calls.append(msg)\n\ndef test_debug_time_basic_yield_and_logging(monkeypatch):\n    \"\"\"\n    Verify that debug_time yields control and logs the elapsed time.\n    \"\"\"\n    recorder = DebugRecorder()\n    monkeypatch.setattr(logs, \"debug\", recorder)\n\n    # Use the context manager\n    with logs.debug_time(\"test operation\") as ctx:\n        # Inside the context, ctx should be None\n        assert ctx is None\n        # Simulate some work\n        time.sleep(0.01)\n\n    # After exiting, debug should have been called once\n    assert len(recorder.calls) == 1\n    # The message should contain the provided msg and a duration string\n    assert recorder.calls[0].startswith(\"test operation took:\")\n\ndef test_debug_time_boundary_zero_duration(monkeypatch):\n    \"\"\"\n    Test that the context manager works even when the block executes instantly.\n    \"\"\"\n    recorder = DebugRecorder()\n    monkeypatch.setattr(logs, \"debug\", recorder)\n\n    with logs.debug_time(\"instant\"):\n        pass  # no work\n\n    assert len(recorder.calls) == 1\n    # Duration should be very small but still a string\n    assert \"instant took:\" in recorder.calls[0]\n    # Ensure the duration part is a valid time delta representation\n    duration_part = recorder.calls[0].split(\"instant took:\")[1].strip()\n    # It should end with a unit like 'seconds' or similar\n    assert any(unit in duration_part for unit in (\"seconds\", \"microseconds\", \"milliseconds\"))\n\ndef test_debug_time_exception_propagation(monkeypatch):\n    \"\"\"\n    Ensure that an exception inside the context propagates and debug is still called.\n    \"\"\"\n    recorder = DebugRecorder()\n    monkeypatch.setattr(logs, \"debug\", recorder)\n\n    with pytest.raises(RuntimeError):\n        with logs.debug_time(\"error case\"):\n            raise RuntimeError(\"boom\")\n\n    # Even though an exception was raised, debug should still have been called\n    assert len(recorder.calls) == 1\n    assert recorder.calls[0].startswith(\"error case took:\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0929392559919506
+}

@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-68308102-22d3-4921-9423-03567a1053cb",
+  "object": "chat.completion",
+  "created": 1795079566,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.postprocessor.metadatafromtitle import MetadataFromTitlePP\n\nclass DummyDownloader:\n    def __init__(self):\n        self.messages = []\n\n    def to_screen(self, msg):\n        self.messages.append(msg)\n\ndef test_normal_parsing_and_attribute_assignment():\n    downloader = DummyDownloader()\n    pp = MetadataFromTitlePP(downloader, \"%(title)s - %(artist)s\")\n    info = {\"title\": \"Song Title - Artist Name\"}\n    _, updated_info = pp.run(info)\n    assert updated_info[\"title\"] == \"Song Title\"\n    assert updated_info[\"artist\"] == \"Artist Name\"\n    assert any(\"[fromtitle] parsed title: Song Title\" in m for m in downloader.messages)\n    assert any(\"[fromtitle] parsed artist: Artist Name\" in m for m in downloader.messages)\n\ndef test_no_placeholder_title_format():\n    downloader = DummyDownloader()\n    pp = MetadataFromTitlePP(downloader, \"Static Title\")\n    info = {\"title\": \"Static Title\"}\n    _, updated_info = pp.run(info)\n    assert updated_info[\"title\"] == \"Static Title\"\n    assert \"parsed\" not in \"\".join(downloader.messages)\n\ndef test_title_mismatch_and_error_message():\n    downloader = DummyDownloader()\n    pp = MetadataFromTitlePP(downloader, \"%(artist)s - %(title)s\")\n    info = {\"title\": \"Song Title - Artist Name\"}\n    _, updated_info = pp.run(info)\n    assert updated_info == info\n    assert any(\"[fromtitle] Could not interpret title\" in m for m in downloader.messages)\n```",
+        "reasoning": "Need tests for MetadataFromTitlePP. Use dummy downloader with to_screen capturing. Test normal parsing, boundary where no placeholders, error when no match. Use tmp_path? not needed. Just create instance."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004548674,
+    "prompt_tokens": 606,
+    "prompt_time": 0.065062751,
+    "completion_tokens": 385,
+    "completion_time": 0.424659378,
+    "total_tokens": 991,
+    "total_time": 0.489722129,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 42
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh8wa3eaeadhwqxjt98eyy",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom youtube_dl.postprocessor.metadatafromtitle import MetadataFromTitlePP\n\nclass DummyDownloader:\n    def __init__(self):\n        self.messages = []\n\n    def to_screen(self, msg):\n        self.messages.append(msg)\n\ndef test_normal_parsing_and_attribute_assignment():\n    downloader = DummyDownloader()\n    pp = MetadataFromTitlePP(downloader, \"%(title)s - %(artist)s\")\n    info = {\"title\": \"Song Title - Artist Name\"}\n    _, updated_info = pp.run(info)\n    assert updated_info[\"title\"] == \"Song Title\"\n    assert updated_info[\"artist\"] == \"Artist Name\"\n    assert any(\"[fromtitle] parsed title: Song Title\" in m for m in downloader.messages)\n    assert any(\"[fromtitle] parsed artist: Artist Name\" in m for m in downloader.messages)\n\ndef test_no_placeholder_title_format():\n    downloader = DummyDownloader()\n    pp = MetadataFromTitlePP(downloader, \"Static Title\")\n    info = {\"title\": \"Static Title\"}\n    _, updated_info = pp.run(info)\n    assert updated_info[\"title\"] == \"Static Title\"\n    assert \"parsed\" not in \"\".join(downloader.messages)\n\ndef test_title_mismatch_and_error_message():\n    downloader = DummyDownloader()\n    pp = MetadataFromTitlePP(downloader, \"%(artist)s - %(title)s\")\n    info = {\"title\": \"Song Title - Artist Name\"}\n    _, updated_info = pp.run(info)\n    assert updated_info == info\n    assert any(\"[fromtitle] Could not interpret title\" in m for m in downloader.messages)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "eb2ac28496f64bf1a61def5d1090934e",
+  "_api_plus_pacing_seconds": 4.536479706002865
+}

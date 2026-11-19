@@ -1,0 +1,116 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________________ test_normal_extraction ____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6d30657f10>
+
+    def test_normal_extraction(monkeypatch):
+        # Simulate a typical API response
+        api_response = {
+            'title': 'Test Video',
+            'source_url': {'mp4_url': 'https://example.com/video.mp4'},
+            'body': '<p>Some <b>description</b></p>',
+            'duration': 123456,          # milliseconds
+            'created_at_i': 1609459200,  # 2021-01-01
+            'user': {'username': 'tester', 'id': 42},
+            'total_views_count': 1000,
+            'hearts_count': 200,
+            'comments_count': 30,
+            'tags': [{'text': 'tag1'}, {'text': 'tag2'}],
+        }
+    
+        def fake_download_json(url, video_id):
+            assert video_id == '12345'
+            return api_response
+    
+        monkeypatch.setattr(HitRecordIE, '_download_json', fake_download_json)
+    
+        ie = HitRecordIE()
+>       result = ie._real_extract('https://hitrecord.org/records/12345')
+
+test_generated.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.hitrecord.HitRecordIE object at 0x7f6d306b72e0>
+url = 'https://hitrecord.org/records/12345'
+
+    def _real_extract(self, url):
+        video_id = self._match_id(url)
+    
+>       video = self._download_json(
+            'https://hitrecord.org/api/web/records/%s' % video_id, video_id)
+E       TypeError: test_normal_extraction.<locals>.fake_download_json() takes 2 positional arguments but 3 were given
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/hitrecord.py:38: TypeError
+_________________________ test_missing_optional_fields _________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6d2f6a8c70>
+
+    def test_missing_optional_fields(monkeypatch):
+        # API response missing optional fields like tags and body
+        api_response = {
+            'title': 'No Tags',
+            'source_url': {'mp4_url': 'https://example.com/no_tags.mp4'},
+            'duration': 5000,          # 5 seconds
+            'created_at_i': 1610000000,
+            'user': {'username': 'no_tags_user', 'id': 99},
+            'total_views_count': None,
+            'hearts_count': None,
+            'comments_count': None,
+        }
+    
+        def fake_download_json(url, video_id):
+            return api_response
+    
+        monkeypatch.setattr(HitRecordIE, '_download_json', fake_download_json)
+    
+        ie = HitRecordIE()
+>       result = ie._real_extract('https://hitrecord.org/records/99999')
+
+test_generated.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.hitrecord.HitRecordIE object at 0x7f6d2f6a89a0>
+url = 'https://hitrecord.org/records/99999'
+
+    def _real_extract(self, url):
+        video_id = self._match_id(url)
+    
+>       video = self._download_json(
+            'https://hitrecord.org/api/web/records/%s' % video_id, video_id)
+E       TypeError: test_missing_optional_fields.<locals>.fake_download_json() takes 2 positional arguments but 3 were given
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/hitrecord.py:38: TypeError
+___________________________ test_invalid_url_raises ____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6d2f4efaf0>
+
+    def test_invalid_url_raises(monkeypatch):
+        # Ensure that an invalid URL triggers a ValueError from _match_id
+        ie = HitRecordIE()
+        with pytest.raises(ValueError):
+>           ie._real_extract('https://hitrecord.org/invalid/abc')
+
+test_generated.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/hitrecord.py:36: in _real_extract
+    video_id = self._match_id(url)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'youtube_dl.extractor.hitrecord.HitRecordIE'>
+url = 'https://hitrecord.org/invalid/abc'
+
+    @classmethod
+    def _match_id(cls, url):
+        if '_VALID_URL_RE' not in cls.__dict__:
+            cls._VALID_URL_RE = re.compile(cls._VALID_URL)
+        m = cls._VALID_URL_RE.match(url)
+>       assert m
+E       AssertionError
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:422: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normal_extraction - TypeError: test_normal_ext...
+FAILED test_generated.py::test_missing_optional_fields - TypeError: test_miss...
+FAILED test_generated.py::test_invalid_url_raises - AssertionError
+3 failed in 0.82s

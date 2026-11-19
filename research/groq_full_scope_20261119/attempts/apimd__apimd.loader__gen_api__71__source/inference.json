@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-206a426a-6325-45c7-b410-5ab392fa669b",
+  "object": "chat.completion",
+  "created": 1795076441,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport importlib.util\nimport os\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\nfrom apimd.loader import gen_api\n\n\ndef _create_module(tmp_path: Path, name: str, content: str) -> Path:\n    \"\"\"Create a Python module file in tmp_path and return its path.\"\"\"\n    module_path = tmp_path / f\"{name}.py\"\n    module_path.write_text(content)\n    return module_path\n\n\ndef test_gen_api_creates_markdown(tmp_path):\n    \"\"\"Normal case: a valid module is loaded and a markdown file is written.\"\"\"\n    # Create a simple module with one function\n    mod_name = \"sample_module\"\n    mod_content = \"\"\"\ndef hello(name: str) -> str:\n    return f\"Hello, {name}\"\n\"\"\"\n    _create_module(tmp_path, mod_name, mod_content)\n\n    # Ensure the module can be found\n    sys.path.insert(0, str(tmp_path))\n\n    # Run gen_api\n    docs = gen_api({\"Sample\": mod_name}, prefix=str(tmp_path / \"docs\"))\n\n    # Verify that a markdown file was created\n    md_path = tmp_path / \"docs\" / f\"{mod_name.replace('_', '-')}-api.md\"\n    assert md_path.is_file(), \"Markdown file was not created\"\n\n    # Verify the content of the markdown file\n    md_text = md_path.read_text()\n    assert \"# Sample API\" in md_text\n    assert \"def hello(name: str) -> str:\" in md_text\n\n    # Verify that the returned docs list contains the same content\n    assert docs == [md_text]\n\n\ndef test_gen_api_skips_missing_module(tmp_path):\n    \"\"\"Boundary case: a non‑existent module is skipped and no file is written.\"\"\"\n    # Run gen_api with a module that does not exist\n    docs = gen_api({\"Missing\": \"nonexistent_module\"}, prefix=str(tmp_path / \"docs\"))\n\n    # No docs should be returned\n    assert docs == []\n\n    # No markdown file should be created\n    md_path = tmp_path / \"docs\" / \"nonexistent-module-api.md\"\n    assert not md_path.exists(), \"Markdown file should not exist for missing module\"\n\n\ndef test_gen_api_dry_run(tmp_path):\n    \"\"\"Error/edge case: dry run mode should not write files but still return docs.\"\"\"\n    # Create a module\n    mod_name = \"dry_module\"\n    mod_content = \"\"\"\ndef add(a: int, b: int) -> int:\n    return a + b\n\"\"\"\n    _create_module(tmp_path, mod_name, mod_content)\n\n    # Ensure the module can be found\n    sys.path.insert(0, str(tmp_path))\n\n    # Run gen_api in dry mode\n    docs = gen_api({\"Dry\": mod_name}, prefix=str(tmp_path / \"docs\"), dry=True)\n\n    # No markdown file should be written\n    md_path = tmp_path / \"docs\" / f\"{mod_name.replace('_', '-')}-api.md\"\n    assert not md_path.exists(), \"Markdown file should not be written in dry mode\"\n\n    # Docs should still contain the generated content\n    assert docs, \"Docs should not be empty in dry mode\"\n    assert \"def add(a: int, b: int) -> int:\" in docs[0]\n```",
+        "reasoning": "We need to test gen_api. We need to create temporary modules to load. loader function not shown; but we can test that it creates files and returns docs. Use tmp_path for prefix. Provide root_names mapping to module names that exist. We need to create a simple module in tmp_path and add to sys.path. Use importlib to create spec. We'll create a module file with a function. Then call gen_api with that module. Expect file created with content containing function signature. We can inspect docs returned. Also test boundary: when module not found, it skips. Third test error: maybe when prefix exists? But we can test that if prefix exists, it doesn't create again. Use dry=True to not write. Let's write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.185154261,
+    "prompt_tokens": 613,
+    "prompt_time": 0.036252407,
+    "completion_tokens": 840,
+    "completion_time": 0.94999936,
+    "total_tokens": 1453,
+    "total_time": 0.986251767,
+    "completion_tokens_details": {
+      "reasoning_tokens": 152
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se9g57e80vygpsz8kbbkfn",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport importlib.util\nimport os\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\nfrom apimd.loader import gen_api\n\n\ndef _create_module(tmp_path: Path, name: str, content: str) -> Path:\n    \"\"\"Create a Python module file in tmp_path and return its path.\"\"\"\n    module_path = tmp_path / f\"{name}.py\"\n    module_path.write_text(content)\n    return module_path\n\n\ndef test_gen_api_creates_markdown(tmp_path):\n    \"\"\"Normal case: a valid module is loaded and a markdown file is written.\"\"\"\n    # Create a simple module with one function\n    mod_name = \"sample_module\"\n    mod_content = \"\"\"\ndef hello(name: str) -> str:\n    return f\"Hello, {name}\"\n\"\"\"\n    _create_module(tmp_path, mod_name, mod_content)\n\n    # Ensure the module can be found\n    sys.path.insert(0, str(tmp_path))\n\n    # Run gen_api\n    docs = gen_api({\"Sample\": mod_name}, prefix=str(tmp_path / \"docs\"))\n\n    # Verify that a markdown file was created\n    md_path = tmp_path / \"docs\" / f\"{mod_name.replace('_', '-')}-api.md\"\n    assert md_path.is_file(), \"Markdown file was not created\"\n\n    # Verify the content of the markdown file\n    md_text = md_path.read_text()\n    assert \"# Sample API\" in md_text\n    assert \"def hello(name: str) -> str:\" in md_text\n\n    # Verify that the returned docs list contains the same content\n    assert docs == [md_text]\n\n\ndef test_gen_api_skips_missing_module(tmp_path):\n    \"\"\"Boundary case: a non‑existent module is skipped and no file is written.\"\"\"\n    # Run gen_api with a module that does not exist\n    docs = gen_api({\"Missing\": \"nonexistent_module\"}, prefix=str(tmp_path / \"docs\"))\n\n    # No docs should be returned\n    assert docs == []\n\n    # No markdown file should be created\n    md_path = tmp_path / \"docs\" / \"nonexistent-module-api.md\"\n    assert not md_path.exists(), \"Markdown file should not exist for missing module\"\n\n\ndef test_gen_api_dry_run(tmp_path):\n    \"\"\"Error/edge case: dry run mode should not write files but still return docs.\"\"\"\n    # Create a module\n    mod_name = \"dry_module\"\n    mod_content = \"\"\"\ndef add(a: int, b: int) -> int:\n    return a + b\n\"\"\"\n    _create_module(tmp_path, mod_name, mod_content)\n\n    # Ensure the module can be found\n    sys.path.insert(0, str(tmp_path))\n\n    # Run gen_api in dry mode\n    docs = gen_api({\"Dry\": mod_name}, prefix=str(tmp_path / \"docs\"), dry=True)\n\n    # No markdown file should be written\n    md_path = tmp_path / \"docs\" / f\"{mod_name.replace('_', '-')}-api.md\"\n    assert not md_path.exists(), \"Markdown file should not be written in dry mode\"\n\n    # Docs should still contain the generated content\n    assert docs, \"Docs should not be empty in dry mode\"\n    assert \"def add(a: int, b: int) -> int:\" in docs[0]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4844400610309094
+}

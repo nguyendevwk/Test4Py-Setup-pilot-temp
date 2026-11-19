@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-4bee56fe-9337-4afc-9a54-579f467d32ec",
+  "object": "chat.completion",
+  "created": 1795078227,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado.locale import CSVLocale\n\ndef test_translate_singular_and_plural():\n    # translations dict with singular and plural entries\n    translations = {\n        \"singular\": {\"apple\": \"manzana\"},\n        \"plural\": {\"apple\": \"manzanas\"},\n        \"unknown\": {\"banana\": \"plátano\"},\n    }\n    locale = CSVLocale(\"es\", translations)\n\n    # singular case\n    assert locale.translate(\"apple\", count=1) == \"manzana\"\n    # plural case\n    assert locale.translate(\"apple\", count=3) == \"manzanas\"\n    # unknown message falls back to key\n    assert locale.translate(\"banana\") == \"plátano\"\n    # message not in dict falls back to original\n    assert locale.translate(\"orange\") == \"orange\"\n\ndef test_translate_with_plural_message_and_count():\n    translations = {\n        \"singular\": {\"car\": \"coche\"},\n        \"plural\": {\"car\": \"coches\"},\n    }\n    locale = CSVLocale(\"es\", translations)\n\n    # use plural_message explicitly\n    assert locale.translate(\"car\", plural_message=\"cars\", count=1) == \"coche\"\n    assert locale.translate(\"car\", plural_message=\"cars\", count=2) == \"coches\"\n    # when count is 1, plural_message should be ignored\n    assert locale.translate(\"car\", plural_message=\"cars\", count=1) == \"coche\"\n\ndef test_pgettext_logs_warning_and_falls_back_to_translate(tmp_path, caplog):\n    translations = {\"singular\": {\"hello\": \"hola\"}}\n    locale = CSVLocale(\"es\", translations)\n\n    caplog.set_level(\"WARNING\")\n    result = locale.pgettext(\"greeting\", \"hello\")\n    assert result == \"hola\"\n    # Verify that a warning was logged\n    assert any(\n        record.message == \"pgettext is not supported by CSVLocale\"\n        for record in caplog.records\n    )\n```",
+        "reasoning": "We need tests for CSVLocale. Need import. Use tmp_path to create translations dict? Actually translations passed as dict. We can test translate behavior. Also pgettext logs warning but returns translate. Use caplog to check warning. Also test boundary: plural count 1 vs not 1. Also test unknown context. Write three functions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048812924,
+    "prompt_tokens": 513,
+    "prompt_time": 0.027015716,
+    "completion_tokens": 488,
+    "completion_time": 0.538020209,
+    "total_tokens": 1001,
+    "total_time": 0.565035925,
+    "completion_tokens_details": {
+      "reasoning_tokens": 69
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg015xev88mg1xy1kkzmkg",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado.locale import CSVLocale\n\ndef test_translate_singular_and_plural():\n    # translations dict with singular and plural entries\n    translations = {\n        \"singular\": {\"apple\": \"manzana\"},\n        \"plural\": {\"apple\": \"manzanas\"},\n        \"unknown\": {\"banana\": \"plátano\"},\n    }\n    locale = CSVLocale(\"es\", translations)\n\n    # singular case\n    assert locale.translate(\"apple\", count=1) == \"manzana\"\n    # plural case\n    assert locale.translate(\"apple\", count=3) == \"manzanas\"\n    # unknown message falls back to key\n    assert locale.translate(\"banana\") == \"plátano\"\n    # message not in dict falls back to original\n    assert locale.translate(\"orange\") == \"orange\"\n\ndef test_translate_with_plural_message_and_count():\n    translations = {\n        \"singular\": {\"car\": \"coche\"},\n        \"plural\": {\"car\": \"coches\"},\n    }\n    locale = CSVLocale(\"es\", translations)\n\n    # use plural_message explicitly\n    assert locale.translate(\"car\", plural_message=\"cars\", count=1) == \"coche\"\n    assert locale.translate(\"car\", plural_message=\"cars\", count=2) == \"coches\"\n    # when count is 1, plural_message should be ignored\n    assert locale.translate(\"car\", plural_message=\"cars\", count=1) == \"coche\"\n\ndef test_pgettext_logs_warning_and_falls_back_to_translate(tmp_path, caplog):\n    translations = {\"singular\": {\"hello\": \"hola\"}}\n    locale = CSVLocale(\"es\", translations)\n\n    caplog.set_level(\"WARNING\")\n    result = locale.pgettext(\"greeting\", \"hello\")\n    assert result == \"hola\"\n    # Verify that a warning was logged\n    assert any(\n        record.message == \"pgettext is not supported by CSVLocale\"\n        for record in caplog.records\n    )\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9541954349842854
+}

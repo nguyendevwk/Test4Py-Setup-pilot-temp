@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-97544381-606c-451d-bb45-1bd2fb85d1b8",
+  "object": "chat.completion",
+  "created": 1795078388,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.transformers.starred_unpacking import StarredUnpackingTransformer\n\ndef _parse_and_transform(source: str) -> ast.AST:\n    \"\"\"Parse source with typed_ast and apply the transformer.\"\"\"\n    tree = typed_ast.parse(source)\n    transformer = StarredUnpackingTransformer()\n    transformed = transformer.visit(tree)\n    return transformed\n\ndef test_list_with_starred_is_transformed_to_binop():\n    source = \"[2, *range(10), 1]\"\n    transformed = _parse_and_transform(source)\n    # The top-level node is a Module with a single Expr\n    expr = transformed.body[0].value\n    # After transformation, the Expr should be a BinOp\n    assert isinstance(expr, typed_ast.BinOp)\n    # The left side should be a BinOp (2 + list(range(10)))\n    left = expr.left\n    assert isinstance(left, typed_ast.BinOp)\n    assert isinstance(left.left, typed_ast.List)\n    assert isinstance(left.right, typed_ast.Call)\n    # The right side should be a List containing the final element\n    assert isinstance(expr.right, typed_ast.List)\n    # Ensure the final element is the integer 1\n    assert isinstance(expr.right.elts[0], typed_ast.Num)\n    assert expr.right.elts[0].n == 1\n\ndef test_call_with_starred_arguments_is_wrapped_in_starred():\n    source = \"print(*range(1), *range(3))\"\n    transformed = _parse_and_transform(source)\n    # The top-level node is a Module with a single Expr\n    expr = transformed.body[0].value\n    # After transformation, the Expr should be a Call\n    assert isinstance(expr, typed_ast.Call)\n    # The call should have a single argument which is a Starred\n    assert len(expr.args) == 1\n    starred = expr.args[0]\n    assert isinstance(starred, typed_ast.Starred)\n    # The starred value should be a BinOp representing the sum of two lists\n    binop = starred.value\n    assert isinstance(binop, typed_ast.BinOp)\n    # Each side of the BinOp should be a List\n    assert isinstance(binop.left, typed_ast.List)\n    assert isinstance(binop.right, typed_ast.List)\n\ndef test_normal_list_without_starred_remains_unchanged():\n    source = \"[1, 2, 3]\"\n    transformed = _parse_and_transform(source)\n    # The top-level node is a Module with a single Expr\n    expr = transformed.body[0].value\n    # It should still be a List with the same elements\n    assert isinstance(expr, typed_ast.List)\n    elts = expr.elts\n    assert len(elts) == 3\n    assert all(isinstance(e, typed_ast.Num) for e in elts)\n    assert [e.n for e in elts] == [1, 2, 3]\n```",
+        "reasoning": "Need tests for StarredUnpackingTransformer. We'll parse code using typed_ast? Use ast.parse from typed_ast? Use typed_ast.ast3.parse. Then apply transformer. Check output AST? Maybe use ast.unparse? typed_ast may not have unparse. We can compare transformed node types. Simpler: use ast.dump. We'll test that list with starred becomes BinOp. Also call with starred becomes Call with Starred. Also normal list unchanged. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052359903,
+    "prompt_tokens": 884,
+    "prompt_time": 0.009232287,
+    "completion_tokens": 735,
+    "completion_time": 0.871650323,
+    "total_tokens": 1619,
+    "total_time": 0.88088261,
+    "prompt_tokens_details": {
+      "cached_tokens": 768
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 96
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sg4xkzey7a2er8h78twcq8",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as typed_ast\nimport pytest\nfrom py_backwards.transformers.starred_unpacking import StarredUnpackingTransformer\n\ndef _parse_and_transform(source: str) -> ast.AST:\n    \"\"\"Parse source with typed_ast and apply the transformer.\"\"\"\n    tree = typed_ast.parse(source)\n    transformer = StarredUnpackingTransformer()\n    transformed = transformer.visit(tree)\n    return transformed\n\ndef test_list_with_starred_is_transformed_to_binop():\n    source = \"[2, *range(10), 1]\"\n    transformed = _parse_and_transform(source)\n    # The top-level node is a Module with a single Expr\n    expr = transformed.body[0].value\n    # After transformation, the Expr should be a BinOp\n    assert isinstance(expr, typed_ast.BinOp)\n    # The left side should be a BinOp (2 + list(range(10)))\n    left = expr.left\n    assert isinstance(left, typed_ast.BinOp)\n    assert isinstance(left.left, typed_ast.List)\n    assert isinstance(left.right, typed_ast.Call)\n    # The right side should be a List containing the final element\n    assert isinstance(expr.right, typed_ast.List)\n    # Ensure the final element is the integer 1\n    assert isinstance(expr.right.elts[0], typed_ast.Num)\n    assert expr.right.elts[0].n == 1\n\ndef test_call_with_starred_arguments_is_wrapped_in_starred():\n    source = \"print(*range(1), *range(3))\"\n    transformed = _parse_and_transform(source)\n    # The top-level node is a Module with a single Expr\n    expr = transformed.body[0].value\n    # After transformation, the Expr should be a Call\n    assert isinstance(expr, typed_ast.Call)\n    # The call should have a single argument which is a Starred\n    assert len(expr.args) == 1\n    starred = expr.args[0]\n    assert isinstance(starred, typed_ast.Starred)\n    # The starred value should be a BinOp representing the sum of two lists\n    binop = starred.value\n    assert isinstance(binop, typed_ast.BinOp)\n    # Each side of the BinOp should be a List\n    assert isinstance(binop.left, typed_ast.List)\n    assert isinstance(binop.right, typed_ast.List)\n\ndef test_normal_list_without_starred_remains_unchanged():\n    source = \"[1, 2, 3]\"\n    transformed = _parse_and_transform(source)\n    # The top-level node is a Module with a single Expr\n    expr = transformed.body[0].value\n    # It should still be a List with the same elements\n    assert isinstance(expr, typed_ast.List)\n    elts = expr.elts\n    assert len(elts) == 3\n    assert all(isinstance(e, typed_ast.Num) for e in elts)\n    assert [e.n for e in elts] == [1, 2, 3]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.27195942500839
+}

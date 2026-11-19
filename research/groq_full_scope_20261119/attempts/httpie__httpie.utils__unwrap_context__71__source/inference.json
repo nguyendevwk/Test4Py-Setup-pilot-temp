@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-4965ce14-54a1-45db-9c58-859e46291049",
+  "object": "chat.completion",
+  "created": 1795079586,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.utils import unwrap_context\n\ndef test_unwrap_context_returns_self_when_no_context():\n    \"\"\"When an exception has no __context__, unwrap_context should return the exception itself.\"\"\"\n    exc = ValueError(\"simple error\")\n    result = unwrap_context(exc)\n    assert result is exc\n    assert isinstance(result, ValueError)\n    assert str(result) == \"simple error\"\n\ndef test_unwrap_context_recurses_into_context_chain():\n    \"\"\"When an exception has a __context__ that is also an exception, unwrap_context should return the deepest exception.\"\"\"\n    # Create a chain: deepest -> middle -> outer\n    deepest = KeyError(\"deep\")\n    middle = RuntimeError(\"middle\")\n    middle.__context__ = deepest\n    outer = IndexError(\"outer\")\n    outer.__context__ = middle\n\n    result = unwrap_context(outer)\n    assert result is deepest\n    assert isinstance(result, KeyError)\n    assert str(result) == \"deep\"\n\ndef test_unwrap_context_returns_outer_when_context_not_exception():\n    \"\"\"If __context__ is not an Exception (e.g., None), unwrap_context should return the original exception.\"\"\"\n    exc = TypeError(\"type error\")\n    # Explicitly set __context__ to a non-Exception value\n    exc.__context__ = \"not an exception\"\n    result = unwrap_context(exc)\n    assert result is exc\n    assert isinstance(result, TypeError)\n    assert str(result) == \"type error\"\n```",
+        "reasoning": "We need tests for unwrap_context. It returns the innermost exception if context chain. Test normal: simple exception no context returns itself. Boundary: nested context chain. Error: when context not exception? but code checks isinstance(context, Exception). If context is None, returns exc. So test that. Write three tests. Use tmp_path not needed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.00513918,
+    "prompt_tokens": 350,
+    "prompt_time": 0.03651127,
+    "completion_tokens": 385,
+    "completion_time": 0.478417751,
+    "total_tokens": 735,
+    "total_time": 0.514929021,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 72
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh9g09egp8z7qexxmnxtkr",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.utils import unwrap_context\n\ndef test_unwrap_context_returns_self_when_no_context():\n    \"\"\"When an exception has no __context__, unwrap_context should return the exception itself.\"\"\"\n    exc = ValueError(\"simple error\")\n    result = unwrap_context(exc)\n    assert result is exc\n    assert isinstance(result, ValueError)\n    assert str(result) == \"simple error\"\n\ndef test_unwrap_context_recurses_into_context_chain():\n    \"\"\"When an exception has a __context__ that is also an exception, unwrap_context should return the deepest exception.\"\"\"\n    # Create a chain: deepest -> middle -> outer\n    deepest = KeyError(\"deep\")\n    middle = RuntimeError(\"middle\")\n    middle.__context__ = deepest\n    outer = IndexError(\"outer\")\n    outer.__context__ = middle\n\n    result = unwrap_context(outer)\n    assert result is deepest\n    assert isinstance(result, KeyError)\n    assert str(result) == \"deep\"\n\ndef test_unwrap_context_returns_outer_when_context_not_exception():\n    \"\"\"If __context__ is not an Exception (e.g., None), unwrap_context should return the original exception.\"\"\"\n    exc = TypeError(\"type error\")\n    # Explicitly set __context__ to a non-Exception value\n    exc.__context__ = \"not an exception\"\n    result = unwrap_context(exc)\n    assert result is exc\n    assert isinstance(result, TypeError)\n    assert str(result) == \"type error\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "95d0049f5bae461281e548827affd612",
+  "_api_plus_pacing_seconds": 1.1285101870307699
+}

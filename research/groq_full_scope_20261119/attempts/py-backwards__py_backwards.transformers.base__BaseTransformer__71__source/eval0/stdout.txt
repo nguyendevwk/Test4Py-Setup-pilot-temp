@@ -1,0 +1,47 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_abstract_transform_raises_type_error ___________________
+
+    def test_abstract_transform_raises_type_error():
+        """
+        Verify that calling the abstract transform method on a subclass that
+        does not implement it raises a TypeError.
+        """
+        class DummyTransformer(BaseTransformer):
+            pass
+    
+        # Instantiate the subclass (allowed because abstract methods are not enforced on instantiation)
+>       transformer = DummyTransformer()
+E       TypeError: Can't instantiate abstract class DummyTransformer with abstract method transform
+
+test_generated.py:16: TypeError
+_______ test_subclass_can_implement_transform_and_return_expected_result _______
+
+    def test_subclass_can_implement_transform_and_return_expected_result():
+        """
+        Verify that a concrete subclass can implement transform and return a
+        TransformationResult that contains the expected keys.
+        """
+        class ConcreteTransformer(BaseTransformer):
+            target = "dummy_target"
+    
+            @classmethod
+            def transform(cls, tree: typed_ast.AST):
+                # For testing, simply return a dict with the target and the number of nodes
+                node_count = sum(1 for _ in ast.walk(tree))
+                return {"target": cls.target, "node_count": node_count}
+    
+        # Create a simple AST node
+        node = typed_ast.parse("a = 2\nb = 3")
+        result = ConcreteTransformer.transform(node)
+    
+        assert isinstance(result, dict)
+        assert result["target"] == "dummy_target"
+>       assert result["node_count"] == 4  # Assign, Name, Constant, Module
+E       assert 1 == 4
+
+test_generated.py:43: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_abstract_transform_raises_type_error - TypeErr...
+FAILED test_generated.py::test_subclass_can_implement_transform_and_return_expected_result
+2 failed, 1 passed in 0.13s

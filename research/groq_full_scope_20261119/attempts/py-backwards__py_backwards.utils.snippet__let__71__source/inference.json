@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-64c12159-a88d-4b00-9d8e-e1bdb55e8219",
+  "object": "chat.completion",
+  "created": 1795076792,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport pytest\nfrom py_backwards.utils.snippet import let, get_source\nfrom typed_ast import ast3 as typed_ast\n\ndef test_simple_let_and_usage(tmp_path):\n    # Create a simple snippet that declares a variable and uses it\n    code = \"\"\"\nlet(x)\nx += 1\ny = 1\n\"\"\"\n    # Parse the code into an AST\n    tree = typed_ast.parse(code)\n    # Apply the let transformation\n    let(tree)\n    # Convert the transformed AST back to source code\n    transformed = get_source(tree)\n    # The variable `x` should be renamed to a unique name\n    assert \"_py_backwards_x_\" in transformed\n    # The assignment to y should remain unchanged\n    assert \"y = 1\" in transformed\n    # The increment should reference the renamed variable\n    assert transformed.count(\"_py_backwards_x_\") == 1\n    assert \"+= 1\" in transformed\n\ndef test_multiple_lets_and_unique_names(tmp_path):\n    # Declare the same variable twice and use it\n    code = \"\"\"\nlet(x)\nx += 1\nlet(x)\nx += 2\n\"\"\"\n    tree = typed_ast.parse(code)\n    let(tree)\n    transformed = get_source(tree)\n    # Two unique names should appear for the two let declarations\n    names = [n for n in transformed.splitlines() if \"_py_backwards_x_\" in n]\n    assert len(names) == 2\n    # The increments should refer to the correct unique names\n    assert \"_py_backwards_x_0 += 1\" in transformed\n    assert \"_py_backwards_x_1 += 2\" in transformed\n\ndef test_let_on_expression_raises_error(tmp_path):\n    # Attempt to use let on an expression (should raise an error)\n    code = \"\"\"\nlet(1)\n\"\"\"\n    tree = typed_ast.parse(code)\n    with pytest.raises(TypeError):\n        let(tree)\n```",
+        "reasoning": "We need to test let function. Let's inspect its implementation.We don't have source. Assume let uses get_non_exp_parent_and_index, replace_at, etc. We need to test behavior: declaring variable, renaming. Likely it transforms AST. We can create snippet code string, parse with typed_ast, apply let, then get source. Use get_source. Let's write tests: 1) simple let and usage. 2) boundary: let same var multiple times? 3) error: let on expression? But we can't mock. We'll just test that let transforms variable names. Use get_source to get code."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052016141,
+    "prompt_tokens": 339,
+    "prompt_time": 0.020315927,
+    "completion_tokens": 550,
+    "completion_time": 0.605366713,
+    "total_tokens": 889,
+    "total_time": 0.62568264,
+    "completion_tokens_details": {
+      "reasoning_tokens": 128
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sem7yye5xtzptdp2rysxzj",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport pytest\nfrom py_backwards.utils.snippet import let, get_source\nfrom typed_ast import ast3 as typed_ast\n\ndef test_simple_let_and_usage(tmp_path):\n    # Create a simple snippet that declares a variable and uses it\n    code = \"\"\"\nlet(x)\nx += 1\ny = 1\n\"\"\"\n    # Parse the code into an AST\n    tree = typed_ast.parse(code)\n    # Apply the let transformation\n    let(tree)\n    # Convert the transformed AST back to source code\n    transformed = get_source(tree)\n    # The variable `x` should be renamed to a unique name\n    assert \"_py_backwards_x_\" in transformed\n    # The assignment to y should remain unchanged\n    assert \"y = 1\" in transformed\n    # The increment should reference the renamed variable\n    assert transformed.count(\"_py_backwards_x_\") == 1\n    assert \"+= 1\" in transformed\n\ndef test_multiple_lets_and_unique_names(tmp_path):\n    # Declare the same variable twice and use it\n    code = \"\"\"\nlet(x)\nx += 1\nlet(x)\nx += 2\n\"\"\"\n    tree = typed_ast.parse(code)\n    let(tree)\n    transformed = get_source(tree)\n    # Two unique names should appear for the two let declarations\n    names = [n for n in transformed.splitlines() if \"_py_backwards_x_\" in n]\n    assert len(names) == 2\n    # The increments should refer to the correct unique names\n    assert \"_py_backwards_x_0 += 1\" in transformed\n    assert \"_py_backwards_x_1 += 2\" in transformed\n\ndef test_let_on_expression_raises_error(tmp_path):\n    # Attempt to use let on an expression (should raise an error)\n    code = \"\"\"\nlet(1)\n\"\"\"\n    tree = typed_ast.parse(code)\n    with pytest.raises(TypeError):\n        let(tree)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9636722689610906
+}

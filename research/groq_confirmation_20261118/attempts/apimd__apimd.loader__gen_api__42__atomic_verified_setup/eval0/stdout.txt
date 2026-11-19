@@ -1,0 +1,84 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_gen_api_creates_markdown _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-53/test_gen_api_creates_markdown0')
+simple_module = PosixPath('/tmp/pytest-of-heurix/pytest-53/test_gen_api_creates_markdown0/pkg/mymodule.py')
+
+    def test_gen_api_creates_markdown(tmp_path, simple_module):
+        """Test that gen_api generates a markdown file with expected content."""
+        root_names = {"My Module": "pkg.mymodule"}
+        docs = gen_api(root_names, prefix=str(tmp_path / "docs"))
+        # One document should be returned
+>       assert len(docs) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+../../../../../../attempts/apimd__apimd.loader__gen_api__42__atomic_verified_setup/eval0/test_generated.py:44: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-53/test_gen_api_creates_markdown0/docs[0m
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-53/test_gen_api_creates_markdown0/docs[0m
+[32mLoad root: pkg.mymodule (My Module)[0m
+[32mLoad root: pkg.mymodule (My Module)[0m
+[33m'pkg.mymodule' can not be found[0m
+[33m'pkg.mymodule' can not be found[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:127 Create directory: /tmp/pytest-of-heurix/pytest-53/test_gen_api_creates_markdown0/docs
+INFO     root:loader.py:131 Load root: pkg.mymodule (My Module)
+WARNING  root:loader.py:134 'pkg.mymodule' can not be found
+______________________ test_gen_api_skips_missing_module _______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-53/test_gen_api_skips_missing_mod0')
+
+    def test_gen_api_skips_missing_module(tmp_path):
+        """Test that a non‑existent module is skipped and no file is created."""
+        root_names = {"Missing": "nonexistent.module"}
+>       docs = gen_api(root_names, prefix=str(tmp_path / "docs"))
+
+../../../../../../attempts/apimd__apimd.loader__gen_api__42__atomic_verified_setup/eval0/test_generated.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+apimd/loader.py:132: in gen_api
+    doc = loader(name, _site_path(name), link, level, toc)
+apimd/loader.py:38: in _site_path
+    s = find_spec(name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'nonexistent.module', package = None
+
+    def find_spec(name, package=None):
+        """Return the spec for the specified module.
+    
+        First, sys.modules is checked to see if the module was already imported. If
+        so, then sys.modules[name].__spec__ is returned. If that happens to be
+        set to None, then ValueError is raised. If the module is not in
+        sys.modules, then sys.meta_path is searched for a suitable spec with the
+        value of 'path' given to the finders. None is returned if no spec could
+        be found.
+    
+        If the name is for submodule (contains a dot), the parent module is
+        automatically imported.
+    
+        The name and package arguments work the same as importlib.import_module().
+        In other words, relative module names (with leading dots) work.
+    
+        """
+        fullname = resolve_name(name, package) if name.startswith('.') else name
+        if fullname not in sys.modules:
+            parent_name = fullname.rpartition('.')[0]
+            if parent_name:
+>               parent = __import__(parent_name, fromlist=['__path__'])
+E               ModuleNotFoundError: No module named 'nonexistent'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/importlib/util.py:94: ModuleNotFoundError
+----------------------------- Captured stderr call -----------------------------
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-53/test_gen_api_skips_missing_mod0/docs[0m
+[32mCreate directory: /tmp/pytest-of-heurix/pytest-53/test_gen_api_skips_missing_mod0/docs[0m
+[32mLoad root: nonexistent.module (Missing)[0m
+[32mLoad root: nonexistent.module (Missing)[0m
+------------------------------ Captured log call -------------------------------
+INFO     root:loader.py:127 Create directory: /tmp/pytest-of-heurix/pytest-53/test_gen_api_skips_missing_mod0/docs
+INFO     root:loader.py:131 Load root: nonexistent.module (Missing)
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/apimd__apimd.loader__gen_api__42__atomic_verified_setup/eval0/test_generated.py::test_gen_api_creates_markdown
+FAILED ../../../../../../attempts/apimd__apimd.loader__gen_api__42__atomic_verified_setup/eval0/test_generated.py::test_gen_api_skips_missing_module
+2 failed, 1 passed in 0.16s

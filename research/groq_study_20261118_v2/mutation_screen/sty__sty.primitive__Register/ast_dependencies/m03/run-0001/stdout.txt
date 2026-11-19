@@ -1,0 +1,64 @@
+.FF.                                                                     [100%]
+=================================== FAILURES ===================================
+__________________ test_call_single_int_returns_eightbit_call __________________
+
+register = <sty.primitive.Register object at 0x7f5aee2e17b0>
+
+    def test_call_single_int_returns_eightbit_call(register: Register):
+        """Calling the register with a single int uses the eightbit_call."""
+        # Set a custom eightbit_call that records the argument
+        called = {}
+        def eightbit(x):
+            called['x'] = x
+            return f"8bit:{x}"
+        register.set_eightbit_call(DummyRenderType)
+        register.eightbit_call = eightbit
+        result = register(42)
+>       assert result == "8bit:42"
+E       AssertionError: assert '' == '8bit:42'
+E         
+E         - 8bit:42
+
+test_generated.py:68: AssertionError
+____________________ test_call_three_ints_returns_rgb_call _____________________
+
+register = <sty.primitive.Register object at 0x7f5aee267a00>
+
+    def test_call_three_ints_returns_rgb_call(register: Register):
+        """Calling the register with three ints uses the rgb_call."""
+        called = {}
+        def rgb(r, g, b):
+            called['rgb'] = (r, g, b)
+            return f"rgb:{r},{g},{b}"
+        register.set_rgb_call(DummyRenderType)
+        register.rgb_call = rgb
+>       result = register(10, 20, 30)
+
+test_generated.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sty.primitive.Register object at 0x7f5aee267a00>, args = (10, 20, 30)
+kwargs = {}
+
+    def __call__(self, *args: Union[int, str], **kwargs) -> str:
+        """
+        This function is to handle calls such as `fg(42)`, `bg(102, 49, 42)`, `fg('red')`.
+        """
+    
+        # Return empty str if object is muted.
+        if self.is_muted:
+            return ""
+    
+        len_args = len(args)
+    
+        if len_args != 1:
+            # If input is an 8bit color code, run 8bit render function.
+            if isinstance(args[0], int):
+>               return self.eightbit_call(*args, **kwargs)
+E               TypeError: Register.__init__.<locals>.<lambda>() takes 1 positional argument but 3 were given
+
+../repo/sty/primitive.py:102: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_call_single_int_returns_eightbit_call - Assert...
+FAILED test_generated.py::test_call_three_ints_returns_rgb_call - TypeError: ...
+2 failed, 2 passed in 0.08s

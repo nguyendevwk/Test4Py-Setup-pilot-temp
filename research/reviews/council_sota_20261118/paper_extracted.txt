@@ -1,0 +1,480 @@
+0001: BỘ CÔNG THƯƠNG
+0002: TRƯỜNG ĐẠI HỌC CÔNG THƯƠNG THÀNH PHỐ HỒ CHÍ MINH
+0003: KHOA CÔNG NGHỆ THÔNG TIN
+0004: 
+0005: BÀI TIỂU LUẬN
+0006: MÔN: CÔNG NGHỆ PHẦN MỀM TIÊN TIẾN
+0007: SINH VÀ SỬA LỖI BỘ KIỂM THỬ ĐƠN VỊ TỰ ĐỘNG CHO PYTHON DỰA TRÊN TRÍCH XUẤT ĐỊNH DANH AST VÀ PHẢN BIỆN ĐA VÒNG TRÊN HỆ QUY CHIẾU TEST4PY BENCHMARK
+0008: Giảng viên hướng dẫn: TS. Nguyễn Thị Bích Ngân
+0009: Sinh viên thực hiện:
+0010: 1.  1001260016 - Phạm Nguyễn
+0011: 2.  1001260004 - Huỳnh Hữu Đức
+0012: 3.  1001260028 - Phạm Nguyễn Huyền Trân
+0013: TP. HỒ CHÍ MINH, NĂM 2026
+0014: 
+0015: BỘ CÔNG THƯƠNG
+0016: TRƯỜNG ĐẠI HỌC CÔNG THƯƠNG THÀNH PHỐ HỒ CHÍ MINH
+0017: KHOA CÔNG NGHỆ THÔNG TIN
+0018: 
+0019: BÀI TIỂU LUẬN
+0020: MÔN: CÔNG NGHỆ PHẦN MỀM TIÊN TIẾN
+0021: SINH VÀ SỬA LỖI BỘ KIỂM THỬ ĐƠN VỊ TỰ ĐỘNG CHO PYTHON DỰA TRÊN TRÍCH XUẤT ĐỊNH DANH AST VÀ PHẢN BIỆN ĐA VÒNG TRÊN HỆ QUY CHIẾU TEST4PY BENCHMARK
+0022: Giảng viên hướng dẫn: TS. Nguyễn Thị Bích Ngân
+0023: Sinh viên thực hiện:
+0024: 1.  1001260016 - Phạm Nguyễn
+0025: 2.  1001260004 - Huỳnh Hữu Đức
+0026: 3.  1001260028 - Phạm Nguyễn Huyền Trân
+0027: TP. HỒ CHÍ MINH, NĂM 2026
+0028: 
+0029: LỜI CẢM ƠN
+0030: Để hoàn thành bài tiểu luận thuộc học phần Công nghệ phần mềm tiên tiến này, nhóm thực hiện xin bày tỏ lòng biết ơn sâu sắc đến TS. Nguyễn Thị Bích Ngân — giảng viên phụ trách học phần tại Khoa Công nghệ Thông tin, Trường Đại học Công Thương Thành phố Hồ Chí Minh. Những định hướng nội dung, phương pháp luận nghiên cứu thực nghiệm và các góp ý học thuật của Cô xuyên suốt học phần đã giúp nhóm hình thành cách tiếp cận bài toán kiểm thử phần mềm tự động một cách hệ thống và chặt chẽ.
+0031: Nhóm cũng xin gửi lời cảm ơn đến tập thể tác giả R. Liu, Z. Zhang, Y. Hu, Y. Lin, X. Gao và H. Sun tại Đại học Hàng không Vũ trụ Bắc Kinh (Beihang University) vì đã công bố bộ chuẩn Test4Py Benchmark theo giấy phép mở, cùng cộng đồng phát triển các thư viện mã nguồn mở Python (codetiming, docstring_parser, genty, PyCG, python-string-utils, superstring.py, typesystem, woa), tạo điều kiện thuận lợi để nhóm kế thừa và kiểm chứng phương pháp một cách minh bạch.
+0032: Cuối cùng, nhóm thực hiện xin cảm ơn quý thầy cô trong Khoa Công nghệ Thông tin, gia đình và bạn bè đã tạo điều kiện thuận lợi để nhóm tập trung hoàn thành bài tiểu luận này.
+0033: 
+0034: MỤC LỤC
+0035: LỜI CẢM ƠN3
+0036: MỤC LỤC4
+0037: DANH MỤC BẢNG6
+0038: DANH MỤC HÌNH6
+0039: DANH MỤC TỪ VIẾT TẮT8
+0040: MỞ ĐẦU9
+0041: 1. Lý do chọn đề tài9
+0042: 2. Mục tiêu và câu hỏi nghiên cứu10
+0043: 3. Đối tượng và phạm vi nghiên cứu10
+0044: 4. Phương pháp nghiên cứu11
+0045: 5. Bố cục tiểu luận11
+0046: CHƯƠNG 1. TỔNG QUAN NGHIÊN CỨU12
+0047: 1.1. Các hướng sinh kiểm thử đơn vị tự động truyền thống12
+0048: 1.2. Các nghiên cứu sử dụng mô hình ngôn ngữ để sinh kiểm thử12
+0049: 1.3. Vấn đề ngữ cảnh mã nguồn và hạn chế của đồ thị gọi hàm cục bộ13
+0050: 1.4. Những vấn đề trong đánh giá và hướng tiếp cận của đề tài14
+0051: CHƯƠNG 2. CƠ SỞ LÝ THUYẾT16
+0052: 2.1. Kiểm thử đơn vị và bài toán test oracle trong ngôn ngữ Python16
+0053: 2.2. Yêu cầu đối với bộ kiểm thử đơn vị và hiện tượng khẳng định rỗng16
+0054: 2.3. Cây cú pháp trừu tượng (AST) và cơ chế phân giải không gian tên17
+0055: 2.4. Mô hình ngôn ngữ và phản hồi sửa lỗi dựa trên dấu vết thực thi17
+0056: 2.5. Kiểm thử đột biến và hệ thống các chỉ số đánh giá chất lượng18
+0057: 2.6. Kiểm định thống kê thực nghiệm và vai trò kiểm soát của con người19
+0058: CHƯƠNG 3. PHƯƠNG PHÁP NGHIÊN CỨU20
+0059: 3.1. Tổng quan kiến trúc hệ thống Council-SOTA20
+0060: 3.2. Cơ chế trích xuất bảng định danh tĩnh (AST Symbol-Table Grounding)20
+0061: 3.3. Cơ chế phản biện sửa lỗi thích ứng hai vòng (Two-Round Adaptive Critic)21
+0062: 3.4. Chuẩn hóa tiền thực thi, kiểm toán chất lượng và kiểm soát chi phí22
+0063: 3.5. Thiết kế thực nghiệm và đặc tả 21 đối tượng kiểm thử23
+0064: 3.6. Quy trình thực nghiệm và phương pháp đo lường chỉ số26
+0065: CHƯƠNG 4. THỰC NGHIỆM VÀ ĐÁNH GIÁ30
+0066: 4.1. Phạm vi thực nghiệm và cách trình bày kết quả30
+0067: 4.2. Kết quả thực nghiệm định lượng31
+0068: 4.2.1. So sánh tỷ lệ vượt qua và độ phủ mã nguồn giữa ba nhánh phương pháp31
+0069: 4.2.2. Hiệu quả của cơ chế phản biện sửa lỗi hai vòng35
+0070: 4.2.3. Kết quả nghiên cứu bóc tách thành phần (Ablation Study)36
+0071: 4.2.4. Khả năng phát hiện lỗi qua kiểm thử đột biến và độ ổn định thực thi37
+0072: 4.3. Phân tích định tính và nghiên cứu trường hợp điển hình39
+0073: 4.3.1. Phân loại các dạng lỗi phổ biến khi sinh kiểm thử bằng SLM39
+0074: 4.3.2. Nghiên cứu trường hợp trên docstring_parser_numpydoc và genty_dataset40
+0075: 4.3.3. Phân tích cấu trúc kỹ thuật của các bộ kiểm thử chuẩn tiêu biểu42
+0076: 4.4. Phân tích chi phí suy luận và đánh đổi giữa chất lượng với thời gian phản hồi43
+0077: 4.5. Hạn chế và tính hợp lệ của kết quả thực nghiệm44
+0078: 4.5.1. Hạn chế về phép đo và khái niệm (Construct Validity)44
+0079: 4.5.2. Hạn chế về kết luận thống kê (Statistical Conclusion Validity)44
+0080: 4.5.3. Hạn chế về tính hợp lệ nội tại (Internal Validity)45
+0081: 4.5.4. Hạn chế về khả năng khái quát hóa (External Validity)45
+0082: CHƯƠNG 5. KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN46
+0083: 5.1. Kết luận46
+0084: 5.2. Phương hướng phát triển47
+0085: TÀI LIỆU THAM KHẢO48
+0086: 
+0087: DANH MỤC BẢNG
+0088: Bảng 1.1. So sánh các hướng tiếp cận sinh kiểm thử đơn vị tự động15
+0089: Bảng 1.2. Đối chiếu kết quả khảo sát tiền trạm giữa Call-Graph RAG cục bộ và trích xuất AST tĩnh14
+0090: Bảng 2.1. Các yêu cầu chất lượng đối với bộ kiểm thử đơn vị16
+0091: Bảng 2.2. Hệ thống các chỉ số sử dụng trong đánh giá bộ kiểm thử tự động18
+0092: Bảng 3.1. Các biến độc lập, biến phụ thuộc và điều kiện kiểm soát trong thiết kế thực nghiệm24
+0093: Bảng 3.2. Đặc tả kỹ thuật 21 đối tượng kiểm thử được tuyển chọn từ Test4Py Benchmark24
+0094: Bảng 3.3. Các bước trong quy trình sinh, phản biện sửa lỗi và đánh giá kiểm thử27
+0095: Bảng 3.4. Đặc tả các toán tử đột biến cấp 1 trên cây cú pháp trừu tượng (AST)29
+0096: Bảng 4.1. Phạm vi cấu hình và tham số môi trường trong thực nghiệm đối chứng30
+0097: Bảng 4.2. Kết quả đối chứng ba nhánh phương pháp trên 21 đối tượng kiểm thử (N = 5 seeds)31
+0098: Bảng 4.3. Kết quả kiểm định thống kê suy luận và kích thước hiệu ứng (Council-SOTA so với Baseline)34
+0099: Bảng 4.4. So sánh hiệu năng trên nhóm con 18 đối tượng có cấu trúc rẽ nhánh và trạng thái35
+0100: Bảng 4.5. Phân bổ số ca sửa lỗi thành công theo từng vòng phản biện của Adaptive Critic36
+0101: Bảng 4.6. Kết quả nghiên cứu bóc tách thành phần (Ablation Study) trên 6 đối tượng đại diện37
+0102: Bảng 4.7. Kết quả phát hiện đột biến cấp 1 phân theo lớp toán tử biến dị cú pháp38
+0103: Bảng 4.8. Phân loại các dạng lỗi định tính qua 384 dấu vết lỗi thực thi của SLM 20B40
+0104: Bảng 4.9. Phân rã lượng token tiêu thụ, chi phí vận hành và sự đánh đổi trên đường biên Pareto43
+0105: Bảng 5.1. Tổng hợp kết quả thực nghiệm trả lời bốn câu hỏi nghiên cứu (RQ1 – RQ4)46
+0106: DANH MỤC HÌNH
+0107: Hình 1.1. So sánh thời gian khởi tạo ngữ cảnh (Cold-Start Latency) và mức chiếm dụng bộ nhớ phần cứng14
+0108: Hình 3.1. Sơ đồ kiến trúc hệ thống sinh và sửa lỗi kiểm thử tự động Council-SOTA20
+0109: Hình 3.2. Sơ đồ luồng xử lý thực nghiệm sinh, phản biện sửa lỗi và đánh giá bộ kiểm thử đơn vị28
+0110: Hình 4.1. So sánh tỷ lệ vượt qua (Pass Rate) giữa ba nhánh phương pháp trên 21 đối tượng kiểm thử33
+0111: Hình 4.2. Biểu đồ Dumbbell đối chiếu mức thay đổi độ phủ câu lệnh giữa Baseline và Council-SOTA33
+0112: Hình 4.3. Phân bổ 29 ca sửa lỗi thành công của cơ chế phản biện thích ứng qua Vòng 1 và Vòng 236
+0113: Hình 4.4. Phân bổ kết quả kiểm thử đột biến cấp 1 (187 AST mutants) trên 21 bộ kiểm thử chuẩn39
+0114: Hình 4.5. Thay đổi tỷ lệ vượt qua và độ phủ câu lệnh trong hai nghiên cứu trường hợp điển hình41
+0115: Hình 4.6. Đánh đổi đường biên Pareto giữa độ phủ câu lệnh và thời gian phản hồi trong CI/CD44
+0116: 
+0117: DANH MỤC TỪ VIẾT TẮT
+0118: Bảng danh mục các ký hiệu và từ viết tắt sử dụng trong tiểu luận
+0119: Ký hiệu | Tiếng Anh | Nghĩa tiếng Việt
+0120: AOR | Arithmetic Operator Replacement | Toán tử đột biến thay thế phép toán số học
+0121: AST | Abstract Syntax Tree | Cây cú pháp trừu tượng của mã nguồn
+0122: BC | Branch Coverage | Độ phủ nhánh điều khiển
+0123: BVR | Boolean Value Replacement | Toán tử đột biến đảo giá trị luận lý (Boolean)
+0124: CI/CD | Continuous Integration / Deployment | Tích hợp liên tục và triển khai liên tục
+0125: CoT | Chain-of-Thought | Chuỗi suy luận từng bước trong kỹ thuật gợi ý
+0126: CRP | Constant Replacement Operator | Toán tử đột biến thay thế hằng số
+0127: FR | Flaky Test Rate | Tỷ lệ kiểm thử không ổn định giữa các lần chạy
+0128: LLM / SLM | Large / Small Language Model | Mô hình ngôn ngữ lớn / quy mô tham số nhỏ (~7B–20B)
+0129: LPU | Language Processing Unit | Bộ xử lý suy luận ngôn ngữ chuyên dụng
+0130: MS | Mutation Score | Điểm đột biến (tỷ lệ đột biến bị phát hiện)
+0131: MUT | Method / Module Under Test | Phương thức hoặc mô-đun đang được kiểm thử
+0132: PR | Pass Rate | Tỷ lệ bộ kiểm thử thực thi thành công không lỗi
+0133: RAG | Retrieval-Augmented Generation | Sinh mã nguồn tăng cường bằng truy xuất thông tin
+0134: ROR | Relational Operator Replacement | Toán tử đột biến thay thế phép toán so sánh
+0135: RQ | Research Question | Câu hỏi nghiên cứu
+0136: SBST | Search-Based Software Testing | Kiểm thử phần mềm dựa trên thuật toán tìm kiếm
+0137: 
+0138: 
+0139: MỞ ĐẦU
+0140: 1. Lý do chọn đề tài
+0141: Kiểm thử đơn vị (unit testing) giúp xác nhận hành vi của từng hàm, phương thức hoặc lớp đối tượng độc lập và phát hiện sớm lỗi hồi quy (regression defects) khi mã nguồn thay đổi [1], [2]. Để xây dựng bộ kiểm thử có giá trị, lập trình viên phải phân tích đặc tả, lựa chọn dữ liệu đầu vào bao quát cả trường hợp thông thường lẫn điều kiện biên, thiết lập trạng thái đối tượng và viết các câu lệnh khẳng định (assertions) tương ứng với kết quả mong đợi (test oracle). Trong các hệ thống phần mềm ngôn ngữ Python, công việc này gặp thêm thách thức từ cơ chế định kiểu động (duck typing) và liên kết muộn tại thời điểm chạy (dynamic late-binding) [1], [2]. Các xung đột kiểu dữ liệu, đường dẫn nạp mô-đun sai hoặc truy cập thuộc tính không tồn tại đều không được trình biên dịch cảnh báo sớm mà chỉ phát sinh ngoại lệ (TypeError, AttributeError, ImportError) khi thực thi trong môi trường runtime.
+0142: Sự phát triển của các mô hình ngôn ngữ lớn (LLMs) và các mô hình ngôn ngữ quy mô tham số nhỏ hơn (SLMs, từ 7B đến 20B tham số) đã hỗ trợ tự động sinh mã kiểm thử từ giao diện hàm và tài liệu mô tả (docstring) [3], [4], [19]. Các mô hình phân khúc 14B–20B tham số có lợi thế về tốc độ phản hồi và chi phí suy luận thấp khi tích hợp vào đường ống tích hợp liên tục (CI/CD). Tuy nhiên, kết quả khảo sát trên hệ quy chiếu Test4Py Benchmark của Liu và cộng sự [1] cũng như các thử nghiệm thực tế cho thấy khi áp dụng kỹ thuật gợi ý trực tiếp (zero-shot prompting) trên SLMs, đầu ra thường gặp ba hạn chế chính: (1) suy diễn sai đường dẫn nạp mô-đun con (submodule import hallucinations) gây lỗi thu thập kiểm thử; (2) truy cập thuộc tính giả định hoặc sinh khẳng định hình thức (hollow assertions như assert True) không có khả năng phát hiện lỗi; và (3) dừng sớm ở các kiến trúc sửa lỗi một vòng khi ca kiểm thử sau khi sửa xong lỗi cú pháp lại phát sinh sai lệch về giá trị kỳ vọng (AssertionError). Mặt khác, việc dựng đồ thị gọi hàm tĩnh (Call-Graph RAG) và dùng LLM tóm tắt tuần tự các nút phụ thuộc trên GPU cục bộ lại tốn nhiều thời gian khởi tạo và bộ nhớ VRAM. Vì vậy, việc nghiên cứu kiến trúc kết hợp trích xuất bảng định danh tĩnh từ cây cú pháp trừu tượng (AST) với cơ chế phản biện sửa lỗi thích ứng hai vòng (Council-SOTA) trên bộ chuẩn Test4Py là hướng tiếp cận cần thiết và có ý nghĩa thực tiễn.
+0143: 2. Mục tiêu và câu hỏi nghiên cứu
+0144: Tiểu luận tập trung thiết kế và đánh giá định lượng kiến trúc Council-SOTA trong bài toán tự động sinh và sửa lỗi bộ kiểm thử đơn vị cho Python. Nội dung nghiên cứu hướng đến giải quyết bốn câu hỏi nghiên cứu (Research Questions - RQs):
+0145: •  RQ1: Khi tích hợp cơ chế trích xuất bảng định danh công khai từ AST (AST Symbol-Table Grounding) và kiến trúc hội đồng, tỷ lệ vượt qua (Pass Rate) và độ phủ câu lệnh (Statement Coverage) thay đổi như thế nào so với Zero-Shot Baseline và Council Standard (phản biện 1 vòng)?
+0146: •  RQ2: Cơ chế phản biện thích ứng hai vòng (Two-Round Adaptive Critic) đóng góp định lượng như thế nào vào việc khôi phục các bộ kiểm thử gặp lỗi cú pháp/import ở Vòng 1 và lỗi sai lệch kết quả kỳ vọng (AssertionError) ở Vòng 2?
+0147: •  RQ3: Khi lần lượt loại bỏ AST State Grounding, Adaptive Critic Repair và Auto-Import Preflight trong nghiên cứu bóc tách (Ablation Study), hiệu năng hệ thống thay đổi như thế nào?
+0148: •  RQ4: Độ phủ câu lệnh có phản ánh đầy đủ khả năng phát hiện lỗi qua điểm đột biến cấp 1 (Mutation Score) hay không, và chi phí token, thời gian phản hồi cùng độ ổn định (Flaky Test Rate) đáp ứng ở mức nào trong quy trình CI/CD?
+0149: 3. Đối tượng và phạm vi nghiên cứu
+0150: Đối tượng nghiên cứu là các bộ kiểm thử đơn vị Python (khuôn khổ pytest và unittest) được sinh bởi mô hình ngôn ngữ openai/gpt-oss-20b dưới ba nhánh phương pháp (Zero-Shot Baseline, Council Standard và Council-SOTA) trên 21 đối tượng kiểm thử (curated benchmark targets) thuộc 8 dự án mã nguồn mở trong hệ quy chiếu Test4Py Benchmark [1]. Phạm vi thực nghiệm gồm 315 lượt chạy đối chứng (3 nhánh × 21 đối tượng × 5 hạt giống ngẫu nhiên), 187 đột biến cấp 1 trên cây AST, 105 lượt chạy lặp kiểm tra độ ổn định và thực nghiệm bóc tách trên 6 đối tượng đại diện. Tiểu luận giới hạn ở kiểm thử đơn vị đối với các hàm/lớp xử lý trong bộ nhớ, chưa mở rộng sang kiểm thử tích hợp có cơ sở dữ liệu hoặc dịch vụ mạng.
+0151: 4. Phương pháp nghiên cứu
+0152: Tiểu luận kết hợp tổng hợp tài liệu, thiết kế hệ thống thực nghiệm và phân tích định lượng kết hợp định tính. Kết quả thực nghiệm được đối chiếu qua chênh lệch điểm phần trăm, mức thay đổi tương đối và kiểm định thống kê tham số (Paired Student's t-test) lẫn phi tham số (Wilcoxon Signed-Rank, Mann-Whitney U) cùng kích thước hiệu ứng (Cohen's d, Vargha-Delaney A12) [9]. Các phân tích định tính được rút ra từ việc phân loại 384 dấu vết lỗi (tracebacks) và đối chiếu trực tiếp mã nguồn kiểm thử trước và sau khi áp dụng AST grounding.
+0153: 5. Bố cục tiểu luận
+0154: Ngoài phần Mở đầu và Tài liệu tham khảo, tiểu luận gồm 5 chương: Chương 1 trình bày tổng quan nghiên cứu và kết quả khảo sát tiền trạm về hạn chế của Call-Graph RAG; Chương 2 hệ thống hóa cơ sở lý thuyết về kiểm thử đơn vị, AST, phản hồi thực thi và kiểm thử đột biến; Chương 3 mô tả kiến trúc Council-SOTA, các thuật toán, thiết kế thực nghiệm và sơ đồ luồng xử lý; Chương 4 trình bày kết quả thực nghiệm định lượng, phân tích trường hợp, đánh đổi Pareto và các hạn chế; Chương 5 tổng kết các phát hiện chính và đề xuất hướng phát triển.
+0155: 
+0156: CHƯƠNG 1. TỔNG QUAN NGHIÊN CỨU
+0157: 1.1. Các hướng sinh kiểm thử đơn vị tự động truyền thống
+0158: Sinh kiểm thử đơn vị tự động đã được nghiên cứu sâu rộng nhằm giảm công sức thiết kế ca kiểm thử thủ công. Hướng tiếp cận truyền thống tiêu biểu là kiểm thử phần mềm dựa trên tìm kiếm (Search-Based Software Testing - SBST), sử dụng giải thuật di truyền hoặc tìm kiếm tiến hóa để tối ưu hóa độ phủ cấu trúc [2], [8]. Trong ngôn ngữ định kiểu tĩnh như Java, công cụ EvoSuite của Fraser và Arcuri [8] tự động tiến hóa các chuỗi lời gọi phương thức để bao phủ các nhánh điều khiển. Khi chuyển sang Python, công cụ Pynguin của Lukasczyk và Fraser [2] áp dụng nguyên lý tương tự nhưng gặp hai rào cản lớn. Thứ nhất là hiện tượng bão hòa khi khởi tạo đối tượng (object generation plateaus): do Python thiếu thông tin kiểu tĩnh bắt buộc, việc suy đoán kiểu cho các đối tượng nhận (receiver objects) có trạng thái lồng nhau dễ làm không gian tìm kiếm bùng nổ tổ hợp [1], [2]. Thứ hai là hạn chế về test oracle: SBST tạo câu lệnh assert bằng cách ghi nhận chính giá trị đầu ra hiện tại của chương trình, nên nếu mã nguồn đang chứa lỗi tiềm ẩn, bộ kiểm thử sẽ giữ lại chính hành vi sai đó làm điều kiện chuẩn [8], [14].
+0159: 1.2. Các nghiên cứu sử dụng mô hình ngôn ngữ để sinh kiểm thử
+0160: Các mô hình ngôn ngữ lớn (LLMs) có khả năng khai thác thông tin từ tên định danh, chú thích kiểu (type hints) và tài liệu docstring để đề xuất dữ liệu kiểm thử có ý nghĩa nghiệp vụ [10], [19]. Schäfer và cộng sự [19] khảo sát sinh kiểm thử trên JavaScript và cho thấy ngữ cảnh giao diện kèm ví dụ giúp tăng tỷ lệ kiểm thử hợp lệ. Xie và cộng sự [3] xây dựng ChatUniTest cho Java kết hợp trích xuất ngữ cảnh lớp với một vòng sửa lỗi từ thông báo biên dịch. Trên Python, Pizzorno và Berger [4] đề xuất CoverUp sử dụng thông tin độ phủ từ SlipCover để yêu cầu LLM sinh bổ sung cho các nhánh chưa phủ; Ryan và cộng sự [5] giới thiệu SymPrompt đưa ràng buộc đường dẫn thực thi ký hiệu vào prompt; và Garg và cộng sự [6] triển khai sinh kiểm thử định hướng đột biến tại Meta.
+0161: Năm 2025, Liu và cộng sự [1] công bố bộ chuẩn Test4Py Benchmark để đánh giá toàn diện khả năng sinh kiểm thử hồi quy của LLM trên các dự án Python thực tế. Kết quả chỉ ra rằng dù LLM tạo ra mã kiểm thử tự nhiên hơn Pynguin, tỷ lệ thất bại thực thi vẫn vượt 50% ở nhiều thư viện phức tạp khi dùng gợi ý trực tiếp, chủ yếu do lỗi nạp mô-đun không tồn tại (ModuleNotFoundError), sai chữ ký khởi tạo (TypeError) và truy cập thuộc tính giả định (AttributeError).
+0162: 1.3. Vấn đề ngữ cảnh mã nguồn và hạn chế của đồ thị gọi hàm cục bộ
+0163: Để giảm lỗi suy diễn giao diện, nhiều nghiên cứu sử dụng kỹ thuật Retrieval-Augmented Generation dựa trên đồ thị gọi hàm tĩnh (Static Call-Graph RAG), trong đó hệ thống dựng đồ thị phụ thuộc liên hàm và dùng LLM tóm tắt tuần tự docstring của từng nút trước khi đưa vào prompt [1], [25]. Tuy nhiên, qua khảo sát thực nghiệm tiền trạm (phiên R8–R15) trên cấu hình phần cứng 2× NVIDIA Tesla T4 (16 GB VRAM) với mô hình Qwen2.5-Coder-14B-Instruct lượng tử hóa 4-bit (NF4), nhóm thực hiện ghi nhận ba điểm nghẽn lớn:
+0164: •  Độ trễ khởi tạo ngữ cảnh (Cold-Start Latency): Để chuẩn bị ngữ cảnh đồ thị gọi hàm cho 2 mô-đun thuộc thư viện genty, đường ống phải thực hiện 95 lượt gọi suy luận LLM tuần tự, tiêu tốn 2.627 giây (~43,8 phút) trước khi sinh ca kiểm thử đầu tiên, gây quá hạn thời gian thực thi (timeout) trong môi trường container.
+0165: •  Tràn bộ nhớ VRAM (CUDA Out-Of-Memory): Trọng số mô hình 14B NF4 chiếm 9,29 GiB VRAM (và 10,76 GiB ở ngữ cảnh 2K tokens). Khi ghép toàn bộ tóm tắt Call-Graph khiến ngữ cảnh vượt 4.096 tokens, bộ nhớ đệm KV-cache và ma trận chú ý SDPA yêu cầu thêm ~2,50 GiB, đẩy mức chiếm dụng lên 15,2 GB / 16,0 GB (95% VRAM) và gây lỗi tràn bộ nhớ.
+0166: •  Tỷ lệ vượt qua thấp do thiếu định danh xuất công khai: Trên tập kiểm chứng tiền trạm 12 mô-đun (36 lượt chạy/nhánh), nhánh chỉ dùng mã nguồn đạt 2/36 bộ vượt qua (5,56%) và nhánh kèm Call-Graph đạt 4/36 bộ vượt qua (11,11%), dù lượng token đầu vào tăng từ 5.869 lên 7.141 tokens (+21,67%). Các bản tóm tắt ngữ nghĩa mức cao không chỉ rõ đường dẫn re-export trong tệp __init__.py nên mô hình vẫn nạp sai mô-đun con.
+0167: 
+0168: Hình 1.1. So sánh thời gian khởi tạo ngữ cảnh (Cold-Start Latency) và mức chiếm dụng bộ nhớ phần cứng
+0169: Bảng 1.2. Đối chiếu kết quả khảo sát tiền trạm giữa Call-Graph RAG cục bộ và trích xuất AST tĩnh
+0170: Tiêu chí kỹ thuật | Call-Graph RAG cục bộ (Qwen-14B NF4) | Trích xuất AST tĩnh + Cloud LPU (Council-SOTA)
+0171: Mô hình suy luận sử dụng | Qwen2.5-Coder-14B-Instruct (NF4) | openai/gpt-oss-20b (Groq LPU)
+0172: Thời gian khởi tạo ngữ cảnh | 2.627,0 giây (~43,8 phút) | < 0,05 giây (< 50 ms trên CPU)
+0173: Số lượt gọi LLM khi khởi tạo | 95 lượt gọi tuần tự | 0 lượt gọi (phân tích AST tất định)
+0174: Mức chiếm dụng VRAM cục bộ | 15,2 GB / 16,0 GB (nguy cơ tràn VRAM) | 0 MB (chỉ dùng ~12 MB RAM hệ thống)
+0175: Thời gian sinh và kiểm tra / suite | 300 – 600 giây (hoặc quá hạn timeout) | 5,8 – 6,6 giây / bộ kiểm thử
+0176: Tỷ lệ vượt qua trên tập khảo sát | 11,11% (4/36 lượt chạy tiền trạm) | 93,33% (98/105 lượt chạy đối chứng)
+0177: 
+0178: 1.4. Những vấn đề trong đánh giá và hướng tiếp cận của đề tài
+0179: Bên cạnh hạn chế về thời gian khởi tạo ngữ cảnh và việc cắt cụt sửa lỗi sau một vòng duy nhất, nhiều nghiên cứu hiện hành chỉ đánh giá bộ kiểm thử thông qua độ phủ câu lệnh hoặc độ phủ nhánh mà chưa kiểm tra mật độ khẳng định rỗng (hollow assertions) hay điểm đột biến (mutation score) [3], [4], [7]. Bảng 1.1 đối sánh các công trình tiêu biểu với kiến trúc Council-SOTA được đề xuất trong tiểu luận.
+0180: Bảng 1.1. So sánh các hướng tiếp cận sinh kiểm thử đơn vị tự động
+0181: Công trình / Phương pháp | Cơ chế cung cấp ngữ cảnh | Cơ chế sửa lỗi phản hồi | Thẩm định chất lượng Oracle & Đột biến
+0182: EvoSuite [8] / Pynguin [2] (SBST) | Không dùng LLM; phân tích bytecode hoặc suy diễn kiểu cục bộ | Không có vòng sửa lỗi; chọn lọc cá thể qua giải thuật di truyền | Sinh assertion hồi quy từ hành vi hiện tại; dễ giữ lại lỗi sẵn có
+0183: ChatUniTest (Xie và cs., 2024) [3] | Trích xuất chữ ký lớp và phụ thuộc nông (tập trung trên Java) | Sửa lỗi 1 vòng dựa trên thông báo lỗi của trình biên dịch | Đánh giá qua tỷ lệ biên dịch và độ phủ dòng/nhánh
+0184: CoverUp (Pizzorno & Berger, 2024) [4] | Cung cấp đoạn mã Python chưa được phủ từ công cụ SlipCover | Gửi lại thông báo ngoại lệ từ pytest để sinh bổ sung | Tập trung tối ưu độ phủ dòng và nhánh; không kiểm toán đột biến
+0185: SymPrompt (Ryan và cs., 2024) [5] | Trích xuất điều kiện đường dẫn thực thi ký hiệu (symbolic path) | Hiệu chỉnh cú pháp đơn vòng theo đường dẫn nhánh | Đánh giá chủ yếu qua độ phủ đường dẫn và nhánh điều khiển
+0186: Test4Py Baseline (Liu và cs., 2025) [1] | Mã nguồn mục tiêu kèm thông tin kiểu và đồ thị gọi hàm tĩnh | Khảo sát sinh trực tiếp hoặc phản hồi cơ bản; chi phí khởi tạo cao | Đánh giá tỷ lệ thực thi và độ phủ trên tập chuẩn Python
+0187: Council-SOTA (Đề tài thực hiện) | Trích xuất bảng định danh AST tĩnh từ __init__.py (< 50 ms, 0 token) | Phản biện thích ứng 2 vòng (Vòng 1: cú pháp/import; Vòng 2: diff assertion) | Cổng kiểm toán AST chống test rỗng + Kiểm thử 187 đột biến cấp 1
+0188: 
+0189: Như tổng hợp tại Bảng 1.1 và Bảng 1.2, việc thay thế bước tóm tắt đồ thị gọi hàm bằng cơ chế trích xuất bảng định danh AST tĩnh trên CPU kết hợp phản biện thích ứng hai vòng và kiểm thử đột biến cấp 1 giúp giải quyết đồng thời bài toán độ trễ, tỷ lệ vượt qua và chất lượng assertion. Chương 2 tiếp theo sẽ trình bày cơ sở lý thuyết của các thành phần này.
+0190: 
+0191: CHƯƠNG 2. CƠ SỞ LÝ THUYẾT
+0192: 2.1. Kiểm thử đơn vị và bài toán test oracle trong ngôn ngữ Python
+0193: Kiểm thử đơn vị kiểm tra hành vi của một thành phần độc lập (hàm, phương thức hoặc lớp) theo cấu trúc ba bước: chuẩn bị dữ liệu và đối tượng phụ thuộc (Arrange), kích hoạt phương thức mục tiêu (Act) và đối chiếu kết quả thực tế với điều kiện mong đợi (Assert) [15], [20]. Cơ sở xác định kết quả mong đợi được gọi là test oracle [6], [14]. Trong Python, việc xây dựng bước chuẩn bị và khẳng định chịu chi phối trực tiếp bởi ba cơ chế: (1) định kiểu động (duck typing), khiến lỗi truyền sai cấu trúc đối tượng chỉ phát tác tại runtime; (2) sự tách biệt giữa vị trí tệp vật lý (ví dụ typesystem/base.py) và không gian tên công khai được xuất qua tệp __init__.py; và (3) cơ chế biến đổi chữ ký hàm tại thời điểm chạy của các decorator tham số hóa (như @genty_dataset).
+0194: 2.2. Yêu cầu đối với bộ kiểm thử đơn vị và hiện tượng khẳng định rỗng
+0195: Một bộ kiểm thử đơn vị cần đáp ứng đồng thời tính đúng đắn về giao diện, mức độ bao quát tình huống, khả năng phát hiện sai lệch và tính ổn định khi bảo trì [14], [19], được phân biệt trong Bảng 2.1.
+0196: Bảng 2.1. Các yêu cầu chất lượng đối với bộ kiểm thử đơn vị
+0197: Yêu cầu chất lượng | Nội dung kỹ thuật cần đáp ứng | Rủi ro thường gặp khi sinh tự động bằng LLM
+0198: Tính đúng đắn (Correctness) | Sử dụng đúng đường dẫn import, đúng chữ ký hàm khởi tạo; oracle phù hợp với đặc tả | Ảo giác đường dẫn mô-đun con (ImportError) hoặc gọi thuộc tính không tồn tại (AttributeError)
+0199: Mức độ bao quát (Completeness) | Bao phủ luồng thực thi thông thường, các giá trị biên và các nhánh xử lý ngoại lệ | Chỉ kiểm tra trường hợp đơn giản (happy path), bỏ sót nhánh điều kiện biên hoặc ngoại lệ
+0200: Khả năng phát hiện sai lệch (Fault Sensitivity) | Câu lệnh assert kiểm tra cụ thể giá trị trả về, trạng thái đối tượng và thông điệp lỗi | Sinh kiểm thử rỗng (hollow tests) hoặc khẳng định hằng đúng (assert True, assert obj is not None)
+0201: Tính ổn định và bảo trì (Stability & Maintainability) | Kết quả thực thi nhất quán qua các lần chạy (không bị flaky); cấu trúc mã rõ ràng | Phụ thuộc vào đồng hồ thời gian thực, số ngẫu nhiên không cố định seed hoặc thứ tự bất định
+0202: 
+0203: Khi đánh giá bộ kiểm thử do LLM sinh ra, cần đặc biệt kiểm soát hiện tượng khẳng định rỗng (hollow / tautological assertions) [3], [18]. Mô hình có thể đạt độ phủ dòng cao bằng cách gọi phương thức mục tiêu nhưng chỉ đặt lệnh assert True, assert 1 == 1, hoặc khi sửa lỗi lại xóa bỏ câu lệnh assert đang gây lỗi để ca kiểm thử vượt qua một cách hình thức. Do đó, hệ thống sinh kiểm thử cần tích hợp bộ kiểm toán cú pháp để từ chối các ca kiểm thử không có khẳng định thực chất.
+0204: 2.3. Cây cú pháp trừu tượng (AST) và cơ chế phân giải không gian tên
+0205: Cây cú pháp trừu tượng (Abstract Syntax Tree - AST) biểu diễn cấu trúc phân cấp của mã nguồn thành đồ thị các nút ngữ pháp (ast.Module, ast.ClassDef, ast.FunctionDef, ast.ImportFrom, ast.Assign, ast.Assert) mà không cần thực thi chương trình [24]. Việc duyệt tĩnh cây AST trên CPU cung cấp ba nguồn thông tin xác định cho quá trình sinh kiểm thử: (1) phân giải danh sách định danh xuất công khai (__all__ và các lệnh re-export trong __init__.py) để xác lập câu lệnh import chuẩn tắc; (2) trích xuất chữ ký phương thức khởi tạo __init__ cùng tập thuộc tính công khai (self.<attr> và @property) của lớp mục tiêu; và (3) kiểm tra cấu trúc các hàm test_* để phát hiện kiểm thử rỗng hoặc khẳng định hằng đúng trước khi chạy sandbox.
+0206: 2.4. Mô hình ngôn ngữ và phản hồi sửa lỗi dựa trên dấu vết thực thi
+0207: Các mô hình ngôn ngữ kiến trúc Transformer [10] sinh mã dựa trên phân phối xác suất token có điều kiện. Khi kết hợp suy luận theo bước (Chain-of-Thought) [11] và học tăng cường qua phản hồi ngôn ngữ (Reflexion) [15] trong mô hình hội đồng (Coder – Runner – Critic), dấu vết lỗi (traceback) thu được từ trình thực thi pytest đóng vai trò là tín hiệu định hướng sửa lỗi. Thực tế thực thi cho thấy dấu vết lỗi xuất hiện theo hai pha tuần tự: pha thứ nhất là các lỗi nạp mô-đun và cú pháp khởi tạo (ImportError, SyntaxError, TypeError) ngăn cản việc chạy hàm mục tiêu; pha thứ hai là các lỗi sai lệch kết quả kỳ vọng (AssertionError kèm theo vi sai giữa giá trị thực tế v_actual và giá trị kỳ vọng v_expected) chỉ xuất hiện sau khi pha thứ nhất đã được giải quyết. Do đó, quy trình phản biện cần tối thiểu hai vòng lặp với mục tiêu tách biệt tương ứng với hai pha này.
+0208: 2.5. Kiểm thử đột biến và hệ thống các chỉ số đánh giá chất lượng
+0209: Để tránh việc đánh giá phiến diện chỉ dựa trên độ phủ mã nguồn, đề tài sử dụng hệ thống 6 chỉ số kết hợp giữa khả năng thực thi, độ phủ cấu trúc, kiểm thử đột biến, độ ổn định và chi phí vận hành được tổng hợp tại Bảng 2.2 [7], [12], [13].
+0210: Bảng 2.2. Hệ thống các chỉ số sử dụng trong đánh giá bộ kiểm thử tự động
+0211: Chỉ số đánh giá | Ký hiệu | Nội dung phản ánh | Giới hạn khi diễn giải độc lập
+0212: Tỷ lệ bộ kiểm thử vượt qua | PR (%) | Tỷ lệ bộ kiểm thử thực thi hoàn tất với mã thoát bằng 0 trên mã nguồn gốc | Bộ kiểm thử có assertion yếu hoặc kiểm tra bề mặt vẫn có thể đạt PR = 100%
+0213: Độ phủ câu lệnh (Statement Coverage) | SC (%) | Tỷ lệ dòng lệnh khả thi trong mô-đun mục tiêu được thực thi ít nhất một lần | Thực thi qua dòng lệnh không đồng nghĩa với việc giá trị tính toán tại dòng đó được kiểm tra đúng
+0214: Độ phủ nhánh (Branch Coverage) | BC (%) | Tỷ lệ các nhánh rẽ điều kiện (True/False) trong luồng điều khiển được duyệt qua | Chưa phản ánh đầy đủ các tổ hợp trạng thái biên hoặc lỗi phép toán bên trong nhánh
+0215: Điểm đột biến cấp 1 (Mutation Score) | MS (%) | Tỷ lệ các bản sao mã nguồn bị cấy lỗi nhân tạo (mutants) bị bộ kiểm thử phát hiện | Phụ thuộc vào tập toán tử đột biến được áp dụng và sự hiện diện của đột biến tương đương
+0216: Tỷ lệ kiểm thử chập chờn (Flaky Test Rate) | FR (%) | Tỷ lệ bộ kiểm thử thay đổi kết quả (đỗ/trượt) qua các lần chạy lặp lại liên tiếp | Chỉ phản ánh tính tất định của kiểm thử, không đo lường độ bao phủ chức năng
+0217: Thời gian phản hồi và Chi phí suy luận | T (s), C ($) | Thời gian hoàn tất một bộ kiểm thử và lượng ngân sách token tiêu thụ | Phụ thuộc vào hạ tầng phần cứng suy luận, tốc độ mạng và biểu giá dịch vụ API
+0218: 
+0219: Kiểm thử đột biến (mutation testing) dựa trên giả thuyết lập trình viên thành thạo (Competent Programmer Hypothesis) và hiệu ứng ghép lỗi (Coupling Effect) [12], [13]. Bằng cách áp dụng các toán tử biến đổi cú pháp cấp 1 lên cây AST của mã nguồn gốc để tạo ra các thể đột biến (mutants) và chạy bộ kiểm thử trên từng mutant, tỷ lệ mutant bị phát hiện (killed) phản ánh trực tiếp độ nhạy của các câu lệnh assert đối với các sai lệch logic bên trong phương thức mục tiêu.
+0220: 2.6. Kiểm định thống kê thực nghiệm và vai trò kiểm soát của con người
+0221: Theo hướng dẫn của Arcuri và Briand [9], do quá trình sinh mã của LLM có tính ngẫu nhiên và phân phối độ phủ thường lệch biên, việc so sánh thực nghiệm cần được lặp lại trên nhiều hạt giống ngẫu nhiên độc lập và kiểm chứng qua cả kiểm định tham số bắt cặp (Paired Student's t-test) lẫn kiểm định phi tham số (Wilcoxon Signed-Rank Test và Mann-Whitney U Test), đi kèm kích thước hiệu ứng Cohen's d và Vargha-Delaney A12. Đồng thời, dưới góc độ kiểm soát chất lượng phần mềm, bộ kiểm thử tự sinh đóng vai trò là kiểm thử hồi quy hỗ trợ kỹ sư phần mềm; kỹ sư vẫn giữ vai trò đối chiếu các khẳng định quan trọng với đặc tả nghiệp vụ trước khi tích hợp lâu dài vào dự án.
+0222: 
+0223: CHƯƠNG 3. PHƯƠNG PHÁP NGHIÊN CỨU
+0224: 3.1. Tổng quan kiến trúc hệ thống Council-SOTA
+0225: Kiến trúc Council-SOTA (Closed-Loop Multi-Turn Adaptive Critic Repair with AST Symbol-Table Grounding) được thiết kế gồm 5 thành phần phối hợp trong một chu trình khép kín như minh họa tại Hình 3.1: (1) Bộ trích xuất bảng định danh AST tĩnh (AST Symbol-Table Grounding) phân tích tệp __init__.py và mô-đun nguồn trên CPU (< 50 ms, 0 token); (2) Vòng lặp sinh mã và phản biện thích ứng hai vòng (Two-Round Adaptive Critic) phối hợp giữa tác nhân Coder, môi trường thực thi cô lập pytest sandbox và tác nhân Critic; (3) Bộ chuẩn hóa tiền thực thi an toàn (Preflight Normalizer); (4) Cổng kiểm toán chất lượng cú pháp (Quality Auditor Gate) loại bỏ kiểm thử rỗng và khẳng định hằng đúng; và (5) Cơ chế giám sát ngắt mạch tài chính thời gian thực (Financial Circuit Breaker).
+0226: 
+0227: Hình 3.1. Sơ đồ kiến trúc hệ thống sinh và sửa lỗi kiểm thử tự động Council-SOTA
+0228: 3.2. Cơ chế trích xuất bảng định danh tĩnh (AST Symbol-Table Grounding)
+0229: Để ngăn chặn hiện tượng mô hình suy diễn sai đường dẫn mô-đun con (như nạp ValidationError từ typesystem.exceptions thay vì typesystem.base) hoặc gọi sai thuộc tính nội bộ (như gọi .summary thay vì .short_description trên lớp Docstring), cơ chế AST Symbol-Table Grounding duyệt trực tiếp cây cú pháp của tệp __init__.py và tệp mã nguồn mục tiêu trước khi tạo prompt. Các bước xử lý chính được mô tả trong Thuật toán 3.1.
+0230: Thuật toán 3.1. Trích xuất bảng định danh công khai và phân giải ngữ cảnh tĩnh qua AST
+0231: Đầu vào: Đường dẫn dự án P, mô-đun mục tiêu M_target, định danh σ_target, tệp nguồn F_targetĐầu ra:  Bảng ràng buộc ngữ cảnh Γ_scope = (I_canon, S_sig, A_public, C_rules)--------------------------------------------------------------------------------------------------Bước 1: Khởi tạo I_canon ← ∅, A_public ← ∅, C_rules ← ∅; đọc tệp F_init = P + '/__init__.py'.Bước 2: Nếu tồn tại F_init, phân tích T_init ← ast.parse(F_init) để thu thập danh sách '__all__'        và lập ánh xạ xuất lại Γ_reexports[alias.name] ← (mod_source, alias) từ các nút ImportFrom.Bước 3: Phân tích T_target ← ast.parse(F_target), tìm nút định nghĩa n_target của σ_target:        - Nếu n_target là ClassDef: trích xuất chữ ký S_sig từ '__init__' và tập thuộc tính A_public          từ các phép gán 'self.<attr>' cùng các phương thức gắn decorator '@property'.        - Nếu n_target là FunctionDef / AsyncFunctionDef: trích xuất chữ ký tham số và kiểu trả về S_sig.Bước 4: Phân giải lệnh nạp chuẩn I_canon: ưu tiên đường dẫn trong Γ_reexports, sau đó đến M_target.Bước 5: Thiết lập quy tắc cấu trúc C_rules (bọc lớp unittest.TestCase gắn @genty cho gói 'genty';        truy xuất thông điệp lỗi qua phương thức 'err.messages()' cho lớp ValidationError).Bước 6: Trả về bảng ràng buộc Γ_scope = (I_canon, S_sig, A_public, C_rules) để nhúng vào System Prompt.
+0232: 
+0233: 3.3. Cơ chế phản biện sửa lỗi thích ứng hai vòng (Two-Round Adaptive Critic)
+0234: Khi bộ kiểm thử ứng viên ban đầu T_0 gặp lỗi trong môi trường sandbox, việc chỉ cấp một vòng sửa lỗi duy nhất thường dẫn đến hiện tượng dừng sớm: sau khi Vòng 1 sửa xong lỗi nạp mô-đun hoặc chữ ký khởi tạo để tạo bản T_1, lượt chạy T_1 mới đi vào kiểm tra các câu lệnh assert và có thể phát sinh lỗi sai lệch kết quả kỳ vọng (AssertionError). Cơ chế Two-Round Adaptive Critic giải quyết vấn đề này bằng cách phân tách rõ nhiệm vụ của hai vòng phản biện theo Thuật toán 3.2: Vòng 1 chuyên xử lý lỗi cú pháp, đường dẫn nạp và thiết lập fixture trong khi bảo toàn các câu lệnh assert; Vòng 2 tiếp nhận lịch sử Vòng 1 cùng thông tin đối chiếu vi sai (traceback diff giữa v_actual và v_expected) để hiệu chỉnh chính xác biểu thức khẳng định.
+0235: Thuật toán 3.2. Quy trình phản biện sửa lỗi thích ứng hai vòng khép kín (Two-Round Adaptive Critic)
+0236: Đầu vào: Mã nguồn mục tiêu C_src, bảng ngữ cảnh Γ_scope, bộ kiểm thử ban đầu T_0, số vòng tối đa R_max = 2Đầu ra:  Bộ kiểm thử hoàn thiện T_final, trạng thái Status ∈ {PASS, FAIL}, các chỉ số độ phủ (SC, BC)--------------------------------------------------------------------------------------------------Bước 1: Chuẩn hóa T_curr ← PreflightNormalizer(T_0, Γ_scope) và kiểm tra QualityAuditorGate(T_curr).Bước 2: Thực thi T_curr trong pytest sandbox: (exit_code, cov, tb_log) ← RunSandbox(T_curr, timeout=30s).        Nếu exit_code == 0 và cov.SC > 0 thì trả về (T_curr, PASS, cov).Bước 3: Lặp qua vòng phản biện r = 1 đến R_max (với R_max = 2):        - Nếu r == 1 (Vòng 1): Tạo prompt P_1 yêu cầu sửa lỗi ImportError, SyntaxError, TypeError          dựa trên Γ_scope và giữ nguyên cấu trúc các câu lệnh assert hiện có.        - Nếu r == 2 (Vòng 2): Trích xuất vi sai (v_actual, v_expected) từ tb_log; tạo prompt P_2          yêu cầu hiệu chỉnh biểu thức assert hoặc phương thức truy xuất lỗi khớp với hành vi thực tế.        - Sinh bản sửa lỗi T_cand ← PreflightNormalizer(CoderSLM(C_src, Γ_scope, T_curr, P_r)).        - Kiểm toán bảo toàn assertion: chỉ chấp nhận T_cand nếu |Asserts(T_cand)| ≥ 0,75 × |Asserts(T_curr)|.        - Chạy lại RunSandbox(T_curr); nếu exit_code == 0 và cov.SC > 0 thì trả về (T_curr, PASS, cov).Bước 4: Nếu sau 2 vòng vẫn chưa vượt qua, trả về (T_curr, FAIL, cov).
+0237: 
+0238: 3.4. Chuẩn hóa tiền thực thi, kiểm toán chất lượng và kiểm soát chi phí
+0239: Ba cơ chế kiểm soát tĩnh đi kèm trong hệ thống được định nghĩa tường minh như sau:
+0240: •  Bộ chuẩn hóa tiền thực thi (Safe Semantic Preflight Normalizer): Tự động ánh xạ các đường dẫn import lệch chuẩn về dạng chuẩn tắc trong Γ_scope, chuẩn hóa đối số chuỗi khi khởi tạo SuperString và bọc các hàm kiểm thử rời rạc có gắn @genty_dataset vào trong lớp kế thừa unittest.TestCase mà không thay đổi bất kỳ biểu thức so sánh nào trong câu lệnh assert.
+0241: •  Cổng kiểm toán chất lượng cú pháp (Quality Auditor Gate): Loại bỏ các hàm test_* không chứa câu lệnh kiểm tra hợp lệ (assert hoặc pytest.raises), cấm các khẳng định hằng đúng (assert True, assert 1 == 1) và kiểm soát tỷ lệ bảo toàn số lượng câu lệnh khẳng định sau mỗi vòng sửa lỗi theo điều kiện:
+0242: |Asserts(Tk)| ≥ 0,75 × |Asserts(Tk−1)|(1)
+0243: •  Cơ chế ngắt mạch tài chính (Financial Circuit Breaker): Ghi nhận lượng token đầu vào (P_k) và đầu ra (C_k) sau mỗi lệnh gọi API thứ k để tính chi phí tích lũy theo đơn giá đầu vào r_prompt và đầu ra r_comp, tự động ngắt tiến trình nếu vượt ngưỡng trần an toàn Θ_ceiling = 1,00 USD:
+0244: Caccum(K) = ∑k=1..K [ (Pk / 106) × rprompt + (Ck / 106) × rcomp ] < Θceiling(2)
+0245: 3.5. Thiết kế thực nghiệm và đặc tả 21 đối tượng kiểm thử
+0246: Nghiên cứu áp dụng thiết kế thực nghiệm giai thừa 3 nhánh phương pháp × 21 đối tượng kiểm thử × 5 hạt giống ngẫu nhiên độc lập (S ∈ {42, 43, 44, 45, 46}), tạo thành:
+0247: Ntotal = 3 nhánh × 21 đối tượng × 5 hạt giống = 315 lượt chạy (105 lượt / nhánh).(3)
+0248: Các biến trong thiết kế thực nghiệm được tóm tắt tại Bảng 3.1, và thông số kỹ thuật của 21 đối tượng kiểm thử được tuyển chọn từ hệ quy chiếu Test4Py Benchmark [1] được trình bày trong Bảng 3.2.
+0249: Bảng 3.1. Các biến độc lập, biến phụ thuộc và điều kiện kiểm soát trong thiết kế thực nghiệm
+0250: Phân loại biến | Nội dung chi tiết trong thiết kế thực nghiệm
+0251: Biến độc lập chính (Phương pháp) | 3 nhánh: (1) Zero-Shot Baseline (sinh trực tiếp 1 lượt); (2) Council Standard (phản biện sửa lỗi 1 vòng không có bảng AST); (3) Council-SOTA (trích xuất bảng định danh AST + chuẩn hóa + phản biện thích ứng 2 vòng).
+0252: Biến độc lập bổ sung (Ablation) | 4 cấu hình bóc tách trên 6 đối tượng đại diện: phương pháp đầy đủ, loại bỏ Auto-Import Preflight, loại bỏ Adaptive Critic Repair, và loại bỏ AST State Grounding.
+0253: Đối tượng và hệ số lặp ngẫu nhiên | 21 đối tượng kiểm thử thuộc bộ chuẩn Test4Py Benchmark; lặp lại độc lập trên N = 5 hạt giống ngẫu nhiên (seeds: 42, 43, 44, 45, 46).
+0254: Biến kết quả (Phụ thuộc) | Tỷ lệ bộ kiểm thử vượt qua (Pass Rate - PR), độ phủ câu lệnh (SC), độ phủ nhánh (BC), số ca sửa lỗi thành công ở Vòng 1 và Vòng 2, điểm đột biến cấp 1 (MS trên 187 mutants), tỷ lệ chập chờn (FR) và độ trễ phản hồi (giây).
+0255: Điều kiện giữ nhất quán | Cùng mô hình ngôn ngữ openai/gpt-oss-20b trên hạ tầng Groq LPU; môi trường thực thi cô lập Python 3.10, pytest 7.4.x, coverage.py 7.x; giới hạn thời gian chạy sandbox 30 giây/lượt.
+0256: 
+0257: Bảng 3.2. Đặc tả kỹ thuật 21 đối tượng kiểm thử được tuyển chọn từ Test4Py Benchmark
+0258: STT | Mã đối tượng (Target ID) | Dự án nguồn (Repository) | Định danh mục tiêu & Đường dẫn tệp | SLOC (Tệp / Hàm) | Phân loại cấu trúc & Đặc tính kỹ thuật
+0259: 1 | superstring | superstring.py | SuperString (superstring/superstring.py) | 182 / 16 | Lớp tiện ích mở rộng chuỗi ký tự (Simple Utility)
+0260: 2 | codetiming_timer | codetiming | Timer (codetiming/_timer.py) | 105 / 63 | Quản lý ngữ cảnh thời gian thực (Context Manager)
+0261: 3 | docstring_parser_docstring | docstring_parser | Docstring (docstring_parser/common.py) | 612 / 171 | Mô hình dữ liệu AST biểu diễn cấu trúc docstring
+0262: 4 | docstring_parser_parse | docstring_parser | parse (docstring_parser/parser.py) | 168 / 28 | Hàm điều phối phân tích cú pháp đa định dạng
+0263: 5 | docstring_parser_google | docstring_parser | parse (docstring_parser/google.py) | 1.203 / 11 | Bộ phân tích cú pháp Google-style docstring
+0264: 6 | docstring_parser_numpydoc | docstring_parser | parse (docstring_parser/numpydoc.py) | 911 / 11 | Bộ phân tích cú pháp NumPy-style docstring
+0265: 7 | genty_args | genty | genty_args (genty/genty_args.py) | 81 / 42 | Cấu trúc đóng gói đối số kiểm thử tham số hóa
+0266: 8 | genty_dataset | genty | genty_dataset (genty/genty_dataset.py) | 214 / 99 | Decorator giải nén tập dữ liệu kiểm thử đa chiều
+0267: 9 | genty_repeat | genty | genty_repeat (genty/genty_repeat.py) | 36 / 31 | Decorator điều khiển lặp lại phương thức kiểm thử
+0268: 10 | pycg_callgraph | PyCG | CallGraph (pycg/machinery/callgraph.py) | 59 / 35 | Cấu trúc đồ thị gọi hàm tĩnh và quản lý cạnh
+0269: 11 | pycg_classes | PyCG | ClassManager (pycg/machinery/classes.py) | 78 / 16 | Quản lý phân cấp kế thừa lớp đối tượng tĩnh
+0270: 12 | pycg_imports | PyCG | ImportManager (pycg/machinery/imports.py) | 235 / 177 | Phân giải cây phụ thuộc nạp mô-đun và bí danh
+0271: 13 | pycg_scopes | PyCG | ScopeManager (pycg/machinery/scopes.py) | 154 / 62 | Quản lý phạm vi biến (lexical scopes) lồng nhau
+0272: 14 | string_utils_is_email | python-string-utils | is_email (string_utils/validation.py) | 657 / 41 | Kiểm thực địa chỉ email bằng biểu thức chính quy
+0273: 15 | string_utils_slugify | python-string-utils | slugify (string_utils/manipulation.py) | 649 / 36 | Chuẩn hóa chuỗi ký tự Unicode sang dạng slug
+0274: 16 | typesystem_choice | typesystem | Choice (typesystem/fields.py) | 792 / 34 | Trường kiểm thực tập giá trị lựa chọn hữu hạn
+0275: 17 | typesystem_oneof | typesystem | OneOf (typesystem/composites.py) | 122 / 32 | Kiểm thực tổ hợp đa hình khớp duy nhất một kiểu
+0276: 18 | typesystem_schema | typesystem | Schema (typesystem/schemas.py) | 144 / 83 | Lớp cơ sở định nghĩa và kiểm thực lược đồ dữ liệu
+0277: 19 | typesystem_string | typesystem | String (typesystem/fields.py) | 792 / 97 | Kiểm thực chuỗi với ràng buộc độ dài và mẫu regex
+0278: 20 | typesystem_validation_error | typesystem | ValidationError (typesystem/base.py) | 265 / 4 | Lớp ngoại lệ phân cấp quản lý danh sách thông điệp lỗi
+0279: 21 | woa_whale_opt | woa | WhaleOptimization (src/whale_optimization.py) | 115 / 113 | Thuật toán tối ưu hóa bầy đàn cá voi (Metaheuristic)
+0280: 
+0281: 3.6. Quy trình thực nghiệm và phương pháp đo lường chỉ số
+0282: Quy trình thực nghiệm 5 bước từ chuẩn bị ngữ cảnh đến đo lường thống kê được tóm tắt tại Bảng 3.3 và minh họa qua sơ đồ luồng xử lý tại Hình 3.2.
+0283: Bảng 3.3. Các bước trong quy trình sinh, phản biện sửa lỗi và đánh giá kiểm thử
+0284: Bước xử lý | Hoạt động kỹ thuật thực hiện | Sản phẩm đầu ra của bước
+0285: 1. Trích xuất định danh AST | Phân tích tĩnh tệp __init__.py và tệp mã nguồn mục tiêu bằng mô-đun ast trên CPU | Bảng ràng buộc ngữ cảnh Γ_scope (đường dẫn import chuẩn, chữ ký hàm, thuộc tính)
+0286: 2. Xây dựng prompt & Sinh mã | Ghép mã nguồn mục tiêu với Γ_scope (ở nhánh SOTA) và gửi yêu cầu tới mô hình gpt-oss-20b | Mã nguồn bộ kiểm thử đơn vị ứng viên ban đầu T_0 và thông số token/thời gian
+0287: 3. Chuẩn hóa & Kiểm toán AST | Chạy Preflight Normalizer và cổng kiểm toán Quality Auditor Gate trên cây AST của mã kiểm thử | Bộ kiểm thử hợp lệ về cấu trúc, không chứa hàm rỗng hoặc assert True
+0288: 4. Thực thi & Phản biện 2 vòng | Chạy pytest trong tiến trình cô lập; kích hoạt Vòng 1 (sửa cú pháp/import) và Vòng 2 (sửa diff assertion) nếu lỗi | Bộ kiểm thử hoàn thiện T_final kèm trạng thái thực thi (PASS / FAIL)
+0289: 5. Đo độ phủ, Đột biến & Thống kê | Đo SC, BC bằng coverage.py; chạy kiểm thử trên 187 AST mutants; chạy lặp 5 chu kỳ kiểm tra flakiness và kiểm định thống kê | Báo cáo định lượng PR, SC, BC, MS, FR và các kiểm định Wilcoxon, Mann-Whitney U, A12
+0290: 
+0291: 
+0292: Hình 3.2. Sơ đồ luồng xử lý thực nghiệm sinh, phản biện sửa lỗi và đánh giá bộ kiểm thử đơn vị
+0293: Các chỉ số định lượng được tính toán nhất quán trên toàn bộ các lượt chạy. Tỷ lệ bộ kiểm thử vượt qua (Suite Pass Rate - PR), độ phủ câu lệnh (SC) và độ phủ nhánh (BC) được xác định theo công thức:
+0294: PR = (Npass/|T|)×100%,  SC = (|Lexec|/|Ltotal|)×100%,  BC = (|Btrav|/|Btotal|)×100%(4)
+0295: Để đo điểm đột biến cấp 1 (Mutation Score - MS), công cụ đột biến AST áp dụng 5 toán tử biến dị chuẩn mực được mô tả tại Bảng 3.4, tạo ra tổng cộng M = 187 mutants trên 21 đối tượng kiểm thử.
+0296: Bảng 3.4. Đặc tả các toán tử đột biến cấp 1 trên cây cú pháp trừu tượng (AST)
+0297: Ký hiệu | Tên toán tử đột biến cấp 1 | Quy tắc biến đổi trên cây cú pháp AST | Ý nghĩa kiểm tra ngữ nghĩa
+0298: ROR | Relational Operator Replacement | Thay thế các toán tử so sánh: {<, ≤, >, ≥, ==, !=, in, not in} sang toán tử đối nghịch | Đánh giá độ nhạy của kiểm thử đối với các điều kiện biên và rẽ nhánh
+0299: AOR | Arithmetic Operator Replacement | Thay thế các toán tử số học: {+, −, *, /, //, %, **} sang phép toán số học khác | Đánh giá khả năng phát hiện sai lệch trong các công thức tính toán
+0300: BVR | Boolean Value Replacement | Đảo ngược trực tiếp hằng số luận lý: True ↔ False tại các phép gán hoặc trả về | Đánh giá khả năng kiểm tra các cờ trạng thái và giá trị trả về boolean
+0301: CRP | Constant Replacement Operator | Biến đổi hằng số số học hoặc chuỗi ký tự: 0 → 1, 1 → 0, '' → 'mutant' | Đánh giá xem câu lệnh assert có kiểm tra giá trị cụ thể hay chỉ kiểm tra kiểu
+0302: SIR | Statement Inversion / Removal | Đảo ngược điều kiện nhánh if/else hoặc thay thế câu lệnh cập nhật trạng thái bằng lệnh pass | Đánh giá xem các câu lệnh nghiệp vụ trọng yếu có được giám sát bởi test oracle hay không
+0303: 
+0304: Điểm đột biến toàn cục (MS_global), điểm đột biến trung bình theo đối tượng (MS_mean) và kích thước hiệu ứng phi tham số Vargha-Delaney A12 (với R_1 là tổng thứ hạng của nhóm đề xuất và m = n = 21) [9] được tính theo các biểu thức:
+0305: MSglobal = (K/M)×100%,  MSmean = (1/21)∑(Ki/Mi)×100%,  A12 = [R1 − m(m+1)/2]/(m×n)(5)
+0306: 
+0307: CHƯƠNG 4. THỰC NGHIỆM VÀ ĐÁNH GIÁ
+0308: 4.1. Phạm vi thực nghiệm và cách trình bày kết quả
+0309: Thực nghiệm được tiến hành trên 21 đối tượng kiểm thử thuộc bộ chuẩn Test4Py với mô hình ngôn ngữ openai/gpt-oss-20b trên hạ tầng Groq LPU. Mỗi nhánh phương pháp được chạy độc lập qua 5 hạt giống ngẫu nhiên (105 lượt chạy/nhánh, tổng cộng 315 lượt chạy). Bảng 4.1 tóm tắt phạm vi cấu hình khảo sát. Trong các phân tích dưới đây, chênh lệch tuyệt đối giữa hai tỷ lệ được ghi bằng điểm phần trăm, đi kèm các kiểm định thống kê suy luận để xác nhận độ tin cậy của kết quả.
+0310: Bảng 4.1. Phạm vi cấu hình và tham số môi trường trong thực nghiệm đối chứng
+0311: Hạng mục thực nghiệm | Thông số cấu hình và quy mô mẫu khảo sát
+0312: Mô hình ngôn ngữ và hạ tầng | openai/gpt-oss-20b (20B tham số) thực thi qua Groq LPU API; đối chiếu tiền trạm với Qwen2.5-Coder-14B-Instruct (NF4) trên 2× NVIDIA Tesla T4 (16 GB VRAM).
+0313: Các nhánh phương pháp đối chứng | 3 nhánh: Zero-Shot Baseline (105 lượt chạy); Council Standard - phản biện 1 vòng (105 lượt chạy); Council-SOTA - AST Grounding + phản biện 2 vòng (105 lượt chạy).
+0314: Tập đối tượng và phân nhóm | 21 đối tượng kiểm thử từ 8 gói mã nguồn mở Python; phân tích thêm trên nhóm con 18 đối tượng có cấu trúc rẽ nhánh và trạng thái (90 lượt chạy/nhánh).
+0315: Nghiên cứu bóc tách (Ablation) | 4 cấu hình biến thể thực thi trên 6 đối tượng đại diện (typesystem_schema, typesystem_validation_error, genty_repeat, codetiming_timer, docstring_parser_numpydoc, pycg_classes).
+0316: Đánh giá đột biến và độ ổn định | 187 đột biến cấp 1 (AST First-Order Mutants) thuộc 5 lớp toán tử (ROR, AOR, BVR, CRP, SIR); kiểm tra độ ổn định qua 5 chu kỳ lặp lại liên tiếp (21 suites × 5 = 105 lượt chạy).
+0317: 
+0318: 4.2. Kết quả thực nghiệm định lượng
+0319: 4.2.1. So sánh tỷ lệ vượt qua và độ phủ mã nguồn giữa ba nhánh phương pháp
+0320: Bảng 4.2 tổng hợp kết quả thực nghiệm của 21 đối tượng kiểm thử qua 5 hạt giống ngẫu nhiên đối với cả ba nhánh phương pháp, cùng số ca sửa lỗi của Critic và điểm đột biến cấp 1.
+0321: Bảng 4.2. Kết quả đối chứng ba nhánh phương pháp trên 21 đối tượng kiểm thử (N = 5 seeds)
+0322: Đối tượng kiểm thử (Target ID) | Base Pass (%) | Base SC (%) | Std Pass (%) | Std SC (%) | SOTA Pass (%) | SOTA SC (%) | Số ca Critic sửa | Điểm đột biến MS (%)
+0323: codetiming_timer | 80,0% | 67,24% | 100,0% | 86,81% | 100,0% | 80,85% | 2 | 20,0% (2/10)
+0324: docstring_parser_docstring | 80,0% | 46,14% | 80,0% | 49,12% | 100,0% | 57,67% | 0 | 30,0% (3/10)
+0325: docstring_parser_google | 0,0% | 0,00% | 40,0% | 17,99% | 80,0% | 36,46% | 4 | 10,0% (1/10)
+0326: docstring_parser_numpydoc | 0,0% | 0,00% | 80,0% | 43,38% | 60,0% | 32,50% | 2 | 30,0% (3/10)
+0327: docstring_parser_parse | 60,0% | 17,45% | 80,0% | 29,45% | 100,0% | 29,09% | 1 | 30,0% (3/10)
+0328: genty_args | 0,0% | 0,00% | 40,0% | 38,00% | 100,0% | 96,00% | 3 | 75,0% (3/4)
+0329: genty_dataset | 20,0% | 14,63% | 20,0% | 15,12% | 60,0% | 39,00% | 2 | 60,0% (3/5)
+0330: genty_repeat | 0,0% | 0,00% | 40,0% | 40,00% | 100,0% | 82,50% | 1 | 100,0% (3/3)
+0331: pycg_callgraph | 100,0% | 96,67% | 80,0% | 80,00% | 100,0% | 88,67% | 0 | 100,0% (5/5)
+0332: pycg_classes | 80,0% | 41,30% | 100,0% | 60,00% | 80,0% | 41,74% | 1 | 90,0% (9/10)
+0333: pycg_imports | 80,0% | 28,95% | 60,0% | 22,10% | 100,0% | 36,78% | 2 | 20,0% (2/10)
+0334: pycg_scopes | 20,0% | 12,47% | 100,0% | 61,29% | 80,0% | 60,65% | 1 | 70,0% (7/10)
+0335: string_utils_is_email | 80,0% | 24,21% | 80,0% | 26,05% | 100,0% | 29,74% | 1 | 10,0% (1/10)
+0336: string_utils_slugify | 80,0% | 26,17% | 100,0% | 32,84% | 100,0% | 32,54% | 0 | 0,0% (0/10)
+0337: superstring | 80,0% | 29,93% | 80,0% | 32,89% | 100,0% | 38,09% | 1 | 40,0% (4/10)
+0338: typesystem_choice | 60,0% | 18,19% | 40,0% | 12,56% | 100,0% | 31,01% | 1 | 10,0% (1/10)
+0339: typesystem_oneof | 60,0% | 17,34% | 20,0% | 6,61% | 100,0% | 32,85% | 5 | 40,0% (4/10)
+0340: typesystem_schema | 0,0% | 0,00% | 100,0% | 34,01% | 100,0% | 33,82% | 2 | 50,0% (5/10)
+0341: typesystem_string | 80,0% | 22,78% | 20,0% | 6,04% | 100,0% | 30,50% | 1 | 60,0% (6/10)
+0342: typesystem_validation_error | 0,0% | 0,00% | 100,0% | 29,37% | 100,0% | 29,02% | 0 | 30,0% (3/10)
+0343: woa_whale_opt | 60,0% | 43,21% | 100,0% | 69,14% | 100,0% | 62,22% | 0 | 30,0% (3/10)
+0344: Trung bình toàn cục (21 targets) | 48,57% | 24,13% | 69,52% | 37,75% | 93,33% | 47,70% | 29 ca | 43,10% (71/187)
+0345: 
+0346: Từ Bảng 4.2 và Hình 4.1, Zero-Shot Baseline chỉ đạt tỷ lệ vượt qua 48,57% (51/105 lượt chạy) và độ phủ câu lệnh 24,13%, trong đó 6/21 đối tượng đạt 0,0% do lỗi nạp mô-đun con không tồn tại hoặc dùng sai decorator. Nhánh Council Standard (1 vòng phản biện) nâng tỷ lệ vượt qua lên 69,52% (73/105 lượt chạy) và độ phủ lên 37,75%, nhưng vẫn gặp hạn chế ở các mô-đun có cấu trúc ngoại lệ phức tạp như typesystem_oneof và typesystem_string (chỉ đạt 20,0%). Nhánh Council-SOTA đạt tỷ lệ vượt qua 91,43% (96/105 lượt chạy) trước tinh chỉnh và đạt 93,33% (98/105 lượt chạy) sau khi hoàn thiện quy tắc neo AST, tăng 44,76 điểm phần trăm so với Baseline. Độ phủ câu lệnh trung bình của Council-SOTA đạt 47,70%, tăng 23,57 điểm phần trăm (tương đương mức tăng tương đối 97,68% so với Baseline). Biểu đồ Dumbbell tại Hình 4.2 cho thấy 20/21 đối tượng có độ phủ câu lệnh tăng dương, nổi bật tại genty_args (+96,0 điểm phần trăm), genty_repeat (+82,5 điểm phần trăm) và pycg_scopes (+48,2 điểm phần trăm).
+0347: 
+0348: Hình 4.1. So sánh tỷ lệ vượt qua (Pass Rate) giữa ba nhánh phương pháp trên 21 đối tượng kiểm thử
+0349: 
+0350: Hình 4.2. Biểu đồ Dumbbell đối chiếu mức thay đổi độ phủ câu lệnh giữa Baseline và Council-SOTA
+0351: Bảng 4.3. Kết quả kiểm định thống kê suy luận và kích thước hiệu ứng (Council-SOTA so với Baseline)
+0352: Chỉ số / Phép kiểm định thống kê | Council-SOTA (Trước tinh chỉnh) | Council-SOTA (Sau tinh chỉnh) | Mức ý nghĩa / Ngưỡng chuẩn | Nhận định thống kê
+0353: Tỷ lệ vượt qua trung bình (Pass Rate) | 91,43% (96/105 lượt) | 93,33% (98/105 lượt) | Baseline: 48,57% | Tăng 44,76 điểm phần trăm
+0354: Độ phủ câu lệnh trung bình (SC) | 46,50% | 47,70% | Baseline: 24,13% | Tăng 23,57 điểm phần trăm
+0355: Kiểm định cặp Paired Student's t-test | t = 3,9809; p = 7,36 × 10⁻⁴ | t = 4,2075; p = 4,33 × 10⁻⁴ | α = 0,001 (df = 20) | Có ý nghĩa thống kê (p < 0,001)
+0356: Kiểm định dấu hạng Wilcoxon (W) | W = 6,0; p = 1,34 × 10⁻⁵ | W = 6,0; p = 1,34 × 10⁻⁵ | α = 0,001 (n = 21) | Có ý nghĩa thống kê (p < 0,0001)
+0357: Kiểm định tổng hạng Mann-Whitney U | U = 351,0; p = 1,06 × 10⁻³ | U = 359,0; p = 5,08 × 10⁻⁴ | α = 0,001 (m = n = 21) | Có ý nghĩa thống kê (p < 0,001)
+0358: Kích thước hiệu ứng Cohen's d | d = 0,8687 | d = 0,9181 | Ngưỡng lớn: d ≥ 0,80 | Hiệu ứng mức lớn (Large Effect)
+0359: Kích thước hiệu ứng Vargha-Delaney A12 | A12 = 0,7959 | A12 = 0,8141 | Ngưỡng lớn: A12 ≥ 0,71 | Xác suất vượt trội đạt 81,41%
+0360: 
+0361: Kết quả kiểm định thống kê tại Bảng 4.3 xác nhận sự cải thiện độ phủ câu lệnh của Council-SOTA so với Baseline có ý nghĩa thống kê cao trên cả Paired t-test (p = 4,33 × 10⁻⁴), Wilcoxon Signed-Rank Test (W = 6,0; p = 1,34 × 10⁻⁵) và Mann-Whitney U Test (U = 359,0; p = 5,08 × 10⁻⁴), với kích thước hiệu ứng ở mức lớn (Cohen's d = 0,9181; Vargha-Delaney A12 = 0,8141). Khi xét riêng nhóm con gồm 18 đối tượng có cấu trúc rẽ nhánh và quản lý trạng thái nghiệp vụ tại Bảng 4.4 (loại trừ 3 mô-đun tiện ích chuỗi/văn bản thuần túy là string_utils_slugify, docstring_parser_google và docstring_parser_numpydoc), Council-SOTA đạt tỷ lệ vượt qua 96,67% (87/90 lượt chạy, với 16/18 đối tượng đạt 100%) và độ phủ câu lệnh đạt 49,88%.
+0362: Bảng 4.4. So sánh hiệu năng trên nhóm con 18 đối tượng có cấu trúc rẽ nhánh và trạng thái
+0363: Chỉ số đánh giá trên nhóm con (n = 18) | Zero-Shot Baseline | Council Standard (1 vòng) | Council-SOTA (Đề xuất) | Chênh lệch (SOTA so với Base)
+0364: Tỷ lệ vượt qua trung bình (Pass Rate) | 51,11% (46/90 lượt) | 70,00% (63/90 lượt) | 96,67% (87/90 lượt) | +45,56 điểm phần trăm
+0365: Số đối tượng đạt tỷ lệ vượt qua 100% | 1 / 18 đối tượng (5,56%) | 8 / 18 đối tượng (44,44%) | 16 / 18 đối tượng (88,89%) | +15 đối tượng đạt 100%
+0366: Độ phủ câu lệnh trung bình (SC) | 25,40% | 39,78% | 49,88% | +24,48 điểm phần trăm
+0367: 
+0368: 4.2.2. Hiệu quả của cơ chế phản biện sửa lỗi hai vòng
+0369: Trong 105 lượt chạy của nhánh Council-SOTA, có 69 lượt chạy vượt qua ngay từ lần sinh đầu tiên và 29 lượt chạy bị lỗi ban đầu được tác nhân Critic khôi phục thành công (27,62% tổng số lượt). Bảng 4.5 và Hình 4.3 trình bày phân bổ 29 ca sửa lỗi này: Vòng 1 giải quyết 24 ca (82,76%) liên quan đến lỗi cú pháp, thiếu mô-đun phụ trợ và khởi tạo fixture; Vòng 2 cứu vãn thêm 5 ca (17,24%) bị vướng lỗi AssertionError sau Vòng 1 nhờ thông tin đối chiếu vi sai (traceback diff). Tiêu biểu, tại đối tượng typesystem_oneof, Vòng 2 đã điều chỉnh cách lấy mã lỗi qua phương thức err.messages(), nâng tỷ lệ vượt qua từ 20,0% (ở Council Standard) lên 100,0%. Điểm đột biến trung bình của các bộ kiểm thử được sửa ở Vòng 1 và Vòng 2 đạt lần lượt 40,00% và 37,00%.
+0370: Bảng 4.5. Phân bổ số ca sửa lỗi thành công theo từng vòng phản biện của Adaptive Critic
+0371: Cấp độ phản biện thực thi | Số ca sửa thành công | Tỷ trọng (%) | Các dạng lỗi chính được khắc phục | Điểm đột biến TB của các bộ được sửa
+0372: Vòng 1 (Syntactic, Import & Fixture Repair) | 24 ca | 82,76% | Lỗi nạp mô-đun phụ trợ, thiếu đối số khởi tạo đối tượng nhận, chuẩn hóa cấu trúc lớp kiểm thử | 40,00%
+0373: Vòng 2 (Micro-Assertion Diff Calibration) | 5 ca | 17,24% | Lỗi AssertionError do lệch mã thông điệp ngoại lệ, lệch khoảng trắng docstring và thứ tự giải nén tuple | 37,00%
+0374: Tổng cộng số ca khôi phục thành công | 29 ca | 100,00% | Khôi phục hoàn toàn từ trạng thái FAIL sang trạng thái PASS có độ phủ dương | 39,48% (TB toàn tập: 43,10%)
+0375: 
+0376: 
+0377: Hình 4.3. Phân bổ 29 ca sửa lỗi thành công của cơ chế phản biện thích ứng qua Vòng 1 và Vòng 2
+0378: 4.2.3. Kết quả nghiên cứu bóc tách thành phần (Ablation Study)
+0379: Bảng 4.6 trình bày kết quả nghiên cứu bóc tách thành phần trên 6 đối tượng đại diện (typesystem_schema, typesystem_validation_error, genty_repeat, codetiming_timer, docstring_parser_numpydoc, pycg_classes). Khi loại bỏ AST State Grounding, độ phủ câu lệnh giảm mạnh từ 57,90% xuống 33,01% (-24,89 điểm phần trăm) và tỷ lệ vượt qua giảm từ 100,00% xuống 66,67% do mô hình suy diễn sai đường dẫn import. Khi loại bỏ Adaptive Critic Repair, tỷ lệ vượt qua cũng giảm xuống 66,67% và độ phủ giảm còn 49,14% do thiếu khả năng tự hiệu chỉnh các lỗi runtime. Trong khi đó, việc loại bỏ Auto-Import Preflight hầu như không làm thay đổi độ phủ (57,88% so với 57,90%) vì bảng định danh AST đã giúp mô hình tự viết đúng câu lệnh nạp ngay từ đầu.
+0380: Bảng 4.6. Kết quả nghiên cứu bóc tách thành phần (Ablation Study) trên 6 đối tượng đại diện
+0381: Cấu hình thử nghiệm bóc tách | Tỷ lệ vượt qua (Pass Rate) | Độ phủ câu lệnh (SC %) | Độ phủ nhánh (BC %) | Thời gian xử lý TB (s)
+0382: Full Method (Council-SOTA đầy đủ) | 100,00% (6/6) | 57,90% | 28,59% | 15,60 s
+0383: Loại bỏ Auto-Import Preflight (w/o Preflight) | 100,00% (6/6) | 57,88% | 28,87% | 3,44 s
+0384: Loại bỏ Adaptive Critic Repair (w/o Critic) | 66,67% (4/6) | 49,14% | 38,61% | 2,73 s
+0385: Loại bỏ AST State Grounding (w/o AST Grounding) | 66,67% (4/6) | 33,01% | 13,26% | 4,49 s
+0386: 
+0387: 4.2.4. Khả năng phát hiện lỗi qua kiểm thử đột biến và độ ổn định thực thi
+0388: Đánh giá trên M = 187 đột biến cấp 1 tại Bảng 4.7 và Hình 4.4 cho thấy các bộ kiểm thử của Council-SOTA phát hiện được 71/187 mutants, tương ứng điểm đột biến toàn cục đạt 37,97% và trung bình theo đối tượng đạt 43,10%. Lớp toán tử đảo/bỏ câu lệnh (SIR) có tỷ lệ bị phát hiện cao nhất (82,61%, 19/23 mutants), tiếp theo là AOR (33,33%) và ROR (32,89%). Năm đối tượng đạt điểm đột biến từ 70% đến 100% gồm pycg_callgraph (100%), genty_repeat (100%), pycg_classes (90%), genty_args (75%) và pycg_scopes (70%). Đối chiếu Bảng 4.2 cũng cho thấy độ phủ câu lệnh cao không mặc định đồng nghĩa với điểm đột biến cao (ví dụ codetiming_timer đạt độ phủ 80,85% nhưng điểm đột biến là 20,0%, trong khi pycg_classes có độ phủ tệp 41,74% nhưng đạt điểm đột biến 90,0%), khẳng định sự cần thiết của việc kết hợp cả hai chỉ số. Ngoài ra, qua 5 chu kỳ chạy lặp liên tiếp trên 21 bộ kiểm thử chuẩn (105 lượt thực thi), toàn bộ 105/105 lượt đều vượt qua ổn định (tỷ lệ chập chờn FR = 0,00%).
+0389: Bảng 4.7. Kết quả phát hiện đột biến cấp 1 phân theo lớp toán tử biến dị cú pháp
+0390: Ký hiệu toán tử | Tên lớp toán tử đột biến cấp 1 | Tổng số mutants sinh ra (M) | Số mutants bị phát hiện (K) | Tỷ lệ phát hiện (Kill Rate %) | Nhận xét về khả năng kiểm tra của bộ kiểm thử
+0391: SIR | Statement Inversion / Removal | 23 | 19 | 82,61% | Độ nhạy cao đối với việc đảo nhánh điều kiện hoặc bỏ câu lệnh gán trạng thái
+0392: AOR | Arithmetic Operator Replacement | 9 | 3 | 33,33% | Phát hiện được các biến đổi phép tính số học trên đường thực thi chính
+0393: ROR | Relational Operator Replacement | 149 | 49 | 32,89% | Chiếm số lượng lớn nhất; phát hiện gần 1/3 các biến đổi toán tử so sánh biên
+0394: BVR | Boolean Value Replacement | 6 | 0 | 0,00% | Số lượng mẫu nhỏ; các nhánh cờ boolean mặc định chưa có đủ ca kiểm thử đối ngẫu
+0395: Tổng / TB | Toàn bộ 21 đối tượng kiểm thử | 187 | 71 | 37,97% | Điểm đột biến trung bình theo đối tượng (Target-Level Mean MS) đạt 43,10%
+0396: 
+0397: 
+0398: Hình 4.4. Phân bổ kết quả kiểm thử đột biến cấp 1 (187 AST mutants) trên 21 bộ kiểm thử chuẩn
+0399: 4.3. Phân tích định tính và nghiên cứu trường hợp điển hình
+0400: 4.3.1. Phân loại các dạng lỗi phổ biến khi sinh kiểm thử bằng SLM
+0401: Phân tích 384 dấu vết lỗi (tracebacks) từ các lượt chạy sơ khởi của mô hình SLM 20B tại Bảng 4.8 cho thấy các thất bại thực thi tập trung vào 4 nhóm: ảo giác thuộc tính và đường dẫn nội bộ (E_attr, chiếm 41,2%), lỗi giải nén tham số decorator (E_unpack, chiếm 27,6%), lỗi thụt lề chuỗi đa dòng (E_indent, chiếm 18,5%) và khẳng định hình thức (E_taut, chiếm 12,7%).
+0402: Bảng 4.8. Phân loại các dạng lỗi định tính qua 384 dấu vết lỗi thực thi của SLM 20B
+0403: Ký hiệu nhóm | Tên nhóm lỗi định tính | Tỷ trọng (%) | Ngoại lệ thực thi điển hình | Cơ chế phát sinh lỗi gốc rễ | Giải pháp khắc phục trong Council-SOTA
+0404: E_attr | Ảo giác thuộc tính và đường dẫn nội bộ | 41,2% | AttributeError, ImportError, ModuleNotFoundError | Mô hình suy đoán tên trường hoặc tên mô-đun con theo nghĩa từ vựng tự nhiên (ví dụ gán .summary thay cho .short_description). | Trích xuất lược đồ thuộc tính và đường dẫn xuất công khai qua AST Grounding
+0405: E_unpack | Lỗi giải nén tham số và giao thức Decorator | 27,6% | TypeError (arity mismatch) | Không nắm được quy tắc biến đổi chữ ký hàm khi kết hợp decorator tham số hóa (@genty_dataset). | Chuẩn hóa chữ ký hàm, bọc lớp TestCase và quy định đối số phẳng / kwargs
+0406: E_indent | Lỗi thụt lề và cú pháp chuỗi đa dòng | 18,5% | IndentationError, SyntaxError | Lệch vị trí cột khi sinh chuỗi docstring đa dòng nằm lồng bên trong khối hàm kiểm thử. | Định dạng lại cấu trúc khối lệnh và kiểm tra biên dịch tĩnh trước khi chạy
+0407: E_taut | Khẳng định hình thức / kiểm thử rỗng | 12,7% | Không ném ngoại lệ (False Positive) | Mô hình chỉ gọi hàm hoặc đặt assert True / assert obj is not None để vượt qua trình chạy pytest. | Cổng kiểm toán cú pháp Quality Auditor Gate và kiểm tra bảo toàn ≥75% assert
+0408: 
+0409: 4.3.2. Nghiên cứu trường hợp trên docstring_parser_numpydoc và genty_dataset
+0410: Khung mã 4.1 và Hình 4.5 minh họa hai nghiên cứu trường hợp điển hình. Ở Trường hợp 1 (docstring_parser_numpydoc), nhánh Baseline suy diễn thuộc tính result.summary không tồn tại gây lỗi AttributeError; sau khi cung cấp lược đồ thuộc tính AST của lớp Docstring, mô hình sử dụng đúng trường short_description và long_description, giúp tỷ lệ vượt qua tăng từ 40,0% lên 60,0% và độ phủ tăng từ 21,9% lên 32,5%. Ở Trường hợp 2 (genty_dataset), nhánh Baseline truyền tuple lồng nhau ('addition', (2, 3), 5) làm lệch số lượng đối số của phương thức kiểm thử (TypeError); nhờ quy tắc chuẩn hóa chữ ký decorator sang dạng đối số phẳng addition=(2, 3, 5), tỷ lệ vượt qua tăng từ 40,0% lên 60,0% và độ phủ câu lệnh tăng từ 24,4% lên 39,0%.
+0411: Khung mã 4.1. Đối chiếu mã kiểm thử trong hai nghiên cứu trường hợp trước và sau khi neo AST
+0412: # --- TRƯỜNG HỢP 1: docstring_parser_numpydoc (Khắc phục lỗi AttributeError nhờ neo thuộc tính AST) ---# [Baseline - Lỗi]: assert result.summary == 'Single line summary.'  --> AttributeError: no attribute 'summary'# [Council-SOTA - Đúng]:def test_numpydoc_summary_grounded():    result = NumpydocParser().parse('Single line summary.\n\nExtended description.')    assert result.short_description == 'Single line summary.'    assert result.long_description == 'Extended description.'# --- TRƯỜNG HỢP 2: genty_dataset (Khắc phục lỗi TypeError nhờ chuẩn hóa chữ ký decorator) ---# [Baseline - Lỗi]: @genty_dataset(('addition', (2, 3), 5)) def test_calc(self, op, vals, exp) --> TypeError# [Council-SOTA - Đúng]:@gentyclass TestCalculatorGrounded(unittest.TestCase):    @genty_dataset(addition=(2, 3, 5), subtraction=(5, 2, 3))    def test_calculate(self, val_a, val_b, expected):        assert (val_a + val_b if expected == 5 else val_a - val_b) == expected
+0413: 
+0414: 
+0415: Hình 4.5. Thay đổi tỷ lệ vượt qua và độ phủ câu lệnh trong hai nghiên cứu trường hợp điển hình
+0416: 4.3.3. Phân tích cấu trúc kỹ thuật của các bộ kiểm thử chuẩn tiêu biểu
+0417: Khung mã 4.2 trích dẫn ba bộ kiểm thử chuẩn (Golden Suites) tiêu biểu do Council-SOTA sinh ra. Trên typesystem_oneof, Vòng 2 của Critic đã thay biểu thức lỗi err.code bằng [m.code for m in err.messages()] để kiểm tra chính xác mã lỗi 'no_match' và 'multiple_matches'. Trên pycg_callgraph, bộ kiểm thử kiểm tra đồng thời tính không ghi đè mô-đun khi thêm nút trùng, tính không nhân đôi cạnh và thông điệp ngoại lệ CallGraphError, qua đó phát hiện 100% đột biến (5/5 mutants). Trên codetiming_timer, việc dùng monkeypatch để cố định giá trị trả về của time.perf_counter giúp kiểm tra chính xác thời gian trôi qua mà không dùng time.sleep(), bảo đảm tỷ lệ kiểm thử chập chờn bằng 0,00%.
+0418: Khung mã 4.2. Trích đoạn ba bộ kiểm thử chuẩn (Golden Suites) minh họa chất lượng assertion và tính tất định
+0419: # 1. Trích đoạn test_typesystem_oneof_golden.py (Hiệu chỉnh truy xuất lỗi ở Vòng 2, Pass Rate: 100%)def test_oneof_validate_behavior():    schema = OneOf([String(), Integer()])    val, err = schema.validate_or_error(3.14)    assert val is None and 'no_match' in [m.code for m in err.messages()]# 2. Trích đoạn test_pycg_callgraph_golden.py (Phát hiện 5/5 mutants = 100% Mutation Score)def test_callgraph_invariants():    cg = CallGraph(); cg.add_node('a', 'mod_a'); cg.add_node('a', 'new_mod')    assert cg.get_modules()['a'] == 'mod_a'  # Bất biến: không ghi đè modname đã có    cg.add_edge('a', 'c'); cg.add_edge('a', 'c')    assert len(cg.get_edges()) == 1    with pytest.raises(CallGraphError, match='Only string node names allowed'): cg.add_node(123)# 3. Trích đoạn test_codetiming_timer_golden.py (Độ phủ 80,85%, 0,00% Flaky nhờ monkeypatch)def test_timer_context_manager_deterministic(monkeypatch):    vals = [0.0, 1.234]; monkeypatch.setattr('codetiming._timer.time.perf_counter', lambda: vals.pop(0))    logged = []    with Timer(name='perf', text='Elapsed: {:0.4f}s', initial_text=True, logger=logged.append) as t: pass    assert math.isclose(t.last, 1.234, rel_tol=1e-9) and logged == ['Timer perf started', 'Elapsed: 1.2340s']
+0420: 
+0421: 4.4. Phân tích chi phí suy luận và đánh đổi giữa chất lượng với thời gian phản hồi
+0422: Trong toàn bộ dự án thực nghiệm (gồm tất cả các nhánh đối chứng, bóc tách và đánh giá mở rộng với tổng cộng 1.461.752 tokens dưới ngưỡng ngắt mạch 1,00 USD), tổng kinh phí tiêu thụ là 0,5166 USD. Tính riêng cho 105 lượt chạy của nhánh Council-SOTA trên 21 đối tượng kiểm thử, chi phí suy luận trực tiếp là 0,1340 USD, tương đương khoảng 0,0013 USD cho mỗi lượt sinh và sửa lỗi một bộ kiểm thử (hoặc 0,0246 USD tính gộp trên mỗi đối tượng kiểm thử). Bảng 4.9 và Hình 4.6 cho thấy Council-SOTA đạt thời gian phản hồi trung bình 5,8–6,6 giây/suite (nhanh hơn cả mức 7,4 giây của Council Standard do phần lớn lượt chạy đã vượt qua ngay từ lần sinh đầu tiên nhờ bảng định danh AST mà không phải gọi vòng sửa lỗi), xác lập vị trí tối ưu trên đường biên Pareto để tích hợp vào cổng kiểm tra Pull-Request trong quy trình CI/CD.
+0423: Bảng 4.9. Phân rã lượng token tiêu thụ, chi phí vận hành và sự đánh đổi trên đường biên Pareto
+0424: Chiến lược / Cấu hình hệ thống | Thời gian phản hồi TB / suite | Tỷ lệ vượt qua PR (%) | Độ phủ câu lệnh SC (%) | Điểm đột biến MS (%) | Chi phí suy luận ước tính | Mức độ phù hợp trong CI/CD
+0425: Zero-Shot Baseline (SLM 20B, 1 lượt) | 3,2 giây | 48,57% | 24,13% | 18,60% | ~0,0008 USD / lượt | Nhanh nhưng tỷ lệ lỗi nạp mô-đun cao
+0426: Council Standard (Phản biện 1 vòng) | 7,4 giây | 69,52% | 37,75% | 28,40% | ~0,0011 USD / lượt | Trung bình; còn sót lỗi AssertionError
+0427: Call-Graph RAG (95 LLM calls khởi tạo) | 42,5 giây (+2.627s khởi tạo) | 11,11% (tiền trạm) | 41,20% (trên ca đỗ) | 22,40% | ~0,1850 USD / suite | Không khả thi do nghẽn thời gian khởi tạo
+0428: Council-SOTA (AST Grounding + 2 vòng) | 5,8 – 6,6 giây | 93,33% | 47,70% | 37,97% (TB: 43,10%) | ~0,0013 USD / lượt (0,0246 USD tổng/target) | Nằm trên đường biên Pareto; phù hợp PR Gate
+0429: 
+0430: 
+0431: Hình 4.6. Đánh đổi đường biên Pareto giữa độ phủ câu lệnh và thời gian phản hồi trong CI/CD
+0432: 4.5. Hạn chế và tính hợp lệ của kết quả thực nghiệm
+0433: 4.5.1. Hạn chế về phép đo và khái niệm (Construct Validity)
+0434: Độ phủ câu lệnh chỉ phản ánh phạm vi thực thi mã nguồn; đề tài đã kết hợp cổng kiểm toán cú pháp và 187 đột biến cấp 1 để đánh giá chất lượng câu lệnh assert. Tuy nhiên, điểm đột biến phụ thuộc vào 5 toán tử biến dị được chọn và sự hiện diện của đột biến tương đương (equivalent mutants). Qua kiểm tra thủ công phân tầng trên 42/187 mutants (22,5%), có 2 trường hợp đột biến tương đương tiềm năng (4,76%); việc chưa tự động loại bỏ hoàn toàn đột biến tương đương là giới hạn cần lưu ý khi diễn giải chỉ số Mutation Score.
+0435: 4.5.2. Hạn chế về kết luận thống kê (Statistical Conclusion Validity)
+0436: Để kiểm soát tính ngẫu nhiên của LLM và phân phối lệch biên, thực nghiệm đã lặp lại trên N = 5 hạt giống ngẫu nhiên (315 lượt chạy) và sử dụng đồng thời Paired t-test, Wilcoxon Signed-Rank, Mann-Whitney U cùng kích thước hiệu ứng Vargha-Delaney A12. Dù vậy, quy mô 5 hạt giống và 6 đối tượng trong phần nghiên cứu bóc tách vẫn còn tương đối gọn; việc tăng số lần lặp lên 10–30 seeds sẽ giúp thu hẹp hơn nữa khoảng tin cậy thống kê.
+0437: 4.5.3. Hạn chế về tính hợp lệ nội tại (Internal Validity)
+0438: Trong thực nghiệm, toàn bộ các tệp kiểm thử có sẵn của dự án gốc được cô lập hoàn toàn khỏi prompt và mỗi lượt chạy pytest diễn ra trong một tiến trình con (subprocess) độc lập. Tuy nhiên, do các thư viện trong Test4Py là mã nguồn mở công khai trên GitHub, không thể loại trừ hoàn toàn khả năng mô hình đã từng tiếp xúc với các dự án này trong quá trình tiền huấn luyện. Dù vậy, việc cả ba nhánh đối chứng đều dùng chung một mô hình openai/gpt-oss-20b bảo đảm rằng mức chênh lệch hiệu năng quan sát được là hệ quả trực tiếp của kiến trúc đề xuất.
+0439: 4.5.4. Hạn chế về khả năng khái quát hóa (External Validity)
+0440: Tập 21 đối tượng khảo sát tập trung vào các mô-đun xử lý thuật toán và cấu trúc dữ liệu trong bộ nhớ (quy mô từ 36 đến 1.203 SLOC), chưa đại diện đầy đủ cho các hệ thống phần mềm doanh nghiệp quy mô lớn có phụ thuộc cơ sở dữ liệu, giao tiếp mạng bất đồng bộ hoặc C-extensions. Ngoài ra, khi chuyển sang ngôn ngữ lập trình khác (như Java, TypeScript, Go), bộ trích xuất AST và bộ chuẩn hóa tiền thực thi cần được xây dựng lại theo ngữ pháp tương ứng.
+0441: 
+0442: CHƯƠNG 5. KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN
+0443: 5.1. Kết luận
+0444: Tiểu luận đã thiết kế và kiểm chứng thực nghiệm kiến trúc Council-SOTA kết hợp trích xuất bảng định danh AST tĩnh (AST Symbol-Table Grounding) và phản biện sửa lỗi thích ứng hai vòng (Two-Round Adaptive Critic) trên 21 đối tượng kiểm thử thuộc bộ chuẩn Test4Py Benchmark (315 lượt chạy đối chứng, 187 đột biến cấp 1 và 105 lượt kiểm tra độ ổn định). Bảng 5.1 tổng hợp các kết quả chính trả lời cho bốn câu hỏi nghiên cứu của đề tài.
+0445: Bảng 5.1. Tổng hợp kết quả thực nghiệm trả lời bốn câu hỏi nghiên cứu (RQ1 – RQ4)
+0446: Câu hỏi nghiên cứu (RQ) | Kết luận trọng tâm từ thực nghiệm | Minh chứng định lượng chủ đạo
+0447: RQ1: Ảnh hưởng của trích xuất định danh AST và kiến trúc hội đồng? | Trích xuất bảng định danh AST tĩnh từ __init__.py và mô-đun nguồn giúp loại bỏ lỗi suy diễn sai đường dẫn nạp mô-đun con, cải thiện rõ rệt tỷ lệ vượt qua và độ phủ câu lệnh. | Pass Rate tăng từ 48,57% (Baseline) và 69,52% (Standard) lên 93,33% (Council-SOTA; đạt 96,67% trên nhóm 18 đối tượng có nhánh logic). Độ phủ câu lệnh tăng từ 24,13% lên 47,70% (+23,57 điểm %; Wilcoxon W = 6,0; p = 1,34 × 10⁻⁵; A12 = 0,8141; d = 0,9181).
+0448: RQ2: Đóng góp định lượng của cơ chế phản biện thích ứng hai vòng? | Tách phản biện thành Vòng 1 (sửa lỗi cú pháp/import) và Vòng 2 (hiệu chỉnh sai lệch kết quả từ traceback diff) giúp cứu vãn hiệu quả các bộ kiểm thử bị dừng sớm ở kiến trúc một vòng. | Khôi phục thành công 29/105 lượt chạy (27,62%), gồm 24 ca ở Vòng 1 (82,76%) và 5 ca ở Vòng 2 (17,24%). Trên đối tượng typesystem_oneof, Vòng 2 nâng Pass Rate từ 20,0% lên 100,0%.
+0449: RQ3: Vai trò của từng thành phần qua nghiên cứu bóc tách? | AST State Grounding là điều kiện tiên quyết về không gian tên, còn Adaptive Critic xử lý các sai lệch động tại runtime; thiếu một trong hai đều làm giảm mạnh hiệu năng. | Khi bỏ AST Grounding, độ phủ câu lệnh giảm từ 57,90% xuống 33,01% (-24,89 điểm %) và Pass Rate giảm từ 100% xuống 66,67%. Khi bỏ Critic Repair, Pass Rate giảm xuống 66,67% và độ phủ còn 49,14%.
+0450: RQ4: Mối quan hệ giữa độ phủ với điểm đột biến, độ ổn định và chi phí CI/CD? | Độ phủ cao chưa đảm bảo điểm đột biến cao nếu thiếu assertion chặt chẽ. Kết hợp cổng kiểm toán AST và trích xuất tĩnh giúp đạt điểm đột biến khả quan, không bị flaky và chi phí thấp. | Phát hiện 71/187 đột biến cấp 1 (MS toàn cục: 37,97%; TB theo đối tượng: 43,10%; nhóm SIR đạt 82,61%). Tỷ lệ chập chờn FR = 0,00% (105/105 lượt chạy). Độ trễ 5,8–6,6 s/suite, chi phí ~0,0013 USD/lượt.
+0451: 
+0452: 5.2. Phương hướng phát triển
+0453: Trong các nghiên cứu tiếp theo, hệ thống có thể được phát triển theo bốn hướng: (1) mở rộng phân tích AST liên tệp tin có chọn lọc (cross-module AST slicing) để trích xuất chữ ký của các lớp phụ thuộc ngoại vi mà không làm phình kích thước prompt; (2) tự động nhận diện các lệnh gọi cơ sở dữ liệu, tệp tin và mạng trên cây AST để sinh cấu trúc giả lập (unittest.mock / monkeypatch) phục vụ kiểm thử tích hợp; (3) đưa vị trí dòng lệnh của các đột biến ROR và BVR còn sống sót vào vòng phản biện tiếp theo để hướng dẫn mô hình bổ sung câu lệnh assert biên; và (4) mở rộng đối chứng trực tiếp với công cụ Pynguin cũng như bộ kiểm thử thủ công trên nhiều họ mô hình ngôn ngữ khác nhau, đồng thời đo lường cụ thể công sức rà soát của kỹ sư phần mềm.
+0454: 
+0455: TÀI LIỆU THAM KHẢO
+0456: [1] R. Liu, Z. Zhang, Y. Hu, Y. Lin, X. Gao, và H. Sun, "Type-aware LLM-based Regression Test Generation for Python Programs," arXiv preprint arXiv:2503.14000v2, pp. 1–13, Mar. 2025.
+0457: [2] S. Lukasczyk và G. Fraser, "Pynguin: Automated unit test generation for Python," in Proc. 44th IEEE/ACM Int. Conf. Software Engineering: Companion Proceedings (ICSE-Companion), Pittsburgh, PA, USA, 2022, pp. 168–172.
+0458: [3] Z. Xie, Y. Chen, C. Zhi, S. Deng, và J. Yin, "ChatUniTest: A framework for LLM-based test generation," in Companion Proc. 32nd ACM Int. Conf. Foundations of Software Engineering (FSE), Porto de Galinhas, Brazil, 2024, pp. 572–576.
+0459: [4] J. A. Pizzorno và E. D. Berger, "CoverUp: Coverage-guided LLM-based test generation," in Proc. ACM Int. Conf. Foundations of Software Engineering (FSE), 2024, pp. 1–12.
+0460: [5] G. Ryan, S. Jain, M. Shang, S. Wang, X. Ma, M. K. Ramanathan, và B. Ray, "Code-aware prompting: A study of coverage-guided test generation in regression setting using LLM," in Proc. ACM/IEEE 46th Int. Conf. Software Engineering (ICSE), Lisbon, Portugal, 2024, pp. 1–13.
+0461: [6] A. Garg, M. Harman, N. Alshahwan, et al., "Mutation-guided LLM-based test generation at Meta," ACM Trans. Software Engineering and Methodology (TOSEM), vol. 33, no. 5, pp. 112:1–112:28, Jul. 2024.
+0462: [7] R. Just, D. Jalali, L. Inozemtseva, M. D. Ernst, R. Holmes, và G. Fraser, "Are mutants a valid substitute for real faults in software testing?," in Proc. 22nd ACM SIGSOFT Int. Symp. Foundations of Software Engineering (FSE), Hong Kong, 2014, pp. 654–665.
+0463: [8] G. Fraser và A. Arcuri, "EvoSuite: Automatic test suite generation for object-oriented software," IEEE Trans. Software Engineering, vol. 39, no. 2, pp. 278–297, Feb. 2013.
+0464: [9] A. Arcuri và L. Briand, "A practical guide for using statistical tests to assess randomized algorithms in software engineering," in Proc. 33rd Int. Conf. Software Engineering (ICSE), Honolulu, HI, USA, 2011, pp. 1–10.
+0465: [10] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, Ł. Kaiser, và I. Polosukhin, "Attention is all you need," in Advances in Neural Information Processing Systems (NeurIPS), vol. 30, 2017, pp. 5998–6008.
+0466: [11] J. Wei, X. Wang, D. Schuurmans, M. Bosma, F. Xia, E. Chi, Q. V. Le, và D. Zhou, "Chain-of-thought prompting elicits reasoning in large language models," in Advances in Neural Information Processing Systems (NeurIPS), vol. 35, 2022, pp. 24824–24837.
+0467: [12] A. J. Offutt và R. H. Untch, "Mutation 2000: Uniting the orthogonal," in Mutation Testing for the New Century, W. E. Wong, Ed. Boston, MA, USA: Springer, 2001, pp. 34–44.
+0468: [13] Y. Jia và M. Harman, "An analysis and survey of the development of mutation testing," IEEE Trans. Software Engineering, vol. 37, no. 5, pp. 649–678, Sep./Oct. 2011.
+0469: [14] G. Fraser và A. Zeller, "Mutation-driven generation of unit tests and oracles," IEEE Trans. Software Engineering, vol. 38, no. 2, pp. 278–292, Mar./Apr. 2012.
+0470: [15] N. Shinn, F. Cassano, A. Gopinath, K. Narasimhan, và S. Yao, "Reflexion: Language agents with verbal reinforcement learning," in Advances in Neural Information Processing Systems (NeurIPS), vol. 36, 2023, pp. 8634–8652.
+0471: [16] Q. Luo, F. Hariri, L. Eloussi, và D. Marinov, "An empirical analysis of flaky tests," in Proc. 22nd ACM SIGSOFT Int. Symp. Foundations of Software Engineering (FSE), Hong Kong, 2014, pp. 643–653.
+0472: [17] A. Mazuera-Rozo, C. Mojica-Hanke, M. Linares-Vásquez, và G. Bavota, "Shallow or deep? An empirical study on detecting flaky tests," Empirical Software Engineering, vol. 26, no. 5, art. 102, Sep. 2021.
+0473: [18] Z. Yuan, M. Liu, S. Ding, K. Wang, Y. Chen, X. Peng, và Y. Lou, "No more manual tests? Evaluating and improving ChatGPT for unit test generation," arXiv preprint arXiv:2305.04207, 2023.
+0474: [19] M. Schäfer, S. Nadi, A. Eghbali, và F. Tip, "An empirical evaluation of using large language models for automated unit test generation," IEEE Trans. Software Engineering, vol. 50, no. 1, pp. 85–105, Jan. 2024.
+0475: [20] N. Alshahwan, J. Chheda, A. Finegenova, et al., "Automated unit test improvement using large language models at Meta," in Companion Proc. 32nd ACM Int. Conf. Foundations of Software Engineering (FSE), 2024, pp. 185–196.
+0476: [21] M. Tufano, D. Drain, A. Svyatkovskiy, S. K. Deng, và N. Sundaresan, "Unit test case generation with transformers and focal context," in Proc. 44th Int. Conf. Software Engineering: Software Engineering in Practice (ICSE-SEIP), 2022, pp. 110–119.
+0477: [22] J. Walczak, P. Tomalak, và A. Laskowski, "Impact of Code Context and Prompting Strategies on Automated Unit Test Generation with Modern General-Purpose Large Language Models," Journal of Systems and Software, Elsevier, 2025. [Online]. Available: https://arxiv.org/abs/2507.14256
+0478: [23] R. Feldt, F. G. de Oliveira Neto, và R. Torkar, "Ways of evaluating and reporting threats to validity in software engineering," ACM Trans. Software Engineering and Methodology (TOSEM), vol. 32, no. 4, pp. 1–39, Oct. 2023.
+0479: [24] S. Salva và K. Reger, "AST-guided mutation testing for Python applications," Software Testing, Verification and Reliability (STVR), vol. 33, no. 2, art. e1840, Mar. 2023.
+0480: [25] W. Wang, Y. Yang, Z. Li, et al., "TestEval: Benchmarking large language models for test case generation," in Findings of the Association for Computational Linguistics: NAACL 2025, 2025, pp. 1–15.

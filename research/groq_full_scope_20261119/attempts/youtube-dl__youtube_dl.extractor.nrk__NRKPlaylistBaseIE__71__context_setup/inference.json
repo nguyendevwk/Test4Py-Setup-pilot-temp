@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-038aae4b-b99d-4108-b8b0-15d0e0adb34f",
+  "object": "chat.completion",
+  "created": 1795077572,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKPlaylistBaseIE\n\nclass DummyIE(NRKPlaylistBaseIE):\n    \"\"\"A minimal stub that satisfies the abstract methods of NRKPlaylistBaseIE.\"\"\"\n    def _match_id(self, url):\n        return \"dummy_id\"\n\n    def _download_webpage(self, url, video_id):\n        return \"<html></html>\"\n\n    _ITEM_RE = r\"video_id=(\\w+)\"\n    def _extract_title(self, webpage):\n        return \"Dummy Title\"\n\n    def _extract_description(self, webpage):\n        return \"Dummy Description\"\n\ndef test_extract_description_returns_none_for_base_class():\n    \"\"\"The base class implementation of _extract_description should return None.\"\"\"\n    base_ie = NRKPlaylistBaseIE()\n    assert base_ie._extract_description(\"<html>content</html>\") is None\n    assert base_ie._extract_description(\"\") is None\n    assert base_ie._extract_description(None) is None\n\ndef test_extract_description_can_be_overridden_in_subclass():\n    \"\"\"A subclass can override _extract_description to provide custom logic.\"\"\"\n    dummy_ie = DummyIE()\n    assert dummy_ie._extract_description(\"<html>content</html>\") == \"Dummy Description\"\n\ndef test_real_extract_uses_overridden_methods_and_returns_playlist_dict(tmp_path):\n    \"\"\"_real_extract should assemble a playlist dict using overridden methods.\"\"\"\n    dummy_ie = DummyIE()\n    # Create a temporary file to act as a dummy playlist URL\n    playlist_file = tmp_path / \"playlist.html\"\n    playlist_file.write_text('<html><body>video_id=abc123</body></html>')\n    # Use the file URL as the input\n    url = f\"file://{playlist_file}\"\n    result = dummy_ie._real_extract(url)\n    # Verify the structure of the returned playlist\n    assert isinstance(result, dict)\n    assert result[\"entries\"] == [\"nrk:abc123\"]\n    assert result[\"id\"] == \"dummy_id\"\n    assert result[\"title\"] == \"Dummy Title\"\n    assert result[\"description\"] == \"Dummy Description\"\n```",
+        "reasoning": "We need to test NRKPlaylistBaseIE._extract_description which is pass. So cannot test. Maybe test _real_extract? It uses _match_id, _download_webpage, _ITEM_RE, _extract_title, _extract_description. But those are not implemented. So cannot. Maybe test that calling _extract_description raises NotImplemented? But it's pass returns None. So test that returns None. Use a dummy subclass? We can subclass NRKPlaylistBaseIE and override necessary methods to test _extract_description. But target is NRKPlaylistBaseIE. We can instantiate it? It inherits InfoExtractor; may need to provide downloader. But we can create instance with dummy. Use minimal. Let's create subclass DummyIE(NRKPlaylistBaseIE) that implements _match_id, _download_webpage, _ITEM_RE, _extract_title, _extract_description. But we are testing _extract_description, so override to call super? Actually we want to test that _extract_description returns None when pass. So we can instantiate NRKPlaylistBaseIE directly? It may require downloader. But we can pass None. Let's try. We'll write tests that instantiate and call _extract_description with dummy webpage. It should return None. Also test that _real_extract raises NotImplementedError? But _real_extract uses other methods. We can test that calling _real_extract with dummy url raises NotImplementedError because _match_id not implemented. But we can override _match_id to return id. But we don't want to test that. Maybe test that _extract_description returns None. That's one test. Another test: test that playlist_result returns expected dict structure. But playlist_result is method of InfoExtractor. Hard.\n\nMaybe test that NRKPlaylistBaseIE._extract_description is not overridden in subclass? But trivial.\n\nGiven constraints, produce three tests: one checks _extract_description returns None; second checks that calling _extract_description with non-string raises TypeError? It accepts webpage string; but pass returns None regardless. So test that passing None returns None. Third test: test that subclass overriding _extract_description returns custom value. But that tests subclass, not target.\n\nI'll produce three tests accordingly."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053957261,
+    "prompt_tokens": 469,
+    "prompt_time": 0.115233888,
+    "completion_tokens": 880,
+    "completion_time": 1.168304182,
+    "total_tokens": 1349,
+    "total_time": 1.28353807,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 439
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfc046em78c3m083n62a7e",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.extractor.nrk import NRKPlaylistBaseIE\n\nclass DummyIE(NRKPlaylistBaseIE):\n    \"\"\"A minimal stub that satisfies the abstract methods of NRKPlaylistBaseIE.\"\"\"\n    def _match_id(self, url):\n        return \"dummy_id\"\n\n    def _download_webpage(self, url, video_id):\n        return \"<html></html>\"\n\n    _ITEM_RE = r\"video_id=(\\w+)\"\n    def _extract_title(self, webpage):\n        return \"Dummy Title\"\n\n    def _extract_description(self, webpage):\n        return \"Dummy Description\"\n\ndef test_extract_description_returns_none_for_base_class():\n    \"\"\"The base class implementation of _extract_description should return None.\"\"\"\n    base_ie = NRKPlaylistBaseIE()\n    assert base_ie._extract_description(\"<html>content</html>\") is None\n    assert base_ie._extract_description(\"\") is None\n    assert base_ie._extract_description(None) is None\n\ndef test_extract_description_can_be_overridden_in_subclass():\n    \"\"\"A subclass can override _extract_description to provide custom logic.\"\"\"\n    dummy_ie = DummyIE()\n    assert dummy_ie._extract_description(\"<html>content</html>\") == \"Dummy Description\"\n\ndef test_real_extract_uses_overridden_methods_and_returns_playlist_dict(tmp_path):\n    \"\"\"_real_extract should assemble a playlist dict using overridden methods.\"\"\"\n    dummy_ie = DummyIE()\n    # Create a temporary file to act as a dummy playlist URL\n    playlist_file = tmp_path / \"playlist.html\"\n    playlist_file.write_text('<html><body>video_id=abc123</body></html>')\n    # Use the file URL as the input\n    url = f\"file://{playlist_file}\"\n    result = dummy_ie._real_extract(url)\n    # Verify the structure of the returned playlist\n    assert isinstance(result, dict)\n    assert result[\"entries\"] == [\"nrk:abc123\"]\n    assert result[\"id\"] == \"dummy_id\"\n    assert result[\"title\"] == \"Dummy Title\"\n    assert result[\"description\"] == \"Dummy Description\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.6466675930423662
+}

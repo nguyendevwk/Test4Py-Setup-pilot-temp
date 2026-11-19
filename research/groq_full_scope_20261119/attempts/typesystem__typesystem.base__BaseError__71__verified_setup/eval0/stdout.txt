@@ -1,0 +1,94 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_single_message_initialization_and_str __________________
+
+    def test_single_message_initialization_and_str():
+        # Instantiate with a single message
+        err = BaseError(text="Invalid input", code="invalid", key="field")
+        # The internal message list should contain one Message instance
+        assert len(err._messages) == 1
+        msg = err._messages[0]
+        assert msg.text == "Invalid input"
+        assert msg.code == "invalid"
+>       assert msg.key == "field"
+E       AttributeError: 'Message' object has no attribute 'key'
+
+test_generated.py:12: AttributeError
+____________________ test_multiple_messages_and_dict_access ____________________
+
+    def test_multiple_messages_and_dict_access():
+        msgs = [
+            Message(text="Missing field", code="required", key="username"),
+>           Message(text="Too short", code="min_length", key="password", index=["user", "password"]),
+        ]
+
+test_generated.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <[AttributeError("'Message' object has no attribute 'index'") raised in repr()] Message object at 0x7fea8ae1e560>
+text = 'Too short', code = 'min_length', key = 'password'
+index = ['user', 'password'], position = None, start_position = None
+end_position = None
+
+    def __init__(
+        self,
+        *,
+        text: str,
+        code: str = None,
+        key: typing.Union[int, str] = None,
+        index: typing.List[typing.Union[int, str]] = None,
+        position: Position = None,
+        start_position: Position = None,
+        end_position: Position = None,
+    ):
+        """
+        text - The error message. 'May not have more than 100 characters'
+        code - An optional error code, eg. 'max_length'
+        key - An optional key of the message within a single parent. eg. 'username'
+        index - The index of the message
+            within a nested object. eg. ['users', 3, 'username']
+    
+        Optionally either:
+    
+        position - The start and end position of the error message
+            within the raw content.
+    
+        Or:
+    
+        start_position - The start position of the error message within the raw content.
+        end_position - The end position of the error message within the raw content.
+        """
+        self.text = text
+        self.code = "custom" if code is None else code
+        if key is not None:
+>           assert index is None
+E           AssertionError
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/base.py:63: AssertionError
+____________________ test_messages_with_prefix_and_equality ____________________
+
+    def test_messages_with_prefix_and_equality():
+        msgs = [
+            Message(text="Invalid email", code="email", index=["contact", "email"]),
+            Message(text="Missing phone", code="required", index=["contact", "phone"]),
+        ]
+        err = BaseError(messages=msgs)
+        prefixed = err.messages(add_prefix="user")
+        # Each prefixed message should have the new prefix added to its index
+        assert all(msg.index[0] == "user" for msg in prefixed)
+        assert prefixed[0].index == ["user", "contact", "email"]
+        assert prefixed[1].index == ["user", "contact", "phone"]
+        # Equality should compare message lists
+        err_copy = BaseError(messages=msgs)
+>       assert err == err_copy
+E       AssertionError: assert BaseError([Me...', 'phone'])]) == BaseError([Me...', 'phone'])])
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Use -v to get more diff
+
+test_generated.py:48: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_single_message_initialization_and_str - Attrib...
+FAILED test_generated.py::test_multiple_messages_and_dict_access - AssertionE...
+FAILED test_generated.py::test_messages_with_prefix_and_equality - AssertionE...
+3 failed in 0.14s

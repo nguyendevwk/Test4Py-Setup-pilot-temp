@@ -1,0 +1,54 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_enable_pretty_logging_file_and_stderr __________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado.log__enable_pretty_logging__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_enable_pretty_logging_fil0')
+
+    def test_enable_pretty_logging_file_and_stderr(tmp_path):
+        log_file = tmp_path / "test.log"
+        opts = DummyOptions(
+            logging="debug",
+            log_file_prefix=str(log_file),
+            log_rotate_mode="size",
+            log_file_max_size=10,
+            log_file_num_backups=2,
+            log_to_stderr=True,
+        )
+        logger = logging.getLogger("tornado_test")
+        logger.handlers = []  # clear any existing handlers
+        enable_pretty_logging(opts, logger)
+    
+        # Verify level
+        assert logger.level == logging.DEBUG
+    
+        # Verify file handler exists and writes to file
+        file_handlers = [h for h in logger.handlers if isinstance(h, logging.handlers.RotatingFileHandler)]
+        assert len(file_handlers) == 1
+        fh = file_handlers[0]
+        assert fh.baseFilename == str(log_file)
+        assert fh.maxBytes == 10
+        assert fh.backupCount == 2
+    
+        # Emit a log message and check file content
+        logger.debug("test message")
+        # Allow handler to flush
+        for h in logger.handlers:
+            h.flush()
+        with open(log_file, "r", encoding="utf-8") as f:
+            content = f.read()
+        assert "test message" in content
+    
+        # Verify stream handler exists
+        stream_handlers = [h for h in logger.handlers if isinstance(h, logging.StreamHandler)]
+>       assert len(stream_handlers) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len([<RotatingFileHandler /home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/tornado__tornado...st_enable_pretty_logging_fil0/test.log (NOTSET)>, <StreamHandler <_io.FileIO name=8 mode='rb+' closefd=True> (NOTSET)>])
+
+test_generated.py:69: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[D 261119 16:15:33 test_generated:59] test message
+------------------------------ Captured log call -------------------------------
+DEBUG    tornado_test:test_generated.py:59 test message
+=========================== short test summary info ============================
+FAILED test_generated.py::test_enable_pretty_logging_file_and_stderr - Assert...
+1 failed, 2 passed in 0.28s

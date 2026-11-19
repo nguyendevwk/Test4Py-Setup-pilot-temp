@@ -22,7 +22,8 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--upstream',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--arm',choices=['baseline','improved'],required=True)
+    parser.add_argument('--arm',choices=['baseline','improved','api_contract'],required=True)
+    parser.add_argument('--mechanism',choices=['api-contract-v1'])
     args=parser.parse_args()
     root=args.output/'product';package=root/'fixturepkg';package.mkdir(parents=True,exist_ok=False)
     (package/'__init__.py').write_text('')
@@ -76,6 +77,8 @@ def main():
                   rounds=1,embedding_device='cpu',upstream_root=str(args.upstream),
                   prompt_policy='upstream-original',score_timeout=20,
                   mutation_manifest=str(args.output/'mutant-pools.json'))
+    if args.mechanism:
+        settings.update(mechanism=args.mechanism,acceptance_policy='preserve-assertions-v1',api_contract_max_chars=2500)
     manifest=args.output/'worker-settings.json';write_json(manifest,settings)
     sys.argv=['benchmark_worker.py',str(manifest)]
     os.chdir(root)
@@ -93,6 +96,11 @@ def main():
     assert set(scope['analyzed_modules']) >= {'fixturepkg.core','fixturepkg.helpers'},scope
     assert scope['selected_generation_modules']==['fixturepkg.core'],scope
     assert report['kind']=='offline_fixture_not_efficacy'
+    if args.mechanism:
+        contexts=[json.loads(l) for l in (args.output/'api_contract_context.jsonl').read_text().splitlines()]
+        assert contexts and all(c['status']!='unknown' for c in contexts),contexts
+        assert any(c['evidence'] is not None for c in contexts)==(args.arm=='api_contract'),contexts
+        assert not (args.output/'type_filter.jsonl').exists(), 'Legacy improved treatment leaked into ablation'
     print('REAL upstream fixture '+args.arm+': PASS (not LLM efficacy)',flush=True)
     return 0
 

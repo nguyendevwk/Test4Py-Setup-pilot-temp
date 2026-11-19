@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-c6e7cc68-425b-42ec-a32d-43b994e5a2e8",
+  "object": "chat.completion",
+  "created": 1795076688,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules.tsuru_not_command import get_new_command\nfrom thefuck.utils import get_all_matched_commands, replace_command\n\nclass DummyCommand:\n    def __init__(self, output):\n        self.output = output\n\ndef test_get_new_command_normal(tmp_path):\n    # Simulate a command output that contains a tsuru command error\n    output = 'Error: tsuru: \"deploy\" is not a tsuru command\\nSome other text'\n    cmd = DummyCommand(output)\n    # The function should extract \"deploy\" and replace it with a matched command\n    new_cmd = get_new_command(cmd)\n    # The new command should contain the matched command from get_all_matched_commands\n    matched = get_all_matched_commands(output)\n    assert matched, \"Expected at least one matched command\"\n    # replace_command should replace the broken command with the first matched command\n    expected = replace_command(cmd, \"deploy\", matched)\n    assert new_cmd == expected, \"The new command should be the result of replace_command\"\n\ndef test_get_new_command_multiple_matches(tmp_path):\n    # Output contains multiple tsuru command errors; only the first should be used\n    output = (\n        'Error: tsuru: \"deploy\" is not a tsuru command\\n'\n        'Error: tsuru: \"scale\" is not a tsuru command\\n'\n        'Some other text'\n    )\n    cmd = DummyCommand(output)\n    new_cmd = get_new_command(cmd)\n    # The broken command extracted should be \"deploy\"\n    assert \"deploy\" in new_cmd, \"The first broken command should be used\"\n    # Ensure that the replacement uses the matched commands list\n    matched = get_all_matched_commands(output)\n    assert matched, \"Expected at least one matched command\"\n    expected = replace_command(cmd, \"deploy\", matched)\n    assert new_cmd == expected, \"The new command should be the result of replace_command\"\n\ndef test_get_new_command_no_match_raises():\n    # Output does not contain the expected pattern; should raise IndexError\n    output = 'Some unrelated error message'\n    cmd = DummyCommand(output)\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n```",
+        "reasoning": "We need to test get_new_command. We need to simulate a command object with output attribute. The function uses re.findall to extract broken_cmd. Then replace_command and get_all_matched_commands. We can import the function and test behavior. We need to test normal, boundary, error. For normal: output contains pattern. For boundary: maybe multiple matches? It picks first. For error: no match should raise IndexError. We'll test that. Use tmp_path? Not needed. Just create simple object. Use simple class. Ensure replace_command and get_all_matched_commands are real functions. We'll import them. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.05281387,
+    "prompt_tokens": 292,
+    "prompt_time": 0.002927662,
+    "completion_tokens": 597,
+    "completion_time": 1.020285967,
+    "total_tokens": 889,
+    "total_time": 1.023213629,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 128
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7seh15cerctz9k3fwykac83",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom thefuck.rules.tsuru_not_command import get_new_command\nfrom thefuck.utils import get_all_matched_commands, replace_command\n\nclass DummyCommand:\n    def __init__(self, output):\n        self.output = output\n\ndef test_get_new_command_normal(tmp_path):\n    # Simulate a command output that contains a tsuru command error\n    output = 'Error: tsuru: \"deploy\" is not a tsuru command\\nSome other text'\n    cmd = DummyCommand(output)\n    # The function should extract \"deploy\" and replace it with a matched command\n    new_cmd = get_new_command(cmd)\n    # The new command should contain the matched command from get_all_matched_commands\n    matched = get_all_matched_commands(output)\n    assert matched, \"Expected at least one matched command\"\n    # replace_command should replace the broken command with the first matched command\n    expected = replace_command(cmd, \"deploy\", matched)\n    assert new_cmd == expected, \"The new command should be the result of replace_command\"\n\ndef test_get_new_command_multiple_matches(tmp_path):\n    # Output contains multiple tsuru command errors; only the first should be used\n    output = (\n        'Error: tsuru: \"deploy\" is not a tsuru command\\n'\n        'Error: tsuru: \"scale\" is not a tsuru command\\n'\n        'Some other text'\n    )\n    cmd = DummyCommand(output)\n    new_cmd = get_new_command(cmd)\n    # The broken command extracted should be \"deploy\"\n    assert \"deploy\" in new_cmd, \"The first broken command should be used\"\n    # Ensure that the replacement uses the matched commands list\n    matched = get_all_matched_commands(output)\n    assert matched, \"Expected at least one matched command\"\n    expected = replace_command(cmd, \"deploy\", matched)\n    assert new_cmd == expected, \"The new command should be the result of replace_command\"\n\ndef test_get_new_command_no_match_raises():\n    # Output does not contain the expected pattern; should raise IndexError\n    output = 'Some unrelated error message'\n    cmd = DummyCommand(output)\n    with pytest.raises(IndexError):\n        get_new_command(cmd)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3731500090216286
+}

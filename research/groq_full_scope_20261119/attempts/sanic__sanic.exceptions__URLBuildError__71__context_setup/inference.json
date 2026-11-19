@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-e06de002-0463-41c6-ad3d-3535b310997b",
+  "object": "chat.completion",
+  "created": 1795076954,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.exceptions import URLBuildError\nfrom sanic.helpers import STATUS_CODES\n\n\ndef test_urlbuilderror_default_message_and_status():\n    \"\"\"When no message is provided, the default status message for 500 is used.\"\"\"\n    exc = URLBuildError()\n    assert isinstance(exc, URLBuildError)\n    assert exc.status_code == 500\n    # STATUS_CODES contains bytes; decode to str for comparison\n    expected_msg = STATUS_CODES[500].decode()\n    assert exc.args[0] == expected_msg\n    assert exc.message == expected_msg\n    assert exc.quiet is None  # default from SanicException\n    assert exc.headers == {}  # default from SanicException\n\n\ndef test_urlbuilderror_bytes_message_and_context():\n    \"\"\"Providing a bytes message should be decoded and stored; context is preserved.\"\"\"\n    msg_bytes = b\"Byte message\"\n    context = {\"detail\": \"extra info\"}\n    exc = URLBuildError(msg_bytes, context=context)\n    assert exc.args[0] == \"Byte message\"\n    assert exc.message == \"Byte message\"\n    assert exc.context == context\n    # status_code should still be 500\n    assert exc.status_code == 500\n    # quiet and headers default\n    assert exc.quiet is None\n    assert exc.headers == {}\n\n\ndef test_urlbuilderror_custom_quiet_and_headers():\n    \"\"\"Custom quiet flag and headers are respected and stored.\"\"\"\n    headers = {\"X-Custom\": \"value\"}\n    exc = URLBuildError(\"Custom error\", quiet=True, headers=headers)\n    assert exc.args[0] == \"Custom error\"\n    assert exc.message == \"Custom error\"\n    assert exc.quiet is True\n    assert exc.headers == headers\n    # context and extra default to None\n    assert exc.context is None\n    assert exc.extra is None\n```",
+        "reasoning": "We need three tests for URLBuildError. Test normal init, boundary: message bytes, quiet default, context. Error behavior: passing invalid type? maybe message not string? but constructor accepts None. Maybe test that status_code is 500. Also test that message None uses status code message. Use STATUS_CODES. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052225216,
+    "prompt_tokens": 1368,
+    "prompt_time": 0.125469479,
+    "completion_tokens": 461,
+    "completion_time": 0.513259848,
+    "total_tokens": 1829,
+    "total_time": 0.638729327,
+    "completion_tokens_details": {
+      "reasoning_tokens": 68
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7ses575e7880gaxvvd4kydm",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.exceptions import URLBuildError\nfrom sanic.helpers import STATUS_CODES\n\n\ndef test_urlbuilderror_default_message_and_status():\n    \"\"\"When no message is provided, the default status message for 500 is used.\"\"\"\n    exc = URLBuildError()\n    assert isinstance(exc, URLBuildError)\n    assert exc.status_code == 500\n    # STATUS_CODES contains bytes; decode to str for comparison\n    expected_msg = STATUS_CODES[500].decode()\n    assert exc.args[0] == expected_msg\n    assert exc.message == expected_msg\n    assert exc.quiet is None  # default from SanicException\n    assert exc.headers == {}  # default from SanicException\n\n\ndef test_urlbuilderror_bytes_message_and_context():\n    \"\"\"Providing a bytes message should be decoded and stored; context is preserved.\"\"\"\n    msg_bytes = b\"Byte message\"\n    context = {\"detail\": \"extra info\"}\n    exc = URLBuildError(msg_bytes, context=context)\n    assert exc.args[0] == \"Byte message\"\n    assert exc.message == \"Byte message\"\n    assert exc.context == context\n    # status_code should still be 500\n    assert exc.status_code == 500\n    # quiet and headers default\n    assert exc.quiet is None\n    assert exc.headers == {}\n\n\ndef test_urlbuilderror_custom_quiet_and_headers():\n    \"\"\"Custom quiet flag and headers are respected and stored.\"\"\"\n    headers = {\"X-Custom\": \"value\"}\n    exc = URLBuildError(\"Custom error\", quiet=True, headers=headers)\n    assert exc.args[0] == \"Custom error\"\n    assert exc.message == \"Custom error\"\n    assert exc.quiet is True\n    assert exc.headers == headers\n    # context and extra default to None\n    assert exc.context is None\n    assert exc.extra is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9952356370049529
+}

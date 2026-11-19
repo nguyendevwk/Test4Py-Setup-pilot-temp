@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-4207577f-7882-4d61-b83a-c5e05b839def",
+  "object": "chat.completion",
+  "created": 1795078987,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport io\nimport pytest\nfrom thefuck.logs import debug\nfrom thefuck.conf import settings\nfrom colorama import Style, Fore\n\n# Helper to capture stderr\n@pytest.fixture\ndef cap_stderr():\n    original = sys.stderr\n    buffer = io.StringIO()\n    sys.stderr = buffer\n    yield buffer\n    sys.stderr = original\n\ndef test_debug_enabled_writes_formatted(cap_stderr):\n    settings.debug = True\n    debug(\"Test message\")\n    output = cap_stderr.getvalue()\n    # Expected format: BLUE + BOLD + \"DEBUG:\" + RESET + \" Test message\\n\"\n    expected_prefix = f\"{Fore.BLUE}{Style.BRIGHT}DEBUG:{Style.RESET_ALL} \"\n    assert output.startswith(expected_prefix)\n    assert output.endswith(\"\\n\")\n    assert \"Test message\" in output\n\ndef test_debug_disabled_does_not_write(cap_stderr):\n    settings.debug = False\n    debug(\"Should not appear\")\n    output = cap_stderr.getvalue()\n    assert output == \"\"\n\ndef test_debug_with_special_characters(cap_stderr):\n    settings.debug = True\n    special_msg = \"Line1\\nLine2\\tUnicode: \\u2603\"\n    debug(special_msg)\n    output = cap_stderr.getvalue()\n    # Ensure the message is present verbatim after the prefix\n    prefix = f\"{Fore.BLUE}{Style.BRIGHT}DEBUG:{Style.RESET_ALL} \"\n    assert output.startswith(prefix)\n    assert output.endswith(\"\\n\")\n    # The message part should match exactly\n    assert output[len(prefix):-1] == special_msg\n```",
+        "reasoning": "We need to test debug function. It writes to stderr if settings.debug True. We can patch settings.debug. Use tmp_path? Not needed. Just capture stderr. Use contextmanager to capture. Write three tests: normal behavior when debug True writes formatted string; when debug False writes nothing; boundary: msg with special chars. Use pytest.raises? Not needed. Use assert."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053287818,
+    "prompt_tokens": 312,
+    "prompt_time": 0.007846011,
+    "completion_tokens": 417,
+    "completion_time": 0.673181464,
+    "total_tokens": 729,
+    "total_time": 0.681027475,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 76
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sgq7cfey3vz1xfw3m15s3z",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport io\nimport pytest\nfrom thefuck.logs import debug\nfrom thefuck.conf import settings\nfrom colorama import Style, Fore\n\n# Helper to capture stderr\n@pytest.fixture\ndef cap_stderr():\n    original = sys.stderr\n    buffer = io.StringIO()\n    sys.stderr = buffer\n    yield buffer\n    sys.stderr = original\n\ndef test_debug_enabled_writes_formatted(cap_stderr):\n    settings.debug = True\n    debug(\"Test message\")\n    output = cap_stderr.getvalue()\n    # Expected format: BLUE + BOLD + \"DEBUG:\" + RESET + \" Test message\\n\"\n    expected_prefix = f\"{Fore.BLUE}{Style.BRIGHT}DEBUG:{Style.RESET_ALL} \"\n    assert output.startswith(expected_prefix)\n    assert output.endswith(\"\\n\")\n    assert \"Test message\" in output\n\ndef test_debug_disabled_does_not_write(cap_stderr):\n    settings.debug = False\n    debug(\"Should not appear\")\n    output = cap_stderr.getvalue()\n    assert output == \"\"\n\ndef test_debug_with_special_characters(cap_stderr):\n    settings.debug = True\n    special_msg = \"Line1\\nLine2\\tUnicode: \\u2603\"\n    debug(special_msg)\n    output = cap_stderr.getvalue()\n    # Ensure the message is present verbatim after the prefix\n    prefix = f\"{Fore.BLUE}{Style.BRIGHT}DEBUG:{Style.RESET_ALL} \"\n    assert output.startswith(prefix)\n    assert output.endswith(\"\\n\")\n    # The message part should match exactly\n    assert output[len(prefix):-1] == special_msg\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0684625419671647
+}

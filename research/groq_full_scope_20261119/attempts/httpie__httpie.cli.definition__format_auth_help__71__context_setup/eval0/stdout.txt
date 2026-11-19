@@ -1,0 +1,43 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_format_auth_help_isolation_mode _____________________
+
+    def test_format_auth_help_isolation_mode():
+        """Test that isolation_mode filters out non-builtin plugins and adds the extra instruction."""
+        mapping = {
+            "dummy": DummyAuthPlugin,
+            "builtin": BuiltinAuthPlugin,
+        }
+        help_text = format_auth_help(mapping, isolation_mode=True)
+        # Only builtin plugin should be listed
+>       assert '"builtin":' in help_text
+E       assert '"builtin":' in '\n    The authentication mechanism to be used. Defaults to "None".\n\n    "None": None\n    \nTo see all available auth types on your system, including ones installed via plugins, run:\n\n    $ http --auth-type'
+
+test_generated.py:52: AssertionError
+______________ test_format_auth_help_no_description_and_wrapping _______________
+
+    def test_format_auth_help_no_description_and_wrapping():
+        """Test that plugins without a description are handled correctly and long descriptions wrap."""
+        mapping = {
+            "nodec": NoDescAuthPlugin,
+            "another": AnotherAuthPlugin,
+        }
+        help_text = format_auth_help(mapping)
+        # No description block for NoDescAuthPlugin
+        assert '"nodec": No Description Auth' in help_text
+>       assert 'provided by' not in help_text  # package name should not appear for builtin
+E       assert 'provided by' not in '\n    The a... text.\n    '
+E         
+E         'provided by' is contained here:
+E           ion Auth (provided by nodec_pkg)
+E         ?           +++++++++++
+E           
+E               "another": Another Auth (provided by another_pkg)
+E                 Another plugin with a longer description that should wrap across
+E                 multiple lines when displayed in the help text.
+
+test_generated.py:66: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_format_auth_help_isolation_mode - assert '"bui...
+FAILED test_generated.py::test_format_auth_help_no_description_and_wrapping
+2 failed, 1 passed in 0.50s

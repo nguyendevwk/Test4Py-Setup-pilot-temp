@@ -1,0 +1,48 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________________ test_extract_formats _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3e1e303f10>
+
+    def test_extract_formats(monkeypatch):
+        # Prepare a dummy instance with minimal required attributes
+        ie = PornerBrosIE()
+        # Mock _download_json to return a predictable token mapping
+        def fake_download_json(url, video_id, data=None, headers=None):
+            # The URL contains the media_id and sources joined by '+'
+            # We ignore it and return a mapping for each source
+            return {
+                '720': 'https://example.com/720p.mp4',
+                '480': 'https://example.com/480p.mp4',
+                '360': 'https://example.com/360p.mp4',
+            }
+        monkeypatch.setattr(ie, "_download_json", fake_download_json)
+    
+        # Call _extract_formats with known parameters
+>       formats = ie._extract_formats(
+            url="https://www.pornerbros.com/videos/video_181369",
+            video_id="181369",
+            media_id="12345",
+            sources=['720', '480', '360']
+        )
+
+test_generated.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/fourtube.py:34: in _extract_formats
+    formats = [{
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x7f3e1d444c40>
+
+    formats = [{
+>       'url': tokens[format]['token'],
+        'format_id': format + 'p',
+        'resolution': format + 'p',
+        'quality': int(format),
+    } for format in sources]
+E   TypeError: string indices must be integers
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/fourtube.py:35: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_extract_formats - TypeError: string indices mu...
+1 failed, 2 passed in 0.78s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-1082e63e-8d83-41f8-92c7-25d166fbbaa2",
+  "object": "chat.completion",
+  "created": 1795076336,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import normalize_path\n\ndef test_normalize_with_home_and_env(tmp_path):\n    # Set up environment variable and home directory\n    os.environ[\"TEST_VAR\"] = \"subdir\"\n    # Create a temporary directory to act as the user's home\n    home_dir = tmp_path / \"home\"\n    home_dir.mkdir()\n    # Monkeypatch getpass.getuser to return a user whose home is home_dir\n    original_getuser = os.getlogin if hasattr(os, \"getlogin\") else None\n    try:\n        os.getlogin = lambda: \"dummy_user\"\n        # Create a dummy user entry in pwd module\n        import pwd\n        pwd.getpwnam = lambda u: type(\"pwd\", (), {\"pw_dir\": str(home_dir)})()\n        # Path containing ~ and env var\n        input_path = \"~/folder/${TEST_VAR}/file.txt\"\n        result = normalize_path(input_path)\n        expected = Path(home_dir, \"folder\", \"subdir\", \"file.txt\")\n        assert result == expected\n    finally:\n        if original_getuser:\n            os.getlogin = original_getuser\n        del os.environ[\"TEST_VAR\"]\n\ndef test_normalize_relative_path(tmp_path):\n    # Create a relative path that includes up-level references\n    rel_path = Path(\"a\") / \"b\" / \"..\" / \"c\" / \".\"\n    # Change current working directory to tmp_path\n    cwd = os.getcwd()\n    os.chdir(tmp_path)\n    try:\n        result = normalize_path(rel_path)\n        expected = tmp_path / \"a\" / \"c\"\n        assert result == expected\n    finally:\n        os.chdir(cwd)\n\ndef test_normalize_invalid_input():\n    with pytest.raises(TypeError):\n        normalize_path(None)\n```",
+        "reasoning": "Need 3 tests. Test normal path with ~ and env var. Test relative path resolution. Test error: passing None should raise TypeError. Use tmp_path."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.048351162,
+    "prompt_tokens": 884,
+    "prompt_time": 0.051902815,
+    "completion_tokens": 425,
+    "completion_time": 0.453269881,
+    "total_tokens": 1309,
+    "total_time": 0.505172696,
+    "completion_tokens_details": {
+      "reasoning_tokens": 34
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se6aadec2rkgsfeynthy0z",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport os\nimport sys\nimport pytest\nfrom pathlib import Path\nfrom flutils.pathutils import normalize_path\n\ndef test_normalize_with_home_and_env(tmp_path):\n    # Set up environment variable and home directory\n    os.environ[\"TEST_VAR\"] = \"subdir\"\n    # Create a temporary directory to act as the user's home\n    home_dir = tmp_path / \"home\"\n    home_dir.mkdir()\n    # Monkeypatch getpass.getuser to return a user whose home is home_dir\n    original_getuser = os.getlogin if hasattr(os, \"getlogin\") else None\n    try:\n        os.getlogin = lambda: \"dummy_user\"\n        # Create a dummy user entry in pwd module\n        import pwd\n        pwd.getpwnam = lambda u: type(\"pwd\", (), {\"pw_dir\": str(home_dir)})()\n        # Path containing ~ and env var\n        input_path = \"~/folder/${TEST_VAR}/file.txt\"\n        result = normalize_path(input_path)\n        expected = Path(home_dir, \"folder\", \"subdir\", \"file.txt\")\n        assert result == expected\n    finally:\n        if original_getuser:\n            os.getlogin = original_getuser\n        del os.environ[\"TEST_VAR\"]\n\ndef test_normalize_relative_path(tmp_path):\n    # Create a relative path that includes up-level references\n    rel_path = Path(\"a\") / \"b\" / \"..\" / \"c\" / \".\"\n    # Change current working directory to tmp_path\n    cwd = os.getcwd()\n    os.chdir(tmp_path)\n    try:\n        result = normalize_path(rel_path)\n        expected = tmp_path / \"a\" / \"c\"\n        assert result == expected\n    finally:\n        os.chdir(cwd)\n\ndef test_normalize_invalid_input():\n    with pytest.raises(TypeError):\n        normalize_path(None)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.8480664439848624
+}

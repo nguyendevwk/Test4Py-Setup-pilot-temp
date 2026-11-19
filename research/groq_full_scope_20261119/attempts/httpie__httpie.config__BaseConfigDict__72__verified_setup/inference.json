@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-f8e05f9b-3182-4591-9d5d-eda3bafdd91b",
+  "object": "chat.completion",
+  "created": 1795079661,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport json\nimport os\nimport sys\nimport tempfile\nfrom pathlib import Path\n\nimport pytest\n\n# Import the target class from the installed package\nfrom httpie.config import BaseConfigDict\n\n\ndef test_base_config_dict_is_new_and_save(tmp_path: Path):\n    \"\"\"\n    Verify that a new BaseConfigDict reports itself as new,\n    can be saved to disk, and that the file contains the expected JSON.\n    \"\"\"\n    cfg_path = tmp_path / \"config.json\"\n    cfg = BaseConfigDict(cfg_path)\n\n    # Initially the file does not exist\n    assert cfg.is_new() is True\n\n    # Set some data and save\n    cfg[\"foo\"] = \"bar\"\n    cfg.save(bump_version=True)\n\n    # After saving, the file should exist and the config should not be new\n    assert cfg_path.exists()\n    assert cfg.is_new() is False\n\n    # Load the file content and compare with the expected JSON\n    with cfg_path.open(\"r\", encoding=\"utf-8\") as f:\n        content = json.load(f)\n    # The saved JSON should contain the key we set\n    assert content[\"foo\"] == \"bar\"\n    # The meta section should contain the httpie version\n    assert \"__meta__\" in content\n    assert \"httpie\" in content[\"__meta__\"]\n\n\ndef test_base_config_dict_load_and_pre_post_processing(tmp_path: Path):\n    \"\"\"\n    Verify that load correctly reads a JSON file and that\n    pre_process_data and post_process_data hooks are respected.\n    \"\"\"\n    cfg_path = tmp_path / \"config.json\"\n\n    # Create a JSON file with a custom key\n    original_data = {\"custom\": \"value\", \"__meta__\": {\"httpie\": \"1.0.0\"}}\n    cfg_path.write_text(json.dumps(original_data, indent=4), encoding=\"utf-8\")\n\n    # Subclass BaseConfigDict to override hooks\n    class HookedConfigDict(BaseConfigDict):\n        def pre_process_data(self, data):\n            # Remove the custom key before loading\n            data.pop(\"custom\", None)\n            return data\n\n        def post_process_data(self, data):\n            # Add a new key before saving\n            data[\"added\"] = \"yes\"\n            return data\n\n    cfg = HookedConfigDict(cfg_path)\n    cfg.load()\n\n    # The custom key should have been removed by pre_process_data\n    assert \"custom\" not in cfg\n    # The meta httpie version should be preserved\n    assert cfg[\"__meta__\"][\"httpie\"] == \"1.0.0\"\n\n    # Save the config and verify that the post_process_data added the key\n    cfg.save()\n    with cfg_path.open(\"r\", encoding=\"utf-8\") as f:\n        saved = json.load(f)\n    assert \"added\" in saved\n    assert saved[\"added\"] == \"yes\"\n\n\ndef test_base_config_dict_version_property(tmp_path: Path):\n    \"\"\"\n    Verify that the version property returns the stored httpie version\n    or falls back to the package __version__ if not present.\n    \"\"\"\n    cfg_path = tmp_path / \"config.json\"\n\n    # Create a config without a __meta__ section\n    cfg_path.write_text(\"{}\", encoding=\"utf-8\")\n\n    cfg = BaseConfigDict(cfg_path)\n    cfg.load()\n\n    # Since no meta section, version should be the package's __version__\n    from httpie import __version__ as pkg_version\n    assert cfg.version == pkg_version\n\n    # Now add a meta section with a different version\n    cfg[\"__meta__\"] = {\"httpie\": \"9.9.9\"}\n    assert cfg.version == \"9.9.9\"\n```",
+        "reasoning": "We need to write pytest module with 3 tests for BaseConfigDict. We need to import from httpie.config. Use tmp_path. Test load with existing file, save writes file, version property. Also test is_new. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005212869,
+    "prompt_tokens": 674,
+    "prompt_time": 0.015642423,
+    "completion_tokens": 831,
+    "completion_time": 1.028944908,
+    "total_tokens": 1505,
+    "total_time": 1.044587331,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 50
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7shbrefednbgaphckt1czvd",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport json\nimport os\nimport sys\nimport tempfile\nfrom pathlib import Path\n\nimport pytest\n\n# Import the target class from the installed package\nfrom httpie.config import BaseConfigDict\n\n\ndef test_base_config_dict_is_new_and_save(tmp_path: Path):\n    \"\"\"\n    Verify that a new BaseConfigDict reports itself as new,\n    can be saved to disk, and that the file contains the expected JSON.\n    \"\"\"\n    cfg_path = tmp_path / \"config.json\"\n    cfg = BaseConfigDict(cfg_path)\n\n    # Initially the file does not exist\n    assert cfg.is_new() is True\n\n    # Set some data and save\n    cfg[\"foo\"] = \"bar\"\n    cfg.save(bump_version=True)\n\n    # After saving, the file should exist and the config should not be new\n    assert cfg_path.exists()\n    assert cfg.is_new() is False\n\n    # Load the file content and compare with the expected JSON\n    with cfg_path.open(\"r\", encoding=\"utf-8\") as f:\n        content = json.load(f)\n    # The saved JSON should contain the key we set\n    assert content[\"foo\"] == \"bar\"\n    # The meta section should contain the httpie version\n    assert \"__meta__\" in content\n    assert \"httpie\" in content[\"__meta__\"]\n\n\ndef test_base_config_dict_load_and_pre_post_processing(tmp_path: Path):\n    \"\"\"\n    Verify that load correctly reads a JSON file and that\n    pre_process_data and post_process_data hooks are respected.\n    \"\"\"\n    cfg_path = tmp_path / \"config.json\"\n\n    # Create a JSON file with a custom key\n    original_data = {\"custom\": \"value\", \"__meta__\": {\"httpie\": \"1.0.0\"}}\n    cfg_path.write_text(json.dumps(original_data, indent=4), encoding=\"utf-8\")\n\n    # Subclass BaseConfigDict to override hooks\n    class HookedConfigDict(BaseConfigDict):\n        def pre_process_data(self, data):\n            # Remove the custom key before loading\n            data.pop(\"custom\", None)\n            return data\n\n        def post_process_data(self, data):\n            # Add a new key before saving\n            data[\"added\"] = \"yes\"\n            return data\n\n    cfg = HookedConfigDict(cfg_path)\n    cfg.load()\n\n    # The custom key should have been removed by pre_process_data\n    assert \"custom\" not in cfg\n    # The meta httpie version should be preserved\n    assert cfg[\"__meta__\"][\"httpie\"] == \"1.0.0\"\n\n    # Save the config and verify that the post_process_data added the key\n    cfg.save()\n    with cfg_path.open(\"r\", encoding=\"utf-8\") as f:\n        saved = json.load(f)\n    assert \"added\" in saved\n    assert saved[\"added\"] == \"yes\"\n\n\ndef test_base_config_dict_version_property(tmp_path: Path):\n    \"\"\"\n    Verify that the version property returns the stored httpie version\n    or falls back to the package __version__ if not present.\n    \"\"\"\n    cfg_path = tmp_path / \"config.json\"\n\n    # Create a config without a __meta__ section\n    cfg_path.write_text(\"{}\", encoding=\"utf-8\")\n\n    cfg = BaseConfigDict(cfg_path)\n    cfg.load()\n\n    # Since no meta section, version should be the package's __version__\n    from httpie import __version__ as pkg_version\n    assert cfg.version == pkg_version\n\n    # Now add a meta section with a different version\n    cfg[\"__meta__\"] = {\"httpie\": \"9.9.9\"}\n    assert cfg.version == \"9.9.9\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "d46d7d0b477644a58018e7b6590042e9",
+  "_api_plus_pacing_seconds": 2.2784234450082295
+}

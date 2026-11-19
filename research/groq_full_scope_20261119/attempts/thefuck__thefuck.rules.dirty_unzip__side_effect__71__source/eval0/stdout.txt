@@ -1,0 +1,68 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_removal_of_safe_files __________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.dirty_unzip__side_effect__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_removal_of_safe_files0')
+zip_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.dirty_unzip__side_effect__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_removal_of_safe_files0/archive.zip')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f77c12cd000>
+
+    def test_removal_of_safe_files(tmp_path, zip_path, monkeypatch):
+        """Files inside the current directory are removed."""
+        # Ensure the safe file exists before the call
+        safe_file = tmp_path / "safe.txt"
+        assert safe_file.exists()
+        # Monkeypatch _zip_file to return our test zip
+        monkeypatch.setattr("thefuck.rules.dirty_unzip._zip_file", lambda old_cmd: str(zip_path))
+        # Call side_effect with a dummy command
+        side_effect("unzip archive.zip", None)
+        # The safe file should be removed
+>       assert not safe_file.exists()
+E       AssertionError: assert not True
+E        +  where True = exists()
+E        +    where exists = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.dirty_unzip__side_effect__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_removal_of_safe_files0/safe.txt').exists
+
+test_generated.py:29: AssertionError
+____________________________ test_handling_oserror _____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.dirty_unzip__side_effect__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_handling_oserror0')
+zip_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/thefuck__thefuck.rules.dirty_unzip__side_effect__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_handling_oserror0/archive.zip')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f77c126f190>
+
+    def test_handling_oserror(tmp_path, zip_path, monkeypatch):
+        """OSError during removal is ignored and does not propagate."""
+        safe_file = tmp_path / "safe.txt"
+        assert safe_file.exists()
+        # Monkeypatch os.remove to raise OSError for the safe file
+        def fake_remove(path):
+            if os.path.abspath(path) == os.path.abspath(safe_file):
+                raise OSError("simulated error")
+            os.remove(path)
+        monkeypatch.setattr("thefuck.rules.dirty_unzip.os.remove", fake_remove)
+        monkeypatch.setattr("thefuck.rules.dirty_unzip._zip_file", lambda old_cmd: str(zip_path))
+        # side_effect should not raise
+>       side_effect("unzip archive.zip", None)
+
+test_generated.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/rules/dirty_unzip.py:53: in side_effect
+    os.remove(file)
+test_generated.py:48: in fake_remove
+    os.remove(path)
+test_generated.py:48: in fake_remove
+    os.remove(path)
+E   RecursionError: maximum recursion depth exceeded
+!!! Recursion detected (same locals & position)
+=============================== warnings summary ===============================
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/conf.py:1: DeprecationWarning: the imp module is deprecated in favour of importlib and slated for removal in Python 3.12; see the module's documentation for alternative uses
+    from imp import load_source
+
+../../../../groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6
+  /home/heurix/Documents/Test4Py_Setup/research/groq_codamosa_extension_20261119/environments/thefuck/venv/lib/python3.10/site-packages/thefuck/system/unix.py:6: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+    from distutils.spawn import find_executable
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_generated.py::test_removal_of_safe_files - AssertionError: assert...
+FAILED test_generated.py::test_handling_oserror - RecursionError: maximum rec...
+2 failed, 1 passed, 2 warnings in 0.21s

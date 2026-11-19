@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-e0259b26-7b5e-494c-a2d7-1df023a8c9e5",
+  "object": "chat.completion",
+  "created": 1795079519,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nimport tornado.ioloop\nimport tornado.web\nimport tornado.httpclient\nimport tornado.gen\nimport asyncio\n\n# Helper to run a simple Tornado server in a background thread\n@pytest.fixture\ndef http_server(tmp_path):\n    class TestHandler(tornado.web.RequestHandler):\n        def get(self):\n            self.write(\"Hello, world!\")\n\n    class RedirectHandler(tornado.web.RequestHandler):\n        def get(self):\n            self.redirect(\"/hello\")\n\n    app = tornado.web.Application(\n        [\n            (r\"/hello\", TestHandler),\n            (r\"/redirect\", RedirectHandler),\n        ]\n    )\n    server = app.listen(0)  # bind to an arbitrary free port\n    port = server.get_socket().getsockname()[1]\n    loop = tornado.ioloop.IOLoop.current()\n    # Run the IOLoop in a separate thread\n    thread = tornado.ioloop.IOLoop.current().start()\n    yield f\"http://localhost:{port}\"\n    server.stop()\n    loop.stop()\n\n\ndef test_fetch_success(http_server):\n    client = tornado.httpclient.HTTPClient()\n    try:\n        response = client.fetch(http_server + \"/hello\")\n        assert response.code == 200\n        assert response.body == b\"Hello, world!\"\n    finally:\n        client.close()\n\n\ndef test_fetch_not_found(http_server):\n    client = tornado.httpclient.HTTPClient()\n    try:\n        with pytest.raises(tornado.httpclient.HTTPError) as excinfo:\n            client.fetch(http_server + \"/nonexistent\")\n        err = excinfo.value\n        assert err.code == 404\n        assert err.response is not None\n        assert err.response.code == 404\n    finally:\n        client.close()\n\n\ndef test_redirect_handling(http_server):\n    client = tornado.httpclient.HTTPClient()\n    try:\n        # By default follow_redirects=True, so we get the final 200\n        response = client.fetch(http_server + \"/redirect\")\n        assert response.code == 200\n        assert response.body == b\"Hello, world!\"\n\n        # Disable redirects; should raise HTTPError with 302 response\n        with pytest.raises(tornado.httpclient.HTTPError) as excinfo:\n            client.fetch(\n                http_server + \"/redirect\",\n                follow_redirects=False,\n            )\n        err = excinfo.value\n        assert err.code == 302\n        assert err.response is not None\n        assert err.response.code == 302\n        assert err.response.headers.get(\"Location\") == \"/hello\"\n    finally:\n        client.close()\n```",
+        "reasoning": "We need 3 tests. Use HTTPClient to fetch local server? Can't network. Use tornado's AsyncHTTPClient with a simple HTTP server via tornado. Use IOLoop. We'll spin up a simple HTTP server using tornado.web.Application with a handler returning 200. Use tmp_path for file? Not needed. Test normal fetch returns body. Test error 404 raises HTTPError. Test follow_redirects False leads to HTTPError with response. Use IOLoop. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.008705237,
+    "prompt_tokens": 1552,
+    "prompt_time": 0.071150127,
+    "completion_tokens": 626,
+    "completion_time": 0.709144395,
+    "total_tokens": 2178,
+    "total_time": 0.780294522,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 98
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh7eb8ebarrj5ne7a1rzb8",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nimport tornado.ioloop\nimport tornado.web\nimport tornado.httpclient\nimport tornado.gen\nimport asyncio\n\n# Helper to run a simple Tornado server in a background thread\n@pytest.fixture\ndef http_server(tmp_path):\n    class TestHandler(tornado.web.RequestHandler):\n        def get(self):\n            self.write(\"Hello, world!\")\n\n    class RedirectHandler(tornado.web.RequestHandler):\n        def get(self):\n            self.redirect(\"/hello\")\n\n    app = tornado.web.Application(\n        [\n            (r\"/hello\", TestHandler),\n            (r\"/redirect\", RedirectHandler),\n        ]\n    )\n    server = app.listen(0)  # bind to an arbitrary free port\n    port = server.get_socket().getsockname()[1]\n    loop = tornado.ioloop.IOLoop.current()\n    # Run the IOLoop in a separate thread\n    thread = tornado.ioloop.IOLoop.current().start()\n    yield f\"http://localhost:{port}\"\n    server.stop()\n    loop.stop()\n\n\ndef test_fetch_success(http_server):\n    client = tornado.httpclient.HTTPClient()\n    try:\n        response = client.fetch(http_server + \"/hello\")\n        assert response.code == 200\n        assert response.body == b\"Hello, world!\"\n    finally:\n        client.close()\n\n\ndef test_fetch_not_found(http_server):\n    client = tornado.httpclient.HTTPClient()\n    try:\n        with pytest.raises(tornado.httpclient.HTTPError) as excinfo:\n            client.fetch(http_server + \"/nonexistent\")\n        err = excinfo.value\n        assert err.code == 404\n        assert err.response is not None\n        assert err.response.code == 404\n    finally:\n        client.close()\n\n\ndef test_redirect_handling(http_server):\n    client = tornado.httpclient.HTTPClient()\n    try:\n        # By default follow_redirects=True, so we get the final 200\n        response = client.fetch(http_server + \"/redirect\")\n        assert response.code == 200\n        assert response.body == b\"Hello, world!\"\n\n        # Disable redirects; should raise HTTPError with 302 response\n        with pytest.raises(tornado.httpclient.HTTPError) as excinfo:\n            client.fetch(\n                http_server + \"/redirect\",\n                follow_redirects=False,\n            )\n        err = excinfo.value\n        assert err.code == 302\n        assert err.response is not None\n        assert err.response.code == 302\n        assert err.response.headers.get(\"Location\") == \"/hello\"\n    finally:\n        client.close()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "1435711e68d9424cb0ae619b39f0051f",
+  "_api_plus_pacing_seconds": 1.7083328319713473
+}

@@ -1,0 +1,67 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_const_type_basic_and_collections _____________________
+
+    def test_const_type_basic_and_collections():
+        # Constant values
+        assert const_type(ast.parse("42", mode="eval").body) == "int"
+        assert const_type(ast.parse("'hello'", mode="eval").body) == "str"
+    
+        # Empty tuple, list, set
+        assert const_type(ast.parse("()", mode="eval").body) == "tuple"
+        assert const_type(ast.parse("[]", mode="eval").body) == "list"
+        assert const_type(ast.parse("set()", mode="eval").body) == "set"
+    
+        # Tuple with heterogeneous types
+        node = ast.parse("(1, 'a', 3.14)", mode="eval").body
+>       assert const_type(node) == "tuple[int|str|float]"
+E       AssertionError: assert 'tuple[Any]' == 'tuple[int|str|float]'
+E         
+E         - tuple[int|str|float]
+E         + tuple[Any]
+
+../../../../../../attempts/apimd__apimd.parser__const_type__44__atomic_source/eval0/test_generated.py:17: AssertionError
+_______________________ test_const_type_call_and_pep585 ________________________
+
+    def test_const_type_call_and_pep585():
+        # Direct built-in type calls
+        node = ast.parse("int()", mode="eval").body
+        assert const_type(node) == "int"
+    
+        # PEP585 type hint call
+        node = ast.parse("list[int]()", mode="eval").body
+        # The unparse of the func will be 'list[int]', which is in PEP585 keys
+>       assert const_type(node) == "list[int]"
+E       AssertionError: assert 'Any' == 'list[int]'
+E         
+E         - list[int]
+E         + Any
+
+../../../../../../attempts/apimd__apimd.parser__const_type__44__atomic_source/eval0/test_generated.py:39: AssertionError
+______________________ test_const_type_error_and_boundary ______________________
+
+    def test_const_type_error_and_boundary():
+        # Unsupported node type should return ANY
+        node = ast.parse("x + y", mode="eval").body
+        assert const_type(node) == ANY
+    
+        # Empty dict
+        node = ast.parse("{}", mode="eval").body
+        assert const_type(node) == "dict"
+    
+        # Dict with mixed key/value types
+        node = ast.parse("{1: 'a', 2: 'b'}", mode="eval").body
+>       assert const_type(node) == "dict[int|str]"
+E       AssertionError: assert 'dict[int, str]' == 'dict[int|str]'
+E         
+E         - dict[int|str]
+E         ?         ^
+E         + dict[int, str]
+E         ?         ^^
+
+../../../../../../attempts/apimd__apimd.parser__const_type__44__atomic_source/eval0/test_generated.py:56: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/apimd__apimd.parser__const_type__44__atomic_source/eval0/test_generated.py::test_const_type_basic_and_collections
+FAILED ../../../../../../attempts/apimd__apimd.parser__const_type__44__atomic_source/eval0/test_generated.py::test_const_type_call_and_pep585
+FAILED ../../../../../../attempts/apimd__apimd.parser__const_type__44__atomic_source/eval0/test_generated.py::test_const_type_error_and_boundary
+3 failed in 0.16s

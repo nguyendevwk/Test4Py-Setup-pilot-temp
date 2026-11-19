@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-6522734e-3874-442c-9e1a-7c6b62aead57",
+  "object": "chat.completion",
+  "created": 1795076829,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport importlib\nimport time\nimport types\nimport pytest\n\n# Import the target module\nfrom thefuck.logs import debug_time\n\n# Helper to capture debug calls\ndef capture_debug():\n    calls = []\n\n    def fake_debug(msg):\n        calls.append(msg)\n\n    return fake_debug, calls\n\n\ndef test_debug_time_measures_elapsed(tmp_path):\n    \"\"\"Normal usage: debug_time should record elapsed time.\"\"\"\n    fake_debug, calls = capture_debug()\n    # Monkey‑patch the module's debug function\n    import thefuck.logs\n    thefuck.logs.debug = fake_debug\n\n    with debug_time(\"test_message\"):\n        time.sleep(0.01)\n\n    assert len(calls) == 1\n    msg = calls[0]\n    assert msg.startswith(\"test_message took: \")\n    # The elapsed time should be at least 0.01 seconds\n    elapsed_str = msg.split(\"took: \")[1]\n    elapsed = float(elapsed_str.split()[0])\n    assert elapsed >= 0.009  # allow small overhead\n\n\ndef test_debug_time_zero_sleep(tmp_path):\n    \"\"\"Boundary case: no sleep, elapsed time should be very small.\"\"\"\n    fake_debug, calls = capture_debug()\n    import thefuck.logs\n    thefuck.logs.debug = fake_debug\n\n    with debug_time(\"zero_sleep\"):\n        pass  # no delay\n\n    assert len(calls) == 1\n    msg = calls[0]\n    assert msg.startswith(\"zero_sleep took: \")\n    elapsed_str = msg.split(\"took: \")[1]\n    elapsed = float(elapsed_str.split()[0])\n    assert elapsed < 0.001  # should be almost instantaneous\n\n\ndef test_debug_time_exception_propagates_and_logs(tmp_path):\n    \"\"\"Error behavior: exception inside context should propagate and still log.\"\"\"\n    fake_debug, calls = capture_debug()\n    import thefuck.logs\n    thefuck.logs.debug = fake_debug\n\n    with pytest.raises(RuntimeError):\n        with debug_time(\"error_case\"):\n            raise RuntimeError(\"boom\")\n\n    assert len(calls) == 1\n    msg = calls[0]\n    assert msg.startswith(\"error_case took: \")\n    # Ensure the exception message propagates\n    with pytest.raises(RuntimeError, match=\"boom\"):\n        with debug_time(\"error_case\"):\n            raise RuntimeError(\"boom\")\n```",
+        "reasoning": "We need to test debug_time contextmanager. It uses debug function from .? Not defined here. But we can import the module and test that it yields and measures time. We can monkeypatch debug to capture output. But cannot mock target. But we can import debug_time and use contextmanager. We can patch debug in module namespace. Use importlib.reload? We can set module.debug = lambda msg: ... But that's modifying product code? It's allowed to modify imported target? It's not modifying source code, just monkeypatching attribute. That's fine. We'll test that time difference is positive. Use tmp_path? Not needed. We'll create a test that enters context, sleeps 0.01s, then check that debug called with message containing \"took\". Use a list to capture. Third test boundary: zero sleep. Error behavior: if exception inside context, debug still called. We'll test that. Use pytest.raises to propagate exception. Ensure debug called. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005371811,
+    "prompt_tokens": 288,
+    "prompt_time": 0.015716192,
+    "completion_tokens": 687,
+    "completion_time": 0.736076742,
+    "total_tokens": 975,
+    "total_time": 0.751792934,
+    "completion_tokens_details": {
+      "reasoning_tokens": 197
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7senbemetrvkf3bbn6j2yv0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport importlib\nimport time\nimport types\nimport pytest\n\n# Import the target module\nfrom thefuck.logs import debug_time\n\n# Helper to capture debug calls\ndef capture_debug():\n    calls = []\n\n    def fake_debug(msg):\n        calls.append(msg)\n\n    return fake_debug, calls\n\n\ndef test_debug_time_measures_elapsed(tmp_path):\n    \"\"\"Normal usage: debug_time should record elapsed time.\"\"\"\n    fake_debug, calls = capture_debug()\n    # Monkey‑patch the module's debug function\n    import thefuck.logs\n    thefuck.logs.debug = fake_debug\n\n    with debug_time(\"test_message\"):\n        time.sleep(0.01)\n\n    assert len(calls) == 1\n    msg = calls[0]\n    assert msg.startswith(\"test_message took: \")\n    # The elapsed time should be at least 0.01 seconds\n    elapsed_str = msg.split(\"took: \")[1]\n    elapsed = float(elapsed_str.split()[0])\n    assert elapsed >= 0.009  # allow small overhead\n\n\ndef test_debug_time_zero_sleep(tmp_path):\n    \"\"\"Boundary case: no sleep, elapsed time should be very small.\"\"\"\n    fake_debug, calls = capture_debug()\n    import thefuck.logs\n    thefuck.logs.debug = fake_debug\n\n    with debug_time(\"zero_sleep\"):\n        pass  # no delay\n\n    assert len(calls) == 1\n    msg = calls[0]\n    assert msg.startswith(\"zero_sleep took: \")\n    elapsed_str = msg.split(\"took: \")[1]\n    elapsed = float(elapsed_str.split()[0])\n    assert elapsed < 0.001  # should be almost instantaneous\n\n\ndef test_debug_time_exception_propagates_and_logs(tmp_path):\n    \"\"\"Error behavior: exception inside context should propagate and still log.\"\"\"\n    fake_debug, calls = capture_debug()\n    import thefuck.logs\n    thefuck.logs.debug = fake_debug\n\n    with pytest.raises(RuntimeError):\n        with debug_time(\"error_case\"):\n            raise RuntimeError(\"boom\")\n\n    assert len(calls) == 1\n    msg = calls[0]\n    assert msg.startswith(\"error_case took: \")\n    # Ensure the exception message propagates\n    with pytest.raises(RuntimeError, match=\"boom\"):\n        with debug_time(\"error_case\"):\n            raise RuntimeError(\"boom\")\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1146309099858627
+}

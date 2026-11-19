@@ -1,0 +1,36 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_extract_ptmd_parses_duration_and_subtitles ________________
+
+ie = <test_generated.DummyIE object at 0x7f1055c162f0>
+
+    def test_extract_ptmd_parses_duration_and_subtitles(ie):
+        # Prepare a fake ptmd JSON with duration and captions
+        ptmd_json = {
+            "basename": "test123",
+            "priorityList": [],
+            "attributes": {"duration": {"value": 987654}},
+            "captions": [
+                {"uri": "http://example.com/sub.srt", "language": "eng"}
+            ]
+        }
+        # Monkeypatch _call_api to return our fake JSON
+        def fake_call_api(url, video_id, item, api_token=None, referrer=None):
+            return ptmd_json
+        ie._call_api = fake_call_api
+        result = ie._extract_ptmd("http://api.example.com/ptmd", "vid", None, None)
+        assert result["id"] == "test123"
+        assert result["duration"] == pytest.approx(987.654)
+        assert "eng" in result["subtitles"]
+        assert result["subtitles"]["eng"][0]["url"] == "http://example.com/sub.srt"
+>       assert result["extractor_key"] == "ZDFIE"
+E       AssertionError: assert 'ZDF' == 'ZDFIE'
+E         
+E         - ZDFIE
+E         ?    --
+E         + ZDF
+
+../../../../../../attempts/youtube-dl__youtube_dl.extractor.zdf__ZDFBaseIE__44__atomic_verified_setup/eval0/test_generated.py:101: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/youtube-dl__youtube_dl.extractor.zdf__ZDFBaseIE__44__atomic_verified_setup/eval0/test_generated.py::test_extract_ptmd_parses_duration_and_subtitles
+1 failed, 2 passed in 1.17s

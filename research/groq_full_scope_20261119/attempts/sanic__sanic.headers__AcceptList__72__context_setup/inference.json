@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-4e2e843a-72c3-42fc-9ea5-a87991a92209",
+  "object": "chat.completion",
+  "created": 1795079275,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import AcceptList, MediaType, Matched\nfrom sanic.exceptions import InvalidHeader\n\n\ndef test_acceptlist_match_preference_and_q_values():\n    \"\"\"\n    Verify that AcceptList.match respects q values, specificity, and argument order.\n    \"\"\"\n    # Construct Accept header with varying q values and specificity\n    accept_header = AcceptList(\n        MediaType(\"text/html; q=0.8\"),\n        MediaType(\"application/json; q=0.9\"),\n        MediaType(\"image/*; q=0.7\"),\n        MediaType(\"*/*; q=0.5\")\n    )\n\n    # The client prefers application/json over text/html due to higher q\n    result = accept_header.match(\"text/html\", \"application/json\")\n    assert isinstance(result, Matched)\n    assert result.mime == \"application/json\"\n    assert result.header == accept_header[1]  # second entry\n\n    # If we reverse the order of arguments, the first argument wins if q equal\n    result = accept_header.match(\"image/png\", \"text/html\")\n    # image/png matches image/* (third entry) which has q=0.7\n    # text/html has q=0.8 but is second argument, so image/png wins\n    assert result.mime == \"image/png\"\n    assert result.header == accept_header[2]\n\n    # Wildcard matching should work when accept_wildcards is True\n    result = accept_header.match(\"application/xml\")\n    assert result.mime == \"application/xml\"\n    assert result.header == accept_header[3]  # */*\n\n\ndef test_acceptlist_match_no_match_returns_empty():\n    \"\"\"\n    Verify that AcceptList.match returns an empty Matched when no match is found.\n    \"\"\"\n    accept_header = AcceptList(\n        MediaType(\"text/html; q=0.8\"),\n        MediaType(\"application/json; q=0.9\")\n    )\n\n    # No Accept header entry matches the requested MIME type\n    result = accept_header.match(\"image/png\", accept_wildcards=False)\n    assert isinstance(result, Matched)\n    assert not result  # __bool__ should be False\n    assert result.mime == \"\"\n    assert result.header is None\n\n    # Even with wildcards allowed, no match if header has no wildcard\n    result = accept_header.match(\"image/png\", accept_wildcards=True)\n    assert isinstance(result, Matched)\n    assert not result\n    assert result.mime == \"\"\n    assert result.header is None\n\n\ndef test_acceptlist_invalid_header_raises_exception():\n    \"\"\"\n    Verify that constructing MediaType with an invalid header raises InvalidHeader.\n    \"\"\"\n    with pytest.raises(InvalidHeader):\n        # Invalid MIME type string should trigger parsing error\n        MediaType(\"invalid/mime; q=abc\")\n\n    # Ensure that AcceptList can be constructed with valid entries only\n    valid_header = AcceptList(MediaType(\"text/plain\"))\n    assert len(valid_header) == 1\n    assert isinstance(valid_header[0], MediaType)\n```",
+        "reasoning": "Need tests for AcceptList.match normal, boundary, error. Use MediaType? Not imported. But AcceptList uses MediaType. We can construct AcceptList with MediaType objects. But we don't have MediaType class. Might be in sanic.headers. We can import AcceptList and MediaType. Let's inspect. Assume MediaType exists. We'll test match returns correct. Also test when no match returns empty. Also test error when invalid header? Maybe InvalidHeader thrown when parsing. Use tmp_path? Not needed. We'll write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047785983,
+    "prompt_tokens": 1397,
+    "prompt_time": 0.010715667,
+    "completion_tokens": 742,
+    "completion_time": 1.39557982,
+    "total_tokens": 2139,
+    "total_time": 1.406295487,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 109
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sgzzvre6jvaznp318y4yxn",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import AcceptList, MediaType, Matched\nfrom sanic.exceptions import InvalidHeader\n\n\ndef test_acceptlist_match_preference_and_q_values():\n    \"\"\"\n    Verify that AcceptList.match respects q values, specificity, and argument order.\n    \"\"\"\n    # Construct Accept header with varying q values and specificity\n    accept_header = AcceptList(\n        MediaType(\"text/html; q=0.8\"),\n        MediaType(\"application/json; q=0.9\"),\n        MediaType(\"image/*; q=0.7\"),\n        MediaType(\"*/*; q=0.5\")\n    )\n\n    # The client prefers application/json over text/html due to higher q\n    result = accept_header.match(\"text/html\", \"application/json\")\n    assert isinstance(result, Matched)\n    assert result.mime == \"application/json\"\n    assert result.header == accept_header[1]  # second entry\n\n    # If we reverse the order of arguments, the first argument wins if q equal\n    result = accept_header.match(\"image/png\", \"text/html\")\n    # image/png matches image/* (third entry) which has q=0.7\n    # text/html has q=0.8 but is second argument, so image/png wins\n    assert result.mime == \"image/png\"\n    assert result.header == accept_header[2]\n\n    # Wildcard matching should work when accept_wildcards is True\n    result = accept_header.match(\"application/xml\")\n    assert result.mime == \"application/xml\"\n    assert result.header == accept_header[3]  # */*\n\n\ndef test_acceptlist_match_no_match_returns_empty():\n    \"\"\"\n    Verify that AcceptList.match returns an empty Matched when no match is found.\n    \"\"\"\n    accept_header = AcceptList(\n        MediaType(\"text/html; q=0.8\"),\n        MediaType(\"application/json; q=0.9\")\n    )\n\n    # No Accept header entry matches the requested MIME type\n    result = accept_header.match(\"image/png\", accept_wildcards=False)\n    assert isinstance(result, Matched)\n    assert not result  # __bool__ should be False\n    assert result.mime == \"\"\n    assert result.header is None\n\n    # Even with wildcards allowed, no match if header has no wildcard\n    result = accept_header.match(\"image/png\", accept_wildcards=True)\n    assert isinstance(result, Matched)\n    assert not result\n    assert result.mime == \"\"\n    assert result.header is None\n\n\ndef test_acceptlist_invalid_header_raises_exception():\n    \"\"\"\n    Verify that constructing MediaType with an invalid header raises InvalidHeader.\n    \"\"\"\n    with pytest.raises(InvalidHeader):\n        # Invalid MIME type string should trigger parsing error\n        MediaType(\"invalid/mime; q=abc\")\n\n    # Ensure that AcceptList can be constructed with valid entries only\n    valid_header = AcceptList(MediaType(\"text/plain\"))\n    assert len(valid_header) == 1\n    assert isinstance(valid_header[0], MediaType)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.8405912619782612
+}

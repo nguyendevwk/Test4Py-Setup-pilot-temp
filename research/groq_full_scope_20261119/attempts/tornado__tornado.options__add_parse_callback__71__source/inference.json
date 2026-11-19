@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-65d32258-59ec-4772-bab9-eb16ec96c05c",
+  "object": "chat.completion",
+  "created": 1795079544,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom tornado import options\nfrom tornado.options import define, parse_command_line, clear_options, add_parse_callback\n\n# Helper to reset options between tests\n@pytest.fixture(autouse=True)\ndef reset_options():\n    clear_options()\n    yield\n    clear_options()\n\n\ndef test_single_parse_callback_invoked():\n    \"\"\"A single callback registered via add_parse_callback is invoked after parsing.\"\"\"\n    called = []\n\n    def cb():\n        called.append(\"called\")\n\n    add_parse_callback(cb)\n\n    # Simulate parsing with no arguments\n    parse_command_line([])\n\n    assert called == [\"called\"], \"Callback should be called once after parsing\"\n\n\ndef test_multiple_callbacks_order():\n    \"\"\"Callbacks are invoked in the order they were added.\"\"\"\n    order = []\n\n    def first():\n        order.append(\"first\")\n\n    def second():\n        order.append(\"second\")\n\n    add_parse_callback(first)\n    add_parse_callback(second)\n\n    parse_command_line([])\n\n    assert order == [\"first\", \"second\"], \"Callbacks should run in registration order\"\n\n\ndef test_callback_can_modify_option():\n    \"\"\"A callback can modify option values after parsing.\"\"\"\n    # Define an option with a default value\n    define(\"test_opt\", default=\"original\", type=str)\n\n    def modify():\n        # Change the option value during callback\n        options.test_opt = \"modified\"\n\n    add_parse_callback(modify)\n\n    parse_command_line([])\n\n    assert options.test_opt == \"modified\", \"Callback should be able to modify option values\"\n```",
+        "reasoning": "We need to test add_parse_callback. Need to import tornado.options. Let's inspect options module. But we can assume options has add_parse_callback method. We'll test that callback is called after parsing. Use options.parse_command_line? Let's check typical usage: tornado.options.parse_command_line(). We'll write tests that register callback, parse, and ensure callback executed. Also test that multiple callbacks executed in order. Also test that callback can modify options. Use tmp_path? Not needed. We'll import tornado.options. Use pytest. Ensure no network. We'll write three tests: 1) callback called once. 2) multiple callbacks order. 3) callback can modify option value. Use a simple option defined via define_options? tornado.options.define. We'll import define. Use options.define. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004984751,
+    "prompt_tokens": 347,
+    "prompt_time": 0.010907686,
+    "completion_tokens": 473,
+    "completion_time": 0.662629737,
+    "total_tokens": 820,
+    "total_time": 0.673537423,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 159
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_75c733514d",
+  "x_groq": {
+    "id": "req_01m7sh86nkepbbxg68zd69zrqm",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom tornado import options\nfrom tornado.options import define, parse_command_line, clear_options, add_parse_callback\n\n# Helper to reset options between tests\n@pytest.fixture(autouse=True)\ndef reset_options():\n    clear_options()\n    yield\n    clear_options()\n\n\ndef test_single_parse_callback_invoked():\n    \"\"\"A single callback registered via add_parse_callback is invoked after parsing.\"\"\"\n    called = []\n\n    def cb():\n        called.append(\"called\")\n\n    add_parse_callback(cb)\n\n    # Simulate parsing with no arguments\n    parse_command_line([])\n\n    assert called == [\"called\"], \"Callback should be called once after parsing\"\n\n\ndef test_multiple_callbacks_order():\n    \"\"\"Callbacks are invoked in the order they were added.\"\"\"\n    order = []\n\n    def first():\n        order.append(\"first\")\n\n    def second():\n        order.append(\"second\")\n\n    add_parse_callback(first)\n    add_parse_callback(second)\n\n    parse_command_line([])\n\n    assert order == [\"first\", \"second\"], \"Callbacks should run in registration order\"\n\n\ndef test_callback_can_modify_option():\n    \"\"\"A callback can modify option values after parsing.\"\"\"\n    # Define an option with a default value\n    define(\"test_opt\", default=\"original\", type=str)\n\n    def modify():\n        # Change the option value during callback\n        options.test_opt = \"modified\"\n\n    add_parse_callback(modify)\n\n    parse_command_line([])\n\n    assert options.test_opt == \"modified\", \"Callback should be able to modify option values\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "d92c6384453b4f2a988801f23048b6f3",
+  "_api_plus_pacing_seconds": 2.154957612976432
+}

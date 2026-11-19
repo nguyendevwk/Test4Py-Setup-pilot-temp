@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-7499ddc2-140f-410b-b409-dc22f6a06c56",
+  "object": "chat.completion",
+  "created": 1795079587,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.utils import unwrap_context\n\n\ndef test_unwrap_context_returns_self_when_no_context():\n    \"\"\"When an exception has no __context__, unwrap_context should return the exception itself.\"\"\"\n    exc = ValueError(\"simple error\")\n    result = unwrap_context(exc)\n    assert result is exc\n    assert isinstance(result, ValueError)\n    assert str(result) == \"simple error\"\n\n\ndef test_unwrap_context_recurses_into_nested_context():\n    \"\"\"When an exception has a __context__ that is also an exception, unwrap_context should return the deepest one.\"\"\"\n    # Create a chain: deepest -> middle -> top\n    deepest = KeyError(\"deep\")\n    middle = RuntimeError(\"middle\")\n    middle.__context__ = deepest\n    top = IndexError(\"top\")\n    top.__context__ = middle\n\n    result = unwrap_context(top)\n    assert result is deepest\n    assert isinstance(result, KeyError)\n    assert str(result) == \"deep\"\n\n\ndef test_unwrap_context_stops_when_context_not_exception():\n    \"\"\"If __context__ is not an Exception instance, unwrap_context should stop and return the original exception.\"\"\"\n    class Dummy:\n        pass\n\n    exc = ValueError(\"error\")\n    exc.__context__ = Dummy()  # non‑Exception context\n    result = unwrap_context(exc)\n    assert result is exc\n    assert isinstance(result, ValueError)\n    assert str(result) == \"error\"\n```",
+        "reasoning": "We need tests for unwrap_context. It returns the innermost exception if context chain. Test normal: simple exception with no context returns itself. Boundary: nested context chain. Error: maybe context not exception? But code checks isinstance(context, Exception). If context is None, returns exc. So test that. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005032023,
+    "prompt_tokens": 350,
+    "prompt_time": 0.018573983,
+    "completion_tokens": 371,
+    "completion_time": 0.395514801,
+    "total_tokens": 721,
+    "total_time": 0.414088784,
+    "completion_tokens_details": {
+      "reasoning_tokens": 67
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7sh9h4penasbrhzkm1y1xqz",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.utils import unwrap_context\n\n\ndef test_unwrap_context_returns_self_when_no_context():\n    \"\"\"When an exception has no __context__, unwrap_context should return the exception itself.\"\"\"\n    exc = ValueError(\"simple error\")\n    result = unwrap_context(exc)\n    assert result is exc\n    assert isinstance(result, ValueError)\n    assert str(result) == \"simple error\"\n\n\ndef test_unwrap_context_recurses_into_nested_context():\n    \"\"\"When an exception has a __context__ that is also an exception, unwrap_context should return the deepest one.\"\"\"\n    # Create a chain: deepest -> middle -> top\n    deepest = KeyError(\"deep\")\n    middle = RuntimeError(\"middle\")\n    middle.__context__ = deepest\n    top = IndexError(\"top\")\n    top.__context__ = middle\n\n    result = unwrap_context(top)\n    assert result is deepest\n    assert isinstance(result, KeyError)\n    assert str(result) == \"deep\"\n\n\ndef test_unwrap_context_stops_when_context_not_exception():\n    \"\"\"If __context__ is not an Exception instance, unwrap_context should stop and return the original exception.\"\"\"\n    class Dummy:\n        pass\n\n    exc = ValueError(\"error\")\n    exc.__context__ = Dummy()  # non‑Exception context\n    result = unwrap_context(exc)\n    assert result is exc\n    assert isinstance(result, ValueError)\n    assert str(result) == \"error\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "36037aa1ccd94fe78bd3a8b3f19367e2",
+  "_api_plus_pacing_seconds": 1.4245727459783666
+}

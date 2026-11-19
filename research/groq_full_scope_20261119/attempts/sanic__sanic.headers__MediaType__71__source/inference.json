@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-6c5c3532-cc13-41c0-a002-d9c739d2a92d",
+  "object": "chat.completion",
+  "created": 1795078214,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom sanic.headers import MediaType\nfrom sanic.exceptions import InvalidHeader\n\ndef test_match_with_exact_and_parameters():\n    \"\"\"Exact match succeeds and parameters must match.\"\"\"\n    mt = MediaType(\"text\", \"html\", charset=\"utf-8\", q=\"0.8\")\n    # Exact string with same parameters\n    assert mt.match(\"text/html; charset=utf-8; q=0.8\") is mt\n    # Same parameters but different order\n    assert mt.match(\"text/html; q=0.8; charset=utf-8\") is mt\n    # Missing a parameter -> no match\n    assert mt.match(\"text/html; charset=utf-8\") is None\n    # Different parameter value -> no match\n    assert mt.match(\"text/html; charset=iso-8859-1; q=0.8\") is None\n\ndef test_match_with_wildcards_and_q():\n    \"\"\"Wildcard matching works in both directions and q is ignored in match.\"\"\"\n    mt = MediaType(\"*\", \"*\", q=\"0.5\")\n    # Wildcard matches any type/subtype\n    assert mt.match(\"application/json\") is mt\n    assert mt.match(\"image/png\") is mt\n    # Wildcard subtype matches any subtype\n    assert MediaType(\"text\", \"*\").match(\"text/plain\") is not None\n    # Wildcard type matches any type\n    assert MediaType(\"*\", \"html\").match(\"application/html\") is not None\n    # Parameters must still match\n    assert MediaType(\"text\", \"*\", charset=\"utf-8\").match(\"text/plain; charset=utf-8\") is not None\n    assert MediaType(\"text\", \"*\", charset=\"utf-8\").match(\"text/plain; charset=iso-8859-1\") is None\n\ndef test_parse_invalid_and_missing_slash():\n    \"\"\"_parse returns None or raises ValueError for malformed inputs.\"\"\"\n    # No slash -> None\n    assert MediaType._parse(\"plain\") is None\n    # Empty type or subtype -> ValueError\n    with pytest.raises(ValueError, match=\"Invalid media type\"):\n        MediaType._parse(\"/html\")\n    with pytest.raises(ValueError, match=\"Invalid media type\"):\n        MediaType._parse(\"text/\")\n    # Leading/trailing spaces are stripped\n    mt = MediaType._parse(\"  text / html ; charset = utf-8 \")\n    assert isinstance(mt, MediaType)\n    assert mt.type == \"text\"\n    assert mt.subtype == \"html\"\n    assert mt.params[\"charset\"] == \"utf-8\"\n```",
+        "reasoning": "Need three tests: normal match, wildcard, error. Use tmp_path? not needed. Just test behavior."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047993517,
+    "prompt_tokens": 1167,
+    "prompt_time": 0.023675463,
+    "completion_tokens": 570,
+    "completion_time": 0.686523366,
+    "total_tokens": 1737,
+    "total_time": 0.710198829,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 23
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sfzkzke1ety0a3fw99cq0d",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom sanic.headers import MediaType\nfrom sanic.exceptions import InvalidHeader\n\ndef test_match_with_exact_and_parameters():\n    \"\"\"Exact match succeeds and parameters must match.\"\"\"\n    mt = MediaType(\"text\", \"html\", charset=\"utf-8\", q=\"0.8\")\n    # Exact string with same parameters\n    assert mt.match(\"text/html; charset=utf-8; q=0.8\") is mt\n    # Same parameters but different order\n    assert mt.match(\"text/html; q=0.8; charset=utf-8\") is mt\n    # Missing a parameter -> no match\n    assert mt.match(\"text/html; charset=utf-8\") is None\n    # Different parameter value -> no match\n    assert mt.match(\"text/html; charset=iso-8859-1; q=0.8\") is None\n\ndef test_match_with_wildcards_and_q():\n    \"\"\"Wildcard matching works in both directions and q is ignored in match.\"\"\"\n    mt = MediaType(\"*\", \"*\", q=\"0.5\")\n    # Wildcard matches any type/subtype\n    assert mt.match(\"application/json\") is mt\n    assert mt.match(\"image/png\") is mt\n    # Wildcard subtype matches any subtype\n    assert MediaType(\"text\", \"*\").match(\"text/plain\") is not None\n    # Wildcard type matches any type\n    assert MediaType(\"*\", \"html\").match(\"application/html\") is not None\n    # Parameters must still match\n    assert MediaType(\"text\", \"*\", charset=\"utf-8\").match(\"text/plain; charset=utf-8\") is not None\n    assert MediaType(\"text\", \"*\", charset=\"utf-8\").match(\"text/plain; charset=iso-8859-1\") is None\n\ndef test_parse_invalid_and_missing_slash():\n    \"\"\"_parse returns None or raises ValueError for malformed inputs.\"\"\"\n    # No slash -> None\n    assert MediaType._parse(\"plain\") is None\n    # Empty type or subtype -> ValueError\n    with pytest.raises(ValueError, match=\"Invalid media type\"):\n        MediaType._parse(\"/html\")\n    with pytest.raises(ValueError, match=\"Invalid media type\"):\n        MediaType._parse(\"text/\")\n    # Leading/trailing spaces are stripped\n    mt = MediaType._parse(\"  text / html ; charset = utf-8 \")\n    assert isinstance(mt, MediaType)\n    assert mt.type == \"text\"\n    assert mt.subtype == \"html\"\n    assert mt.params[\"charset\"] == \"utf-8\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1143568530096672
+}

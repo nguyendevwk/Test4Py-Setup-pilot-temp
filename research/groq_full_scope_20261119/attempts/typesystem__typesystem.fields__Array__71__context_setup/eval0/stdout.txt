@@ -1,0 +1,54 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_array_unique_items_error _________________________
+
+    def test_array_unique_items_error():
+        """Array should raise ValidationError when duplicate items are present and unique_items=True."""
+        arr_field = Array(items=IntField(), unique_items=True)
+        with pytest.raises(ValidationError) as excinfo:
+            arr_field.validate([1, 2, 1])
+        errors = excinfo.value.messages()
+        # Expect one error message for the duplicate at position 2
+        assert len(errors) == 1
+        assert errors[0].code == "unique_items"
+>       assert errors[0].key == 2
+E       AttributeError: 'Message' object has no attribute 'key'
+
+test_generated.py:38: AttributeError
+_____________ test_array_type_error_on_non_list_and_non_int_items ______________
+
+    def test_array_type_error_on_non_list_and_non_int_items():
+        """Array should raise type errors for non-list input and for items that are not integers."""
+        arr_field = Array(items=IntField())
+        # Non-list input
+        with pytest.raises(ValidationError) as excinfo:
+            arr_field.validate("not a list")
+        assert excinfo.value.messages()[0].code == "type"
+    
+        # List with a non-integer item
+        with pytest.raises(ValidationError) as excinfo:
+>           arr_field.validate([1, "two", 3])
+
+test_generated.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:647: in validate
+    item, error = validator.validate_or_error(item)
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:54: in validate_or_error
+    value = self.validate(value)
+test_generated.py:11: in validate
+    raise self.validation_error("type")
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:72: in validation_error
+    text = self.get_error_text(code)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.IntField object at 0x7fcf5bce6bf0>, code = 'type'
+
+    def get_error_text(self, code: str) -> str:
+>       return self.errors[code].format(**self.__dict__)
+E       KeyError: 'type'
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:76: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_array_unique_items_error - AttributeError: 'Me...
+FAILED test_generated.py::test_array_type_error_on_non_list_and_non_int_items
+2 failed, 1 passed in 0.16s

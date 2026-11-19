@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-d6a25e58-1a47-4c8d-9eef-cbe360fa8d0f",
+  "object": "chat.completion",
+  "created": 1795077463,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import walk_body\n\ndef test_walk_body_simple_sequence():\n    # A simple body with two statements: assignment and expression\n    body = ast.parse(\"x = 1\\nprint(x)\").body\n    # Convert generator to list\n    nodes = list(walk_body(body))\n    # Expect exactly two nodes in order\n    assert len(nodes) == 2\n    assert isinstance(nodes[0], ast.Assign)\n    assert isinstance(nodes[1], ast.Expr)\n    # The assignment should assign to 'x'\n    assert isinstance(nodes[0].targets[0], ast.Name)\n    assert nodes[0].targets[0].id == \"x\"\n    # The expression should be a call to print\n    assert isinstance(nodes[1].value, ast.Call)\n    assert isinstance(nodes[1].value.func, ast.Name)\n    assert nodes[1].value.func.id == \"print\"\n\ndef test_walk_body_nested_if_and_try():\n    # Build a body with nested If and Try structures\n    code = \"\"\"\nif True:\n    a = 1\nelse:\n    a = 2\ntry:\n    b = a + 1\nexcept Exception:\n    b = 0\nfinally:\n    c = b * 2\n\"\"\"\n    body = ast.parse(code).body\n    nodes = list(walk_body(body))\n    # The walk_body should yield all statements in the order they appear\n    # after flattening the If and Try blocks.\n    # Expected sequence: a=1, a=2, b=a+1, b=0, c=b*2\n    assert len(nodes) == 5\n    # Check types and order\n    assert isinstance(nodes[0], ast.Assign) and nodes[0].targets[0].id == \"a\"\n    assert isinstance(nodes[1], ast.Assign) and nodes[1].targets[0].id == \"a\"\n    assert isinstance(nodes[2], ast.Assign) and nodes[2].targets[0].id == \"b\"\n    assert isinstance(nodes[3], ast.Assign) and nodes[3].targets[0].id == \"b\"\n    assert isinstance(nodes[4], ast.Assign) and nodes[4].targets[0].id == \"c\"\n\ndef test_walk_body_invalid_input_raises_type_error():\n    # walk_body expects an iterable of stmt nodes; passing a non-iterable should raise TypeError\n    with pytest.raises(TypeError):\n        list(walk_body(42))\n```",
+        "reasoning": "We need tests for walk_body. It yields nodes from body, recursing into If and Try. Test normal: simple list of nodes. Boundary: nested If and Try. Error: passing non-Sequence? But type hint expects Sequence[stmt]. Could test that it raises TypeError if not iterable? But function uses for node in body, so if body is not iterable, TypeError. We can test that. Use ast.parse to create nodes. Use tmp_path? Not needed. Use ast.parse to get body. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047316138,
+    "prompt_tokens": 476,
+    "prompt_time": 0.029844362,
+    "completion_tokens": 641,
+    "completion_time": 0.699122008,
+    "total_tokens": 1117,
+    "total_time": 0.72896637,
+    "completion_tokens_details": {
+      "reasoning_tokens": 109
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sf8pm9ee2837tptbaw8rqy",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport pytest\nfrom apimd.parser import walk_body\n\ndef test_walk_body_simple_sequence():\n    # A simple body with two statements: assignment and expression\n    body = ast.parse(\"x = 1\\nprint(x)\").body\n    # Convert generator to list\n    nodes = list(walk_body(body))\n    # Expect exactly two nodes in order\n    assert len(nodes) == 2\n    assert isinstance(nodes[0], ast.Assign)\n    assert isinstance(nodes[1], ast.Expr)\n    # The assignment should assign to 'x'\n    assert isinstance(nodes[0].targets[0], ast.Name)\n    assert nodes[0].targets[0].id == \"x\"\n    # The expression should be a call to print\n    assert isinstance(nodes[1].value, ast.Call)\n    assert isinstance(nodes[1].value.func, ast.Name)\n    assert nodes[1].value.func.id == \"print\"\n\ndef test_walk_body_nested_if_and_try():\n    # Build a body with nested If and Try structures\n    code = \"\"\"\nif True:\n    a = 1\nelse:\n    a = 2\ntry:\n    b = a + 1\nexcept Exception:\n    b = 0\nfinally:\n    c = b * 2\n\"\"\"\n    body = ast.parse(code).body\n    nodes = list(walk_body(body))\n    # The walk_body should yield all statements in the order they appear\n    # after flattening the If and Try blocks.\n    # Expected sequence: a=1, a=2, b=a+1, b=0, c=b*2\n    assert len(nodes) == 5\n    # Check types and order\n    assert isinstance(nodes[0], ast.Assign) and nodes[0].targets[0].id == \"a\"\n    assert isinstance(nodes[1], ast.Assign) and nodes[1].targets[0].id == \"a\"\n    assert isinstance(nodes[2], ast.Assign) and nodes[2].targets[0].id == \"b\"\n    assert isinstance(nodes[3], ast.Assign) and nodes[3].targets[0].id == \"b\"\n    assert isinstance(nodes[4], ast.Assign) and nodes[4].targets[0].id == \"c\"\n\ndef test_walk_body_invalid_input_raises_type_error():\n    # walk_body expects an iterable of stmt nodes; passing a non-iterable should raise TypeError\n    with pytest.raises(TypeError):\n        list(walk_body(42))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0795337110175751
+}

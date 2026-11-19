@@ -1,0 +1,64 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_field_raises_on_invalid_name _______________________
+
+    def test_field_raises_on_invalid_name():
+        """Calling Field with an unknown provider name should raise FieldNameError."""
+        field = Field()
+        with pytest.raises(FieldNameError):
+>           field("nonexistent_provider")
+
+test_generated.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:328: in __call__
+    return self.perform(name, key=key, **kwargs)
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:209: in perform
+    result = self._lookup_method(name)(**kwargs)
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:137: in _lookup_method
+    method = self._fuzzy_lookup(name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <mimesis.schema.Field object at 0x7efe39ec0a30>
+name = 'nonexistent_provider'
+
+    def _fuzzy_lookup(self, name: str) -> Any:
+        """A fuzzy method lookup.
+    
+        This method is called when the field definition
+        is fuzzy, like this: ``method``
+    
+        :param name: The field name.
+        :return: Callable object.
+        :raise FieldError: When field is invalid.
+        """
+        for provider_name in dir(self._generic):
+            provider = getattr(self._generic, provider_name)
+            if isinstance(provider, BaseProvider) and name in dir(provider):
+                return getattr(provider, name)
+    
+>       raise FieldError(name)
+E       mimesis.exceptions.FieldError: Field «nonexistent_provider» is not supported.
+
+../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:117: FieldError
+_________________________ test_field_uses_key_function _________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/mimesis__mimesis.schema__Field__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_field_uses_key_function0')
+
+    def test_field_uses_key_function(tmp_path):
+        """Field should accept a key function and return its result."""
+        field = Field()
+        # Define a key function that returns a fixed value
+        def key_func(provider, name, **kwargs):
+            return f"fixed-{name}"
+        result = field("email", key=key_func)
+>       assert result == "fixed-email"
+E       AssertionError: assert 'fixed-<mimes...558f77c83370>' == 'fixed-email'
+E         
+E         - fixed-email
+E         + fixed-<mimesis.random.Random object at 0x558f77c83370>
+
+test_generated.py:36: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_field_raises_on_invalid_name - mimesis.excepti...
+FAILED test_generated.py::test_field_uses_key_function - AssertionError: asse...
+2 failed, 1 passed in 0.25s

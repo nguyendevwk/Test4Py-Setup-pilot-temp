@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-a5beb1d0-fc8e-4cde-aa8a-772e6145c434",
+  "object": "chat.completion",
+  "created": 1795079087,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport asyncio\nimport socket\nimport pytest\nfrom tornado.netutil import OverrideResolver, Resolver\n\n\nclass DummyResolver(Resolver):\n    \"\"\"A minimal resolver that returns a deterministic address list.\"\"\"\n\n    async def resolve(self, host: str, port: int, family: socket.AddressFamily = socket.AF_UNSPEC):\n        # Return a single tuple with the family and a fake address string\n        return [(family, f\"{host}:{port}\")]\n\n\n@pytest.mark.asyncio\nasync def test_host_override(tmp_path):\n    \"\"\"Override a hostname to a different IP address.\"\"\"\n    resolver = DummyResolver()\n    mapping = {\"example.com\": \"127.0.1.1\"}\n    override = OverrideResolver()\n    override.initialize(resolver, mapping)\n\n    result = await override.resolve(\"example.com\", 80)\n    # The resolver should be called with the overridden host\n    assert result == [(socket.AF_UNSPEC, \"127.0.1.1:80\")]\n\n\n@pytest.mark.asyncio\nasync def test_host_port_override(tmp_path):\n    \"\"\"Override a hostname+port pair to a different host+port.\"\"\"\n    resolver = DummyResolver()\n    mapping = {(\"login.example.com\", 443): (\"localhost\", 1443)}\n    override = OverrideResolver()\n    override.initialize(resolver, mapping)\n\n    result = await override.resolve(\"login.example.com\", 443)\n    # The resolver should be called with the overridden host and port\n    assert result == [(socket.AF_UNSPEC, \"localhost:1443\")]\n\n\n@pytest.mark.asyncio\nasync def test_host_port_family_override(tmp_path):\n    \"\"\"Override a hostname+port+family triplet to a different host+port.\"\"\"\n    resolver = DummyResolver()\n    mapping = {(\"login.example.com\", 443, socket.AF_INET6): (\"::1\", 1443)}\n    override = OverrideResolver()\n    override.initialize(resolver, mapping)\n\n    result = await override.resolve(\"login.example.com\", 443, socket.AF_INET6)\n    # The resolver should be called with the overridden host and port, preserving the family\n    assert result == [(socket.AF_INET6, \"::1:1443\")]\n```",
+        "reasoning": "Need tests for OverrideResolver. Need a dummy Resolver that returns predictable. Use simple resolver that returns list of tuples. Test override mapping for host, host+port, host+port+family. Also test that if no override, passes through. Use asyncio. Write three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047791404,
+    "prompt_tokens": 615,
+    "prompt_time": 0.018596646,
+    "completion_tokens": 510,
+    "completion_time": 1.390683986,
+    "total_tokens": 1125,
+    "total_time": 1.409280632,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 57
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgt7y8eema1w4hsm713q8x",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport asyncio\nimport socket\nimport pytest\nfrom tornado.netutil import OverrideResolver, Resolver\n\n\nclass DummyResolver(Resolver):\n    \"\"\"A minimal resolver that returns a deterministic address list.\"\"\"\n\n    async def resolve(self, host: str, port: int, family: socket.AddressFamily = socket.AF_UNSPEC):\n        # Return a single tuple with the family and a fake address string\n        return [(family, f\"{host}:{port}\")]\n\n\n@pytest.mark.asyncio\nasync def test_host_override(tmp_path):\n    \"\"\"Override a hostname to a different IP address.\"\"\"\n    resolver = DummyResolver()\n    mapping = {\"example.com\": \"127.0.1.1\"}\n    override = OverrideResolver()\n    override.initialize(resolver, mapping)\n\n    result = await override.resolve(\"example.com\", 80)\n    # The resolver should be called with the overridden host\n    assert result == [(socket.AF_UNSPEC, \"127.0.1.1:80\")]\n\n\n@pytest.mark.asyncio\nasync def test_host_port_override(tmp_path):\n    \"\"\"Override a hostname+port pair to a different host+port.\"\"\"\n    resolver = DummyResolver()\n    mapping = {(\"login.example.com\", 443): (\"localhost\", 1443)}\n    override = OverrideResolver()\n    override.initialize(resolver, mapping)\n\n    result = await override.resolve(\"login.example.com\", 443)\n    # The resolver should be called with the overridden host and port\n    assert result == [(socket.AF_UNSPEC, \"localhost:1443\")]\n\n\n@pytest.mark.asyncio\nasync def test_host_port_family_override(tmp_path):\n    \"\"\"Override a hostname+port+family triplet to a different host+port.\"\"\"\n    resolver = DummyResolver()\n    mapping = {(\"login.example.com\", 443, socket.AF_INET6): (\"::1\", 1443)}\n    override = OverrideResolver()\n    override.initialize(resolver, mapping)\n\n    result = await override.resolve(\"login.example.com\", 443, socket.AF_INET6)\n    # The resolver should be called with the overridden host and port, preserving the family\n    assert result == [(socket.AF_INET6, \"::1:1443\")]\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.801614800002426
+}

@@ -1,0 +1,64 @@
+FFsubmission failed
+.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_single_task_execution __________________________
+
+    def test_single_task_execution():
+        """Submitting a single task should execute it and return a Future."""
+        worker = MonoWorker()
+    
+        def task():
+            return 42
+    
+        future = worker.submit(task)
+        assert isinstance(future, Future)
+>       assert future.done() is False  # not finished immediately
+E       assert True is False
+E        +  where True = done()
+E        +    where done = <Future at 0x7fd13053f490 state=finished returned int>.done
+
+../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__44__atomic_verified_setup/eval0/test_generated.py:17: AssertionError
+_________________________ test_overwrite_waiting_task __________________________
+
+    def test_overwrite_waiting_task():
+        """Submitting a second task while one is running should replace the waiting task."""
+        worker = MonoWorker()
+    
+        # First task sleeps for a short time
+        def long_task():
+            time.sleep(0.2)
+            return "long"
+    
+        # Second task is quick
+        def short_task():
+            return "short"
+    
+        # Submit first task
+        long_future = worker.submit(long_task)
+        # Submit second task immediately; it should replace the waiting slot
+        short_future = worker.submit(short_task)
+    
+        # The long task should still be running
+        assert long_future.done() is False
+        # The short task should be waiting (not yet done)
+        assert short_future.done() is False
+    
+        # Wait for the long task to finish
+        long_result = long_future.result(timeout=1)
+        assert long_result == "long"
+    
+        # After the long task finishes, the short task should start and finish
+        short_result = short_future.result(timeout=1)
+        assert short_result == "short"
+    
+        # Deque should be empty after both finish
+>       assert len(worker.futures) == 0
+E       assert 2 == 0
+E        +  where 2 = len(deque([<Future at 0x7fd1303bef50 state=finished returned str>, <Future at 0x7fd1303becb0 state=finished returned str>]))
+E        +    where deque([<Future at 0x7fd1303bef50 state=finished returned str>, <Future at 0x7fd1303becb0 state=finished returned str>]) = <tqdm.contrib.utils_worker.MonoWorker object at 0x7fd1303bf010>.futures
+
+../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__44__atomic_verified_setup/eval0/test_generated.py:56: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__44__atomic_verified_setup/eval0/test_generated.py::test_single_task_execution
+FAILED ../../../../../../attempts/tqdm__tqdm.contrib.utils_worker__MonoWorker__44__atomic_verified_setup/eval0/test_generated.py::test_overwrite_waiting_task
+2 failed, 1 passed in 0.43s

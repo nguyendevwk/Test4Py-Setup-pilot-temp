@@ -1,0 +1,89 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_decimal_default_validation ________________________
+
+    def test_decimal_default_validation():
+        field = Decimal()
+        # Valid decimal input
+        result = field.validate(decimal.Decimal("12.34"))
+>       assert result.value == decimal.Decimal("12.34")
+E       AttributeError: 'decimal.Decimal' object has no attribute 'value'
+
+test_generated.py:10: AttributeError
+_______________________ test_decimal_boundary_conditions _______________________
+
+    def test_decimal_boundary_conditions():
+        field = Decimal(minimum=decimal.Decimal("10"), maximum=decimal.Decimal("20"),
+                        exclusive_minimum=decimal.Decimal("15"), exclusive_maximum=decimal.Decimal("18"))
+        # Value equal to minimum is allowed
+>       assert field.validate(decimal.Decimal("10")).value == decimal.Decimal("10")
+
+test_generated.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <typesystem.fields.Decimal object at 0x7f2e5fe4fbb0>
+value = Decimal('10')
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        if value is None and self.allow_null:
+            return None
+        elif value == "" and self.allow_null and self.coerce_types:
+            return None
+        elif value is None:
+            raise self.validation_error("null")
+        elif isinstance(value, bool):
+            raise self.validation_error("type")
+        elif (
+            self.numeric_type is int
+            and isinstance(value, float)
+            and not value.is_integer()
+        ):
+            raise self.validation_error("integer")
+        elif not isinstance(value, (int, float)) and not self.coerce_types:
+            raise self.validation_error("type")
+    
+        try:
+            if isinstance(value, str):
+                # Casting to a decimal first gives more lenient parsing.
+                value = decimal.Decimal(value)
+            if self.numeric_type is not None:
+                value = self.numeric_type(value)
+        except (TypeError, ValueError, decimal.InvalidOperation):
+            raise self.validation_error("type")
+    
+        if not isfinite(value):
+            # inf, -inf, nan, are all invalid.
+            raise self.validation_error("finite")
+    
+        if self.precision is not None:
+            numeric_type = self.numeric_type or type(value)
+            quantize_val = decimal.Decimal(self.precision)
+            decimal_val = decimal.Decimal(value)
+            decimal_val = decimal_val.quantize(
+                quantize_val, rounding=decimal.ROUND_HALF_UP
+            )
+            value = numeric_type(decimal_val)
+    
+        if self.minimum is not None and value < self.minimum:
+            raise self.validation_error("minimum")
+    
+        if self.exclusive_minimum is not None and value <= self.exclusive_minimum:
+>           raise self.validation_error("exclusive_minimum")
+E           typesystem.base.ValidationError: Must be greater than 15.
+
+../../../../groq_codamosa_extension_20261119/environments/typesystem/venv/lib/python3.10/site-packages/typesystem/fields.py:283: ValidationError
+___________________ test_decimal_invalid_input_and_precision ___________________
+
+    def test_decimal_invalid_input_and_precision():
+        field = Decimal(precision="2")
+        # Invalid type (int) should be coerced to Decimal and then rounded to 2 decimal places
+        result = field.validate(123)
+>       assert result.value == decimal.Decimal("123.00")
+E       AttributeError: 'decimal.Decimal' object has no attribute 'value'
+
+test_generated.py:40: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_decimal_default_validation - AttributeError: '...
+FAILED test_generated.py::test_decimal_boundary_conditions - typesystem.base....
+FAILED test_generated.py::test_decimal_invalid_input_and_precision - Attribut...
+3 failed in 0.18s

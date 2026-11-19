@@ -1,0 +1,123 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_valid_url_matches_and_id_extraction ___________________
+
+    def test_valid_url_matches_and_id_extraction():
+        url = 'https://www.eitb.tv/es/video/abc/123/456/7890/'
+        ie = EitbIE()
+        assert ie._VALID_URL.startswith('https?://')
+        video_id = ie._match_id(url)
+>       assert video_id == '7890'
+E       AssertionError: assert '456' == '7890'
+E         
+E         - 7890
+E         + 456
+
+test_generated.py:33: AssertionError
+__________________ test_real_extract_parses_basic_video_info ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.eitb__EitbIE__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_real_extract_parses_basic0')
+
+    def test_real_extract_parses_basic_video_info(tmp_path):
+        # Minimal JSON structure required by _real_extract
+        json_data = {
+            'web_media': [{
+                'RENDITIONS': [
+                    {'PMD_URL': 'http://example.com/video.mp4',
+                     'ENCODING_RATE': '1500',
+                     'FRAME_WIDTH': '1280',
+                     'FRAME_HEIGHT': '720'},
+                    {'PMD_URL': None}  # should be skipped
+                ],
+                'HLS_SURL': None,
+                'HDS_SURL': None,
+                'NAME_ES': 'Test Title',
+                'SHORT_DESC_ES': 'Test Description',
+                'STILL_URL': 'http://example.com/thumb.jpg',
+                'LENGTH': '4000',
+                'BROADCST_DATE': '2013-10-14 00:00:00',
+                'TAGS': ['tag1', 'tag2']
+            }],
+            'desc_group': 'Group Description'
+        }
+        downloader = DummyDownloader(json_data)
+        ie = EitbIE()
+        ie._downloader = downloader
+>       result = ie._real_extract('http://www.eitb.tv/es/video/abc/123/456/7890/')
+
+test_generated.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/eitb.py:35: in _real_extract
+    video = self._download_json(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:895: in _download_json
+    res = self._download_json_handle(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:874: in _download_json_handle
+    res = self._download_webpage_handle(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:667: in _download_webpage_handle
+    urlh = self._request_webpage(url_or_request, video_id, note, errnote, fatal, data=data, headers=headers, query=query, expected_status=expected_status)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:611: in _request_webpage
+    self.to_screen('%s: %s' % (video_id, note))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.eitb.EitbIE object at 0x7f5ccc923c70>
+msg = '456: Downloading video JSON'
+
+    def to_screen(self, msg):
+        """Print msg to screen, prefixing it with '[ie_name]'"""
+>       self._downloader.to_screen('[%s] %s' % (self.IE_NAME, msg))
+E       AttributeError: 'DummyDownloader' object has no attribute 'to_screen'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:921: AttributeError
+_________ test_real_extract_ignores_missing_renditions_and_uses_token __________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.extractor.eitb__EitbIE__71__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_real_extract_ignores_miss0')
+
+    def test_real_extract_ignores_missing_renditions_and_uses_token(tmp_path):
+        # JSON with HLS_SURL and token data
+        json_data = {
+            'web_media': [{
+                'RENDITIONS': [],
+                'HLS_SURL': 'http://example.com/playlist.m3u8',
+                'NAME_ES': 'HLS Title',
+                'SHORT_DESC_ES': None,
+                'STILL_URL': None,
+                'LENGTH': '6000',
+                'BROADCST_DATE': '2014-01-01 12:00:00',
+                'TAGS': None
+            }],
+            'desc_group': None
+        }
+        token_data = {'token': 'abc123'}
+        downloader = DummyDownloader(json_data, token_data)
+        ie = EitbIE()
+        ie._downloader = downloader
+>       result = ie._real_extract('http://www.eitb.tv/es/video/abc/123/456/7890/')
+
+test_generated.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/eitb.py:35: in _real_extract
+    video = self._download_json(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:895: in _download_json
+    res = self._download_json_handle(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:874: in _download_json_handle
+    res = self._download_webpage_handle(
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:667: in _download_webpage_handle
+    urlh = self._request_webpage(url_or_request, video_id, note, errnote, fatal, data=data, headers=headers, query=query, expected_status=expected_status)
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:611: in _request_webpage
+    self.to_screen('%s: %s' % (video_id, note))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <youtube_dl.extractor.eitb.EitbIE object at 0x7f5ccca73910>
+msg = '456: Downloading video JSON'
+
+    def to_screen(self, msg):
+        """Print msg to screen, prefixing it with '[ie_name]'"""
+>       self._downloader.to_screen('[%s] %s' % (self.IE_NAME, msg))
+E       AttributeError: 'DummyDownloader' object has no attribute 'to_screen'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/extractor/common.py:921: AttributeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_valid_url_matches_and_id_extraction - Assertio...
+FAILED test_generated.py::test_real_extract_parses_basic_video_info - Attribu...
+FAILED test_generated.py::test_real_extract_ignores_missing_renditions_and_uses_token
+3 failed in 0.96s

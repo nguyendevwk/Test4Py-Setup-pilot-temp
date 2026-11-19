@@ -1,0 +1,76 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_get_local_reprs_custom_repr_and_max_length ________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_get_local_reprs_custom_re0')
+
+    def test_get_local_reprs_custom_repr_and_max_length(tmp_path):
+        def inner():
+            long_str = "x" * 50
+            num = 123456789
+            return inspect.currentframe()
+    
+        frame = inner()
+        # Custom repr for int: show hex
+        custom_repr = (int, lambda x: hex(x))
+        # Max length 10 to truncate long_str
+>       result = get_local_reprs(frame, custom_repr=custom_repr, max_length=10)
+
+test_generated.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/tracer.py:37: in get_local_reprs
+    result_items = [(key, utils.get_shortish_repr(value, custom_repr,
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/tracer.py:37: in <listcomp>
+    result_items = [(key, utils.get_shortish_repr(value, custom_repr,
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/utils.py:68: in get_shortish_repr
+    repr_function = get_repr_function(item, custom_repr)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+item = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+custom_repr = (<class 'int'>, <function test_get_local_reprs_custom_repr_and_max_length.<locals>.<lambda> at 0x7f9cc3a825f0>)
+
+    def get_repr_function(item, custom_repr):
+>       for condition, action in custom_repr:
+E       TypeError: cannot unpack non-iterable type object
+
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/utils.py:51: TypeError
+____________________ test_get_local_reprs_watch_integration ____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__72__source/eval0/tmp/pytest-of-heurix/pytest-0/test_get_local_reprs_watch_int0')
+
+    def test_get_local_reprs_watch_integration(tmp_path):
+        def inner():
+            x = 42
+            y = "test"
+            return inspect.currentframe()
+    
+        frame = inner()
+        watch = DummyWatch({"watch_var": "watched_value"})
+>       result = get_local_reprs(frame, watch=watch)
+
+test_generated.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+frame = <frame at 0x7f9cc3a925a0, file '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/PySnooper__pysnooper.tracer__get_local_reprs__72__source/eval0/test_generated.py', line 58, code inner>
+watch = <test_generated.DummyWatch object at 0x7f9cc3c22350>, custom_repr = ()
+max_length = None, normalize = False
+
+    def get_local_reprs(frame, watch=(), custom_repr=(), max_length=None, normalize=False):
+        code = frame.f_code
+        vars_order = (code.co_varnames + code.co_cellvars + code.co_freevars +
+                      tuple(frame.f_locals.keys()))
+    
+        result_items = [(key, utils.get_shortish_repr(value, custom_repr,
+                                                      max_length, normalize))
+                        for key, value in frame.f_locals.items()]
+        result_items.sort(key=lambda key_value: vars_order.index(key_value[0]))
+        result = collections.OrderedDict(result_items)
+    
+>       for variable in watch:
+E       TypeError: 'DummyWatch' object is not iterable
+
+../../../../groq_codamosa_extension_20261119/environments/PySnooper/venv/lib/python3.10/site-packages/pysnooper/tracer.py:43: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_get_local_reprs_custom_repr_and_max_length - T...
+FAILED test_generated.py::test_get_local_reprs_watch_integration - TypeError:...
+2 failed, 1 passed in 0.15s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-c2e77b6f-8742-428d-bfb3-b1acd9ecff9c",
+  "object": "chat.completion",
+  "created": 1795077836,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport textwrap\nimport pytest\nfrom httpie.cli.definition import format_auth_help\nfrom httpie.plugins.builtin import BuiltinAuthPlugin\n\n# Helper plugin classes for testing\nclass DummyAuthPlugin:\n    auth_type = \"dummy\"\n    name = \"Dummy Auth\"\n    package_name = \"dummy_pkg\"\n    description = \"A simple dummy authentication plugin used for testing.\"\n\nclass AnotherAuthPlugin:\n    auth_type = \"another\"\n    name = \"Another Auth\"\n    package_name = \"another_pkg\"\n    description = \"Another plugin with a longer description that should wrap across multiple lines when displayed in the help text.\"\n\nclass NoDescAuthPlugin:\n    auth_type = \"nodec\"\n    name = \"No Description Auth\"\n    package_name = \"nodec_pkg\"\n    description = \"\"\n\ndef test_format_auth_help_basic():\n    \"\"\"Test that the help text includes the default auth type and all plugin entries.\"\"\"\n    mapping = {\n        \"dummy\": DummyAuthPlugin,\n        \"another\": AnotherAuthPlugin,\n    }\n    help_text = format_auth_help(mapping)\n    # Default should be the first plugin's auth_type\n    assert \"Defaults to \\\"dummy\\\"\" in help_text\n    # Both plugins should appear\n    assert '\"dummy\": Dummy Auth' in help_text\n    assert '\"another\": Another Auth' in help_text\n    # Description of dummy plugin should be wrapped correctly\n    wrapped = textwrap.wrap(DummyAuthPlugin.description)\n    for line in wrapped:\n        assert line in help_text\n    # No extra isolation mode text\n    assert \"To see all available auth types\" not in help_text\n\ndef test_format_auth_help_isolation_mode():\n    \"\"\"Test that isolation_mode filters out non-builtin plugins and adds the extra instruction.\"\"\"\n    mapping = {\n        \"dummy\": DummyAuthPlugin,\n        \"builtin\": BuiltinAuthPlugin,\n    }\n    help_text = format_auth_help(mapping, isolation_mode=True)\n    # Only builtin plugin should be listed\n    assert '\"builtin\":' in help_text\n    assert '\"dummy\":' not in help_text\n    # The instruction about running http --auth-type should appear\n    assert \"run:\\n\\n    $ http --auth-type\" in help_text\n\ndef test_format_auth_help_no_description_and_wrapping():\n    \"\"\"Test that plugins without a description are handled correctly and long descriptions wrap.\"\"\"\n    mapping = {\n        \"nodec\": NoDescAuthPlugin,\n        \"another\": AnotherAuthPlugin,\n    }\n    help_text = format_auth_help(mapping)\n    # No description block for NoDescAuthPlugin\n    assert '\"nodec\": No Description Auth' in help_text\n    assert 'provided by' not in help_text  # package name should not appear for builtin\n    # Long description should be wrapped\n    wrapped = textwrap.wrap(AnotherAuthPlugin.description)\n    for line in wrapped:\n        assert line in help_text\n```",
+        "reasoning": "We need three tests for format_auth_help. Use dummy plugins. Use tmp_path? Not needed. Just create simple classes. Test normal, isolation_mode, description wrapping."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.04806243,
+    "prompt_tokens": 725,
+    "prompt_time": 0.040312917,
+    "completion_tokens": 640,
+    "completion_time": 0.704382689,
+    "total_tokens": 1365,
+    "total_time": 0.744695606,
+    "completion_tokens_details": {
+      "reasoning_tokens": 35
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sfm2p7e89855g32f445j3d",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport textwrap\nimport pytest\nfrom httpie.cli.definition import format_auth_help\nfrom httpie.plugins.builtin import BuiltinAuthPlugin\n\n# Helper plugin classes for testing\nclass DummyAuthPlugin:\n    auth_type = \"dummy\"\n    name = \"Dummy Auth\"\n    package_name = \"dummy_pkg\"\n    description = \"A simple dummy authentication plugin used for testing.\"\n\nclass AnotherAuthPlugin:\n    auth_type = \"another\"\n    name = \"Another Auth\"\n    package_name = \"another_pkg\"\n    description = \"Another plugin with a longer description that should wrap across multiple lines when displayed in the help text.\"\n\nclass NoDescAuthPlugin:\n    auth_type = \"nodec\"\n    name = \"No Description Auth\"\n    package_name = \"nodec_pkg\"\n    description = \"\"\n\ndef test_format_auth_help_basic():\n    \"\"\"Test that the help text includes the default auth type and all plugin entries.\"\"\"\n    mapping = {\n        \"dummy\": DummyAuthPlugin,\n        \"another\": AnotherAuthPlugin,\n    }\n    help_text = format_auth_help(mapping)\n    # Default should be the first plugin's auth_type\n    assert \"Defaults to \\\"dummy\\\"\" in help_text\n    # Both plugins should appear\n    assert '\"dummy\": Dummy Auth' in help_text\n    assert '\"another\": Another Auth' in help_text\n    # Description of dummy plugin should be wrapped correctly\n    wrapped = textwrap.wrap(DummyAuthPlugin.description)\n    for line in wrapped:\n        assert line in help_text\n    # No extra isolation mode text\n    assert \"To see all available auth types\" not in help_text\n\ndef test_format_auth_help_isolation_mode():\n    \"\"\"Test that isolation_mode filters out non-builtin plugins and adds the extra instruction.\"\"\"\n    mapping = {\n        \"dummy\": DummyAuthPlugin,\n        \"builtin\": BuiltinAuthPlugin,\n    }\n    help_text = format_auth_help(mapping, isolation_mode=True)\n    # Only builtin plugin should be listed\n    assert '\"builtin\":' in help_text\n    assert '\"dummy\":' not in help_text\n    # The instruction about running http --auth-type should appear\n    assert \"run:\\n\\n    $ http --auth-type\" in help_text\n\ndef test_format_auth_help_no_description_and_wrapping():\n    \"\"\"Test that plugins without a description are handled correctly and long descriptions wrap.\"\"\"\n    mapping = {\n        \"nodec\": NoDescAuthPlugin,\n        \"another\": AnotherAuthPlugin,\n    }\n    help_text = format_auth_help(mapping)\n    # No description block for NoDescAuthPlugin\n    assert '\"nodec\": No Description Auth' in help_text\n    assert 'provided by' not in help_text  # package name should not appear for builtin\n    # Long description should be wrapped\n    wrapped = textwrap.wrap(AnotherAuthPlugin.description)\n    for line in wrapped:\n        assert line in help_text\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0955016629886813
+}

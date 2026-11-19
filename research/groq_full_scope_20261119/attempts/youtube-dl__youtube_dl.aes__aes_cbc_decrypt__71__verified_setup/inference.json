@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-e54236db-2545-43f6-a44c-f36cd32b89c2",
+  "object": "chat.completion",
+  "created": 1795076283,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.aes import aes_cbc_decrypt\nfrom Crypto.Cipher import AES  # pycryptodome is expected to be available in the test environment\n\n# Helper to convert bytes to list of ints\ndef bytes_to_intlist(b: bytes):\n    return list(b)\n\n# Test 1: Decrypt a known AES‑CBC ciphertext (normal case)\ndef test_aes_cbc_decrypt_known_vector():\n    key = bytes([0x00] * 16)\n    iv = bytes([0x00] * 16)\n    plaintext = b\"abcdefghijklmnop\"  # 16 bytes\n    cipher = AES.new(key, AES.MODE_CBC, iv)\n    ciphertext = cipher.encrypt(plaintext)\n\n    # Convert ciphertext to list of ints as expected by aes_cbc_decrypt\n    data = bytes_to_intlist(ciphertext)\n\n    decrypted = aes_cbc_decrypt(data, bytes_to_intlist(key), bytes_to_intlist(iv))\n    assert bytes(decrypted) == plaintext\n\n# Test 2: Decrypt data whose length is not a multiple of the block size (boundary case)\ndef test_aes_cbc_decrypt_partial_block():\n    key = bytes([0x01] * 16)\n    iv = bytes([0x02] * 16)\n    # Create a 20‑byte plaintext and encrypt it\n    plaintext = b\"1234567890abcdefghij\"  # 20 bytes\n    cipher = AES.new(key, AES.MODE_CBC, iv)\n    ciphertext = cipher.encrypt(plaintext[:16]) + cipher.encrypt(plaintext[16:])[:4]  # 20 bytes\n\n    data = bytes_to_intlist(ciphertext)\n    decrypted = aes_cbc_decrypt(data, bytes_to_intlist(key), bytes_to_intlist(iv))\n    assert bytes(decrypted) == plaintext\n\n# Test 3: Decrypt with an empty data list (error/edge case)\ndef test_aes_cbc_decrypt_empty_data():\n    key = bytes([0x0f] * 16)\n    iv = bytes([0x0e] * 16)\n    data = []\n    decrypted = aes_cbc_decrypt(data, bytes_to_intlist(key), bytes_to_intlist(iv))\n    assert decrypted == []\n```",
+        "reasoning": "We need to test aes_cbc_decrypt. Need to import from youtube_dl.aes. We need to provide data, key, iv. Use known AES test vectors. Use simple 16-byte key, iv, plaintext. Encrypt using known AES CBC to get ciphertext. But we don't have encryption function. Could use pycryptodome? Not allowed network. But we can use known test vector: plaintext \"Hello, world!!!\" 16 bytes? Actually 16 bytes. Let's use plaintext b\"1234567890abcdef\". Key 16 bytes all zeros. IV zeros. Then ciphertext known? We can compute using python's Crypto.Cipher AES from Crypto.Cipher import AES. That is external package maybe not installed. But we can use cryptography? Not sure. Instead we can test that decrypting the ciphertext produced by encrypting with same function? But we don't have encrypt. So maybe test that decrypting data that is already plaintext with key and iv returns same? Not correct. Maybe test that decrypting data of length not multiple of block size truncates correctly. Use dummy data that is already decrypted? Hard.\n\nMaybe we can test that decrypting data that is result of encrypting with same function? But no encrypt.\n\nWe can test that function raises error if key length invalid? It doesn't check. So maybe test that it returns correct length.\n\nWe can use known ciphertext from RFC 3602? Let's quickly compute using python's built-in 'cryptography' library? Might not be installed. But we can use 'pycryptodome' if available. Assume available. Use from Crypto.Cipher import AES. Use key=16 bytes zeros, iv zeros, plaintext b\"abcdefghijklmnop\". Encrypt to get ciphertext. Then feed to aes_cbc_decrypt and compare to plaintext. That will test normal. Second test boundary: data length not multiple of block size: use plaintext 20 bytes, pad? But encryption would produce 32 bytes. We can create ciphertext of 20 bytes? Hard.\n\nMaybe test that decrypting data shorter than block size returns same length. Use data length 10, key zeros, iv zeros. Since function will pad block with zeros, decrypt, xor with iv, then truncate to original length. We can compute expected by manually performing AES decrypt of padded block? Hard.\n\nGiven constraints, maybe just test that function returns list of ints of same length as input. And that decrypting known ciphertext yields expected plaintext using known vector from internet. We'll compute ciphertext using Crypto library. We'll assume it's available."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052540419,
+    "prompt_tokens": 460,
+    "prompt_time": 0.027502981,
+    "completion_tokens": 997,
+    "completion_time": 1.062333916,
+    "total_tokens": 1457,
+    "total_time": 1.089836897,
+    "completion_tokens_details": {
+      "reasoning_tokens": 514
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se4p02ebf8fdv2rykn0pj0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.aes import aes_cbc_decrypt\nfrom Crypto.Cipher import AES  # pycryptodome is expected to be available in the test environment\n\n# Helper to convert bytes to list of ints\ndef bytes_to_intlist(b: bytes):\n    return list(b)\n\n# Test 1: Decrypt a known AES‑CBC ciphertext (normal case)\ndef test_aes_cbc_decrypt_known_vector():\n    key = bytes([0x00] * 16)\n    iv = bytes([0x00] * 16)\n    plaintext = b\"abcdefghijklmnop\"  # 16 bytes\n    cipher = AES.new(key, AES.MODE_CBC, iv)\n    ciphertext = cipher.encrypt(plaintext)\n\n    # Convert ciphertext to list of ints as expected by aes_cbc_decrypt\n    data = bytes_to_intlist(ciphertext)\n\n    decrypted = aes_cbc_decrypt(data, bytes_to_intlist(key), bytes_to_intlist(iv))\n    assert bytes(decrypted) == plaintext\n\n# Test 2: Decrypt data whose length is not a multiple of the block size (boundary case)\ndef test_aes_cbc_decrypt_partial_block():\n    key = bytes([0x01] * 16)\n    iv = bytes([0x02] * 16)\n    # Create a 20‑byte plaintext and encrypt it\n    plaintext = b\"1234567890abcdefghij\"  # 20 bytes\n    cipher = AES.new(key, AES.MODE_CBC, iv)\n    ciphertext = cipher.encrypt(plaintext[:16]) + cipher.encrypt(plaintext[16:])[:4]  # 20 bytes\n\n    data = bytes_to_intlist(ciphertext)\n    decrypted = aes_cbc_decrypt(data, bytes_to_intlist(key), bytes_to_intlist(iv))\n    assert bytes(decrypted) == plaintext\n\n# Test 3: Decrypt with an empty data list (error/edge case)\ndef test_aes_cbc_decrypt_empty_data():\n    key = bytes([0x0f] * 16)\n    iv = bytes([0x0e] * 16)\n    data = []\n    decrypted = aes_cbc_decrypt(data, bytes_to_intlist(key), bytes_to_intlist(iv))\n    assert decrypted == []\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.4474861330236308
+}

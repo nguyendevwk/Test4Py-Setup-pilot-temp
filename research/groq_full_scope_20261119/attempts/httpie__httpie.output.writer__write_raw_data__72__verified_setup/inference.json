@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-3be3b727-ac87-4a1d-9853-b449239a6000",
+  "object": "chat.completion",
+  "created": 1795079430,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport io\nimport os\nimport tempfile\nimport pytest\nfrom httpie.output.writer import write_raw_data\nfrom httpie.context import Environment\nfrom httpie.models import OutputOptions\nfrom httpie.cli.dicts import HTTPHeadersDict\n\ndef test_write_raw_data_writes_bytes(tmp_path):\n    \"\"\"write_raw_data should write raw bytes to the environment output.\"\"\"\n    # Prepare environment with a temporary file as output\n    out_file = tmp_path / \"out.bin\"\n    env = Environment()\n    env.output = open(out_file, \"wb\")\n    try:\n        data = b\"hello world\"\n        headers = HTTPHeadersDict({\"Content-Type\": \"text/plain\"})\n        write_raw_data(env, data, headers=headers)\n        env.output.flush()\n        env.output.close()\n        # Verify file content\n        with open(out_file, \"rb\") as f:\n            content = f.read()\n        assert content == data\n    finally:\n        env.output.close()\n\ndef test_write_raw_data_with_text_and_headers(tmp_path):\n    \"\"\"write_raw_data should handle string data and preserve headers.\"\"\"\n    out_file = tmp_path / \"out.txt\"\n    env = Environment()\n    env.output = open(out_file, \"w\", encoding=\"utf-8\")\n    try:\n        data = \"foo bar\"\n        headers = HTTPHeadersDict({\"X-Custom\": \"value\"})\n        write_raw_data(env, data, headers=headers)\n        env.output.flush()\n        env.output.close()\n        # Verify file content\n        with open(out_file, \"r\", encoding=\"utf-8\") as f:\n            content = f.read()\n        assert content == data\n        # Ensure headers were set on the prepared request\n        # We cannot access the internal request directly, but we can\n        # confirm that no exception was raised and the output is correct.\n    finally:\n        env.output.close()\n\ndef test_write_raw_data_raises_on_invalid_env(tmp_path):\n    \"\"\"write_raw_data should raise an exception if env.output is not writable.\"\"\"\n    env = Environment()\n    # Intentionally set output to a read-only file\n    out_file = tmp_path / \"readonly.txt\"\n    out_file.write_text(\"readonly\")\n    env.output = open(out_file, \"r\")\n    data = b\"data\"\n    with pytest.raises(Exception):\n        write_raw_data(env, data)\n    env.output.close()\n```",
+        "reasoning": "Need to test write_raw_data. We need to import it. Use tmp_path for any file? It writes to env? Let's inspect write_message. But we can't modify. We'll just test that it returns a stream? Let's inspect write_message in same module.We need to open file.We can't open. But we can assume write_message returns something. We can test that passing data and headers results in correct output. Maybe write_message writes to env.output? Let's inspect Environment.We can't. But we can test that write_raw_data returns a stream that when read yields data. Let's assume it returns a stream object with read method. We'll create env with output to tmp_path. Let's inspect Environment.We can't. But we can create a dummy env with output attribute? Let's inspect httpie.context.Environment.We can't. But maybe Environment has output attribute of type TextIO. We'll create a temporary file and set env.output to that file. Then call write_raw_data and read file. Let's implement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005317844,
+    "prompt_tokens": 487,
+    "prompt_time": 0.012134996,
+    "completion_tokens": 727,
+    "completion_time": 0.772153092,
+    "total_tokens": 1214,
+    "total_time": 0.784288088,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 206
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh4qb3e0prvywk62twxa8f",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport io\nimport os\nimport tempfile\nimport pytest\nfrom httpie.output.writer import write_raw_data\nfrom httpie.context import Environment\nfrom httpie.models import OutputOptions\nfrom httpie.cli.dicts import HTTPHeadersDict\n\ndef test_write_raw_data_writes_bytes(tmp_path):\n    \"\"\"write_raw_data should write raw bytes to the environment output.\"\"\"\n    # Prepare environment with a temporary file as output\n    out_file = tmp_path / \"out.bin\"\n    env = Environment()\n    env.output = open(out_file, \"wb\")\n    try:\n        data = b\"hello world\"\n        headers = HTTPHeadersDict({\"Content-Type\": \"text/plain\"})\n        write_raw_data(env, data, headers=headers)\n        env.output.flush()\n        env.output.close()\n        # Verify file content\n        with open(out_file, \"rb\") as f:\n            content = f.read()\n        assert content == data\n    finally:\n        env.output.close()\n\ndef test_write_raw_data_with_text_and_headers(tmp_path):\n    \"\"\"write_raw_data should handle string data and preserve headers.\"\"\"\n    out_file = tmp_path / \"out.txt\"\n    env = Environment()\n    env.output = open(out_file, \"w\", encoding=\"utf-8\")\n    try:\n        data = \"foo bar\"\n        headers = HTTPHeadersDict({\"X-Custom\": \"value\"})\n        write_raw_data(env, data, headers=headers)\n        env.output.flush()\n        env.output.close()\n        # Verify file content\n        with open(out_file, \"r\", encoding=\"utf-8\") as f:\n            content = f.read()\n        assert content == data\n        # Ensure headers were set on the prepared request\n        # We cannot access the internal request directly, but we can\n        # confirm that no exception was raised and the output is correct.\n    finally:\n        env.output.close()\n\ndef test_write_raw_data_raises_on_invalid_env(tmp_path):\n    \"\"\"write_raw_data should raise an exception if env.output is not writable.\"\"\"\n    env = Environment()\n    # Intentionally set output to a read-only file\n    out_file = tmp_path / \"readonly.txt\"\n    out_file.write_text(\"readonly\")\n    env.output = open(out_file, \"r\")\n    data = b\"data\"\n    with pytest.raises(Exception):\n        write_raw_data(env, data)\n    env.output.close()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "157299cd13b84becbd24df707a4a6501",
+  "_api_plus_pacing_seconds": 1.2970065330155194
+}

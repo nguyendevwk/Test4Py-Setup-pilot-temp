@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-a4ea0fcb-4bb8-4709-80fe-86678f4b14f8",
+  "object": "chat.completion",
+  "created": 1795079662,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom httpie.output.processing import Conversion\nfrom httpie.plugins.registry import plugin_manager\nfrom httpie.plugins import ConverterPlugin\n\n# Dummy converter plugin for testing\nclass DummyConverter(ConverterPlugin):\n    supports_mime = \"application/json\"\n\n    def __init__(self, mime: str):\n        self.mime = mime\n\n    @classmethod\n    def supports(cls, mime: str) -> bool:\n        return mime == cls.supports_mime\n\n# Helper to monkeypatch plugin_manager.get_converters\n@pytest.fixture(autouse=True)\ndef patch_plugin_manager(monkeypatch):\n    monkeypatch.setattr(plugin_manager, \"get_converters\", lambda: [DummyConverter])\n\ndef test_get_converter_returns_instance_for_valid_mime():\n    \"\"\"Conversion.get_converter should return a DummyConverter instance when the MIME is supported.\"\"\"\n    converter = Conversion.get_converter(\"application/json\")\n    assert converter is not None\n    assert isinstance(converter, DummyConverter)\n    assert converter.mime == \"application/json\"\n\ndef test_get_converter_returns_none_for_unsupported_mime():\n    \"\"\"Conversion.get_converter should return None when the MIME is not supported by any converter.\"\"\"\n    converter = Conversion.get_converter(\"text/plain\")\n    assert converter is None\n\ndef test_get_converter_handles_invalid_mime_format():\n    \"\"\"Conversion.get_converter should return None for an invalid MIME format (e.g., missing slash).\"\"\"\n    converter = Conversion.get_converter(\"invalidmime\")\n    assert converter is None\n```",
+        "reasoning": "We need to test Conversion.get_converter. Need plugin_manager with converters. In tests, we can create dummy plugin classes and register? plugin_manager likely from httpie.plugins.registry. We can't modify product code. But we can monkeypatch plugin_manager.get_converters to return list of dummy classes. Use tmp_path? Not needed. Just test normal, boundary, error. For error: invalid mime returns None. For normal: valid mime returns instance. Boundary: mime with uppercase? is_valid_mime function? Not provided. Assume is_valid_mime checks format. We can test with valid and invalid. Use pytest.raises? No exception expected. Just None. Use assert. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004715928,
+    "prompt_tokens": 304,
+    "prompt_time": 0.004794325,
+    "completion_tokens": 447,
+    "completion_time": 0.462644322,
+    "total_tokens": 751,
+    "total_time": 0.467438647,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 139
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7shbtjxec9ty439hg052ep0",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom httpie.output.processing import Conversion\nfrom httpie.plugins.registry import plugin_manager\nfrom httpie.plugins import ConverterPlugin\n\n# Dummy converter plugin for testing\nclass DummyConverter(ConverterPlugin):\n    supports_mime = \"application/json\"\n\n    def __init__(self, mime: str):\n        self.mime = mime\n\n    @classmethod\n    def supports(cls, mime: str) -> bool:\n        return mime == cls.supports_mime\n\n# Helper to monkeypatch plugin_manager.get_converters\n@pytest.fixture(autouse=True)\ndef patch_plugin_manager(monkeypatch):\n    monkeypatch.setattr(plugin_manager, \"get_converters\", lambda: [DummyConverter])\n\ndef test_get_converter_returns_instance_for_valid_mime():\n    \"\"\"Conversion.get_converter should return a DummyConverter instance when the MIME is supported.\"\"\"\n    converter = Conversion.get_converter(\"application/json\")\n    assert converter is not None\n    assert isinstance(converter, DummyConverter)\n    assert converter.mime == \"application/json\"\n\ndef test_get_converter_returns_none_for_unsupported_mime():\n    \"\"\"Conversion.get_converter should return None when the MIME is not supported by any converter.\"\"\"\n    converter = Conversion.get_converter(\"text/plain\")\n    assert converter is None\n\ndef test_get_converter_handles_invalid_mime_format():\n    \"\"\"Conversion.get_converter should return None for an invalid MIME format (e.g., missing slash).\"\"\"\n    converter = Conversion.get_converter(\"invalidmime\")\n    assert converter is None\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "11948efec5db49debae8bc163bd1fbf4",
+  "_api_plus_pacing_seconds": 1.836672257981263
+}

@@ -1,0 +1,57 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_remove_misplaced_content_length _____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.client__transform_headers__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_remove_misplaced_content_0')
+
+    def test_remove_misplaced_content_length(tmp_path):
+        """
+        Verify that a misplaced 'Content-Length' header is removed when the
+        request method is one that should ignore it (e.g., GET) and the
+        prepared request incorrectly contains 'Content-Length: 0'.
+        """
+        # Build a request with a non‑zero Content-Length
+        req = requests.Request(
+            method="GET",
+            url="http://example.com",
+            headers={"Content-Length": "123"},
+        )
+        prepared = req.prepare()
+        # Simulate requests adding a misplaced Content-Length of 0
+        prepared.headers["Content-Length"] = "0"
+    
+        # Apply the transformation
+        transform_headers(req, prepared)
+    
+        # The misplaced header should be removed
+>       assert "Content-Length" not in prepared.headers
+E       AssertionError: assert 'Content-Length' not in <HTTPHeadersDict('Content-Length': '0')>
+E        +  where <HTTPHeadersDict('Content-Length': '0')> = <PreparedRequest [GET]>.headers
+
+test_generated.py:27: AssertionError
+_____________________ test_apply_missing_repeated_headers ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.client__transform_headers__72__verified_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_apply_missing_repeated_he0')
+
+    def test_apply_missing_repeated_headers(tmp_path):
+        """
+        Verify that headers present in the original request but missing from
+        the prepared request are added during transformation.
+        """
+        # Original request has an Accept header
+        req = requests.Request(
+            method="POST",
+            url="http://example.com",
+            headers={"Accept": "application/json"},
+        )
+        prepared = req.prepare()
+        # Ensure the prepared request initially lacks the Accept header
+>       assert "Accept" not in prepared.headers
+E       AssertionError: assert 'Accept' not in {'Accept': 'application/json', 'Content-Length': '0'}
+E        +  where {'Accept': 'application/json', 'Content-Length': '0'} = <PreparedRequest [POST]>.headers
+
+test_generated.py:45: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_remove_misplaced_content_length - AssertionErr...
+FAILED test_generated.py::test_apply_missing_repeated_headers - AssertionErro...
+2 failed, 1 passed in 0.56s

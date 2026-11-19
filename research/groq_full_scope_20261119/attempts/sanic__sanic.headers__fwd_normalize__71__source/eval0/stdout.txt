@@ -1,0 +1,55 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_fwd_normalize_basic_types ________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/sanic__sanic.headers__fwd_normalize__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_fwd_normalize_basic_types0')
+
+    def test_fwd_normalize_basic_types(tmp_path):
+        """Test normal conversion of each supported key type."""
+        input_data = [
+            ("by", "192.0.2.1"),
+            ("for", "2001:db8::1"),
+            ("host", "Example.COM"),
+            ("proto", "HTTPS"),
+            ("port", "443"),
+            ("path", "/some%20path"),
+            ("custom", "value"),
+        ]
+        result = fwd_normalize(input_data)
+        assert result["by"] == _normalize_address("192.0.2.1")
+>       assert result["for"] == _normalize_address("2001:db8::1")
+E       AssertionError: assert '[2001:db8::1]' == '2001:db8::1'
+E         
+E         - 2001:db8::1
+E         + [2001:db8::1]
+E         ? +           +
+
+test_generated.py:26: AssertionError
+______________________ test_fwd_normalize_invalid_values _______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/sanic__sanic.headers__fwd_normalize__71__source/eval0/tmp/pytest-of-heurix/pytest-0/test_fwd_normalize_invalid_val0')
+
+    def test_fwd_normalize_invalid_values(tmp_path):
+        """Test that invalid values are ignored and do not raise."""
+        input_data = [
+            ("port", "not_a_number"),   # ValueError on int conversion
+            ("by", None),               # None value should be ignored
+            ("for", "invalid_address"), # Assume address normalization may raise
+            ("unknown", "value"),       # Unknown key should be preserved
+        ]
+        result = fwd_normalize(input_data)
+        # Invalid port should be omitted
+        assert "port" not in result
+        # None value should be omitted
+        assert "by" not in result
+        # Unknown key should be preserved
+        assert result["unknown"] == "value"
+        # For key with invalid address, we expect it to be omitted
+>       assert "for" not in result
+E       AssertionError: assert 'for' not in {'for': 'invalid_address', 'unknown': 'value'}
+
+test_generated.py:65: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_fwd_normalize_basic_types - AssertionError: as...
+FAILED test_generated.py::test_fwd_normalize_invalid_values - AssertionError:...
+2 failed, 1 passed in 0.31s

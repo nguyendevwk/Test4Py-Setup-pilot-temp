@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-afe03f55-f22f-4739-86cc-aa18d24ee548",
+  "object": "chat.completion",
+  "created": 1795077933,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom docstring_parser.numpydoc import NumpydocParser, DocstringStyle\n\ndef test_parse_basic_docstring():\n    \"\"\"Verify that a simple numpydoc docstring is parsed correctly.\"\"\"\n    parser = NumpydocParser()\n    doc = \"\"\"\n    Short description.\n\n    Long description that spans\n    multiple lines.\n\n    Parameters\n    ----------\n    x : int\n        The first parameter.\n    y : str, optional\n        The second parameter.\n    \"\"\"\n    result = parser.parse(doc)\n    assert result.style == DocstringStyle.NUMPYDOC\n    assert result.short_description == \"Short description.\"\n    assert result.long_description == \"Long description that spans\\nmultiple lines.\"\n    assert result.blank_after_short_description is True\n    assert result.blank_after_long_description is False\n    # There should be two parameter entries\n    params = [m for m in result.meta if hasattr(m, \"name\")]\n    assert len(params) == 2\n    names = {p.name for p in params}\n    assert names == {\"x\", \"y\"}\n\ndef test_parse_empty_docstring():\n    \"\"\"An empty or None docstring should return an empty Docstring object.\"\"\"\n    parser = NumpydocParser()\n    assert parser.parse(\"\") == parser.parse(None)\n    empty = parser.parse(\"\")\n    assert empty.short_description is None\n    assert empty.long_description is None\n    assert empty.meta == []\n\ndef test_parse_unknown_section_raises():\n    \"\"\"If the docstring contains a section title not in the parser's registry,\n    a KeyError should be raised.\"\"\"\n    parser = NumpydocParser()\n    bad_doc = \"\"\"\n    Short description.\n\n    Unknown\n    -------\n    Some content that should trigger an error.\n    \"\"\"\n    with pytest.raises(KeyError):\n        parser.parse(bad_doc)\n```",
+        "reasoning": "We need to write tests for NumpydocParser.parse. We don't have Section definitions. But we can use default sections. Let's import NumpydocParser and parse a simple docstring. Use tmp_path? Not needed. Just test parsing. Three tests: normal docstring with description and Parameters section; boundary: empty docstring; error: invalid section title? But parser will ignore unknown? It uses self.sections dict; if title not found KeyError. So test that unknown section raises KeyError. Use simple docstring with unknown header. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.051611709,
+    "prompt_tokens": 855,
+    "prompt_time": 0.04896588,
+    "completion_tokens": 502,
+    "completion_time": 0.569175761,
+    "total_tokens": 1357,
+    "total_time": 0.618141641,
+    "completion_tokens_details": {
+      "reasoning_tokens": 116
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfq1bje1dr64zbv3j0f3yf",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom docstring_parser.numpydoc import NumpydocParser, DocstringStyle\n\ndef test_parse_basic_docstring():\n    \"\"\"Verify that a simple numpydoc docstring is parsed correctly.\"\"\"\n    parser = NumpydocParser()\n    doc = \"\"\"\n    Short description.\n\n    Long description that spans\n    multiple lines.\n\n    Parameters\n    ----------\n    x : int\n        The first parameter.\n    y : str, optional\n        The second parameter.\n    \"\"\"\n    result = parser.parse(doc)\n    assert result.style == DocstringStyle.NUMPYDOC\n    assert result.short_description == \"Short description.\"\n    assert result.long_description == \"Long description that spans\\nmultiple lines.\"\n    assert result.blank_after_short_description is True\n    assert result.blank_after_long_description is False\n    # There should be two parameter entries\n    params = [m for m in result.meta if hasattr(m, \"name\")]\n    assert len(params) == 2\n    names = {p.name for p in params}\n    assert names == {\"x\", \"y\"}\n\ndef test_parse_empty_docstring():\n    \"\"\"An empty or None docstring should return an empty Docstring object.\"\"\"\n    parser = NumpydocParser()\n    assert parser.parse(\"\") == parser.parse(None)\n    empty = parser.parse(\"\")\n    assert empty.short_description is None\n    assert empty.long_description is None\n    assert empty.meta == []\n\ndef test_parse_unknown_section_raises():\n    \"\"\"If the docstring contains a section title not in the parser's registry,\n    a KeyError should be raised.\"\"\"\n    parser = NumpydocParser()\n    bad_doc = \"\"\"\n    Short description.\n\n    Unknown\n    -------\n    Some content that should trigger an error.\n    \"\"\"\n    with pytest.raises(KeyError):\n        parser.parse(bad_doc)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9832059659529477
+}

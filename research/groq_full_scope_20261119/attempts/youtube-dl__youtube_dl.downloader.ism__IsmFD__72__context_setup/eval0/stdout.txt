@@ -1,0 +1,144 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________________ test_normal_download _____________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.ism__IsmFD__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_normal_download0')
+
+    def test_normal_download(tmp_path):
+        fd = DummyIsmFD(ydl=None, params={})
+        info = {
+            'fragments': [{'url': 'http://example.com/frag1'}],
+            '_download_params': {'track_id': None}
+        }
+>       result = fd.real_download(str(tmp_path / 'out'), info)
+
+test_generated.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyIsmFD object at 0x7f41b55449a0>
+filename = '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.ism__IsmFD__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_normal_download0/out'
+info_dict = {'fragments': [{'url': 'http://example.com/frag1'}], '_download_params': {'track_id': None}}
+
+    def real_download(self, filename, info_dict):
+        segments = info_dict['fragments'][:1] if self.params.get(
+            'test', False) else info_dict['fragments']
+    
+        ctx = {
+            'filename': filename,
+            'total_frags': len(segments),
+        }
+    
+        self._prepare_and_start_frag_download(ctx)
+    
+        fragment_retries = self.params.get('fragment_retries', 0)
+        skip_unavailable_fragments = self.params.get('skip_unavailable_fragments', True)
+    
+        track_written = False
+        frag_index = 0
+        for i, segment in enumerate(segments):
+            frag_index += 1
+>           if frag_index <= ctx['fragment_index']:
+E           KeyError: 'fragment_index'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/ism.py:231: KeyError
+______________________ test_test_mode_only_first_fragment ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.ism__IsmFD__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_test_mode_only_first_frag0')
+
+    def test_test_mode_only_first_fragment(tmp_path):
+        fd = DummyIsmFD(ydl=None, params={'test': True})
+        info = {
+            'fragments': [
+                {'url': 'http://example.com/frag1'},
+                {'url': 'http://example.com/frag2'}
+            ],
+            '_download_params': {'track_id': None}
+        }
+>       result = fd.real_download(str(tmp_path / 'out'), info)
+
+test_generated.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.DummyIsmFD object at 0x7f41b47bd300>
+filename = '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.ism__IsmFD__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_test_mode_only_first_frag0/out'
+info_dict = {'fragments': [{'url': 'http://example.com/frag1'}, {'url': 'http://example.com/frag2'}], '_download_params': {'track_id': None}}
+
+    def real_download(self, filename, info_dict):
+        segments = info_dict['fragments'][:1] if self.params.get(
+            'test', False) else info_dict['fragments']
+    
+        ctx = {
+            'filename': filename,
+            'total_frags': len(segments),
+        }
+    
+        self._prepare_and_start_frag_download(ctx)
+    
+        fragment_retries = self.params.get('fragment_retries', 0)
+        skip_unavailable_fragments = self.params.get('skip_unavailable_fragments', True)
+    
+        track_written = False
+        frag_index = 0
+        for i, segment in enumerate(segments):
+            frag_index += 1
+>           if frag_index <= ctx['fragment_index']:
+E           KeyError: 'fragment_index'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/ism.py:231: KeyError
+_____________________________ test_retry_and_skip ______________________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.ism__IsmFD__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_retry_and_skip0')
+
+    def test_retry_and_skip(tmp_path):
+        class RetryDummyIsmFD(DummyIsmFD):
+            def __init__(self, ydl, params):
+                super().__init__(ydl, params)
+                self.attempts = 0
+    
+            def _download_fragment(self, ctx, url, info_dict):
+                self.attempts += 1
+                if self.attempts < 3:
+                    raise compat_urllib_error.HTTPError(url, 404, 'Not Found', {}, None)
+                return True, b'\x00\x00\x00\x08moof' + b'\x00'*4 + b'\x00\x00\x00\x08traf' + b'\x00'*4 + b'\x00\x00\x00\x08tfhd' + b'\x00'*4
+    
+        fd = RetryDummyIsmFD(ydl=None, params={'fragment_retries': 2, 'skip_unavailable_fragments': True})
+        info = {
+            'fragments': [{'url': 'http://example.com/frag1'}],
+            '_download_params': {'track_id': None}
+        }
+>       result = fd.real_download(str(tmp_path / 'out'), info)
+
+test_generated.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_generated.test_retry_and_skip.<locals>.RetryDummyIsmFD object at 0x7f41b4803ee0>
+filename = '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/youtube-dl__youtube_dl.downloader.ism__IsmFD__72__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_retry_and_skip0/out'
+info_dict = {'fragments': [{'url': 'http://example.com/frag1'}], '_download_params': {'track_id': None}}
+
+    def real_download(self, filename, info_dict):
+        segments = info_dict['fragments'][:1] if self.params.get(
+            'test', False) else info_dict['fragments']
+    
+        ctx = {
+            'filename': filename,
+            'total_frags': len(segments),
+        }
+    
+        self._prepare_and_start_frag_download(ctx)
+    
+        fragment_retries = self.params.get('fragment_retries', 0)
+        skip_unavailable_fragments = self.params.get('skip_unavailable_fragments', True)
+    
+        track_written = False
+        frag_index = 0
+        for i, segment in enumerate(segments):
+            frag_index += 1
+>           if frag_index <= ctx['fragment_index']:
+E           KeyError: 'fragment_index'
+
+../../../../groq_codamosa_extension_20261119/environments/youtube-dl/venv/lib/python3.10/site-packages/youtube_dl/downloader/ism.py:231: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_normal_download - KeyError: 'fragment_index'
+FAILED test_generated.py::test_test_mode_only_first_fragment - KeyError: 'fra...
+FAILED test_generated.py::test_retry_and_skip - KeyError: 'fragment_index'
+3 failed in 1.24s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-c85cf114-229b-4d98-9a59-746c0f703af4",
+  "object": "chat.completion",
+  "created": 1795076317,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom dataclasses_json.cfg import config, LetterCase\nfrom dataclasses_json.undefined import Undefined, UndefinedParameterError\nfrom marshmallow.fields import Field as MarshmallowField\n\ndef test_config_with_encoder_decoder_and_mm_field():\n    def enc(x): return str(x)\n    def dec(x): return int(x)\n    class DummyField(MarshmallowField):\n        pass\n    metadata = {\"existing\": \"value\"}\n    result = config(\n        metadata=metadata,\n        encoder=enc,\n        decoder=dec,\n        mm_field=DummyField(),\n        letter_case=LetterCase.SNAKE,\n        undefined=Undefined.IGNORE,\n        field_name=\"custom_name\",\n        exclude=lambda x: False,\n    )\n    # Ensure original metadata dict is returned and enriched correctly\n    assert result is metadata\n    lib_meta = metadata[\"dataclasses_json\"]\n    assert lib_meta[\"encoder\"] is enc\n    assert lib_meta[\"decoder\"] is dec\n    assert lib_meta[\"mm_field\"] is DummyField\n    assert lib_meta[\"letter_case\"] is LetterCase.SNAKE\n    assert lib_meta[\"undefined\"] is Undefined.IGNORE\n    assert lib_meta[\"exclude\"] is not None\n    # field_name override should change letter_case behavior\n    assert lib_meta[\"letter_case\"](\"ignored\") == \"custom_name\"\n\ndef test_config_field_name_override_without_letter_case():\n    metadata = {}\n    result = config(\n        metadata=metadata,\n        field_name=\"fixed_name\",\n    )\n    lib_meta = metadata[\"dataclasses_json\"]\n    # letter_case should be a function that returns the field_name\n    assert lib_meta[\"letter_case\"](\"any\") == \"fixed_name\"\n    # No other keys should be present\n    assert set(lib_meta.keys()) == {\"letter_case\"}\n\ndef test_config_invalid_undefined_raises():\n    metadata = {}\n    with pytest.raises(UndefinedParameterError) as excinfo:\n        config(metadata=metadata, undefined=\"nonexistent_action\")\n    assert \"must be one of\" in str(excinfo.value)\n```",
+        "reasoning": "We need three tests. Test normal: passing metadata and encoder etc. Test boundary: field_name override letter_case. Test error: invalid undefined string. Use tmp_path? not needed. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.046104983,
+    "prompt_tokens": 928,
+    "prompt_time": 0.054823216,
+    "completion_tokens": 472,
+    "completion_time": 0.508032459,
+    "total_tokens": 1400,
+    "total_time": 0.562855675,
+    "completion_tokens_details": {
+      "reasoning_tokens": 41
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7se5qdyetj8n5rnky14drwk",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom dataclasses_json.cfg import config, LetterCase\nfrom dataclasses_json.undefined import Undefined, UndefinedParameterError\nfrom marshmallow.fields import Field as MarshmallowField\n\ndef test_config_with_encoder_decoder_and_mm_field():\n    def enc(x): return str(x)\n    def dec(x): return int(x)\n    class DummyField(MarshmallowField):\n        pass\n    metadata = {\"existing\": \"value\"}\n    result = config(\n        metadata=metadata,\n        encoder=enc,\n        decoder=dec,\n        mm_field=DummyField(),\n        letter_case=LetterCase.SNAKE,\n        undefined=Undefined.IGNORE,\n        field_name=\"custom_name\",\n        exclude=lambda x: False,\n    )\n    # Ensure original metadata dict is returned and enriched correctly\n    assert result is metadata\n    lib_meta = metadata[\"dataclasses_json\"]\n    assert lib_meta[\"encoder\"] is enc\n    assert lib_meta[\"decoder\"] is dec\n    assert lib_meta[\"mm_field\"] is DummyField\n    assert lib_meta[\"letter_case\"] is LetterCase.SNAKE\n    assert lib_meta[\"undefined\"] is Undefined.IGNORE\n    assert lib_meta[\"exclude\"] is not None\n    # field_name override should change letter_case behavior\n    assert lib_meta[\"letter_case\"](\"ignored\") == \"custom_name\"\n\ndef test_config_field_name_override_without_letter_case():\n    metadata = {}\n    result = config(\n        metadata=metadata,\n        field_name=\"fixed_name\",\n    )\n    lib_meta = metadata[\"dataclasses_json\"]\n    # letter_case should be a function that returns the field_name\n    assert lib_meta[\"letter_case\"](\"any\") == \"fixed_name\"\n    # No other keys should be present\n    assert set(lib_meta.keys()) == {\"letter_case\"}\n\ndef test_config_invalid_undefined_raises():\n    metadata = {}\n    with pytest.raises(UndefinedParameterError) as excinfo:\n        config(metadata=metadata, undefined=\"nonexistent_action\")\n    assert \"must be one of\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9164001989993267
+}

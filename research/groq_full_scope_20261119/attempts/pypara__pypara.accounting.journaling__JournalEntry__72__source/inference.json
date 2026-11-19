@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-0f8b5f60-f09b-4fb0-86b8-563092e4180d",
+  "object": "chat.completion",
+  "created": 1795078395,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport datetime\nimport pytest\nfrom pypara.accounting.journaling import JournalEntry, Direction, Posting\nfrom pypara.accounting.accounts import Account, AccountType\n\n# Helper source object (any type is fine)\nclass DummySource:\n    pass\n\ndef test_posting_increments_and_decrements(tmp_path):\n    entry = JournalEntry[DummySource]()\n    entry.source = DummySource()\n    entry.date = datetime.date.today()\n    entry.description = \"Test entry\"\n\n    # Create two accounts\n    acc_inc = Account(\"Cash\", AccountType.ASSET)\n    acc_dec = Account(\"Revenue\", AccountType.REVENUE)\n\n    # Post positive quantity (increment)\n    entry.post(entry.date, acc_inc, 100)\n    # Post negative quantity (decrement)\n    entry.post(entry.date, acc_dec, -50)\n\n    # Verify postings count\n    assert len(entry.postings) == 2\n\n    # Verify increments and decrements\n    inc_postings = list(entry.increments)\n    dec_postings = list(entry.decrements)\n    assert len(inc_postings) == 1\n    assert len(dec_postings) == 1\n    assert inc_postings[0].account == acc_inc\n    assert dec_postings[0].account == acc_dec\n\n    # Verify amounts are absolute\n    assert inc_postings[0].amount == 100\n    assert dec_postings[0].amount == 50\n\ndef test_zero_quantity_not_posted(tmp_path):\n    entry = JournalEntry[DummySource]()\n    entry.source = DummySource()\n    entry.date = datetime.date.today()\n    entry.description = \"Zero quantity test\"\n\n    acc = Account(\"Bank\", AccountType.ASSET)\n\n    # Post zero quantity\n    entry.post(entry.date, acc, 0)\n\n    # No postings should be added\n    assert len(entry.postings) == 0\n\ndef test_validate_raises_on_imbalance(tmp_path):\n    entry = JournalEntry[DummySource]()\n    entry.source = DummySource()\n    entry.date = datetime.date.today()\n    entry.description = \"Imbalance test\"\n\n    acc_debit = Account(\"Expense\", AccountType.EXPENSE)\n    acc_credit = Account(\"Cash\", AccountType.ASSET)\n\n    # Post debit of 200\n    entry.post(entry.date, acc_debit, 200)\n    # Post credit of 100 (imbalance)\n    entry.post(entry.date, acc_credit, -100)\n\n    # Validate should raise AssertionError due to imbalance\n    with pytest.raises(AssertionError) as excinfo:\n        entry.validate()\n    assert \"Total Debits and Credits are not equal\" in str(excinfo.value)\n```",
+        "reasoning": "We need 3 tests. Use tmp_path? not needed. Test posting increments/decrements, validate passes, and validate fails when imbalance. Also test that zero quantity not added. Use dummy source. Use Account from module. Need import. Let's write."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.049219667,
+    "prompt_tokens": 839,
+    "prompt_time": 0.047559542,
+    "completion_tokens": 617,
+    "completion_time": 0.695507896,
+    "total_tokens": 1456,
+    "total_time": 0.743067438,
+    "completion_tokens_details": {
+      "reasoning_tokens": 52
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e99e93f2ac",
+  "x_groq": {
+    "id": "req_01m7sg54vfescssd55nczgxj98",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport datetime\nimport pytest\nfrom pypara.accounting.journaling import JournalEntry, Direction, Posting\nfrom pypara.accounting.accounts import Account, AccountType\n\n# Helper source object (any type is fine)\nclass DummySource:\n    pass\n\ndef test_posting_increments_and_decrements(tmp_path):\n    entry = JournalEntry[DummySource]()\n    entry.source = DummySource()\n    entry.date = datetime.date.today()\n    entry.description = \"Test entry\"\n\n    # Create two accounts\n    acc_inc = Account(\"Cash\", AccountType.ASSET)\n    acc_dec = Account(\"Revenue\", AccountType.REVENUE)\n\n    # Post positive quantity (increment)\n    entry.post(entry.date, acc_inc, 100)\n    # Post negative quantity (decrement)\n    entry.post(entry.date, acc_dec, -50)\n\n    # Verify postings count\n    assert len(entry.postings) == 2\n\n    # Verify increments and decrements\n    inc_postings = list(entry.increments)\n    dec_postings = list(entry.decrements)\n    assert len(inc_postings) == 1\n    assert len(dec_postings) == 1\n    assert inc_postings[0].account == acc_inc\n    assert dec_postings[0].account == acc_dec\n\n    # Verify amounts are absolute\n    assert inc_postings[0].amount == 100\n    assert dec_postings[0].amount == 50\n\ndef test_zero_quantity_not_posted(tmp_path):\n    entry = JournalEntry[DummySource]()\n    entry.source = DummySource()\n    entry.date = datetime.date.today()\n    entry.description = \"Zero quantity test\"\n\n    acc = Account(\"Bank\", AccountType.ASSET)\n\n    # Post zero quantity\n    entry.post(entry.date, acc, 0)\n\n    # No postings should be added\n    assert len(entry.postings) == 0\n\ndef test_validate_raises_on_imbalance(tmp_path):\n    entry = JournalEntry[DummySource]()\n    entry.source = DummySource()\n    entry.date = datetime.date.today()\n    entry.description = \"Imbalance test\"\n\n    acc_debit = Account(\"Expense\", AccountType.EXPENSE)\n    acc_credit = Account(\"Cash\", AccountType.ASSET)\n\n    # Post debit of 200\n    entry.post(entry.date, acc_debit, 200)\n    # Post credit of 100 (imbalance)\n    entry.post(entry.date, acc_credit, -100)\n\n    # Validate should raise AssertionError due to imbalance\n    with pytest.raises(AssertionError) as excinfo:\n        entry.validate()\n    assert \"Total Debits and Credits are not equal\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.1465466280351393
+}

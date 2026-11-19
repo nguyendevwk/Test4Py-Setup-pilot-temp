@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-9f5f24d9-dfe4-439b-bbc6-e8497773b92d",
+  "object": "chat.completion",
+  "created": 1795077030,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport logging\nimport sys\nimport io\nimport pytest\nfrom tqdm.contrib.logging import tqdm_logging_redirect\nfrom tqdm import trange\n\ndef test_logging_redirected_to_pbar_output(capsys):\n    \"\"\"When a log message is emitted inside the context, it appears in the tqdm bar output.\"\"\"\n    LOG = logging.getLogger(\"tqdm_test\")\n    LOG.setLevel(logging.INFO)\n\n    # Capture stdout to inspect tqdm output\n    with tqdm_logging_redirect(trange(3), total=3, leave=False) as pbar:\n        LOG.info(\"Test message\")\n        # Advance the bar to force output\n        for _ in range(3):\n            pbar.update(1)\n\n    # Capture the printed output\n    captured = capsys.readouterr()\n    # The log message should be present in the output (tqdm.write writes to stdout)\n    assert \"Test message\" in captured.out\n    # The progress bar should also be present\n    assert \"100%\" in captured.out or \"3/3\" in captured.out\n\ndef test_zero_iterations_no_output(capsys):\n    \"\"\"If the iterable is empty, no progress bar or log output should appear.\"\"\"\n    LOG = logging.getLogger(\"tqdm_test_zero\")\n    LOG.setLevel(logging.INFO)\n\n    with tqdm_logging_redirect(trange(0), total=0, leave=False) as pbar:\n        LOG.info(\"Should not appear\")\n        # No updates\n\n    captured = capsys.readouterr()\n    # No progress bar or log message should be printed\n    assert captured.out == \"\"\n\ndef test_default_loggers_use_root(capsys):\n    \"\"\"When no loggers are specified, the root logger is used for redirection.\"\"\"\n    LOG = logging.getLogger(\"tqdm_test_root\")\n    LOG.setLevel(logging.INFO)\n\n    # Ensure root logger has a console handler\n    root_handler = logging.StreamHandler(sys.stdout)\n    logging.root.handlers = [root_handler]\n\n    with tqdm_logging_redirect(trange(1), total=1, leave=False) as pbar:\n        LOG.info(\"Root logger message\")\n        pbar.update(1)\n\n    captured = capsys.readouterr()\n    assert \"Root logger message\" in captured.out\n    assert \"100%\" in captured.out or \"1/1\" in captured.out\n```",
+        "reasoning": "Need tests for tqdm_logging_redirect. Use tmp_path to capture output? We can test that progress bar shows and logging redirected. Use logging to capture output via StringIO? But tqdm.write writes to stream. We can capture via a custom stream. Use tqdm_class=std_tqdm. Use tqdm_logging_redirect to create pbar and inside log. Test that log message appears in pbar output. Use capsys. Also test boundary: zero iterations. And error: passing invalid loggers? maybe passing None? We'll test that loggers default to root. Use capsys to capture."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052141766,
+    "prompt_tokens": 1114,
+    "prompt_time": 0.066267473,
+    "completion_tokens": 606,
+    "completion_time": 0.705974416,
+    "total_tokens": 1720,
+    "total_time": 0.772241889,
+    "completion_tokens_details": {
+      "reasoning_tokens": 119
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sevfdge4jbek461pzsrwz8",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport logging\nimport sys\nimport io\nimport pytest\nfrom tqdm.contrib.logging import tqdm_logging_redirect\nfrom tqdm import trange\n\ndef test_logging_redirected_to_pbar_output(capsys):\n    \"\"\"When a log message is emitted inside the context, it appears in the tqdm bar output.\"\"\"\n    LOG = logging.getLogger(\"tqdm_test\")\n    LOG.setLevel(logging.INFO)\n\n    # Capture stdout to inspect tqdm output\n    with tqdm_logging_redirect(trange(3), total=3, leave=False) as pbar:\n        LOG.info(\"Test message\")\n        # Advance the bar to force output\n        for _ in range(3):\n            pbar.update(1)\n\n    # Capture the printed output\n    captured = capsys.readouterr()\n    # The log message should be present in the output (tqdm.write writes to stdout)\n    assert \"Test message\" in captured.out\n    # The progress bar should also be present\n    assert \"100%\" in captured.out or \"3/3\" in captured.out\n\ndef test_zero_iterations_no_output(capsys):\n    \"\"\"If the iterable is empty, no progress bar or log output should appear.\"\"\"\n    LOG = logging.getLogger(\"tqdm_test_zero\")\n    LOG.setLevel(logging.INFO)\n\n    with tqdm_logging_redirect(trange(0), total=0, leave=False) as pbar:\n        LOG.info(\"Should not appear\")\n        # No updates\n\n    captured = capsys.readouterr()\n    # No progress bar or log message should be printed\n    assert captured.out == \"\"\n\ndef test_default_loggers_use_root(capsys):\n    \"\"\"When no loggers are specified, the root logger is used for redirection.\"\"\"\n    LOG = logging.getLogger(\"tqdm_test_root\")\n    LOG.setLevel(logging.INFO)\n\n    # Ensure root logger has a console handler\n    root_handler = logging.StreamHandler(sys.stdout)\n    logging.root.handlers = [root_handler]\n\n    with tqdm_logging_redirect(trange(1), total=1, leave=False) as pbar:\n        LOG.info(\"Root logger message\")\n        pbar.update(1)\n\n    captured = capsys.readouterr()\n    assert \"Root logger message\" in captured.out\n    assert \"100%\" in captured.out or \"1/1\" in captured.out\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.145059428003151
+}

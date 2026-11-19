@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-12abcc75-fb4a-4074-8372-0884c3f8739e",
+  "object": "chat.completion",
+  "created": 1795077081,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport re\nimport pytest\nfrom inspect import cleandoc\nfrom docstring_parser.numpydoc import ParamSection\nfrom docstring_parser.common import DocstringParam\n\n# Helper regex patterns from the module (re-exported for clarity)\nPARAM_KEY_REGEX = re.compile(r\"(?P<name>\\w+)(?::\\s*(?P<type>.+))?\")\nPARAM_OPTIONAL_REGEX = re.compile(r\"(?P<type>.+)\\s*,\\s*optional\")\nPARAM_DEFAULT_REGEX = re.compile(r\"(?P<type>.+)\\s*=\\s*(?P<value>.+)\")\nPARAM_DEFAULT_REGEX_IN_DESC = re.compile(r\"(?P<value>.+?)\\s*\\(default\\s*=\\s*(?P<value>.+?)\\)\")\n\ndef test_parse_item_basic():\n    \"\"\"Test parsing of a simple parameter without type or default.\"\"\"\n    section = ParamSection()\n    key = \"param1\"\n    value = \"This is a simple parameter.\"\n    result = section._parse_item(key, value)\n    assert isinstance(result, DocstringParam)\n    assert result.arg_name == \"param1\"\n    assert result.type_name is None\n    assert result.is_optional is None\n    assert result.default is None\n    assert result.description == \"This is a simple parameter.\"\n\ndef test_parse_item_optional_with_default():\n    \"\"\"Test parsing of a parameter marked optional with a default in the type.\"\"\"\n    section = ParamSection()\n    key = \"param2 : int, optional = 42\"\n    value = \"An integer parameter with a default.\"\n    result = section._parse_item(key, value)\n    assert result.arg_name == \"param2\"\n    assert result.type_name == \"int\"\n    assert result.is_optional is True\n    assert result.default == \"42\"\n    assert result.description == \"An integer parameter with a default.\"\n\ndef test_parse_item_default_in_description():\n    \"\"\"Test parsing when the default is only present in the description.\"\"\"\n    section = ParamSection()\n    key = \"param3 : str\"\n    value = cleandoc(\"\"\"\n        A string parameter.\n        (default = 'hello')\n    \"\"\")\n    result = section._parse_item(key, value)\n    assert result.arg_name == \"param3\"\n    assert result.type_name == \"str\"\n    assert result.is_optional is None\n    assert result.default == \"'hello'\"\n    assert result.description == \"A string parameter.\\n(default = 'hello')\"\n```",
+        "reasoning": "We need to test ParamSection._parse_item. Need to import it. Use tmp_path? Not needed. Write three tests: normal parsing, optional with default, default in description. Use assertions."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.066696494,
+    "prompt_tokens": 631,
+    "prompt_time": 0.037551183,
+    "completion_tokens": 562,
+    "completion_time": 0.644118409,
+    "total_tokens": 1193,
+    "total_time": 0.681669592,
+    "completion_tokens_details": {
+      "reasoning_tokens": 41
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sex246evh9e85j1vvndaph",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport re\nimport pytest\nfrom inspect import cleandoc\nfrom docstring_parser.numpydoc import ParamSection\nfrom docstring_parser.common import DocstringParam\n\n# Helper regex patterns from the module (re-exported for clarity)\nPARAM_KEY_REGEX = re.compile(r\"(?P<name>\\w+)(?::\\s*(?P<type>.+))?\")\nPARAM_OPTIONAL_REGEX = re.compile(r\"(?P<type>.+)\\s*,\\s*optional\")\nPARAM_DEFAULT_REGEX = re.compile(r\"(?P<type>.+)\\s*=\\s*(?P<value>.+)\")\nPARAM_DEFAULT_REGEX_IN_DESC = re.compile(r\"(?P<value>.+?)\\s*\\(default\\s*=\\s*(?P<value>.+?)\\)\")\n\ndef test_parse_item_basic():\n    \"\"\"Test parsing of a simple parameter without type or default.\"\"\"\n    section = ParamSection()\n    key = \"param1\"\n    value = \"This is a simple parameter.\"\n    result = section._parse_item(key, value)\n    assert isinstance(result, DocstringParam)\n    assert result.arg_name == \"param1\"\n    assert result.type_name is None\n    assert result.is_optional is None\n    assert result.default is None\n    assert result.description == \"This is a simple parameter.\"\n\ndef test_parse_item_optional_with_default():\n    \"\"\"Test parsing of a parameter marked optional with a default in the type.\"\"\"\n    section = ParamSection()\n    key = \"param2 : int, optional = 42\"\n    value = \"An integer parameter with a default.\"\n    result = section._parse_item(key, value)\n    assert result.arg_name == \"param2\"\n    assert result.type_name == \"int\"\n    assert result.is_optional is True\n    assert result.default == \"42\"\n    assert result.description == \"An integer parameter with a default.\"\n\ndef test_parse_item_default_in_description():\n    \"\"\"Test parsing when the default is only present in the description.\"\"\"\n    section = ParamSection()\n    key = \"param3 : str\"\n    value = cleandoc(\"\"\"\n        A string parameter.\n        (default = 'hello')\n    \"\"\")\n    result = section._parse_item(key, value)\n    assert result.arg_name == \"param3\"\n    assert result.type_name == \"str\"\n    assert result.is_optional is None\n    assert result.default == \"'hello'\"\n    assert result.description == \"A string parameter.\\n(default = 'hello')\"\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.081731058016885
+}

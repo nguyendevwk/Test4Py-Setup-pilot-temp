@@ -1,0 +1,40 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_unwrap_context_recurses_into_nested_context _______________
+
+    def test_unwrap_context_recurses_into_nested_context():
+        """When an exception has a __context__ that is also an exception, unwrap_context should return the deepest one."""
+        # Create a chain: deepest -> middle -> top
+        deepest = KeyError("deep")
+        middle = RuntimeError("middle")
+        middle.__context__ = deepest
+        top = IndexError("top")
+        top.__context__ = middle
+    
+        result = unwrap_context(top)
+        assert result is deepest
+        assert isinstance(result, KeyError)
+>       assert str(result) == "deep"
+E       assert "'deep'" == 'deep'
+E         
+E         - deep
+E         + 'deep'
+E         ? +    +
+
+test_generated.py:26: AssertionError
+_____________ test_unwrap_context_stops_when_context_not_exception _____________
+
+    def test_unwrap_context_stops_when_context_not_exception():
+        """If __context__ is not an Exception instance, unwrap_context should stop and return the original exception."""
+        class Dummy:
+            pass
+    
+        exc = ValueError("error")
+>       exc.__context__ = Dummy()  # non‑Exception context
+E       TypeError: exception context must be None or derive from BaseException
+
+test_generated.py:35: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_unwrap_context_recurses_into_nested_context - ...
+FAILED test_generated.py::test_unwrap_context_stops_when_context_not_exception
+2 failed, 1 passed in 0.39s

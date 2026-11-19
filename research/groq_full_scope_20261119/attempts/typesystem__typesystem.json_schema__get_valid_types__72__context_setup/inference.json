@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-2e4c90f9-5cfd-412a-8bb3-4d4b4bb3e573",
+  "object": "chat.completion",
+  "created": 1795079508,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem.json_schema import get_valid_types\n\ndef test_get_valid_types_with_various_type_entries():\n    # Case 1: type as a single string\n    data = {\"type\": \"string\"}\n    types, allow_null = get_valid_types(data)\n    assert types == {\"string\"}\n    assert allow_null is False\n\n    # Case 2: type as a list including null and number\n    data = {\"type\": [\"null\", \"number\", \"integer\", \"boolean\"]}\n    types, allow_null = get_valid_types(data)\n    # number should override integer, null should be removed\n    assert types == {\"number\", \"boolean\"}\n    assert allow_null is True\n\n    # Case 3: type omitted, defaults to all primitive types\n    data = {}\n    types, allow_null = get_valid_types(data)\n    assert types == {\"boolean\", \"object\", \"array\", \"number\", \"string\"}\n    assert allow_null is False\n\ndef test_get_valid_types_with_empty_and_nonstandard_inputs():\n    # Empty type list should default to all primitive types\n    data = {\"type\": []}\n    types, allow_null = get_valid_types(data)\n    assert types == {\"boolean\", \"object\", \"array\", \"number\", \"string\"}\n    assert allow_null is False\n\n    # Type list containing only null should result in all primitives and allow_null True\n    data = {\"type\": [\"null\"]}\n    types, allow_null = get_valid_types(data)\n    assert types == {\"boolean\", \"object\", \"array\", \"number\", \"string\"}\n    assert allow_null is True\n\ndef test_get_valid_types_raises_on_invalid_input():\n    # Passing a non-dict should raise an AttributeError because .get is not defined\n    with pytest.raises(AttributeError):\n        get_valid_types(42)\n```",
+        "reasoning": "We need three test functions testing normal, boundary, error. The function get_valid_types expects dict. Edge: type missing, type string, list, empty list, includes null, number with integer. Also error: passing non-dict? It will error. We can test that TypeError? Actually data.get will error if not dict. So test that passing int raises AttributeError. Use pytest.raises. Use tmp_path not needed. Write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004670132,
+    "prompt_tokens": 462,
+    "prompt_time": 0.019062964,
+    "completion_tokens": 479,
+    "completion_time": 0.604635918,
+    "total_tokens": 941,
+    "total_time": 0.623698882,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 91
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_e23fc997ca",
+  "x_groq": {
+    "id": "req_01m7sh73jhe65rdkyd0ctpw3k3",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem.json_schema import get_valid_types\n\ndef test_get_valid_types_with_various_type_entries():\n    # Case 1: type as a single string\n    data = {\"type\": \"string\"}\n    types, allow_null = get_valid_types(data)\n    assert types == {\"string\"}\n    assert allow_null is False\n\n    # Case 2: type as a list including null and number\n    data = {\"type\": [\"null\", \"number\", \"integer\", \"boolean\"]}\n    types, allow_null = get_valid_types(data)\n    # number should override integer, null should be removed\n    assert types == {\"number\", \"boolean\"}\n    assert allow_null is True\n\n    # Case 3: type omitted, defaults to all primitive types\n    data = {}\n    types, allow_null = get_valid_types(data)\n    assert types == {\"boolean\", \"object\", \"array\", \"number\", \"string\"}\n    assert allow_null is False\n\ndef test_get_valid_types_with_empty_and_nonstandard_inputs():\n    # Empty type list should default to all primitive types\n    data = {\"type\": []}\n    types, allow_null = get_valid_types(data)\n    assert types == {\"boolean\", \"object\", \"array\", \"number\", \"string\"}\n    assert allow_null is False\n\n    # Type list containing only null should result in all primitives and allow_null True\n    data = {\"type\": [\"null\"]}\n    types, allow_null = get_valid_types(data)\n    assert types == {\"boolean\", \"object\", \"array\", \"number\", \"string\"}\n    assert allow_null is True\n\ndef test_get_valid_types_raises_on_invalid_input():\n    # Passing a non-dict should raise an AttributeError because .get is not defined\n    with pytest.raises(AttributeError):\n        get_valid_types(42)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "6bd6906f3f2047689aa0e61795debe7f",
+  "_api_plus_pacing_seconds": 1.6781096479971893
+}

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-4704c324-3e02-4994-9b31-53ed3c140059",
+  "object": "chat.completion",
+  "created": 1795077680,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport decimal\nimport pytest\nfrom typesystem.fields import Number\nfrom typesystem.base import ValidationError\n\ndef test_number_valid_and_precision(tmp_path):\n    # Valid integer, float, and string casting with precision rounding\n    field = Number(precision=\"0.01\")\n    assert field.validate(10) == 10\n    assert field.validate(10.123) == 10.12  # rounded down\n    assert field.validate(\"10.129\") == 10.13  # rounded up\n    # Ensure precision rounding uses the specified numeric type\n    field_int = Number(precision=\"0.1\", numeric_type=int)\n    assert field_int.validate(10.9) == 11  # rounded to nearest integer\n\ndef test_number_boundary_conditions():\n    # Minimum and maximum inclusive\n    field = Number(minimum=0, maximum=100)\n    assert field.validate(0) == 0\n    assert field.validate(100) == 100\n    # Exclusive boundaries\n    field_excl = Number(exclusive_minimum=0, exclusive_maximum=100)\n    with pytest.raises(ValidationError):\n        field_excl.validate(0)\n    with pytest.raises(ValidationError):\n        field_excl.validate(100)\n    # Multiple of constraint\n    field_multi = Number(multiple_of=5)\n    assert field_multi.validate(10) == 10\n    with pytest.raises(ValidationError):\n        field_multi.validate(12)\n\ndef test_number_error_cases():\n    field = Number()\n    # Null not allowed\n    with pytest.raises(ValidationError):\n        field.validate(None)\n    # Boolean is invalid\n    with pytest.raises(ValidationError):\n        field.validate(True)\n    # Non-numeric string without coercion\n    field_no_coerce = Number(coerce_types=False)\n    with pytest.raises(ValidationError):\n        field_no_coerce.validate(\"123\")\n    # Non-finite values\n    with pytest.raises(ValidationError):\n        field.validate(float(\"nan\"))\n    with pytest.raises(ValidationError):\n        field.validate(float(\"inf\"))\n```",
+        "reasoning": "Need tests for Number field. Import Number. Test normal: valid int, float, string cast, precision. Boundary: min max. Error: type, null, multiple_of. Use pytest.raises."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047143772,
+    "prompt_tokens": 1169,
+    "prompt_time": 0.067322084,
+    "completion_tokens": 478,
+    "completion_time": 0.505485806,
+    "total_tokens": 1647,
+    "total_time": 0.57280789,
+    "completion_tokens_details": {
+      "reasoning_tokens": 41
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sffb1ce61b64hzmmrzrxhn",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport decimal\nimport pytest\nfrom typesystem.fields import Number\nfrom typesystem.base import ValidationError\n\ndef test_number_valid_and_precision(tmp_path):\n    # Valid integer, float, and string casting with precision rounding\n    field = Number(precision=\"0.01\")\n    assert field.validate(10) == 10\n    assert field.validate(10.123) == 10.12  # rounded down\n    assert field.validate(\"10.129\") == 10.13  # rounded up\n    # Ensure precision rounding uses the specified numeric type\n    field_int = Number(precision=\"0.1\", numeric_type=int)\n    assert field_int.validate(10.9) == 11  # rounded to nearest integer\n\ndef test_number_boundary_conditions():\n    # Minimum and maximum inclusive\n    field = Number(minimum=0, maximum=100)\n    assert field.validate(0) == 0\n    assert field.validate(100) == 100\n    # Exclusive boundaries\n    field_excl = Number(exclusive_minimum=0, exclusive_maximum=100)\n    with pytest.raises(ValidationError):\n        field_excl.validate(0)\n    with pytest.raises(ValidationError):\n        field_excl.validate(100)\n    # Multiple of constraint\n    field_multi = Number(multiple_of=5)\n    assert field_multi.validate(10) == 10\n    with pytest.raises(ValidationError):\n        field_multi.validate(12)\n\ndef test_number_error_cases():\n    field = Number()\n    # Null not allowed\n    with pytest.raises(ValidationError):\n        field.validate(None)\n    # Boolean is invalid\n    with pytest.raises(ValidationError):\n        field.validate(True)\n    # Non-numeric string without coercion\n    field_no_coerce = Number(coerce_types=False)\n    with pytest.raises(ValidationError):\n        field_no_coerce.validate(\"123\")\n    # Non-finite values\n    with pytest.raises(ValidationError):\n        field.validate(float(\"nan\"))\n    with pytest.raises(ValidationError):\n        field.validate(float(\"inf\"))\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9650920019485056
+}

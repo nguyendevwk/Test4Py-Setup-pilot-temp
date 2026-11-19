@@ -1,0 +1,16 @@
+{
+  "status": "test_failure",
+  "exit_code": 1,
+  "timeout": false,
+  "total_nodes": 1,
+  "collected": 1,
+  "collection_errors": 0,
+  "passing_nodes": [],
+  "pass_count": 0,
+  "suite_pass": false,
+  "line_pct": null,
+  "branch_pct": null,
+  "coverage_status": "not_measured: suite not all-pass",
+  "stdout": "F                                                                        [100%]\n=================================== FAILURES ===================================\n___________ test_whale_optimization_optimize_updates_and_constraints ___________\n\n    def test_whale_optimization_optimize_updates_and_constraints():\n        # deterministic random seed\n        np.random.seed(0)\n    \n        # simple objective: sum of squares (minimization)\n        opt_func = lambda x, y: x**2 + y**2\n        constraints = [(0.0, 1.0), (0.0, 1.0)]\n        nsols = 5\n        b, a, a_step = 1.0, 2.0, 0.5\n    \n        optimizer = WhaleOptimization(opt_func, constraints, nsols, b, a, a_step, maximize=False)\n    \n        # Capture initial state\n        initial_sols = optimizer.get_solutions().copy()\n        len_before = len(optimizer._best_solutions)\n    \n        # Get best solution before optimization\n        best_sol = optimizer._rank_solutions()[0]\n    \n        # Run one optimization step\n        optimizer.optimize()\n    \n        # After optimization, number of solutions should remain unchanged\n        assert optimizer.get_solutions().shape == initial_sols.shape\n    \n        # Parameter 'a' should have decreased by a_step\n        assert optimizer._a == a - a_step\n    \n        # The first solution in the new generation should be the previous best solution\n        assert np.allclose(optimizer.get_solutions()[0], best_sol)\n    \n        # Best solutions history should have grown by one entry\n>       assert len(optimizer._best_solutions) == len_before + 1\nE       assert 2 == (0 + 1)\nE        +  where 2 = len([(np.float64(0.3265107873623069), array([0.4236548 , 0.38344152])), (np.float64(0.3265107873623069), array([0.4236548 , 0.38344152]))])\nE        +    where [(np.float64(0.3265107873623069), array([0.4236548 , 0.38344152])), (np.float64(0.3265107873623069), array([0.4236548 , 0.38344152]))] = <src.whale_optimization.WhaleOptimization object at 0x7f0aca19fe30>._best_solutions\n\n../../expanded_120_results/woa_whale_opt/baseline/seed_46/v1_exec/test_run.py:37: AssertionError\n=========================== short test summary info ============================\nFAILED ../../expanded_120_results/woa_whale_opt/baseline/seed_46/v1_exec/test_run.py::test_whale_optimization_optimize_updates_and_constraints\n1 failed in 0.39s\n",
+  "stderr": ""
+}

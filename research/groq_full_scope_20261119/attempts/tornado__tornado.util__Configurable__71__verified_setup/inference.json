@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-fdfa3100-24d9-4f3b-8c35-6f2cbf3d2064",
+  "object": "chat.completion",
+  "created": 1795079574,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom types import SimpleNamespace\n\n# Import the target class\nfrom tornado.util import Configurable\n\n\nclass DummyBase(Configurable):\n    \"\"\"Concrete implementation of Configurable for testing.\"\"\"\n\n    @classmethod\n    def configurable_base(cls):\n        return DummyBase\n\n    @classmethod\n    def configurable_default(cls):\n        return DummyImpl\n\n    def initialize(self, *args, **kwargs):\n        # Store initialization arguments for inspection\n        self._init_args = args\n        self._init_kwargs = kwargs\n\n\nclass DummyImpl(DummyBase):\n    \"\"\"Implementation subclass used by default.\"\"\"\n\n    def initialize(self, *args, **kwargs):\n        super().initialize(*args, **kwargs)\n        self._impl_marker = \"impl\"\n\n\nclass AnotherImpl(DummyBase):\n    \"\"\"Alternative implementation for configuration tests.\"\"\"\n\n    def initialize(self, *args, **kwargs):\n        super().initialize(*args, **kwargs)\n        self._impl_marker = \"another\"\n\n\ndef test_default_implementation_and_initialization(tmp_path):\n    \"\"\"Instantiating the base class uses the default implementation.\"\"\"\n    # Ensure no prior configuration\n    DummyBase._restore_configuration((None, {}))\n    instance = DummyBase()\n    # The instance should be of the default implementation class\n    assert isinstance(instance, DummyImpl)\n    # The initialize method should have been called with no args\n    assert instance._init_args == ()\n    assert instance._init_kwargs == {}\n    # Implementation marker set by DummyImpl\n    assert getattr(instance, \"_impl_marker\", None) == \"impl\"\n\n\ndef test_configure_with_kwargs_and_subclass(tmp_path):\n    \"\"\"Configuring the base class with a subclass and kwargs.\"\"\"\n    # Save current configuration to restore later\n    saved = DummyBase._save_configuration()\n    try:\n        # Configure to use AnotherImpl with a keyword argument\n        DummyBase.configure(AnotherImpl, foo=\"bar\")\n        instance = DummyBase()\n        # Instance should be of the configured subclass\n        assert isinstance(instance, AnotherImpl)\n        # The keyword argument should be passed to initialize\n        assert instance._init_kwargs == {\"foo\": \"bar\"}\n        # Implementation marker set by AnotherImpl\n        assert getattr(instance, \"_impl_marker\", None) == \"another\"\n    finally:\n        # Restore original configuration\n        DummyBase._restore_configuration(saved)\n\n\ndef test_invalid_configuration_raises_value_error(tmp_path):\n    \"\"\"Providing an invalid subclass to configure raises ValueError.\"\"\"\n    # Attempt to configure with a class that is not a subclass of DummyBase\n    class NotSub:\n        pass\n\n    with pytest.raises(ValueError, match=\"Invalid subclass\"):\n        DummyBase.configure(NotSub)\n```",
+        "reasoning": "Need tests for Configurable. Create dummy subclass implementing required methods. Test configure, default, kwargs. Three tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.004378065,
+    "prompt_tokens": 1433,
+    "prompt_time": 0.01436572,
+    "completion_tokens": 577,
+    "completion_time": 0.595057911,
+    "total_tokens": 2010,
+    "total_time": 0.609423631,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 24
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a12402de73",
+  "x_groq": {
+    "id": "req_01m7sh94c8e5ns4ta2wfbc1hrn",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom types import SimpleNamespace\n\n# Import the target class\nfrom tornado.util import Configurable\n\n\nclass DummyBase(Configurable):\n    \"\"\"Concrete implementation of Configurable for testing.\"\"\"\n\n    @classmethod\n    def configurable_base(cls):\n        return DummyBase\n\n    @classmethod\n    def configurable_default(cls):\n        return DummyImpl\n\n    def initialize(self, *args, **kwargs):\n        # Store initialization arguments for inspection\n        self._init_args = args\n        self._init_kwargs = kwargs\n\n\nclass DummyImpl(DummyBase):\n    \"\"\"Implementation subclass used by default.\"\"\"\n\n    def initialize(self, *args, **kwargs):\n        super().initialize(*args, **kwargs)\n        self._impl_marker = \"impl\"\n\n\nclass AnotherImpl(DummyBase):\n    \"\"\"Alternative implementation for configuration tests.\"\"\"\n\n    def initialize(self, *args, **kwargs):\n        super().initialize(*args, **kwargs)\n        self._impl_marker = \"another\"\n\n\ndef test_default_implementation_and_initialization(tmp_path):\n    \"\"\"Instantiating the base class uses the default implementation.\"\"\"\n    # Ensure no prior configuration\n    DummyBase._restore_configuration((None, {}))\n    instance = DummyBase()\n    # The instance should be of the default implementation class\n    assert isinstance(instance, DummyImpl)\n    # The initialize method should have been called with no args\n    assert instance._init_args == ()\n    assert instance._init_kwargs == {}\n    # Implementation marker set by DummyImpl\n    assert getattr(instance, \"_impl_marker\", None) == \"impl\"\n\n\ndef test_configure_with_kwargs_and_subclass(tmp_path):\n    \"\"\"Configuring the base class with a subclass and kwargs.\"\"\"\n    # Save current configuration to restore later\n    saved = DummyBase._save_configuration()\n    try:\n        # Configure to use AnotherImpl with a keyword argument\n        DummyBase.configure(AnotherImpl, foo=\"bar\")\n        instance = DummyBase()\n        # Instance should be of the configured subclass\n        assert isinstance(instance, AnotherImpl)\n        # The keyword argument should be passed to initialize\n        assert instance._init_kwargs == {\"foo\": \"bar\"}\n        # Implementation marker set by AnotherImpl\n        assert getattr(instance, \"_impl_marker\", None) == \"another\"\n    finally:\n        # Restore original configuration\n        DummyBase._restore_configuration(saved)\n\n\ndef test_invalid_configuration_raises_value_error(tmp_path):\n    \"\"\"Providing an invalid subclass to configure raises ValueError.\"\"\"\n    # Attempt to configure with a class that is not a subclass of DummyBase\n    class NotSub:\n        pass\n\n    with pytest.raises(ValueError, match=\"Invalid subclass\"):\n        DummyBase.configure(NotSub)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "287cf05713824a95b2cb8eb27532c46c",
+  "_api_plus_pacing_seconds": 9.68559600401204
+}

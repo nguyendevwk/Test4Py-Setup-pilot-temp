@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-92c89487-6daa-46c4-847c-b4bbbd5d3cbc",
+  "object": "chat.completion",
+  "created": 1795077894,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport itertools\nimport math\nimport pytest\nfrom tqdm.contrib.itertools import product as tqdm_product\n\nclass DummyTqdm:\n    \"\"\"Simple stand‑in for tqdm that records the total argument.\"\"\"\n    def __init__(self, iterable, total=None, **kwargs):\n        self.total = total\n        self.iterable = iterable\n    def __iter__(self):\n        return iter(self.iterable)\n\ndef test_total_computed_for_known_lengths():\n    \"\"\"When iterables have known lengths, total is computed as product of lengths.\"\"\"\n    a = [1, 2]\n    b = ['x', 'y', 'z']\n    # Use DummyTqdm to capture the total passed to tqdm\n    result = list(tqdm_product(a, b, tqdm_class=DummyTqdm))\n    # Expected total: len(a) * len(b) = 2 * 3 = 6\n    assert len(result) == 6\n    # Verify that DummyTqdm received the correct total\n    dummy = DummyTqdm(itertools.product(a, b))\n    assert dummy.total == 6\n\ndef test_custom_tqdm_receives_correct_total_and_yields_items():\n    \"\"\"Custom tqdm_class receives the computed total and yields the correct items.\"\"\"\n    a = [0, 1]\n    b = [10]\n    # repeat=2 should produce 2^2 * 1 = 4 combinations\n    result = list(tqdm_product(a, b, repeat=2, tqdm_class=DummyTqdm))\n    expected = list(itertools.product(a, b, repeat=2))\n    assert result == expected\n    # DummyTqdm should have total equal to 4\n    dummy = DummyTqdm(itertools.product(a, b, repeat=2))\n    assert dummy.total == 4\n\ndef test_total_none_when_iterable_lengths_unknown():\n    \"\"\"If any iterable has no length, total remains None and no exception is raised.\"\"\"\n    # Define a generator (no len)\n    gen = (i for i in range(3))\n    # Use DummyTqdm to capture the total argument\n    result = list(tqdm_product(gen, [1, 2], tqdm_class=DummyTqdm))\n    # Total should be None because len(gen) is not available\n    dummy = DummyTqdm(itertools.product(gen, [1, 2]))\n    assert dummy.total is None\n    # Ensure the product yields the correct combinations\n    expected = list(itertools.product(gen, [1, 2]))\n    assert result == expected\n```",
+        "reasoning": "We need to write tests for tqdm.contrib.itertools.product. It uses tqdm_auto. We can import tqdm.contrib.itertools.product. We need to test normal, boundary, error. Use tmp_path? Not needed. But maybe test that total is computed correctly. Also test that passing non-iterable raises? Actually product yields from tqdm_class. We can use a dummy tqdm_class that records total. But cannot mock target. But we can pass a custom tqdm_class that is simple. For example, a class that records total and yields items. Use a simple class that implements __iter__? Actually tqdm_class is called with iterable and total. So we can define a dummy class that stores total and returns the iterable. For example:\n\nclass DummyTqdm:\n    def __init__(self, iterable, total=None, **kwargs):\n        self.total = total\n        self.iterable = iterable\n    def __iter__(self):\n        return iter(self.iterable)\n\nThen product(*iterables, tqdm_class=DummyTqdm). Then we can assert dummy.total equals expected. Also test that when total is None and iterables have lengths, total computed. Also test error: if iterables include non-iterable, total remains None and no error. But product will still yield. We can test that passing repeat=2 works.\n\nThree tests: test_total_computed, test_custom_tqdm_total, test_non_iterable_total_none.\n\nImplement."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047034794,
+    "prompt_tokens": 331,
+    "prompt_time": 0.021875176,
+    "completion_tokens": 843,
+    "completion_time": 0.951402677,
+    "total_tokens": 1174,
+    "total_time": 0.973277853,
+    "completion_tokens_details": {
+      "reasoning_tokens": 295
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sfnvsyetarnfnabk1x6tcv",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport itertools\nimport math\nimport pytest\nfrom tqdm.contrib.itertools import product as tqdm_product\n\nclass DummyTqdm:\n    \"\"\"Simple stand‑in for tqdm that records the total argument.\"\"\"\n    def __init__(self, iterable, total=None, **kwargs):\n        self.total = total\n        self.iterable = iterable\n    def __iter__(self):\n        return iter(self.iterable)\n\ndef test_total_computed_for_known_lengths():\n    \"\"\"When iterables have known lengths, total is computed as product of lengths.\"\"\"\n    a = [1, 2]\n    b = ['x', 'y', 'z']\n    # Use DummyTqdm to capture the total passed to tqdm\n    result = list(tqdm_product(a, b, tqdm_class=DummyTqdm))\n    # Expected total: len(a) * len(b) = 2 * 3 = 6\n    assert len(result) == 6\n    # Verify that DummyTqdm received the correct total\n    dummy = DummyTqdm(itertools.product(a, b))\n    assert dummy.total == 6\n\ndef test_custom_tqdm_receives_correct_total_and_yields_items():\n    \"\"\"Custom tqdm_class receives the computed total and yields the correct items.\"\"\"\n    a = [0, 1]\n    b = [10]\n    # repeat=2 should produce 2^2 * 1 = 4 combinations\n    result = list(tqdm_product(a, b, repeat=2, tqdm_class=DummyTqdm))\n    expected = list(itertools.product(a, b, repeat=2))\n    assert result == expected\n    # DummyTqdm should have total equal to 4\n    dummy = DummyTqdm(itertools.product(a, b, repeat=2))\n    assert dummy.total == 4\n\ndef test_total_none_when_iterable_lengths_unknown():\n    \"\"\"If any iterable has no length, total remains None and no exception is raised.\"\"\"\n    # Define a generator (no len)\n    gen = (i for i in range(3))\n    # Use DummyTqdm to capture the total argument\n    result = list(tqdm_product(gen, [1, 2], tqdm_class=DummyTqdm))\n    # Total should be None because len(gen) is not available\n    dummy = DummyTqdm(itertools.product(gen, [1, 2]))\n    assert dummy.total is None\n    # Ensure the product yields the correct combinations\n    expected = list(itertools.product(gen, [1, 2]))\n    assert result == expected\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.3184723890153691
+}

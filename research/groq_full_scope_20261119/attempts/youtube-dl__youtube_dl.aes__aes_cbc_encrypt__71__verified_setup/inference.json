@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-bdc2e78f-f1a2-413d-ac8f-c10d2bb444df",
+  "object": "chat.completion",
+  "created": 1795079635,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom youtube_dl.aes import aes_cbc_encrypt, BLOCK_SIZE_BYTES, key_expansion, aes_encrypt, xor\n\ndef test_padding_and_block_count(tmp_path):\n    # 10 bytes of data, key and iv of 16 bytes\n    data = list(range(10))\n    key = [0x00] * 16\n    iv = [0x00] * 16\n\n    encrypted = aes_cbc_encrypt(data, key, iv)\n\n    # The output length must be a multiple of BLOCK_SIZE_BYTES\n    assert len(encrypted) % BLOCK_SIZE_BYTES == 0\n    # For 10 bytes input, we expect 16 bytes output\n    assert len(encrypted) == BLOCK_SIZE_BYTES\n\n    # The padding byte should be 6 (16-10)\n    padding_value = encrypted[-1]\n    assert padding_value == 6\n    # All padding bytes should be the same\n    assert all(b == padding_value for b in encrypted[-padding_value:])\n\ndef test_deterministic_output_and_iv_effect(tmp_path):\n    data = [1, 2, 3, 4]\n    key = [0x01] * 16\n    iv1 = [0x00] * 16\n    iv2 = [0xFF] * 16\n\n    enc1 = aes_cbc_encrypt(data, key, iv1)\n    enc2 = aes_cbc_encrypt(data, key, iv1)\n    enc3 = aes_cbc_encrypt(data, key, iv2)\n\n    # Same inputs produce same output\n    assert enc1 == enc2\n    # Different IV produces different output\n    assert enc1 != enc3\n\ndef test_invalid_key_length_raises():\n    data = [0] * 16\n    key_short = [0x00] * 15  # invalid length\n    iv = [0x00] * 16\n    with pytest.raises(ValueError):\n        aes_cbc_encrypt(data, key_short, iv)\n```",
+        "reasoning": "We need to test aes_cbc_encrypt. Need to import from youtube_dl.aes. Let's inspect other functions: key_expansion, aes_encrypt, xor, BLOCK_SIZE_BYTES. Assume available. We'll write tests with known key, iv, data. Use small data. Compute expected using reference? Hard. Maybe test that encryption is deterministic and reversible? We can test that encrypting then decrypting yields original. But decrypt function not given. Maybe we can test that padding added correctly: length of output equals ceil(len(data)/16)*16. Also that iv used: first block XOR with iv. We can test that changing iv changes output. Also test that key length must be 16/24/32 else error? Not sure. We'll test that passing key of wrong length raises ValueError. Assume key_expansion checks. We'll write tests accordingly."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.005917922,
+    "prompt_tokens": 469,
+    "prompt_time": 0.025106079,
+    "completion_tokens": 600,
+    "completion_time": 0.65448608,
+    "total_tokens": 1069,
+    "total_time": 0.679592159,
+    "completion_tokens_details": {
+      "reasoning_tokens": 172
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_a8c584dda7",
+  "x_groq": {
+    "id": "req_01m7shazvrervab7gjntaehwr3",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom youtube_dl.aes import aes_cbc_encrypt, BLOCK_SIZE_BYTES, key_expansion, aes_encrypt, xor\n\ndef test_padding_and_block_count(tmp_path):\n    # 10 bytes of data, key and iv of 16 bytes\n    data = list(range(10))\n    key = [0x00] * 16\n    iv = [0x00] * 16\n\n    encrypted = aes_cbc_encrypt(data, key, iv)\n\n    # The output length must be a multiple of BLOCK_SIZE_BYTES\n    assert len(encrypted) % BLOCK_SIZE_BYTES == 0\n    # For 10 bytes input, we expect 16 bytes output\n    assert len(encrypted) == BLOCK_SIZE_BYTES\n\n    # The padding byte should be 6 (16-10)\n    padding_value = encrypted[-1]\n    assert padding_value == 6\n    # All padding bytes should be the same\n    assert all(b == padding_value for b in encrypted[-padding_value:])\n\ndef test_deterministic_output_and_iv_effect(tmp_path):\n    data = [1, 2, 3, 4]\n    key = [0x01] * 16\n    iv1 = [0x00] * 16\n    iv2 = [0xFF] * 16\n\n    enc1 = aes_cbc_encrypt(data, key, iv1)\n    enc2 = aes_cbc_encrypt(data, key, iv1)\n    enc3 = aes_cbc_encrypt(data, key, iv2)\n\n    # Same inputs produce same output\n    assert enc1 == enc2\n    # Different IV produces different output\n    assert enc1 != enc3\n\ndef test_invalid_key_length_raises():\n    data = [0] * 16\n    key_short = [0x00] * 15  # invalid length\n    iv = [0x00] * 16\n    with pytest.raises(ValueError):\n        aes_cbc_encrypt(data, key_short, iv)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "8c2e392d76b34d5ca629b1be85cc1929",
+  "_api_plus_pacing_seconds": 1.6782770569552667
+}

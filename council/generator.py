@@ -56,12 +56,19 @@ def auto_resolve_imports(code: str, module_name: str, target_source: str) -> str
         new_imports.append("import pytest")
         undefined.discard("pytest")
 
-    # Standard library modules (os, sys, json, re, math, time, shutil, etc.)
+    # Standard library modules (os, sys, json, re, math, time, shutil, socket, etc.)
     stdlib_modules = getattr(sys, "stdlib_module_names", set())
     stdlib_to_import = [name for name in sorted(undefined) if name in stdlib_modules]
     for m in stdlib_to_import:
         new_imports.append(f"import {m}")
         undefined.discard(m)
+
+    # Common unittest.mock symbols
+    mock_symbols = [s for s in ('Mock', 'MagicMock', 'patch', 'call') if s in undefined]
+    if mock_symbols:
+        new_imports.append(f"from unittest.mock import {', '.join(sorted(mock_symbols))}")
+        for s in mock_symbols:
+            undefined.discard(s)
 
     # Target module exported classes/exceptions/functions
     target_symbols = [s for s in sorted(undefined) if s in target_exports]

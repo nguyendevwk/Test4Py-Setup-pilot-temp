@@ -1,0 +1,117 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________________ test_open_with_lockfile_reads_and_writes ___________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__open_with_lockfile__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_open_with_lockfile_reads_0')
+
+    def test_open_with_lockfile_reads_and_writes(tmp_path: Path):
+        """Normal usage: file is opened, written to, read from, and lockfile is cleaned up."""
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("hello world")
+    
+        # Open the file with the lockfile context manager
+>       with open_with_lockfile(test_file, "r") as f:
+
+test_generated.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/contextlib.py:135: in __enter__
+    return next(self.gen)
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/utils.py:282: in open_with_lockfile
+    target_file.touch(exist_ok=False)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/pathlib.py:1168: in touch
+    self._accessor.touch(self, mode, exist_ok)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <pathlib._NormalAccessor object at 0x7fd52ca0e440>
+path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__open_...udGV4dF9zZXR1cC9ldmFsMC90bXAvcHl0ZXN0LW9mLWhldXJpeC9weXRlc3QtMC90ZXN0X29wZW5fd2l0aF9sb2NrZmlsZV9yZWFkc18wL3Rlc3QudHh0')
+mode = 438, exist_ok = False
+
+    def touch(self, path, mode=0o666, exist_ok=True):
+        if exist_ok:
+            # First try to bump modification time
+            # Implementation note: GNU touch uses the UTIME_NOW option of
+            # the utimensat() / futimens() functions.
+            try:
+                os.utime(path, None)
+            except OSError:
+                # Avoid exception chaining
+                pass
+            else:
+                return
+        flags = os.O_CREAT | os.O_WRONLY
+        if not exist_ok:
+            flags |= os.O_EXCL
+>       fd = os.open(path, flags, mode)
+E       OSError: [Errno 36] File name too long: '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__open_with_lockfile__71__context_setup/eval0/tmp/L2hvbWUvaGV1cml4L0RvY3VtZW50cy9UZXN0NFB5X1NldHVwL3Jlc2VhcmNoL2dyb3FfZnVsbF9zY29wZV8yMDI2MTExOS9hdHRlbXB0cy9odHRwaWVfX2h0dHBpZS51dGlsc19fb3Blbl93aXRoX2xvY2tmaWxlX183MV9fY29udGV4dF9zZXR1cC9ldmFsMC90bXAvcHl0ZXN0LW9mLWhldXJpeC9weXRlc3QtMC90ZXN0X29wZW5fd2l0aF9sb2NrZmlsZV9yZWFkc18wL3Rlc3QudHh0'
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/pathlib.py:331: OSError
+____________________ test_open_with_lockfile_lockfile_error ____________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__open_with_lockfile__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_open_with_lockfile_lockfi0')
+
+    def test_open_with_lockfile_lockfile_error(tmp_path: Path):
+        """If a lockfile already exists, open_with_lockfile should raise LockFileError."""
+        test_file = tmp_path / "locked.txt"
+        test_file.write_text("locked content")
+    
+        # Manually create the lockfile to simulate a concurrent lock
+        file_id = os.fsencode(test_file).decode()
+        lockfile = Path(tempfile.gettempdir()) / file_id
+        lockfile.touch()
+    
+        with pytest.raises(LockFileError):
+>           with open_with_lockfile(test_file, "r") as _:
+
+test_generated.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/contextlib.py:135: in __enter__
+    return next(self.gen)
+../../../../groq_confirmation_20261118/environments/httpie/venv/lib/python3.10/site-packages/httpie/utils.py:282: in open_with_lockfile
+    target_file.touch(exist_ok=False)
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/pathlib.py:1168: in touch
+    self._accessor.touch(self, mode, exist_ok)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <pathlib._NormalAccessor object at 0x7fd52ca0e440>
+path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__open_...4dF9zZXR1cC9ldmFsMC90bXAvcHl0ZXN0LW9mLWhldXJpeC9weXRlc3QtMC90ZXN0X29wZW5fd2l0aF9sb2NrZmlsZV9sb2NrZmkwL2xvY2tlZC50eHQ=')
+mode = 438, exist_ok = False
+
+    def touch(self, path, mode=0o666, exist_ok=True):
+        if exist_ok:
+            # First try to bump modification time
+            # Implementation note: GNU touch uses the UTIME_NOW option of
+            # the utimensat() / futimens() functions.
+            try:
+                os.utime(path, None)
+            except OSError:
+                # Avoid exception chaining
+                pass
+            else:
+                return
+        flags = os.O_CREAT | os.O_WRONLY
+        if not exist_ok:
+            flags |= os.O_EXCL
+>       fd = os.open(path, flags, mode)
+E       OSError: [Errno 36] File name too long: '/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__open_with_lockfile__71__context_setup/eval0/tmp/L2hvbWUvaGV1cml4L0RvY3VtZW50cy9UZXN0NFB5X1NldHVwL3Jlc2VhcmNoL2dyb3FfZnVsbF9zY29wZV8yMDI2MTExOS9hdHRlbXB0cy9odHRwaWVfX2h0dHBpZS51dGlsc19fb3Blbl93aXRoX2xvY2tmaWxlX183MV9fY29udGV4dF9zZXR1cC9ldmFsMC90bXAvcHl0ZXN0LW9mLWhldXJpeC9weXRlc3QtMC90ZXN0X29wZW5fd2l0aF9sb2NrZmlsZV9sb2NrZmkwL2xvY2tlZC50eHQ='
+
+/home/heurix/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/lib/python3.10/pathlib.py:331: OSError
+_____________________ test_open_with_lockfile_closes_file ______________________
+
+tmp_path = PosixPath('/home/heurix/Documents/Test4Py_Setup/research/groq_full_scope_20261119/attempts/httpie__httpie.utils__open_with_lockfile__71__context_setup/eval0/tmp/pytest-of-heurix/pytest-0/test_open_with_lockfile_closes0')
+
+    def test_open_with_lockfile_closes_file(tmp_path: Path):
+        """The file should be closed after the generator exits."""
+        test_file = tmp_path / "close.txt"
+        test_file.write_text("close test")
+    
+        # Open the file and keep a reference to the file object
+        gen = open_with_lockfile(test_file, "r")
+>       f = next(gen)
+E       TypeError: '_GeneratorContextManager' object is not an iterator
+
+test_generated.py:49: TypeError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_open_with_lockfile_reads_and_writes - OSError:...
+FAILED test_generated.py::test_open_with_lockfile_lockfile_error - OSError: [...
+FAILED test_generated.py::test_open_with_lockfile_closes_file - TypeError: '_...
+3 failed in 0.77s

@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-7c62f091-15e7-4faa-a650-0512c60c4a3c",
+  "object": "chat.completion",
+  "created": 1795076314,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom dataclasses_json.cfg import config\nfrom dataclasses_json.undefined import Undefined, UndefinedParameterError\nfrom marshmallow.fields import Integer\n\ndef test_config_basic_metadata_and_options():\n    # Basic usage: provide metadata and all optional arguments\n    def custom_encoder(x): return str(x)\n    def custom_decoder(x): return int(x)\n    def exclude_func(x): return False\n\n    metadata = {\"existing\": \"value\"}\n    result = config(\n        metadata=metadata,\n        encoder=custom_encoder,\n        decoder=custom_decoder,\n        mm_field=Integer(),\n        letter_case=lambda s: s.upper(),\n        undefined=Undefined.REJECT,\n        field_name=\"custom_name\",\n        exclude=exclude_func,\n    )\n\n    # The original metadata dict should be updated in place\n    assert metadata is result\n    lib_meta = metadata[\"dataclasses_json\"]\n    assert lib_meta[\"encoder\"] is custom_encoder\n    assert lib_meta[\"decoder\"] is custom_decoder\n    assert lib_meta[\"mm_field\"] is Integer()\n    assert lib_meta[\"letter_case\"](\"test\") == \"TEST\"\n    assert lib_meta[\"undefined\"] is Undefined.REJECT\n    assert lib_meta[\"exclude\"] is exclude_func\n    # field_name overrides letter_case\n    assert lib_meta[\"letter_case\"](\"ignored\") == \"custom_name\"\n\ndef test_config_field_name_override_without_letter_case():\n    # When field_name is provided without letter_case, it should be used directly\n    metadata = {}\n    result = config(metadata=metadata, field_name=\"explicit_name\")\n    lib_meta = result[\"dataclasses_json\"]\n    # letter_case should be a function that returns the field_name\n    assert lib_meta[\"letter_case\"](\"any\") == \"explicit_name\"\n\ndef test_config_invalid_undefined_raises_error():\n    # Passing an invalid string for undefined should raise UndefinedParameterError\n    metadata = {}\n    with pytest.raises(UndefinedParameterError) as excinfo:\n        config(metadata=metadata, undefined=\"invalid_action\")\n    assert \"must be one of\" in str(excinfo.value)\n```",
+        "reasoning": "We need three test functions for config. Test normal: passing metadata and options. Boundary: field_name override. Error: invalid undefined string. Use pytest.raises. Use tmp_path? not needed."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.0472184,
+    "prompt_tokens": 718,
+    "prompt_time": 0.043063767,
+    "completion_tokens": 473,
+    "completion_time": 0.517746206,
+    "total_tokens": 1191,
+    "total_time": 0.560809973,
+    "completion_tokens_details": {
+      "reasoning_tokens": 40
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7se5mmveqwrn3nyqa5caz32",
+    "seed": 71
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom dataclasses_json.cfg import config\nfrom dataclasses_json.undefined import Undefined, UndefinedParameterError\nfrom marshmallow.fields import Integer\n\ndef test_config_basic_metadata_and_options():\n    # Basic usage: provide metadata and all optional arguments\n    def custom_encoder(x): return str(x)\n    def custom_decoder(x): return int(x)\n    def exclude_func(x): return False\n\n    metadata = {\"existing\": \"value\"}\n    result = config(\n        metadata=metadata,\n        encoder=custom_encoder,\n        decoder=custom_decoder,\n        mm_field=Integer(),\n        letter_case=lambda s: s.upper(),\n        undefined=Undefined.REJECT,\n        field_name=\"custom_name\",\n        exclude=exclude_func,\n    )\n\n    # The original metadata dict should be updated in place\n    assert metadata is result\n    lib_meta = metadata[\"dataclasses_json\"]\n    assert lib_meta[\"encoder\"] is custom_encoder\n    assert lib_meta[\"decoder\"] is custom_decoder\n    assert lib_meta[\"mm_field\"] is Integer()\n    assert lib_meta[\"letter_case\"](\"test\") == \"TEST\"\n    assert lib_meta[\"undefined\"] is Undefined.REJECT\n    assert lib_meta[\"exclude\"] is exclude_func\n    # field_name overrides letter_case\n    assert lib_meta[\"letter_case\"](\"ignored\") == \"custom_name\"\n\ndef test_config_field_name_override_without_letter_case():\n    # When field_name is provided without letter_case, it should be used directly\n    metadata = {}\n    result = config(metadata=metadata, field_name=\"explicit_name\")\n    lib_meta = result[\"dataclasses_json\"]\n    # letter_case should be a function that returns the field_name\n    assert lib_meta[\"letter_case\"](\"any\") == \"explicit_name\"\n\ndef test_config_invalid_undefined_raises_error():\n    # Passing an invalid string for undefined should raise UndefinedParameterError\n    metadata = {}\n    with pytest.raises(UndefinedParameterError) as excinfo:\n        config(metadata=metadata, undefined=\"invalid_action\")\n    assert \"must be one of\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 0.9132496590027586
+}

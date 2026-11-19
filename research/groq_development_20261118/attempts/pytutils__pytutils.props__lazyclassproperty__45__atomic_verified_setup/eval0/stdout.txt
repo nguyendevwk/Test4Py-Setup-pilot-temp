@@ -1,0 +1,35 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_lazyclassproperty_caches_value ______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-43/test_lazyclassproperty_caches_0')
+
+    def test_lazyclassproperty_caches_value(tmp_path):
+        # The value should be computed only once and cached on the class
+        assert Dummy.value == 42
+        # Modify the underlying function to see if cache prevents recomputation
+>       original_fn = Dummy.value.fget
+E       AttributeError: 'int' object has no attribute 'fget'
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pytutils__pytutils.props__lazyclassproperty__45__atomic_verified_setup/eval0/test_generated.py:17: AttributeError
+_________________ test_lazyclassproperty_inheritance_and_cache _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-heurix/pytest-43/test_lazyclassproperty_inherit0')
+
+    def test_lazyclassproperty_inheritance_and_cache(tmp_path):
+        # Subclass should inherit the property and compute its own cache
+        assert SubDummy.value == 42
+        # Ensure that the subclass has its own cached attribute, not the base's
+        assert hasattr(SubDummy, "_lazy_value")
+        assert not hasattr(Dummy, "_lazy_value") or Dummy._lazy_value == 42
+        # Changing the base's cached value should not affect the subclass
+        Dummy._lazy_value = 100
+>       assert SubDummy.value == 42
+E       assert 100 == 42
+E        +  where 100 = SubDummy.value
+
+/home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pytutils__pytutils.props__lazyclassproperty__45__atomic_verified_setup/eval0/test_generated.py:32: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pytutils__pytutils.props__lazyclassproperty__45__atomic_verified_setup/eval0/test_generated.py::test_lazyclassproperty_caches_value
+FAILED ../../../home/heurix/Documents/Test4Py_Setup/research/groq_development_20261118/attempts/pytutils__pytutils.props__lazyclassproperty__45__atomic_verified_setup/eval0/test_generated.py::test_lazyclassproperty_inheritance_and_cache
+2 failed, 1 passed in 0.10s

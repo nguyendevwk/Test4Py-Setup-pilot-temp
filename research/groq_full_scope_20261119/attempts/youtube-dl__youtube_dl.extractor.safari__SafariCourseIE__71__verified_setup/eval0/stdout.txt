@@ -1,0 +1,45 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_invalid_url_rejection __________________________
+
+    def test_invalid_url_rejection():
+        """Ensure _VALID_URL rejects URLs that are not Safari course URLs."""
+        invalid_urls = [
+            'https://www.example.com/library/view/1234567890',
+            'https://www.safaribooksonline.com/library/view/invalid/1234567890',
+            'https://www.safaribooksonline.com/other/1234567890',
+            'https://www.safaribooksonline.com/library/view/1234567890',
+            'https://www.safaribooksonline.com/api/v1/book/1234567890',
+            'https://www.safaribooksonline.com/api/v1/book/1234567890?foo=bar',
+        ]
+        pattern = re.compile(SafariCourseIE._VALID_URL, re.VERBOSE)
+        for url in invalid_urls:
+>           assert not pattern.search(url), f"URL should not match pattern: {url}"
+E           AssertionError: URL should not match pattern: https://www.safaribooksonline.com/library/view/invalid/1234567890
+E           assert not <re.Match object; span=(0, 65), match='https://www.safaribooksonline.com/library/view/in>
+E            +  where <re.Match object; span=(0, 65), match='https://www.safaribooksonline.com/library/view/in> = <built-in method search of re.Pattern object at 0x56170fd2bfd0>('https://www.safaribooksonline.com/library/view/invalid/1234567890')
+E            +    where <built-in method search of re.Pattern object at 0x56170fd2bfd0> = re.compile('(?x)\n                    https?://\n                        (?:\n                            (?:www\\.)?(?:safaribooksonline|(?:learning\\.)?oreilly)\\.com/\n                            (?:\n       , re.VERBOSE).search
+
+test_generated.py:33: AssertionError
+____________________ test_suitable_logic_excludes_other_ie _____________________
+
+    def test_suitable_logic_excludes_other_ie():
+        """SafariCourseIE.suitable should return False when SafariIE or SafariApiIE are suitable."""
+        # URLs that match SafariIE or SafariApiIE patterns
+        safari_ie_url = 'https://www.safaribooksonline.com/library/view/1234567890'
+        safari_api_ie_url = 'https://www.safaribooksonline.com/api/v1/book/1234567890'
+        # URLs that match SafariCourseIE but not the other IEs
+        course_url = 'https://www.safaribooksonline.com/library/view/1234567890/1234567890/'
+    
+        # SafariIE and SafariApiIE should report suitable for their URLs
+>       assert SafariIE.suitable(safari_ie_url), "SafariIE should be suitable for its URL"
+E       AssertionError: SafariIE should be suitable for its URL
+E       assert False
+E        +  where False = suitable('https://www.safaribooksonline.com/library/view/1234567890')
+E        +    where suitable = SafariIE.suitable
+
+test_generated.py:45: AssertionError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_invalid_url_rejection - AssertionError: URL sh...
+FAILED test_generated.py::test_suitable_logic_excludes_other_ie - AssertionEr...
+2 failed, 1 passed in 1.35s

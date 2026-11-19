@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-f3a45ea2-6e06-476a-9cf7-52f20d8c1e9f",
+  "object": "chat.completion",
+  "created": 1795079361,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom typesystem import String, ValidationError\n\n# Test normal validation: string passes all constraints\ndef test_string_validates_correctly():\n    field = String(max_length=10, min_length=3, pattern=r\"^\\w+$\", allow_blank=False)\n    result = field.validate(\"abc123\")\n    assert result == \"abc123\"\n\n# Test boundary conditions: trimming, null character removal, and length limits\ndef test_string_boundary_conditions():\n    field = String(max_length=5, trim_whitespace=True, allow_blank=True)\n    # Leading/trailing whitespace should be stripped\n    assert field.validate(\"  abc  \") == \"abc\"\n    # Null character should be removed\n    assert field.validate(\"a\\0b\") == \"ab\"\n    # Value exactly at max_length passes\n    assert field.validate(\"abcde\") == \"abcde\"\n    # Value exceeding max_length raises ValidationError\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"abcdef\")\n    assert \"max_length\" in str(excinfo.value)\n\n# Test error handling: null, blank, type, and pattern mismatches\ndef test_string_error_cases():\n    field = String(allow_blank=False, coerce_types=True)\n    # None value when not allowed should raise\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(None)\n    assert \"null\" in str(excinfo.value)\n\n    # Empty string when blank not allowed should raise\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"\")\n    assert \"blank\" in str(excinfo.value)\n\n    # Non-string type should raise\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(123)\n    assert \"type\" in str(excinfo.value)\n\n    # Pattern mismatch should raise\n    field_with_pattern = String(pattern=r\"^\\d+$\")\n    with pytest.raises(ValidationError) as excinfo:\n        field_with_pattern.validate(\"abc\")\n    assert \"pattern\" in str(excinfo.value)\n```",
+        "reasoning": "We need to write tests for String field. Use pytest. Three functions. Test normal, boundary, error. Use tmp_path? Not needed. Just test behavior. Use typesystem import. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.047079602,
+    "prompt_tokens": 1069,
+    "prompt_time": 0.005559188,
+    "completion_tokens": 474,
+    "completion_time": 0.592968332,
+    "total_tokens": 1543,
+    "total_time": 0.59852752,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 43
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_80501ff3a1",
+  "x_groq": {
+    "id": "req_01m7sh2msgeea9fj1esfb3p7cp",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom typesystem import String, ValidationError\n\n# Test normal validation: string passes all constraints\ndef test_string_validates_correctly():\n    field = String(max_length=10, min_length=3, pattern=r\"^\\w+$\", allow_blank=False)\n    result = field.validate(\"abc123\")\n    assert result == \"abc123\"\n\n# Test boundary conditions: trimming, null character removal, and length limits\ndef test_string_boundary_conditions():\n    field = String(max_length=5, trim_whitespace=True, allow_blank=True)\n    # Leading/trailing whitespace should be stripped\n    assert field.validate(\"  abc  \") == \"abc\"\n    # Null character should be removed\n    assert field.validate(\"a\\0b\") == \"ab\"\n    # Value exactly at max_length passes\n    assert field.validate(\"abcde\") == \"abcde\"\n    # Value exceeding max_length raises ValidationError\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"abcdef\")\n    assert \"max_length\" in str(excinfo.value)\n\n# Test error handling: null, blank, type, and pattern mismatches\ndef test_string_error_cases():\n    field = String(allow_blank=False, coerce_types=True)\n    # None value when not allowed should raise\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(None)\n    assert \"null\" in str(excinfo.value)\n\n    # Empty string when blank not allowed should raise\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(\"\")\n    assert \"blank\" in str(excinfo.value)\n\n    # Non-string type should raise\n    with pytest.raises(ValidationError) as excinfo:\n        field.validate(123)\n    assert \"type\" in str(excinfo.value)\n\n    # Pattern mismatch should raise\n    field_with_pattern = String(pattern=r\"^\\d+$\")\n    with pytest.raises(ValidationError) as excinfo:\n        field_with_pattern.validate(\"abc\")\n    assert \"pattern\" in str(excinfo.value)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0231339450110681
+}

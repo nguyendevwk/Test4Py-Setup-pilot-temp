@@ -1,0 +1,49 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________ test_optimize_includes_best_and_updates_state _________________
+
+    def test_optimize_includes_best_and_updates_state():
+        # deterministic random seed
+        np.random.seed(42)
+    
+        # simple objective: sum of coordinates (minimization)
+        opt_func = lambda x, y: x + y
+        constraints = [(0.0, 1.0), (0.0, 1.0)]
+        nsols = 3
+        b = 1.0
+        a = 1.0
+        a_step = 0.1
+    
+        wo = WhaleOptimization(opt_func, constraints, nsols, b, a, a_step, maximize=False)
+    
+        # capture initial state
+        initial_sols = wo.get_solutions().copy()
+        initial_a = wo._a
+        # rank solutions to find current best
+        ranked = wo._rank_solutions()
+        best_before = ranked[0]
+    
+        # run one optimization step
+        wo.optimize()
+    
+        # after optimization, shape should remain unchanged
+        assert wo.get_solutions().shape == initial_sols.shape
+    
+        # a should be decreased by a_step
+        assert wo._a == pytest.approx(initial_a - a_step)
+    
+        # best solution should be first element in new population
+        new_sols = wo.get_solutions()
+        assert np.allclose(new_sols[0], best_before)
+    
+        # history of best solutions should have grown by one
+>       assert len(wo._best_solutions) == 1
+E       assert 2 == 1
+E        +  where 2 = len([(np.float64(0.8879884621476077), array([0.73199394, 0.15599452])), (np.float64(0.8879884621476077), array([0.73199394, 0.15599452]))])
+E        +    where [(np.float64(0.8879884621476077), array([0.73199394, 0.15599452])), (np.float64(0.8879884621476077), array([0.73199394, 0.15599452]))] = <src.whale_optimization.WhaleOptimization object at 0x7f957526dd00>._best_solutions
+
+../../expanded_120_results/woa_whale_opt/baseline/seed_45/v1_exec/test_run.py:40: AssertionError
+=========================== short test summary info ============================
+FAILED ../../expanded_120_results/woa_whale_opt/baseline/seed_45/v1_exec/test_run.py::test_optimize_includes_best_and_updates_state
+1 failed in 0.38s
+

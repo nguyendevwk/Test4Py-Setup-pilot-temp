@@ -1,0 +1,45 @@
+{
+  "id": "chatcmpl-e4996bcc-1633-4bfe-a115-99d0d1ef59f4",
+  "object": "chat.completion",
+  "created": 1795079412,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport sys\nimport pytest\nfrom concurrent import futures\nfrom tornado.concurrent import DummyExecutor\n\n\ndef test_dummy_executor_success(tmp_path):\n    \"\"\"Submitting a simple function should return a Future with the correct result.\"\"\"\n    executor = DummyExecutor()\n    future = executor.submit(lambda x, y: x + y, 2, 3)\n    assert isinstance(future, futures.Future)\n    assert future.done()\n    assert not future.cancelled()\n    assert future.result() == 5\n\n\ndef test_dummy_executor_exception(tmp_path):\n    \"\"\"If the function raises, the Future should contain the exception.\"\"\"\n    executor = DummyExecutor()\n\n    def raise_error():\n        raise ValueError(\"boom\")\n\n    future = executor.submit(raise_error)\n    assert isinstance(future, futures.Future)\n    assert future.done()\n    assert future.cancelled() is False\n    with pytest.raises(ValueError) as excinfo:\n        future.result()\n    assert str(excinfo.value) == \"boom\"\n\n\ndef test_dummy_executor_shutdown(tmp_path):\n    \"\"\"Calling shutdown should not raise an exception regardless of Python version.\"\"\"\n    executor = DummyExecutor()\n    # The shutdown signature differs between Python 3.9+ and older versions.\n    if sys.version_info >= (3, 9):\n        # Should accept both arguments without error.\n        executor.shutdown(wait=True, cancel_futures=False)\n        executor.shutdown(wait=False, cancel_futures=True)\n    else:\n        # Should accept only the wait argument.\n        executor.shutdown(wait=True)\n        executor.shutdown(wait=False)\n```",
+        "reasoning": "Need tests for DummyExecutor submit, shutdown. Use tmp_path? not needed. Test normal execution returns result, error handling sets exception. Also test shutdown no exception. Use pytest."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.054357939,
+    "prompt_tokens": 416,
+    "prompt_time": 0.012131771,
+    "completion_tokens": 357,
+    "completion_time": 0.425086196,
+    "total_tokens": 773,
+    "total_time": 0.437217967,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 37
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sh4622eqbrrnpfe26zpnqn",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport sys\nimport pytest\nfrom concurrent import futures\nfrom tornado.concurrent import DummyExecutor\n\n\ndef test_dummy_executor_success(tmp_path):\n    \"\"\"Submitting a simple function should return a Future with the correct result.\"\"\"\n    executor = DummyExecutor()\n    future = executor.submit(lambda x, y: x + y, 2, 3)\n    assert isinstance(future, futures.Future)\n    assert future.done()\n    assert not future.cancelled()\n    assert future.result() == 5\n\n\ndef test_dummy_executor_exception(tmp_path):\n    \"\"\"If the function raises, the Future should contain the exception.\"\"\"\n    executor = DummyExecutor()\n\n    def raise_error():\n        raise ValueError(\"boom\")\n\n    future = executor.submit(raise_error)\n    assert isinstance(future, futures.Future)\n    assert future.done()\n    assert future.cancelled() is False\n    with pytest.raises(ValueError) as excinfo:\n        future.result()\n    assert str(excinfo.value) == \"boom\"\n\n\ndef test_dummy_executor_shutdown(tmp_path):\n    \"\"\"Calling shutdown should not raise an exception regardless of Python version.\"\"\"\n    executor = DummyExecutor()\n    # The shutdown signature differs between Python 3.9+ and older versions.\n    if sys.version_info >= (3, 9):\n        # Should accept both arguments without error.\n        executor.shutdown(wait=True, cancel_futures=False)\n        executor.shutdown(wait=False, cancel_futures=True)\n    else:\n        # Should accept only the wait argument.\n        executor.shutdown(wait=True)\n        executor.shutdown(wait=False)\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_internal_request_id": "042708fd0650482385614694910d42a4",
+  "_api_plus_pacing_seconds": 1.207228153012693
+}

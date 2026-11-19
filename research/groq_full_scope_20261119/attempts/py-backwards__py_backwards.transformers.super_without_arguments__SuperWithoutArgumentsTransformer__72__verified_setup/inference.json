@@ -1,0 +1,44 @@
+{
+  "id": "chatcmpl-755e4c86-b791-4502-a61e-64458f4bbc41",
+  "object": "chat.completion",
+  "created": 1795076175,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport ast\nimport typed_ast.ast3 as ast3\nimport pytest\nfrom py_backwards.transformers.super_without_arguments import SuperWithoutArgumentsTransformer\nfrom py_backwards.exceptions import NodeNotFound\nfrom py_backwards.utils.helpers import warn\n\n# Helper to parse source and apply transformer\ndef transform_source(src: str) -> ast3.Module:\n    tree = ast3.parse(src)\n    transformer = SuperWithoutArgumentsTransformer(tree)\n    transformer.visit(tree)\n    return tree\n\ndef ast_to_source(tree: ast3.Module) -> str:\n    return ast.unparse(tree)\n\ndef test_super_without_arguments_replaced_inside_method():\n    src = \"\"\"\nclass A:\n    def foo(self):\n        return super()\n\"\"\"\n    tree = transform_source(src)\n    # The call should now be super(A, self)\n    new_src = ast_to_source(tree)\n    assert \"super(A, self)\" in new_src\n    # Ensure no other changes\n    assert \"class A\" in new_src\n    assert \"def foo(self)\" in new_src\n\ndef test_super_without_arguments_outside_function_or_class():\n    src = \"\"\"\ndef bar():\n    return super()\n\"\"\"\n    tree = transform_source(src)\n    # No change should occur\n    new_src = ast_to_source(tree)\n    assert \"super()\" in new_src\n    assert \"super(\" not in new_src.replace(\"super()\", \"\")\n\ndef test_super_with_arguments_not_modified():\n    src = \"\"\"\nclass B:\n    def baz(self):\n        return super(B, self)\n\"\"\"\n    tree = transform_source(src)\n    new_src = ast_to_source(tree)\n    # The original call should remain unchanged\n    assert \"super(B, self)\" in new_src\n    # No additional super() calls should appear\n    assert new_src.count(\"super(\") == 1\n```",
+        "reasoning": "We need to write tests for SuperWithoutArgumentsTransformer. We need to import it. We'll create code that builds an AST from source using typed_ast.ast3. Then apply transformer. We need to test normal: super() inside method of class. Boundary: super() outside function or class triggers warn but no change. Error: maybe super() with arguments should not change. Use tmp_path for writing? Not needed. Use pytest. We'll need to capture warnings? warn function likely prints. We can just test that tree unchanged. Use typed_ast to parse. Let's write tests."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.052694931,
+    "prompt_tokens": 543,
+    "prompt_time": 0.003504297,
+    "completion_tokens": 498,
+    "completion_time": 0.576661321,
+    "total_tokens": 1041,
+    "total_time": 0.580165618,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 116
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7se1dehe5nvsfeza784qcem",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport ast\nimport typed_ast.ast3 as ast3\nimport pytest\nfrom py_backwards.transformers.super_without_arguments import SuperWithoutArgumentsTransformer\nfrom py_backwards.exceptions import NodeNotFound\nfrom py_backwards.utils.helpers import warn\n\n# Helper to parse source and apply transformer\ndef transform_source(src: str) -> ast3.Module:\n    tree = ast3.parse(src)\n    transformer = SuperWithoutArgumentsTransformer(tree)\n    transformer.visit(tree)\n    return tree\n\ndef ast_to_source(tree: ast3.Module) -> str:\n    return ast.unparse(tree)\n\ndef test_super_without_arguments_replaced_inside_method():\n    src = \"\"\"\nclass A:\n    def foo(self):\n        return super()\n\"\"\"\n    tree = transform_source(src)\n    # The call should now be super(A, self)\n    new_src = ast_to_source(tree)\n    assert \"super(A, self)\" in new_src\n    # Ensure no other changes\n    assert \"class A\" in new_src\n    assert \"def foo(self)\" in new_src\n\ndef test_super_without_arguments_outside_function_or_class():\n    src = \"\"\"\ndef bar():\n    return super()\n\"\"\"\n    tree = transform_source(src)\n    # No change should occur\n    new_src = ast_to_source(tree)\n    assert \"super()\" in new_src\n    assert \"super(\" not in new_src.replace(\"super()\", \"\")\n\ndef test_super_with_arguments_not_modified():\n    src = \"\"\"\nclass B:\n    def baz(self):\n        return super(B, self)\n\"\"\"\n    tree = transform_source(src)\n    new_src = ast_to_source(tree)\n    # The original call should remain unchanged\n    assert \"super(B, self)\" in new_src\n    # No additional super() calls should appear\n    assert new_src.count(\"super(\") == 1\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0492105839657597
+}

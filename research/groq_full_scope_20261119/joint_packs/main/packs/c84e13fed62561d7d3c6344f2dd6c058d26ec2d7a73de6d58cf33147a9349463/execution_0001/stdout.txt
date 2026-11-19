@@ -1,0 +1,90 @@
+.........FF.......                                                       [100%]
+=================================== FAILURES ===================================
+___________ test_fieldset_default_iterations_returns_correct_length ____________
+
+    def test_fieldset_default_iterations_returns_correct_length():
+        """Fieldset without explicit i should return the default number of items."""
+        fieldset = Fieldset()
+>       result = fieldset("username")
+
+tests/test_ce51a8c41c760439befc99094f89838f4c4573d333734c7d42d0e05c3449d260.py:9: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:403: in __call__
+    return [self.perform(name, key=key, **kwargs) for _ in range(iterations)]
+../../../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:403: in <listcomp>
+    return [self.perform(name, key=key, **kwargs) for _ in range(iterations)]
+../../../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:209: in perform
+    result = self._lookup_method(name)(**kwargs)
+../../../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:137: in _lookup_method
+    method = self._fuzzy_lookup(name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <mimesis.schema.Fieldset object at 0x7f8df9c94a90>, name = 'username'
+
+    def _fuzzy_lookup(self, name: str) -> Any:
+        """A fuzzy method lookup.
+    
+        This method is called when the field definition
+        is fuzzy, like this: ``method``
+    
+        :param name: The field name.
+        :return: Callable object.
+        :raise FieldError: When field is invalid.
+        """
+        for provider_name in dir(self._generic):
+            provider = getattr(self._generic, provider_name)
+            if isinstance(provider, BaseProvider) and name in dir(provider):
+                return getattr(provider, name)
+    
+>       raise FieldError(name)
+E       mimesis.exceptions.FieldError: Field «username» is not supported.
+
+../../../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:117: FieldError
+_______________ test_fieldset_custom_iterations_and_key_function _______________
+
+    def test_fieldset_custom_iterations_and_key_function():
+        """Fieldset should respect custom i and apply key function to each item."""
+        # Use a simple key function that appends a suffix
+        def key_func(value):
+            return f"{value}_suffix"
+    
+        fieldset = Fieldset()
+>       result = fieldset("username", i=3, key=key_func)
+
+tests/test_ce51a8c41c760439befc99094f89838f4c4573d333734c7d42d0e05c3449d260.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:403: in __call__
+    return [self.perform(name, key=key, **kwargs) for _ in range(iterations)]
+../../../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:403: in <listcomp>
+    return [self.perform(name, key=key, **kwargs) for _ in range(iterations)]
+../../../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:209: in perform
+    result = self._lookup_method(name)(**kwargs)
+../../../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:137: in _lookup_method
+    method = self._fuzzy_lookup(name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <mimesis.schema.Fieldset object at 0x7f8df9c9fb20>, name = 'username'
+
+    def _fuzzy_lookup(self, name: str) -> Any:
+        """A fuzzy method lookup.
+    
+        This method is called when the field definition
+        is fuzzy, like this: ``method``
+    
+        :param name: The field name.
+        :return: Callable object.
+        :raise FieldError: When field is invalid.
+        """
+        for provider_name in dir(self._generic):
+            provider = getattr(self._generic, provider_name)
+            if isinstance(provider, BaseProvider) and name in dir(provider):
+                return getattr(provider, name)
+    
+>       raise FieldError(name)
+E       mimesis.exceptions.FieldError: Field «username» is not supported.
+
+../../../../../../groq_confirmation_20261118/environments/mimesis/venv/lib/python3.10/site-packages/mimesis/schema.py:117: FieldError
+=========================== short test summary info ============================
+FAILED tests/test_ce51a8c41c760439befc99094f89838f4c4573d333734c7d42d0e05c3449d260.py::test_fieldset_default_iterations_returns_correct_length
+FAILED tests/test_ce51a8c41c760439befc99094f89838f4c4573d333734c7d42d0e05c3449d260.py::test_fieldset_custom_iterations_and_key_function
+2 failed, 16 passed in 0.36s

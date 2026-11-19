@@ -1,0 +1,46 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_materialize_cookies_with_single_cookie __________________
+
+    def test_materialize_cookies_with_single_cookie():
+        """Ensure a single cookie is correctly materialized into a dict."""
+        jar = RequestsCookieJar()
+        cookie = Cookie(
+            version=0,
+            name="sessionid",
+            value="abc123",
+            port=None,
+            port_specified=False,
+            domain="example.com",
+            domain_specified=True,
+            domain_initial_dot=False,
+            path="/",
+            path_specified=True,
+            secure=False,
+            expires=1700000000,
+            discard=False,
+            comment=None,
+            comment_url=None,
+            rest={"HttpOnly": None},
+            rfc2109=False,
+        )
+        jar.set_cookie(cookie)
+    
+        result = materialize_cookies(jar)
+    
+        assert isinstance(result, list)
+        assert len(result) == 1
+        cookie_dict = result[0]
+        assert cookie_dict["name"] == "sessionid"
+        assert cookie_dict["value"] == "abc123"
+        assert cookie_dict["domain"] == "example.com"
+        assert cookie_dict["path"] == "/"
+        assert cookie_dict["expires"] == 1700000000
+        assert cookie_dict["secure"] is False
+>       assert cookie_dict["httpOnly"] is True  # HttpOnly flag present
+E       KeyError: 'httpOnly'
+
+test_generated.py:44: KeyError
+=========================== short test summary info ============================
+FAILED test_generated.py::test_materialize_cookies_with_single_cookie - KeyEr...
+1 failed, 2 passed in 0.75s

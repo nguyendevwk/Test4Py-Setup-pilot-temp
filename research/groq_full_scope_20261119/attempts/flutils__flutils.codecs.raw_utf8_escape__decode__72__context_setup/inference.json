@@ -1,0 +1,41 @@
+{
+  "id": "chatcmpl-82928e66-dd48-4ce4-92e4-97597bc10edf",
+  "object": "chat.completion",
+  "created": 1795078783,
+  "model": "openai/gpt-oss-20b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```python\nimport pytest\nfrom flutils.codecs.raw_utf8_escape import decode\nfrom typing import UserString\n\ndef test_decode_normal_bytes():\n    # Input: escaped UTF-8 bytes for \"Hello, 世界\" (H e l l o , space + Chinese)\n    # UTF-8 bytes for \"Hello, 世界\" are:\n    # 48 65 6c 6c 6f 2c 20 e4 b8 96 e7 95 8c\n    # Escaped as b'\\\\x48\\\\x65\\\\x6c\\\\x6c\\\\x6f\\\\x2c\\\\x20\\\\xe4\\\\xb8\\\\x96\\\\xe7\\\\x95\\\\x8c'\n    escaped = b'\\\\x48\\\\x65\\\\x6c\\\\x6c\\\\x6f\\\\x2c\\\\x20\\\\xe4\\\\xb8\\\\x96\\\\xe7\\\\x95\\\\x8c'\n    result, consumed = decode(escaped)\n    assert result == \"Hello, 世界\"\n    assert consumed == len(escaped)\n\ndef test_decode_empty_input():\n    # Empty input should return empty string and zero consumed bytes\n    result, consumed = decode(b'')\n    assert result == \"\"\n    assert consumed == 0\n\ndef test_decode_invalid_utf8_raises():\n    # Escaped bytes that decode to invalid UTF-8 sequence:\n    # \\x80 is a continuation byte without a leading byte\n    invalid = b'\\\\x80'\n    with pytest.raises(UnicodeDecodeError) as excinfo:\n        decode(invalid)\n    # Verify that the exception is raised with the correct codec name and data\n    e = excinfo.value\n    assert e.codec == 'eutf8h'\n    assert e.object == b'\\x80'\n    # The start and end should refer to the problematic byte\n    assert e.start == 0\n    assert e.end == 1\n    # Reason should indicate an unexpected continuation byte\n    assert \"unexpected\" in e.reason.lower()\n```",
+        "reasoning": "We need three test functions. Test normal decoding, boundary (empty), error. Use tmp_path? Not needed. Just bytes. Ensure error raises UnicodeDecodeError with correct args. Let's craft."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "queue_time": 0.053546563,
+    "prompt_tokens": 668,
+    "prompt_time": 0.042274286,
+    "completion_tokens": 479,
+    "completion_time": 0.556630934,
+    "total_tokens": 1147,
+    "total_time": 0.59890522,
+    "completion_tokens_details": {
+      "reasoning_tokens": 40
+    }
+  },
+  "usage_breakdown": null,
+  "system_fingerprint": "fp_c5a89987dc",
+  "x_groq": {
+    "id": "req_01m7sgh05nejrr6v6sdnktztje",
+    "seed": 72
+  },
+  "service_tier": "on_demand",
+  "content": "```python\nimport pytest\nfrom flutils.codecs.raw_utf8_escape import decode\nfrom typing import UserString\n\ndef test_decode_normal_bytes():\n    # Input: escaped UTF-8 bytes for \"Hello, 世界\" (H e l l o , space + Chinese)\n    # UTF-8 bytes for \"Hello, 世界\" are:\n    # 48 65 6c 6c 6f 2c 20 e4 b8 96 e7 95 8c\n    # Escaped as b'\\\\x48\\\\x65\\\\x6c\\\\x6c\\\\x6f\\\\x2c\\\\x20\\\\xe4\\\\xb8\\\\x96\\\\xe7\\\\x95\\\\x8c'\n    escaped = b'\\\\x48\\\\x65\\\\x6c\\\\x6c\\\\x6f\\\\x2c\\\\x20\\\\xe4\\\\xb8\\\\x96\\\\xe7\\\\x95\\\\x8c'\n    result, consumed = decode(escaped)\n    assert result == \"Hello, 世界\"\n    assert consumed == len(escaped)\n\ndef test_decode_empty_input():\n    # Empty input should return empty string and zero consumed bytes\n    result, consumed = decode(b'')\n    assert result == \"\"\n    assert consumed == 0\n\ndef test_decode_invalid_utf8_raises():\n    # Escaped bytes that decode to invalid UTF-8 sequence:\n    # \\x80 is a continuation byte without a leading byte\n    invalid = b'\\\\x80'\n    with pytest.raises(UnicodeDecodeError) as excinfo:\n        decode(invalid)\n    # Verify that the exception is raised with the correct codec name and data\n    e = excinfo.value\n    assert e.codec == 'eutf8h'\n    assert e.object == b'\\x80'\n    # The start and end should refer to the problematic byte\n    assert e.start == 0\n    assert e.end == 1\n    # Reason should indicate an unexpected continuation byte\n    assert \"unexpected\" in e.reason.lower()\n```",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "_api_plus_pacing_seconds": 1.0232355649932288
+}
